@@ -17,6 +17,22 @@ function appendToOutput(content) {
     output.scrollTop = output.scrollHeight;
 }
 
+function showRebootModal(callback) {
+    const modal = document.getElementById('reboot-modal');
+    modal.style.display = 'block';
+    
+    document.getElementById('reboot-yes').onclick = async () => {
+        modal.style.display = 'none';
+        await execCommand('reboot');
+        if (callback) callback(true);
+    };
+    
+    document.getElementById('reboot-no').onclick = () => {
+        modal.style.display = 'none';
+        if (callback) callback(false);
+    };
+}
+
 async function loadVersion() {
     const versionElement = document.getElementById('version-text');
     try {
@@ -31,11 +47,9 @@ async function loadToggleStates() {
     try {
         const autoBrightnessToggle = document.getElementById('toggle-auto-brightness');
         const dndToggle = document.getElementById('toggle-dnd');
-        const loggerToggle = document.getElementById('toggle-logger');
         const state = await execCommand("cat /data/adb/copg_state || echo ''");
         autoBrightnessToggle.checked = state.includes("AUTO_BRIGHTNESS_OFF=1") || !state.includes("AUTO_BRIGHTNESS_OFF=");
         dndToggle.checked = state.includes("DND_ON=1") || !state.includes("DND_ON=");
-        loggerToggle.checked = state.includes("LOGGER_KILLER=1");
     } catch (error) {
         appendToOutput("[!] Failed to load toggle states");
     }
@@ -46,18 +60,14 @@ function applyEventListeners() {
         const isChecked = e.target.checked;
         await execCommand(`sed -i '/AUTO_BRIGHTNESS_OFF=/d' /data/adb/copg_state; echo "AUTO_BRIGHTNESS_OFF=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
         appendToOutput(isChecked ? "✅ Auto-Brightness Disable for Games Enabled" : "❌ Auto-Brightness Disable for Games Disabled");
+        showRebootModal();
     });
 
     document.getElementById('toggle-dnd').addEventListener('change', async (e) => {
         const isChecked = e.target.checked;
         await execCommand(`sed -i '/DND_ON=/d' /data/adb/copg_state; echo "DND_ON=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
         appendToOutput(isChecked ? "✅ DND for Games Enabled" : "❌ DND for Games Disabled");
-    });
-
-    document.getElementById('toggle-logger').addEventListener('change', async (e) => {
-        const isChecked = e.target.checked;
-        await execCommand(`sed -i '/LOGGER_KILLER=/d' /data/adb/copg_state; echo "LOGGER_KILLER=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-        appendToOutput(isChecked ? "✅ Logger Killer Enabled" : "❌ Logger Killer Disabled");
+        showRebootModal();
     });
 
     document.getElementById('update-config').addEventListener('click', async () => {
@@ -69,6 +79,16 @@ function applyEventListeners() {
             output.split('\n').forEach(line => {
                 if (line.trim()) appendToOutput(line);
             });
+            const lastLine = output.split('\n').filter(line => line.trim()).pop();
+            if (lastLine !== "🌟 [COPG] ✅ Your config is already up-to-date!" &&
+                !lastLine.includes("❌ Failed to download config.json") &&
+                !lastLine.includes("❌ Error: curl or wget not found")) {
+                showRebootModal((rebooted) => {
+                    if (rebooted) {
+                        appendToOutput("🔄 Device rebooting to apply config changes...");
+                    }
+                });
+            }
         } catch (error) {
             appendToOutput("[!] Failed to update game list: " + error);
         }

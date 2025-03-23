@@ -30,13 +30,6 @@
                         <span class="slider"></span>
                     </label>
                 </div>
-                <div class="toggle-group">
-                    <label class="toggle-label">Logger Killer</label>
-                    <label class="switch">
-                        <input type="checkbox" id="toggle-logger">
-                        <span class="slider"></span>
-                    </label>
-                </div>
             </div>
             <button class="update-btn" id="update-config">Update Game List</button>
         </main>
@@ -49,6 +42,16 @@
                 <pre id="output"></pre>
             </div>
         </section>
+    </div>
+    <!-- Reboot Confirmation Modal -->
+    <div id="reboot-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p>For saving changes you need to reboot device</p>
+            <div class="modal-buttons">
+                <button id="reboot-yes" class="modal-btn yes">Yes</button>
+                <button id="reboot-no" class="modal-btn no">No</button>
+            </div>
+        </div>
     </div>
 </body>
 </html>
