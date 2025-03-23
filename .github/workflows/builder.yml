@@ -149,7 +149,7 @@ jobs:
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/webroot/index.html -O module/webroot/index.html
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/webroot/scripts.js -O module/webroot/scripts.js
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/webroot/styles.css -O module/webroot/styles.css
-          wget https://raw.githubusercontent.com/AlirezaParsi/COPG/raw/refs/heads/JSON/webroot/assets/RobotoMono-Regular.ttf -O module/webroot/assets/RobotoMono-Regular.ttf
+          wget https://github.com/AlirezaParsi/COPG/raw/refs/heads/JSON/webroot/assets/RobotoMono-Regular.ttf -O module/webroot/assets/RobotoMono-Regular.ttf
 
       - name: Package module into ZIP
         run: |
