@@ -95,8 +95,7 @@ public:
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
         if (!args || !args->nice_name) {
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-
-return;
+            return;
         }
         const char* package_name = env->GetStringUTFChars(args->nice_name, nullptr);
         if (!package_name) {
@@ -115,7 +114,7 @@ return;
     }
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
-        if (!args  !args->nice_name  package_map.empty() || !buildClass) return;
+        if (!args || !args->nice_name || package_map.empty() || !buildClass) return;
         const char* package_name = env->GetStringUTFChars(args->nice_name, nullptr);
         if (!package_name) return;
         auto it = package_map.find(package_name);
@@ -171,8 +170,7 @@ private:
         if (brandField) env->SetStaticObjectField(buildClass, brandField, env->NewStringUTF(info.brand.c_str()));
         if (deviceField) env->SetStaticObjectField(buildClass, deviceField, env->NewStringUTF(info.device.c_str()));
         if (manufacturerField) env->SetStaticObjectField(buildClass, manufacturerField, env->NewStringUTF(info.manufacturer.c_str()));
-
-if (fingerprintField) env->SetStaticObjectField(buildClass, fingerprintField, env->NewStringUTF(info.fingerprint.c_str()));
+        if (fingerprintField) env->SetStaticObjectField(buildClass, fingerprintField, env->NewStringUTF(info.fingerprint.c_str()));
         if (buildIdField && !info.build_id.empty()) env->SetStaticObjectField(buildClass, buildIdField, env->NewStringUTF(info.build_id.c_str()));
         if (displayField && !info.display.empty()) env->SetStaticObjectField(buildClass, displayField, env->NewStringUTF(info.display.c_str()));
         if (productField && !info.product.empty()) env->SetStaticObjectField(buildClass, productField, env->NewStringUTF(info.product.c_str()));
@@ -241,7 +239,7 @@ if (fingerprintField) env->SetStaticObjectField(buildClass, fingerprintField, en
             real_path[len] = '\0';
             std::string file_path(real_path);
 
-if (file_path == "/proc/cpuinfo" && !current_info.cpuinfo.empty()) {
+            if (file_path == "/proc/cpuinfo" && !current_info.cpuinfo.empty()) {
                 size_t bytes_to_copy = std::min(count, current_info.cpuinfo.length());
                 memcpy(buf, current_info.cpuinfo.c_str(), bytes_to_copy);
                 return bytes_to_copy;
@@ -276,9 +274,9 @@ if (file_path == "/proc/cpuinfo" && !current_info.cpuinfo.empty()) {
     static void hooked_set_static_object_field(JNIEnv* env, jclass clazz, jfieldID fieldID, jobject value) {
         if (clazz == buildClass) {
             // Prevent resetting of spoofed Build fields
-            if (fieldID == modelField  fieldID == brandField  fieldID == deviceField ||
-                fieldID == manufacturerField  fieldID == fingerprintField  fieldID == buildIdField ||
-                fieldID == displayField  fieldID == productField  fieldID == serialField) {
+            if (fieldID == modelField || fieldID == brandField || fieldID == deviceField ||
+                fieldID == manufacturerField || fieldID == fingerprintField || fieldID == buildIdField ||
+                fieldID == displayField || fieldID == productField || fieldID == serialField) {
                 return; // Block reset without logging
             }
         } else if (clazz == versionClass) {
