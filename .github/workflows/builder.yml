@@ -62,7 +62,6 @@ jobs:
         run: |
           echo "ANDROID_HOME is: $ANDROID_HOME"
           ls -la $ANDROID_HOME/cmdline-tools/latest/bin || echo "bin directory missing!"
-          # Workaround for Java 17 JAXB issue
           JAVA_OPTS="--add-modules java.xml.bind" yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || echo "License acceptance failed!"
 
       - name: Install build tools
@@ -142,7 +141,8 @@ jobs:
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/uninstall.sh -O module/uninstall.sh
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/META-INF/com/google/android/update-binary -O module/META-INF/com/google/android/update-binary
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/META-INF/com/google/android/updater-script -O module/META-INF/com/google/android/updater-script
-          chmod 755 module/customize.sh module/action.sh module/uninstall.sh module/META-INF/com/google/android/update-binary
+          wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/service.sh -O module/service.sh
+          chmod 755 module/customize.sh module/action.sh module/uninstall.sh module/service.sh module/META-INF/com/google/android/update-binary
 
       - name: Fetch WebUI files
         run: |
