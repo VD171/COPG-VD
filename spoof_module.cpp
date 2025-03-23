@@ -362,19 +362,23 @@ private:
             return;
         }
 
-        std::ifstream file("/data/adb/copg_state");
-        if (!file.is_open()) {
-            LOGE("Failed to open /data/adb/copg_state for package %s", package_name.c_str());
+        // Use popen with su -c to read /data/adb/copg_state as root
+        FILE* pipe = popen("su -c 'cat /data/adb/copg_state'", "r");
+        if (!pipe) {
+            LOGE("Failed to popen su -c 'cat /data/adb/copg_state' for package %s", package_name.c_str());
             return;
         }
 
         std::unordered_map<std::string, int> toggles;
-        std::string line;
-        while (std::getline(file, line)) {
+        char buffer[128];
+        while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+            std::string line(buffer);
             size_t pos = line.find('=');
             if (pos != std::string::npos) {
                 std::string key = line.substr(0, pos);
                 std::string value = line.substr(pos + 1);
+                // Remove any trailing newline or whitespace
+                value.erase(value.find_last_not_of(" \n\r\t") + 1);
                 try {
                     toggles[key] = std::stoi(value);
                     LOGD("Read toggle: %s = %d", key.c_str(), toggles[key]);
@@ -383,39 +387,42 @@ private:
                 }
             }
         }
-        file.close();
+        int pipe_result = pclose(pipe);
+        if (pipe_result != 0) {
+            LOGE("pclose failed with result: %d for package %s", pipe_result, package_name.c_str());
+        }
 
         GameSettings& settings = active_settings[package_name];
         LOGD("Managing settings for package: %s", package_name.c_str());
 
-        // Get original settings
+        // Get original settings with root
         if (settings.original_zen_mode == -1) {
-            FILE* pipe = popen("su -c 'settings get global zen_mode'", "r");
-            if (pipe) {
-                char buffer[128];
-                if (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-                    settings.original_zen_mode = atoi(buffer);
+            FILE* zen_pipe = popen("su -c 'settings get global zen_mode'", "r");
+            if (zen_pipe) {
+                char zen_buffer[128];
+                if (fgets(zen_buffer, sizeof(zen_buffer), zen_pipe) != nullptr) {
+                    settings.original_zen_mode = atoi(zen_buffer);
                     LOGD("Original zen_mode: %d", settings.original_zen_mode);
                 } else {
                     LOGE("Failed to read zen_mode");
                 }
-                pclose(pipe);
+                pclose(zen_pipe);
             } else {
                 LOGE("Failed to popen settings get global zen_mode");
             }
         }
 
         if (settings.original_brightness_mode == -1) {
-            FILE* pipe = popen("su -c 'settings get system screen_brightness_mode'", "r");
-            if (pipe) {
-                char buffer[128];
-                if (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-                    settings.original_brightness_mode = atoi(buffer);
+            FILE* bright_pipe = popen("su -c 'settings get system screen_brightness_mode'", "r");
+            if (bright_pipe) {
+                char bright_buffer[128];
+                if (fgets(bright_buffer, sizeof(bright_buffer), bright_pipe) != nullptr) {
+                    settings.original_brightness_mode = atoi(bright_buffer);
                     LOGD("Original brightness_mode: %d", settings.original_brightness_mode);
                 } else {
                     LOGE("Failed to read screen_brightness_mode");
                 }
-                pclose(pipe);
+                pclose(bright_pipe);
             } else {
                 LOGE("Failed to popen settings get system screen_brightness_mode");
             }
