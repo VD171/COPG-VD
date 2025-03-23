@@ -13,6 +13,7 @@
         <header class="header">
             <h1>COPG Control</h1>
             <span class="version" id="version-text"></span>
+            <button class="reboot-btn" id="reboot-btn">Reboot</button>
         </header>
         <main class="controls">
             <div class="card">
@@ -49,6 +50,16 @@
                 <pre id="output"></pre>
             </div>
         </section>
+    </div>
+    <div class="popup" id="reboot-popup">
+        <div class="popup-content">
+            <h3>Reboot Required</h3>
+            <p>To apply the updated configuration, a device reboot is needed. Would you like to reboot now?</p>
+            <div class="popup-buttons">
+                <button class="popup-btn yes-btn" id="reboot-yes">Yes, Reboot</button>
+                <button class="popup-btn no-btn" id="reboot-no">No, Cancel</button>
+            </div>
+        </div>
     </div>
 </body>
 </html>
