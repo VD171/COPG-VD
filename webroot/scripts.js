@@ -51,6 +51,16 @@ function hideRebootPopup() {
     popup.style.display = 'none';
 }
 
+function showRebootConfirmPopup() {
+    const popup = document.getElementById('reboot-confirm-popup');
+    popup.style.display = 'flex';
+}
+
+function hideRebootConfirmPopup() {
+    const popup = document.getElementById('reboot-confirm-popup');
+    popup.style.display = 'none';
+}
+
 async function rebootDevice() {
     appendToOutput("[+] Rebooting device...");
     try {
@@ -98,7 +108,7 @@ function applyEventListeners() {
     });
 
     document.getElementById('reboot-btn').addEventListener('click', () => {
-        showRebootPopup();
+        showRebootConfirmPopup();
     });
 
     document.getElementById('reboot-yes').addEventListener('click', async () => {
@@ -108,6 +118,16 @@ function applyEventListeners() {
 
     document.getElementById('reboot-no').addEventListener('click', () => {
         hideRebootPopup();
+        appendToOutput("[+] Reboot canceled");
+    });
+
+    document.getElementById('reboot-confirm-yes').addEventListener('click', async () => {
+        hideRebootConfirmPopup();
+        await rebootDevice();
+    });
+
+    document.getElementById('reboot-confirm-no').addEventListener('click', () => {
+        hideRebootConfirmPopup();
         appendToOutput("[+] Reboot canceled");
     });
 }
