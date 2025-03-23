@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COPG Control</title>
+    <link rel="stylesheet" href="styles.css" type="text/css">
+    <link rel="stylesheet" type="text/css" href="/mmrl/insets.css" />
+    <script type="module" crossorigin src="scripts.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>COPG Control</h1>
+            <span class="version" id="version-text"></span>
+        </header>
+        <main class="controls">
+            <div class="card">
+                <div class="toggle-group">
+                    <label class="toggle-label">Disable Auto-Brightness</label>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-auto-brightness" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-group">
+                    <label class="toggle-label">Enable DND</label>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-dnd" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-group">
+                    <label class="toggle-label">Logger Killer</label>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-logger">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <button class="update-btn" id="update-config">Update Game List</button>
+        </main>
+        <section class="log-section">
+            <div class="log-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+                <h2>Log Output</h2>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="log-content">
+                <pre id="output"></pre>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
