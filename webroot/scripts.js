@@ -31,9 +31,11 @@ async function loadToggleStates() {
     try {
         const autoBrightnessToggle = document.getElementById('toggle-auto-brightness');
         const dndToggle = document.getElementById('toggle-dnd');
+        const loggingToggle = document.getElementById('toggle-logging');
         const state = await execCommand("cat /data/adb/copg_state || echo ''");
         autoBrightnessToggle.checked = state.includes("AUTO_BRIGHTNESS_OFF=1") || !state.includes("AUTO_BRIGHTNESS_OFF=");
         dndToggle.checked = state.includes("DND_ON=1") || !state.includes("DND_ON=");
+        loggingToggle.checked = state.includes("DISABLE_LOGGING=1") || !state.includes("DISABLE_LOGGING=");
     } catch (error) {
         appendToOutput("[!] Failed to load toggle states");
     }
@@ -50,6 +52,12 @@ function applyEventListeners() {
         const isChecked = e.target.checked;
         await execCommand(`sed -i '/DND_ON=/d' /data/adb/copg_state; echo "DND_ON=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
         appendToOutput(isChecked ? "✅ DND for Games Enabled" : "❌ DND for Games Disabled");
+    });
+
+    document.getElementById('toggle-logging').addEventListener('change', async (e) => {
+        const isChecked = e.target.checked;
+        await execCommand(`sed -i '/DISABLE_LOGGING=/d' /data/adb/copg_state; echo "DISABLE_LOGGING=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
+        appendToOutput(isChecked ? "✅ System Logging Disabled for Games" : "❌ System Logging Enabled for Games");
     });
 
     document.getElementById('update-config').addEventListener('click', async () => {
