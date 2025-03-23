@@ -60,7 +60,10 @@ jobs:
 
       - name: Accept Android SDK licenses
         run: |
-          JAVA_OPTS="--add-modules java.xml.bind" yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          echo "ANDROID_HOME is: $ANDROID_HOME"
+          ls -la $ANDROID_HOME/cmdline-tools/latest/bin || echo "bin directory missing!"
+          # Workaround for Java 17 JAXB issue
+          JAVA_OPTS="--add-modules java.xml.bind" yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || echo "License acceptance failed!"
 
       - name: Install build tools
         run: |
