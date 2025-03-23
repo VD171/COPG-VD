@@ -60,10 +60,8 @@ static std::atomic<bool> game_running(false);            // Thread-safe game sta
 static std::atomic<bool> monitor_running(false);         // Thread-safe monitor control
 static bool last_auto_brightness_off = true;             // Last toggle states
 static bool last_dnd_on = true;
-static bool last_logger_killer = false;
 static int pre_game_brightness_mode = -1;                // Pre-game auto-brightness state (0 = manual, 1 = auto)
 static bool pre_game_dnd_state = false;                  // Pre-game DND state (0 = off, >0 = on)
-static bool pre_game_logd_running = false;               // Pre-game logd state
 
 class SpoofModule : public zygisk::ModuleBase {
 public:
@@ -278,35 +276,18 @@ private:
         return false;
     }
 
-    bool isLogdRunning() {
-        FILE* fp = popen("pidof logd", "r");
-        if (!fp) return false;
-        char buffer[16];
-        if (fgets(buffer, sizeof(buffer), fp) != nullptr) {
-            pclose(fp);
-            return true;
-        }
-        pclose(fp);
-        return false;
-    }
-
     void applyGameSettings() {
         pre_game_brightness_mode = getBrightnessMode();
         pre_game_dnd_state = getDndState();
-        pre_game_logd_running = isLogdRunning();
 
         last_auto_brightness_off = readToggle("AUTO_BRIGHTNESS_OFF");
         last_dnd_on = readToggle("DND_ON");
-        last_logger_killer = readToggle("LOGGER_KILLER");
 
         if (last_auto_brightness_off) {
             system("settings put system screen_brightness_mode 0");
         }
         if (last_dnd_on) {
             system("cmd notification set_dnd on");
-        }
-        if (last_logger_killer && pre_game_logd_running) {
-            system("pkill -f logd");
         }
     }
 
@@ -318,9 +299,6 @@ private:
         if (last_dnd_on) {
             system(pre_game_dnd_state ? "cmd notification set_dnd on" : "cmd notification set_dnd off");
         }
-        if (last_logger_killer && pre_game_logd_running && !isLogdRunning()) {
-            system("start logd");
-        }
     }
 
     static void monitorToggles(SpoofModule* module) {
@@ -328,7 +306,6 @@ private:
             if (game_running) {
                 bool auto_brightness_off = module->readToggle("AUTO_BRIGHTNESS_OFF");
                 bool dnd_on = module->readToggle("DND_ON");
-                bool logger_killer = module->readToggle("LOGGER_KILLER");
 
                 if (auto_brightness_off != last_auto_brightness_off) {
                     if (auto_brightness_off) {
@@ -346,14 +323,6 @@ private:
                         system("cmd notification set_dnd off");
                     }
                     last_dnd_on = dnd_on;
-                }
-                if (logger_killer != last_logger_killer) {
-                    if (logger_killer && pre_game_logd_running) {
-                        system("pkill -f logd");
-                    } else if (!logger_killer && pre_game_logd_running && !module->isLogdRunning()) {
-                        system("start logd");
-                    }
-                    last_logger_killer = logger_killer;
                 }
             }
             sleep(1);
