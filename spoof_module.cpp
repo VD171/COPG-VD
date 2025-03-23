@@ -8,8 +8,13 @@
 #include <dlfcn.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <android/log.h>
 
 using json = nlohmann::json;
+
+#define LOG_TAG "SpoofModule"
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 struct DeviceInfo {
     std::string brand;
@@ -63,6 +68,8 @@ public:
         this->api = api;
         this->env = env;
 
+        LOGD("onLoad called");
+
         if (!buildClass) {
             buildClass = (jclass)env->NewGlobalRef(env->FindClass("android/os/Build"));
             if (buildClass) {
@@ -75,6 +82,8 @@ public:
                 displayField = env->GetStaticFieldID(buildClass, "DISPLAY", "Ljava/lang/String;");
                 productField = env->GetStaticFieldID(buildClass, "PRODUCT", "Ljava/lang/String;");
                 serialField = env->GetStaticFieldID(buildClass, "SERIAL", "Ljava/lang/String;");
+            } else {
+                LOGE("Failed to find android/os/Build class");
             }
         }
         if (!versionClass) {
@@ -82,6 +91,8 @@ public:
             if (versionClass) {
                 versionReleaseField = env->GetStaticFieldID(versionClass, "RELEASE", "Ljava/lang/String;");
                 sdkIntField = env->GetStaticFieldID(versionClass, "SDK_INT", "I");
+            } else {
+                LOGE("Failed to find android/os/Build$VERSION class");
             }
         }
 
@@ -90,6 +101,8 @@ public:
             orig_prop_get = (orig_prop_get_t)dlsym(handle, "__system_property_get");
             orig_read = (orig_read_t)dlsym(handle, "read");
             dlclose(handle);
+        } else {
+            LOGE("Failed to dlopen libc.so");
         }
 
         hookNativeGetprop();
@@ -109,6 +122,7 @@ public:
             return;
         }
         std::string pkg_str(package_name);
+        LOGD("preAppSpecialize for package: %s", pkg_str.c_str());
         auto it = package_map.find(pkg_str);
         if (it == package_map.end()) {
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
@@ -126,6 +140,7 @@ public:
         const char* package_name = env->GetStringUTFChars(args->nice_name, nullptr);
         if (!package_name) return;
         std::string pkg_str(package_name);
+        LOGD("postAppSpecialize for package: %s", pkg_str.c_str());
         auto it = package_map.find(pkg_str);
         if (it != package_map.end()) {
             current_info = it->second;
@@ -137,6 +152,7 @@ public:
     }
 
     ~SpoofModule() {
+        LOGD("Destructor called, restoring settings");
         for (const auto& [pkg, settings] : active_settings) {
             restoreOriginalSettings(settings);
         }
@@ -150,7 +166,10 @@ private:
 
     void loadConfig() {
         std::ifstream file("/data/adb/modules/COPG/config.json");
-        if (!file.is_open()) return;
+        if (!file.is_open()) {
+            LOGE("Failed to open config.json");
+            return;
+        }
         try {
             json config = json::parse(file);
             for (auto& [key, value] : config.items()) {
@@ -176,9 +195,14 @@ private:
                 info.cpuinfo = device.contains("CPUINFO") ? device["CPUINFO"].get<std::string>() : "";
                 info.serial_content = device.contains("SERIAL_CONTENT") ? device["SERIAL_CONTENT"].get<std::string>() : "";
 
-                for (const auto& pkg : packages) package_map[pkg] = info;
+                for (const auto& pkg : packages) {
+                    package_map[pkg] = info;
+                    LOGD("Loaded package: %s", pkg.c_str());
+                }
             }
-        } catch (const json::exception&) {}
+        } catch (const json::exception& e) {
+            LOGE("JSON parse error: %s", e.what());
+        }
         file.close();
     }
 
@@ -238,9 +262,13 @@ private:
                 if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == 0) {
                     *(void**)&orig_prop_get = (void*)hooked_prop_get;
                     mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
+                } else {
+                    LOGE("mprotect failed for __system_property_get");
                 }
             }
             dlclose(handle);
+        } else {
+            LOGE("Failed to dlopen libc.so for hooking __system_property_get");
         }
     }
 
@@ -248,7 +276,6 @@ private:
         if (!orig_read) return -1;
 
         char path[256];
-        ssize_t result = -1;
         snprintf(path, sizeof(path), "/proc/self/fd/%d", fd);
         char real_path[256];
         ssize_t len = readlink(path, real_path, sizeof(real_path) - 1);
@@ -281,9 +308,13 @@ private:
                 if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == 0) {
                     *(void**)&orig_read = (void*)hooked_read;
                     mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
+                } else {
+                    LOGE("mprotect failed for read");
                 }
             }
             dlclose(handle);
+        } else {
+            LOGE("Failed to dlopen libc.so for hooking read");
         }
     }
 
@@ -315,17 +346,27 @@ private:
                     orig_set_static_object_field = *(orig_set_static_object_field_t*)&sym;
                     *(void**)&sym = (void*)hooked_set_static_object_field;
                     mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
+                } else {
+                    LOGE("mprotect failed for JNI_SetStaticObjectField");
                 }
             }
             dlclose(handle);
+        } else {
+            LOGE("Failed to dlopen libandroid_runtime.so");
         }
     }
 
     void manageGameSettings(const std::string& package_name) {
-        if (package_map.find(package_name) == package_map.end()) return;
+        if (package_map.find(package_name) == package_map.end()) {
+            LOGD("Package %s not in package_map, skipping", package_name.c_str());
+            return;
+        }
 
         std::ifstream file("/data/adb/copg_state");
-        if (!file.is_open()) return;
+        if (!file.is_open()) {
+            LOGE("Failed to open /data/adb/copg_state for package %s", package_name.c_str());
+            return;
+        }
 
         std::unordered_map<std::string, int> toggles;
         std::string line;
@@ -336,58 +377,97 @@ private:
                 std::string value = line.substr(pos + 1);
                 try {
                     toggles[key] = std::stoi(value);
+                    LOGD("Read toggle: %s = %d", key.c_str(), toggles[key]);
                 } catch (...) {
-                    continue;
+                    LOGE("Failed to parse value for key: %s", key.c_str());
                 }
             }
         }
         file.close();
 
         GameSettings& settings = active_settings[package_name];
+        LOGD("Managing settings for package: %s", package_name.c_str());
 
+        // Get original settings
         if (settings.original_zen_mode == -1) {
-            FILE* pipe = popen("settings get global zen_mode", "r");
+            FILE* pipe = popen("su -c 'settings get global zen_mode'", "r");
             if (pipe) {
                 char buffer[128];
                 if (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
                     settings.original_zen_mode = atoi(buffer);
+                    LOGD("Original zen_mode: %d", settings.original_zen_mode);
+                } else {
+                    LOGE("Failed to read zen_mode");
                 }
                 pclose(pipe);
+            } else {
+                LOGE("Failed to popen settings get global zen_mode");
             }
         }
 
         if (settings.original_brightness_mode == -1) {
-            FILE* pipe = popen("settings get system screen_brightness_mode", "r");
+            FILE* pipe = popen("su -c 'settings get system screen_brightness_mode'", "r");
             if (pipe) {
                 char buffer[128];
                 if (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
                     settings.original_brightness_mode = atoi(buffer);
+                    LOGD("Original brightness_mode: %d", settings.original_brightness_mode);
+                } else {
+                    LOGE("Failed to read screen_brightness_mode");
                 }
                 pclose(pipe);
+            } else {
+                LOGE("Failed to popen settings get system screen_brightness_mode");
             }
         }
 
+        // Apply DND settings with root
         if (toggles.find("DND_ON") != toggles.end()) {
-            if (toggles["DND_ON"] == 1) {
-                system("cmd notification set_dnd on");
-                settings.dnd_changed = true;
+            if (toggles["DND_ON"] == 1 && settings.original_zen_mode != 1) {
+                int result = system("su -c 'cmd notification set_dnd on'");
+                if (result == 0) {
+                    settings.dnd_changed = true;
+                    LOGD("DND turned ON for %s", package_name.c_str());
+                } else {
+                    LOGE("Failed to turn DND on for %s, result: %d", package_name.c_str(), result);
+                }
+            } else {
+                LOGD("DND not enabled or already on for %s (original: %d)", package_name.c_str(), settings.original_zen_mode);
             }
         }
 
+        // Apply brightness settings with root
         if (toggles.find("AUTO_BRIGHTNESS_OFF") != toggles.end()) {
-            if (toggles["AUTO_BRIGHTNESS_OFF"] == 1) {
-                system("settings put system screen_brightness_mode 0");
-                settings.brightness_changed = true;
+            if (toggles["AUTO_BRIGHTNESS_OFF"] == 1 && settings.original_brightness_mode != 0) {
+                int result = system("su -c 'settings put system screen_brightness_mode 0'");
+                if (result == 0) {
+                    settings.brightness_changed = true;
+                    LOGD("Auto-brightness turned OFF for %s", package_name.c_str());
+                } else {
+                    LOGE("Failed to turn off auto-brightness for %s, result: %d", package_name.c_str(), result);
+                }
+            } else {
+                LOGD("Auto-brightness not disabled or already off for %s (original: %d)", package_name.c_str(), settings.original_brightness_mode);
             }
         }
     }
 
     void restoreOriginalSettings(const GameSettings& settings) {
         if (settings.dnd_changed && settings.original_zen_mode == 0) {
-            system("cmd notification set_dnd off");
+            int result = system("su -c 'cmd notification set_dnd off'");
+            if (result == 0) {
+                LOGD("Restored DND to OFF");
+            } else {
+                LOGE("Failed to restore DND to OFF, result: %d", result);
+            }
         }
         if (settings.brightness_changed && settings.original_brightness_mode == 1) {
-            system("settings put system screen_brightness_mode 1");
+            int result = system("su -c 'settings put system screen_brightness_mode 1'");
+            if (result == 0) {
+                LOGD("Restored auto-brightness to ON");
+            } else {
+                LOGE("Failed to restore auto-brightness to ON, result: %d", result);
+            }
         }
     }
 };
