@@ -362,10 +362,10 @@ private:
             return;
         }
 
-        // Use popen with su -c to read /data/adb/copg_state as root
-        FILE* pipe = popen("su -c 'cat /data/adb/copg_state'", "r");
+        LOGD("Attempting to read /data/adb/copg_state for %s", package_name.c_str());
+        FILE* pipe = popen("/system/bin/su -c 'cat /data/adb/copg_state'", "r");
         if (!pipe) {
-            LOGE("Failed to popen su -c 'cat /data/adb/copg_state' for package %s", package_name.c_str());
+            LOGE("Failed to popen /system/bin/su -c 'cat /data/adb/copg_state' for package %s", package_name.c_str());
             return;
         }
 
@@ -377,7 +377,6 @@ private:
             if (pos != std::string::npos) {
                 std::string key = line.substr(0, pos);
                 std::string value = line.substr(pos + 1);
-                // Remove any trailing newline or whitespace
                 value.erase(value.find_last_not_of(" \n\r\t") + 1);
                 try {
                     toggles[key] = std::stoi(value);
@@ -389,7 +388,9 @@ private:
         }
         int pipe_result = pclose(pipe);
         if (pipe_result != 0) {
-            LOGE("pclose failed with result: %d for package %s", pipe_result, package_name.c_str());
+            LOGE("pclose failed with result: %d for package %s (likely command not found)", pipe_result, package_name.c_str());
+        } else {
+            LOGD("Successfully read /data/adb/copg_state for %s", package_name.c_str());
         }
 
         GameSettings& settings = active_settings[package_name];
@@ -397,41 +398,45 @@ private:
 
         // Get original settings with root
         if (settings.original_zen_mode == -1) {
-            FILE* zen_pipe = popen("su -c 'settings get global zen_mode'", "r");
+            FILE* zen_pipe = popen("/system/bin/su -c 'settings get global zen_mode'", "r");
             if (zen_pipe) {
                 char zen_buffer[128];
                 if (fgets(zen_buffer, sizeof(zen_buffer), zen_pipe) != nullptr) {
                     settings.original_zen_mode = atoi(zen_buffer);
                     LOGD("Original zen_mode: %d", settings.original_zen_mode);
                 } else {
-                    LOGE("Failed to read zen_mode");
+                    LOGE("Failed to read zen_mode output");
+                    settings.original_zen_mode = 0; // Fallback
                 }
                 pclose(zen_pipe);
             } else {
-                LOGE("Failed to popen settings get global zen_mode");
+                LOGE("Failed to popen /system/bin/su -c 'settings get global zen_mode'");
+                settings.original_zen_mode = 0; // Fallback
             }
         }
 
         if (settings.original_brightness_mode == -1) {
-            FILE* bright_pipe = popen("su -c 'settings get system screen_brightness_mode'", "r");
+            FILE* bright_pipe = popen("/system/bin/su -c 'settings get system screen_brightness_mode'", "r");
             if (bright_pipe) {
                 char bright_buffer[128];
                 if (fgets(bright_buffer, sizeof(bright_buffer), bright_pipe) != nullptr) {
                     settings.original_brightness_mode = atoi(bright_buffer);
                     LOGD("Original brightness_mode: %d", settings.original_brightness_mode);
                 } else {
-                    LOGE("Failed to read screen_brightness_mode");
+                    LOGE("Failed to read screen_brightness_mode output");
+                    settings.original_brightness_mode = 1; // Fallback
                 }
                 pclose(bright_pipe);
             } else {
-                LOGE("Failed to popen settings get system screen_brightness_mode");
+                LOGE("Failed to popen /system/bin/su -c 'settings get system screen_brightness_mode'");
+                settings.original_brightness_mode = 1; // Fallback
             }
         }
 
         // Apply DND settings with root
         if (toggles.find("DND_ON") != toggles.end()) {
             if (toggles["DND_ON"] == 1 && settings.original_zen_mode != 1) {
-                int result = system("su -c 'cmd notification set_dnd on'");
+                int result = system("/system/bin/su -c 'cmd notification set_dnd on'");
                 if (result == 0) {
                     settings.dnd_changed = true;
                     LOGD("DND turned ON for %s", package_name.c_str());
@@ -446,7 +451,7 @@ private:
         // Apply brightness settings with root
         if (toggles.find("AUTO_BRIGHTNESS_OFF") != toggles.end()) {
             if (toggles["AUTO_BRIGHTNESS_OFF"] == 1 && settings.original_brightness_mode != 0) {
-                int result = system("su -c 'settings put system screen_brightness_mode 0'");
+                int result = system("/system/bin/su -c 'settings put system screen_brightness_mode 0'");
                 if (result == 0) {
                     settings.brightness_changed = true;
                     LOGD("Auto-brightness turned OFF for %s", package_name.c_str());
@@ -461,7 +466,7 @@ private:
 
     void restoreOriginalSettings(const GameSettings& settings) {
         if (settings.dnd_changed && settings.original_zen_mode == 0) {
-            int result = system("su -c 'cmd notification set_dnd off'");
+            int result = system("/system/bin/su -c 'cmd notification set_dnd off'");
             if (result == 0) {
                 LOGD("Restored DND to OFF");
             } else {
@@ -469,7 +474,7 @@ private:
             }
         }
         if (settings.brightness_changed && settings.original_brightness_mode == 1) {
-            int result = system("su -c 'settings put system screen_brightness_mode 1'");
+            int result = system("/system/bin/su -c 'settings put system screen_brightness_mode 1'");
             if (result == 0) {
                 LOGD("Restored auto-brightness to ON");
             } else {
