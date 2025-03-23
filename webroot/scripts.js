@@ -41,6 +41,25 @@ async function loadToggleStates() {
     }
 }
 
+function showRebootPopup() {
+    const popup = document.getElementById('reboot-popup');
+    popup.style.display = 'flex';
+}
+
+function hideRebootPopup() {
+    const popup = document.getElementById('reboot-popup');
+    popup.style.display = 'none';
+}
+
+async function rebootDevice() {
+    appendToOutput("[+] Rebooting device...");
+    try {
+        await execCommand("su -c reboot");
+    } catch (error) {
+        appendToOutput("[!] Failed to reboot: " + error);
+    }
+}
+
 function applyEventListeners() {
     document.getElementById('toggle-auto-brightness').addEventListener('change', async (e) => {
         const isChecked = e.target.checked;
@@ -69,10 +88,27 @@ function applyEventListeners() {
             output.split('\n').forEach(line => {
                 if (line.trim()) appendToOutput(line);
             });
+            if (output.includes("Reboot required to apply changes")) {
+                showRebootPopup();
+            }
         } catch (error) {
             appendToOutput("[!] Failed to update game list: " + error);
         }
         actionRunning = false;
+    });
+
+    document.getElementById('reboot-btn').addEventListener('click', () => {
+        showRebootPopup();
+    });
+
+    document.getElementById('reboot-yes').addEventListener('click', async () => {
+        hideRebootPopup();
+        await rebootDevice();
+    });
+
+    document.getElementById('reboot-no').addEventListener('click', () => {
+        hideRebootPopup();
+        appendToOutput("[+] Reboot canceled");
     });
 }
 
