@@ -8,9 +8,6 @@
 #include <dlfcn.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <cstdlib>  // For system()
-#include <thread>   // For toggle monitoring thread
-#include <atomic>   // For thread-safe flags
 
 using json = nlohmann::json;
 
@@ -27,7 +24,13 @@ struct DeviceInfo {
     std::string serial;
     std::string cpuinfo;
     std::string serial_content;
-    bool is_game = false;  // Flag for game packages
+};
+
+struct GameSettings {
+    int original_zen_mode = -1;
+    int original_brightness_mode = -1;
+    bool dnd_changed = false;
+    bool brightness_changed = false;
 };
 
 // Static function pointers for hooks
@@ -53,15 +56,6 @@ static jfieldID productField = nullptr;
 static jfieldID versionReleaseField = nullptr;
 static jfieldID sdkIntField = nullptr;
 static jfieldID serialField = nullptr;
-
-// Game-specific variables
-static std::string current_game;                         // Currently running game
-static std::atomic<bool> game_running(false);            // Thread-safe game state
-static std::atomic<bool> monitor_running(false);         // Thread-safe monitor control
-static bool last_auto_brightness_off = true;             // Last toggle states
-static bool last_dnd_on = true;
-static int pre_game_brightness_mode = -1;                // Pre-game auto-brightness state (0 = manual, 1 = auto)
-static bool pre_game_dnd_state = false;                  // Pre-game DND state (0 = off, >0 = on)
 
 class SpoofModule : public zygisk::ModuleBase {
 public:
@@ -102,9 +96,6 @@ public:
         hookNativeRead();
         hookJniSetStaticObjectField();
         loadConfig();
-
-        monitor_running = true;
-        std::thread(monitorToggles, this).detach();
     }
 
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
@@ -117,30 +108,16 @@ public:
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
         }
-
-        std::string pkg(package_name);
-        auto it = package_map.find(pkg);
-
-        if (it != package_map.end()) {
-            current_info = it->second;
-            if (current_info.is_game) {
-                if (!game_running || current_game != pkg) {
-                    current_game = pkg;
-                    game_running = true;
-                    applyGameSettings();
-                }
-            } else if (game_running && current_game == pkg) {
-                game_running = false;
-                revertGameSettings();
-                current_game = "";
-            } else {
-                spoofDevice(current_info);
-                spoofSystemProperties(current_info);
-            }
-        } else {
+        std::string pkg_str(package_name);
+        auto it = package_map.find(pkg_str);
+        if (it == package_map.end()) {
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+        } else {
+            current_info = it->second;
+            spoofDevice(current_info);
+            spoofSystemProperties(current_info);
+            manageGameSettings(pkg_str);
         }
-
         env->ReleaseStringUTFChars(args->nice_name, package_name);
     }
 
@@ -148,31 +125,28 @@ public:
         if (!args || !args->nice_name || package_map.empty() || !buildClass) return;
         const char* package_name = env->GetStringUTFChars(args->nice_name, nullptr);
         if (!package_name) return;
-
-        std::string pkg(package_name);
-        auto it = package_map.find(pkg);
-
+        std::string pkg_str(package_name);
+        auto it = package_map.find(pkg_str);
         if (it != package_map.end()) {
             current_info = it->second;
-            if (current_info.is_game) {
-                if (!game_running || current_game != pkg) {
-                    current_game = pkg;
-                    game_running = true;
-                    applyGameSettings();
-                }
-            } else {
-                spoofDevice(current_info);
-                spoofSystemProperties(current_info);
-            }
+            spoofDevice(current_info);
+            spoofSystemProperties(current_info);
+            manageGameSettings(pkg_str);
         }
-
         env->ReleaseStringUTFChars(args->nice_name, package_name);
+    }
+
+    ~SpoofModule() {
+        for (const auto& [pkg, settings] : active_settings) {
+            restoreOriginalSettings(settings);
+        }
     }
 
 private:
     zygisk::Api* api;
     JNIEnv* env;
     std::unordered_map<std::string, DeviceInfo> package_map;
+    static std::unordered_map<std::string, GameSettings> active_settings;
 
     void loadConfig() {
         std::ifstream file("/data/adb/modules/COPG/config.json");
@@ -183,31 +157,26 @@ private:
                 if (key.find("_DEVICE") != std::string::npos) continue;
                 auto packages = value.get<std::vector<std::string>>();
                 std::string device_key = key + "_DEVICE";
+                if (!config.contains(device_key)) continue;
+                auto device = config[device_key];
 
                 DeviceInfo info;
-                if (!config.contains(device_key)) {
-                    info.is_game = true;
-                } else {
-                    auto device = config[device_key];
-                    info.brand = device["BRAND"].get<std::string>();
-                    info.device = device["DEVICE"].get<std::string>();
-                    info.manufacturer = device["MANUFACTURER"].get<std::string>();
-                    info.model = device["MODEL"].get<std::string>();
-                    info.fingerprint = device.contains("FINGERPRINT") ? 
-                        device["FINGERPRINT"].get<std::string>() : "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys";
-                    info.build_id = device.contains("BUILD_ID") ? device["BUILD_ID"].get<std::string>() : "";
-                    info.display = device.contains("DISPLAY") ? device["DISPLAY"].get<std::string>() : "";
-                    info.product = device.contains("PRODUCT") ? device["PRODUCT"].get<std::string>() : info.device;
-                    info.version_release = device.contains("VERSION_RELEASE") ? 
-                        device["VERSION_RELEASE"].get<std::string>() : "";
-                    info.serial = device.contains("SERIAL") ? device["SERIAL"].get<std::string>() : "";
-                    info.cpuinfo = device.contains("CPUINFO") ? device["CPUINFO"].get<std::string>() : "";
-                    info.serial_content = device.contains("SERIAL_CONTENT") ? device["SERIAL_CONTENT"].get<std::string>() : "";
-                }
+                info.brand = device["BRAND"].get<std::string>();
+                info.device = device["DEVICE"].get<std::string>();
+                info.manufacturer = device["MANUFACTURER"].get<std::string>();
+                info.model = device["MODEL"].get<std::string>();
+                info.fingerprint = device.contains("FINGERPRINT") ? 
+                    device["FINGERPRINT"].get<std::string>() : "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys";
+                info.build_id = device.contains("BUILD_ID") ? device["BUILD_ID"].get<std::string>() : "";
+                info.display = device.contains("DISPLAY") ? device["DISPLAY"].get<std::string>() : "";
+                info.product = device.contains("PRODUCT") ? device["PRODUCT"].get<std::string>() : info.device;
+                info.version_release = device.contains("VERSION_RELEASE") ? 
+                    device["VERSION_RELEASE"].get<std::string>() : "";
+                info.serial = device.contains("SERIAL") ? device["SERIAL"].get<std::string>() : "";
+                info.cpuinfo = device.contains("CPUINFO") ? device["CPUINFO"].get<std::string>() : "";
+                info.serial_content = device.contains("SERIAL_CONTENT") ? device["SERIAL_CONTENT"].get<std::string>() : "";
 
-                for (const auto& pkg : packages) {
-                    package_map[pkg] = info;
-                }
+                for (const auto& pkg : packages) package_map[pkg] = info;
             }
         } catch (const json::exception&) {}
         file.close();
@@ -235,98 +204,6 @@ private:
         if (!info.manufacturer.empty()) __system_property_set("ro.product.manufacturer", info.manufacturer.c_str());
         if (!info.model.empty()) __system_property_set("ro.product.model", info.model.c_str());
         if (!info.fingerprint.empty()) __system_property_set("ro.build.fingerprint", info.fingerprint.c_str());
-    }
-
-    bool readToggle(const std::string& toggle) {
-        std::ifstream state_file("/data/adb/copg_state");
-        if (!state_file.is_open()) return true;
-        std::string line;
-        while (std::getline(state_file, line)) {
-            if (line.find(toggle + "=") == 0) {
-                state_file.close();
-                return line.substr(toggle.length() + 1) == "1";
-            }
-        }
-        state_file.close();
-        return true;
-    }
-
-    int getBrightnessMode() {
-        FILE* fp = popen("settings get system screen_brightness_mode", "r");
-        if (!fp) return -1;
-        char buffer[16];
-        if (fgets(buffer, sizeof(buffer), fp) != nullptr) {
-            pclose(fp);
-            return atoi(buffer);
-        }
-        pclose(fp);
-        return -1;
-    }
-
-    bool getDndState() {
-        FILE* fp = popen("settings get global zen_mode", "r");
-        if (!fp) return false;
-        char buffer[16];
-        if (fgets(buffer, sizeof(buffer), fp) != nullptr) {
-            pclose(fp);
-            int zen_mode = atoi(buffer);
-            return zen_mode > 0;
-        }
-        pclose(fp);
-        return false;
-    }
-
-    void applyGameSettings() {
-        pre_game_brightness_mode = getBrightnessMode();
-        pre_game_dnd_state = getDndState();
-
-        last_auto_brightness_off = readToggle("AUTO_BRIGHTNESS_OFF");
-        last_dnd_on = readToggle("DND_ON");
-
-        if (last_auto_brightness_off) {
-            system("settings put system screen_brightness_mode 0");
-        }
-        if (last_dnd_on) {
-            system("cmd notification set_dnd on");
-        }
-    }
-
-    void revertGameSettings() {
-        if (last_auto_brightness_off && pre_game_brightness_mode != -1) {
-            std::string cmd = "settings put system screen_brightness_mode " + std::to_string(pre_game_brightness_mode);
-            system(cmd.c_str());
-        }
-        if (last_dnd_on) {
-            system(pre_game_dnd_state ? "cmd notification set_dnd on" : "cmd notification set_dnd off");
-        }
-    }
-
-    static void monitorToggles(SpoofModule* module) {
-        while (monitor_running) {
-            if (game_running) {
-                bool auto_brightness_off = module->readToggle("AUTO_BRIGHTNESS_OFF");
-                bool dnd_on = module->readToggle("DND_ON");
-
-                if (auto_brightness_off != last_auto_brightness_off) {
-                    if (auto_brightness_off) {
-                        system("settings put system screen_brightness_mode 0");
-                    } else {
-                        std::string cmd = "settings put system screen_brightness_mode " + std::to_string(pre_game_brightness_mode);
-                        system(cmd.c_str());
-                    }
-                    last_auto_brightness_off = auto_brightness_off;
-                }
-                if (dnd_on != last_dnd_on) {
-                    if (dnd_on) {
-                        system("cmd notification set_dnd on");
-                    } else {
-                        system("cmd notification set_dnd off");
-                    }
-                    last_dnd_on = dnd_on;
-                }
-            }
-            sleep(1);
-        }
     }
 
     static int hooked_prop_get(const char* name, char* value, const char* default_value) {
@@ -371,6 +248,7 @@ private:
         if (!orig_read) return -1;
 
         char path[256];
+        ssize_t result = -1;
         snprintf(path, sizeof(path), "/proc/self/fd/%d", fd);
         char real_path[256];
         ssize_t len = readlink(path, real_path, sizeof(real_path) - 1);
@@ -442,6 +320,78 @@ private:
             dlclose(handle);
         }
     }
+
+    void manageGameSettings(const std::string& package_name) {
+        if (package_map.find(package_name) == package_map.end()) return;
+
+        std::ifstream file("/data/adb/copg_state");
+        if (!file.is_open()) return;
+
+        std::unordered_map<std::string, int> toggles;
+        std::string line;
+        while (std::getline(file, line)) {
+            size_t pos = line.find('=');
+            if (pos != std::string::npos) {
+                std::string key = line.substr(0, pos);
+                std::string value = line.substr(pos + 1);
+                try {
+                    toggles[key] = std::stoi(value);
+                } catch (...) {
+                    continue;
+                }
+            }
+        }
+        file.close();
+
+        GameSettings& settings = active_settings[package_name];
+
+        if (settings.original_zen_mode == -1) {
+            FILE* pipe = popen("settings get global zen_mode", "r");
+            if (pipe) {
+                char buffer[128];
+                if (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+                    settings.original_zen_mode = atoi(buffer);
+                }
+                pclose(pipe);
+            }
+        }
+
+        if (settings.original_brightness_mode == -1) {
+            FILE* pipe = popen("settings get system screen_brightness_mode", "r");
+            if (pipe) {
+                char buffer[128];
+                if (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+                    settings.original_brightness_mode = atoi(buffer);
+                }
+                pclose(pipe);
+            }
+        }
+
+        if (toggles.find("DND_ON") != toggles.end()) {
+            if (toggles["DND_ON"] == 1) {
+                system("cmd notification set_dnd on");
+                settings.dnd_changed = true;
+            }
+        }
+
+        if (toggles.find("AUTO_BRIGHTNESS_OFF") != toggles.end()) {
+            if (toggles["AUTO_BRIGHTNESS_OFF"] == 1) {
+                system("settings put system screen_brightness_mode 0");
+                settings.brightness_changed = true;
+            }
+        }
+    }
+
+    void restoreOriginalSettings(const GameSettings& settings) {
+        if (settings.dnd_changed && settings.original_zen_mode == 0) {
+            system("cmd notification set_dnd off");
+        }
+        if (settings.brightness_changed && settings.original_brightness_mode == 1) {
+            system("settings put system screen_brightness_mode 1");
+        }
+    }
 };
+
+std::unordered_map<std::string, GameSettings> SpoofModule::active_settings;
 
 REGISTER_ZYGISK_MODULE(SpoofModule)
