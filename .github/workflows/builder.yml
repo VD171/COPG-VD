@@ -1,0 +1,190 @@
+name: Build COPG Module
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_to_release:
+        description: 'Upload ZIP to GitHub Release?'
+        type: boolean
+        required: true
+        default: false
+      upload_to_telegram:
+        description: 'Upload ZIP to Telegram?'
+        type: boolean
+        required: true
+        default: false
+      branch:
+        description: 'Branch to build from'
+        type: string
+        required: true
+        default: 'JSON'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    environment: Telegram
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Android SDK and NDK
+        run: |
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+          unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+          if [ -d "$ANDROID_HOME/cmdline-tools/cmdline-tools" ]; then
+            mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+          elif [ -d "$ANDROID_HOME/cmdline-tools/tools" ]; then
+            mv $ANDROID_HOME/cmdline-tools/tools $ANDROID_HOME/cmdline-tools/latest
+          else
+            echo "Unexpected directory structure after unzip:"
+            ls -la $ANDROID_HOME/cmdline-tools
+            exit 1
+          fi
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973" "platforms;android-34" "build-tools;34.0.0"
+          echo "NDK_PATH=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
+
+      - name: Accept Android SDK licenses
+        run: |
+          JAVA_OPTS="--add-modules java.xml.bind" yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake zip
+
+      - name: Fetch Zygisk Headers and JSON Library
+        run: |
+          mkdir -p zygisk include/nlohmann
+          wget https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hh
+          wget https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp -O include/nlohmann/json.hpp
+
+      - name: Fetch config.json
+        run: |
+          wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/config.json -O config.json
+
+      - name: Build Project (arm64-v8a)
+        uses: threeal/cmake-action@v2.1.0
+        with:
+          build-dir: build/arm64-v8a
+          args: |
+            -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake
+            -DANDROID_ABI=arm64-v8a
+            -DANDROID_PLATFORM=android-34
+            -DCMAKE_MAKE_PROGRAM=/usr/bin/make
+
+      - name: Check arm64-v8a output
+        run: |
+          if [ ! -f "build/arm64-v8a/libspoof.so" ]; then
+            echo "Error: arm64-v8a library not built!"
+            ls -la build/arm64-v8a
+            exit 1
+          fi
+
+      - name: Build Project (armeabi-v7a)
+        uses: threeal/cmake-action@v2.1.0
+        with:
+          build-dir: build/armeabi-v7a
+          args: |
+            -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake
+            -DANDROID_ABI=armeabi-v7a
+            -DANDROID_PLATFORM=android-34
+            -DCMAKE_MAKE_PROGRAM=/usr/bin/make
+
+      - name: Check armeabi-v7a output
+        run: |
+          if [ ! -f "build/armeabi-v7a/libspoof.so" ]; then
+            echo "Error: armeabi-v7a library not built!"
+            ls -la build/armeabi-v7a
+            exit 1
+          fi
+
+      - name: Prepare module structure
+        run: |
+          mkdir -p module/zygisk module/META-INF/com/google/android module/webroot/assets
+          cp build/arm64-v8a/libspoof.so module/zygisk/arm64-v8a.so
+          cp build/armeabi-v7a/libspoof.so module/zygisk/armeabi-v7a.so
+          chmod 755 module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
+          cp config.json module/config.json
+          cat > module/module.prop << 'EOF'
+          id=COPG
+          name=✨ COPG spoof ✨
+          version=3.0
+          versionCode=300
+          author=AlirezaParsi
+          description=Spoof your device for games. Click Action button to update your config if needed.
+          support=https://t.me/theaosp
+          updateJson=https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/update.json
+          minMagisk=20.4
+          EOF
+
+      - name: Fetch module files
+        run: |
+          wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/customize.sh -O module/customize.sh
+          wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/action.sh -O module/action.sh
+          wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/uninstall.sh -O module/uninstall.sh
+          wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/META-INF/com/google/android/update-binary -O module/META-INF/com/google/android/update-binary
+          wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/META-INF/com/google/android/updater-script -O module/META-INF/com/google/android/updater-script
+          chmod 755 module/customize.sh module/action.sh module/uninstall.sh module/META-INF/com/google/android/update-binary
+
+      - name: Fetch WebUI files
+        run: |
+          wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/webroot/index.html -O module/webroot/index.html
+          wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/webroot/scripts.js -O module/webroot/scripts.js
+          wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/webroot/styles.css -O module/webroot/styles.css
+          wget https://raw.githubusercontent.com/AlirezaParsi/COPG/raw/refs/heads/JSON/webroot/assets/RobotoMono-Regular.ttf -O module/webroot/assets/RobotoMono-Regular.ttf
+
+      - name: Package module into ZIP
+        run: |
+          VERSION=$(grep "version=" module/module.prop | cut -d'=' -f2)
+          ZIP_NAME="COPG-v$VERSION.zip"
+          cd module
+          zip -r "../$ZIP_NAME" .
+          cd ..
+          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+
+      - name: Upload Module ZIP as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: COPG
+          path: ${{ env.ZIP_NAME }}
+
+      - name: Upload ZIP to GitHub Release
+        if: github.event.inputs.upload_to_release == 'true'
+        run: |
+          VERSION=$(grep "version=" module/module.prop | cut -d'=' -f2)
+          TAG="v$VERSION"
+          gh release create "$TAG" \
+            --title "Release $TAG" \
+            --notes "Built on $(date -u +'%Y-%m-%d %H:%M:%S UTC')" \
+            --draft \
+            || gh release edit "$TAG" --draft
+          gh release upload "$TAG" ${{ env.ZIP_NAME }} --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload ZIP to Telegram
+        if: github.event.inputs.upload_to_telegram == 'true'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          document: ${{ env.ZIP_NAME }}
+          message: |
+            New COPG Spoof Module Build
+            Version: ${{ env.VERSION }}
+            Built on: ${{ github.run_id }} @ ${{ github.sha }}
