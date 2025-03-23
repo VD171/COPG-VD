@@ -1,5 +1,14 @@
 Support Group:
 https://t.me/TheAOSP
+# v3.0.3
+- added webui 
+- webui: added disable DND toggle 
+- webui: added disable auto brightness  toggle
+- webui: added stop logger toggle 
+- webui: added update game list button
+- webui/action: added game list compare 
+- webui: added reboot pop-up question if game list updated
+- webui: added reboot button with pop-up question
 # v2.8
 - trying to fix mid-game crashing
 - improve ban spoof system
