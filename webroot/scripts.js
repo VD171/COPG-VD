@@ -13,8 +13,13 @@ async function execCommand(command) {
 
 function appendToOutput(content) {
     const output = document.getElementById('output');
-    output.textContent += `${new Date().toLocaleTimeString()} - ${content}\n`;
-    output.scrollTop = output.scrollHeight;
+    const logContent = document.getElementById('log-content');
+    const logEntry = document.createElement('div');
+    logEntry.textContent = `${new Date().toLocaleTimeString()} - ${content}`;
+    output.appendChild(logEntry);
+    if (!logContent.classList.contains('collapsed')) {
+        logEntry.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
 }
 
 async function loadVersion() {
@@ -41,23 +46,13 @@ async function loadToggleStates() {
     }
 }
 
-function showRebootPopup() {
-    const popup = document.getElementById('reboot-popup');
+function showPopup(popupId) {
+    const popup = document.getElementById(popupId);
     popup.style.display = 'flex';
 }
 
-function hideRebootPopup() {
-    const popup = document.getElementById('reboot-popup');
-    popup.style.display = 'none';
-}
-
-function showRebootConfirmPopup() {
-    const popup = document.getElementById('reboot-confirm-popup');
-    popup.style.display = 'flex';
-}
-
-function hideRebootConfirmPopup() {
-    const popup = document.getElementById('reboot-confirm-popup');
+function hidePopup(popupId) {
+    const popup = document.getElementById(popupId);
     popup.style.display = 'none';
 }
 
@@ -70,23 +65,37 @@ async function rebootDevice() {
     }
 }
 
+function toggleLogSection() {
+    const logContent = document.getElementById('log-content');
+    const toggleIcon = document.querySelector('.toggle-icon');
+    logContent.classList.toggle('collapsed');
+    toggleIcon.textContent = logContent.classList.contains('collapsed') ? '▲' : '▼';
+    if (!logContent.classList.contains('collapsed')) {
+        const output = document.getElementById('output');
+        const lastEntry = output.lastElementChild;
+        if (lastEntry) {
+            lastEntry.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+    }
+}
+
 function applyEventListeners() {
     document.getElementById('toggle-auto-brightness').addEventListener('change', async (e) => {
         const isChecked = e.target.checked;
         await execCommand(`sed -i '/AUTO_BRIGHTNESS_OFF=/d' /data/adb/copg_state; echo "AUTO_BRIGHTNESS_OFF=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-        appendToOutput(isChecked ? "✅ Auto-Brightness Disable for Games Enabled" : "❌ Auto-Brightness Disable for Games Disabled");
+        appendToOutput(isChecked ? "✅ Auto-Brightness Disabled" : "❌ Auto-Brightness Enabled");
     });
 
     document.getElementById('toggle-dnd').addEventListener('change', async (e) => {
         const isChecked = e.target.checked;
         await execCommand(`sed -i '/DND_ON=/d' /data/adb/copg_state; echo "DND_ON=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-        appendToOutput(isChecked ? "✅ DND for Games Enabled" : "❌ DND for Games Disabled");
+        appendToOutput(isChecked ? "✅ DND Enabled" : "❌ DND Disabled");
     });
 
     document.getElementById('toggle-logging').addEventListener('change', async (e) => {
         const isChecked = e.target.checked;
         await execCommand(`sed -i '/DISABLE_LOGGING=/d' /data/adb/copg_state; echo "DISABLE_LOGGING=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-        appendToOutput(isChecked ? "✅ System Logging Disabled for Games" : "❌ System Logging Enabled for Games");
+        appendToOutput(isChecked ? "✅ Logging Disabled" : "❌ Logging Enabled");
     });
 
     document.getElementById('update-config').addEventListener('click', async () => {
@@ -99,7 +108,7 @@ function applyEventListeners() {
                 if (line.trim()) appendToOutput(line);
             });
             if (output.includes("Reboot required to apply changes")) {
-                showRebootPopup();
+                showPopup('reboot-popup');
             }
         } catch (error) {
             appendToOutput("[!] Failed to update game list: " + error);
@@ -107,28 +116,22 @@ function applyEventListeners() {
         actionRunning = false;
     });
 
-    document.getElementById('reboot-btn').addEventListener('click', () => {
-        showRebootConfirmPopup();
-    });
-
     document.getElementById('reboot-yes').addEventListener('click', async () => {
-        hideRebootPopup();
+        hidePopup('reboot-popup');
         await rebootDevice();
     });
 
     document.getElementById('reboot-no').addEventListener('click', () => {
-        hideRebootPopup();
+        hidePopup('reboot-popup');
         appendToOutput("[+] Reboot canceled");
     });
 
-    document.getElementById('reboot-confirm-yes').addEventListener('click', async () => {
-        hideRebootConfirmPopup();
-        await rebootDevice();
-    });
+    document.getElementById('log-header').addEventListener('click', toggleLogSection);
 
-    document.getElementById('reboot-confirm-no').addEventListener('click', () => {
-        hideRebootConfirmPopup();
-        appendToOutput("[+] Reboot canceled");
+    document.getElementById('clear-log').addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent toggle when clicking "Clear"
+        document.getElementById('output').textContent = '';
+        appendToOutput("[+] Log cleared");
     });
 }
 
