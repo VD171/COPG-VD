@@ -31,7 +31,7 @@ apply_toggle_settings() {
     if [ -f "$TOGGLE_FILE" ]; then
         . "$TOGGLE_FILE"  # Source the toggle file
         [ "$AUTO_BRIGHTNESS_OFF" = "1" ] && su -c settings put system screen_brightness_mode 0
-        [ "$DND_ON" = "1" ] && su -c cmd notification set_dnd on
+        [ "$DND_ON" = "1" ] && su -c cmd notification set_dnd priority
         [ "$DISABLE_LOGGING" = "1" ] && su -c stop logd
     fi
 }
