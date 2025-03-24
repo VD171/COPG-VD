@@ -13,7 +13,6 @@
         <header class="header">
             <h1>COPG Control</h1>
             <span class="version" id="version-text"></span>
-            <button class="reboot-btn" id="reboot-btn">Reboot</button>
         </header>
         <main class="controls">
             <div class="card">
@@ -42,11 +41,14 @@
             <button class="update-btn" id="update-config">Update Game List</button>
         </main>
         <section class="log-section">
-            <div class="log-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
-                <h2>Log Output</h2>
-                <span class="toggle-icon">▼</span>
+            <div class="log-header" id="log-header">
+                <div class="log-title">
+                    <span class="toggle-icon">▼</span>
+                    <h2>Log Output</h2>
+                </div>
+                <button class="clear-btn" id="clear-log">Clear</button>
             </div>
-            <div class="log-content">
+            <div class="log-content" id="log-content">
                 <pre id="output"></pre>
             </div>
         </section>
@@ -58,16 +60,6 @@
             <div class="popup-buttons">
                 <button class="popup-btn yes-btn" id="reboot-yes">Yes, Reboot</button>
                 <button class="popup-btn no-btn" id="reboot-no">No, Cancel</button>
-            </div>
-        </div>
-    </div>
-    <div class="popup" id="reboot-confirm-popup">
-        <div class="popup-content">
-            <h3>Confirm Reboot</h3>
-            <p>Do you want to reboot your device now?</p>
-            <div class="popup-buttons">
-                <button class="popup-btn yes-btn" id="reboot-confirm-yes">Yes, Reboot</button>
-                <button class="popup-btn no-btn" id="reboot-confirm-no">No, Cancel</button>
             </div>
         </div>
     </div>
