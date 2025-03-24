@@ -1,56 +1,117 @@
 #!/system/bin/sh
 
-# Paths as per your request
+# Paths
 CONFIG_JSON="/data/adb/modules/COPG/config.json"
 TOGGLE_FILE="/data/adb/copg_state"
-STATE_FILE="/data/adb/copg_previous_state"
+DEFAULTS_FILE="/data/adb/copg_defaults"  # Base name for .brightness and .dnd
 
-# Function to extract package names from config.json
-get_packages() {
-    cat "$CONFIG_JSON" | grep -oE '"com\.[^"]+"' | tr -d '"'
+# Function to execute root commands
+exec_root() {
+    local cmd="$1"
+    su -c "$cmd" >/dev/null 2>&1
+    return $?
 }
 
-# Function to save current brightness and DND states
-save_default_states() {
-    su -c settings get system screen_brightness_mode > "$STATE_FILE.brightness"
-    su -c settings get global zen_mode > "$STATE_FILE.dnd"
-}
-
-# Function to restore default states
-restore_default_states() {
-    if [ -f "$STATE_FILE.brightness" ] && [ -f "$STATE_FILE.dnd" ]; then
-        su -c settings put system screen_brightness_mode "$(cat "$STATE_FILE.brightness")"
-        su -c cmd notification set_dnd off
-        [ -f "$TOGGLE_FILE" ] && . "$TOGGLE_FILE" && [ "$DISABLE_LOGGING" = "1" ] && su -c start logd
-        rm -f "$STATE_FILE.brightness" "$STATE_FILE.dnd"
-    fi
+# Function to save current DND and brightness states
+save_current_states() {
+    val=$(settings get system screen_brightness_mode) && echo "$val" > "$DEFAULTS_FILE.brightness"
+    val=$(settings get global zen_mode) && echo "$val" > "$DEFAULTS_FILE.dnd"
 }
 
 # Function to apply toggle settings
-apply_toggle_settings() {
+apply_toggles() {
     if [ -f "$TOGGLE_FILE" ]; then
-        . "$TOGGLE_FILE"  # Source the toggle file
-        [ "$AUTO_BRIGHTNESS_OFF" = "1" ] && su -c settings put system screen_brightness_mode 0
-        [ "$DND_ON" = "1" ] && su -c cmd notification set_dnd priority
-        [ "$DISABLE_LOGGING" = "1" ] && su -c stop logd
+        . "$TOGGLE_FILE" 2>/dev/null
+        [ "$AUTO_BRIGHTNESS_OFF" = "1" ] && exec_root "settings put system screen_brightness_mode 0"
+        [ "$DND_ON" = "1" ] && exec_root "cmd notification set_dnd priority"
+        [ "$DISABLE_LOGGING" = "1" ] && exec_root "stop logd"
+    fi
+}
+
+# Function to restore saved states
+restore_saved_states() {
+    if [ -f "$DEFAULTS_FILE.brightness" ] && [ -f "$DEFAULTS_FILE.dnd" ]; then
+        local brightness=$(cat "$DEFAULTS_FILE.brightness")
+        exec_root "settings put system screen_brightness_mode $brightness"
+
+        local dnd=$(cat "$DEFAULTS_FILE.dnd")
+        case "$dnd" in
+            0) exec_root "cmd notification set_dnd off" ;;
+            1) exec_root "cmd notification set_dnd priority" ;;
+            2) exec_root "cmd notification set_dnd total" ;;
+            3) exec_root "cmd notification set_dnd alarms" ;;
+        esac
+
+        if [ -f "$TOGGLE_FILE" ]; then
+            . "$TOGGLE_FILE" 2>/dev/null
+            [ "$DISABLE_LOGGING" = "1" ] && exec_root "start logd"
+        fi
+
+        rm -f "$DEFAULTS_FILE.brightness" "$DEFAULTS_FILE.dnd"
+    fi
+}
+
+# Function to check if a process is running
+is_process_running() {
+    local package="$1"
+    pidof "$package" >/dev/null 2>&1
+    return $?
+}
+
+# Function to extract package names from config.json
+get_packages() {
+    if [ -f "$CONFIG_JSON" ]; then
+        cat "$CONFIG_JSON" | grep -oE '"com\.[^"]+"' | tr -d '"' | sort -u
+    else
+        exit 1
     fi
 }
 
 # Main monitoring loop
 last_app=""
+debounce_count=0
+DEBOUNCE_THRESHOLD=3
+
+# Test root access
+exec_root "whoami" >/dev/null
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+
+# Pre-cache package list
+PACKAGE_LIST=$(get_packages | tr '\n' '|' | sed 's/|$//')
+if [ -z "$PACKAGE_LIST" ]; then
+    exit 1
+fi
+
 while true; do
-    window=$(dumpsys window)
-    current_app=$(echo "$window" | grep -E 'mCurrentFocus|mFocusedApp' | grep -Eo "$(get_packages | tr '\n' '|' | sed 's/|$//')")
+    window=$(su -c "dumpsys window" 2>/dev/null)
+    if [ $? -ne 0 ]; then
+        sleep 1
+        continue
+    fi
+
+    current_app=$(echo "$window" | grep -E 'mCurrentFocus|mFocusedApp' | grep -Eo "$PACKAGE_LIST" | head -n 1)
 
     if [ -n "$current_app" ] && [ "$current_app" != "$last_app" ]; then
-        echo "Game/App started: $current_app"
-        save_default_states
-        apply_toggle_settings
-        last_app="$current_app"
+        debounce_count=$((debounce_count + 1))
+        if [ "$debounce_count" -ge "$DEBOUNCE_THRESHOLD" ]; then
+            save_current_states
+            apply_toggles
+            last_app="$current_app"
+            debounce_count=0
+        fi
     elif [ -z "$current_app" ] && [ -n "$last_app" ]; then
-        echo "Game/App exited: $last_app"
-        restore_default_states
-        last_app=""
+        debounce_count=$((debounce_count + 1))
+        if [ "$debounce_count" -ge "$DEBOUNCE_THRESHOLD" ]; then
+            if ! is_process_running "$last_app"; then
+                restore_saved_states
+                last_app=""
+            fi
+            debounce_count=0
+        fi
+    else
+        debounce_count=0
     fi
 
     sleep 1
