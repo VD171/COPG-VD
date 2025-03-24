@@ -23,7 +23,6 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: relative;
 }
 
 h1 {
@@ -34,24 +33,6 @@ h1 {
 .version {
     font-size: 14px;
     opacity: 0.9;
-}
-
-.reboot-btn {
-    background: #FF6F61;
-    color: #FFF;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.reboot-btn:hover {
-    background: #FF8A80;
-    transform: scale(1.05);
 }
 
 .controls {
@@ -65,19 +46,24 @@ h1 {
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
+    transition: transform 0.2s ease;
 }
 
 .card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
 }
 
 .toggle-group {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
+    padding: 12px 0;
     border-bottom: 1px solid #E0E0E0;
+    transition: background 0.2s;
+}
+
+.toggle-group:hover {
+    background: #F7F8FA;
 }
 
 .toggle-group:last-child {
@@ -110,7 +96,7 @@ h1 {
     bottom: 0;
     background-color: #CCC;
     border-radius: 24px;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s ease;
     cursor: pointer;
 }
 
@@ -123,7 +109,7 @@ h1 {
     bottom: 3px;
     background-color: #FFF;
     border-radius: 50%;
-    transition: transform 0.3s;
+    transition: transform 0.3s ease;
 }
 
 input:checked + .slider {
@@ -157,39 +143,74 @@ input:checked + .slider:before {
     border-radius: 12px;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    position: relative;
 }
 
 .log-header {
     background: #006D77;
-    color: #FFF;
+    color: #DDEEEF; /* Slightly less white for header text */
     padding: 10px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
+    transition: background 0.3s;
+}
+
+.log-header:hover {
+    background: #00838F;
+}
+
+.log-title {
+    display: flex;
+    align-items: center;
+    position: relative;
 }
 
 h2 {
     margin: 0;
     font-size: 18px;
+    margin-left: 20px; /* Space for toggle icon */
+    color: #DDEEEF; /* Matches log-header */
 }
 
 .toggle-icon {
     font-size: 14px;
-    transition: transform 0.3s;
+    color: #FFFFFF; /* Pure white for the angle icon */
+    transition: transform 0.3s ease;
+    position: absolute;
+    left: 0;
+    opacity: 1; /* Full visibility */
+}
+
+.clear-btn {
+    background: none;
+    color: #DDEEEF; /* Matches log-header */
+    padding: 4px 10px;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.clear-btn:hover {
+    opacity: 0.7;
 }
 
 .log-content {
     background: #F7F8FA;
     padding: 15px;
-    max-height: 300px;
+    max-height: 250px;
     overflow-y: auto;
-    transition: max-height 0.3s ease;
+    transition: max-height 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), padding 0.1s ease-out;
+    will-change: max-height, padding;
 }
 
 .log-content.collapsed {
     max-height: 0;
     padding: 0 15px;
+    overflow: hidden;
 }
 
 #output {
@@ -198,6 +219,11 @@ h2 {
     font-size: 14px;
     white-space: pre-wrap;
     word-wrap: break-word;
+    transition: opacity 0.2s ease-out;
+}
+
+.log-content.collapsed #output {
+    opacity: 0;
 }
 
 .popup {
@@ -207,7 +233,7 @@ h2 {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     justify-content: center;
     align-items: center;
     z-index: 1000;
@@ -215,7 +241,7 @@ h2 {
 
 .popup-content {
     background: #FFF;
-    padding: 20px;
+    padding: 25px;
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     text-align: center;
@@ -225,29 +251,30 @@ h2 {
 }
 
 @keyframes popupFadeIn {
-    from { opacity: 0; transform: scale(0.9); }
+    from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
 }
 
 .popup-content h3 {
-    margin: 0 0 10px;
+    margin: 0 0 15px;
     color: #006D77;
-    font-size: 20px;
+    font-size: 22px;
 }
 
 .popup-content p {
     margin: 0 0 20px;
     color: #555;
+    font-size: 16px;
 }
 
 .popup-buttons {
     display: flex;
-    gap: 10px;
+    gap: 15px;
     justify-content: center;
 }
 
 .popup-btn {
-    padding: 10px 20px;
+    padding: 10px 25px;
     border: none;
     border-radius: 8px;
     font-size: 16px;
