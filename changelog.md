@@ -1,5 +1,20 @@
 Support Group:
 https://t.me/TheAOSP
+# v3.1.0 - March 24, 2025
+
+## What’s New
+- **Enhanced User Interface**: Revamped UI with smoother transitions and a modern vibe for a delightful experience.
+- **Clear Console Button**: Added a handy "Clear" button to reset the log output with one tap—no more cluttered console!
+- **Auto-Scrolling Logs**: New logs now auto-scroll like a Linux terminal, keeping you on the latest updates without manual effort.
+- **Improved Log Animation**: Slicker animation when expanding the log output for a seamless reveal.
+- **Smarter DND Backend**: Adjusted "Do Not Disturb" to priority mode when on, toning down its aggressive silence for a balanced feel.
+
+## Removed
+- **Reboot Button**: Ditched the reboot option to streamline the interface and keep it simple.
+
+## Under the Hood
+- Optimized animations for smoother performance across devices.
+- Polished responsiveness for a snappier, more fluid feel.
 # v3.0.3
 - added webui 
 - webui: added disable DND toggle 
