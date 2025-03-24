@@ -2,7 +2,7 @@ Support Group:
 https://t.me/TheAOSP
 # v3.1.0 - March 24, 2025
 
-## What’s New
+## What’s New?
 - **Enhanced User Interface**: Revamped UI with smoother transitions and a modern vibe for a delightful experience.
 - **Clear Console Button**: Added a handy "Clear" button to reset the log output with one tap—no more cluttered console!
 - **Auto-Scrolling Logs**: New logs now auto-scroll like a Linux terminal, keeping you on the latest updates without manual effort.
