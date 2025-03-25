@@ -11,10 +11,32 @@ async function execCommand(command) {
     });
 }
 
-function appendToOutput(content) {
+function toggleTheme() {
+    document.body.classList.toggle('dark-theme');
+    const themeIcon = document.getElementById('theme-icon');
+    themeIcon.textContent = document.body.classList.contains('dark-theme') ? '🌙' : '☀️';
+    localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+}
+
+function appendToOutput(content, type = 'info') {
     const output = document.getElementById('output');
     const logContent = document.getElementById('log-content');
     const logEntry = document.createElement('div');
+    
+    let colorClass = 'log-info';
+    if (type === 'error' || content.includes('[!]') || content.includes('❌')) {
+        colorClass = 'log-error';
+    } else if (type === 'success' || content.includes('✅')) {
+        colorClass = 'log-success';
+    } else if (content.includes('🔄')) {
+        colorClass = 'log-amber';
+    } else if (content.includes('Disabled')) {
+        colorClass = 'log-red';
+    } else if (content.includes('Enabled')) {
+        colorClass = 'log-green';
+    }
+    
+    logEntry.className = colorClass;
     logEntry.textContent = `${new Date().toLocaleTimeString()} - ${content}`;
     output.appendChild(logEntry);
     if (!logContent.classList.contains('collapsed')) {
@@ -28,7 +50,7 @@ async function loadVersion() {
         const version = await execCommand("grep '^version=' /data/adb/modules/COPG/module.prop | cut -d'=' -f2");
         versionElement.textContent = `v${version.trim()}`;
     } catch (error) {
-        appendToOutput("[!] Failed to load version");
+        appendToOutput("[!] Failed to load version", 'error');
     }
 }
 
@@ -42,7 +64,7 @@ async function loadToggleStates() {
         dndToggle.checked = state.includes("DND_ON=1") || !state.includes("DND_ON=");
         loggingToggle.checked = state.includes("DISABLE_LOGGING=1") || !state.includes("DISABLE_LOGGING=");
     } catch (error) {
-        appendToOutput("[!] Failed to load toggle states");
+        appendToOutput("[!] Failed to load toggle states", 'error');
     }
 }
 
@@ -61,7 +83,7 @@ async function rebootDevice() {
     try {
         await execCommand("su -c reboot");
     } catch (error) {
-        appendToOutput("[!] Failed to reboot: " + error);
+        appendToOutput("[!] Failed to reboot: " + error, 'error');
     }
 }
 
@@ -111,7 +133,7 @@ function applyEventListeners() {
                 showPopup('reboot-popup');
             }
         } catch (error) {
-            appendToOutput("[!] Failed to update game list: " + error);
+            appendToOutput("[!] Failed to update game list: " + error, 'error');
         }
         actionRunning = false;
     });
@@ -129,14 +151,21 @@ function applyEventListeners() {
     document.getElementById('log-header').addEventListener('click', toggleLogSection);
 
     document.getElementById('clear-log').addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent toggle when clicking "Clear"
+        e.stopPropagation();
         document.getElementById('output').textContent = '';
-        appendToOutput("[+] Log cleared");
+        appendToOutput("[+] Log cleared", 'success');
     });
+
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    appendToOutput("UI initialized");
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        document.getElementById('theme-icon').textContent = '🌙';
+    }
+    appendToOutput("UI initialized", 'success');
     loadVersion();
     loadToggleStates();
     applyEventListeners();
