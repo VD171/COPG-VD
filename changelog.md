@@ -1,18 +1,26 @@
 Support Group:
 https://t.me/TheAOSP
+# v3.1.5
+### What’s New?
+- **UI Upgrades**  
+  - Sleeker output log for clearer feedback.  
+  - Dark/light theme toggle—your eyes will thank you!  
+- **Remove ROM Limits**  
+  - New prop kills FPS caps in games like PUBG Mobile.  
+- **Saves Your Settings**  
+  - Stores DND and brightness settings when you start gaming, restores them after.  
+- **Better Handling**  
+  - DND and brightness stay consistent during gameplay, reset only when you exit.
 # v3.1.0 - March 24, 2025
-
-## What’s New?
+### What’s New?
 - **Enhanced User Interface**: Revamped UI with smoother transitions and a modern vibe for a delightful experience.
 - **Clear Console Button**: Added a handy "Clear" button to reset the log output with one tap—no more cluttered console!
 - **Auto-Scrolling Logs**: New logs now auto-scroll like a Linux terminal, keeping you on the latest updates without manual effort.
 - **Improved Log Animation**: Slicker animation when expanding the log output for a seamless reveal.
 - **Smarter DND Backend**: Adjusted "Do Not Disturb" to priority mode when on, toning down its aggressive silence for a balanced feel.
-
-## Removed
+### Removed
 - **Reboot Button**: Ditched the reboot option to streamline the interface and keep it simple.
-
-## Under the Hood
+### Under the Hood
 - Optimized animations for smoother performance across devices.
 - Polished responsiveness for a snappier, more fluid feel.
 # v3.0.3
