@@ -1,7 +1,7 @@
 # COPG Spoof Module
 - **Support Group**:
 https://t.me/TheAOSP
-# v3.1.5
+## v3.1.5
 ### What’s New?
 - **UI Upgrades**  
   - Sleeker output log for clearer feedback.  
@@ -12,7 +12,7 @@ https://t.me/TheAOSP
   - Stores DND and brightness settings when you start gaming, restores them after.  
 - **Better Handling**  
   - DND and brightness stay consistent during gameplay, reset only when you exit.
-# v3.1.0 - March 24, 2025
+## v3.1.0
 ### What’s New?
 - **Enhanced User Interface**: Revamped UI with smoother transitions and a modern vibe for a delightful experience.
 - **Clear Console Button**: Added a handy "Clear" button to reset the log output with one tap—no more cluttered console!
@@ -24,7 +24,7 @@ https://t.me/TheAOSP
 ### Under the Hood
 - Optimized animations for smoother performance across devices.
 - Polished responsiveness for a snappier, more fluid feel.
-# v3.0.3
+## v3.0.3
 - added webui 
 - webui: added disable DND toggle 
 - webui: added disable auto brightness  toggle
@@ -33,29 +33,29 @@ https://t.me/TheAOSP
 - webui/action: added game list compare 
 - webui: added reboot pop-up question if game list updated
 - webui: added reboot button with pop-up question
-# v2.8
+## v2.8
 - trying to fix mid-game crashing
 - improve ban spoof system
 - **Note**: getting banned at your own risk
-# v2.6
+## v2.6
 - better anti-cheat handling
 - **Note**: getting banned at your own risk
-# v2.5
+## v2.5
 - added better spoof for Call of duty anti-cheat
 - **Note**: getting banned at your own risk
-# v2.3
+## v2.3
 - added action button for downloading updated config if needed
 - added Zygisk check for installing module
 - **Note**: getting banned at your own risk 
-# v2.2
+## v2.2
 - Cache JNI Calls for faster app game launch.
 - removed logd for even faster launch.
-# v2.1.1
+## v2.1.1
 - fix s24 ultra in config.json
-# v2.1
+## v2.1
 - now you can add your game to config yourself and you don't need to ask for new update
 - config direction: /data/adb/modules/COPG/config.json
-# v2
+## v2
 - Added Mobile Legends `com.mobilelegends.mi` support - spoof as ZTE NX769J
 - Added Brawl Stars `com.supercell.brawlstars` support - spoof as ZTE NX769J
 - Added Diablo Immortal `com.blizzard.diablo.immortal` support - spoof as ZTE NX769J
@@ -112,7 +112,7 @@ https://t.me/TheAOSP
 - Added Call of Duty: Mobile (Korea) `com.tencent.tmgp.kr.codm` support - spoof as Lenovo TB-9707F
 - Added Call of Duty: Mobile (Vietnam) `com.vng.codmvn` support - spoof as Lenovo TB-9707F
 ---
-# v1.0.5
+## v1.0.5
 - Added Fortnite support (spoof to s24 ultra)
 - added mobile legends support (spoof to s24 ultra)
 
