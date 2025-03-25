@@ -125,8 +125,8 @@ jobs:
           cat > module/module.prop << 'EOF'
           id=COPG
           name=✨ COPG spoof ✨
-          version=3.1.0
-          versionCode=310
+          version=3.1.5
+          versionCode=315
           author=AlirezaParsi
           description=Spoof your device for games. Click Action button to update your config if needed.
           support=https://t.me/theaosp
@@ -142,6 +142,7 @@ jobs:
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/META-INF/com/google/android/update-binary -O module/META-INF/com/google/android/update-binary
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/META-INF/com/google/android/updater-script -O module/META-INF/com/google/android/updater-script
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/service.sh -O module/service.sh
+          wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/system.prop -O module/system.prop
           chmod 755 module/customize.sh module/action.sh module/uninstall.sh module/service.sh module/META-INF/com/google/android/update-binary
 
       - name: Fetch WebUI files
