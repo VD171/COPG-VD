@@ -1,9 +1,28 @@
+:root {
+    --bg-light: #EDEFF2;
+    --bg-dark: #1A1A1A;
+    --card-light: #FFF;
+    --card-dark: #2D2D2D;
+    --text-light: #333;
+    --text-dark: #E0E0E0;
+    --header-light: #006D77;
+    --header-dark: #004D57;
+    --log-bg-light: #F7F8FA;
+    --log-bg-dark: #252525;
+}
+
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #EDEFF2;
+    background-color: var(--bg-light);
     margin: 0;
     padding: 20px;
-    color: #333;
+    color: var(--text-light);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark-theme {
+    background-color: var(--bg-dark);
+    color: var(--text-dark);
 }
 
 .container {
@@ -15,7 +34,7 @@ body {
 }
 
 .header {
-    background: linear-gradient(135deg, #006D77, #00838F);
+    background: linear-gradient(135deg, var(--header-light), #00838F);
     color: #FFF;
     padding: 15px 25px;
     border-radius: 12px;
@@ -23,6 +42,10 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.dark-theme .header {
+    background: linear-gradient(135deg, var(--header-dark), #006670);
 }
 
 h1 {
@@ -42,11 +65,16 @@ h1 {
 }
 
 .card {
-    background: #FFF;
+    background: var(--card-light);
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease;
+}
+
+.dark-theme .card {
+    background: var(--card-dark);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
 }
 
 .card:hover {
@@ -64,6 +92,10 @@ h1 {
 
 .toggle-group:hover {
     background: #F7F8FA;
+}
+
+.dark-theme .toggle-group:hover {
+    background: #383838;
 }
 
 .toggle-group:last-child {
@@ -139,16 +171,20 @@ input:checked + .slider:before {
 }
 
 .log-section {
-    background: #FFF;
+    background: var(--card-light);
     border-radius: 12px;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     position: relative;
 }
 
+.dark-theme .log-section {
+    background: var(--card-dark);
+}
+
 .log-header {
-    background: #006D77;
-    color: #DDEEEF; /* Slightly less white for header text */
+    background: var(--header-light);
+    color: #DDEEEF;
     padding: 10px 20px;
     display: flex;
     justify-content: space-between;
@@ -157,8 +193,16 @@ input:checked + .slider:before {
     transition: background 0.3s;
 }
 
+.dark-theme .log-header {
+    background: var(--header-dark);
+}
+
 .log-header:hover {
     background: #00838F;
+}
+
+.dark-theme .log-header:hover {
+    background: #006670;
 }
 
 .log-title {
@@ -170,22 +214,22 @@ input:checked + .slider:before {
 h2 {
     margin: 0;
     font-size: 18px;
-    margin-left: 20px; /* Space for toggle icon */
-    color: #DDEEEF; /* Matches log-header */
+    margin-left: 20px;
+    color: #DDEEEF;
 }
 
 .toggle-icon {
     font-size: 14px;
-    color: #FFFFFF; /* Pure white for the angle icon */
+    color: #FFFFFF;
     transition: transform 0.3s ease;
     position: absolute;
     left: 0;
-    opacity: 1; /* Full visibility */
+    opacity: 1;
 }
 
 .clear-btn {
     background: none;
-    color: #DDEEEF; /* Matches log-header */
+    color: #DDEEEF;
     padding: 4px 10px;
     border: none;
     font-size: 12px;
@@ -199,12 +243,16 @@ h2 {
 }
 
 .log-content {
-    background: #F7F8FA;
+    background: var(--log-bg-light);
     padding: 15px;
     max-height: 250px;
     overflow-y: auto;
     transition: max-height 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), padding 0.1s ease-out;
     will-change: max-height, padding;
+}
+
+.dark-theme .log-content {
+    background: var(--log-bg-dark);
 }
 
 .log-content.collapsed {
@@ -240,7 +288,7 @@ h2 {
 }
 
 .popup-content {
-    background: #FFF;
+    background: var(--card-light);
     padding: 25px;
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -248,6 +296,10 @@ h2 {
     max-width: 400px;
     width: 90%;
     animation: popupFadeIn 0.3s ease;
+}
+
+.dark-theme .popup-content {
+    background: var(--card-dark);
 }
 
 @keyframes popupFadeIn {
@@ -261,10 +313,18 @@ h2 {
     font-size: 22px;
 }
 
+.dark-theme .popup-content h3 {
+    color: #00838F;
+}
+
 .popup-content p {
     margin: 0 0 20px;
     color: #555;
     font-size: 16px;
+}
+
+.dark-theme .popup-content p {
+    color: #BBB;
 }
 
 .popup-buttons {
@@ -298,9 +358,53 @@ h2 {
     color: #333;
 }
 
+.dark-theme .no-btn {
+    background: #444;
+    color: #FFF;
+}
+
 .no-btn:hover {
     background: #DDD;
     transform: translateY(-2px);
+}
+
+.dark-theme .no-btn:hover {
+    background: #555;
+}
+
+.log-red { color: #FF4444; }
+.log-green { color: #00CC00; }
+.log-amber { color: #FFA500; }
+.log-error { color: #FF4444; }
+.log-success { color: #00CC00; }
+.log-info { color: #1E90FF; }
+
+.theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s, transform 0.2s;
+    font-size: 18px;
+    padding: 0;
+}
+
+.dark-theme .theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.dark-theme .theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 @media (max-width: 600px) {
