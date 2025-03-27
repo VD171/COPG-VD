@@ -40,28 +40,35 @@ check_zygisk() {
 }
 check_zygisk
 chmod +x "$MODPATH/action.sh"
-ARCH=$(getprop ro.product.cpu.abilist)
+#!/system/bin/sh
+
 MODDIR=${MODPATH:-$MODDIR}
-
-# Path to our binaries in the module
 BIN_DIR="$MODDIR/bin"
-
-# Target directory in system
 TARGET_DIR="$MODDIR/system/bin"
 
-# Create target dir if missing
+# Get primary ABI (most preferred architecture)
+ABI_LIST=$(getprop ro.product.cpu.abilist)
+PRIMARY_ABI=$(echo "$ABI_LIST" | cut -d',' -f1)
+
+# Create target directory
 mkdir -p "$TARGET_DIR"
 
-if [ "$ARCH" = "arm64-v8a" ]; then
-    cp "$BIN_DIR/arm64-v8a/jq" "$TARGET_DIR/jq"
-elif [ "$ARCH" = "armeabi-v7a" ]; then
-    cp "$BIN_DIR/armeabi-v7a/jq" "$TARGET_DIR/jq"
-else
-    echo "Unsupported CPU architecture: $ARCH"
-    exit 1
-fi
+# Install the correct jq binary
+case "$PRIMARY_ABI" in
+    "arm64-v8a"|"armv9-a")
+        cp "$BIN_DIR/arm64-v8a/jq" "$TARGET_DIR/jq"
+        ;;
+    "armeabi-v7a")
+        cp "$BIN_DIR/armeabi-v7a/jq" "$TARGET_DIR/jq"
+        ;;
+    *)
+        echo "Unsupported primary ABI: $PRIMARY_ABI (Full list: $ABI_LIST)"
+        exit 1
+        ;;
+esac
 
 # Set permissions
 chmod 0755 "$TARGET_DIR/jq"
+chmod 0755 "$MODPATH/service.sh"
 ui_print "- COPG setup complete"
 ui_print "- Click Action button to update your config if needed"
