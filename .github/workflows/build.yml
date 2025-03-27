@@ -143,8 +143,8 @@ jobs:
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/META-INF/com/google/android/updater-script -O module/META-INF/com/google/android/updater-script
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/service.sh -O module/service.sh
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/system.prop -O module/system.prop
-          wget https://github.com/AlirezaParsi/COPG/raw/refs/heads/JSON/bin/arm64-v8a/jq -O module/bin/arm64-v8a/jq
-          wget https://github.com/AlirezaParsi/COPG/raw/refs/heads/JSON/bin/armeabi-v7a/jq -O module/bin/armeabi-v7a/jq
+          wget https://github.com/AlirezaParsi/COPG/raw/refs/heads/JSON/bin/arm64-v8a/jq -O module/bin/arm64-v8a/
+          wget https://github.com/AlirezaParsi/COPG/raw/refs/heads/JSON/bin/armeabi-v7a/jq -O module/bin/armeabi-v7a/
           chmod 755 module/customize.sh module/action.sh module/uninstall.sh module/service.sh module/META-INF/com/google/android/update-binary
 
       - name: Fetch WebUI files
