@@ -1,4 +1,4 @@
-name: Build COPG Module
+name: Build COPG Module with jq
 
 on:
   workflow_dispatch:
@@ -44,15 +44,11 @@ jobs:
           echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
           mkdir -p $ANDROID_HOME/cmdline-tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
-          unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+          unzip -q cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
           if [ -d "$ANDROID_HOME/cmdline-tools/cmdline-tools" ]; then
             mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
           elif [ -d "$ANDROID_HOME/cmdline-tools/tools" ]; then
             mv $ANDROID_HOME/cmdline-tools/tools $ANDROID_HOME/cmdline-tools/latest
-          else
-            echo "Unexpected directory structure after unzip:"
-            ls -la $ANDROID_HOME/cmdline-tools
-            exit 1
           fi
           echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973" "platforms;android-34" "build-tools;34.0.0"
@@ -60,9 +56,7 @@ jobs:
 
       - name: Accept Android SDK licenses
         run: |
-          echo "ANDROID_HOME is: $ANDROID_HOME"
-          ls -la $ANDROID_HOME/cmdline-tools/latest/bin || echo "bin directory missing!"
-          JAVA_OPTS="--add-modules java.xml.bind" yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || echo "License acceptance failed!"
+          JAVA_OPTS="--add-modules java.xml.bind" yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
       - name: Install build tools
         run: |
@@ -91,11 +85,7 @@ jobs:
 
       - name: Check arm64-v8a output
         run: |
-          if [ ! -f "build/arm64-v8a/libspoof.so" ]; then
-            echo "Error: arm64-v8a library not built!"
-            ls -la build/arm64-v8a
-            exit 1
-          fi
+          [ -f "build/arm64-v8a/libspoof.so" ] || { echo "Error: arm64-v8a library not built!"; exit 1; }
 
       - name: Build Project (armeabi-v7a)
         uses: threeal/cmake-action@v2.1.0
@@ -109,26 +99,26 @@ jobs:
 
       - name: Check armeabi-v7a output
         run: |
-          if [ ! -f "build/armeabi-v7a/libspoof.so" ]; then
-            echo "Error: armeabi-v7a library not built!"
-            ls -la build/armeabi-v7a
-            exit 1
-          fi
+          [ -f "build/armeabi-v7a/libspoof.so" ] || { echo "Error: armeabi-v7a library not built!"; exit 1; }
 
       - name: Prepare module structure
         run: |
-          mkdir -p module/zygisk module/META-INF/com/google/android module/webroot/assets
+          mkdir -p module/zygisk module/bin/arm64-v8a module/bin/armeabi-v7a module/META-INF/com/google/android module/webroot/assets
           cp build/arm64-v8a/libspoof.so module/zygisk/arm64-v8a.so
           cp build/armeabi-v7a/libspoof.so module/zygisk/armeabi-v7a.so
           chmod 755 module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
           cp config.json module/config.json
+          # Fetch jq binaries
+          wget https://github.com/AlirezaParsi/COPG/raw/refs/heads/JSON/bin/arm64-v8a/jq -O module/bin/arm64-v8a/jq
+          wget https://github.com/AlirezaParsi/COPG/raw/refs/heads/JSON/bin/armeabi-v7a/jq -O module/bin/armeabi-v7a/jq
+          chmod 755 module/bin/arm64-v8a/jq module/bin/armeabi-v7a/jq
           cat > module/module.prop << 'EOF'
           id=COPG
           name=✨ COPG spoof ✨
-          version=3.1.5
-          versionCode=315
+          version=3.2.0
+          versionCode=320
           author=AlirezaParsi
-          description=Spoof your device for games. Click Action button to update your config if needed.
+          description=Spoof your device for games. Includes jq for config parsing. Click Action button to update config.
           support=https://t.me/theaosp
           updateJson=https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/update.json
           minMagisk=20.4
@@ -172,11 +162,7 @@ jobs:
         run: |
           VERSION=$(grep "version=" module/module.prop | cut -d'=' -f2)
           TAG="v$VERSION"
-          gh release create "$TAG" \
-            --title "Release $TAG" \
-            --notes "Built on $(date -u +'%Y-%m-%d %H:%M:%S UTC')" \
-            --draft \
-            || gh release edit "$TAG" --draft
+          gh release create "$TAG" --title "Release $TAG" --notes "Built on $(date -u +'%Y-%m-%d %H:%M:%S UTC')" --draft || gh release edit "$TAG" --draft
           gh release upload "$TAG" ${{ env.ZIP_NAME }} --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
