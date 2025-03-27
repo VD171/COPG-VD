@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [ armv7a-linux-androideabi, aarch64-linux-android ]  # ARMv7 + ARMv8
-        api_level: [ 21 ]  # Min Android 5.0 (adjust if needed)
+        target: [armv7a-linux-androideabi, aarch64-linux-android]  # ARMv7 + ARMv8
+        api_level: [21]  # Android 5.0+
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Clone jq source
@@ -20,14 +20,15 @@ jobs:
           cd jq
           git submodule update --init  # For oniguruma (regex support)
 
-      - name: Set up NDK
-        uses: android-actions/setup-ndk@v1
+      - name: Set up Android NDK
+        uses: nrlquaker/setup-ndk@v3
         with:
-          ndk-version: "26b"  # Stable NDK version
+          ndk-version: '26.1.10909125'  # Latest stable NDK r26b
+          local-cache: true  # Speed up builds
 
       - name: Build jq
         env:
-          TOOLCHAIN: ${{ github.workspace }}/android-ndk-r26b/toolchains/llvm/prebuilt/linux-x86_64
+          NDK: ${{ env.ANDROID_NDK_HOME }}  # Set by setup-ndk
           TARGET: ${{ matrix.target }}
           API: ${{ matrix.api_level }}
         run: |
@@ -37,11 +38,11 @@ jobs:
             --host="$TARGET" \
             --prefix=/data/local/tmp \
             --disable-maintainer-mode \
-            CC="$TOOLCHAIN/bin/${TARGET}${API}-clang" \
-            AR="$TOOLCHAIN/bin/llvm-ar" \
-            LD="$TOOLCHAIN/bin/ld"
+            CC="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/${TARGET}${API}-clang" \
+            AR="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" \
+            LD="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/ld"
           make -j$(nproc)
-          strip ./jq  # Reduce binary size
+          $NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip ./jq  # Reduce binary size
           mv ./jq "../jq-$TARGET"
 
       - name: Upload artifacts
