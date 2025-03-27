@@ -145,7 +145,7 @@ jobs:
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/system.prop -O module/system.prop
           wget https://github.com/AlirezaParsi/COPG/raw/refs/heads/JSON/bin/arm64-v8a/jq -O module/bin/arm64-v8a/jq
           wget https://github.com/AlirezaParsi/COPG/raw/refs/heads/JSON/bin/armeabi-v7a/jq -O module/bin/armeabi-v7a/jq
-          chmod 755 module/customize.sh module/action.sh module/uninstall.sh module/service.sh module/META-INF/com/google/android/update-binary module/bin/arm64-v8a/jq module/bin/armeabi-v7a/jq
+          chmod 755 module/customize.sh module/action.sh module/uninstall.sh module/service.sh module/META-INF/com/google/android/update-binary
 
       - name: Fetch WebUI files
         run: |
