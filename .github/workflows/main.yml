@@ -1,0 +1,51 @@
+name: Build jq for Android (ARMv7/ARMv8)
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [ armv7a-linux-androideabi, aarch64-linux-android ]  # ARMv7 + ARMv8
+        api_level: [ 21 ]  # Min Android 5.0 (adjust if needed)
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Clone jq source
+        run: |
+          git clone https://github.com/jqlang/jq.git --depth=1
+          cd jq
+          git submodule update --init  # For oniguruma (regex support)
+
+      - name: Set up NDK
+        uses: android-actions/setup-ndk@v1
+        with:
+          ndk-version: "26b"  # Stable NDK version
+
+      - name: Build jq
+        env:
+          TOOLCHAIN: ${{ github.workspace }}/android-ndk-r26b/toolchains/llvm/prebuilt/linux-x86_64
+          TARGET: ${{ matrix.target }}
+          API: ${{ matrix.api_level }}
+        run: |
+          cd jq
+          autoreconf -fi  # Generate configure script
+          ./configure \
+            --host="$TARGET" \
+            --prefix=/data/local/tmp \
+            --disable-maintainer-mode \
+            CC="$TOOLCHAIN/bin/${TARGET}${API}-clang" \
+            AR="$TOOLCHAIN/bin/llvm-ar" \
+            LD="$TOOLCHAIN/bin/ld"
+          make -j$(nproc)
+          strip ./jq  # Reduce binary size
+          mv ./jq "../jq-$TARGET"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: jq-android-${{ matrix.target }}
+          path: jq-${{ matrix.target }}
