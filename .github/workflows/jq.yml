@@ -21,18 +21,10 @@ jobs:
           git submodule update --init  # For oniguruma (regex support)
 
       - name: Set up Android NDK
-        id: setup-ndk
-        uses: nrlquaker/setup-ndk@v3
+        uses: nrlquaker/setup-ndk@e4e60e3a3e6987f186e172b6d3e7d8e69373a585  # SHA for v3
         with:
           ndk-version: '26.1.10909125'  # NDK r26b
           local-cache: true
-        continue-on-error: true  # Debug if it fails
-
-      - name: Debug NDK Setup Failure
-        if: steps.setup-ndk.outcome == 'failure'
-        run: |
-          echo "NDK setup failed. Check action availability or version."
-          exit 1
 
       - name: Build jq
         env:
