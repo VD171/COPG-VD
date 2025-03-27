@@ -82,11 +82,12 @@ body.dark-theme {
 }
 
 .version {
-    font-size: 12px;
+    font-size: 11px; /* Adjusted to be smaller and proportional */
     background: rgba(255, 255, 255, 0.2);
-    padding: 2px 8px;
-    border-radius: 12px;
-    margin-left: 8px; /* Space between title and version */
+    padding: 1px 6px; /* Tighter padding */
+    border-radius: 10px; /* Slightly smaller radius */
+    margin-left: 8px;
+    line-height: 1.2; /* Aligns vertically with h1 */
 }
 
 /* Tab Navigation */
@@ -133,7 +134,7 @@ body.dark-theme {
     position: relative;
     overflow: hidden;
     flex: 1;
-    z-index: 1; /* Ensure it’s above log section for swipe */
+    z-index: 1;
 }
 
 .tab-content {
@@ -145,7 +146,7 @@ body.dark-theme {
     opacity: 0;
     transform: translateX(0);
     transition: transform 0.3s ease, opacity 0.3s ease;
-    height: 100%; /* Fill the tab container */
+    height: 100%;
 }
 
 .tab-content.active {
@@ -498,7 +499,7 @@ input:checked + .slider:before {
     box-shadow: 0 2px 8px var(--shadow);
     border: 1px solid var(--border);
     margin-top: 12px;
-    max-height: 50%; /* Prevent overlap with blank space */
+    max-height: 50%;
     display: flex;
     flex-direction: column;
 }
@@ -564,7 +565,7 @@ h2 {
     overflow-y: auto;
     transition: max-height 0.3s ease;
     background: #F5F5F5;
-    flex: 1; /* Fit within log-section */
+    flex: 1;
 }
 
 .dark-theme .log-content {
