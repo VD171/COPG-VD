@@ -62,10 +62,12 @@ async function loadToggleStates() {
         const autoBrightnessToggle = document.getElementById('toggle-auto-brightness');
         const dndToggle = document.getElementById('toggle-dnd');
         const loggingToggle = document.getElementById('toggle-logging');
+        const keepScreenOnToggle = document.getElementById('toggle-keep-screen-on');
         const state = await execCommand("cat /data/adb/copg_state || echo ''");
         autoBrightnessToggle.checked = state.includes("AUTO_BRIGHTNESS_OFF=1") || !state.includes("AUTO_BRIGHTNESS_OFF=");
         dndToggle.checked = state.includes("DND_ON=1") || !state.includes("DND_ON=");
         loggingToggle.checked = state.includes("DISABLE_LOGGING=1") || !state.includes("DISABLE_LOGGING=");
+        keepScreenOnToggle.checked = state.includes("KEEP_SCREEN_ON=1") || !state.includes("KEEP_SCREEN_ON=");
     } catch (error) {
         appendToOutput("[!] Failed to load toggle states: " + error, 'error');
     }
@@ -174,7 +176,7 @@ function renderGameList() {
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg>
+                                </svg>
                             </button>
                             <button class="delete-btn" data-game="${gamePackage}" data-device="${key}" title="Delete">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -506,7 +508,7 @@ async function rebootDevice() {
 }
 
 function toggleLogSection(e) {
-    e.stopPropagation(); // Prevent swipe interference
+    e.stopPropagation();
     const logContent = document.getElementById('log-content');
     const toggleIcon = document.querySelector('#settings-log-section .toggle-icon');
     logContent.classList.toggle('collapsed');
@@ -620,6 +622,12 @@ function applyEventListeners() {
         const isChecked = e.target.checked;
         await execCommand(`sed -i '/DISABLE_LOGGING=/d' /data/adb/copg_state; echo "DISABLE_LOGGING=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
         appendToOutput(isChecked ? "✅ Logging Disabled" : "❌ Logging Enabled");
+    });
+
+    document.getElementById('toggle-keep-screen-on').addEventListener('change', async (e) => {
+        const isChecked = e.target.checked;
+        await execCommand(`sed -i '/KEEP_SCREEN_ON=/d' /data/adb/copg_state; echo "KEEP_SCREEN_ON=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
+        appendToOutput(isChecked ? "✅ Keep Screen On Enabled" : "❌ Keep Screen On Disabled");
     });
 
     document.getElementById('update-config').addEventListener('click', () => {
