@@ -40,27 +40,28 @@ check_zygisk() {
 }
 check_zygisk
 chmod +x "$MODPATH/action.sh"
-
-# Get device CPU architecture
 ARCH=$(getprop ro.product.cpu.abi)
-
-# Module directory (Magisk sets MODPATH)
 MODDIR=${MODPATH:-$MODDIR}
 
-# Path to jq binaries
+# Path to our binaries in the module
 BIN_DIR="$MODDIR/bin"
 
-# Install the correct jq binary
+# Target directory in system
+TARGET_DIR="$MODDIR/system/bin"
+
+# Create target dir if missing
+mkdir -p "$TARGET_DIR"
+
 if [ "$ARCH" = "arm64-v8a" ]; then
-    cp "$BIN_DIR/arm64-v8a/jq" "$MODDIR/system/bin/jq"
+    cp "$BIN_DIR/arm64-v8a/jq" "$TARGET_DIR/jq"
 elif [ "$ARCH" = "armeabi-v7a" ]; then
-    cp "$BIN_DIR/armeabi-v7a/jq" "$MODDIR/system/bin/jq"
+    cp "$BIN_DIR/armeabi-v7a/jq" "$TARGET_DIR/jq"
 else
     echo "Unsupported CPU architecture: $ARCH"
     exit 1
 fi
 
-# Set executable permissions
-chmod 0755 "$MODDIR/system/bin/jq"
+# Set permissions
+chmod 0755 "$TARGET_DIR/jq"
 ui_print "- COPG setup complete"
 ui_print "- Click Action button to update your config if needed"
