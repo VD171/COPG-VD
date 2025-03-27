@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>COPG Control</title>
     <link rel="stylesheet" href="styles.css" type="text/css">
     <link rel="stylesheet" type="text/css" href="/mmrl/insets.css" />
@@ -11,58 +11,186 @@
 <body>
     <div class="container">
         <header class="header">
-            <h1>COPG Control</h1>
-            <span class="version" id="version-text"></span>
-            <button id="theme-toggle" class="theme-toggle" title="Switch Theme">
+            <h1>COPG Control <span class="version" id="version-text"></span></h1>
+            <button id="theme-toggle" class="theme-btn" title="Switch Theme">
                 <span id="theme-icon">☀️</span>
             </button>
         </header>
-        <main class="controls">
-            <div class="card">
-                <div class="toggle-group">
-                    <label class="toggle-label">Disable Auto-Brightness</label>
-                    <label class="switch">
-                        <input type="checkbox" id="toggle-auto-brightness" checked>
-                        <span class="slider"></span>
-                    </label>
+        
+        <nav class="tab-nav">
+            <button class="tab-btn active" id="tab-settings">Settings</button>
+            <button class="tab-btn" id="tab-devices">Devices</button>
+            <button class="tab-btn" id="tab-games">Games</button>
+        </nav>
+        
+        <div class="tab-container" id="tab-container">
+            <main class="tab-content active" id="settings-tab">
+                <div class="card">
+                    <div class="toggle-group">
+                        <label class="toggle-label">Disable Auto-Brightness</label>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-auto-brightness" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-group">
+                        <label class="toggle-label">Enable DND</label>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-dnd" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-group">
+                        <label class="toggle-label">Disable System Logging</label>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-logging" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <button class="action-btn" id="update-config">Update Game List</button>
                 </div>
-                <div class="toggle-group">
-                    <label class="toggle-label">Enable DND</label>
-                    <label class="switch">
-                        <input type="checkbox" id="toggle-dnd" checked>
-                        <span class="slider"></span>
-                    </label>
+                <section class="log-section" id="settings-log-section">
+                    <div class="log-header" id="log-header">
+                        <div class="log-title">
+                            <svg class="toggle-icon expanded" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                            <h2>Console</h2>
+                        </div>
+                        <span class="clear-text" id="clear-log">Clear</span>
+                    </div>
+                    <div class="log-content" id="log-content">
+                        <pre id="output"></pre>
+                    </div>
+                </section>
+            </main>
+            
+            <main class="tab-content" id="devices-tab">
+                <div class="card">
+                    <div class="section-header">
+                        <h3>Device Profiles</h3>
+                    </div>
+                    <div class="search-container">
+                        <input type="text" id="device-search" placeholder="Search devices...">
+                        <button class="add-btn" id="add-device">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14"></path>
+                            </svg>
+                            Add Device
+                        </button>
+                    </div>
+                    <div class="scroll-container">
+                        <div class="device-list" id="device-list"></div>
+                    </div>
                 </div>
-                <div class="toggle-group">
-                    <label class="toggle-label">Disable System Logging</label>
-                    <label class="switch">
-                        <input type="checkbox" id="toggle-logging" checked>
-                        <span class="slider"></span>
-                    </label>
+            </main>
+            
+            <main class="tab-content" id="games-tab">
+                <div class="card">
+                    <div class="section-header">
+                        <h3>Game Configurations</h3>
+                    </div>
+                    <div class="search-container">
+                        <input type="text" id="game-search" placeholder="Search games...">
+                        <button class="add-btn" id="add-game">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14"></path>
+                            </svg>
+                            Add Game
+                        </button>
+                    </div>
+                    <div class="scroll-container">
+                        <div class="game-list" id="game-list"></div>
+                    </div>
                 </div>
-            </div>
-            <button class="update-btn" id="update-config">Update Game List</button>
-        </main>
-        <section class="log-section">
-            <div class="log-header" id="log-header">
-                <div class="log-title">
-                    <span class="toggle-icon">▼</span>
-                    <h2>Log Output</h2>
-                </div>
-                <button class="clear-btn" id="clear-log">Clear</button>
-            </div>
-            <div class="log-content" id="log-content">
-                <pre id="output"></pre>
-            </div>
-        </section>
+            </main>
+        </div>
     </div>
+    
+    <div class="modal" id="device-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="device-modal-title">Add New Device</h3>
+                <button class="close-btn">×</button>
+            </div>
+            <form id="device-form">
+                <div class="form-group">
+                    <label for="device-name">Profile Name</label>
+                    <input type="text" id="device-name" placeholder="e.g., Galaxy S24" required>
+                </div>
+                <div class="form-group">
+                    <label for="device-brand">Brand</label>
+                    <input type="text" id="device-brand" placeholder="e.g., Samsung" required>
+                </div>
+                <div class="form-group">
+                    <label for="device-model">Model</label>
+                    <input type="text" id="device-model" placeholder="e.g., SM-S928U" required>
+                </div>
+                <div class="form-group">
+                    <label for="device-manufacturer">Manufacturer</label>
+                    <input type="text" id="device-manufacturer" placeholder="e.g., Samsung" required>
+                </div>
+                <div class="form-group">
+                    <label for="device-fingerprint">Fingerprint</label>
+                    <input type="text" id="device-fingerprint" placeholder="e.g., samsung/hero2ltexx/..." required>
+                </div>
+                <div class="form-group">
+                    <label for="device-build-id">Build ID</label>
+                    <input type="text" id="device-build-id" placeholder="e.g., TP1A.220624.014" required>
+                </div>
+                <div class="form-group">
+                    <label for="device-cpu">CPU Info</label>
+                    <textarea id="device-cpu" rows="3" placeholder="e.g., Snapdragon 8 Gen 2" required></textarea>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="action-btn">Save</button>
+                    <button type="button" class="cancel-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="modal" id="game-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="game-modal-title">Add New Game</h3>
+                <button class="close-btn">×</button>
+            </div>
+            <form id="game-form">
+                <div class="form-group">
+                    <label for="game-package">Package Name</label>
+                    <input type="text" id="game-package" placeholder="com.example.game" required>
+                </div>
+                <div class="form-group">
+                    <label for="game-device">Device Profile</label>
+                    <select id="game-device" required></select>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="action-btn">Save</button>
+                    <button type="button" class="cancel-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="popup" id="update-confirm-popup">
+        <div class="popup-content">
+            <h3>Confirm Update</h3>
+            <p>Your default settings will be reset. Are you sure?</p>
+            <div class="popup-buttons">
+                <button class="action-btn" id="update-yes">Yes</button>
+                <button class="cancel-btn" id="update-no">No</button>
+            </div>
+        </div>
+    </div>
+    
     <div class="popup" id="reboot-popup">
         <div class="popup-content">
             <h3>Reboot Required</h3>
-            <p>To apply the updated configuration, a device reboot is needed. Would you like to reboot now?</p>
+            <p>A reboot is needed to apply changes. Reboot now?</p>
             <div class="popup-buttons">
-                <button class="popup-btn yes-btn" id="reboot-yes">Yes, Reboot</button>
-                <button class="popup-btn no-btn" id="reboot-no">No, Cancel</button>
+                <button class="action-btn" id="reboot-yes">Yes</button>
+                <button class="cancel-btn" id="reboot-no">No</button>
             </div>
         </div>
     </div>
