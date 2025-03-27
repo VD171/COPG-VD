@@ -56,11 +56,16 @@ restore_saved_states() {
     rm -f "$DEFAULTS_FILE.brightness" "$DEFAULTS_FILE.dnd" "$DEFAULTS_FILE.timeout"
 }
 
-# Function to check if a process is running
-is_process_running() {
-    local package="$1"
-    pidof "$package" >/dev/null 2>&1
-    return $?
+# Function to check if any package from the list is running
+is_any_package_running() {
+    local package_list="$1"
+    for package in $(echo "$package_list" | tr '|' ' '); do
+        pidof "$package" >/dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            return 0  # At least one is running
+        fi
+    done
+    return 1  # None running
 }
 
 # Function to extract package names from config.json using jq
@@ -76,6 +81,7 @@ get_packages() {
 last_app=""
 debounce_count=0
 DEBOUNCE_THRESHOLD=3
+states_saved=0  # Track if states are saved
 
 # Test root access
 exec_root "whoami" >/dev/null
@@ -98,19 +104,25 @@ while true; do
 
     current_app=$(echo "$window" | grep -E 'mCurrentFocus|mFocusedApp' | grep -Eo "$PACKAGE_LIST" | head -n 1)
 
-    if [ -n "$current_app" ] && [ "$current_app" != "$last_app" ]; then
+    if [ -n "$current_app" ] && [ "$current_app" != "$last_app" ] && [ "$states_saved" -eq 0 ]; then
         debounce_count=$((debounce_count + 1))
         if [ "$debounce_count" -ge "$DEBOUNCE_THRESHOLD" ]; then
             save_current_states
             apply_toggles
+            states_saved=1  # Mark states as saved
             last_app="$current_app"
             debounce_count=0
         fi
-    elif [ -z "$current_app" ] && [ -n "$last_app" ]; then
+    elif [ -n "$current_app" ] && [ "$current_app" != "$last_app" ] && [ "$states_saved" -eq 1 ]; then
+        # New game opened, but states already saved—just update last_app
+        last_app="$current_app"
+        debounce_count=0
+    elif [ -z "$current_app" ] && [ "$states_saved" -eq 1 ]; then
         debounce_count=$((debounce_count + 1))
         if [ "$debounce_count" -ge "$DEBOUNCE_THRESHOLD" ]; then
-            if ! is_process_running "$last_app"; then
+            if ! is_any_package_running "$PACKAGE_LIST"; then
                 restore_saved_states
+                states_saved=0  # Reset for next cycle
                 last_app=""
             fi
             debounce_count=0
