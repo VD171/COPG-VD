@@ -21,19 +21,27 @@ jobs:
           git submodule update --init  # For oniguruma (regex support)
 
       - name: Set up Android NDK
+        id: setup-ndk
         uses: nrlquaker/setup-ndk@v3
         with:
-          ndk-version: '26.1.10909125'  # Latest stable NDK r26b
-          local-cache: true  # Speed up builds
+          ndk-version: '26.1.10909125'  # NDK r26b
+          local-cache: true
+        continue-on-error: true  # Debug if it fails
+
+      - name: Debug NDK Setup Failure
+        if: steps.setup-ndk.outcome == 'failure'
+        run: |
+          echo "NDK setup failed. Check action availability or version."
+          exit 1
 
       - name: Build jq
         env:
-          NDK: ${{ env.ANDROID_NDK_HOME }}  # Set by setup-ndk
+          NDK: ${{ env.ANDROID_NDK_HOME }}
           TARGET: ${{ matrix.target }}
           API: ${{ matrix.api_level }}
         run: |
           cd jq
-          autoreconf -fi  # Generate configure script
+          autoreconf -fi
           ./configure \
             --host="$TARGET" \
             --prefix=/data/local/tmp \
@@ -42,7 +50,7 @@ jobs:
             AR="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" \
             LD="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/ld"
           make -j$(nproc)
-          $NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip ./jq  # Reduce binary size
+          $NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip ./jq
           mv ./jq "../jq-$TARGET"
 
       - name: Upload artifacts
