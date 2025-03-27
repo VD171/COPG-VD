@@ -1,6 +1,38 @@
 # COPG Spoof Module
 - **Support Group**:
 https://t.me/TheAOSP
+---
+## v3.2.1
+### Added
+- **New UI Sections**:  
+  - Dedicated tabs for *Devices* and *Games* management.  
+  - Search bar for quick filtering.  
+- **Device/Game Controls**:  
+  - Add, edit, or remove devices/games directly from the UI.  
+  - Swap devices per-game dynamically.  
+- **Quality of Life**:  
+  - `KEEP_SCREEN_ON` toggle (timeout: ~83 hours) with auto-reset on exit.  
+  - Screen Timeout Toggle to prevent interruptions.  
+  - Swipe gestures to navigate between tabs.  
+- **Animations**: Smoother MIUI/HyperOS-style transitions.  
+
+### Changed  
+- **UI/UX**:  
+  - Updated theme and improved visual consistency.  
+  - Enhanced smoothness across interactions.  
+- **Game Detection**:  
+  - Replaced `grep` with `jq` for reliable package parsing (ignores `_DEVICE` keys).  
+- **Multi-Game Handling**:  
+  - Toggles persist while any game is active; reset only after all close.  
+
+### Fixed  
+- **Root Compatibility**: Fixed Magisk integration with Zygisk Next installation.  
+- **Stability**: Better console error handling.  
+- **Edge Cases**: Split-screen/switching between games no longer breaks settings.  
+
+---  
+*For older versions, refer to previous releases.*  
+
 ## v3.1.5
 ### What’s New?
 - **UI Upgrades**  
