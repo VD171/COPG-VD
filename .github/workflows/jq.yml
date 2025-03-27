@@ -1,15 +1,15 @@
 name: Build jq for Android (ARMv7/ARMv8)
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [armv7a-linux-androideabi, aarch64-linux-android]  # ARMv7 + ARMv8
-        api_level: [21]  # Android 5.0+
+        target: [armv7a-linux-androideabi, aarch64-linux-android]
+        api_level: [21]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,17 +18,27 @@ jobs:
         run: |
           git clone https://github.com/jqlang/jq.git --depth=1
           cd jq
-          git submodule update --init  # For oniguruma (regex support)
+          git submodule update --init
 
-      - name: Set up Android NDK
-        uses: nrlquaker/setup-ndk@e4e60e3a3e6987f186e172b6d3e7d8e69373a585  # SHA for v3
+      - name: Set up Java (for sdkmanager)
+        uses: actions/setup-java@v4
         with:
-          ndk-version: '26.1.10909125'  # NDK r26b
-          local-cache: true
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Android SDK and NDK
+        run: |
+          mkdir -p $HOME/android-sdk
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O cmdline-tools.zip
+          unzip -q cmdline-tools.zip -d $HOME/android-sdk
+          mkdir -p $HOME/android-sdk/cmdline-tools/latest
+          mv $HOME/android-sdk/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
+          export ANDROID_HOME=$HOME/android-sdk
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "ndk;26.1.10909125" "platform-tools"
 
       - name: Build jq
         env:
-          NDK: ${{ env.ANDROID_NDK_HOME }}
+          NDK: $HOME/android-sdk/ndk/26.1.10909125
           TARGET: ${{ matrix.target }}
           API: ${{ matrix.api_level }}
         run: |
