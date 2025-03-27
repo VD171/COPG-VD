@@ -40,7 +40,7 @@ check_zygisk() {
 }
 check_zygisk
 chmod +x "$MODPATH/action.sh"
-ARCH=$(getprop ro.product.cpu.abi)
+ARCH=$(getprop ro.product.cpu.abilist)
 MODDIR=${MODPATH:-$MODDIR}
 
 # Path to our binaries in the module
