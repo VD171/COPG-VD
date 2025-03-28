@@ -11,6 +11,7 @@
 #include <android/log.h>
 #include <GLES2/gl2.h>
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 using json = nlohmann::json;
 
@@ -40,6 +41,10 @@ static glGetString_t orig_glGetString = nullptr;
 typedef const char* (*eglGetString_t)(EGLDisplay, EGLint);
 static eglGetString_t orig_eglGetString = nullptr;
 
+#ifndef EGL_RENDERER_EXT
+#define EGL_RENDERER_EXT 0x305A
+#endif
+
 static DeviceInfo current_info;
 static jclass buildClass = nullptr;
 static jclass versionClass = nullptr;
@@ -60,6 +65,32 @@ public:
     void onLoad(zygisk::Api* api, JNIEnv* env) override {
         this->api = api;
         this->env = env;
+
+        buildClass = (jclass)env->NewGlobalRef(env->FindClass("android/os/Build"));
+        if (buildClass) {
+            modelField = env->GetStaticFieldID(buildClass, "MODEL", "Ljava/lang/String;");
+            brandField = env->GetStaticFieldID(buildClass, "BRAND", "Ljava/lang/String;");
+            deviceField = env->GetStaticFieldID(buildClass, "DEVICE", "Ljava/lang/String;");
+            manufacturerField = env->GetStaticFieldID(buildClass, "MANUFACTURER", "Ljava/lang/String;");
+            fingerprintField = env->GetStaticFieldID(buildClass, "FINGERPRINT", "Ljava/lang/String;");
+            buildIdField = env->GetStaticFieldID(buildClass, "ID", "Ljava/lang/String;");
+            displayField = env->GetStaticFieldID(buildClass, "DISPLAY", "Ljava/lang/String;");
+            productField = env->GetStaticFieldID(buildClass, "PRODUCT", "Ljava/lang/String;");
+            serialField = env->GetStaticFieldID(buildClass, "SERIAL", "Ljava/lang/String;");
+        }
+        versionClass = (jclass)env->NewGlobalRef(env->FindClass("android/os/Build$VERSION"));
+        if (versionClass) {
+            versionReleaseField = env->GetStaticFieldID(versionClass, "RELEASE", "Ljava/lang/String;");
+            sdkIntField = env->GetStaticFieldID(versionClass, "SDK_INT", "I");
+        }
+
+        void* handle = dlopen("libc.so", RTLD_LAZY);
+        if (handle) {
+            orig_prop_get = (orig_prop_get_t)dlsym(handle, "__system_property_get");
+            orig_read = (orig_read_t)dlsym(handle, "read");
+            dlclose(handle);
+        }
+
         __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Module loaded");
         hookNativeGetprop();
         hookNativeRead();
@@ -92,6 +123,8 @@ public:
         env->ReleaseStringUTFChars(args->nice_name, package_name);
     }
 
+    void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {}
+
 private:
     zygisk::Api* api;
     JNIEnv* env;
@@ -105,8 +138,10 @@ private:
         }
         try {
             json config = json::parse(file);
+            package_map.reserve(config.size() / 2);
             for (auto& [key, value] : config.items()) {
                 if (key.find("_DEVICE") != std::string::npos) continue;
+                if (!value.is_array()) continue;
                 auto packages = value.get<std::vector<std::string>>();
                 std::string device_key = key + "_DEVICE";
                 if (!config.contains(device_key)) continue;
@@ -117,7 +152,7 @@ private:
                 info.device = device["DEVICE"].get<std::string>();
                 info.manufacturer = device["MANUFACTURER"].get<std::string>();
                 info.model = device["MODEL"].get<std::string>();
-                info.fingerprint = device.contains("FINGERPRINT") ? device["FINGERPRINT"].get<std::string>() : "";
+                info.fingerprint = device.contains("FINGERPRINT") ? device["FINGERPRINT"].get<std::string>() : "generic/brand/device:13/RP1A.231005.001/123456:user/release-keys";
                 info.build_id = device.contains("BUILD_ID") ? device["BUILD_ID"].get<std::string>() : "";
                 info.display = device.contains("DISPLAY") ? device["DISPLAY"].get<std::string>() : "";
                 info.product = device.contains("PRODUCT") ? device["PRODUCT"].get<std::string>() : info.device;
@@ -175,6 +210,10 @@ private:
             strncpy(value, "196610", PROP_VALUE_MAX - 1);
             value[PROP_VALUE_MAX - 1] = '\0';
             return strlen(value);
+        } else if (prop_name == "ro.display.refresh_rate") {
+            strncpy(value, "165", PROP_VALUE_MAX - 1);
+            value[PROP_VALUE_MAX - 1] = '\0';
+            return strlen(value);
         }
         return orig_prop_get(name, value, default_value);
     }
@@ -189,6 +228,8 @@ private:
                 if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == 0) {
                     *(void**)&orig_prop_get = (void*)hooked_prop_get;
                     mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
+                } else {
+                    __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect failed for prop_get: %s", strerror(errno));
                 }
             }
             dlclose(handle);
@@ -233,6 +274,8 @@ private:
                 if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == 0) {
                     *(void**)&orig_read = (void*)hooked_read;
                     mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
+                } else {
+                    __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect failed for read: %s", strerror(errno));
                 }
             }
             dlclose(handle);
@@ -240,14 +283,18 @@ private:
     }
 
     static void hooked_set_static_object_field(JNIEnv* env, jclass clazz, jfieldID fieldID, jobject value) {
-        if (clazz == buildClass && (fieldID == modelField || fieldID == brandField || fieldID == deviceField ||
-            fieldID == manufacturerField || fieldID == fingerprintField || fieldID == buildIdField ||
-            fieldID == displayField || fieldID == productField || fieldID == serialField)) {
-            return;
+        if (clazz == buildClass) {
+            if (fieldID == modelField || fieldID == brandField || fieldID == deviceField ||
+                fieldID == manufacturerField || fieldID == fingerprintField || fieldID == buildIdField ||
+                fieldID == displayField || fieldID == productField || fieldID == serialField) {
+                return;
+            }
         } else if (clazz == versionClass && fieldID == versionReleaseField) {
             return;
         }
-        if (orig_set_static_object_field) orig_set_static_object_field(env, clazz, fieldID, value);
+        if (orig_set_static_object_field) {
+            orig_set_static_object_field(env, clazz, fieldID, value);
+        }
     }
 
     void hookJniSetStaticObjectField() {
@@ -261,6 +308,8 @@ private:
                     orig_set_static_object_field = *(orig_set_static_object_field_t*)&sym;
                     *(void**)&sym = (void*)hooked_set_static_object_field;
                     mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
+                } else {
+                    __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect failed for JNI hook: %s", strerror(errno));
                 }
             }
             dlclose(handle);
@@ -279,8 +328,9 @@ private:
         } else if (name == GL_VERSION) {
             __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "GL_VERSION requested - Spoofed: OpenGL ES 3.2, Original: %s", original);
             return "OpenGL ES 3.2";
+        } else {
+            __android_log_print(ANDROID_LOG_DEBUG, "SpoofModule", "GL Query %d requested - Returning: %s", name, original);
         }
-        __android_log_print(ANDROID_LOG_DEBUG, "SpoofModule", "GL Query %d requested - Returning: %s", name, original);
         return original;
     }
 
