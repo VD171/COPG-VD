@@ -48,6 +48,8 @@ static adreno_get_gpu_info_t orig_adreno_get_gpu_info = nullptr;
 #endif
 
 static DeviceInfo current_info;
+static std::string current_package_name;
+static bool should_spoof_version = false;
 static jclass buildClass = nullptr;
 static jclass versionClass = nullptr;
 static jfieldID modelField = nullptr;
@@ -61,6 +63,14 @@ static jfieldID productField = nullptr;
 static jfieldID versionReleaseField = nullptr;
 static jfieldID sdkIntField = nullptr;
 static jfieldID serialField = nullptr;
+
+// Map Android version to SDK_INT
+static int getSdkIntForVersion(const std::string& version) {
+    if (version == "12") return 31;
+    if (version == "13") return 33;
+    if (version == "14") return 34;
+    return 33; // Default to API 33 (Android 13) if unknown
+}
 
 class SpoofModule : public zygisk::ModuleBase {
 public:
@@ -115,13 +125,16 @@ public:
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
         }
+        current_package_name = package_name;
         __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Specializing app: %s", package_name);
         auto it = package_map.find(package_name);
         if (it == package_map.end()) {
             __android_log_print(ANDROID_LOG_DEBUG, "SpoofModule", "App %s not in package_map", package_name);
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            should_spoof_version = false;
         } else {
             current_info = it->second;
+            should_spoof_version = true;
             applySpoofing(current_info);
             __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Spoofed %s as %s with Adreno 830", package_name, current_info.model.c_str());
         }
@@ -164,18 +177,18 @@ private:
                 info.device = device["DEVICE"].get<std::string>();
                 info.manufacturer = device["MANUFACTURER"].get<std::string>();
                 info.model = device["MODEL"].get<std::string>();
-                info.fingerprint = device.contains("FINGERPRINT") ? device["FINGERPRINT"].get<std::string>() : "generic/brand/device:14/UP1A.231005.001/123456:user/release-keys";
+                info.fingerprint = device.contains("FINGERPRINT") ? device["FINGERPRINT"].get<std::string>() : "generic/brand/device:13/RP1A.231005.001/123456:user/release-keys";
                 info.build_id = device.contains("BUILD_ID") ? device["BUILD_ID"].get<std::string>() : "";
                 info.display = device.contains("DISPLAY") ? device["DISPLAY"].get<std::string>() : "";
                 info.product = device.contains("PRODUCT") ? device["PRODUCT"].get<std::string>() : info.device;
-                info.version_release = device.contains("VERSION_RELEASE") ? device["VERSION_RELEASE"].get<std::string>() : "14";
+                info.version_release = device.contains("VERSION_RELEASE") ? device["VERSION_RELEASE"].get<std::string>() : "13";
                 info.serial = device.contains("SERIAL") ? device["SERIAL"].get<std::string>() : "";
                 info.cpuinfo = device.contains("CPUINFO") ? device["CPUINFO"].get<std::string>() : "";
                 info.serial_content = device.contains("SERIAL_CONTENT") ? device["SERIAL_CONTENT"].get<std::string>() : "";
 
                 for (const auto& pkg : packages) {
                     package_map[pkg] = info;
-                    __android_log_print(ANDROID_LOG_DEBUG, "SpoofModule", "Mapped package %s to device %s", pkg.c_str(), info.model.c_str());
+                    __android_log_print(ANDROID_LOG_DEBUG, "SpoofModule", "Mapped package %s to device %s (Android %s)", pkg.c_str(), info.model.c_str(), info.version_release.c_str());
                 }
             }
         } catch (const json::exception& e) {
@@ -193,10 +206,10 @@ private:
         if (buildIdField && !info.build_id.empty()) env->SetStaticObjectField(buildClass, buildIdField, env->NewStringUTF(info.build_id.c_str()));
         if (displayField && !info.display.empty()) env->SetStaticObjectField(buildClass, displayField, env->NewStringUTF(info.display.c_str()));
         if (productField && !info.product.empty()) env->SetStaticObjectField(buildClass, productField, env->NewStringUTF(info.product.c_str()));
-        if (versionReleaseField) 
-            env->SetStaticObjectField(versionClass, versionReleaseField, env->NewStringUTF("14")); // Spoof Android 14
-        if (sdkIntField) 
-            env->SetStaticIntField(versionClass, sdkIntField, 34); // API 34
+        if (versionReleaseField && !info.version_release.empty()) 
+            env->SetStaticObjectField(versionClass, versionReleaseField, env->NewStringUTF(info.version_release.c_str()));
+        if (sdkIntField && !info.version_release.empty()) 
+            env->SetStaticIntField(versionClass, sdkIntField, getSdkIntForVersion(info.version_release));
         if (serialField && !info.serial.empty()) env->SetStaticObjectField(buildClass, serialField, env->NewStringUTF(info.serial.c_str()));
 
         if (!info.brand.empty()) __system_property_set("ro.product.brand", info.brand.c_str());
@@ -206,8 +219,10 @@ private:
         if (!info.fingerprint.empty()) __system_property_set("ro.build.fingerprint", info.fingerprint.c_str());
         __system_property_set("ro.hardware.gpu", "adreno");
         __system_property_set("ro.product.gpu", "Adreno 830");
-        __system_property_set("ro.build.version.release", "14");
-        __system_property_set("ro.build.version.sdk", "34");
+        if (!info.version_release.empty()) {
+            __system_property_set("ro.build.version.release", info.version_release.c_str());
+            __system_property_set("ro.build.version.sdk", std::to_string(getSdkIntForVersion(info.version_release)).c_str());
+        }
         __system_property_set("ro.opengles.version", "196610");
         __system_property_set("ro.display.refresh_rate", "165");
     }
@@ -228,14 +243,15 @@ private:
             strncpy(value, "adreno", PROP_VALUE_MAX - 1);
             value[PROP_VALUE_MAX - 1] = '\0';
             return strlen(value);
-        } else if (prop_name == "ro.build.version.release") {
-            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Property ro.build.version.release requested - Spoofed: 14");
-            strncpy(value, "14", PROP_VALUE_MAX - 1);
+        } else if (prop_name == "ro.build.version.release" && should_spoof_version && !current_info.version_release.empty()) {
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Property ro.build.version.release requested - Spoofed: %s", current_info.version_release.c_str());
+            strncpy(value, current_info.version_release.c_str(), PROP_VALUE_MAX - 1);
             value[PROP_VALUE_MAX - 1] = '\0';
             return strlen(value);
-        } else if (prop_name == "ro.build.version.sdk") {
-            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Property ro.build.version.sdk requested - Spoofed: 34");
-            strncpy(value, "34", PROP_VALUE_MAX - 1);
+        } else if (prop_name == "ro.build.version.sdk" && should_spoof_version && !current_info.version_release.empty()) {
+            std::string api_level = std::to_string(getSdkIntForVersion(current_info.version_release));
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Property ro.build.version.sdk requested - Spoofed: %s", api_level.c_str());
+            strncpy(value, api_level.c_str(), PROP_VALUE_MAX - 1);
             value[PROP_VALUE_MAX - 1] = '\0';
             return strlen(value);
         } else if (prop_name == "ro.opengles.version") {
@@ -293,18 +309,18 @@ private:
             real_path[len] = '\0';
             std::string file_path(real_path);
             if (file_path == "/proc/cpuinfo" && !current_info.cpuinfo.empty()) {
-                __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Spoofed /proc/cpuinfo read");
+                __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Spoofed /proc/cpuinfo read for %s", current_package_name.c_str());
                 size_t bytes_to_copy = std::min(count, current_info.cpuinfo.length());
                 memcpy(buf, current_info.cpuinfo.c_str(), bytes_to_copy);
                 return bytes_to_copy;
             } else if (file_path == "/sys/devices/soc0/serial_number" && !current_info.serial_content.empty()) {
-                __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Spoofed /sys/devices/soc0/serial_number read");
+                __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Spoofed /sys/devices/soc0/serial_number read for %s", current_package_name.c_str());
                 size_t bytes_to_copy = std::min(count, current_info.serial_content.length());
                 memcpy(buf, current_info.serial_content.c_str(), bytes_to_copy);
                 return bytes_to_copy;
             } else if (file_path.find("/sys/class/kgsl/") != std::string::npos && file_path.find("gpu_model") != std::string::npos) {
                 const char* spoofed_gpu = "Adreno 830";
-                __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Spoofed GPU model read: %s", spoofed_gpu);
+                __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Spoofed GPU model read for %s: %s", current_package_name.c_str(), spoofed_gpu);
                 size_t bytes_to_copy = std::min(count, strlen(spoofed_gpu));
                 memcpy(buf, spoofed_gpu, bytes_to_copy);
                 return bytes_to_copy;
@@ -346,9 +362,11 @@ private:
             if (fieldID == modelField || fieldID == brandField || fieldID == deviceField ||
                 fieldID == manufacturerField || fieldID == fingerprintField || fieldID == buildIdField ||
                 fieldID == displayField || fieldID == productField || fieldID == serialField) {
+                __android_log_print(ANDROID_LOG_DEBUG, "SpoofModule", "Blocked JNI_SetStaticObjectField for Build class field in %s", current_package_name.c_str());
                 return;
             }
-        } else if (clazz == versionClass && (fieldID == versionReleaseField || fieldID == sdkIntField)) {
+        } else if (clazz == versionClass && (fieldID == versionReleaseField || fieldID == sdkIntField) && should_spoof_version) {
+            __android_log_print(ANDROID_LOG_DEBUG, "SpoofModule", "Blocked JNI_SetStaticObjectField for VERSION class field in %s", current_package_name.c_str());
             return;
         }
         if (orig_set_static_object_field) {
@@ -392,13 +410,13 @@ private:
         }
         const char* original = orig_glGetString(name);
         if (name == GL_RENDERER) {
-            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "GL_RENDERER requested - Spoofed: Adreno 830, Original: %s", original);
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "GL_RENDERER requested by %s - Spoofed: Adreno 830, Original: %s", current_package_name.c_str(), original);
             return "Adreno 830";
         } else if (name == GL_VERSION) {
-            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "GL_VERSION requested - Spoofed: OpenGL ES 3.2, Original: %s", original);
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "GL_VERSION requested by %s - Spoofed: OpenGL ES 3.2, Original: %s", current_package_name.c_str(), original);
             return "OpenGL ES 3.2";
         } else {
-            __android_log_print(ANDROID_LOG_DEBUG, "SpoofModule", "GL Query %d requested - Returning: %s", name, original);
+            __android_log_print(ANDROID_LOG_DEBUG, "SpoofModule", "GL Query %d requested by %s - Returning: %s", name, current_package_name.c_str(), original);
         }
         return original;
     }
@@ -443,10 +461,10 @@ private:
         }
         const char* original = orig_eglQueryString(dpy, name);
         if (name == EGL_RENDERER_EXT) {
-            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "EGL_RENDERER_EXT requested - Spoofed: Adreno 830, Original: %s", original);
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "EGL_RENDERER_EXT requested by %s - Spoofed: Adreno 830, Original: %s", current_package_name.c_str(), original);
             return "Adreno 830";
         }
-        __android_log_print(ANDROID_LOG_DEBUG, "SpoofModule", "EGL Query %d requested - Returning: %s", name, original);
+        __android_log_print(ANDROID_LOG_DEBUG, "SpoofModule", "EGL Query %d requested by %s - Returning: %s", name, current_package_name.c_str(), original);
         return original;
     }
 
@@ -485,7 +503,7 @@ private:
             return "Unknown";
         }
         const char* original = orig_adreno_get_gpu_info();
-        __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "adreno_get_gpu_info requested - Spoofed: Adreno 830, Original: %s", original);
+        __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "adreno_get_gpu_info requested by %s - Spoofed: Adreno 830, Original: %s", current_package_name.c_str(), original);
         return "Adreno 830";
     }
 
