@@ -8,7 +8,8 @@
 #include <dlfcn.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <android/log.h> 
+#include <android/log.h>
+#include <GLES2/gl2.h> // Added OpenGL ES 2.0 header (use GLES3/gl3.h for ES 3.0+ if needed)
 
 using json = nlohmann::json;
 
@@ -34,8 +35,8 @@ typedef ssize_t (*orig_read_t)(int, void*, size_t);
 static orig_read_t orig_read = nullptr;
 typedef void (*orig_set_static_object_field_t)(JNIEnv*, jclass, jfieldID, jobject);
 static orig_set_static_object_field_t orig_set_static_object_field = nullptr;
-typedef const char* (*glGetString_t)(GLenum);
-static glGetString_t orig_glGetString = nullptr; // for OpenGL hook
+typedef const char* (*glGetString_t)(GLenum); // GLenum is now defined via GLES2/gl2.h
+static glGetString_t orig_glGetString = nullptr;
 
 // Static global variables
 static DeviceInfo current_info;
@@ -94,7 +95,7 @@ public:
         hookNativeGetprop();
         hookNativeRead();
         hookJniSetStaticObjectField();
-        hookOpenGL(); 
+        hookOpenGL();
         loadConfig();
     }
 
@@ -113,14 +114,14 @@ public:
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
         } else {
             current_info = it->second;
-            applySpoofing(current_info); // Consolidated spoofing
+            applySpoofing(current_info);
             __android_log_print(ANDROID_LOG_DEBUG, "SpoofModule", "Spoofed %s as %s with Adreno 830", package_name, current_info.model.c_str());
         }
         env->ReleaseStringUTFChars(args->nice_name, package_name);
     }
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
-        // Optional: Keep empty unless specific post-actions needed
+        // Empty unless needed
     }
 
 private:
@@ -136,7 +137,7 @@ private:
         }
         try {
             json config = json::parse(file);
-            package_map.reserve(config.size() / 2); // Optimize memory
+            package_map.reserve(config.size() / 2);
             for (auto& [key, value] : config.items()) {
                 if (key.find("_DEVICE") != std::string::npos) continue;
                 if (!value.is_array()) continue;
@@ -170,7 +171,6 @@ private:
     }
 
     void applySpoofing(const DeviceInfo& info) {
-        // JNI spoofing
         if (modelField) env->SetStaticObjectField(buildClass, modelField, env->NewStringUTF(info.model.c_str()));
         if (brandField) env->SetStaticObjectField(buildClass, brandField, env->NewStringUTF(info.brand.c_str()));
         if (deviceField) env->SetStaticObjectField(buildClass, deviceField, env->NewStringUTF(info.device.c_str()));
@@ -185,7 +185,6 @@ private:
             env->SetStaticIntField(versionClass, sdkIntField, info.version_release == "13" ? 33 : 34);
         if (serialField && !info.serial.empty()) env->SetStaticObjectField(buildClass, serialField, env->NewStringUTF(info.serial.c_str()));
 
-        // System property spoofing
         if (!info.brand.empty()) __system_property_set("ro.product.brand", info.brand.c_str());
         if (!info.device.empty()) __system_property_set("ro.product.device", info.device.c_str());
         if (!info.manufacturer.empty()) __system_property_set("ro.product.manufacturer", info.manufacturer.c_str());
@@ -196,7 +195,7 @@ private:
         __system_property_set("ro.hardware.gpu", "adreno");
         __system_property_set("ro.product.gpu", "Adreno 830");
         __system_property_set("ro.opengles.version", "196610"); // OpenGL ES 3.2
-        __system_property_set("ro.display.refresh_rate", "165"); // Aggressive 165Hz for Snapdragon 8 Elite
+        __system_property_set("ro.display.refresh_rate", "165");
     }
 
     static int hooked_prop_get(const char* name, char* value, const char* default_value) {
@@ -345,9 +344,9 @@ private:
     static const char* hooked_glGetString(GLenum name) {
         if (!orig_glGetString) return "Unknown";
         if (name == GL_RENDERER) {
-            return "Adreno 830"; // Spoof GPU name
+            return "Adreno 830";
         } else if (name == GL_VERSION) {
-            return "OpenGL ES 3.2"; // Consistent with Adreno 830
+            return "OpenGL ES 3.2";
         }
         return orig_glGetString(name);
     }
