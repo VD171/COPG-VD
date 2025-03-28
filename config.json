@@ -24,7 +24,6 @@
         "DEVICE": "NX769J",
         "MANUFACTURER": "ZTE",
         "MODEL": "NX769J",
-        "ro.product.model": "NX769J",
         "FINGERPRINT": "ZTE/NX769J/NX769J:14/UP1A.231005.007/20240301:user/release-keys",
         "BUILD_ID": "UP1A.231005.007",
         "DISPLAY": "UP1A.231005.007.A1",
@@ -42,7 +41,6 @@
         "DEVICE": "Black Shark 4",
         "MANUFACTURER": "Xiaomi",
         "MODEL": "2SM-X706B",
-        "ro.product.model": "PRS-H0",
         "FINGERPRINT": "BlackShark/PRS-H0/Black Shark 4:13/TQ3A.230805.001/20230315:user/release-keys",
         "BUILD_ID": "TQ3A.230805.001",
         "DISPLAY": "TQ3A.230805.001.A1",
@@ -63,7 +61,6 @@
         "DEVICE": "Mi 11T PRO",
         "MANUFACTURER": "Xiaomi",
         "MODEL": "2107113SI",
-        "ro.product.model": "2107113SI",
         "FINGERPRINT": "Xiaomi/2107113SI/Mi 11T PRO:13/RKQ1.211001.001/20230410:user/release-keys",
         "BUILD_ID": "RKQ1.211001.001",
         "DISPLAY": "RKQ1.211001.001.A1",
@@ -88,7 +85,6 @@
         "DEVICE": "Mi 13 Pro",
         "MANUFACTURER": "Xiaomi",
         "MODEL": "2210132G",
-        "ro.product.model": "2210132G",
         "FINGERPRINT": "Xiaomi/2210132G/Mi 13 Pro:14/UP1A.231005.007/20240220:user/release-keys",
         "BUILD_ID": "UP1A.231005.007",
         "DISPLAY": "UP1A.231005.007.A1",
@@ -109,7 +105,6 @@
         "DEVICE": "OnePlus 8 PRO",
         "MANUFACTURER": "OnePlus",
         "MODEL": "IN2020",
-        "ro.product.model": "IN2020",
         "FINGERPRINT": "OnePlus/IN2020/OnePlus 8 PRO:13/RKQ1.211119.001/20230501:user/release-keys",
         "BUILD_ID": "RKQ1.211119.001",
         "DISPLAY": "RKQ1.211119.001.A1",
@@ -129,7 +124,6 @@
         "DEVICE": "OnePlus 9 PRO",
         "MANUFACTURER": "OnePlus",
         "MODEL": "LE2101",
-        "ro.product.model": "LE2101",
         "FINGERPRINT": "OnePlus/LE2101/OnePlus 9 PRO:14/UP1A.231005.007/20240115:user/release-keys",
         "BUILD_ID": "UP1A.231005.007",
         "DISPLAY": "UP1A.231005.007.A1",
@@ -147,7 +141,6 @@
         "DEVICE": "POCO F5",
         "MANUFACTURER": "Xiaomi",
         "MODEL": "23049PCD8G",
-        "ro.product.model": "23049PCD8G",
         "FINGERPRINT": "POCO/23049PCD8G/POCO F5:13/TQ3A.230805.001/20230620:user/release-keys",
         "BUILD_ID": "TQ3A.230805.001",
         "DISPLAY": "TQ3A.230805.001.A1",
@@ -158,15 +151,13 @@
         "SERIAL_CONTENT": "POCOF512345"
     },
     "PACKAGES_ROG": [
-        "com.dts.freefireth",
-        "com.dts.freefirethmax"
+        "com.test.app.trst"
     ],
     "PACKAGES_ROG_DEVICE": {
         "BRAND": "Asus",
         "DEVICE": "ROG Phone",
         "MANUFACTURER": "Asus",
         "MODEL": "ASUS_Z01QD",
-        "ro.product.model": "ASUS_Z01QD",
         "FINGERPRINT": "Asus/ASUS_Z01QD/ROG Phone:12/SKQ1.210821.001/20220810:user/release-keys",
         "BUILD_ID": "SKQ1.210821.001",
         "DISPLAY": "SKQ1.210821.001.A1",
@@ -177,7 +168,6 @@
         "SERIAL_CONTENT": "ROG12345678"
     },
     "PACKAGES_ROG6": [
-        "com.ea.gp.fifamobile",
         "com.gameloft.android.ANMP.GloftA9HM",
         "com.madfingergames.legends",
         "com.pearlabyss.blackdesertm",
@@ -188,7 +178,6 @@
         "DEVICE": "ROG Phone 6",
         "MANUFACTURER": "Asus",
         "MODEL": "ASUS_AI2201",
-        "ro.product.model": "ASUS_AI2201",
         "FINGERPRINT": "Asus/ASUS_AI2201/ROG Phone 6:14/UP1A.231005.007/20240315:user/release-keys",
         "BUILD_ID": "UP1A.231005.007",
         "DISPLAY": "UP1A.231005.007.A1",
@@ -209,7 +198,6 @@
         "DEVICE": "TB-9707F",
         "MANUFACTURER": "Lenovo",
         "MODEL": "Lenovo TB-9707F",
-        "ro.product.model": "Lenovo TB-9707F",
         "FINGERPRINT": "Lenovo/TB-9707F/Lenovo TB-9707F:13/TQ3A.230805.001/20230901:user/release-keys",
         "BUILD_ID": "TQ3A.230805.001",
         "DISPLAY": "TQ3A.230805.001.A1",
@@ -227,7 +215,6 @@
         "DEVICE": "SM-S928B",
         "MANUFACTURER": "samsung",
         "MODEL": "SM-S928B",
-        "ro.product.model": "SM-S928B",
         "FINGERPRINT": "samsung/SM-S928B/SM-S928B:14/UP1A.231005.007/20240225:user/release-keys",
         "BUILD_ID": "UP1A.231005.007",
         "DISPLAY": "UP1A.231005.007.A1",
@@ -236,5 +223,23 @@
         "SERIAL": "SAM12345678",
         "CPUINFO": "processor\t: 0\nmodel name\t: ARMv8-A (Galaxy S24 Ultra)\nHardware\t: Qualcomm Snapdragon 8 Gen 3\nSerial\t: SAM12345678",
         "SERIAL_CONTENT": "SAM12345678"
+    },
+    "PACKAGES_REDMAGIC9PRO": [
+        "com.dts.freefireth",
+        "com.dts.freefirethmax"
+    ],
+    "PACKAGES_REDMAGIC9PRO_DEVICE": {
+        "BRAND": "Nubia",
+        "DEVICE": "NX769J-Pro",
+        "MANUFACTURER": "ZTE",
+        "MODEL": "NX769J-Pro",
+        "FINGERPRINT": "Nubia/NX769J-Pro/NX769J-Pro:14/UP1A.231005.007/20231215:user/release-keys",
+        "BUILD_ID": "UP1A.231005.007",
+        "DISPLAY": "UP1A.231005.007.A1",
+        "PRODUCT": "NX769J-Pro",
+        "VERSION_RELEASE": "14",
+        "SERIAL": "NUBIA98765432",
+        "CPUINFO": "processor\t: 0\nmodel name\t: ARMv8-A (RedMagic 9 Pro)\nHardware\t: Qualcomm Snapdragon 8 Gen 3\nSerial\t: NUBIA98765432",
+        "SERIAL_CONTENT": "NUBIA98765432"
     }
 }
