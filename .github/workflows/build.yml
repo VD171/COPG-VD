@@ -125,7 +125,7 @@ jobs:
           cat > module/module.prop << 'EOF'
           id=COPG
           name=✨ COPG spoof ✨
-          version=3.2.1
+          version=3.2.1-gpu
           versionCode=321
           author=AlirezaParsi
           description=Spoof your device for games. Click Action button to update your config if needed.
