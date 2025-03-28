@@ -38,8 +38,10 @@ typedef void (*orig_set_static_object_field_t)(JNIEnv*, jclass, jfieldID, jobjec
 static orig_set_static_object_field_t orig_set_static_object_field = nullptr;
 typedef const char* (*glGetString_t)(GLenum);
 static glGetString_t orig_glGetString = nullptr;
-typedef const char* (*eglGetString_t)(EGLDisplay, EGLint);
-static eglGetString_t orig_eglGetString = nullptr;
+typedef const char* (*eglQueryString_t)(EGLDisplay, EGLint);
+static eglQueryString_t orig_eglQueryString = nullptr;
+typedef const char* (*adreno_get_gpu_info_t)(void);
+static adreno_get_gpu_info_t orig_adreno_get_gpu_info = nullptr;
 
 #ifndef EGL_RENDERER_EXT
 #define EGL_RENDERER_EXT 0x305A
@@ -97,16 +99,19 @@ public:
         hookJniSetStaticObjectField();
         hookOpenGL();
         hookEGL();
+        hookAdrenoUtils();
         loadConfig();
     }
 
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
         if (!args || !args->nice_name) {
+            __android_log_print(ANDROID_LOG_DEBUG, "SpoofModule", "No package name in args");
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
         }
         const char* package_name = env->GetStringUTFChars(args->nice_name, nullptr);
         if (!package_name) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "Failed to get package name");
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
         }
@@ -138,13 +143,20 @@ private:
         }
         try {
             json config = json::parse(file);
+            package_map.clear(); // Clear to avoid duplicates
             package_map.reserve(config.size() / 2);
             for (auto& [key, value] : config.items()) {
                 if (key.find("_DEVICE") != std::string::npos) continue;
-                if (!value.is_array()) continue;
+                if (!value.is_array()) {
+                    __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "Invalid package list for %s: not an array", key.c_str());
+                    continue;
+                }
                 auto packages = value.get<std::vector<std::string>>();
                 std::string device_key = key + "_DEVICE";
-                if (!config.contains(device_key)) continue;
+                if (!config.contains(device_key)) {
+                    __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "No device config for %s", key.c_str());
+                    continue;
+                }
                 auto device = config[device_key];
 
                 DeviceInfo info;
@@ -152,16 +164,19 @@ private:
                 info.device = device["DEVICE"].get<std::string>();
                 info.manufacturer = device["MANUFACTURER"].get<std::string>();
                 info.model = device["MODEL"].get<std::string>();
-                info.fingerprint = device.contains("FINGERPRINT") ? device["FINGERPRINT"].get<std::string>() : "generic/brand/device:13/RP1A.231005.001/123456:user/release-keys";
+                info.fingerprint = device.contains("FINGERPRINT") ? device["FINGERPRINT"].get<std::string>() : "generic/brand/device:14/UP1A.231005.001/123456:user/release-keys";
                 info.build_id = device.contains("BUILD_ID") ? device["BUILD_ID"].get<std::string>() : "";
                 info.display = device.contains("DISPLAY") ? device["DISPLAY"].get<std::string>() : "";
                 info.product = device.contains("PRODUCT") ? device["PRODUCT"].get<std::string>() : info.device;
-                info.version_release = device.contains("VERSION_RELEASE") ? device["VERSION_RELEASE"].get<std::string>() : "";
+                info.version_release = device.contains("VERSION_RELEASE") ? device["VERSION_RELEASE"].get<std::string>() : "14";
                 info.serial = device.contains("SERIAL") ? device["SERIAL"].get<std::string>() : "";
                 info.cpuinfo = device.contains("CPUINFO") ? device["CPUINFO"].get<std::string>() : "";
                 info.serial_content = device.contains("SERIAL_CONTENT") ? device["SERIAL_CONTENT"].get<std::string>() : "";
 
-                for (const auto& pkg : packages) package_map[pkg] = info;
+                for (const auto& pkg : packages) {
+                    package_map[pkg] = info;
+                    __android_log_print(ANDROID_LOG_DEBUG, "SpoofModule", "Mapped package %s to device %s", pkg.c_str(), info.model.c_str());
+                }
             }
         } catch (const json::exception& e) {
             __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "JSON parsing failed: %s", e.what());
@@ -178,10 +193,10 @@ private:
         if (buildIdField && !info.build_id.empty()) env->SetStaticObjectField(buildClass, buildIdField, env->NewStringUTF(info.build_id.c_str()));
         if (displayField && !info.display.empty()) env->SetStaticObjectField(buildClass, displayField, env->NewStringUTF(info.display.c_str()));
         if (productField && !info.product.empty()) env->SetStaticObjectField(buildClass, productField, env->NewStringUTF(info.product.c_str()));
-        if (versionReleaseField && !info.version_release.empty()) 
-            env->SetStaticObjectField(versionClass, versionReleaseField, env->NewStringUTF(info.version_release.c_str()));
-        if (sdkIntField && !info.version_release.empty()) 
-            env->SetStaticIntField(versionClass, sdkIntField, info.version_release == "13" ? 33 : 34);
+        if (versionReleaseField) 
+            env->SetStaticObjectField(versionClass, versionReleaseField, env->NewStringUTF("14")); // Spoof Android 14
+        if (sdkIntField) 
+            env->SetStaticIntField(versionClass, sdkIntField, 34); // API 34
         if (serialField && !info.serial.empty()) env->SetStaticObjectField(buildClass, serialField, env->NewStringUTF(info.serial.c_str()));
 
         if (!info.brand.empty()) __system_property_set("ro.product.brand", info.brand.c_str());
@@ -191,26 +206,45 @@ private:
         if (!info.fingerprint.empty()) __system_property_set("ro.build.fingerprint", info.fingerprint.c_str());
         __system_property_set("ro.hardware.gpu", "adreno");
         __system_property_set("ro.product.gpu", "Adreno 830");
+        __system_property_set("ro.build.version.release", "14");
+        __system_property_set("ro.build.version.sdk", "34");
         __system_property_set("ro.opengles.version", "196610");
         __system_property_set("ro.display.refresh_rate", "165");
     }
 
     static int hooked_prop_get(const char* name, char* value, const char* default_value) {
-        if (!orig_prop_get) return -1;
+        if (!orig_prop_get) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "orig_prop_get is null");
+            return -1;
+        }
         std::string prop_name(name);
         if (prop_name == "ro.product.gpu") {
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Property ro.product.gpu requested - Spoofed: Adreno 830");
             strncpy(value, "Adreno 830", PROP_VALUE_MAX - 1);
             value[PROP_VALUE_MAX - 1] = '\0';
             return strlen(value);
         } else if (prop_name == "ro.hardware.gpu") {
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Property ro.hardware.gpu requested - Spoofed: adreno");
             strncpy(value, "adreno", PROP_VALUE_MAX - 1);
             value[PROP_VALUE_MAX - 1] = '\0';
             return strlen(value);
+        } else if (prop_name == "ro.build.version.release") {
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Property ro.build.version.release requested - Spoofed: 14");
+            strncpy(value, "14", PROP_VALUE_MAX - 1);
+            value[PROP_VALUE_MAX - 1] = '\0';
+            return strlen(value);
+        } else if (prop_name == "ro.build.version.sdk") {
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Property ro.build.version.sdk requested - Spoofed: 34");
+            strncpy(value, "34", PROP_VALUE_MAX - 1);
+            value[PROP_VALUE_MAX - 1] = '\0';
+            return strlen(value);
         } else if (prop_name == "ro.opengles.version") {
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Property ro.opengles.version requested - Spoofed: 196610");
             strncpy(value, "196610", PROP_VALUE_MAX - 1);
             value[PROP_VALUE_MAX - 1] = '\0';
             return strlen(value);
         } else if (prop_name == "ro.display.refresh_rate") {
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Property ro.display.refresh_rate requested - Spoofed: 165");
             strncpy(value, "165", PROP_VALUE_MAX - 1);
             value[PROP_VALUE_MAX - 1] = '\0';
             return strlen(value);
@@ -220,24 +254,37 @@ private:
 
     void hookNativeGetprop() {
         void* handle = dlopen("libc.so", RTLD_LAZY);
-        if (handle) {
-            void* sym = dlsym(handle, "__system_property_get");
-            if (sym) {
-                size_t page_size = sysconf(_SC_PAGE_SIZE);
-                void* page_start = (void*)((uintptr_t)sym & ~(page_size - 1));
-                if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == 0) {
-                    *(void**)&orig_prop_get = (void*)hooked_prop_get;
-                    mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
-                } else {
-                    __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect failed for prop_get: %s", strerror(errno));
-                }
-            }
-            dlclose(handle);
+        if (!handle) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "Failed to open libc.so for prop_get: %s", dlerror());
+            return;
         }
+        void* sym = dlsym(handle, "__system_property_get");
+        if (!sym) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "dlsym failed for __system_property_get: %s", dlerror());
+            dlclose(handle);
+            return;
+        }
+        size_t page_size = sysconf(_SC_PAGE_SIZE);
+        void* page_start = (void*)((uintptr_t)sym & ~(page_size - 1));
+        if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect failed for prop_get: %s", strerror(errno));
+            dlclose(handle);
+            return;
+        }
+        *(void**)&orig_prop_get = (void*)hooked_prop_get;
+        if (mprotect(page_start, page_size, PROT_READ | PROT_EXEC) != 0) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect restore failed for prop_get: %s", strerror(errno));
+        } else {
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Successfully hooked __system_property_get");
+        }
+        dlclose(handle);
     }
 
     static ssize_t hooked_read(int fd, void* buf, size_t count) {
-        if (!orig_read) return -1;
+        if (!orig_read) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "orig_read is null");
+            return -1;
+        }
         char path[256];
         snprintf(path, sizeof(path), "/proc/self/fd/%d", fd);
         char real_path[256];
@@ -246,18 +293,20 @@ private:
             real_path[len] = '\0';
             std::string file_path(real_path);
             if (file_path == "/proc/cpuinfo" && !current_info.cpuinfo.empty()) {
+                __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Spoofed /proc/cpuinfo read");
                 size_t bytes_to_copy = std::min(count, current_info.cpuinfo.length());
                 memcpy(buf, current_info.cpuinfo.c_str(), bytes_to_copy);
                 return bytes_to_copy;
             } else if (file_path == "/sys/devices/soc0/serial_number" && !current_info.serial_content.empty()) {
+                __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Spoofed /sys/devices/soc0/serial_number read");
                 size_t bytes_to_copy = std::min(count, current_info.serial_content.length());
                 memcpy(buf, current_info.serial_content.c_str(), bytes_to_copy);
                 return bytes_to_copy;
             } else if (file_path.find("/sys/class/kgsl/") != std::string::npos && file_path.find("gpu_model") != std::string::npos) {
                 const char* spoofed_gpu = "Adreno 830";
+                __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Spoofed GPU model read: %s", spoofed_gpu);
                 size_t bytes_to_copy = std::min(count, strlen(spoofed_gpu));
                 memcpy(buf, spoofed_gpu, bytes_to_copy);
-                __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Spoofed GPU model read: %s", spoofed_gpu);
                 return bytes_to_copy;
             }
         }
@@ -266,20 +315,30 @@ private:
 
     void hookNativeRead() {
         void* handle = dlopen("libc.so", RTLD_LAZY);
-        if (handle) {
-            void* sym = dlsym(handle, "read");
-            if (sym) {
-                size_t page_size = sysconf(_SC_PAGE_SIZE);
-                void* page_start = (void*)((uintptr_t)sym & ~(page_size - 1));
-                if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == 0) {
-                    *(void**)&orig_read = (void*)hooked_read;
-                    mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
-                } else {
-                    __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect failed for read: %s", strerror(errno));
-                }
-            }
-            dlclose(handle);
+        if (!handle) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "Failed to open libc.so for read: %s", dlerror());
+            return;
         }
+        void* sym = dlsym(handle, "read");
+        if (!sym) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "dlsym failed for read: %s", dlerror());
+            dlclose(handle);
+            return;
+        }
+        size_t page_size = sysconf(_SC_PAGE_SIZE);
+        void* page_start = (void*)((uintptr_t)sym & ~(page_size - 1));
+        if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect failed for read: %s", strerror(errno));
+            dlclose(handle);
+            return;
+        }
+        *(void**)&orig_read = (void*)hooked_read;
+        if (mprotect(page_start, page_size, PROT_READ | PROT_EXEC) != 0) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect restore failed for read: %s", strerror(errno));
+        } else {
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Successfully hooked read");
+        }
+        dlclose(handle);
     }
 
     static void hooked_set_static_object_field(JNIEnv* env, jclass clazz, jfieldID fieldID, jobject value) {
@@ -289,7 +348,7 @@ private:
                 fieldID == displayField || fieldID == productField || fieldID == serialField) {
                 return;
             }
-        } else if (clazz == versionClass && fieldID == versionReleaseField) {
+        } else if (clazz == versionClass && (fieldID == versionReleaseField || fieldID == sdkIntField)) {
             return;
         }
         if (orig_set_static_object_field) {
@@ -299,21 +358,31 @@ private:
 
     void hookJniSetStaticObjectField() {
         void* handle = dlopen("libandroid_runtime.so", RTLD_LAZY);
-        if (handle) {
-            void* sym = dlsym(handle, "JNI_SetStaticObjectField");
-            if (sym) {
-                size_t page_size = sysconf(_SC_PAGE_SIZE);
-                void* page_start = (void*)((uintptr_t)sym & ~(page_size - 1));
-                if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == 0) {
-                    orig_set_static_object_field = *(orig_set_static_object_field_t*)&sym;
-                    *(void**)&sym = (void*)hooked_set_static_object_field;
-                    mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
-                } else {
-                    __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect failed for JNI hook: %s", strerror(errno));
-                }
-            }
-            dlclose(handle);
+        if (!handle) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "Failed to open libandroid_runtime.so: %s", dlerror());
+            return;
         }
+        void* sym = dlsym(handle, "JNI_SetStaticObjectField");
+        if (!sym) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "dlsym failed for JNI_SetStaticObjectField: %s", dlerror());
+            dlclose(handle);
+            return;
+        }
+        size_t page_size = sysconf(_SC_PAGE_SIZE);
+        void* page_start = (void*)((uintptr_t)sym & ~(page_size - 1));
+        if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect failed for JNI hook: %s", strerror(errno));
+            dlclose(handle);
+            return;
+        }
+        orig_set_static_object_field = *(orig_set_static_object_field_t*)&sym;
+        *(void**)&sym = (void*)hooked_set_static_object_field;
+        if (mprotect(page_start, page_size, PROT_READ | PROT_EXEC) != 0) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect restore failed for JNI hook: %s", strerror(errno));
+        } else {
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Successfully hooked JNI_SetStaticObjectField");
+        }
+        dlclose(handle);
     }
 
     static const char* hooked_glGetString(GLenum name) {
@@ -367,12 +436,12 @@ private:
         }
     }
 
-    static const char* hooked_eglGetString(EGLDisplay dpy, EGLint name) {
-        if (!orig_eglGetString) {
-            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "orig_eglGetString is null");
+    static const char* hooked_eglQueryString(EGLDisplay dpy, EGLint name) {
+        if (!orig_eglQueryString) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "orig_eglQueryString is null");
             return "Unknown";
         }
-        const char* original = orig_eglGetString(dpy, name);
+        const char* original = orig_eglQueryString(dpy, name);
         if (name == EGL_RENDERER_EXT) {
             __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "EGL_RENDERER_EXT requested - Spoofed: Adreno 830, Original: %s", original);
             return "Adreno 830";
@@ -387,25 +456,64 @@ private:
             __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "Failed to open libEGL.so: %s", dlerror());
             return;
         }
-        void* sym = dlsym(handle, "eglGetString");
+        void* sym = dlsym(handle, "eglQueryString");
         if (!sym) {
-            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "dlsym failed for eglGetString: %s", dlerror());
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "dlsym failed for eglQueryString: %s", dlerror());
             dlclose(handle);
             return;
         }
         size_t page_size = sysconf(_SC_PAGE_SIZE);
         void* page_start = (void*)((uintptr_t)sym & ~(page_size - 1));
         if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
-            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect failed for eglGetString: %s", strerror(errno));
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect failed for eglQueryString: %s", strerror(errno));
             dlclose(handle);
             return;
         }
-        orig_eglGetString = *(eglGetString_t*)&sym;
-        *(void**)&sym = (void*)hooked_eglGetString;
+        orig_eglQueryString = *(eglQueryString_t*)&sym;
+        *(void**)&sym = (void*)hooked_eglQueryString;
         if (mprotect(page_start, page_size, PROT_READ | PROT_EXEC) != 0) {
-            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect restore failed for eglGetString: %s", strerror(errno));
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect restore failed for eglQueryString: %s", strerror(errno));
         } else {
-            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Successfully hooked eglGetString");
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Successfully hooked eglQueryString");
+        }
+        dlclose(handle);
+    }
+
+    static const char* hooked_adreno_get_gpu_info() {
+        if (!orig_adreno_get_gpu_info) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "orig_adreno_get_gpu_info is null");
+            return "Unknown";
+        }
+        const char* original = orig_adreno_get_gpu_info();
+        __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "adreno_get_gpu_info requested - Spoofed: Adreno 830, Original: %s", original);
+        return "Adreno 830";
+    }
+
+    void hookAdrenoUtils() {
+        void* handle = dlopen("libadreno_utils.so", RTLD_LAZY);
+        if (!handle) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "Failed to open libadreno_utils.so: %s", dlerror());
+            return;
+        }
+        void* sym = dlsym(handle, "adreno_get_gpu_info");
+        if (!sym) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "dlsym failed for adreno_get_gpu_info: %s", dlerror());
+            dlclose(handle);
+            return;
+        }
+        size_t page_size = sysconf(_SC_PAGE_SIZE);
+        void* page_start = (void*)((uintptr_t)sym & ~(page_size - 1));
+        if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect failed for adreno_get_gpu_info: %s", strerror(errno));
+            dlclose(handle);
+            return;
+        }
+        orig_adreno_get_gpu_info = *(adreno_get_gpu_info_t*)&sym;
+        *(void**)&sym = (void*)hooked_adreno_get_gpu_info;
+        if (mprotect(page_start, page_size, PROT_READ | PROT_EXEC) != 0) {
+            __android_log_print(ANDROID_LOG_ERROR, "SpoofModule", "mprotect restore failed for adreno_get_gpu_info: %s", strerror(errno));
+        } else {
+            __android_log_print(ANDROID_LOG_INFO, "SpoofModule", "Successfully hooked adreno_get_gpu_info");
         }
         dlclose(handle);
     }
