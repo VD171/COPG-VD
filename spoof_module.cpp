@@ -1,4 +1,3 @@
-// main.cpp
 #include <jni.h>
 #include <string>
 #include <zygisk.hh>
@@ -75,6 +74,23 @@ static jfieldID productField = nullptr;
 static jfieldID versionReleaseField = nullptr;
 static jfieldID sdkIntField = nullptr;
 static jfieldID serialField = nullptr;
+
+// Forward declarations of hooking functions
+static void hookNativeGetprop();
+static void hookNativeRead();
+static void hookJniSetStaticObjectField();
+static void hookOpenGL();
+static void hookEGL();
+static void hookAdrenoUtils();
+static void hookVulkan();
+static int hooked_prop_get(const char* name, char* value, const char* default_value);
+static ssize_t hooked_read(int fd, void* buf, size_t count);
+static void hooked_set_static_object_field(JNIEnv* env, jclass clazz, jfieldID fieldID, jobject value);
+static const char* hooked_glGetString(GLenum name);
+static const char* hooked_eglQueryString(EGLDisplay dpy, EGLint name);
+static const char* hooked_adreno_get_gpu_info();
+static VkResult hooked_vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties* pProperties);
+static VkResult hooked_vkEnumeratePhysicalDevices(VkInstance instance, uint32_t* pPhysicalDeviceCount, VkPhysicalDevice* pPhysicalDevices);
 
 // Helper functions
 static int getSdkIntForVersion(const std::string& version) {
@@ -283,50 +299,265 @@ private:
         __system_property_set("ro.opengles.version", "196610");
         __system_property_set("ro.display.refresh_rate", "165");
     }
+};
 
-    // Hook implementations...
-    // [Previous hook implementations go here, but updated with new Vulkan hooks]
-    
-    void hookVulkan() {
-        void* handle = dlopen("libvulkan.so", RTLD_LAZY);
+// Hook implementations
+static void hookNativeGetprop() {
+    if (!orig_prop_get) {
+        ALOGE("Original prop_get function not found");
+        return;
+    }
+    hook_function((void*)orig_prop_get, (void*)hooked_prop_get, "__system_property_get");
+}
+
+static void hookNativeRead() {
+    if (!orig_read) {
+        ALOGE("Original read function not found");
+        return;
+    }
+    hook_function((void*)orig_read, (void*)hooked_read, "read");
+}
+
+static void hookJniSetStaticObjectField() {
+    void* handle = dlopen("libandroid_runtime.so", RTLD_LAZY);
+    if (!handle) {
+        ALOGE("Failed to open libandroid_runtime.so");
+        return;
+    }
+
+    void* sym = dlsym(handle, "JNI_SetStaticObjectField");
+    if (!sym) {
+        ALOGE("dlsym failed for JNI_SetStaticObjectField");
+        dlclose(handle);
+        return;
+    }
+
+    hook_function(sym, (void*)hooked_set_static_object_field, "JNI_SetStaticObjectField");
+    dlclose(handle);
+}
+
+static void hookOpenGL() {
+    const char* libraries[] = {"libGLESv2.so", "libGLESv3.so"};
+    for (const char* lib : libraries) {
+        void* handle = dlopen(lib, RTLD_LAZY);
         if (!handle) {
-            ALOGE("Failed to load libvulkan.so");
+            ALOGE("Failed to open %s", lib);
+            continue;
+        }
+
+        void* sym = dlsym(handle, "glGetString");
+        if (!sym) {
+            ALOGE("dlsym failed for glGetString in %s", lib);
+            dlclose(handle);
+            continue;
+        }
+
+        hook_function(sym, (void*)hooked_glGetString, "glGetString");
+        dlclose(handle);
+        break;
+    }
+}
+
+static void hookEGL() {
+    void* handle = dlopen("libEGL.so", RTLD_LAZY);
+    if (!handle) {
+        ALOGE("Failed to open libEGL.so");
+        return;
+    }
+
+    void* sym = dlsym(handle, "eglQueryString");
+    if (!sym) {
+        ALOGE("dlsym failed for eglQueryString");
+        dlclose(handle);
+        return;
+    }
+
+    hook_function(sym, (void*)hooked_eglQueryString, "eglQueryString");
+    dlclose(handle);
+}
+
+static void hookAdrenoUtils() {
+    void* handle = dlopen("libadreno_utils.so", RTLD_LAZY);
+    if (!handle) {
+        ALOGE("Failed to open libadreno_utils.so");
+        return;
+    }
+
+    void* sym = dlsym(handle, "adreno_get_gpu_info");
+    if (!sym) {
+        ALOGE("dlsym failed for adreno_get_gpu_info");
+        dlclose(handle);
+        return;
+    }
+
+    hook_function(sym, (void*)hooked_adreno_get_gpu_info, "adreno_get_gpu_info");
+    dlclose(handle);
+}
+
+static void hookVulkan() {
+    void* handle = dlopen("libvulkan.so", RTLD_LAZY);
+    if (!handle) {
+        ALOGE("Failed to load libvulkan.so");
+        return;
+    }
+
+    orig_vkGetPhysicalDeviceProperties = (vkGetPhysicalDeviceProperties_t)dlsym(handle, "vkGetPhysicalDeviceProperties");
+    if (orig_vkGetPhysicalDeviceProperties) {
+        hook_function((void*)orig_vkGetPhysicalDeviceProperties, (void*)hooked_vkGetPhysicalDeviceProperties, "vkGetPhysicalDeviceProperties");
+    }
+
+    orig_vkEnumeratePhysicalDevices = (vkEnumeratePhysicalDevices_t)dlsym(handle, "vkEnumeratePhysicalDevices");
+    if (orig_vkEnumeratePhysicalDevices) {
+        hook_function((void*)orig_vkEnumeratePhysicalDevices, (void*)hooked_vkEnumeratePhysicalDevices, "vkEnumeratePhysicalDevices");
+    }
+
+    dlclose(handle);
+}
+
+// Hooked function implementations
+static int hooked_prop_get(const char* name, char* value, const char* default_value) {
+    if (!orig_prop_get) {
+        ALOGE("Original prop_get is null");
+        return -1;
+    }
+
+    std::string prop_name(name);
+    if (prop_name == "ro.product.gpu") {
+        strncpy(value, "Adreno 830", PROP_VALUE_MAX - 1);
+        value[PROP_VALUE_MAX - 1] = '\0';
+        return strlen(value);
+    } else if (prop_name == "ro.hardware.gpu") {
+        strncpy(value, "adreno", PROP_VALUE_MAX - 1);
+        value[PROP_VALUE_MAX - 1] = '\0';
+        return strlen(value);
+    } else if (prop_name == "ro.build.version.release" && should_spoof && !current_info.version_release.empty()) {
+        strncpy(value, current_info.version_release.c_str(), PROP_VALUE_MAX - 1);
+        value[PROP_VALUE_MAX - 1] = '\0';
+        return strlen(value);
+    } else if (prop_name == "ro.build.version.sdk" && should_spoof && !current_info.version_release.empty()) {
+        std::string api_level = std::to_string(getSdkIntForVersion(current_info.version_release));
+        strncpy(value, api_level.c_str(), PROP_VALUE_MAX - 1);
+        value[PROP_VALUE_MAX - 1] = '\0';
+        return strlen(value);
+    } else if (prop_name == "ro.opengles.version") {
+        strncpy(value, "196610", PROP_VALUE_MAX - 1);
+        value[PROP_VALUE_MAX - 1] = '\0';
+        return strlen(value);
+    } else if (prop_name == "ro.display.refresh_rate") {
+        strncpy(value, "165", PROP_VALUE_MAX - 1);
+        value[PROP_VALUE_MAX - 1] = '\0';
+        return strlen(value);
+    } else if (prop_name == "ro.board.platform") {
+        strncpy(value, "kona", PROP_VALUE_MAX - 1);
+        value[PROP_VALUE_MAX - 1] = '\0';
+        return strlen(value);
+    } else if (prop_name == "ro.chipname") {
+        strncpy(value, "SM8250", PROP_VALUE_MAX - 1);
+        value[PROP_VALUE_MAX - 1] = '\0';
+        return strlen(value);
+    } else if (prop_name == "ro.hardware.chipname") {
+        strncpy(value, "kona", PROP_VALUE_MAX - 1);
+        value[PROP_VALUE_MAX - 1] = '\0';
+        return strlen(value);
+    }
+
+    return orig_prop_get(name, value, default_value);
+}
+
+static ssize_t hooked_read(int fd, void* buf, size_t count) {
+    if (!orig_read) {
+        ALOGE("Original read is null");
+        return -1;
+    }
+
+    char path[256];
+    snprintf(path, sizeof(path), "/proc/self/fd/%d", fd);
+    char real_path[256];
+    ssize_t len = readlink(path, real_path, sizeof(real_path) - 1);
+    if (len != -1) {
+        real_path[len] = '\0';
+        std::string file_path(real_path);
+        if (file_path == "/proc/cpuinfo" && !current_info.cpuinfo.empty()) {
+            size_t bytes_to_copy = std::min(count, current_info.cpuinfo.length());
+            memcpy(buf, current_info.cpuinfo.c_str(), bytes_to_copy);
+            return bytes_to_copy;
+        } else if (file_path == "/sys/devices/soc0/serial_number" && !current_info.serial_content.empty()) {
+            size_t bytes_to_copy = std::min(count, current_info.serial_content.length());
+            memcpy(buf, current_info.serial_content.c_str(), bytes_to_copy);
+            return bytes_to_copy;
+        } else if (file_path.find("/sys/class/kgsl/") != std::string::npos && file_path.find("gpu_model") != std::string::npos) {
+            const char* spoofed_gpu = "Adreno 830";
+            size_t bytes_to_copy = std::min(count, strlen(spoofed_gpu));
+            memcpy(buf, spoofed_gpu, bytes_to_copy);
+            return bytes_to_copy;
+        }
+    }
+    return orig_read(fd, buf, count);
+}
+
+static void hooked_set_static_object_field(JNIEnv* env, jclass clazz, jfieldID fieldID, jobject value) {
+    if (clazz == buildClass) {
+        if (fieldID == modelField || fieldID == brandField || fieldID == deviceField ||
+            fieldID == manufacturerField || fieldID == fingerprintField || fieldID == buildIdField ||
+            fieldID == displayField || fieldID == productField || fieldID == serialField) {
             return;
         }
-
-        orig_vkGetPhysicalDeviceProperties = (vkGetPhysicalDeviceProperties_t)dlsym(handle, "vkGetPhysicalDeviceProperties");
-        if (orig_vkGetPhysicalDeviceProperties) {
-            hook_function((void*)orig_vkGetPhysicalDeviceProperties, (void*)hooked_vkGetPhysicalDeviceProperties, "vkGetPhysicalDeviceProperties");
-        }
-
-        orig_vkEnumeratePhysicalDevices = (vkEnumeratePhysicalDevices_t)dlsym(handle, "vkEnumeratePhysicalDevices");
-        if (orig_vkEnumeratePhysicalDevices) {
-            hook_function((void*)orig_vkEnumeratePhysicalDevices, (void*)hooked_vkEnumeratePhysicalDevices, "vkEnumeratePhysicalDevices");
-        }
-
-        dlclose(handle);
+    } else if (clazz == versionClass && (fieldID == versionReleaseField || fieldID == sdkIntField) && should_spoof) {
+        return;
     }
-
-    static VkResult hooked_vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties* pProperties) {
-        VkResult result = orig_vkGetPhysicalDeviceProperties(physicalDevice, pProperties);
-        if (result == VK_SUCCESS && should_spoof) {
-            strncpy(pProperties->deviceName, "Adreno 830", VK_MAX_PHYSICAL_DEVICE_NAME_SIZE);
-            pProperties->vendorID = 0x13F0; // Qualcomm
-            pProperties->deviceID = 0x0830; // Fake Adreno 830
-            pProperties->apiVersion = VK_MAKE_VERSION(1, 3, 0);
-            pProperties->driverVersion = VK_MAKE_VERSION(512, 512, 0);
-            ALOGI("Spoofed Vulkan device properties for %s", current_package_name.c_str());
-        }
-        return result;
+    if (orig_set_static_object_field) {
+        orig_set_static_object_field(env, clazz, fieldID, value);
     }
+}
 
-    static VkResult hooked_vkEnumeratePhysicalDevices(VkInstance instance, uint32_t* pPhysicalDeviceCount, VkPhysicalDevice* pPhysicalDevices) {
-        VkResult result = orig_vkEnumeratePhysicalDevices(instance, pPhysicalDeviceCount, pPhysicalDevices);
-        if (result == VK_SUCCESS && should_spoof && pPhysicalDeviceCount) {
-            ALOGI("Intercepted vkEnumeratePhysicalDevices for %s", current_package_name.c_str());
-        }
-        return result;
+static const char* hooked_glGetString(GLenum name) {
+    if (!orig_glGetString) {
+        ALOGE("Original glGetString is null");
+        return "Unknown";
     }
-};
+    const char* original = orig_glGetString(name);
+    if (name == GL_RENDERER) {
+        return "Adreno 830";
+    } else if (name == GL_VERSION) {
+        return "OpenGL ES 3.2";
+    }
+    return original;
+}
+
+static const char* hooked_eglQueryString(EGLDisplay dpy, EGLint name) {
+    if (!orig_eglQueryString) {
+        ALOGE("Original eglQueryString is null");
+        return "Unknown";
+    }
+    const char* original = orig_eglQueryString(dpy, name);
+    if (name == EGL_RENDERER_EXT) {
+        return "Adreno 830";
+    }
+    return original;
+}
+
+static const char* hooked_adreno_get_gpu_info() {
+    if (!orig_adreno_get_gpu_info) {
+        ALOGE("Original adreno_get_gpu_info is null");
+        return "Unknown";
+    }
+    return "Adreno 830";
+}
+
+static VkResult hooked_vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties* pProperties) {
+    VkResult result = orig_vkGetPhysicalDeviceProperties(physicalDevice, pProperties);
+    if (result == VK_SUCCESS && should_spoof) {
+        strncpy(pProperties->deviceName, "Adreno 830", VK_MAX_PHYSICAL_DEVICE_NAME_SIZE);
+        pProperties->vendorID = 0x13F0; // Qualcomm
+        pProperties->deviceID = 0x0830; // Fake Adreno 830
+        pProperties->apiVersion = VK_MAKE_VERSION(1, 3, 0);
+        pProperties->driverVersion = VK_MAKE_VERSION(512, 512, 0);
+    }
+    return result;
+}
+
+static VkResult hooked_vkEnumeratePhysicalDevices(VkInstance instance, uint32_t* pPhysicalDeviceCount, VkPhysicalDevice* pPhysicalDevices) {
+    return orig_vkEnumeratePhysicalDevices(instance, pPhysicalDeviceCount, pPhysicalDevices);
+}
 
 REGISTER_ZYGISK_MODULE(GPUSpoofModule)
