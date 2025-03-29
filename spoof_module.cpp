@@ -13,9 +13,8 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <vulkan/vulkan.h>
-#include <string>
 #include <vector>
-#include <android/String8.h>
+#include <cstring>
 
 #define LOG_TAG "GPUSpoof"
 #define ALOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
@@ -69,8 +68,8 @@ typedef const char* (*adreno_get_gpu_info_t)(void);
 typedef VkResult (*vkGetPhysicalDeviceProperties_t)(VkPhysicalDevice, VkPhysicalDeviceProperties*);
 typedef VkResult (*vkEnumeratePhysicalDevices_t)(VkInstance, uint32_t*, VkPhysicalDevice*);
 typedef int (*execve_t)(const char*, char* const*, char* const*);
-typedef void* (*SurfaceFlinger_dump_t)(void*, void*, int, void*);
-typedef android::String8 (*GraphicBuffer_dump_t)(const char*);
+typedef void* (*SurfaceFlinger_dump_t)(void*, void*, int, char**);
+typedef std::string (*GraphicBuffer_dump_t)(const char*);
 
 // Original function pointers
 static orig_prop_get_t orig_prop_get = nullptr;
@@ -128,19 +127,6 @@ static void hook_function(void* original, void* replacement, const char* name) {
         ALOGI("Successfully hooked %s", name);
     }
 }
-
-// Hook implementations
-static int hooked_prop_get(const char* name, char* value, const char* default_value);
-static ssize_t hooked_read(int fd, void* buf, size_t count);
-static void hooked_set_static_object_field(JNIEnv* env, jclass clazz, jfieldID fieldID, jobject value);
-static const char* hooked_glGetString(GLenum name);
-static const char* hooked_eglQueryString(EGLDisplay dpy, EGLint name);
-static const char* hooked_adreno_get_gpu_info();
-static VkResult hooked_vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties* pProperties);
-static VkResult hooked_vkEnumeratePhysicalDevices(VkInstance instance, uint32_t* pPhysicalDeviceCount, VkPhysicalDevice* pPhysicalDevices);
-static int hooked_execve(const char* pathname, char* const argv[], char* const envp[]);
-static void* hooked_SurfaceFlinger_dump(void* thisptr, void* args, int out, void* result);
-static android::String8 hooked_GraphicBuffer_dump(const char* prefix);
 
 class GPUSpoofModule : public zygisk::ModuleBase {
 public:
@@ -733,13 +719,13 @@ static int hooked_execve(const char* pathname, char* const argv[], char* const e
     return orig_execve(pathname, argv, envp);
 }
 
-static void* hooked_SurfaceFlinger_dump(void* thisptr, void* args, int out, void* result) {
+static void* hooked_SurfaceFlinger_dump(void* thisptr, void* args, int out, char** result) {
     void* ret = orig_SurfaceFlinger_dump(thisptr, args, out, result);
     
-    if (should_spoof && result) {
-        std::string modified(static_cast<char*>(result));
+    if (should_spoof && result && *result) {
+        std::string modified(*result);
         
-        // Spoof GPU-related info in SurfaceFlinger dump
+        // Spoof GPU-related info
         size_t gpu_pos = modified.find("GPU:");
         if (gpu_pos != std::string::npos) {
             modified.replace(gpu_pos, modified.find("\n", gpu_pos) - gpu_pos,
@@ -752,15 +738,17 @@ static void* hooked_SurfaceFlinger_dump(void* thisptr, void* args, int out, void
                            "GLES: Adreno (TM) 830");
         }
         
-        strcpy(static_cast<char*>(result), modified.c_str());
+        // Free original and allocate new string
+        free(*result);
+        *result = strdup(modified.c_str());
         ALOGI("Modified SurfaceFlinger dump output");
     }
     
     return ret;
 }
 
-static android::String8 hooked_GraphicBuffer_dump(const char* prefix) {
-    android::String8 result = orig_GraphicBuffer_dump(prefix);
+static std::string hooked_GraphicBuffer_dump(const char* prefix) {
+    std::string result = orig_GraphicBuffer_dump(prefix);
     if (should_spoof) {
         ALOGI("Intercepted GraphicBuffer dump");
         result = "Fake GPU allocation info - Adreno 830";
