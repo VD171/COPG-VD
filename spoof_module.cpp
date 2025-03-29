@@ -8,39 +8,14 @@
 #include <dlfcn.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <ctime> // For timestamp in logs
+#include <android/log.h> // For logcat logging
 
 using json = nlohmann::json;
 
-// Logging to file
-#define LOG_FILE "/data/adb/modules/COPG/spoof_log.txt"
-static std::ofstream log_file;
-
-void log_to_file(const char* level, const char* format, ...) {
-    if (!log_file.is_open()) {
-        log_file.open(LOG_FILE, std::ios::app); // Append mode
-        if (!log_file.is_open()) return; // Fail silently if can't open
-    }
-
-    // Get current time
-    time_t now = time(nullptr);
-    char time_str[20];
-    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", localtime(&now));
-
-    // Format the log message
-    va_list args;
-    va_start(args, format);
-    char message[1024];
-    vsnprintf(message, sizeof(message), format, args);
-    va_end(args);
-
-    // Write to file
-    log_file << "[" << time_str << "] [" << level << "] " << message << "\n";
-    log_file.flush(); // Ensure it's written immediately
-}
-
-#define LOGD(...) log_to_file("DEBUG", __VA_ARGS__)
-#define LOGE(...) log_to_file("ERROR", __VA_ARGS__)
+// Define log tag and macros
+#define LOG_TAG "SpoofModule"
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 struct DeviceInfo {
     std::string brand;
@@ -129,11 +104,6 @@ public:
         hookNativeRead();
         hookJniSetStaticObjectField();
         loadConfig();
-
-        // Close log file after onLoad to avoid keeping it open unnecessarily
-        if (log_file.is_open()) {
-            log_file.close();
-        }
     }
 
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
