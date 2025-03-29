@@ -2,6 +2,8 @@
 - **Support Group**:
 https://t.me/TheAOSP
 ---
+## v3.2.2
+- update config
 ## v3.2.1
 ### Added
 - **New UI Sections**:  
