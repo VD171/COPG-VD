@@ -17,6 +17,22 @@
 #define LOG_TAG "GPUSpoof"
 #define ALOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define ALOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+#define ALOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
+#define ALOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+
+// EGL extension definitions if not available
+#ifndef EGL_RENDERER_EXT
+#define EGL_RENDERER_EXT 0x335F
+#endif
+#ifndef EGL_VENDOR
+#define EGL_VENDOR 0x3053
+#endif
+#ifndef EGL_VERSION
+#define EGL_VERSION 0x3054
+#endif
+#ifndef EGL_EXTENSIONS
+#define EGL_EXTENSIONS 0x3055
+#endif
 
 using json = nlohmann::json;
 
@@ -35,6 +51,8 @@ struct DeviceInfo {
     std::string serial_content;
     std::string vulkan_version;
     std::string vulkan_driver_version;
+    std::string gl_extensions;
+    std::string egl_extensions;
 };
 
 // Function pointer types
@@ -75,7 +93,7 @@ static jfieldID versionReleaseField = nullptr;
 static jfieldID sdkIntField = nullptr;
 static jfieldID serialField = nullptr;
 
-// Forward declarations of hooking functions
+// Forward declarations
 static void hookNativeGetprop();
 static void hookNativeRead();
 static void hookJniSetStaticObjectField();
@@ -233,7 +251,9 @@ private:
                 info.cpuinfo = device.value("CPUINFO", "");
                 info.serial_content = device.value("SERIAL_CONTENT", "");
                 info.vulkan_version = device.value("VULKAN_VERSION", "1.3.0");
-                info.vulkan_driver_version = device.value("VULKAN_DRIVER_VERSION", "1.3.0");
+                info.vulkan_driver_version = device.value("VULKAN_DRIVER_VERSION", "512.512.0");
+                info.gl_extensions = device.value("GL_EXTENSIONS", "");
+                info.egl_extensions = device.value("EGL_EXTENSIONS", "");
 
                 for (const auto& pkg : value.get<std::vector<std::string>>()) {
                     package_map[pkg] = info;
@@ -517,10 +537,19 @@ static const char* hooked_glGetString(GLenum name) {
     }
     const char* original = orig_glGetString(name);
     if (name == GL_RENDERER) {
+        ALOGI("Spoofed GL_RENDERER as Adreno 830");
         return "Adreno 830";
     } else if (name == GL_VERSION) {
+        ALOGI("Spoofed GL_VERSION");
         return "OpenGL ES 3.2";
+    } else if (name == GL_VENDOR) {
+        ALOGI("Spoofed GL_VENDOR");
+        return "Qualcomm";
+    } else if (name == GL_EXTENSIONS && !current_info.gl_extensions.empty()) {
+        ALOGI("Returning custom GL extensions");
+        return current_info.gl_extensions.c_str();
     }
+    ALOGD("Returning original GL query for name: 0x%X", name);
     return original;
 }
 
@@ -529,10 +558,31 @@ static const char* hooked_eglQueryString(EGLDisplay dpy, EGLint name) {
         ALOGE("Original eglQueryString is null");
         return "Unknown";
     }
+    
+    if (dpy == EGL_NO_DISPLAY) {
+        return orig_eglQueryString(dpy, name);
+    }
+    
     const char* original = orig_eglQueryString(dpy, name);
+    
     if (name == EGL_RENDERER_EXT) {
+        ALOGI("Spoofed EGL_RENDERER_EXT as Adreno 830");
         return "Adreno 830";
     }
+    else if (name == EGL_VENDOR) {
+        ALOGI("Spoofed EGL_VENDOR as Qualcomm");
+        return "Qualcomm";
+    }
+    else if (name == EGL_VERSION) {
+        ALOGI("Spoofed EGL_VERSION");
+        return "1.5";
+    }
+    else if (name == EGL_EXTENSIONS && !current_info.egl_extensions.empty()) {
+        ALOGI("Returning custom EGL extensions");
+        return current_info.egl_extensions.c_str();
+    }
+    
+    ALOGD("Returning original EGL query for name: 0x%X", name);
     return original;
 }
 
@@ -541,6 +591,7 @@ static const char* hooked_adreno_get_gpu_info() {
         ALOGE("Original adreno_get_gpu_info is null");
         return "Unknown";
     }
+    ALOGI("Spoofed adreno_get_gpu_info as Adreno 830");
     return "Adreno 830";
 }
 
@@ -552,12 +603,17 @@ static VkResult hooked_vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDe
         pProperties->deviceID = 0x0830; // Fake Adreno 830
         pProperties->apiVersion = VK_MAKE_VERSION(1, 3, 0);
         pProperties->driverVersion = VK_MAKE_VERSION(512, 512, 0);
+        ALOGI("Spoofed Vulkan device properties");
     }
     return result;
 }
 
 static VkResult hooked_vkEnumeratePhysicalDevices(VkInstance instance, uint32_t* pPhysicalDeviceCount, VkPhysicalDevice* pPhysicalDevices) {
-    return orig_vkEnumeratePhysicalDevices(instance, pPhysicalDeviceCount, pPhysicalDevices);
+    VkResult result = orig_vkEnumeratePhysicalDevices(instance, pPhysicalDeviceCount, pPhysicalDevices);
+    if (result == VK_SUCCESS && should_spoof && pPhysicalDeviceCount) {
+        ALOGI("Intercepted vkEnumeratePhysicalDevices");
+    }
+    return result;
 }
 
 REGISTER_ZYGISK_MODULE(GPUSpoofModule)
