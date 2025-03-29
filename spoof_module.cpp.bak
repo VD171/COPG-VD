@@ -8,8 +8,14 @@
 #include <dlfcn.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <android/log.h> // For logcat logging
 
 using json = nlohmann::json;
+
+// Define log tag and macros
+#define LOG_TAG "SpoofModule"
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 struct DeviceInfo {
     std::string brand;
@@ -26,7 +32,7 @@ struct DeviceInfo {
     std::string serial_content;
 };
 
-// Static function pointers for hooks
+// Static function pointers for hooks (unchanged)
 typedef int (*orig_prop_get_t)(const char*, char*, const char*);
 static orig_prop_get_t orig_prop_get = nullptr;
 typedef ssize_t (*orig_read_t)(int, void*, size_t);
@@ -34,7 +40,7 @@ static orig_read_t orig_read = nullptr;
 typedef void (*orig_set_static_object_field_t)(JNIEnv*, jclass, jfieldID, jobject);
 static orig_set_static_object_field_t orig_set_static_object_field = nullptr;
 
-// Static global variables
+// Static global variables (unchanged)
 static DeviceInfo current_info;
 static jclass buildClass = nullptr;
 static jclass versionClass = nullptr;
@@ -56,6 +62,8 @@ public:
         this->api = api;
         this->env = env;
 
+        LOGD("Module loaded successfully");
+
         // Initialize static fields once
         if (!buildClass) {
             buildClass = (jclass)env->NewGlobalRef(env->FindClass("android/os/Build"));
@@ -69,6 +77,8 @@ public:
                 displayField = env->GetStaticFieldID(buildClass, "DISPLAY", "Ljava/lang/String;");
                 productField = env->GetStaticFieldID(buildClass, "PRODUCT", "Ljava/lang/String;");
                 serialField = env->GetStaticFieldID(buildClass, "SERIAL", "Ljava/lang/String;");
+            } else {
+                LOGE("Failed to find android/os/Build class");
             }
         }
         if (!versionClass) {
@@ -76,6 +86,8 @@ public:
             if (versionClass) {
                 versionReleaseField = env->GetStaticFieldID(versionClass, "RELEASE", "Ljava/lang/String;");
                 sdkIntField = env->GetStaticFieldID(versionClass, "SDK_INT", "I");
+            } else {
+                LOGE("Failed to find android/os/Build$VERSION class");
             }
         }
 
@@ -84,29 +96,36 @@ public:
             orig_prop_get = (orig_prop_get_t)dlsym(handle, "__system_property_get");
             orig_read = (orig_read_t)dlsym(handle, "read");
             dlclose(handle);
+        } else {
+            LOGE("Failed to open libc.so");
         }
 
         hookNativeGetprop();
         hookNativeRead();
-        hookJniSetStaticObjectField(); // Still call this to set up the hook
+        hookJniSetStaticObjectField();
         loadConfig();
     }
 
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
         if (!args || !args->nice_name) {
+            LOGD("No package name provided, closing module");
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
         }
         const char* package_name = env->GetStringUTFChars(args->nice_name, nullptr);
         if (!package_name) {
+            LOGE("Failed to get package name");
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
         }
+        LOGD("Processing package: %s", package_name);
         auto it = package_map.find(package_name);
         if (it == package_map.end()) {
+            LOGD("Package %s not found in config, closing module", package_name);
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
         } else {
             current_info = it->second;
+            LOGD("Spoofing device for package %s: %s", package_name, current_info.model.c_str());
             spoofDevice(current_info);
             spoofSystemProperties(current_info);
         }
@@ -116,10 +135,14 @@ public:
     void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
         if (!args || !args->nice_name || package_map.empty() || !buildClass) return;
         const char* package_name = env->GetStringUTFChars(args->nice_name, nullptr);
-        if (!package_name) return;
+        if (!package_name) {
+            LOGE("Failed to get package name in postAppSpecialize");
+            return;
+        }
         auto it = package_map.find(package_name);
         if (it != package_map.end()) {
             current_info = it->second;
+            LOGD("Post-specialize spoofing for %s: %s", package_name, current_info.model.c_str());
             spoofDevice(current_info);
             spoofSystemProperties(current_info);
         }
@@ -133,14 +156,21 @@ private:
 
     void loadConfig() {
         std::ifstream file("/data/adb/modules/COPG/config.json");
-        if (!file.is_open()) return;
+        if (!file.is_open()) {
+            LOGE("Failed to open config.json");
+            return;
+        }
+        LOGD("Config file opened successfully");
         try {
             json config = json::parse(file);
             for (auto& [key, value] : config.items()) {
                 if (key.find("_DEVICE") != std::string::npos) continue;
                 auto packages = value.get<std::vector<std::string>>();
                 std::string device_key = key + "_DEVICE";
-                if (!config.contains(device_key)) continue;
+                if (!config.contains(device_key)) {
+                    LOGE("No device info for key %s", key.c_str());
+                    continue;
+                }
                 auto device = config[device_key];
 
                 DeviceInfo info;
@@ -159,13 +189,20 @@ private:
                 info.cpuinfo = device.contains("CPUINFO") ? device["CPUINFO"].get<std::string>() : "";
                 info.serial_content = device.contains("SERIAL_CONTENT") ? device["SERIAL_CONTENT"].get<std::string>() : "";
 
-                for (const auto& pkg : packages) package_map[pkg] = info;
+                for (const auto& pkg : packages) {
+                    package_map[pkg] = info;
+                    LOGD("Loaded package %s with model %s", pkg.c_str(), info.model.c_str());
+                }
             }
-        } catch (const json::exception&) {}
+            LOGD("Config loaded with %zu packages", package_map.size());
+        } catch (const json::exception& e) {
+            LOGE("JSON parsing error: %s", e.what());
+        }
         file.close();
     }
 
     void spoofDevice(const DeviceInfo& info) {
+        LOGD("Spoofing device: %s", info.model.c_str());
         if (modelField) env->SetStaticObjectField(buildClass, modelField, env->NewStringUTF(info.model.c_str()));
         if (brandField) env->SetStaticObjectField(buildClass, brandField, env->NewStringUTF(info.brand.c_str()));
         if (deviceField) env->SetStaticObjectField(buildClass, deviceField, env->NewStringUTF(info.device.c_str()));
@@ -182,6 +219,7 @@ private:
     }
 
     void spoofSystemProperties(const DeviceInfo& info) {
+        LOGD("Spoofing system properties for: %s", info.model.c_str());
         if (!info.brand.empty()) __system_property_set("ro.product.brand", info.brand.c_str());
         if (!info.device.empty()) __system_property_set("ro.product.device", info.device.c_str());
         if (!info.manufacturer.empty()) __system_property_set("ro.product.manufacturer", info.manufacturer.c_str());
@@ -221,9 +259,14 @@ private:
                 if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == 0) {
                     *(void**)&orig_prop_get = (void*)hooked_prop_get;
                     mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
+                    LOGD("Successfully hooked __system_property_get");
+                } else {
+                    LOGE("Failed to mprotect for __system_property_get");
                 }
             }
             dlclose(handle);
+        } else {
+            LOGE("Failed to open libc.so for property hook");
         }
     }
 
@@ -264,24 +307,29 @@ private:
                 if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == 0) {
                     *(void**)&orig_read = (void*)hooked_read;
                     mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
+                    LOGD("Successfully hooked read");
+                } else {
+                    LOGE("Failed to mprotect for read");
                 }
             }
             dlclose(handle);
+        } else {
+            LOGE("Failed to open libc.so for read hook");
         }
     }
 
-    // JNI hook without logging
     static void hooked_set_static_object_field(JNIEnv* env, jclass clazz, jfieldID fieldID, jobject value) {
         if (clazz == buildClass) {
-            // Prevent resetting of spoofed Build fields
             if (fieldID == modelField || fieldID == brandField || fieldID == deviceField ||
                 fieldID == manufacturerField || fieldID == fingerprintField || fieldID == buildIdField ||
                 fieldID == displayField || fieldID == productField || fieldID == serialField) {
-                return; // Block reset without logging
+                LOGD("Blocked attempt to reset Build field");
+                return;
             }
         } else if (clazz == versionClass) {
             if (fieldID == versionReleaseField) {
-                return; // Block reset without logging
+                LOGD("Blocked attempt to reset VERSION.RELEASE");
+                return;
             }
         }
         if (orig_set_static_object_field) {
@@ -300,9 +348,14 @@ private:
                     orig_set_static_object_field = *(orig_set_static_object_field_t*)&sym;
                     *(void**)&sym = (void*)hooked_set_static_object_field;
                     mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
+                    LOGD("Successfully hooked JNI_SetStaticObjectField");
+                } else {
+                    LOGE("Failed to mprotect for JNI_SetStaticObjectField");
                 }
             }
             dlclose(handle);
+        } else {
+            LOGE("Failed to open libandroid_runtime.so");
         }
     }
 };
