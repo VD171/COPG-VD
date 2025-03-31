@@ -69,10 +69,11 @@ jobs:
           ls -la $ANDROID_HOME/cmdline-tools/latest/bin || echo "bin directory missing!"
           JAVA_OPTS="--add-modules java.xml.bind" yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || echo "License acceptance failed!"
 
-      - name: Install build tools
+      - name: Install build tools and Python dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake zip curl imagemagick
+          sudo apt-get install -y build-essential cmake zip curl imagemagick python3 python3-pip
+          pip3 install telethon
 
       - name: Fetch Zygisk Headers and JSON Library
         run: |
@@ -234,16 +235,69 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Send Telegram Notification with Thumbnail
+      - name: Send Telegram Notification
         if: github.event.inputs.upload_to_telegram == 'true'
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ZIP_NAME: ${{ env.ZIP_NAME }}
+          THUMBNAIL_PATH: icon_thumb.jpg
+          TITLE: ${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}
+          WORKFLOW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          UPLOAD_TO_RELEASE: ${{ github.event.inputs.upload_to_release }}
+          VERSION: ${{ env.VERSION }}
+          BRANCH: ${{ github.event.inputs.branch }}
+          ARM64_BUILD_TIME: ${{ env.ARM64_BUILD_TIME }}
+          ARM32_BUILD_TIME: ${{ env.ARM32_BUILD_TIME }}
+          COMMIT: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+          CHANGELOG: ${{ env.CHANGELOG }}
         run: |
-          MESSAGE="<a href='https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/icon.png'>‌</a><b>${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}</b> ✅\n<a href='${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'>View Workflow Run</a>\n<b>Build Type:</b> ${{ github.event.inputs.upload_to_release == 'true' && 'Release' || 'CI' }}\n<b>Version:</b> ${{ env.VERSION }}\n<b>Branch:</b> ${{ github.event.inputs.branch }}\n<b>Build Times:</b>\n- arm64-v8a: ${{ env.ARM64_BUILD_TIME }} seconds\n- arm32-v7a: ${{ env.ARM32_BUILD_TIME }} seconds\n<b>Commit:</b> <code>${{ github.sha }}</code>\n<b>Run ID:</b> ${{ github.run_id }}"
-          if [ "${{ github.event.inputs.upload_to_release }}" = "true" ]; then
-            MESSAGE="$MESSAGE\n\n<b>Changelog (v${{ env.VERSION }}):</b>\n${{ env.CHANGELOG }}"
-          fi
-          curl -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -F document=@"${{ env.ZIP_NAME }}" \
-            -F thumb=@"icon_thumb.jpg" \
-            -F caption="$MESSAGE" \
-            -F parse_mode="HTML" \
-            https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument
+          python3 - <<EOF
+          from telethon import TelegramClient
+          import os
+
+          # Telegram API credentials (using bot token only, no api_id/api_hash needed for bot)
+          bot_token = os.getenv('TELEGRAM_TOKEN')
+          chat_id = int(os.getenv('TELEGRAM_CHAT_ID'))
+
+          # Initialize the Telegram client
+          client = TelegramClient('github_bot', 2040, 'b18441a1ff607e10a989891a5462e627').start(bot_token=bot_token)
+
+          async def send_notification():
+              try:
+                  # Build the message (using Markdown for consistency with your example)
+                  hidden_link = '[‌](https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/icon.png)'
+                  title = os.getenv('TITLE')
+                  build_type = "Release" if os.getenv('UPLOAD_TO_RELEASE') == 'true' else "CI"
+                  message = (
+                      f"{hidden_link}**{title}** ✅\n"
+                      f"[View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})\n"
+                      f"**Build Type**: {build_type}\n"
+                      f"**Version**: {os.getenv('VERSION')}\n"
+                      f"**Branch**: {os.getenv('BRANCH')}\n"
+                      f"**Build Times**:\n"
+                      f"- arm64-v8a: {os.getenv('ARM64_BUILD_TIME')} seconds\n"
+                      f"- arm32-v7a: {os.getenv('ARM32_BUILD_TIME')} seconds\n"
+                      f"**Commit**: `{os.getenv('COMMIT')}`\n"
+                      f"**Run ID**: {os.getenv('RUN_ID')}"
+                  )
+                  if os.getenv('UPLOAD_TO_RELEASE') == 'true':
+                      message += f"\n\n**Changelog (v{os.getenv('VERSION')})**:\n{os.getenv('CHANGELOG')}"
+
+                  # Send the file with thumbnail
+                  await client.send_file(
+                      chat_id,
+                      file=os.getenv('ZIP_NAME'),
+                      caption=message,
+                      thumb=os.getenv('THUMBNAIL_PATH'),
+                      parse_mode='markdown'
+                  )
+                  print("Message sent successfully!")
+              except Exception as e:
+                  print(f"Failed to send notification: {e}")
+                  exit(1)
+
+          with client:
+              client.loop.run_until_complete(send_notification())
+          EOF
