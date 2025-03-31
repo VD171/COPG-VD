@@ -257,7 +257,7 @@ jobs:
           from telethon import TelegramClient
           import os
 
-          # Telegram API credentials (using bot token only, no api_id/api_hash needed for bot)
+          # Telegram API credentials
           bot_token = os.getenv('TELEGRAM_TOKEN')
           chat_id = int(os.getenv('TELEGRAM_CHAT_ID'))
 
@@ -266,12 +266,11 @@ jobs:
 
           async def send_notification():
               try:
-                  # Build the message (using Markdown for consistency with your example)
-                  hidden_link = '[‌](https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/icon.png)'
+                  # Build the message (Markdown, no emoji or hidden link)
                   title = os.getenv('TITLE')
                   build_type = "Release" if os.getenv('UPLOAD_TO_RELEASE') == 'true' else "CI"
                   message = (
-                      f"{hidden_link}**{title}** ✅\n"
+                      f"**{title}**\n"
                       f"[View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})\n"
                       f"**Build Type**: {build_type}\n"
                       f"**Version**: {os.getenv('VERSION')}\n"
