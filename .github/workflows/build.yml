@@ -195,7 +195,7 @@ jobs:
           if [ ! -f "changelog.md" ]; then
             echo "Error: Failed to fetch changelog.md"
             exit 1
-          fi CONCLUSIONS
+          fi
 
       - name: Debug changelog
         if: github.event.inputs.upload_to_telegram == 'true'
