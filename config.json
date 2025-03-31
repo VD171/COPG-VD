@@ -85,11 +85,11 @@
         "DEVICE": "Xiaomi 13 Pro",
         "MANUFACTURER": "Xiaomi",
         "MODEL": "2210132G",
-        "FINGERPRINT": "Xiaomi/2210132G/Xiaomi 13 Pro:14/UP1A.231005.007/20240220:user/release-keys",
+        "FINGERPRINT": "Xiaomi/fuxi_eea/fuxi:13/TKQ1.221114.001/OS2.0.102.0.VMCEUXM:user/release-keys",
         "BUILD_ID": "UP1A.231005.007",
         "DISPLAY": "UP1A.231005.007.A1",
         "PRODUCT": "2210132G",
-        "VERSION_RELEASE": "14",
+        "VERSION_RELEASE": "13",
         "SERIAL": "XM13P67890",
         "CPUINFO": "processor\t: 0\nmodel name\t: ARMv8-A (Xiaomi 13 Pro)\nHardware\t: Qualcomm Snapdragon 8 Gen 2\nSerial\t: XM13P67890",
         "SERIAL_CONTENT": "XM13P67890"
