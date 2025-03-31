@@ -192,14 +192,16 @@ jobs:
         run: |
           if [ -f "changelog.md" ]; then
             VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
-            CHANGELOG=$(awk "/^## v$VERSION/{p=1;next}/^## /{p=0}p" changelog.md | sed '/^$/d' | sed 's/.*/&<br>/' | tr -d '\n')
+            CHANGELOG=$(awk "/^## v$VERSION/{p=1;next}/^## /{p=0}p" changelog.md | sed '/^$/d' | sed 's/.*/- &/')
             if [ -z "$CHANGELOG" ]; then
-              echo "CHANGELOG=No changelog found for v${{ env.VERSION }}<br>" >> $GITHUB_ENV
+              echo "CHANGELOG=No changelog found for v${{ env.VERSION }}" >> $GITHUB_ENV
             else
-              echo "CHANGELOG=$CHANGELOG" >> $GITHUB_ENV
+              echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+              echo "$CHANGELOG" >> $GITHUB_ENV
+              echo "EOF" >> $GITHUB_ENV
             fi
           else
-            echo "CHANGELOG=No changelog file available<br>" >> $GITHUB_ENV
+            echo "CHANGELOG=No changelog file available" >> $GITHUB_ENV
           fi
 
       - name: Upload Module ZIP as Artifact
@@ -230,13 +232,13 @@ jobs:
           format: html
           document: ${{ env.ZIP_NAME }}
           message: |
-            <b>${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}</b> ✅<br>
-            <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Workflow Run</a><br>
-            <b>Build Type:</b> ${{ github.event.inputs.upload_to_release == 'true' && 'Release' || 'CI' }}<br>
-            <b>Version:</b> ${{ env.VERSION }}<br>
-            <b>Branch:</b> ${{ github.event.inputs.branch }}<br>
-            <b>Build Times:</b><br>
-            - arm64-v8a: ${{ env.ARM64_BUILD_TIME }} seconds<br>
-            - arm32-v7a: ${{ env.ARM32_BUILD_TIME }} seconds<br>
-            <b>Commit:</b> <code>${{ github.sha }}</code><br>
-            <b>Run ID:</b> ${{ github.run_id }}<br>${{ github.event.inputs.upload_to_release == 'true' && format('<b>Changelog (v{0}):</b><br>{1}', env.VERSION, env.CHANGELOG) || '' }}
+            <b>${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}</b> ✅
+            <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Workflow Run</a>
+            <b>Build Type:</b> ${{ github.event.inputs.upload_to_release == 'true' && 'Release' || 'CI' }}
+            <b>Version:</b> ${{ env.VERSION }}
+            <b>Branch:</b> ${{ github.event.inputs.branch }}
+            <b>Build Times:</b>
+            - arm64-v8a: ${{ env.ARM64_BUILD_TIME }} seconds
+            - arm32-v7a: ${{ env.ARM32_BUILD_TIME }} seconds
+            <b>Commit:</b> <code>${{ github.sha }}</code>
+            <b>Run ID:</b> ${{ github.run_id }}${{ github.event.inputs.upload_to_release == 'true' && format('\n\n<b>Changelog (v{0}):</b>\n{1}', env.VERSION, env.CHANGELOG) || '' }}
