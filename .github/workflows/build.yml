@@ -149,8 +149,8 @@ jobs:
           cat > module/module.prop << 'EOF'
           id=COPG
           name=✨ COPG spoof ✨
-          version=3.4
-          versionCode=340
+          version=3.3.1
+          versionCode=331
           author=AlirezaParsi
           description=Spoof your device for games. Click Action button to update your config if needed.
           support=https://t.me/theaosp
@@ -195,7 +195,7 @@ jobs:
           if [ ! -f "changelog.md" ]; then
             echo "Error: Failed to fetch changelog.md"
             exit 1
-          fi
+          fi CONCLUSIONS
 
       - name: Debug changelog
         if: github.event.inputs.upload_to_telegram == 'true'
@@ -212,7 +212,7 @@ jobs:
           if [ -f "changelog.md" ]; then
             VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
             echo "Escaped VERSION for awk: $VERSION"
-            CHANGELOG=$(awk "/^# v$VERSION/{p=1;next}/^#|^##/{p=0}p" changelog.md | sed '/^$/d')
+            CHANGELOG=$(awk "/^## v$VERSION/{p=1;next}/^##/{p=0}p" changelog.md | sed '/^$/d')
             if [ -z "$CHANGELOG" ]; then
               echo "CHANGELOG=No changelog found for v${{ env.VERSION }}" >> $GITHUB_ENV
             else
