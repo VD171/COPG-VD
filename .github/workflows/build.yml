@@ -192,7 +192,7 @@ jobs:
         run: |
           if [ -f "changelog.md" ]; then
             VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
-            CHANGELOG=$(awk "/^## v$VERSION/{p=1;next}/^## /{p=0}p" changelog.md | sed '/^$/d' | sed 's/.*/- &/')
+            CHANGELOG=$(awk "/^## v$VERSION/{p=1;next}/^## /{p=0}p" changelog.md | sed '/^$/d')
             if [ -z "$CHANGELOG" ]; then
               echo "CHANGELOG=No changelog found for v${{ env.VERSION }}" >> $GITHUB_ENV
             else
@@ -241,4 +241,5 @@ jobs:
             - arm64-v8a: ${{ env.ARM64_BUILD_TIME }} seconds
             - arm32-v7a: ${{ env.ARM32_BUILD_TIME }} seconds
             <b>Commit:</b> <code>${{ github.sha }}</code>
-            <b>Run ID:</b> ${{ github.run_id }}${{ github.event.inputs.upload_to_release == 'true' && format('\n\n<b>Changelog (v{0}):</b>\n{1}', env.VERSION, env.CHANGELOG) || '' }}
+            <b>Run ID:</b> ${{ github.run_id }}
+            ${{ github.event.inputs.upload_to_release == 'true' && format('<b>Changelog (v{0}):</b>\n{1}', env.VERSION, env.CHANGELOG) || '' }}
