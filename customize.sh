@@ -70,21 +70,6 @@ check_zygisk() {
 check_zygisk
 
 # ┌──────────────────────────────────────────────┐
-# │            ABI Detection                    │
-# └──────────────────────────────────────────────┘
-# Improved ABI detection that handles edge cases
-get_abi() {
-  local abi_list=$(getprop ro.product.cpu.abilist)
-  local abi=$(getprop ro.product.cpu.abi)
-  
-  # Fallback to primary ABI if abilist is empty
-  [ -z "$abi_list" ] && abi_list="$abi"
-  
-  # Sanitize output (remove spaces, empty entries)
-  echo "$abi_list" | tr -d ' ' | tr ',' '\n' | grep -v '^$'
-}
-
-# ┌──────────────────────────────────────────────┐
 # │            Binary Installation              │
 # └──────────────────────────────────────────────┘
 MODDIR=${MODPATH:-$MODDIR}
@@ -93,8 +78,8 @@ TARGET_DIR="$MODDIR/system/bin"
 
 ui_print "- Installing jq binary for your architecture"
 
-# Get sanitized ABI list
-ABI_LIST=$(get_abi)
+# Get ALL supported ABIs in priority order
+ABI_LIST=$(getprop ro.product.cpu.abilist)
 
 # Create target directory
 mkdir -p "$TARGET_DIR" || {
@@ -103,7 +88,7 @@ mkdir -p "$TARGET_DIR" || {
 }
 
 # Try architectures in priority order
-for ABI in $ABI_LIST; do
+for ABI in $(echo "$ABI_LIST" | tr ',' ' '); do
   case "$ABI" in
     "arm64-v8a"|"armv8-a"|"armv9-a")
       if [ -f "$BIN_DIR/arm64-v8a/jq" ]; then
@@ -133,9 +118,9 @@ if ! [ -x "$TARGET_DIR/jq" ]; then
   abort "! No matching binary found in module"
 fi
 
-# Clean up bin directory
+# Clean up unused binary subdirectories
 ui_print "- Cleaning up unused binary files"
-rm -rf "$BIN_DIR" || ui_print "- Warning: Failed to remove bin directory"
+rm -rf "$BIN_DIR/arm64-v8a" "$BIN_DIR/armeabi-v7a" || ui_print "- Warning: Failed to remove unused binary subdirectories"
 
 # ┌──────────────────────────────────────────────┐
 # │            Final Setup                      │
