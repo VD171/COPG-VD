@@ -79,6 +79,11 @@ jobs:
         run: |
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/config.json -O config.json
 
+      - name: Build Project (arm64-v8a) - Start
+        id: arm64_start
+        run: |
+          echo "ARM64_START_TIME=$(date -u +%s)" >> $GITHUB_ENV
+
       - name: Build Project (arm64-v8a)
         uses: threeal/cmake-action@v2.1.0
         with:
@@ -89,13 +94,22 @@ jobs:
             -DANDROID_PLATFORM=android-34
             -DCMAKE_MAKE_PROGRAM=/usr/bin/make
 
-      - name: Check arm64-v8a output
+      - name: Build Project (arm64-v8a) - End
+        id: arm64_end
         run: |
+          ARM64_END_TIME=$(date -u +%s)
+          ARM64_DURATION=$((ARM64_END_TIME - ARM64_START_TIME))
+          echo "ARM64_BUILD_TIME=$ARM64_DURATION" >> $GITHUB_ENV
           if [ ! -f "build/arm64-v8a/libspoof.so" ]; then
             echo "Error: arm64-v8a library not built!"
             ls -la build/arm64-v8a
             exit 1
           fi
+
+      - name: Build Project (armeabi-v7a) - Start
+        id: arm32_start
+        run: |
+          echo "ARM32_START_TIME=$(date -u +%s)" >> $GITHUB_ENV
 
       - name: Build Project (armeabi-v7a)
         uses: threeal/cmake-action@v2.1.0
@@ -107,8 +121,12 @@ jobs:
             -DANDROID_PLATFORM=android-34
             -DCMAKE_MAKE_PROGRAM=/usr/bin/make
 
-      - name: Check armeabi-v7a output
+      - name: Build Project (armeabi-v7a) - End
+        id: arm32_end
         run: |
+          ARM32_END_TIME=$(date -u +%s)
+          ARM32_DURATION=$((ARM32_END_TIME - ARM32_START_TIME))
+          echo "ARM32_BUILD_TIME=$ARM32_DURATION" >> $GITHUB_ENV
           if [ ! -f "build/armeabi-v7a/libspoof.so" ]; then
             echo "Error: armeabi-v7a library not built!"
             ls -la build/armeabi-v7a
@@ -162,6 +180,7 @@ jobs:
           zip -r "../$ZIP_NAME" .
           cd ..
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Upload Module ZIP as Artifact
         uses: actions/upload-artifact@v4
@@ -172,8 +191,7 @@ jobs:
       - name: Upload ZIP to GitHub Release
         if: github.event.inputs.upload_to_release == 'true'
         run: |
-          VERSION=$(grep "version=" module/module.prop | cut -d'=' -f2)
-          TAG="v$VERSION"
+          TAG="v${{ env.VERSION }}"
           gh release create "$TAG" \
             --title "Release $TAG" \
             --notes "Built on $(date -u +'%Y-%m-%d %H:%M:%S UTC')" \
@@ -191,6 +209,12 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           document: ${{ env.ZIP_NAME }}
           message: |
-            New COPG Spoof Module Build
-            Version: ${{ env.VERSION }}
-            Built on: ${{ github.run_id }} @ ${{ github.sha }}
+            *New COPG Spoof Module Build*
+            *Build Type:* ${{ github.event.inputs.upload_to_release == 'true' && 'Release' || 'CI' }}
+            *Version:* ${{ env.VERSION }}
+            *Branch:* ${{ github.event.inputs.branch }}
+            *Build Times:*
+              - arm64-v8a: ${{ env.ARM64_BUILD_TIME }} seconds
+              - arm32-v7a: ${{ env.ARM32_BUILD_TIME }} seconds
+            *Commit:* ${{ github.sha }}
+            *Run ID:* ${{ github.run_id }}
