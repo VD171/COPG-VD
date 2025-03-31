@@ -2,10 +2,6 @@
 - **Support Group**:
 https://t.me/TheAOSP
 ---
-# v3.4
-- test
-- test2
-- test test test test
 ## v3.3.1
 - Better installation script 
 - removing unused files after installing 
