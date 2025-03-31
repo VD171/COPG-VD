@@ -72,7 +72,7 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake zip
+          sudo apt-get install -y build-essential cmake zip curl imagemagick
 
       - name: Fetch Zygisk Headers and JSON Library
         run: |
@@ -204,6 +204,12 @@ jobs:
             echo "CHANGELOG=No changelog file available" >> $GITHUB_ENV
           fi
 
+      - name: Download and Prepare Thumbnail
+        if: github.event.inputs.upload_to_telegram == 'true'
+        run: |
+          curl -o icon.png "https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/icon.png"
+          convert icon.png -resize 320x320 -quality 80 -format jpg icon_thumb.jpg
+
       - name: Upload Module ZIP as Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -231,8 +237,9 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: html
           document: ${{ env.ZIP_NAME }}
+          thumb: icon_thumb.jpg
           message: |
-            <b>${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}</b> ✅
+            <a href="https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/icon.png">‌</a><b>${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}</b> ✅
             <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Workflow Run</a>
             <b>Build Type:</b> ${{ github.event.inputs.upload_to_release == 'true' && 'Release' || 'CI' }}
             <b>Version:</b> ${{ env.VERSION }}
