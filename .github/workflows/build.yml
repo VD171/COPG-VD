@@ -208,7 +208,12 @@ jobs:
         if: github.event.inputs.upload_to_telegram == 'true'
         run: |
           curl -o icon.png "https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/icon.png"
-          convert icon.png -resize 320x320 -quality 80 -format jpg icon_thumb.jpg
+          convert icon.png -resize 320x320 -quality 80 icon_thumb.jpg
+          if [ ! -f "icon_thumb.jpg" ]; then
+            echo "Error: Thumbnail creation failed!"
+            ls -la
+            exit 1
+          fi
 
       - name: Upload Module ZIP as Artifact
         uses: actions/upload-artifact@v4
@@ -229,24 +234,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Send Telegram Notification
+      - name: Send Telegram Notification with Thumbnail
         if: github.event.inputs.upload_to_telegram == 'true'
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          format: html
-          document: ${{ env.ZIP_NAME }}
-          thumb: icon_thumb.jpg
-          message: |
-            <a href="https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/icon.png">‌</a><b>${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}</b> ✅
-            <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Workflow Run</a>
-            <b>Build Type:</b> ${{ github.event.inputs.upload_to_release == 'true' && 'Release' || 'CI' }}
-            <b>Version:</b> ${{ env.VERSION }}
-            <b>Branch:</b> ${{ github.event.inputs.branch }}
-            <b>Build Times:</b>
-            - arm64-v8a: ${{ env.ARM64_BUILD_TIME }} seconds
-            - arm32-v7a: ${{ env.ARM32_BUILD_TIME }} seconds
-            <b>Commit:</b> <code>${{ github.sha }}</code>
-            <b>Run ID:</b> ${{ github.run_id }}
-            ${{ github.event.inputs.upload_to_release == 'true' && format('<b>Changelog (v{0}):</b>\n{1}', env.VERSION, env.CHANGELOG) || '' }}
+        run: |
+          MESSAGE="<a href='https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/icon.png'>‌</a><b>${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}</b> ✅\n<a href='${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'>View Workflow Run</a>\n<b>Build Type:</b> ${{ github.event.inputs.upload_to_release == 'true' && 'Release' || 'CI' }}\n<b>Version:</b> ${{ env.VERSION }}\n<b>Branch:</b> ${{ github.event.inputs.branch }}\n<b>Build Times:</b>\n- arm64-v8a: ${{ env.ARM64_BUILD_TIME }} seconds\n- arm32-v7a: ${{ env.ARM32_BUILD_TIME }} seconds\n<b>Commit:</b> <code>${{ github.sha }}</code>\n<b>Run ID:</b> ${{ github.run_id }}"
+          if [ "${{ github.event.inputs.upload_to_release }}" = "true" ]; then
+            MESSAGE="$MESSAGE\n\n<b>Changelog (v${{ env.VERSION }}):</b>\n${{ env.CHANGELOG }}"
+          fi
+          curl -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -F document=@"${{ env.ZIP_NAME }}" \
+            -F thumb=@"icon_thumb.jpg" \
+            -F caption="$MESSAGE" \
+            -F parse_mode="HTML" \
+            https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument
