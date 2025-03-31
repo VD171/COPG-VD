@@ -297,7 +297,6 @@ jobs:
                       f"**Build Times**:\n"
                       f"- arm64-v8a: {os.getenv('ARM64_BUILD_TIME')} seconds\n"
                       f"- arm32-v7a: {os.getenv('ARM32_BUILD_TIME')} seconds\n"
-                      f"**Commit**: `{os.getenv('COMMIT')}`\n"
                       f"**Run ID**: {os.getenv('RUN_ID')}"
                   )
                   if os.getenv('UPLOAD_TO_RELEASE') == 'true':
