@@ -18,6 +18,11 @@ on:
         type: string
         required: true
         default: 'JSON'
+      title:
+        description: 'Custom title for Telegram message'
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -143,8 +148,8 @@ jobs:
           cat > module/module.prop << 'EOF'
           id=COPG
           name=✨ COPG spoof ✨
-          version=3.3
-          versionCode=330
+          version=3.2.2
+          versionCode=322
           author=AlirezaParsi
           description=Spoof your device for games. Click Action button to update your config if needed.
           support=https://t.me/theaosp
@@ -182,6 +187,18 @@ jobs:
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+      - name: Extract latest changelog
+        if: github.event.inputs.upload_to_telegram == 'true'
+        run: |
+          # Assume changelog.md exists in the root of the repo
+          if [ -f "changelog.md" ]; then
+            # Extract the first version block (latest)
+            CHANGELOG=$(awk '/^## /{if (p) exit; p=1; next} p' changelog.md | sed 's/"/\\"/g' | tr '\n' '\r' | sed 's/\r$//')
+            echo "CHANGELOG=$CHANGELOG" >> $GITHUB_ENV
+          else
+            echo "CHANGELOG=No changelog available" >> $GITHUB_ENV
+          fi
+
       - name: Upload Module ZIP as Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -209,12 +226,12 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           document: ${{ env.ZIP_NAME }}
           message: |
-            *New COPG Spoof Module Build*
-            *Build Type:* ${{ github.event.inputs.upload_to_release == 'true' && 'Release' || 'CI' }}
-            *Version:* ${{ env.VERSION }}
-            *Branch:* ${{ github.event.inputs.branch }}
-            *Build Times:*
+            **${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}**
+            **Build Type:** ${{ github.event.inputs.upload_to_release == 'true' && 'Release' || 'CI' }}
+            **Version:** ${{ env.VERSION }}
+            **Branch:** ${{ github.event.inputs.branch }}
+            **Build Times:**
               - arm64-v8a: ${{ env.ARM64_BUILD_TIME }} seconds
               - arm32-v7a: ${{ env.ARM32_BUILD_TIME }} seconds
-            *Commit:* ${{ github.sha }}
-            *Run ID:* ${{ github.run_id }}
+            **Commit:** ${{ github.sha }}
+            **Run ID:** ${{ github.run_id }}${{ github.event.inputs.upload_to_release == 'true' && format('\n\n**Changelog (v{0}):**\n{1}', env.VERSION, env.CHANGELOG) || '' }}
