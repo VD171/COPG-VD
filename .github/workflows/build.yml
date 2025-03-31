@@ -148,8 +148,8 @@ jobs:
           cat > module/module.prop << 'EOF'
           id=COPG
           name=✨ COPG spoof ✨
-          version=3.3
-          versionCode=330
+          version=3.2.2
+          versionCode=322
           author=AlirezaParsi
           description=Spoof your device for games. Click Action button to update your config if needed.
           support=https://t.me/theaosp
@@ -192,16 +192,14 @@ jobs:
         run: |
           if [ -f "changelog.md" ]; then
             VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
-            CHANGELOG=$(awk "/^## v$VERSION/{p=1;next}/^## /{p=0}p" changelog.md | sed '/^$/d' | sed 's/^/- /' | tr '\n' '\n' | paste -sd'')
+            CHANGELOG=$(awk "/^## v$VERSION/{p=1;next}/^## /{p=0}p" changelog.md | sed '/^$/d' | sed 's/.*/&<br>/' | tr -d '\n')
             if [ -z "$CHANGELOG" ]; then
-              echo "CHANGELOG=No changelog found for v${{ env.VERSION }}" >> $GITHUB_ENV
+              echo "CHANGELOG=No changelog found for v${{ env.VERSION }}<br>" >> $GITHUB_ENV
             else
-              echo "CHANGELOG<<EOF" >> $GITHUB_ENV
-              echo "$CHANGELOG" >> $GITHUB_ENV
-              echo "EOF" >> $GITHUB_ENV
+              echo "CHANGELOG=$CHANGELOG" >> $GITHUB_ENV
             fi
           else
-            echo "CHANGELOG=No changelog file available" >> $GITHUB_ENV
+            echo "CHANGELOG=No changelog file available<br>" >> $GITHUB_ENV
           fi
 
       - name: Upload Module ZIP as Artifact
@@ -241,4 +239,4 @@ jobs:
             - arm64-v8a: ${{ env.ARM64_BUILD_TIME }} seconds<br>
             - arm32-v7a: ${{ env.ARM32_BUILD_TIME }} seconds<br>
             <b>Commit:</b> <code>${{ github.sha }}</code><br>
-            <b>Run ID:</b> ${{ github.run_id }}${{ github.event.inputs.upload_to_release == 'true' && format('<br><br><b>Changelog (v{0}):</b><br>{1}', env.VERSION, env.CHANGELOG) || '' }}
+            <b>Run ID:</b> ${{ github.run_id }}<br>${{ github.event.inputs.upload_to_release == 'true' && format('<b>Changelog (v{0}):</b><br>{1}', env.VERSION, env.CHANGELOG) || '' }}
