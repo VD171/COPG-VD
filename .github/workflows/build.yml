@@ -212,7 +212,7 @@ jobs:
           if [ -f "changelog.md" ]; then
             VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
             echo "Escaped VERSION for awk: $VERSION"
-            CHANGELOG=$(awk "/^# v$VERSION/{p=1;next}/^#[# ]+v[0-9]+\.[0-9]+\.[0-9]+/{p=0}p" changelog.md | sed '/^$/d' | grep -v "^##* v")
+            CHANGELOG=$(awk "/^# v$VERSION/{p=1; getline; next}/^#|^##/{p=0}p" changelog.md | sed '/^$/d')
             if [ -z "$CHANGELOG" ]; then
               echo "CHANGELOG=No changelog found for v${{ env.VERSION }}" >> $GITHUB_ENV
             else
