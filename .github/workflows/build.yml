@@ -197,31 +197,24 @@ jobs:
             exit 1
           fi
 
-      - name: Extract current version changelog
+      - name: Debug changelog
+        if: github.event.inputs.upload_to_telegram == 'true'
+        run: |
+          echo "Working directory contents:"
+          ls -la
+          echo "changelog.md content:"
+          cat changelog.md
+          echo "VERSION from env: ${{ env.VERSION }}"
+
+      - name: Extract changelog for current version
         if: github.event.inputs.upload_to_telegram == 'true'
         run: |
           if [ -f "changelog.md" ]; then
-            VERSION="${{ env.VERSION }}"
-            VERSION_V="v$VERSION"
-            
-            # Extract only the current version's changelog
-            CHANGELOG=$(awk -v version="$VERSION_V" '
-              BEGIN { found=0 }
-              /^# v[0-9]+\.[0-9]+\.[0-9]+/ {
-                if ($2 == version) { found=1; next }
-                else { found=0 }
-              }
-              /^v[0-9]+\.[0-9]+\.[0-9]+/ {
-                if ($1 == version) { found=1; next }
-                else { found=0 }
-              }
-              found && !/^# v[0-9]+\.[0-9]+\.[0-9]+/ && !/^v[0-9]+\.[0-9]+\.[0-9]+/ {
-                print
-              }
-            ' changelog.md | sed '/^$/d')
-            
+            VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
+            echo "Escaped VERSION for awk: $VERSION"
+            CHANGELOG=$(awk "/^# v$VERSION/{p=1;next}/^##? v[0-9]+\.[0-9]+\.[0-9]+/{p=0}p" changelog.md | sed '/^$/d')
             if [ -z "$CHANGELOG" ]; then
-              echo "CHANGELOG=No changelog found for $VERSION_V" >> $GITHUB_ENV
+              echo "CHANGELOG=No changelog found for v${{ env.VERSION }}" >> $GITHUB_ENV
             else
               echo "CHANGELOG<<EOF" >> $GITHUB_ENV
               echo "$CHANGELOG" >> $GITHUB_ENV
@@ -283,31 +276,34 @@ jobs:
           from telethon import TelegramClient
           import os
 
+          # Telegram API credentials
           bot_token = os.getenv('TELEGRAM_TOKEN')
           chat_id = int(os.getenv('TELEGRAM_CHAT_ID'))
 
+          # Initialize the Telegram client
           client = TelegramClient('github_bot', 2040, 'b18441a1ff607e10a989891a5462e627').start(bot_token=bot_token)
 
           async def send_notification():
               try:
+                  # Build the message (Markdown, no emoji or hidden link)
                   title = os.getenv('TITLE')
                   build_type = "Release" if os.getenv('UPLOAD_TO_RELEASE') == 'true' else "CI"
-                  
                   message = (
                       f"**{title}**\n"
+                      f"[View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})\n"
+                      f"**Build Type**: {build_type}\n"
                       f"**Version**: {os.getenv('VERSION')}\n"
                       f"**Branch**: {os.getenv('BRANCH')}\n"
-                      f"[View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})\n"
                       f"**Build Times**:\n"
-                      f"- arm64-v8a: {os.getenv('ARM64_BUILD_TIME')}s\n"
-                      f"- armeabi-v7a: {os.getenv('ARM32_BUILD_TIME')}s\n"
+                      f"- arm64-v8a: {os.getenv('ARM64_BUILD_TIME')} seconds\n"
+                      f"- arm32-v7a: {os.getenv('ARM32_BUILD_TIME')} seconds\n"
+                      f"**Commit**: `{os.getenv('COMMIT')}`\n"
+                      f"**Run ID**: {os.getenv('RUN_ID')}"
                   )
-                  
                   if os.getenv('UPLOAD_TO_RELEASE') == 'true':
-                      changelog = os.getenv('CHANGELOG')
-                      if changelog and not changelog.startswith("No changelog"):
-                          message += f"\n**Changelog**:\n{changelog}"
+                      message += f"\n\n**Changelog (v{os.getenv('VERSION')})**:\n{os.getenv('CHANGELOG')}"
 
+                  # Send the file with thumbnail
                   await client.send_file(
                       chat_id,
                       file=os.getenv('ZIP_NAME'),
