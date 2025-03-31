@@ -2,6 +2,9 @@
 - **Support Group**:
 https://t.me/TheAOSP
 ---
+# v3.4
+- Better installation script 
+- removing unused files after installing 
 ## v3.3
 - improved UI
 - Added more animations
