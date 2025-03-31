@@ -192,13 +192,27 @@ jobs:
         if: github.event.inputs.upload_to_telegram == 'true'
         run: |
           wget https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/changelog.md -O changelog.md
+          if [ ! -f "changelog.md" ]; then
+            echo "Error: Failed to fetch changelog.md"
+            exit 1
+          fi
+
+      - name: Debug changelog
+        if: github.event.inputs.upload_to_telegram == 'true'
+        run: |
+          echo "Working directory contents:"
+          ls -la
+          echo "changelog.md content:"
+          cat changelog.md
+          echo "VERSION from env: ${{ env.VERSION }}"
 
       - name: Extract changelog for current version
         if: github.event.inputs.upload_to_telegram == 'true'
         run: |
           if [ -f "changelog.md" ]; then
             VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
-            CHANGELOG=$(awk "/^##[[:space:]]*v$VERSION/{p=1;next}/^##[[:space:]]/{p=0}p" changelog.md | sed '/^$/d')
+            echo "Escaped VERSION for awk: $VERSION"
+            CHANGELOG=$(awk "/^##[[:space:]]*(\[)?v$VERSION(])?/{p=1;next}/^##[[:space:]]/{p=0}p" changelog.md | sed '/^$/d')
             if [ -z "$CHANGELOG" ]; then
               echo "CHANGELOG=No changelog found for v${{ env.VERSION }}" >> $GITHUB_ENV
             else
