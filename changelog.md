@@ -2,6 +2,12 @@
 - **Support Group**:
 https://t.me/TheAOSP
 ---
+## v3.3
+- improved UI
+- Added more animations
+- added better logging UI
+- Added Android version input
+- Minor fix when user was adding a new device 
 ## v3.2.2
 - update config
 ## v3.2.1
