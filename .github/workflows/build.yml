@@ -187,16 +187,20 @@ jobs:
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Extract latest changelog
+      - name: Extract changelog for current version
         if: github.event.inputs.upload_to_telegram == 'true'
         run: |
-          # Assume changelog.md exists in the root of the repo
           if [ -f "changelog.md" ]; then
-            # Extract the first version block (latest)
-            CHANGELOG=$(awk '/^## /{if (p) exit; p=1; next} p' changelog.md | sed 's/"/\\"/g' | tr '\n' '\r' | sed 's/\r$//')
-            echo "CHANGELOG=$CHANGELOG" >> $GITHUB_ENV
+            # Extract changelog for the current version
+            VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')  # Escape dots for regex
+            CHANGELOG=$(awk "/^## v$VERSION/{p=1;next}/^## /{p=0}p" changelog.md | sed '/^$/d' | sed 's/"/\\"/g' | while IFS= read -r line; do echo "$line<br>"; done | tr -d '\n')
+            if [ -z "$CHANGELOG" ]; then
+              echo "CHANGELOG=No changelog found for v${{ env.VERSION }}" >> $GITHUB_ENV
+            else
+              echo "CHANGELOG=$CHANGELOG" >> $GITHUB_ENV
+            fi
           else
-            echo "CHANGELOG=No changelog available" >> $GITHUB_ENV
+            echo "CHANGELOG=No changelog file available" >> $GITHUB_ENV
           fi
 
       - name: Upload Module ZIP as Artifact
@@ -225,13 +229,14 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           document: ${{ env.ZIP_NAME }}
+          format: html
           message: |
-            **${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}**
-            **Build Type:** ${{ github.event.inputs.upload_to_release == 'true' && 'Release' || 'CI' }}
-            **Version:** ${{ env.VERSION }}
-            **Branch:** ${{ github.event.inputs.branch }}
-            **Build Times:**
-              - arm64-v8a: ${{ env.ARM64_BUILD_TIME }} seconds
-              - arm32-v7a: ${{ env.ARM32_BUILD_TIME }} seconds
-            **Commit:** ${{ github.sha }}
-            **Run ID:** ${{ github.run_id }}${{ github.event.inputs.upload_to_release == 'true' && format('\n\n**Changelog (v{0}):**\n{1}', env.VERSION, env.CHANGELOG) || '' }}
+            <b>${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}</b><br>
+            <b>Build Type:</b> ${{ github.event.inputs.upload_to_release == 'true' && 'Release' || 'CI' }}<br>
+            <b>Version:</b> ${{ env.VERSION }}<br>
+            <b>Branch:</b> ${{ github.event.inputs.branch }}<br>
+            <b>Build Times:</b><br>
+              - arm64-v8a: ${{ env.ARM64_BUILD_TIME }} seconds<br>
+              - arm32-v7a: ${{ env.ARM32_BUILD_TIME }} seconds<br>
+            <b>Commit:</b> ${{ github.sha }}<br>
+            <b>Run ID:</b> ${{ github.run_id }}${{ github.event.inputs.upload_to_release == 'true' && format('<br><br><b>Changelog (v{0}):</b><br>{1}', env.VERSION, env.CHANGELOG) || '' }}
