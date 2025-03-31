@@ -191,13 +191,14 @@ jobs:
         if: github.event.inputs.upload_to_telegram == 'true'
         run: |
           if [ -f "changelog.md" ]; then
-            # Extract changelog for the current version
-            VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')  # Escape dots for regex
-            CHANGELOG=$(awk "/^## v$VERSION/{p=1;next}/^## /{p=0}p" changelog.md | sed '/^$/d' | sed 's/"/\\"/g' | while IFS= read -r line; do echo "$line<br>"; done | tr -d '\n')
+            VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
+            CHANGELOG=$(awk "/^## v$VERSION/{p=1;next}/^## /{p=0}p" changelog.md | sed '/^$/d' | sed 's/^/- /' | tr '\n' '\n' | paste -sd'')
             if [ -z "$CHANGELOG" ]; then
               echo "CHANGELOG=No changelog found for v${{ env.VERSION }}" >> $GITHUB_ENV
             else
-              echo "CHANGELOG=$CHANGELOG" >> $GITHUB_ENV
+              echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+              echo "$CHANGELOG" >> $GITHUB_ENV
+              echo "EOF" >> $GITHUB_ENV
             fi
           else
             echo "CHANGELOG=No changelog file available" >> $GITHUB_ENV
@@ -222,21 +223,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload ZIP to Telegram
+      - name: Send Telegram Notification
         if: github.event.inputs.upload_to_telegram == 'true'
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          document: ${{ env.ZIP_NAME }}
           format: html
+          document: ${{ env.ZIP_NAME }}
           message: |
-            <b>${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}</b><br>
+            <b>${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}</b> ✅<br>
+            <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Workflow Run</a><br>
             <b>Build Type:</b> ${{ github.event.inputs.upload_to_release == 'true' && 'Release' || 'CI' }}<br>
             <b>Version:</b> ${{ env.VERSION }}<br>
             <b>Branch:</b> ${{ github.event.inputs.branch }}<br>
             <b>Build Times:</b><br>
-              - arm64-v8a: ${{ env.ARM64_BUILD_TIME }} seconds<br>
-              - arm32-v7a: ${{ env.ARM32_BUILD_TIME }} seconds<br>
-            <b>Commit:</b> ${{ github.sha }}<br>
+            - arm64-v8a: ${{ env.ARM64_BUILD_TIME }} seconds<br>
+            - arm32-v7a: ${{ env.ARM32_BUILD_TIME }} seconds<br>
+            <b>Commit:</b> <code>${{ github.sha }}</code><br>
             <b>Run ID:</b> ${{ github.run_id }}${{ github.event.inputs.upload_to_release == 'true' && format('<br><br><b>Changelog (v{0}):</b><br>{1}', env.VERSION, env.CHANGELOG) || '' }}
