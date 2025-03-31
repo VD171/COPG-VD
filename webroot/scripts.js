@@ -27,20 +27,36 @@ function appendToOutput(content, type = 'info') {
     const logEntry = document.createElement('div');
     
     let colorClass = 'log-info';
+    let iconClass = 'icon-info';
+    
     if (type === 'error' || content.includes('[!]') || content.includes('❌')) {
         colorClass = 'log-error';
+        iconClass = 'icon-error';
+    } else if (content.includes('Deleted') || content.includes('Removed') || content.includes('Disabled')) {
+        colorClass = 'log-red';
+        iconClass = 'icon-error';
     } else if (type === 'success' || content.includes('✅')) {
         colorClass = 'log-success';
-    } else if (content.includes('🔄')) {
-        colorClass = 'log-amber';
-    } else if (content.includes('Disabled')) {
-        colorClass = 'log-red';
+        iconClass = 'icon-success';
+    } else if (content.includes('🔄') || content.includes('Rebooting') || content.includes('Deleting')) {
+        colorClass = 'log-warning';
+        iconClass = 'icon-warning';
     } else if (content.includes('Enabled')) {
         colorClass = 'log-green';
+        iconClass = 'icon-success';
+    } else if (type === 'warning') {
+        colorClass = 'log-warning';
+        iconClass = 'icon-warning';
+    } else if (content.includes('saved') || content.includes('added') || content.includes('cleared')) {
+        colorClass = 'log-green';
+        iconClass = 'icon-success';
+    } else if (content.includes('canceled')) {
+        colorClass = 'log-info';
+        iconClass = 'icon-info';
     }
     
     logEntry.className = colorClass;
-    logEntry.textContent = `${new Date().toLocaleTimeString()} - ${content}`;
+    logEntry.innerHTML = `<span class="log-icon ${iconClass}"></span> ${new Date().toLocaleTimeString()} - ${content.replace(/^\[.\]\s*/i, '')}`;
     output.appendChild(logEntry);
     if (!logContent.classList.contains('collapsed')) {
         logEntry.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -53,7 +69,7 @@ async function loadVersion() {
         const version = await execCommand("grep '^version=' /data/adb/modules/COPG/module.prop | cut -d'=' -f2");
         versionElement.textContent = `v${version.trim()}`;
     } catch (error) {
-        appendToOutput("[!] Failed to load version: " + error, 'error');
+        appendToOutput("Failed to load version: " + error, 'error');
     }
 }
 
@@ -69,7 +85,7 @@ async function loadToggleStates() {
         loggingToggle.checked = state.includes("DISABLE_LOGGING=1") || !state.includes("DISABLE_LOGGING=");
         keepScreenOnToggle.checked = state.includes("KEEP_SCREEN_ON=1") || !state.includes("KEEP_SCREEN_ON=");
     } catch (error) {
-        appendToOutput("[!] Failed to load toggle states: " + error, 'error');
+        appendToOutput("Failed to load toggle states: " + error, 'error');
     }
 }
 
@@ -82,12 +98,11 @@ async function loadConfig() {
                 currentConfig[key].CPUINFO = currentConfig[key].CPUINFO.replace(/\n/g, '\\n').replace(/\t/g, '\\t');
             }
         }
-        appendToOutput("[i] Config loaded successfully", 'info');
+        appendToOutput("Config loaded successfully", 'success');
         renderDeviceList();
         renderGameList();
-        populateDeviceDropdown();
     } catch (error) {
-        appendToOutput("[!] Failed to load config: " + error, 'error');
+        appendToOutput("Failed to load config: " + error, 'error');
         currentConfig = {};
     }
 }
@@ -176,7 +191,7 @@ function renderGameList() {
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                </svg>
+                            </svg>
                             </button>
                             <button class="delete-btn" data-game="${gamePackage}" data-device="${key}" title="Delete">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -217,17 +232,27 @@ function deleteGameHandler(e) {
     deleteGame(e.currentTarget.dataset.game, e.currentTarget.dataset.device);
 }
 
-function populateDeviceDropdown() {
-    const dropdown = document.getElementById('game-device');
-    dropdown.innerHTML = '';
+function populateDevicePicker() {
+    const picker = document.getElementById('device-picker-list');
+    picker.innerHTML = '';
     
     for (const [key, value] of Object.entries(currentConfig)) {
         if (key.endsWith('_DEVICE')) {
             const deviceName = value.DEVICE || key.replace('PACKAGES_', '').replace('_DEVICE', '');
-            const option = document.createElement('option');
-            option.value = key;
-            option.textContent = `${deviceName} (${value.BRAND || 'Unknown'} ${value.MODEL || 'Unknown'})`;
-            dropdown.appendChild(option);
+            const deviceCard = document.createElement('div');
+            deviceCard.className = 'picker-device-card';
+            deviceCard.dataset.key = key;
+            deviceCard.innerHTML = `
+                <h4>${deviceName}</h4>
+                <p>${value.BRAND || 'Unknown'} ${value.MODEL || 'Unknown'}</p>
+            `;
+            deviceCard.addEventListener('click', () => {
+                const selectedDeviceInput = document.getElementById('game-device');
+                selectedDeviceInput.value = deviceName;
+                selectedDeviceInput.dataset.key = key;
+                closePopup('device-picker-popup');
+            });
+            picker.appendChild(deviceCard);
         }
     }
 }
@@ -250,6 +275,7 @@ function openDeviceModal(deviceKey = null) {
         document.getElementById('device-brand').value = deviceData.BRAND || '';
         document.getElementById('device-model').value = deviceData.MODEL || '';
         document.getElementById('device-manufacturer').value = deviceData.MANUFACTURER || '';
+        document.getElementById('device-android-version').value = deviceData.VERSION_RELEASE || '';
         document.getElementById('device-fingerprint').value = deviceData.FINGERPRINT || '';
         document.getElementById('device-build-id').value = deviceData.BUILD_ID || '';
         document.getElementById('device-cpu').value = (deviceData.CPUINFO || '').replace(/\\n/g, '\n').replace(/\\t/g, '\t');
@@ -260,6 +286,7 @@ function openDeviceModal(deviceKey = null) {
     }
     
     modal.style.display = 'flex';
+    modal.querySelector('.modal-content').classList.add('modal-enter');
 }
 
 function editGame(gamePackage, deviceKey) {
@@ -268,25 +295,29 @@ function editGame(gamePackage, deviceKey) {
 
 function openGameModal(gamePackage = null, deviceKey = null) {
     const modal = document.getElementById('game-modal');
-    if (!modal) return appendToOutput("[!] Error: 'game-modal' not found", 'error');
+    if (!modal) return appendToOutput("Error: 'game-modal' not found", 'error');
     
     const title = document.getElementById('game-modal-title');
     const form = document.getElementById('game-form');
     const packageInput = document.getElementById('game-package');
-    const deviceSelect = document.getElementById('game-device');
+    const deviceInput = document.getElementById('game-device');
     
     if (gamePackage) {
         title.textContent = 'Edit Game Configuration';
         editingGame = { package: gamePackage, device: deviceKey };
         packageInput.value = gamePackage;
-        deviceSelect.value = `${deviceKey}_DEVICE`;
+        deviceInput.value = currentConfig[`${deviceKey}_DEVICE`]?.DEVICE || '';
+        deviceInput.dataset.key = `${deviceKey}_DEVICE`;
     } else {
         title.textContent = 'Add New Game';
         editingGame = null;
         form.reset();
+        deviceInput.value = '';
+        deviceInput.dataset.key = '';
     }
     
     modal.style.display = 'flex';
+    modal.querySelector('.modal-content').classList.add('modal-enter');
 }
 
 async function saveDevice(e) {
@@ -297,7 +328,7 @@ async function saveDevice(e) {
     const packageKey = deviceKey.replace('_DEVICE', '');
     
     if (!editingDevice && Object.keys(currentConfig).some(key => key.endsWith('_DEVICE') && key !== deviceKey && currentConfig[key].DEVICE === deviceName)) {
-        appendToOutput(`[!] Device profile "${deviceName}" already exists`, 'error');
+        appendToOutput(`Device profile "${deviceName}" already exists`, 'error');
         return;
     }
 
@@ -306,17 +337,18 @@ async function saveDevice(e) {
     const brand = document.getElementById('device-brand').value.trim() || 'Unknown';
     const model = document.getElementById('device-model').value.trim() || 'Unknown';
     const buildId = document.getElementById('device-build-id').value.trim() || 'Unknown';
+    const androidVersion = document.getElementById('device-android-version').value.trim() || '14';
     
     const deviceData = {
         BRAND: brand,
         DEVICE: deviceName,
         MANUFACTURER: document.getElementById('device-manufacturer').value.trim() || 'Unknown',
         MODEL: model,
-        FINGERPRINT: document.getElementById('device-fingerprint').value.trim() || `${brand}/${model}/${model}:13/${buildId}/20230101:user/release-keys`,
+        FINGERPRINT: document.getElementById('device-fingerprint').value.trim() || `${brand}/${model}/${model}:${androidVersion}/${buildId}/20230101:user/release-keys`,
         BUILD_ID: buildId,
         DISPLAY: `${buildId}.A1`,
         PRODUCT: model,
-        VERSION_RELEASE: document.getElementById('device-fingerprint').value.split(':')[1] || '13',
+        VERSION_RELEASE: androidVersion,
         SERIAL: `${brand.substring(0, 3)}${Math.floor(100000 + Math.random() * 900000)}`,
         CPUINFO: escapedCpuInfo,
         SERIAL_CONTENT: `${brand.substring(0, 3)}${Math.floor(100000 + Math.random() * 900000)}`
@@ -331,7 +363,7 @@ async function saveDevice(e) {
                 delete currentConfig[oldPackageKey];
             }
             delete currentConfig[editingDevice];
-            appendToOutput(`[i] Renamed device from "${editingDevice}" to "${deviceKey}"`, 'info');
+            appendToOutput(`Renamed device from "${editingDevice}" to "${deviceKey}"`, 'info');
         }
         
         if (!Array.isArray(currentConfig[packageKey])) {
@@ -342,10 +374,9 @@ async function saveDevice(e) {
         await saveConfig();
         closeModal('device-modal');
         renderDeviceList();
-        populateDeviceDropdown();
-        appendToOutput(`✅ Device profile "${deviceName}" saved`, 'success');
+        appendToOutput(`Device profile "${deviceName}" saved`, 'success');
     } catch (error) {
-        appendToOutput(`[!] Failed to save device: ${error}`, 'error');
+        appendToOutput(`Failed to save device: ${error}`, 'error');
     }
 }
 
@@ -353,16 +384,16 @@ async function saveGame(e) {
     e.preventDefault();
     
     const gamePackage = document.getElementById('game-package').value.trim();
-    const deviceKey = document.getElementById('game-device').value;
+    const deviceKey = document.getElementById('game-device').dataset.key;
     const packageKey = deviceKey.replace('_DEVICE', '');
     
     if (!gamePackage || !deviceKey) {
-        appendToOutput("[!] Please fill all required fields", 'error');
+        appendToOutput("Please fill all required fields and select a device", 'error');
         return;
     }
 
     if (!currentConfig[deviceKey]) {
-        appendToOutput("[!] Selected device profile does not exist", 'error');
+        appendToOutput("Selected device profile does not exist", 'error');
         return;
     }
 
@@ -386,11 +417,10 @@ async function saveGame(e) {
         closeModal('game-modal');
         renderGameList();
         renderDeviceList();
-        populateDeviceDropdown();
-        appendToOutput(`✅ Game "${gamePackage}" added to "${currentConfig[deviceKey].DEVICE}"`, 'success');
+        appendToOutput(`Game "${gamePackage}" added to "${currentConfig[deviceKey].DEVICE}"`, 'success');
         showPopup('reboot-popup');
     } catch (error) {
-        appendToOutput(`[!] Failed to save game: ${error}`, 'error');
+        appendToOutput(`Failed to save game: ${error}`, 'error');
     }
 }
 
@@ -405,17 +435,18 @@ async function deleteDevice(deviceKey) {
     setTimeout(async () => {
         card.remove();
         try {
-            appendToOutput(`[i] Deleting device: ${deviceName}`, 'info');
+            appendToOutput(`Deleting device: ${deviceName}`, 'warning');
             delete currentConfig[packageKey];
             delete currentConfig[deviceKey];
             await saveConfig();
             renderDeviceList();
-            populateDeviceDropdown();
-            appendToOutput(`✅ Deleted device "${deviceName}"`, 'success');
+            renderGameList();
+            appendToOutput(`Deleted device "${deviceName}"`, 'red');
             showPopup('reboot-popup');
         } catch (error) {
-            appendToOutput(`[!] Failed to delete device: ${error}`, 'error');
+            appendToOutput(`Failed to delete device: ${error}`, 'error');
             renderDeviceList();
+            renderGameList();
         }
     }, 300);
 }
@@ -431,13 +462,13 @@ async function deleteGame(gamePackage, deviceKey) {
         card.remove();
         try {
             if (!Array.isArray(currentConfig[deviceKey]) || currentConfig[deviceKey].length === 0) {
-                appendToOutput(`[!] No games found for "${deviceName}"`, 'warning');
+                appendToOutput(`No games found for "${deviceName}"`, 'warning');
                 return;
             }
             
             const index = currentConfig[deviceKey].indexOf(gamePackage);
             if (index === -1) {
-                appendToOutput(`[!] Game "${gamePackage}" not found in "${deviceName}"`, 'error');
+                appendToOutput(`Game "${gamePackage}" not found in "${deviceName}"`, 'error');
                 return;
             }
             
@@ -445,11 +476,10 @@ async function deleteGame(gamePackage, deviceKey) {
             await saveConfig();
             renderGameList();
             renderDeviceList();
-            populateDeviceDropdown();
-            appendToOutput(`✅ Removed "${gamePackage}" from "${deviceName}"`, 'success');
+            appendToOutput(`Removed "${gamePackage}" from "${deviceName}"`, 'warning');
             showPopup('reboot-popup');
         } catch (error) {
-            appendToOutput(`[!] Failed to delete game: ${error}`, 'error');
+            appendToOutput(`Failed to delete game: ${error}`, 'error');
             renderGameList();
         }
     }, 300);
@@ -464,17 +494,24 @@ async function saveConfig() {
         }
         const configStr = JSON.stringify(currentConfig, null, 2);
         await execCommand(`echo '${configStr.replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/config.json`);
-        appendToOutput("[i] Config saved", 'info');
+        appendToOutput("Config saved", 'info');
     } catch (error) {
-        appendToOutput(`[!] Failed to save config: ${error}`, 'error');
+        appendToOutput(`Failed to save config: ${error}`, 'error');
         throw error;
     }
 }
 
 function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
-    editingDevice = null;
-    editingGame = null;
+    const modal = document.getElementById(modalId);
+    const content = modal.querySelector('.modal-content');
+    content.classList.remove('modal-enter');
+    content.classList.add('modal-exit');
+    content.addEventListener('animationend', () => {
+        modal.style.display = 'none';
+        content.classList.remove('modal-exit');
+        editingDevice = null;
+        editingGame = null;
+    }, { once: true });
 }
 
 function showPopup(popupId) {
@@ -482,6 +519,21 @@ function showPopup(popupId) {
     if (popup) {
         popup.style.display = 'flex';
         popup.querySelector('.popup-content').classList.remove('popup-exit');
+        if (popupId === 'device-picker-popup') {
+            populateDevicePicker();
+        }
+    }
+}
+
+function closePopup(popupId) {
+    const popup = document.getElementById(popupId);
+    if (popup) {
+        const content = popup.querySelector('.popup-content');
+        content.classList.add('popup-exit');
+        content.addEventListener('animationend', () => {
+            popup.style.display = 'none';
+            content.classList.remove('popup-exit');
+        }, { once: true });
     }
 }
 
@@ -499,11 +551,11 @@ function hidePopup(popupId, callback) {
 }
 
 async function rebootDevice() {
-    appendToOutput("[+] Rebooting device...");
+    appendToOutput("Rebooting device...", 'warning');
     try {
         await execCommand("su -c reboot");
     } catch (error) {
-        appendToOutput("[!] Failed to reboot: " + error, 'error');
+        appendToOutput("Failed to reboot: " + error, 'error');
     }
 }
 
@@ -543,14 +595,11 @@ function switchTab(tabId, direction = null) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById(`tab-${tabId}`).classList.add('active');
     
-    if (tabId === 'devices') renderDeviceList();
-    if (tabId === 'games') renderGameList();
-    
     setTimeout(() => {
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.classList.remove('slide-in-left', 'slide-in-right', 'slide-out-left', 'slide-out-right');
         });
-    }, 300);
+    }, 400);
 }
 
 function setupSwipeNavigation() {
@@ -590,7 +639,7 @@ function setupSwipeNavigation() {
 async function updateGameList() {
     if (actionRunning) return;
     actionRunning = true;
-    appendToOutput("[+] Updating game list...");
+    appendToOutput("Updating game list...");
     try {
         const output = await execCommand("sh /data/adb/modules/COPG/action.sh");
         output.split('\n').forEach(line => {
@@ -598,9 +647,9 @@ async function updateGameList() {
             if (line.includes('🔄 Reboot required')) showPopup('reboot-popup');
         });
         await loadConfig();
-        appendToOutput("[+] Game list updated successfully", 'success');
+        appendToOutput("Game list updated successfully", 'success');
     } catch (error) {
-        appendToOutput("[!] Failed to update game list: " + error, 'error');
+        appendToOutput("Failed to update game list: " + error, 'error');
     }
     actionRunning = false;
 }
@@ -609,25 +658,25 @@ function applyEventListeners() {
     document.getElementById('toggle-auto-brightness').addEventListener('change', async (e) => {
         const isChecked = e.target.checked;
         await execCommand(`sed -i '/AUTO_BRIGHTNESS_OFF=/d' /data/adb/copg_state; echo "AUTO_BRIGHTNESS_OFF=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-        appendToOutput(isChecked ? "✅ Auto-Brightness Disabled" : "❌ Auto-Brightness Enabled");
+        appendToOutput(isChecked ? "Auto-Brightness Disabled" : "Auto-Brightness Enabled", isChecked ? 'success' : 'error');
     });
 
     document.getElementById('toggle-dnd').addEventListener('change', async (e) => {
         const isChecked = e.target.checked;
         await execCommand(`sed -i '/DND_ON=/d' /data/adb/copg_state; echo "DND_ON=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-        appendToOutput(isChecked ? "✅ DND Enabled" : "❌ DND Disabled");
+        appendToOutput(isChecked ? "DND Enabled" : "DND Disabled", isChecked ? 'success' : 'error');
     });
 
     document.getElementById('toggle-logging').addEventListener('change', async (e) => {
         const isChecked = e.target.checked;
         await execCommand(`sed -i '/DISABLE_LOGGING=/d' /data/adb/copg_state; echo "DISABLE_LOGGING=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-        appendToOutput(isChecked ? "✅ Logging Disabled" : "❌ Logging Enabled");
+        appendToOutput(isChecked ? "Logging Disabled" : "Logging Enabled", isChecked ? 'success' : 'error');
     });
 
     document.getElementById('toggle-keep-screen-on').addEventListener('change', async (e) => {
         const isChecked = e.target.checked;
         await execCommand(`sed -i '/KEEP_SCREEN_ON=/d' /data/adb/copg_state; echo "KEEP_SCREEN_ON=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-        appendToOutput(isChecked ? "✅ Keep Screen On Enabled" : "❌ Keep Screen On Disabled");
+        appendToOutput(isChecked ? "Keep Screen On Enabled" : "Keep Screen On Disabled", isChecked ? 'success' : 'error');
     });
 
     document.getElementById('update-config').addEventListener('click', () => {
@@ -643,7 +692,7 @@ function applyEventListeners() {
 
     document.getElementById('update-no').addEventListener('click', () => {
         hidePopup('update-confirm-popup');
-        appendToOutput("[+] Update canceled");
+        appendToOutput("Update canceled");
     });
 
     document.getElementById('reboot-yes').addEventListener('click', async () => {
@@ -653,14 +702,15 @@ function applyEventListeners() {
 
     document.getElementById('reboot-no').addEventListener('click', () => {
         hidePopup('reboot-popup');
-        appendToOutput("[+] Reboot canceled");
+        appendToOutput("Reboot canceled");
     });
 
     document.getElementById('log-header').addEventListener('click', toggleLogSection);
     document.getElementById('clear-log').addEventListener('click', (e) => {
         e.stopPropagation();
-        document.getElementById('output').textContent = '';
-        appendToOutput("[+] Log cleared", 'success');
+        const output = document.getElementById('output');
+        output.innerHTML = '';
+        appendToOutput("Log cleared", 'success');
     });
 
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
@@ -672,7 +722,13 @@ function applyEventListeners() {
     document.getElementById('add-device').addEventListener('click', () => openDeviceModal());
     document.getElementById('add-game').addEventListener('click', () => openGameModal());
 
-    document.querySelectorAll('.close-btn, .cancel-btn').forEach(btn => btn.addEventListener('click', () => closeModal(btn.closest('.modal').id)));
+    document.querySelectorAll('.close-btn, .cancel-btn').forEach(btn => btn.addEventListener('click', () => {
+        const modal = btn.closest('.modal');
+        const popup = btn.closest('.popup');
+        if (modal) closeModal(modal.id);
+        if (popup) closePopup(popup.id);
+    }));
+
     document.getElementById('device-form').addEventListener('submit', saveDevice);
     document.getElementById('game-form').addEventListener('submit', saveGame);
 
@@ -680,6 +736,16 @@ function applyEventListeners() {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) closeModal(modal.id);
         });
+    });
+
+    document.querySelectorAll('.popup').forEach(popup => {
+        popup.addEventListener('click', (e) => {
+            if (e.target === popup) closePopup(popup.id);
+        });
+    });
+
+    document.getElementById('game-device').addEventListener('click', () => {
+        showPopup('device-picker-popup');
     });
 
     document.getElementById('device-search').addEventListener('input', (e) => {
@@ -708,9 +774,12 @@ function applyEventListeners() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
+    if (!savedTheme || savedTheme === 'dark') {
         document.body.classList.add('dark-theme');
         document.getElementById('theme-icon').textContent = '🌙';
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.getElementById('theme-icon').textContent = '☀️';
     }
     appendToOutput("UI initialized", 'success');
     loadVersion();
