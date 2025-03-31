@@ -117,8 +117,7 @@
     },
     "PACKAGES_OP9P": [
         "com.epicgames.fortnite",
-        "com.epicgames.portal",
-        "com.tencent.lolm"
+        "com.epicgames.portal"
     ],
     "PACKAGES_OP9P_DEVICE": {
         "BRAND": "OnePlus",
