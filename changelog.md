@@ -2,6 +2,8 @@
 - **Support Group**:
 https://t.me/TheAOSP
 ---
+## v3.3.2
+- fix installation for magisk 
 ## v3.3.1
 - Better installation script 
 - removing unused files after installing 
