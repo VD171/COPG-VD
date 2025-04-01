@@ -8,7 +8,7 @@
 #include <dlfcn.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <GLES2/gl2.h> // For GL_RENDERER
+#include <GLES2/gl2.h>
 
 using json = nlohmann::json;
 
@@ -25,7 +25,9 @@ struct DeviceInfo {
     std::string serial;
     std::string cpuinfo;
     std::string serial_content;
-    std::string gpu_renderer; // New field for GPU spoofing
+    std::string gpu_renderer;
+    int display_width;  // New: Spoofed width in pixels
+    int display_height; // New: Spoofed height in pixels
 };
 
 // Static function pointers for existing hooks
@@ -35,10 +37,12 @@ typedef ssize_t (*orig_read_t)(int, void*, size_t);
 static orig_read_t orig_read = nullptr;
 typedef void (*orig_set_static_object_field_t)(JNIEnv*, jclass, jfieldID, jobject);
 static orig_set_static_object_field_t orig_set_static_object_field = nullptr;
-
-// Static function pointer for GPU hook
 typedef const GLubyte* (*orig_glGetString_t)(GLenum);
 static orig_glGetString_t orig_glGetString = nullptr;
+
+// New hook for DisplayMetrics
+typedef void (*orig_getDisplayMetrics_t)(JNIEnv*, jobject, jobject);
+static orig_getDisplayMetrics_t orig_getDisplayMetrics = nullptr;
 
 // Static global variables
 static DeviceInfo current_info;
@@ -97,9 +101,8 @@ public:
         hookNativeGetprop();
         hookNativeRead();
         hookJniSetStaticObjectField();
-
-        // Hook GPU function
         hookGpuRenderer();
+        hookDisplayMetrics(); // New: Hook for resolution spoofing
 
         // Load config
         loadConfig();
@@ -172,7 +175,11 @@ private:
                 info.cpuinfo = device.contains("CPUINFO") ? device["CPUINFO"].get<std::string>() : "";
                 info.serial_content = device.contains("SERIAL_CONTENT") ? device["SERIAL_CONTENT"].get<std::string>() : "";
                 info.gpu_renderer = device.contains("GPU_RENDERER") ? 
-                    device["GPU_RENDERER"].get<std::string>() : "Adreno (TM) 830"; // Default to Adreno 830
+                    device["GPU_RENDERER"].get<std::string>() : "Adreno (TM) 830";
+                info.display_width = device.contains("DISPLAY_WIDTH") ? 
+                    device["DISPLAY_WIDTH"].get<int>() : 0;  // New: Load width
+                info.display_height = device.contains("DISPLAY_HEIGHT") ? 
+                    device["DISPLAY_HEIGHT"].get<int>() : 0; // New: Load height
 
                 for (const auto& pkg : packages) package_map[pkg] = info;
             }
@@ -192,7 +199,7 @@ private:
         if (versionReleaseField && !info.version_release.empty()) 
             env->SetStaticObjectField(versionClass, versionReleaseField, env->NewStringUTF(info.version_release.c_str()));
         if (sdkIntField && !info.version_release.empty()) 
-            env->SetStaticIntField(versionClass, sdkIntField, info.version_release == "13" ? 33 : 34);
+            env->SetStaticIntField(versionClass, sdkIntField, info.version_release == "13" ? 33 : (info.version_release == "14" ? 34 : 35));
         if (serialField && !info.serial.empty()) env->SetStaticObjectField(buildClass, serialField, env->NewStringUTF(info.serial.c_str()));
     }
 
@@ -244,16 +251,13 @@ private:
 
     static ssize_t hooked_read(int fd, void* buf, size_t count) {
         if (!orig_read) return -1;
-
         char path[256];
-        ssize_t result = -1;
         snprintf(path, sizeof(path), "/proc/self/fd/%d", fd);
         char real_path[256];
         ssize_t len = readlink(path, real_path, sizeof(real_path) - 1);
         if (len != -1) {
             real_path[len] = '\0';
             std::string file_path(real_path);
-
             if (file_path == "/proc/cpuinfo" && !current_info.cpuinfo.empty()) {
                 size_t bytes_to_copy = std::min(count, current_info.cpuinfo.length());
                 memcpy(buf, current_info.cpuinfo.c_str(), bytes_to_copy);
@@ -264,7 +268,6 @@ private:
                 return bytes_to_copy;
             }
         }
-
         return orig_read(fd, buf, count);
     }
 
@@ -319,7 +322,6 @@ private:
         }
     }
 
-    // New GPU spoofing hook
     static const GLubyte* hooked_glGetString(GLenum name) {
         if (!orig_glGetString) return nullptr;
         if (name == GL_RENDERER && !current_info.gpu_renderer.empty()) {
@@ -330,7 +332,7 @@ private:
 
     void hookGpuRenderer() {
         void* handle = dlopen("libGLESv2.so", RTLD_LAZY);
-        if (!handle) return; // If libGLESv2.so fails, GPU spoofing won't work
+        if (!handle) return;
         void* sym = dlsym(handle, "glGetString");
         if (sym) {
             size_t page_size = sysconf(_SC_PAGE_SIZE);
@@ -342,6 +344,39 @@ private:
             }
         }
         dlclose(handle);
+    }
+
+    // New: Hook DisplayMetrics
+    static void hooked_getDisplayMetrics(JNIEnv* env, jobject thiz, jobject metrics) {
+        if (!orig_getDisplayMetrics || !metrics) {
+            if (orig_getDisplayMetrics) orig_getDisplayMetrics(env, thiz, metrics);
+            return;
+        }
+        orig_getDisplayMetrics(env, thiz, metrics);
+        if (current_info.display_width > 0 && current_info.display_height > 0) {
+            jclass metricsClass = env->GetObjectClass(metrics);
+            jfieldID widthField = env->GetFieldID(metricsClass, "widthPixels", "I");
+            jfieldID heightField = env->GetFieldID(metricsClass, "heightPixels", "I");
+            env->SetIntField(metrics, widthField, current_info.display_width);
+            env->SetIntField(metrics, heightField, current_info.display_height);
+        }
+    }
+
+    void hookDisplayMetrics() {
+        void* handle = dlopen("libandroid.so", RTLD_LAZY);
+        if (handle) {
+            void* sym = dlsym(handle, "Java_android_view_Display_getMetrics");
+            if (sym) {
+                size_t page_size = sysconf(_SC_PAGE_SIZE);
+                void* page_start = (void*)((uintptr_t)sym & ~(page_size - 1));
+                if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == 0) {
+                    orig_getDisplayMetrics = (orig_getDisplayMetrics_t)sym;
+                    *(void**)&sym = (void*)hooked_getDisplayMetrics;
+                    mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
+                }
+            }
+            dlclose(handle);
+        }
     }
 };
 
