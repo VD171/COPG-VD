@@ -29,30 +29,40 @@ function appendToOutput(content, type = 'info') {
     let colorClass = 'log-info';
     let iconClass = 'icon-info';
     
-    if (type === 'error' || content.includes('[!]') || content.includes('❌')) {
+    // Prioritize explicit type over content-based rules
+    if (type === 'error') {
         colorClass = 'log-error';
         iconClass = 'icon-error';
-    } else if (content.includes('Deleted') || content.includes('Removed') || content.includes('Disabled')) {
-        colorClass = 'log-red';
-        iconClass = 'icon-error';
-    } else if (type === 'success' || content.includes('✅')) {
+    } else if (type === 'success') {
         colorClass = 'log-success';
-        iconClass = 'icon-success';
-    } else if (content.includes('🔄') || content.includes('Rebooting') || content.includes('Deleting')) {
-        colorClass = 'log-warning';
-        iconClass = 'icon-warning';
-    } else if (content.includes('Enabled')) {
-        colorClass = 'log-green';
         iconClass = 'icon-success';
     } else if (type === 'warning') {
         colorClass = 'log-warning';
         iconClass = 'icon-warning';
-    } else if (content.includes('saved') || content.includes('added') || content.includes('cleared')) {
-        colorClass = 'log-green';
-        iconClass = 'icon-success';
-    } else if (content.includes('canceled')) {
-        colorClass = 'log-info';
-        iconClass = 'icon-info';
+    } else {
+        // Fallback content-based rules
+        if (content.includes('[!]') || content.includes('❌')) {
+            colorClass = 'log-error';
+            iconClass = 'icon-error';
+        } else if (content.includes('Deleted') || content.includes('Removed') || content.includes('Disabled')) {
+            colorClass = 'log-red';
+            iconClass = 'icon-error';
+        } else if (content.includes('✅')) {
+            colorClass = 'log-success';
+            iconClass = 'icon-success';
+        } else if (content.includes('🔄') || content.includes('Rebooting') || content.includes('Deleting')) {
+            colorClass = 'log-warning';
+            iconClass = 'icon-warning';
+        } else if (content.includes('Enabled')) {
+            colorClass = 'log-green';
+            iconClass = 'icon-success';
+        } else if (content.includes('saved') || content.includes('added') || content.includes('cleared')) {
+            colorClass = 'log-green';
+            iconClass = 'icon-success';
+        } else if (content.includes('canceled')) {
+            colorClass = 'log-info';
+            iconClass = 'icon-info';
+        }
     }
     
     logEntry.className = colorClass;
