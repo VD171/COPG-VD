@@ -82,13 +82,24 @@ jobs:
           git clone --depth 1 https://github.com/jmpews/Dobby.git dobby
           cd dobby
           mkdir -p build/arm64-v8a build/armeabi-v7a
+          echo "NDK assembler: ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-as"
           cd build/arm64-v8a
-          cmake -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-34 ../..
-          make -j$(nproc)
+          cmake -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake \
+                -DANDROID_ABI=arm64-v8a \
+                -DANDROID_PLATFORM=android-34 \
+                -DCMAKE_ASM_COMPILER=${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-as \
+                -DCMAKE_ASM_FLAGS="-x assembler-with-cpp" \
+                ../..
+          make -j$(nproc) || { echo "Dobby arm64-v8a build failed"; ls -la; cat CMakeFiles/CMakeError.log; exit 1; }
           cp libdobby.a ../../lib/arm64-v8a/
           cd ../armeabi-v7a
-          cmake -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-34 ../..
-          make -j$(nproc)
+          cmake -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake \
+                -DANDROID_ABI=armeabi-v7a \
+                -DANDROID_PLATFORM=android-34 \
+                -DCMAKE_ASM_COMPILER=${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/arm-linux-androideabi-as \
+                -DCMAKE_ASM_FLAGS="-x assembler-with-cpp" \
+                ../..
+          make -j$(nproc) || { echo "Dobby armeabi-v7a build failed"; ls -la; cat CMakeFiles/CMakeError.log; exit 1; }
           cp libdobby.a ../../lib/armeabi-v7a/
           cd ../..
 
@@ -164,8 +175,8 @@ jobs:
           cat > module/module.prop << 'EOF'
           id=COPG
           name=✨ COPG spoof ✨
-          version=3.3.3
-          versionCode=333
+          version=3.3.2
+          versionCode=332
           author=AlirezaParsi
           description=Spoof your device for games. Click Action button to update your config if needed.
           support=https://t.me/theaosp
