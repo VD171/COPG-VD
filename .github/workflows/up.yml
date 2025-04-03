@@ -75,12 +75,22 @@ jobs:
 
       - name: Fetch Zygisk Headers, JSON Library, and Dobby
         run: |
-          mkdir -p zygisk include/nlohmann include/dobby lib/arm64-v8a lib/armeabi-v7a
+          mkdir -p zygisk include/nlohmann include/dobby lib/arm64-v8a lib/armeabi-v7a dobby
           wget https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hh
           wget https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp -O include/nlohmann/json.hpp
-          wget https://raw.githubusercontent.com/JingMatrix/Dobby/05a09ac6807a6bb1726350e40ea4b127c1c79809/include/dobby.h -O include/dobby/dobby.h
-          wget https://github.com/jmpews/Dobby/releases/download/v1.2/libdobby-arm64-v8a.so -O lib/arm64-v8a/libdobby.so
-          wget https://github.com/jmpews/Dobby/releases/download/v1.2/libdobby-armeabi-v7a.so -O lib/armeabi-v7a/libdobby.so
+          wget https://raw.githubusercontent.com/jmpews/Dobby/master/include/dobby.h -O include/dobby/dobby.h
+          git clone --depth 1 https://github.com/jmpews/Dobby.git dobby
+          cd dobby
+          mkdir -p build/arm64-v8a build/armeabi-v7a
+          cd build/arm64-v8a
+          cmake -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-34 ../..
+          make -j$(nproc)
+          cp libdobby.a ../../lib/arm64-v8a/
+          cd ../armeabi-v7a
+          cmake -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-34 ../..
+          make -j$(nproc)
+          cp libdobby.a ../../lib/armeabi-v7a/
+          cd ../..
 
       - name: Fetch config.json
         run: |
@@ -100,7 +110,8 @@ jobs:
             -DANDROID_ABI=arm64-v8a
             -DANDROID_PLATFORM=android-34
             -DCMAKE_MAKE_PROGRAM=/usr/bin/make
-            -DDOBBY_LIB=${{ github.workspace }}/lib/arm64-v8a/libdobby.so
+            -DDOBBY_DIR=${{ github.workspace }}/dobby
+            -DDOBBY_LIB=${{ github.workspace }}/lib/arm64-v8a/libdobby.a
 
       - name: Build Project (arm64-v8a) - End
         id: arm64_end
@@ -128,7 +139,8 @@ jobs:
             -DANDROID_ABI=armeabi-v7a
             -DANDROID_PLATFORM=android-34
             -DCMAKE_MAKE_PROGRAM=/usr/bin/make
-            -DDOBBY_LIB=${{ github.workspace }}/lib/armeabi-v7a/libdobby.so
+            -DDOBBY_DIR=${{ github.workspace }}/dobby
+            -DDOBBY_LIB=${{ github.workspace }}/lib/armeabi-v7a/libdobby.a
 
       - name: Build Project (armeabi-v7a) - End
         id: arm32_end
@@ -305,7 +317,7 @@ jobs:
                   await client.send_file(
                       chat_id,
                       file=os.getenv('ZIP_NAME'),
-                      caption=message  ,
+                      caption=message,
                       thumb=os.getenv('THUMBNAIL_PATH'),
                       parse_mode='markdown'
                   )
