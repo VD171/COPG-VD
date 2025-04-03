@@ -11,4 +11,10 @@ find_library(log-lib log)
 include_directories(${CMAKE_SOURCE_DIR}/zygisk)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-target_link_libraries(spoof ${log-lib})
+if(ANDROID_ABI STREQUAL "arm64-v8a")
+    set(DOBBY_LIB_PATH ${DOBBY_LIB})
+elseif(ANDROID_ABI STREQUAL "armeabi-v7a")
+    set(DOBBY_LIB_PATH ${DOBBY_LIB})
+endif()
+
+target_link_libraries(spoof ${log-lib} ${DOBBY_LIB_PATH})
