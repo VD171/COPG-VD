@@ -40,12 +40,12 @@ function appendToOutput(content, type = 'info') {
         colorClass = 'log-warning';
         iconClass = 'icon-warning';
     } else {
-        // Fallback content-based rules
+        // Updated content-based rules
         if (content.includes('[!]') || content.includes('❌')) {
             colorClass = 'log-error';
             iconClass = 'icon-error';
         } else if (content.includes('Deleted') || content.includes('Removed') || content.includes('Disabled')) {
-            colorClass = 'log-red';
+            colorClass = 'log-red'; // Changed 'Removed' to red instead of yellow
             iconClass = 'icon-error';
         } else if (content.includes('✅')) {
             colorClass = 'log-success';
@@ -120,7 +120,7 @@ async function loadConfig() {
 function renderDeviceList() {
     const deviceList = document.getElementById('device-list');
     deviceList.innerHTML = '';
-    
+    let index = 0;
     for (const [key, value] of Object.entries(currentConfig)) {
         if (key.endsWith('_DEVICE')) {
             const deviceName = value.DEVICE || key.replace('PACKAGES_', '').replace('_DEVICE', '');
@@ -130,6 +130,7 @@ function renderDeviceList() {
             const deviceCard = document.createElement('div');
             deviceCard.className = 'device-card';
             deviceCard.dataset.key = key;
+            deviceCard.style.animationDelay = `${index * 0.1}s`; // Staggered entrance
             deviceCard.innerHTML = `
                 <div class="device-header">
                     <h4 class="device-name">${deviceName}</h4>
@@ -155,9 +156,9 @@ function renderDeviceList() {
                 </div>
             `;
             deviceList.appendChild(deviceCard);
+            index++;
         }
     }
-    
     attachDeviceListeners();
 }
 
@@ -183,7 +184,7 @@ function deleteDeviceHandler(e) {
 function renderGameList() {
     const gameList = document.getElementById('game-list');
     gameList.innerHTML = '';
-    
+    let index = 0;
     for (const [key, value] of Object.entries(currentConfig)) {
         if (Array.isArray(value) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
             const deviceKey = `${key}_DEVICE`;
@@ -193,6 +194,7 @@ function renderGameList() {
                 gameCard.className = 'game-card';
                 gameCard.dataset.package = gamePackage;
                 gameCard.dataset.device = key;
+                gameCard.style.animationDelay = `${index * 0.1}s`; // Staggered entrance
                 gameCard.innerHTML = `
                     <div class="game-header">
                         <h4 class="game-name">${gamePackage}</h4>
@@ -216,10 +218,10 @@ function renderGameList() {
                     </div>
                 `;
                 gameList.appendChild(gameCard);
+                index++;
             });
         }
     }
-    
     attachGameListeners();
 }
 
@@ -245,7 +247,6 @@ function deleteGameHandler(e) {
 function populateDevicePicker() {
     const picker = document.getElementById('device-picker-list');
     picker.innerHTML = '';
-    
     for (const [key, value] of Object.entries(currentConfig)) {
         if (key.endsWith('_DEVICE')) {
             const deviceName = value.DEVICE || key.replace('PACKAGES_', '').replace('_DEVICE', '');
@@ -280,7 +281,6 @@ function openDeviceModal(deviceKey = null) {
         title.textContent = 'Edit Device Profile';
         editingDevice = deviceKey;
         const deviceData = currentConfig[deviceKey];
-        
         document.getElementById('device-name').value = deviceData.DEVICE || '';
         document.getElementById('device-brand').value = deviceData.BRAND || '';
         document.getElementById('device-model').value = deviceData.MODEL || '';
@@ -332,7 +332,6 @@ function openGameModal(gamePackage = null, deviceKey = null) {
 
 async function saveDevice(e) {
     e.preventDefault();
-    
     const deviceName = document.getElementById('device-name').value.trim();
     const deviceKey = `PACKAGES_${deviceName.toUpperCase().replace(/ /g, '_')}_DEVICE`;
     const packageKey = deviceKey.replace('_DEVICE', '');
@@ -392,7 +391,6 @@ async function saveDevice(e) {
 
 async function saveGame(e) {
     e.preventDefault();
-    
     const gamePackage = document.getElementById('game-package').value.trim();
     const deviceKey = document.getElementById('game-device').dataset.key;
     const packageKey = deviceKey.replace('_DEVICE', '');
@@ -486,7 +484,7 @@ async function deleteGame(gamePackage, deviceKey) {
             await saveConfig();
             renderGameList();
             renderDeviceList();
-            appendToOutput(`Removed "${gamePackage}" from "${deviceName}"`, 'warning');
+            appendToOutput(`Removed "${gamePackage}" from "${deviceName}"`, 'red'); // Changed to 'red'
             showPopup('reboot-popup');
         } catch (error) {
             appendToOutput(`Failed to delete game: ${error}`, 'error');
@@ -649,6 +647,8 @@ function setupSwipeNavigation() {
 async function updateGameList() {
     if (actionRunning) return;
     actionRunning = true;
+    const btn = document.getElementById('update-config');
+    btn.classList.add('loading');
     appendToOutput("Updating game list...");
     try {
         const output = await execCommand("sh /data/adb/modules/COPG/action.sh");
@@ -661,6 +661,7 @@ async function updateGameList() {
     } catch (error) {
         appendToOutput("Failed to update game list: " + error, 'error');
     }
+    btn.classList.remove('loading');
     actionRunning = false;
 }
 
