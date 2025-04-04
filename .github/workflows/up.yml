@@ -17,7 +17,7 @@ on:
         description: 'Branch to build from'
         type: string
         required: true
-        default: 'dobby'
+        default: 'JSON'
       title:
         description: 'Custom title for Telegram message'
         type: string
@@ -36,7 +36,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
         with:
-          ref: ${{ github.event.inputs.branch }}
+          ref: ${{ github.eventinputs.branch }}
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -44,7 +44,7 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Set up Android SDK and NDK r28
+      - name: Set up Android SDK and NDK r27
         run: |
           echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
           mkdir -p $ANDROID_HOME/cmdline-tools
@@ -60,8 +60,8 @@ jobs:
             exit 1
           fi
           echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;28.0.13004108" "platforms;android-34" "build-tools;34.0.0"
-          echo "NDK_PATH=$ANDROID_HOME/ndk/28.0.13004108" >> $GITHUB_ENV
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973" "platforms;android-34" "build-tools;34.0.0"
+          echo "NDK_PATH=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
 
       - name: Accept Android SDK licenses
         run: |
@@ -141,7 +141,7 @@ jobs:
             -DCMAKE_MAKE_PROGRAM=/usr/bin/make
             -DCMAKE_BUILD_TYPE=MinSizeRel
             -DDOBBY_DIR=${{ github.workspace }}
-            -DDOBBY_LIB=${{ github.workflow }}/lib/armeabi-v7a/libdobby.a
+            -DDOBBY_LIB=${{ github.workspace }}/lib/armeabi-v7a/libdobby.a
 
       - name: Build Project (armeabi-v7a) - End
         id: arm32_end
