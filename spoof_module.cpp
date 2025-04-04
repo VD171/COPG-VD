@@ -1,6 +1,6 @@
 #include <jni.h>
 #include <string>
-#include <zygisk.hh>
+#include <zygisk.hpp>
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <unordered_map>
