@@ -64,7 +64,7 @@ jobs:
           echo "NDK_PATH=$ANDROID_HOME/ndk/28.0.13004108" >> $GITHUB_ENV
 
       - name: Accept Android SDK licenses
-A        run: |
+        run: |
           JAVA_OPTS="--add-modules java.xml.bind" yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || echo "License acceptance failed!"
 
       - name: Install build tools and Python dependencies
