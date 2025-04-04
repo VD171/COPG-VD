@@ -81,9 +81,10 @@ jobs:
           wget https://raw.githubusercontent.com/jmpews/Dobby/master/include/dobby.h -O include/dobby/dobby.h
           git clone --depth 1 https://github.com/jmpews/Dobby.git dobby
           cd dobby
+          # Patch closure_bridge_arm64.asm for ELF compatibility
+          sed -i 's/adrp x17, common_closure_bridge_handler@PAGE/ldr x17, =common_closure_bridge_handler/' source/TrampolineBridge/ClosureTrampolineBridge/arm64/closure_bridge_arm64.asm
+          sed -i '/add x17, x17, common_closure_bridge_handler@PAGEOFF/d' source/TrampolineBridge/ClosureTrampolineBridge/arm64/closure_bridge_arm64.asm
           mkdir -p build/arm64-v8a build/armeabi-v7a
-          echo "NDK Clang: ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
-          ls -l ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang || echo "Clang not found"
           cd build/arm64-v8a
           cmake -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake \
                 -DANDROID_ABI=arm64-v8a \
@@ -176,8 +177,8 @@ jobs:
           cat > module/module.prop << 'EOF'
           id=COPG
           name=✨ COPG spoof ✨
-          version=3.3.3
-          versionCode=333
+          version=3.3.2
+          versionCode=332
           author=AlirezaParsi
           description=Spoof your device for games. Click Action button to update your config if needed.
           support=https://t.me/theaosp
