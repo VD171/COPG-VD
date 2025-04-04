@@ -17,7 +17,7 @@ on:
         description: 'Branch to build from'
         type: string
         required: true
-        default: 'dobby'
+        default: 'JSON'
       title:
         description: 'Custom title for Telegram message'
         type: string
@@ -36,7 +36,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
         with:
-          ref: ${{ github.eventinputs.branch }}
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -78,7 +78,7 @@ jobs:
       - name: Fetch Zygisk Headers, JSON Library, and Prebuilt Dobby
         run: |
           mkdir -p zygisk include/nlohmann include/dobby lib/arm64-v8a lib/armeabi-v7a
-          wget https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hh
+          wget https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hpp
           wget https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp -O include/nlohmann/json.hpp
           wget https://raw.githubusercontent.com/jmpews/Dobby/master/include/dobby.h -O include/dobby/dobby.h
           # Download and extract prebuilt Dobby libraries
@@ -86,7 +86,6 @@ jobs:
           wget https://github.com/AlirezaParsi/Dobby/releases/download/Release/cmake-build-android-armeabi-v7a.zip -O armv7.zip
           unzip arm64.zip -d lib/arm64-v8a/
           unzip armv7.zip -d lib/armeabi-v7a/
-          # No need for mv; files are already in lib/arm64-v8a/ and lib/armeabi-v7a/
           ls -la lib/  # Debug: Verify libraries
           ls -la lib/arm64-v8a/  # Debug: Check arm64-v8a contents
           ls -la lib/armeabi-v7a/  # Debug: Check armeabi-v7a contents
@@ -112,6 +111,13 @@ jobs:
             -DCMAKE_BUILD_TYPE=MinSizeRel
             -DDOBBY_DIR=${{ github.workspace }}
             -DDOBBY_LIB=${{ github.workspace }}/lib/arm64-v8a/libdobby.a
+
+      - name: Debug Symbols in libspoof.so (arm64-v8a)
+        run: |
+          # Install binutils for nm
+          sudo apt-get install -y binutils-aarch64-linux-gnu
+          # Dump symbols from libspoof.so
+          aarch64-linux-gnu-nm -D build/arm64-v8a/libspoof.so | grep Dobby || echo "No Dobby symbols found in libspoof.so"
 
       - name: Build Project (arm64-v8a) - End
         id: arm64_end
@@ -142,6 +148,13 @@ jobs:
             -DCMAKE_BUILD_TYPE=MinSizeRel
             -DDOBBY_DIR=${{ github.workspace }}
             -DDOBBY_LIB=${{ github.workspace }}/lib/armeabi-v7a/libdobby.a
+
+      - name: Debug Symbols in libspoof.so (armeabi-v7a)
+        run: |
+          # Install binutils for nm
+          sudo apt-get install -y binutils-arm-linux-gnueabihf
+          # Dump symbols from libspoof.so
+          arm-linux-gnueabihf-nm -D build/armeabi-v7a/libspoof.so | grep Dobby || echo "No Dobby symbols found in libspoof.so"
 
       - name: Build Project (armeabi-v7a) - End
         id: arm32_end
