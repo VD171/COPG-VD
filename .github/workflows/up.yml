@@ -44,7 +44,7 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Set up Android SDK and NDK
+      - name: Set up Android SDK and NDK r25b
         run: |
           echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
           mkdir -p $ANDROID_HOME/cmdline-tools
@@ -60,8 +60,8 @@ jobs:
             exit 1
           fi
           echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973" "platforms;android-34" "build-tools;34.0.0"
-          echo "NDK_PATH=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;25.2.9519653" "platforms;android-34" "build-tools;34.0.0"
+          echo "NDK_PATH=$ANDROID_HOME/ndk/25.2.9519653" >> $GITHUB_ENV
 
       - name: Accept Android SDK licenses
         run: |
@@ -81,29 +81,12 @@ jobs:
           wget https://raw.githubusercontent.com/jmpews/Dobby/master/include/dobby.h -O include/dobby/dobby.h
           git clone --depth 1 https://github.com/jmpews/Dobby.git dobby
           cd dobby
-          # Patch closure_bridge_arm64.asm for ELF compatibility
-          sed -i 's/adrp x17, common_closure_bridge_handler@PAGE/ldr x17, =common_closure_bridge_handler/' source/TrampolineBridge/ClosureTrampolineBridge/arm64/closure_bridge_arm64.asm
-          sed -i '/add x17, x17, common_closure_bridge_handler@PAGEOFF/d' source/TrampolineBridge/ClosureTrampolineBridge/arm64/closure_bridge_arm64.asm
-          mkdir -p build/arm64-v8a build/armeabi-v7a
-          cd build/arm64-v8a
-          cmake -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake \
-                -DANDROID_ABI=arm64-v8a \
-                -DANDROID_PLATFORM=android-34 \
-                -DCMAKE_C_COMPILER=${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang \
-                -DCMAKE_CXX_COMPILER=${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \
-                ../..
-          make -j$(nproc) || { echo "Dobby arm64-v8a build failed"; ls -la; cat CMakeFiles/CMakeError.log; exit 1; }
-          cp libdobby.a ../../lib/arm64-v8a/
-          cd ../armeabi-v7a
-          cmake -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake \
-                -DANDROID_ABI=armeabi-v7a \
-                -DANDROID_PLATFORM=android-34 \
-                -DCMAKE_C_COMPILER=${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang \
-                -DCMAKE_CXX_COMPILER=${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \
-                ../..
-          make -j$(nproc) || { echo "Dobby armeabi-v7a build failed"; ls -la; cat CMakeFiles/CMakeError.log; exit 1; }
-          cp libdobby.a ../../lib/armeabi-v7a/
-          cd ../..
+          # Use Dobby's platform_builder.py for Android
+          python3 scripts/platform_builder.py --platform=android --arch=arm64-v8a --android_ndk_dir=${{ env.NDK_PATH }}
+          cp build/android/arm64-v8a/libdobby.a ../lib/arm64-v8a/
+          python3 scripts/platform_builder.py --platform=android --arch=armeabi-v7a --android_ndk_dir=${{ env.NDK_PATH }}
+          cp build/android/armeabi-v7a/libdobby.a ../lib/armeabi-v7a/
+          cd ..
 
       - name: Fetch config.json
         run: |
