@@ -124,6 +124,7 @@ body.dark-theme {
 
 .tab-btn:hover {
     color: var(--primary);
+    transform: translateY(-2px); /* Lift on hover */
 }
 
 .dark-theme .tab-btn {
@@ -177,23 +178,25 @@ body.dark-theme {
 }
 
 @keyframes slideInLeft {
-    from { transform: translateX(-100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+    0% { transform: translateX(-100%) scale(0.95); opacity: 0; }
+    70% { transform: translateX(0) scale(1.02); opacity: 1; }
+    100% { transform: translateX(0) scale(1); opacity: 1; }
 }
 
 @keyframes slideInRight {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+    0% { transform: translateX(100%) scale(0.95); opacity: 0; }
+    70% { transform: translateX(0) scale(1.02); opacity: 1; }
+    100% { transform: translateX(0) scale(1); opacity: 1; }
 }
 
 @keyframes slideOutLeft {
-    from { transform: translateX(0); opacity: 1; }
-    to { transform: translateX(-100%); opacity: 0; }
+    0% { transform: translateX(0) scale(1); opacity: 1; }
+    100% { transform: translateX(-100%) scale(0.95); opacity: 0; }
 }
 
 @keyframes slideOutRight {
-    from { transform: translateX(0); opacity: 1; }
-    to { transform: translateX(100%); opacity: 0; }
+    0% { transform: translateX(0) scale(1); opacity: 1; }
+    100% { transform: translateX(100%) scale(0.95); opacity: 0; }
 }
 
 /* Cards */
@@ -357,10 +360,17 @@ input:checked + .slider:before {
     position: relative;
     overflow: hidden;
     margin-top: 12px;
+    transform: scale(1); /* Base state for animations */
 }
 
-.dark-theme .action-btn {
-    background: var(--primary-dark);
+.action-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px var(--shadow);
+}
+
+.action-btn:active {
+    transform: scale(0.95); /* Shrink on click */
+    transition: transform 0.1s ease;
 }
 
 .action-btn::after {
@@ -381,9 +391,32 @@ input:checked + .slider:before {
     height: 120px;
 }
 
-.action-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px var(--shadow);
+.action-btn.loading::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.action-btn.loading {
+    padding-left: 32px; /* Space for spinner */
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.dark-theme .action-btn {
+    background: var(--primary-dark);
 }
 
 .dark-theme .action-btn:hover {
@@ -409,7 +442,7 @@ input:checked + .slider:before {
 
 .add-btn:hover {
     background: var(--primary-dark);
-    transform: scale(1.02);
+    transform: scale(1.05) translateX(2px); /* Scale and shift */
 }
 
 .add-btn svg {
@@ -444,6 +477,13 @@ input:checked + .slider:before {
     border: 1px solid var(--border);
     transition: all 0.3s ease;
     position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: cardEnter 0.4s ease forwards;
+}
+
+@keyframes cardEnter {
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .device-card.fade-out, .game-card.fade-out {
@@ -457,7 +497,7 @@ input:checked + .slider:before {
 
 .device-card:hover, .game-card:hover {
     box-shadow: 0 8px 20px var(--shadow);
-    transform: translateY(-2px);
+    transform: translateY(-4px) rotate(1deg); /* Tilt on hover */
 }
 
 .dark-theme .device-card, .dark-theme .game-card {
@@ -600,7 +640,7 @@ h2 {
     padding: 12px;
     max-height: 200px;
     overflow-y: auto;
-    transition: max-height 0.3s ease;
+    transition: max-height 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Elastic ease */
     background: #F5F5F5;
     flex: 1;
     scrollbar-width: thin;
@@ -645,6 +685,14 @@ h2 {
     white-space: pre-wrap;
     word-wrap: break-word;
 }
+
+/* Log Styles */
+.log-info { color: var(--info); }
+.log-success { color: var(--success); }
+.log-error { color: var(--error); }
+.log-warning { color: var(--warning); }
+.log-green { color: #00E676; }
+.log-red { color: var(--error); } /* Changed from yellow to red for 'Removed' logs */
 
 /* Log Icons */
 .log-icon {
@@ -718,13 +766,14 @@ h2 {
 }
 
 @keyframes modalEnter {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+    0% { transform: scale(0.9); opacity: 0; }
+    70% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 @keyframes modalExit {
-    from { transform: scale(1); opacity: 1; }
-    to { transform: scale(0.9); opacity: 0; }
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.9); opacity: 0; }
 }
 
 .dark-theme .modal-content {
@@ -900,14 +949,19 @@ h2 {
 
 .popup-content h3 {
     font-size: 17px;
+    font-weight: 600;
     color: var(--primary);
     margin-bottom: 12px;
 }
 
 .popup-content p {
-    font-size: 15px;
+    font-size: 14px;
     color: var(--text-secondary);
     margin-bottom: 16px;
+}
+
+.dark-theme .popup-content p {
+    color: var(--dark-text-secondary);
 }
 
 .popup-buttons {
@@ -915,48 +969,25 @@ h2 {
     gap: 8px;
 }
 
-/* Device Picker */
 .device-picker {
-    max-height: 50vh;
-    overflow-y: auto;
-    padding: 8px 0;
-    scrollbar-width: thin;
-    scrollbar-color: #B0BEC5 var(--card-bg);
-}
-
-.device-picker::-webkit-scrollbar {
-    width: 6px;
-}
-
-.device-picker::-webkit-scrollbar-thumb {
-    background: #B0BEC5;
-    border-radius: 3px;
-}
-
-.device-picker::-webkit-scrollbar-track {
-    background: var(--card-bg);
-}
-
-.dark-theme .device-picker {
-    scrollbar-color: #616161 var(--dark-card);
-}
-
-.dark-theme .device-picker::-webkit-scrollbar-thumb {
-    background: #616161;
-}
-
-.dark-theme .device-picker::-webkit-scrollbar-track {
-    background: var(--dark-card);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
 }
 
 .picker-device-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 12px;
-    margin-bottom: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
+}
+
+.picker-device-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
 }
 
 .dark-theme .picker-device-card {
@@ -965,78 +996,36 @@ h2 {
 }
 
 .picker-device-card h4 {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
+    margin: 0;
     color: var(--text);
-    margin: 0 0 4px 0;
 }
 
 .dark-theme .picker-device-card h4 {
-    color: #F0F0F0;
+    color: var(--dark-text);
 }
 
 .picker-device-card p {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-secondary);
-    margin: 0;
+    margin: 4px 0 0;
 }
 
 .dark-theme .picker-device-card p {
     color: var(--dark-text-secondary);
 }
 
-.picker-device-card:hover {
-    border-color: var(--primary);
-    transform: scale(1.02);
-}
-
 /* Theme Button */
 .theme-btn {
-    background: rgba(255, 255, 255, 0.2);
+    background: none;
     border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+    font-size: 20px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
+    padding: 6px;
+    transition: transform 0.3s ease;
 }
 
 .theme-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-/* Log Colors */
-.log-error { color: var(--error); }
-.log-success { color: var(--success); }
-.log-info { color: var(--info); }
-.log-warning { color: var(--warning); }
-.log-red { color: var(--error); }
-.log-green { color: var(--success); }
-.log-amber { color: var(--warning); }
-
-/* Responsive Design */
-@media (max-width: 480px) {
-    .search-container {
-        flex-direction: row;
-        gap: 6px;
-    }
-    .search-container input {
-        flex: 1;
-        padding: 8px 12px;
-    }
-    .search-container .add-btn {
-        padding: 8px 10px;
-    }
-    .header h1 { font-size: 20px; }
-    .tab-btn { font-size: 14px; padding: 8px 12px; }
-    .card { padding: 16px; }
-    .section-header h3 { font-size: 16px; }
-    .modal-content { max-width: 90%; }
-    .device-picker-content { 
-        max-width: 90%;
-        width: 90%;
-    }
+    transform: scale(1.2);
 }
