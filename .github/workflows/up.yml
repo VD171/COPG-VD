@@ -17,7 +17,7 @@ on:
         description: 'Branch to build from'
         type: string
         required: true
-        default: 'JSON'
+        default: 'dobby'
       title:
         description: 'Custom title for Telegram message'
         type: string
