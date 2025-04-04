@@ -78,7 +78,7 @@ jobs:
       - name: Fetch Zygisk Headers and JSON Library
         run: |
           mkdir -p zygisk include/nlohmann
-          wget https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hh
+          wget https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hpp
           wget https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp -O include/nlohmann/json.hpp
 
       - name: Fetch config.json
