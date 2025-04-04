@@ -44,38 +44,49 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
+      - name: Set up Android SDK and NDK
+        run: |
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+          unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+          if [ -d "$ANDROID_HOME/cmdline-tools/cmdline-tools" ]; then
+            mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+          elif [ -d "$ANDROID_HOME/cmdline-tools/tools" ]; then
+            mv $ANDROID_HOME/cmdline-tools/tools $ANDROID_HOME/cmdline-tools/latest
+          else
+            echo "Unexpected directory structure after unzip:"
+            ls -la $ANDROID_HOME/cmdline-tools
+            exit 1
+          fi
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;25.2.9519653" "platforms;android-34" "build-tools;34.0.0"
+          echo "NDK_PATH=$ANDROID_HOME/ndk/25.2.9519653" >> $GITHUB_ENV
+
+      - name: Accept Android SDK licenses
+        run: |
+          JAVA_OPTS="--add-modules java.xml.bind" yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || echo "License acceptance failed!"
+
       - name: Install build tools and Python dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake zip curl imagemagick python3 python3-pip
           pip3 install telethon
 
-      - name: Clone Dobby and Setup Environment
+      - name: Fetch Zygisk Headers, JSON Library, and Prebuilt Dobby
         run: |
-          git clone --depth 1 https://github.com/jmpews/Dobby.git dobby
-          cd dobby
-          sh scripts/setup_linux_cross_compile.sh
-          ls -la ~/opt/  # Debug: Verify tools are installed
-
-      - name: Build Dobby for Android
-        run: |
-          cd dobby
-          python3 scripts/platform_builder.py --platform=android --arch=all --cmake_dir=$HOME/opt/cmake-3.25.2 --llvm_dir=$HOME/opt/llvm-15.0.6 --android_ndk_dir=$HOME/opt/ndk-r25b
-          ls -la build/android/  # Debug: Check output
-
-      - name: Copy Dobby Libraries
-        run: |
-          mkdir -p lib/arm64-v8a lib/armeabi-v7a include/dobby
-          cp dobby/build/android/arm64-v8a/libdobby.a lib/arm64-v8a/
-          cp dobby/build/android/armeabi-v7a/libdobby.a lib/armeabi-v7a/
-          cp dobby/include/dobby.h include/dobby/
-          ls -la lib/  # Debug: Verify libraries
-
-      - name: Fetch Zygisk Headers and JSON Library
-        run: |
-          mkdir -p zygisk include/nlohmann
+          mkdir -p zygisk include/nlohmann include/dobby lib/arm64-v8a lib/armeabi-v7a
           wget https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hh
           wget https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp -O include/nlohmann/json.hpp
+          wget https://raw.githubusercontent.com/jmpews/Dobby/master/include/dobby.h -O include/dobby/dobby.h
+          # Download and extract prebuilt Dobby libraries
+          wget https://github.com/AlirezaParsi/Dobby/releases/download/Release/cmake-build-android-arm64-v8a.zip -O arm64.zip
+          wget https://github.com/AlirezaParsi/Dobby/releases/download/Release/cmake-build-android-armeabi-v7a.zip -O armv7.zip
+          unzip arm64.zip -d lib/arm64-v8a/
+          unzip armv7.zip -d lib/armeabi-v7a/
+          mv lib/arm64-v8a/cmake-build-android-arm64-v8a/libdobby.a lib/arm64-v8a/
+          mv lib/armeabi-v7a/cmake-build-android-armeabi-v7a/libdobby.a lib/armeabi-v7a/
+          ls -la lib/  # Debug: Verify libraries
 
       - name: Fetch config.json
         run: |
@@ -91,7 +102,7 @@ jobs:
         with:
           build-dir: build/arm64-v8a
           args: |
-            -DCMAKE_TOOLCHAIN_FILE=$HOME/opt/ndk-r25b/build/cmake/android.toolchain.cmake
+            -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake
             -DANDROID_ABI=arm64-v8a
             -DANDROID_PLATFORM=android-34
             -DCMAKE_MAKE_PROGRAM=/usr/bin/make
@@ -121,7 +132,7 @@ jobs:
         with:
           build-dir: build/armeabi-v7a
           args: |
-            -DCMAKE_TOOLCHAIN_FILE=$HOME/opt/ndk-r25b/build/cmake/android.toolchain.cmake
+            -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake
             -DANDROID_ABI=armeabi-v7a
             -DANDROID_PLATFORM=android-34
             -DCMAKE_MAKE_PROGRAM=/usr/bin/make
