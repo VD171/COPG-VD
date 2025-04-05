@@ -2,6 +2,13 @@
 - **Support Group**:
 https://t.me/TheAOSP
 ---
+## v3.3.3
+- Updated config and fixed Black Shark device model  
+- Changed UI color details and improved dark mode  
+- Improved UI/UX and smoothness  
+- Enhanced animations  
+- Smoother switching between tabs  
+- Added logging to the module for better debugging  
 ## v3.3.2
 - fix installation for magisk 
 ## v3.3.1
