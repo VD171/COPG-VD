@@ -29,7 +29,6 @@ function appendToOutput(content, type = 'info') {
     let colorClass = 'log-info';
     let iconClass = 'icon-info';
     
-    // Prioritize explicit type over content-based rules
     if (type === 'error') {
         colorClass = 'log-error';
         iconClass = 'icon-error';
@@ -40,12 +39,11 @@ function appendToOutput(content, type = 'info') {
         colorClass = 'log-warning';
         iconClass = 'icon-warning';
     } else {
-        // Updated content-based rules
         if (content.includes('[!]') || content.includes('❌')) {
             colorClass = 'log-error';
             iconClass = 'icon-error';
         } else if (content.includes('Deleted') || content.includes('Removed') || content.includes('Disabled')) {
-            colorClass = 'log-red'; // Changed 'Removed' to red instead of yellow
+            colorClass = 'log-red';
             iconClass = 'icon-error';
         } else if (content.includes('✅')) {
             colorClass = 'log-success';
@@ -130,7 +128,7 @@ function renderDeviceList() {
             const deviceCard = document.createElement('div');
             deviceCard.className = 'device-card';
             deviceCard.dataset.key = key;
-            deviceCard.style.animationDelay = `${index * 0.1}s`; // Staggered entrance
+            deviceCard.style.animationDelay = `${Math.min(index * 0.05, 0.5)}s`;
             deviceCard.innerHTML = `
                 <div class="device-header">
                     <h4 class="device-name">${deviceName}</h4>
@@ -150,9 +148,7 @@ function renderDeviceList() {
                     </div>
                 </div>
                 <div class="device-details">
-                    <div><strong>Brand:</strong> ${value.BRAND || 'Unknown'}</div>
-                    <div><strong>Model:</strong> ${value.MODEL || 'Unknown'}</div>
-                    <div><strong>Games:</strong> ${gameCount}</div>
+                    Games associated: ${gameCount}
                 </div>
             `;
             deviceList.appendChild(deviceCard);
@@ -188,13 +184,14 @@ function renderGameList() {
     for (const [key, value] of Object.entries(currentConfig)) {
         if (Array.isArray(value) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
             const deviceKey = `${key}_DEVICE`;
-            const deviceName = currentConfig[deviceKey]?.DEVICE || key.replace('PACKAGES_', '');
+            const deviceData = currentConfig[deviceKey] || {};
+            const deviceName = deviceData.DEVICE || key.replace('PACKAGES_', '');
             value.forEach(gamePackage => {
                 const gameCard = document.createElement('div');
                 gameCard.className = 'game-card';
                 gameCard.dataset.package = gamePackage;
                 gameCard.dataset.device = key;
-                gameCard.style.animationDelay = `${index * 0.1}s`; // Staggered entrance
+                gameCard.style.animationDelay = `${Math.min(index * 0.05, 0.5)}s`;
                 gameCard.innerHTML = `
                     <div class="game-header">
                         <h4 class="game-name">${gamePackage}</h4>
@@ -214,7 +211,7 @@ function renderGameList() {
                         </div>
                     </div>
                     <div class="game-details">
-                        <div><strong>Spoofed as:</strong> ${deviceName}</div>
+                        Spoofed as: ${deviceName}
                     </div>
                 `;
                 gameList.appendChild(gameCard);
@@ -484,7 +481,7 @@ async function deleteGame(gamePackage, deviceKey) {
             await saveConfig();
             renderGameList();
             renderDeviceList();
-            appendToOutput(`Removed "${gamePackage}" from "${deviceName}"`, 'red'); // Changed to 'red'
+            appendToOutput(`Removed "${gamePackage}" from "${deviceName}"`, 'red');
             showPopup('reboot-popup');
         } catch (error) {
             appendToOutput(`Failed to delete game: ${error}`, 'error');
@@ -594,20 +591,27 @@ function switchTab(tabId, direction = null) {
     
     if (currentTabElement) {
         currentTabElement.classList.remove('active');
-        currentTabElement.classList.add(inferredDirection === 'left' ? 'slide-out-right' : 'slide-out-left');
+        currentTabElement.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        currentTabElement.style.opacity = '0';
+        currentTabElement.style.transform = inferredDirection === 'left' ? 'translateX(-100%)' : 'translateX(100%)';
+        currentTabElement.addEventListener('transitionend', () => {
+            currentTabElement.style.display = 'none';
+            currentTabElement.style.transform = 'translateX(0)'; // Reset transform
+        }, { once: true });
     }
     
-    newTabElement.classList.add('active');
-    newTabElement.classList.add(inferredDirection === 'left' ? 'slide-in-left' : 'slide-in-right');
+    newTabElement.style.display = 'block';
+    newTabElement.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    newTabElement.style.transform = inferredDirection === 'left' ? 'translateX(100%)' : 'translateX(-100%)';
+    newTabElement.style.opacity = '0';
+    requestAnimationFrame(() => {
+        newTabElement.classList.add('active');
+        newTabElement.style.transform = 'translateX(0)';
+        newTabElement.style.opacity = '1';
+    });
     
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById(`tab-${tabId}`).classList.add('active');
-    
-    setTimeout(() => {
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.remove('slide-in-left', 'slide-in-right', 'slide-out-left', 'slide-out-right');
-        });
-    }, 400);
 }
 
 function setupSwipeNavigation() {
@@ -617,31 +621,100 @@ function setupSwipeNavigation() {
     let touchMoveX = 0;
     let touchMoveY = 0;
     const tabs = ['settings', 'devices', 'games'];
-    
+    const threshold = 100;
+    let isScrolling = false;
+    let isSwiping = false;
+
+    // Reset all tabs to initial state
+    function resetTabStates() {
+        tabs.forEach(tab => {
+            const tabElement = document.getElementById(`${tab}-tab`);
+            if (tabElement) {
+                tabElement.style.transition = 'none';
+                tabElement.style.transform = 'translateX(0)';
+                tabElement.style.opacity = tabElement.classList.contains('active') ? '1' : '0';
+                tabElement.style.display = tabElement.classList.contains('active') ? 'block' : 'none';
+            }
+        });
+    }
+
     container.addEventListener('touchstart', (e) => {
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
+        isScrolling = false;
+        isSwiping = false;
     }, { passive: true });
 
     container.addEventListener('touchmove', (e) => {
         touchMoveX = e.touches[0].clientX;
         touchMoveY = e.touches[0].clientY;
+        const diffX = touchMoveX - touchStartX;
+        const diffY = touchMoveY - touchStartY;
+        const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`).classList.contains('active'));
+        const currentIndex = tabs.indexOf(currentTab);
+        const currentTabElement = document.getElementById(`${currentTab}-tab`);
+
+        // Detect vertical scroll
+        if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 20) {
+            isScrolling = true;
+            return;
+        }
+
+        if (isScrolling || (currentIndex === 0 && diffX > 0) || (currentIndex === tabs.length - 1 && diffX < 0)) return;
+
+        isSwiping = true;
+        currentTabElement.style.transition = 'none';
+        currentTabElement.style.transform = `translateX(${diffX}px)`;
+        currentTabElement.style.opacity = Math.max(0.2, 1 - Math.abs(diffX) / window.innerWidth);
+
+        const nextTab = diffX < 0 ? tabs[currentIndex + 1] : tabs[currentIndex - 1];
+        const nextTabElement = document.getElementById(`${nextTab}-tab`);
+        if (nextTabElement) {
+            nextTabElement.style.display = 'block';
+            nextTabElement.style.transition = 'none';
+            nextTabElement.style.transform = `translateX(${diffX < 0 ? window.innerWidth + diffX : -window.innerWidth + diffX}px)`;
+            nextTabElement.style.opacity = Math.min(1, Math.abs(diffX) / window.innerWidth);
+        }
     }, { passive: true });
 
     container.addEventListener('touchend', (e) => {
-        const diffX = touchStartX - touchMoveX;
-        const diffY = touchStartY - touchMoveY;
+        if (isScrolling || !isSwiping) {
+            resetTabStates();
+            return;
+        }
+
+        const diffX = touchMoveX - touchStartX;
         const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`).classList.contains('active'));
         const currentIndex = tabs.indexOf(currentTab);
-        
-        if (Math.abs(diffY) > Math.abs(diffX) || Math.abs(diffX) < 80) return;
-        
-        if (diffX > 0 && currentIndex < tabs.length - 1) {
-            switchTab(tabs[currentIndex + 1], 'left');
-        } else if (diffX < 0 && currentIndex > 0) {
-            switchTab(tabs[currentIndex - 1], 'right');
+        const currentTabElement = document.getElementById(`${currentTab}-tab`);
+        const nextTab = diffX < 0 ? tabs[currentIndex + 1] : tabs[currentIndex - 1];
+        const nextTabElement = document.getElementById(`${nextTab}-tab`);
+
+        currentTabElement.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        if (nextTabElement) nextTabElement.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+
+        if (Math.abs(diffX) > threshold && nextTab) {
+            // Commit to next tab
+            switchTab(nextTab, diffX < 0 ? 'left' : 'right');
+        } else {
+            // Revert to current tab
+            currentTabElement.style.transform = 'translateX(0)';
+            currentTabElement.style.opacity = '1';
+            if (nextTabElement) {
+                nextTabElement.style.transform = diffX < 0 ? 'translateX(100%)' : 'translateX(-100%)';
+                nextTabElement.style.opacity = '0';
+                nextTabElement.addEventListener('transitionend', () => {
+                    nextTabElement.style.display = 'none';
+                    resetTabStates(); // Ensure clean state after revert
+                }, { once: true });
+            } else {
+                resetTabStates(); // Reset if no next tab
+            }
         }
     });
+
+    // Ensure initial state
+    resetTabStates();
 }
 
 async function updateGameList() {
@@ -763,10 +836,7 @@ function applyEventListeners() {
         const searchTerm = e.target.value.toLowerCase();
         document.querySelectorAll('.device-card').forEach(card => {
             const name = card.querySelector('.device-name').textContent.toLowerCase();
-            const brand = card.querySelector('.device-details div:nth-child(1)').textContent.toLowerCase().replace('brand: ', '');
-            const model = card.querySelector('.device-details div:nth-child(2)').textContent.toLowerCase().replace('model: ', '');
-            const matches = name.includes(searchTerm) || brand.includes(searchTerm) || model.includes(searchTerm);
-            card.style.display = matches ? '' : 'none';
+            card.style.display = name.includes(searchTerm) ? 'block' : 'none';
         });
     });
 
@@ -774,9 +844,8 @@ function applyEventListeners() {
         const searchTerm = e.target.value.toLowerCase();
         document.querySelectorAll('.game-card').forEach(card => {
             const name = card.querySelector('.game-name').textContent.toLowerCase();
-            const device = card.querySelector('.game-details div').textContent.toLowerCase().replace('spoofed as: ', '');
-            const matches = name.includes(searchTerm) || device.includes(searchTerm);
-            card.style.display = matches ? '' : 'none';
+            const device = card.querySelector('.game-details').textContent.toLowerCase().replace('spoofed as: ', '');
+            card.style.display = (name.includes(searchTerm) || device.includes(searchTerm)) ? 'block' : 'none';
         });
     });
 
@@ -785,12 +854,13 @@ function applyEventListeners() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     const savedTheme = localStorage.getItem('theme');
-    if (!savedTheme || savedTheme === 'dark') {
+    if (!savedTheme || savedTheme === 'light') {
+        document.body.classList.remove('dark-theme');
+        document.getElementById('theme-icon').textContent = '☀️';
+        localStorage.setItem('theme', 'light');
+    } else {
         document.body.classList.add('dark-theme');
         document.getElementById('theme-icon').textContent = '🌙';
-        localStorage.setItem('theme', 'dark');
-    } else {
-        document.getElementById('theme-icon').textContent = '☀️';
     }
     appendToOutput("UI initialized", 'success');
     loadVersion();
