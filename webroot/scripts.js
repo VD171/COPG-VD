@@ -117,6 +117,7 @@ async function loadConfig() {
 
 function renderDeviceList() {
     const deviceList = document.getElementById('device-list');
+    if (!deviceList) return appendToOutput("Error: 'device-list' not found", 'error');
     deviceList.innerHTML = '';
     let index = 0;
     for (const [key, value] of Object.entries(currentConfig)) {
@@ -124,6 +125,7 @@ function renderDeviceList() {
             const deviceName = value.DEVICE || key.replace('PACKAGES_', '').replace('_DEVICE', '');
             const packageKey = key.replace('_DEVICE', '');
             const gameCount = Array.isArray(currentConfig[packageKey]) ? currentConfig[packageKey].length : 0;
+            const model = value.MODEL || 'Unknown';
             
             const deviceCard = document.createElement('div');
             deviceCard.className = 'device-card';
@@ -148,6 +150,7 @@ function renderDeviceList() {
                     </div>
                 </div>
                 <div class="device-details">
+                    Model: ${model}<br>
                     Games associated: ${gameCount}
                 </div>
             `;
@@ -179,6 +182,7 @@ function deleteDeviceHandler(e) {
 
 function renderGameList() {
     const gameList = document.getElementById('game-list');
+    if (!gameList) return appendToOutput("Error: 'game-list' not found", 'error');
     gameList.innerHTML = '';
     let index = 0;
     for (const [key, value] of Object.entries(currentConfig)) {
@@ -596,18 +600,28 @@ function switchTab(tabId, direction = null) {
         currentTabElement.style.transform = inferredDirection === 'left' ? 'translateX(-100%)' : 'translateX(100%)';
         currentTabElement.addEventListener('transitionend', () => {
             currentTabElement.style.display = 'none';
-            currentTabElement.style.transform = 'translateX(0)'; // Reset transform
+            currentTabElement.style.transform = 'translateX(0)';
+            currentTabElement.style.opacity = '0';
         }, { once: true });
     }
     
     newTabElement.style.display = 'block';
-    newTabElement.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-    newTabElement.style.transform = inferredDirection === 'left' ? 'translateX(100%)' : 'translateX(-100%)';
     newTabElement.style.opacity = '0';
+    newTabElement.style.transform = inferredDirection === 'left' ? 'translateX(100%)' : 'translateX(-100%)';
     requestAnimationFrame(() => {
         newTabElement.classList.add('active');
+        newTabElement.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
         newTabElement.style.transform = 'translateX(0)';
         newTabElement.style.opacity = '1';
+        
+        // Force reflow and re-render for Devices tab
+        if (tabId === 'devices') {
+            const devicesContent = document.getElementById('devices-tab');
+            devicesContent.style.display = 'none';
+            devicesContent.offsetHeight; // Trigger reflow
+            devicesContent.style.display = 'block';
+            renderDeviceList(); // Ensure content is rendered
+        }
     });
     
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -621,11 +635,10 @@ function setupSwipeNavigation() {
     let touchMoveX = 0;
     let touchMoveY = 0;
     const tabs = ['settings', 'devices', 'games'];
-    const threshold = 100;
-    let isScrolling = false;
+    const swipeThreshold = 50;
+    const verticalThreshold = 50;
     let isSwiping = false;
 
-    // Reset all tabs to initial state
     function resetTabStates() {
         tabs.forEach(tab => {
             const tabElement = document.getElementById(`${tab}-tab`);
@@ -641,7 +654,6 @@ function setupSwipeNavigation() {
     container.addEventListener('touchstart', (e) => {
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
-        isScrolling = false;
         isSwiping = false;
     }, { passive: true });
 
@@ -652,17 +664,15 @@ function setupSwipeNavigation() {
         const diffY = touchMoveY - touchStartY;
         const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`).classList.contains('active'));
         const currentIndex = tabs.indexOf(currentTab);
-        const currentTabElement = document.getElementById(`${currentTab}-tab`);
 
-        // Detect vertical scroll
-        if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 20) {
-            isScrolling = true;
-            return;
-        }
+        if (Math.abs(diffY) > verticalThreshold || Math.abs(diffX) < 20) return;
 
-        if (isScrolling || (currentIndex === 0 && diffX > 0) || (currentIndex === tabs.length - 1 && diffX < 0)) return;
-
+        e.preventDefault();
         isSwiping = true;
+
+        if ((currentIndex === 0 && diffX > 0) || (currentIndex === tabs.length - 1 && diffX < 0)) return;
+
+        const currentTabElement = document.getElementById(`${currentTab}-tab`);
         currentTabElement.style.transition = 'none';
         currentTabElement.style.transform = `translateX(${diffX}px)`;
         currentTabElement.style.opacity = Math.max(0.2, 1 - Math.abs(diffX) / window.innerWidth);
@@ -675,15 +685,13 @@ function setupSwipeNavigation() {
             nextTabElement.style.transform = `translateX(${diffX < 0 ? window.innerWidth + diffX : -window.innerWidth + diffX}px)`;
             nextTabElement.style.opacity = Math.min(1, Math.abs(diffX) / window.innerWidth);
         }
-    }, { passive: true });
+    }, { passive: false });
 
     container.addEventListener('touchend', (e) => {
-        if (isScrolling || !isSwiping) {
-            resetTabStates();
-            return;
-        }
+        if (!isSwiping) return;
 
         const diffX = touchMoveX - touchStartX;
+        const diffY = touchMoveY - touchStartY;
         const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`).classList.contains('active'));
         const currentIndex = tabs.indexOf(currentTab);
         const currentTabElement = document.getElementById(`${currentTab}-tab`);
@@ -693,11 +701,9 @@ function setupSwipeNavigation() {
         currentTabElement.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
         if (nextTabElement) nextTabElement.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
 
-        if (Math.abs(diffX) > threshold && nextTab) {
-            // Commit to next tab
+        if (Math.abs(diffX) > swipeThreshold && Math.abs(diffY) <= verticalThreshold && nextTab) {
             switchTab(nextTab, diffX < 0 ? 'left' : 'right');
         } else {
-            // Revert to current tab
             currentTabElement.style.transform = 'translateX(0)';
             currentTabElement.style.opacity = '1';
             if (nextTabElement) {
@@ -705,15 +711,14 @@ function setupSwipeNavigation() {
                 nextTabElement.style.opacity = '0';
                 nextTabElement.addEventListener('transitionend', () => {
                     nextTabElement.style.display = 'none';
-                    resetTabStates(); // Ensure clean state after revert
+                    resetTabStates();
                 }, { once: true });
             } else {
-                resetTabStates(); // Reset if no next tab
+                resetTabStates();
             }
         }
     });
 
-    // Ensure initial state
     resetTabStates();
 }
 
@@ -741,26 +746,46 @@ async function updateGameList() {
 function applyEventListeners() {
     document.getElementById('toggle-auto-brightness').addEventListener('change', async (e) => {
         const isChecked = e.target.checked;
-        await execCommand(`sed -i '/AUTO_BRIGHTNESS_OFF=/d' /data/adb/copg_state; echo "AUTO_BRIGHTNESS_OFF=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-        appendToOutput(isChecked ? "Auto-Brightness Disabled" : "Auto-Brightness Enabled", isChecked ? 'success' : 'error');
+        try {
+            await execCommand(`sed -i '/AUTO_BRIGHTNESS_OFF=/d' /data/adb/copg_state; echo "AUTO_BRIGHTNESS_OFF=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
+            appendToOutput(isChecked ? "Auto-Brightness Disabled" : "Auto-Brightness Enabled", isChecked ? 'success' : 'error');
+        } catch (error) {
+            appendToOutput(`Failed to update auto-brightness: ${error}`, 'error');
+            e.target.checked = !isChecked;
+        }
     });
 
     document.getElementById('toggle-dnd').addEventListener('change', async (e) => {
         const isChecked = e.target.checked;
-        await execCommand(`sed -i '/DND_ON=/d' /data/adb/copg_state; echo "DND_ON=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-        appendToOutput(isChecked ? "DND Enabled" : "DND Disabled", isChecked ? 'success' : 'error');
+        try {
+            await execCommand(`sed -i '/DND_ON=/d' /data/adb/copg_state; echo "DND_ON=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
+            appendToOutput(isChecked ? "DND Enabled" : "DND Disabled", isChecked ? 'success' : 'error');
+        } catch (error) {
+            appendToOutput(`Failed to update DND: ${error}`, 'error');
+            e.target.checked = !isChecked;
+        }
     });
 
     document.getElementById('toggle-logging').addEventListener('change', async (e) => {
         const isChecked = e.target.checked;
-        await execCommand(`sed -i '/DISABLE_LOGGING=/d' /data/adb/copg_state; echo "DISABLE_LOGGING=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-        appendToOutput(isChecked ? "Logging Disabled" : "Logging Enabled", isChecked ? 'success' : 'error');
+        try {
+            await execCommand(`sed -i '/DISABLE_LOGGING=/d' /data/adb/copg_state; echo "DISABLE_LOGGING=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
+            appendToOutput(isChecked ? "Logging Disabled" : "Logging Enabled", isChecked ? 'success' : 'error');
+        } catch (error) {
+            appendToOutput(`Failed to update logging: ${error}`, 'error');
+            e.target.checked = !isChecked;
+        }
     });
 
     document.getElementById('toggle-keep-screen-on').addEventListener('change', async (e) => {
         const isChecked = e.target.checked;
-        await execCommand(`sed -i '/KEEP_SCREEN_ON=/d' /data/adb/copg_state; echo "KEEP_SCREEN_ON=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-        appendToOutput(isChecked ? "Keep Screen On Enabled" : "Keep Screen On Disabled", isChecked ? 'success' : 'error');
+        try {
+            await execCommand(`sed -i '/KEEP_SCREEN_ON=/d' /data/adb/copg_state; echo "KEEP_SCREEN_ON=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
+            appendToOutput(isChecked ? "Keep Screen On Enabled" : "Keep Screen On Disabled", isChecked ? 'success' : 'error');
+        } catch (error) {
+            appendToOutput(`Failed to update keep screen on: ${error}`, 'error');
+            e.target.checked = !isChecked;
+        }
     });
 
     document.getElementById('update-config').addEventListener('click', () => {
@@ -775,8 +800,8 @@ function applyEventListeners() {
     });
 
     document.getElementById('update-no').addEventListener('click', () => {
-        hidePopup('update-confirm-popup');
-        appendToOutput("Update canceled");
+        closePopup('update-confirm-popup');
+        appendToOutput("Update canceled", 'info');
     });
 
     document.getElementById('reboot-yes').addEventListener('click', async () => {
@@ -785,8 +810,8 @@ function applyEventListeners() {
     });
 
     document.getElementById('reboot-no').addEventListener('click', () => {
-        hidePopup('reboot-popup');
-        appendToOutput("Reboot canceled");
+        closePopup('reboot-popup');
+        appendToOutput("Reboot canceled", 'info');
     });
 
     document.getElementById('log-header').addEventListener('click', toggleLogSection);
@@ -833,10 +858,21 @@ function applyEventListeners() {
     });
 
     document.getElementById('device-search').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
+        const searchTerm = e.target.value.toLowerCase().trim();
         document.querySelectorAll('.device-card').forEach(card => {
-            const name = card.querySelector('.device-name').textContent.toLowerCase();
-            card.style.display = name.includes(searchTerm) ? 'block' : 'none';
+            const key = card.dataset.key;
+            const deviceData = currentConfig[key] || {};
+            const searchableText = [
+                deviceData.DEVICE || '',
+                deviceData.BRAND || '',
+                deviceData.MODEL || '',
+                deviceData.MANUFACTURER || '',
+                deviceData.FINGERPRINT || '',
+                deviceData.BUILD_ID || '',
+                deviceData.VERSION_RELEASE || '',
+                (deviceData.CPUINFO || '').replace(/\\n/g, ' ').replace(/\\t/g, ' ')
+            ].join(' ').toLowerCase();
+            card.style.display = searchableText.includes(searchTerm) ? 'block' : 'none';
         });
     });
 
