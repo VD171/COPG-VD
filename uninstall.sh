@@ -1,4 +1,5 @@
 rm -rf /data/adb/modules/COPG
+rm -rf /data/adb/copg_state
 # Don't modify anything after this
 if [ -f $INFO ]; then
   while read LINE; do
