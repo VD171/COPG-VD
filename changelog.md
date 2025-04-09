@@ -8,7 +8,7 @@ https://t.me/TheAOSP
 - Added Zygisk Next disable detection
 - Added better ouput log for installation
 - Added multiple root detection
-- Added better deleting 
+- Added better module deleting 
 ## v3.3.3
 - Updated config and fixed Black Shark device model  
 - Changed UI color details and improved dark mode  
