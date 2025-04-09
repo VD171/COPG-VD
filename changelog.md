@@ -2,6 +2,13 @@
 - **Support Group**:
 https://t.me/TheAOSP
 ---
+## v3.3.4
+- Added apatch support
+- Added better architecture detection
+- Added Zygisk Next disable detection
+- Added better ouput log for installation
+- Added multiple root detection
+- Added better deletions 
 ## v3.3.3
 - Updated config and fixed Black Shark device model  
 - Changed UI color details and improved dark mode  
