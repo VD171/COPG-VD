@@ -1,3 +1,5 @@
+#!/system/bin/sh
+
 # ================================================
 # COPG Module Installation Script
 # ================================================
@@ -39,18 +41,53 @@ check_zygisk() {
     abort "*********************************************************"
   fi
 
-  # Check Zygisk state
+  # Handle Magisk cases
+  if [ "$ROOT_SOLUTION" = "Magisk" ]; then
+    # First check native Zygisk
+    ZYGISK_STATUS=$(magisk --sqlite "SELECT value FROM settings WHERE key='zygisk';" 2>/dev/null)
+    
+    if [ "$ZYGISK_STATUS" = "value=1" ]; then
+      # Native Zygisk is enabled
+      if [ -d "$ZYGISK_MODULE" ]; then
+        if magisk --sqlite "SELECT value FROM modules WHERE name='zygisksu' AND enable=0;" 2>/dev/null | grep -q "1"; then
+          ui_print "- ⚠ Zygisk Next is installed but disabled"
+          ui_print "- Native Zygisk is enabled using native Zygisk ..."
+        fi
+      fi
+      ui_print "- ✔ Magisk with native Zygisk detected"
+      return 0
+    fi
+    
+    # Check Zygisk Next if native Zygisk is disabled
+    if [ -d "$ZYGISK_MODULE" ]; then
+      if magisk --sqlite "SELECT value FROM modules WHERE name='zygisksu' AND enable=0;" 2>/dev/null | grep -q "1"; then
+        ui_print "*********************************************************"
+        ui_print "! Zygisk Next is disabled and native Zygisk not enabled!"
+        ui_print "! Please enable either:"
+        ui_print "! 1. Native Zygisk: Settings → Enable Zygisk → Reboot"
+        ui_print "! 2. Zygisk Next: Modules → Enable Zygisk Next"
+        abort "*********************************************************"
+      fi
+      ui_print "- ✔ Magisk with Zygisk Next detected"
+      return 0
+    fi
+    
+    # No Zygisk available
+    ui_print "*********************************************************"
+    ui_print "! Magisk detected but no Zygisk enabled!"
+    ui_print "! Please enable native Zygisk in Settings"
+    abort "*********************************************************"
+  fi
+
+  # Handle APatch/KernelSU
   if [ -d "$ZYGISK_MODULE" ]; then
     case "$ROOT_SOLUTION" in
       "APatch")
         if apd module list | grep -q "zygisksu.*disabled"; then
           ui_print "*********************************************************"
           ui_print "! Zygisk Next is disabled in APatch!"
-          ui_print "! Required steps:"
-          ui_print "! 1. Open APatch Manager"
-          ui_print "! 2. Enable Zygisk Next module"
+          ui_print "! Please enable it in APatch Manager"
           abort "*********************************************************"
-        fi
         ;;
       "KernelSU")
         if ksud module list | grep -q "\"name\":\"zygisksu\".*\"enable\":false"; then
@@ -60,36 +97,11 @@ check_zygisk() {
           abort "*********************************************************"
         fi
         ;;
-      "Magisk")
-        if magisk --sqlite "SELECT value FROM modules WHERE name='zygisksu' AND enable=0;" 2>/dev/null | grep -q "1"; then
-          ui_print "*********************************************************"
-          ui_print "! Zygisk Next is disabled in Magisk!"
-          ui_print "! Required steps:"
-          ui_print "! 1. Open Magisk app"
-          ui_print "! 2. Go to Modules tab"
-          ui_print "! 3. Enable Zygisk Next"
-          abort "*********************************************************"
-        fi
-        ;;
     esac
     ui_print "- ✔ ${ROOT_SOLUTION} with Zygisk Next detected"
-  elif [ "$ROOT_SOLUTION" = "Magisk" ]; then
-    if magisk --sqlite "SELECT value FROM settings WHERE key='zygisk';" 2>/dev/null | grep -q "value=1"; then
-      ui_print "- ✔ Magisk with native Zygisk detected"
-    else
-      ui_print "*********************************************************"
-      ui_print "! Magisk detected but Zygisk not enabled!"
-      ui_print "! Required steps:"
-      ui_print "! 1. Open Magisk Settings"
-      ui_print "! 2. Enable Zygisk option"
-      ui_print "! 3. Reboot your device"
-      abort "*********************************************************"
-    fi
   else
     ui_print "*********************************************************"
     ui_print "! ${ROOT_SOLUTION} detected but Zygisk Next not installed!"
-    ui_print "! Required steps:"
-    ui_print "! Install Zygisk Next module"
     abort "*********************************************************"
   fi
 }
