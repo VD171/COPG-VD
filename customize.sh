@@ -1,5 +1,3 @@
-#!/system/bin/sh
-
 # ================================================
 # COPG Module Installation Script
 # ================================================
@@ -20,146 +18,138 @@ if [ "$API" -lt 26 ]; then
   abort "*********************************************************"
 fi
 
-# Function to check module state
-is_module_disabled() {
-  local module_path="$1"
-  local root_solution="$2"
-  
-  [ -f "$module_path/disable" ] && return 0
-  
-  case "$root_solution" in
-    "KernelSU")
-      command -v ksud >/dev/null && ksud module list | grep -q "\"name\":\"zygisksu\".*\"enable\":false" && return 0
-      ;;
-    "Magisk")
-      command -v magisk >/dev/null && magisk --sqlite "SELECT value FROM modules WHERE name='zygisksu' AND enable=0;" 2>/dev/null | grep -q "1" && return 0
-      ;;
-    "APatch")
-      command -v apd >/dev/null && apd module list | grep -q "zygisksu.*disabled" && return 0
-      ;;
-  esac
-  return 1
-}
-
 check_zygisk() {
   ZYGISK_MODULE="/data/adb/modules/zygisksu"
   NEED_REBOOT=false
-  
-  # Detect root solutions
-  if [ -d "/data/adb/ap" ]; then
+
+  # Detect root solution using official binaries
+  if command -v apd >/dev/null; then
     ROOT_SOLUTION="APatch"
-  elif [ -d "/data/adb/ksu" ]; then
+  elif command -v ksud >/dev/null; then
     ROOT_SOLUTION="KernelSU"
-  elif [ -d "/data/adb/magisk" ]; then
+  elif command -v magisk >/dev/null; then
     ROOT_SOLUTION="Magisk"
   else
     ui_print "*********************************************************"
     ui_print "! No supported root solution detected!"
-    ui_print "! Requires Magisk/KernelSU/APatch with Zygisk support"
+    ui_print "! Requires one of:"
+    ui_print "! • Magisk v26.4+ with Zygisk"
+    ui_print "! • KernelSU v0.7.0+ with Zygisk Next"
+    ui_print "! • APatch v1.0.7+ with Zygisk Next"
     abort "*********************************************************"
   fi
 
   # Check Zygisk state
   if [ -d "$ZYGISK_MODULE" ]; then
-    if is_module_disabled "$ZYGISK_MODULE" "$ROOT_SOLUTION"; then
-      ui_print "*********************************************************"
-      ui_print "! Zygisk Next is disabled!"
-      if [ "$ROOT_SOLUTION" = "Magisk" ]; then
-        ui_print "! Please enable it in Magisk Manager:"
-        ui_print "! 1. Open Magisk app"
-        ui_print "! 2. Go to Modules tab"
-        ui_print "! 3. Enable Zygisk Next"
-      else
-        ui_print "! Please enable it in ${ROOT_SOLUTION} Manager"
-      fi
-      [ "$ROOT_SOLUTION" = "APatch" ] && ui_print "! Then reboot your device"
-      abort "*********************************************************"
-    fi
-    ui_print "- ${ROOT_SOLUTION} with Zygisk Next detected"
+    case "$ROOT_SOLUTION" in
+      "APatch")
+        if apd module list | grep -q "zygisksu.*disabled"; then
+          ui_print "*********************************************************"
+          ui_print "! Zygisk Next is disabled in APatch!"
+          ui_print "! Required steps:"
+          ui_print "! 1. Open APatch Manager"
+          ui_print "! 2. Enable Zygisk Next module"
+          abort "*********************************************************"
+        fi
+        ;;
+      "KernelSU")
+        if ksud module list | grep -q "\"name\":\"zygisksu\".*\"enable\":false"; then
+          ui_print "*********************************************************"
+          ui_print "! Zygisk Next is disabled in KernelSU!"
+          ui_print "! Please enable it in KernelSU Manager"
+          abort "*********************************************************"
+        fi
+        ;;
+      "Magisk")
+        if magisk --sqlite "SELECT value FROM modules WHERE name='zygisksu' AND enable=0;" 2>/dev/null | grep -q "1"; then
+          ui_print "*********************************************************"
+          ui_print "! Zygisk Next is disabled in Magisk!"
+          ui_print "! Required steps:"
+          ui_print "! 1. Open Magisk app"
+          ui_print "! 2. Go to Modules tab"
+          ui_print "! 3. Enable Zygisk Next"
+          abort "*********************************************************"
+        fi
+        ;;
+    esac
+    ui_print "- ✔ ${ROOT_SOLUTION} with Zygisk Next detected"
   elif [ "$ROOT_SOLUTION" = "Magisk" ]; then
-    ZYGISK_STATUS=$(magisk --sqlite "SELECT value FROM settings WHERE key='zygisk';" 2>/dev/null)
-    if [ "$ZYGISK_STATUS" = "value=1" ]; then
-      ui_print "- Magisk with native Zygisk detected"
+    if magisk --sqlite "SELECT value FROM settings WHERE key='zygisk';" 2>/dev/null | grep -q "value=1"; then
+      ui_print "- ✔ Magisk with native Zygisk detected"
     else
       ui_print "*********************************************************"
       ui_print "! Magisk detected but Zygisk not enabled!"
-      ui_print "! Please enable Zygisk in Magisk Settings:"
-      ui_print "! 1. Open Magisk app"
-      ui_print "! 2. Go to Settings"
-      ui_print "! 3. Enable 'Zygisk' option"
-      ui_print "! 4. Reboot and reinstall this module"
+      ui_print "! Required steps:"
+      ui_print "! 1. Open Magisk Settings"
+      ui_print "! 2. Enable Zygisk option"
+      ui_print "! 3. Reboot your device"
       abort "*********************************************************"
     fi
   else
     ui_print "*********************************************************"
     ui_print "! ${ROOT_SOLUTION} detected but Zygisk Next not installed!"
-    ui_print "! Please install Zygisk Next module"
+    ui_print "! Required steps:"
+    ui_print "! Install Zygisk Next module"
     abort "*********************************************************"
-  fi
-
-  if [ "$ROOT_SOLUTION" = "APatch" ]; then
-    NEED_REBOOT=true
   fi
 }
 
 check_zygisk
 
 # ┌──────────────────────────────────────────────┐
-# │            Binary Installation              │
+# │            ARM Binary Installation          │
 # └──────────────────────────────────────────────┘
-MODDIR=${MODPATH:-$MODDIR}
-BIN_DIR="$MODDIR/bin"
-TARGET_DIR="$MODPATH/system/bin"
+ui_print "- 🔄 Detecting device architecture"
 
-ui_print "- Installing jq binary for your architecture"
+# Supported ARM variants
+ARM64_VARIANTS="arm64-v8a|armv8-a|armv9-a|arm64"
+ARM32_VARIANTS="armeabi-v7a|armeabi|armv7-a|armv7l|armhf|arm"
 
-# Get ALL supported ABIs in priority order
+# Get device ABI
+PRIMARY_ABI=$(getprop ro.product.cpu.abi)
 ABI_LIST=$(getprop ro.product.cpu.abilist)
+ui_print "- Supported ABIs: $ABI_LIST"
 
 # Create target directory
-mkdir -p "$TARGET_DIR" || {
+mkdir -p "$MODPATH/system/bin" || {
   ui_print "! Failed to create system directory"
   abort
 }
 
-# Try architectures in priority order
+# Install best matching binary
 BINARY_INSTALLED=false
 for ABI in $(echo "$ABI_LIST" | tr ',' ' '); do
-  case "$ABI" in
-    "arm64-v8a"|"armv8-a"|"armv9-a")
-      if [ -f "$BIN_DIR/arm64-v8a/jq" ]; then
-        cp "$BIN_DIR/arm64-v8a/jq" "$TARGET_DIR/jq" && \
-        chmod 0755 "$TARGET_DIR/jq" && {
-          ui_print "- Installed arm64-v8a version"
-          BINARY_INSTALLED=true
-          break
-        }
-      fi
-      ;;
-    "armeabi-v7a"|"armeabi"|"armv7-a"|"armhf")
-      if [ -f "$BIN_DIR/armeabi-v7a/jq" ]; then
-        cp "$BIN_DIR/armeabi-v7a/jq" "$TARGET_DIR/jq" && \
-        chmod 0755 "$TARGET_DIR/jq" && {
-          ui_print "- Installed armeabi-v7a version"
-          BINARY_INSTALLED=true
-          break
-        }
-      fi
-      ;;
-  esac
+  if echo "$ABI" | grep -qE "$ARM64_VARIANTS"; then
+    if [ -f "$MODPATH/bin/arm64-v8a/jq" ]; then
+      cp "$MODPATH/bin/arm64-v8a/jq" "$MODPATH/system/bin/jq"
+      chmod 0755 "$MODPATH/system/bin/jq"
+      ui_print "- ✔ Installed ARM64 binary (detected as: $ABI)"
+      BINARY_INSTALLED=true
+      break
+    fi
+  elif echo "$ABI" | grep -qE "$ARM32_VARIANTS"; then
+    if [ -f "$MODPATH/bin/armeabi-v7a/jq" ]; then
+      cp "$MODPATH/bin/armeabi-v7a/jq" "$MODPATH/system/bin/jq"
+      chmod 0755 "$MODPATH/system/bin/jq"
+      ui_print "- ✔ Installed ARM32 binary (detected as: $ABI)"
+      BINARY_INSTALLED=true
+      break
+    fi
+  fi
 done
 
 if ! $BINARY_INSTALLED; then
   ui_print "*********************************************************"
-  ui_print "! Failed to install compatible jq binary"
-  ui_print "! Supported ARM ABIs: arm64-v8a, armeabi-v7a"
-  ui_print "! Your device supports: $ABI_LIST"
+  ui_print "! No compatible ARM binary found!"
+  ui_print "! Supported architectures:"
+  ui_print "! • ARM64 (arm64-v8a)"
+  ui_print "! • ARM32 (armeabi-v7a)"
   abort "*********************************************************"
 fi
 
-# Clean up unused binary subdirectories
-ui_print "- Cleaning up unused binary files"
-rm -rf "$BIN_DIR"
+# Cleanup
+ui_print "- 🧹 Cleaning up unused binaries"
+rm -rf "$MODPATH/bin"
 
 # ┌──────────────────────────────────────────────┐
 # │            Final Setup                      │
@@ -167,9 +157,14 @@ rm -rf "$BIN_DIR"
 chmod 0755 "$MODPATH/service.sh"
 chmod 0755 "$MODPATH/action.sh"
 
-ui_print "- COPG setup complete"
+ui_print "==============================================="
+ui_print "✔ Installation completed successfully"
 if $NEED_REBOOT; then
-  ui_print "- Please reboot your device"
+  ui_print " "
+  ui_print "⚠ REBOOT REQUIRED ⚠"
+  ui_print "Please reboot to activate module features"
 else
-  ui_print "- Click Action button to update config if needed"
+  ui_print " "
+  ui_print "ℹ Optional: Reboot if features don't appear"
 fi
+ui_print "==============================================="
