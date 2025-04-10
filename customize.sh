@@ -37,25 +37,49 @@ check_zygisk() {
   print_box_start
   ui_print "      ✦ Zygisk Detection ✦      "
   print_empty_line
+
+  DETECTED_ROOT_SOLUTIONS=""
+  ROOT_SOLUTION_COUNT=0
+
   if command -v apd >/dev/null; then
+    DETECTED_ROOT_SOLUTIONS="$DETECTED_ROOT_SOLUTIONS APatch"
+    ROOT_SOLUTION_COUNT=$((ROOT_SOLUTION_COUNT + 1))
     ROOT_SOLUTION="APatch"
     MANAGER_NAME="APatch Manager"
-    ui_print " ➔ Root Solution: APatch         "
-  elif command -v ksud >/dev/null; then
-    ROOT_SOLUTION="KernelSU"
-    MANAGER_NAME="KernelSU Manager"
-    ui_print " ➔ Root Solution: KernelSU       "
-  elif command -v magisk >/dev/null; then
-    ROOT_SOLUTION="Magisk"
-    MANAGER_NAME="Magisk Manager"
-    ui_print " ➔ Root Solution: Magisk         "
-  else
+  fi
+
+  if command -v ksud >/dev/null; then
+    DETECTED_ROOT_SOLUTIONS="$DETECTED_ROOT_SOLUTIONS KernelSU"
+    ROOT_SOLUTION_COUNT=$((ROOT_SOLUTION_COUNT + 1))
+    if [ $ROOT_SOLUTION_COUNT -eq 1 ]; then
+      ROOT_SOLUTION="KernelSU"
+      MANAGER_NAME="KernelSU Manager"
+    fi
+  fi
+
+  if command -v magisk >/dev/null; then
+    DETECTED_ROOT_SOLUTIONS="$DETECTED_ROOT_SOLUTIONS Magisk"
+    ROOT_SOLUTION_COUNT=$((ROOT_SOLUTION_COUNT + 1))
+    if [ $ROOT_SOLUTION_COUNT -eq 1 ]; then
+      ROOT_SOLUTION="Magisk"
+      MANAGER_NAME="Magisk Manager"
+    fi
+  fi
+
+  if [ $ROOT_SOLUTION_COUNT -gt 1 ]; then
+    ui_print " ✗ Multiple Root Solutions Found!"
+    ui_print " ➤ Detected:$DETECTED_ROOT_SOLUTIONS"
+    ui_print " ➤ Only One Root Solution Allowed"
+    print_failure_and_exit "zygisk"
+  elif [ $ROOT_SOLUTION_COUNT -eq 0 ]; then
     ui_print " ✗ No Supported Root Solution!   "
     ui_print " ➤ Supported Solutions:          "
     ui_print " ➤ • Magisk v26.4+ (Zygisk/Next) "
     ui_print " ➤ • KernelSU v0.7.0+ (Next)    "
     ui_print " ➤ • APatch v1.0.7+ (Next)      "
     print_failure_and_exit "zygisk"
+  else
+    ui_print " ➔ Root Solution: $ROOT_SOLUTION "
   fi
 
   if [ "$ROOT_SOLUTION" = "Magisk" ]; then
