@@ -159,12 +159,3 @@ chmod 0755 "$MODPATH/action.sh"
 
 ui_print "==============================================="
 ui_print "✔ Installation completed successfully"
-if $NEED_REBOOT; then
-  ui_print " "
-  ui_print "⚠ REBOOT REQUIRED ⚠"
-  ui_print "Please reboot to activate module features"
-else
-  ui_print " "
-  ui_print "ℹ Optional: Reboot if features don't appear"
-fi
-ui_print "==============================================="
