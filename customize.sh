@@ -1,4 +1,3 @@
-#!/system/bin/sh
 
 # ================================================
 # COPG Module Installation Script
@@ -49,9 +48,9 @@ check_zygisk() {
     if [ "$ZYGISK_STATUS" = "value=1" ]; then
       # Native Zygisk is enabled
       if [ -d "$ZYGISK_MODULE" ]; then
-        if magisk --sqlite "SELECT value FROM modules WHERE name='zygisksu' AND enable=0;" 2>/dev/null | grep -q "1"; then
+        if [ -f "$ZYGISK_MODULE/disable" ]; then
           ui_print "- ⚠ Zygisk Next is installed but disabled"
-          ui_print "- Native Zygisk is enabled using native Zygisk ..."
+          ui_print "- Using native Zygisk (recommend enabling Zygisk Next for full features)"
         fi
       fi
       ui_print "- ✔ Magisk with native Zygisk detected"
@@ -60,12 +59,12 @@ check_zygisk() {
     
     # Check Zygisk Next if native Zygisk is disabled
     if [ -d "$ZYGISK_MODULE" ]; then
-      if magisk --sqlite "SELECT value FROM modules WHERE name='zygisksu' AND enable=0;" 2>/dev/null | grep -q "1"; then
+      if [ -f "$ZYGISK_MODULE/disable" ]; then
         ui_print "*********************************************************"
         ui_print "! Zygisk Next is disabled and native Zygisk not enabled!"
         ui_print "! Please enable either:"
         ui_print "! 1. Native Zygisk: Settings → Enable Zygisk → Reboot"
-        ui_print "! 2. Zygisk Next: Modules → Enable Zygisk Next"
+        ui_print "! 2. Zygisk Next: Modules → Enable Zygisk Next → Reboot"
         abort "*********************************************************"
       fi
       ui_print "- ✔ Magisk with Zygisk Next detected"
@@ -74,8 +73,10 @@ check_zygisk() {
     
     # No Zygisk available
     ui_print "*********************************************************"
-    ui_print "! Magisk detected but no Zygisk enabled!"
-    ui_print "! Please enable native Zygisk in Settings"
+    ui_print "! Magisk detected but no Zygisk enabled or installed!"
+    ui_print "! Please do one of:"
+    ui_print "! 1. Enable native Zygisk: Settings → Enable Zygisk → Reboot"
+    ui_print "! 2. Install Zygisk Next module and enable it"
     abort "*********************************************************"
   fi
 
@@ -88,6 +89,7 @@ check_zygisk() {
           ui_print "! Zygisk Next is disabled in APatch!"
           ui_print "! Please enable it in APatch Manager"
           abort "*********************************************************"
+        fi
         ;;
       "KernelSU")
         if ksud module list | grep -q "\"name\":\"zygisksu\".*\"enable\":false"; then
@@ -115,7 +117,7 @@ ui_print "- 🔄 Detecting device architecture"
 
 # Supported ARM variants
 ARM64_VARIANTS="arm64-v8a|armv8-a|armv9-a|arm64"
-ARM32_VARIANTS="armeabi-v7a|armeabi|armv7-a|armv7l|armhf|arm"
+ARM32_VARIANTS="armeabi-v7.navigator|armeabi|armv7-a|armv7l|armhf|arm"
 
 # Get device ABI
 PRIMARY_ABI=$(getprop ro.product.cpu.abi)
