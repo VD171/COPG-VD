@@ -17,7 +17,8 @@
     "com.ea.games.r3_row",
     "com.supercell.squad",
     "com.blitzteam.battleprime",
-    "com.tencent.tmgp.gnyx"
+    "com.tencent.tmgp.gnyx",
+    "com.garena.game.df"
   ],
   "PACKAGES_REDMAGIC9_DEVICE": {
     "BRAND": "nubia",
