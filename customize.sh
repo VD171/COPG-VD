@@ -229,6 +229,10 @@ if $INSTALL_SUCCESS; then
       ui_print " ✗ Failed to Set Permissions (action.sh)! "
       print_failure_and_exit "binary"
     }
+    chmod 0755 "$MODPATH/update_config.sh" || {
+      ui_print " ✗ Failed to Set Permissions (update_config.sh)! "
+      print_failure_and_exit "binary"
+    }
   fi
 
   if $INSTALL_SUCCESS; then
