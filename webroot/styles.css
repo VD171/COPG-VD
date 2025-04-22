@@ -263,7 +263,7 @@ body.dark-theme::before {
     background: var(--card-bg);
     border-radius: 16px;
     padding: 20px;
-    box-shadow: 0 6px 20px var(--shadow);
+    box-shadow: 0 4px 12px var(--shadow); /* Adjusted for consistency */
     border: none;
     transition: transform 0.2s ease;
 }
@@ -279,15 +279,17 @@ body.dark-theme::before {
 
 /* Scroll Container */
 .scroll-container {
-    max-height: calc(90vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom) - 180px); /* Increased to extend the list further down */
+    max-height: calc(90vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom) - 180px);
     overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal overflow */
     margin-top: 0;
-    padding: 0;
+    padding: 8px; /* Add padding to create space around content */
     border-radius: 16px;
     background: var(--card-bg);
-    box-shadow: 0 6px 20px var(--shadow);
     border: 1px solid var(--border);
     position: relative;
+    -webkit-mask-image: -webkit-radial-gradient(white, black); /* Ensure content respects border-radius */
+    mask-image: radial-gradient(white, black); /* For non-WebKit browsers */
 }
 
 .dark-theme .scroll-container {
@@ -301,11 +303,14 @@ body.dark-theme::before {
 
 .scroll-container::-webkit-scrollbar-thumb {
     background: var(--text-secondary);
-    border-radius: 3px;
+    border-radius: 10px; /* Rounded thumb to match container */
+    margin: 8px 0; /* Prevent thumb from touching top/bottom edges */
 }
 
 .scroll-container::-webkit-scrollbar-track {
     background: transparent;
+    border-radius: 16px; /* Match container's border-radius */
+    margin: 8px 0; /* Add margin to track to avoid corner overlap */
 }
 
 .dark-theme .scroll-container::-webkit-scrollbar-thumb {
@@ -387,12 +392,12 @@ body.dark-theme::before {
 .toggle-label {
     font-size: 15px;
     font-weight: 500;
-    color: var(--text); /* Ensure visibility in light mode */
+    color: var(--text);
     transition: color 0.3s ease;
 }
 
 .dark-theme .toggle-label {
-    color: #F3F4F6; /* Gray 100 - Bright white for dark mode */
+    color: #F3F4F6;
 }
 
 /* Switches */
@@ -562,7 +567,8 @@ input:checked + .slider:before {
 
 /* List Wrapper */
 .list-wrapper {
-    padding: 16px;
+    padding: 8px 16px; /* Adjusted padding to ensure content doesn't touch edges */
+    width: 100%; /* Ensure it takes full width to prevent overflow */
 }
 
 /* Lists */
@@ -578,7 +584,7 @@ input:checked + .slider:before {
     background: var(--card-bg);
     border-radius: 12px;
     padding: 16px;
-    box-shadow: 0 4px 15px var(--shadow);
+    box-shadow: 0 2px 8px var(--shadow); /* Softer shadow for cards */
     transition: all 0.3s ease;
     position: relative;
     opacity: 0;
@@ -592,6 +598,7 @@ input:checked + .slider:before {
 
 .device-card.fade-out, .game-card.fade-out {
     animation: fadeOut 0.3s ease forwards;
+    overflow: hidden; /* Prevent content from spilling during animation */
 }
 
 @keyframes fadeOut {
@@ -600,7 +607,7 @@ input:checked + .slider:before {
 }
 
 .device-card:hover, .game-card:hover {
-    box-shadow: 0 8px 20px var(--shadow);
+    box-shadow: 0 4px 12px var(--shadow); /* Slightly stronger shadow on hover */
     transform: translateY(-4px);
 }
 
@@ -678,7 +685,7 @@ input:checked + .slider:before {
 .log-section {
     background: var(--card-bg);
     border-radius: 16px;
-    box-shadow: 0 6px 20px var(--shadow);
+    box-shadow: 0 4px 12px var(--shadow); /* Adjusted for consistency */
     margin-top: 16px;
     max-height: calc(50% - var(--safe-area-inset-bottom));
     display: flex;
@@ -854,7 +861,7 @@ h2 {
     max-width: 400px;
     max-height: calc(80vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
     overflow-y: auto;
-    box-shadow: 0 8px 24px var(--shadow);
+    box-shadow: 0 4px 12px var(--shadow); /* Adjusted for consistency */
     transform: scale(0.9);
     opacity: 0;
     transition: all 0.3s ease;
@@ -1021,7 +1028,7 @@ h2 {
     max-width: 400px;
     width: 100%;
     text-align: center;
-    box-shadow: 0 8px 24px var(--shadow);
+    box-shadow: 0 4px 12px var(--shadow); /* Adjusted for consistency */
     transform: scale(0.9);
     opacity: 0;
     transition: all 0.3s ease;
