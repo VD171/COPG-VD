@@ -13,6 +13,7 @@
     --error: #F87171; /* Red 400 */
     --warning: #FBBF24; /* Amber 400 */
     --info: #60A5FA; /* Soft Blue 400 */
+    --status-bar-height: 24px; /* Default status bar height, can be overridden */
 
     /* Dark Theme (Matching One UI dark tones with detail) */
     --dark-bg: #111827; /* Gray 900 */
@@ -39,7 +40,6 @@ body {
     font-family: 'Poppins', sans-serif;
     background: var(--background);
     color: var(--text);
-    padding: 16px;
     line-height: 1.5;
     transition: all 0.3s ease;
     -webkit-tap-highlight-color: transparent;
@@ -79,6 +79,8 @@ body.dark-theme::before {
     flex-direction: column;
     gap: 16px;
     height: 100%;
+    padding: 16px;
+    padding-top: calc(16px + var(--status-bar-height)); /* Add status bar height to top padding */
 }
 
 /* Header */
