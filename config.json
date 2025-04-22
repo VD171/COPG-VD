@@ -18,8 +18,7 @@
     "com.supercell.squad",
     "com.blitzteam.battleprime",
     "com.tencent.tmgp.gnyx",
-    "com.garena.game.df",
-    "com.proxima.dfm"
+    "com.garena.game.df"
   ],
   "PACKAGES_REDMAGIC9_DEVICE": {
     "BRAND": "nubia",
@@ -240,7 +239,24 @@
     "PRODUCT": "2211133G",
     "VERSION_RELEASE": "14",
     "SERIAL": "Xia837589",
-    "CPUINFO": "processor\t: 0\nmodel name\t: ARMv8-A (Xiaomi 13 Pro)\nHardware\t: Qualcomm Snapdragon 8 Gen 2\nSerial\t: XM1367890",
+    "CPUINFO": "processor\t: 0\nmodel name\t: ARMv8-A (Xiaomi 13)\nHardware\t: Qualcomm Snapdragon 8 Gen 2\nSerial\t: Xia837589",
     "SERIAL_CONTENT": "Xia430617"
+  },
+  "PACKAGES_ONEPLUS_13": [
+    "com.proxima.dfm"
+  ],
+  "PACKAGES_ONEPLUS_13_DEVICE": {
+    "BRAND": "OnePlus",
+    "DEVICE": "OnePlus 13",
+    "MANUFACTURER": "OnePlus",
+    "MODEL": "PJZ110",
+    "FINGERPRINT": "OnePlus/PJZ110/OP5D0DL1:15/AP3A.240617.008/V.1bd19a1-1-2:user/release-keys",
+    "BUILD_ID": "AP3A.240617.008",
+    "DISPLAY": "AP3A.240617.008.A1",
+    "PRODUCT": "PJZ110",
+    "VERSION_RELEASE": "15",
+    "SERIAL": "One180964",
+    "CPUINFO": "processor\t: 0\nmodel name\t: ARMv8-A (OnePlus 13)\nHardware\t: Qualcomm Snapdragon 8 Elite\nSerial\t: One180964",
+    "SERIAL_CONTENT": "One403114"
   }
 }
