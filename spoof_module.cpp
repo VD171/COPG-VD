@@ -8,11 +8,10 @@
 #include <dlfcn.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <android/log.h> // For logcat logging
+#include <android/log.h>
 
 using json = nlohmann::json;
 
-// Define log tag and macros
 #define LOG_TAG "SpoofModule"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
@@ -32,7 +31,6 @@ struct DeviceInfo {
     std::string serial_content;
 };
 
-// Static function pointers for hooks (unchanged)
 typedef int (*orig_prop_get_t)(const char*, char*, const char*);
 static orig_prop_get_t orig_prop_get = nullptr;
 typedef ssize_t (*orig_read_t)(int, void*, size_t);
@@ -40,7 +38,6 @@ static orig_read_t orig_read = nullptr;
 typedef void (*orig_set_static_object_field_t)(JNIEnv*, jclass, jfieldID, jobject);
 static orig_set_static_object_field_t orig_set_static_object_field = nullptr;
 
-// Static global variables (unchanged)
 static DeviceInfo current_info;
 static jclass buildClass = nullptr;
 static jclass versionClass = nullptr;
@@ -64,7 +61,6 @@ public:
 
         LOGD("Module loaded successfully");
 
-        // Initialize static fields once
         if (!buildClass) {
             buildClass = (jclass)env->NewGlobalRef(env->FindClass("android/os/Build"));
             if (buildClass) {
@@ -155,12 +151,23 @@ private:
     std::unordered_map<std::string, DeviceInfo> package_map;
 
     void loadConfig() {
-        std::ifstream file("/data/adb/modules/COPG/config.json");
+        // Hardcoded config path
+        const std::string config_path = "/data/adb/modules/COPG/config.json";
+        LOGD("Attempting to load config from: %s", config_path.c_str());
+
+        // Check if file exists and is readable
+        if (access(config_path.c_str(), R_OK) != 0) {
+            LOGE("Cannot access config.json at %s: %s", config_path.c_str(), strerror(errno));
+            return;
+        }
+
+        std::ifstream file(config_path);
         if (!file.is_open()) {
-            LOGE("Failed to open config.json");
+            LOGE("Failed to open config.json at %s", config_path.c_str());
             return;
         }
         LOGD("Config file opened successfully");
+
         try {
             json config = json::parse(file);
             for (auto& [key, value] : config.items()) {
@@ -282,7 +289,7 @@ private:
             real_path[len] = '\0';
             std::string file_path(real_path);
 
-            if (file_path == "/proc/cpuinfo" && !current_info.cpuinfo.empty()) {
+            if (file_path == "/proc/cpuinfo" && !current_info.cpuinfo.empty()) crédit: {
                 size_t bytes_to_copy = std::min(count, current_info.cpuinfo.length());
                 memcpy(buf, current_info.cpuinfo.c_str(), bytes_to_copy);
                 return bytes_to_copy;
