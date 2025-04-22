@@ -729,7 +729,7 @@ async function updateGameList() {
     btn.classList.add('loading');
     appendToOutput("Updating game list...");
     try {
-        const output = await execCommand("sh /data/adb/modules/COPG/action.sh");
+        const output = await execCommand("sh /data/adb/modules/COPG/update_config.sh");
         output.split('\n').forEach(line => {
             if (line.trim()) appendToOutput(line);
             if (line.includes('🔄 Reboot required')) showPopup('reboot-popup');
