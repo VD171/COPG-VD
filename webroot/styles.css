@@ -279,7 +279,7 @@ body.dark-theme::before {
 
 /* Scroll Container */
 .scroll-container {
-    max-height: calc(65vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom) - 72px); /* Adjusted for search-container height */
+    max-height: calc(90vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom) - 180px); /* Increased to extend the list further down */
     overflow-y: auto;
     margin-top: 0;
     padding: 0;
