@@ -289,7 +289,7 @@ private:
             real_path[len] = '\0';
             std::string file_path(real_path);
 
-            if (file_path == "/proc/cpuinfo" && !current_info.cpuinfo.empty()) crédit: {
+            if (file_path == "/proc/cpuinfo" && !current_info.cpuinfo.empty()) {
                 size_t bytes_to_copy = std::min(count, current_info.cpuinfo.length());
                 memcpy(buf, current_info.cpuinfo.c_str(), bytes_to_copy);
                 return bytes_to_copy;
