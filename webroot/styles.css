@@ -283,7 +283,7 @@ body.dark-theme::before {
     overflow-y: auto;
     overflow-x: hidden; /* Prevent horizontal overflow */
     margin-top: 0;
-    padding: 8px; /* Add padding to create space around content */
+    padding: 8px; /* Consistent padding */
     border-radius: 16px;
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -567,7 +567,7 @@ input:checked + .slider:before {
 
 /* List Wrapper */
 .list-wrapper {
-    padding: 8px 16px; /* Adjusted padding to ensure content doesn't touch edges */
+    padding: 8px; /* Standardized padding for equal left and right spacing */
     width: 100%; /* Ensure it takes full width to prevent overflow */
 }
 
@@ -577,7 +577,7 @@ input:checked + .slider:before {
     flex-direction: column;
     gap: 12px;
     transition: all 0.3s ease;
-    margin: 0;
+    margin: 0; /* Ensure no margins interfere with spacing */
 }
 
 .device-card, .game-card {
