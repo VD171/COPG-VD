@@ -41,6 +41,7 @@ echo "✅ Config downloaded successfully!"
 mv "$TEMP_CONFIG" "$CONFIG_PATH"
 echo "📍 Saved to: $CONFIG_PATH"
 chmod 0644 "$CONFIG_PATH"
+chcon u:object_r:system_file:s0 "$CONFIG_PATH"
 echo "🔄 Reboot required to apply changes"
 
 # Prompt for reboot with volume keys
