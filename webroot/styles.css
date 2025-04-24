@@ -263,7 +263,7 @@ body.dark-theme::before {
     background: var(--card-bg);
     border-radius: 16px;
     padding: 20px;
-    box-shadow: 0 4px 12px var(--shadow); /* Adjusted for consistency */
+    box-shadow: 0 4px 12px var(--shadow);
     border: none;
     transition: transform 0.2s ease;
 }
@@ -281,15 +281,35 @@ body.dark-theme::before {
 .scroll-container {
     max-height: calc(90vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom) - 180px);
     overflow-y: auto;
-    overflow-x: hidden; /* Prevent horizontal overflow */
+    overflow-x: hidden;
     margin-top: 0;
-    padding: 8px; /* Consistent padding */
+    padding: 8px;
     border-radius: 16px;
     background: var(--card-bg);
     border: 1px solid var(--border);
     position: relative;
-    -webkit-mask-image: -webkit-radial-gradient(white, black); /* Ensure content respects border-radius */
-    mask-image: radial-gradient(white, black); /* For non-WebKit browsers */
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    mask-image: radial-gradient(white, black);
+}
+
+#device-picker-popup .scroll-container {
+    min-height: 350px;
+    height: 350px;
+    flex: 1 0 auto;
+    overflow-y: auto;
+}
+
+#device-modal .scroll-container {
+    min-height: 350px;
+    max-height: 350px;
+    flex: 1 0 auto;
+    overflow-y: auto;
+    padding: 12px;
+    border: none;
+}
+
+#device-picker-popup .scroll-container.no-scrollbar {
+    overflow-y: hidden;
 }
 
 .dark-theme .scroll-container {
@@ -303,14 +323,14 @@ body.dark-theme::before {
 
 .scroll-container::-webkit-scrollbar-thumb {
     background: var(--text-secondary);
-    border-radius: 10px; /* Rounded thumb to match container */
-    margin: 8px 0; /* Prevent thumb from touching top/bottom edges */
+    border-radius: 10px;
+    margin: 8px 0;
 }
 
 .scroll-container::-webkit-scrollbar-track {
     background: transparent;
-    border-radius: 16px; /* Match container's border-radius */
-    margin: 8px 0; /* Add margin to track to avoid corner overlap */
+    border-radius: 16px;
+    margin: 8px 0;
 }
 
 .dark-theme .scroll-container::-webkit-scrollbar-thumb {
@@ -567,51 +587,78 @@ input:checked + .slider:before {
 
 /* List Wrapper */
 .list-wrapper {
-    padding: 8px; /* Standardized padding for equal left and right spacing */
-    width: 100%; /* Ensure it takes full width to prevent overflow */
+    padding: 8px;
+    width: 100%;
 }
 
 /* Lists */
-.device-list, .game-list {
+.device-list, .game-list, .device-picker {
     display: flex;
     flex-direction: column;
     gap: 12px;
     transition: all 0.3s ease;
-    margin: 0; /* Ensure no margins interfere with spacing */
+    margin: 0;
 }
 
-.device-card, .game-card {
+.device-card, .game-card, .picker-device-card {
     background: var(--card-bg);
     border-radius: 12px;
     padding: 16px;
-    box-shadow: 0 2px 8px var(--shadow); /* Softer shadow for cards */
+    box-shadow: 0 2px 8px var(--shadow);
     transition: all 0.3s ease;
     position: relative;
     opacity: 0;
     transform: translateY(20px);
     animation: cardEnter 0.3s ease forwards;
+    margin: 0 4px;
+    will-change: opacity, transform, max-height;
 }
 
 @keyframes cardEnter {
     to { opacity: 1; transform: translateY(0); }
 }
 
-.device-card.fade-out, .game-card.fade-out {
-    animation: fadeOut 0.3s ease forwards;
-    overflow: hidden; /* Prevent content from spilling during animation */
+.device-card.fade-out, .game-card.fade-out, .picker-device-card.fade-out {
+    animation: fadeOut 0.4s ease forwards;
+    max-height: 200px;
+    overflow: hidden;
 }
 
 @keyframes fadeOut {
-    from { opacity: 1; transform: translateY(0); }
-    to { opacity: 0; transform: translateY(10px); height: 0; margin: 0; padding: 0; }
+    0% { 
+        opacity: 1; 
+        transform: translateY(0); 
+        max-height: 200px; 
+        margin: 0 4px; 
+        padding: 16px; 
+    }
+    100% { 
+        opacity: 0; 
+        transform: translateY(10px); 
+        max-height: 0; 
+        margin: 0 4px; 
+        padding: 0 16px; 
+    }
 }
 
-.device-card:hover, .game-card:hover {
-    box-shadow: 0 4px 12px var(--shadow); /* Slightly stronger shadow on hover */
+.device-card:hover, .game-card:hover, .picker-device-card:hover {
+    box-shadow: 0 4px 12px var(--shadow);
     transform: translateY(-4px);
 }
 
-.dark-theme .device-card, .dark-theme .game-card {
+.picker-device-card.selected {
+    background: rgba(96, 165, 250, 0.1);
+    border: 1px solid var(--primary);
+    box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+}
+
+.dark-theme .picker-device-card.selected {
+    background: rgba(96, 165, 250, 0.15);
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+}
+
+.dark-theme .device-card, .dark-theme .game-card, .dark-theme .picker-device-card {
     background: var(--dark-card);
 }
 
@@ -681,11 +728,33 @@ input:checked + .slider:before {
     color: var(--dark-text-secondary);
 }
 
+/* Picker Device Card Specific Styles */
+.picker-device-card h4 {
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0;
+    color: var(--text);
+}
+
+.dark-theme .picker-device-card h4 {
+    color: var(--dark-text);
+}
+
+.picker-device-card p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 4px 0 0;
+}
+
+.dark-theme .picker-device-card p {
+    color: var(--dark-text-secondary);
+}
+
 /* Log Section */
 .log-section {
     background: var(--card-bg);
     border-radius: 16px;
-    box-shadow: 0 4px 12px var(--shadow); /* Adjusted for consistency */
+    box-shadow: 0 4px 12px var(--shadow);
     margin-top: 16px;
     max-height: calc(50% - var(--safe-area-inset-bottom));
     display: flex;
@@ -841,30 +910,48 @@ h2 {
 .modal {
     display: none;
     position: fixed;
-    top: var(--safe-area-inset-top);
+    top: 0;
     left: var(--safe-area-inset-left);
     width: calc(100% - var(--safe-area-inset-left) - var(--safe-area-inset-right));
-    height: calc(100% - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+    height: 100%;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(5px);
     z-index: 1000;
     justify-content: center;
     align-items: center;
-    padding: 16px;
+    padding: calc(var(--safe-area-inset-top) + 16px) 16px calc(var(--safe-area-inset-bottom) + 16px);
 }
 
 .modal-content {
     background: var(--card-bg);
     border-radius: 20px;
-    padding: 24px;
+    padding: 20px;
     width: 100%;
     max-width: 400px;
-    max-height: calc(80vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+    max-height: 70vh;
     overflow-y: auto;
-    box-shadow: 0 4px 12px var(--shadow); /* Adjusted for consistency */
+    box-shadow: 0 4px 12px var(--shadow);
     transform: scale(0.9);
     opacity: 0;
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+#game-modal .modal-content {
+    max-height: 600px;
+}
+
+#device-modal .modal-content {
+    max-height: 600px;
+    min-height: 400px;
+}
+
+.device-form-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 12px;
 }
 
 .modal-content.modal-enter {
@@ -895,6 +982,7 @@ h2 {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
+    flex-shrink: 0;
 }
 
 .modal-header h3 {
@@ -917,7 +1005,8 @@ h2 {
 
 /* Form Styles */
 .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
+    position: relative;
 }
 
 .form-group label {
@@ -932,7 +1021,7 @@ h2 {
     color: var(--dark-text);
 }
 
-.form-group input, .form-group textarea {
+.form-group input, .form-group textarea, .form-group select {
     width: 100%;
     padding: 12px 16px;
     border: 1px solid var(--border);
@@ -943,18 +1032,44 @@ h2 {
     transition: all 0.3s ease;
 }
 
-.dark-theme .form-group input, .dark-theme .form-group textarea {
+.form-group input.error, .form-group textarea.error, .form-group select.error {
+    border-color: var(--error);
+    box-shadow: 0 0 8px rgba(248, 113, 113, 0.3);
+}
+
+.error-message {
+    color: var(--error);
+    font-size: 12px;
+    margin-top: 6px;
+    display: block;
+    padding: 4px 8px;
+    background: rgba(248, 113, 113, 0.1);
+    border-radius: 6px;
+    transition: opacity 0.3s ease;
+}
+
+.dark-theme .error-message {
+    background: rgba(248, 113, 113, 0.15);
+}
+
+.dark-theme .form-group input, .dark-theme .form-group textarea, .dark-theme .form-group select {
     background: var(--dark-bg);
     border-color: var(--dark-border);
     color: var(--dark-text);
 }
 
+.dark-theme .form-group input.error, .dark-theme .form-group textarea.error, .dark-theme .form-group select.error {
+    border-color: var(--error);
+    box-shadow: 0 0 8px rgba(248, 113, 113, 0.3);
+}
+
 .dark-theme .form-group input::placeholder,
-.dark-theme .form-group textarea::placeholder {
+.dark-theme .form-group textarea::placeholder,
+.dark-theme .form-group select::placeholder {
     color: var(--dark-text-secondary);
 }
 
-.form-group input:focus, .form-group textarea:focus {
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
     border-color: var(--primary);
     outline: none;
     box-shadow: 0 0 8px rgba(96, 165, 250, 0.3);
@@ -972,16 +1087,39 @@ h2 {
     cursor: pointer;
 }
 
+#game-device.error {
+    border-color: var(--error);
+    box-shadow: 0 0 8px rgba(248, 113, 113, 0.3);
+}
+
+#game-device.highlighted {
+    border: 1px solid var(--primary);
+    box-shadow: 0 0 8px rgba(96, 165, 250, 0.3);
+    background: rgba(96, 165, 250, 0.05);
+}
+
 .dark-theme #game-device {
     background: var(--dark-bg);
     border-color: var(--dark-border);
     color: var(--dark-text);
 }
 
+.dark-theme #game-device.error {
+    border-color: var(--error);
+    box-shadow: 0 0 8px rgba(248, 113, 113, 0.3);
+}
+
+.dark-theme #game-device.highlighted {
+    border: 1px solid var(--primary);
+    box-shadow: 0 0 8px rgba(96, 165, 250, 0.3);
+    background: rgba(96, 165, 250, 0.1);
+}
+
 .form-buttons {
     display: flex;
     gap: 8px;
     margin-top: 16px;
+    flex-shrink: 0;
 }
 
 .cancel-btn {
@@ -1010,35 +1148,57 @@ h2 {
 .popup {
     display: none;
     position: fixed;
-    top: var(--safe-area-inset-top);
+    top: 0;
     left: var(--safe-area-inset-left);
     width: calc(100% - var(--safe-area-inset-left) - var(--safe-area-inset-right));
-    height: calc(100% - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+    height: 100%;
     background: rgba(0, 0, 0, 0.5);
     z-index: 1000;
     justify-content: center;
     align-items: center;
-    padding: 16px;
+    padding: calc(var(--safe-area-inset-top) + 16px) 16px calc(var(--safe-area-inset-bottom) + 16px);
 }
 
 .popup-content {
     background: var(--card-bg);
     border-radius: 20px;
-    padding: 24px;
+    padding: 20px;
     max-width: 400px;
     width: 100%;
     text-align: center;
-    box-shadow: 0 4px 12px var(--shadow); /* Adjusted for consistency */
+    box-shadow: 0 4px 12px var(--shadow);
     transform: scale(0.9);
     opacity: 0;
     transition: all 0.3s ease;
 }
 
+#device-picker-popup .popup-content {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
 .device-picker-content {
     max-width: 400px;
-    max-height: calc(70vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
-    overflow-y: auto;
+    max-height: calc(80vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
     text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 350px;
+    flex: 1;
+}
+
+.device-picker {
+    flex: 1 0 auto;
+    width: 100%;
+    overflow-y: visible;
+    padding: 0 4px;
+    min-height: 350px;
+}
+
+.device-picker::-webkit-scrollbar {
+    display: none;
 }
 
 .popup-content:not(.popup-exit) {
@@ -1073,53 +1233,6 @@ h2 {
 .popup-buttons {
     display: flex;
     gap: 8px;
-}
-
-.device-picker {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 16px;
-}
-
-.picker-device-card {
-    background: var(--background);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.picker-device-card:hover {
-    border-color: var(--primary);
-    transform: translateY(-2px);
-}
-
-.dark-theme .picker-device-card {
-    background: var(--dark-bg);
-    border-color: var(--dark-border);
-}
-
-.picker-device-card h4 {
-    font-size: 15px;
-    font-weight: 500;
-    margin: 0;
-    color: var(--text);
-}
-
-.dark-theme .picker-device-card h4 {
-    color: var(--dark-text);
-}
-
-.picker-device-card p {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin: 4px 0 0;
-}
-
-.dark-theme .picker-device-card p {
-    color: var(--dark-text-secondary);
 }
 
 /* Theme Button */
