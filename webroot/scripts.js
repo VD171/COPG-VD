@@ -331,6 +331,15 @@ function openGameModal(gamePackage = null, deviceKey = null) {
     const packageInput = document.getElementById('game-package');
     const deviceInput = document.getElementById('game-device');
     
+    // Clear existing error messages and error classes
+    form.querySelectorAll('input').forEach(field => {
+        field.classList.remove('error');
+        const existingError = field.nextElementSibling;
+        if (existingError && existingError.classList.contains('error-message')) {
+            existingError.remove();
+        }
+    });
+    
     if (gamePackage) {
         title.textContent = 'Edit Game Configuration';
         editingGame = { package: gamePackage, device: deviceKey };
@@ -441,6 +450,8 @@ async function saveDevice(e) {
             ? `Please fill in the following fields: ${missingFields.join(', ')}`
             : 'Please correct the errors in the form';
         appendToOutput(errorMessage, 'error');
+        document.getElementById('error-message').textContent = errorMessage;
+        showPopup('error-popup');
         return;
     }
     
@@ -496,17 +507,88 @@ async function saveDevice(e) {
 
 async function saveGame(e) {
     e.preventDefault();
+    const form = document.getElementById('game-form');
     const gamePackage = document.getElementById('game-package').value.trim();
-    const deviceKey = document.getElementById('game-device').dataset.key;
+    const deviceInput = document.getElementById('game-device');
+    const deviceKey = deviceInput.dataset.key;
     const packageKey = deviceKey.replace('_DEVICE', '');
     
-    if (!gamePackage || !deviceKey) {
-        appendToOutput("Please fill all required fields and select a device", 'error');
+    // Clear existing error messages
+    form.querySelectorAll('input').forEach(field => {
+        field.classList.remove('error');
+        const existingError = field.nextElementSibling;
+        if (existingError && existingError.classList.contains('error-message')) {
+            existingError.remove();
+        }
+    });
+    
+    // Validate required fields
+    let hasError = false;
+    const missingFields = [];
+    
+    if (!gamePackage) {
+        const field = document.getElementById('game-package');
+        field.classList.add('error');
+        const errorMessage = document.createElement('span');
+        errorMessage.className = 'error-message';
+        errorMessage.textContent = 'This field is required';
+        field.insertAdjacentElement('afterend', errorMessage);
+        hasError = true;
+        missingFields.push('Package Name');
+    }
+    
+    if (!deviceKey) {
+        deviceInput.classList.add('error');
+        const errorMessage = document.createElement('span');
+        errorMessage.className = 'error-message';
+        errorMessage.textContent = 'Please select a device';
+        deviceInput.insertAdjacentElement('afterend', errorMessage);
+        hasError = true;
+        missingFields.push('Device Profile');
+    }
+    
+    // Validate duplicate game package
+    if (!editingGame || editingGame.package !== gamePackage) {
+        for (const [key, value] of Object.entries(currentConfig)) {
+            if (Array.isArray(value) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
+                if (value.includes(gamePackage)) {
+                    const associatedDeviceKey = `${key}_DEVICE`;
+                    const associatedDeviceName = currentConfig[associatedDeviceKey]?.DEVICE || key.replace('PACKAGES_', '');
+                    const field = document.getElementById('game-package');
+                    field.classList.add('error');
+                    const existingError = field.nextElementSibling;
+                    if (existingError && existingError.classList.contains('error-message')) {
+                        existingError.remove();
+                    }
+                    const errorMessage = document.createElement('span');
+                    errorMessage.className = 'error-message';
+                    errorMessage.textContent = 'Game package already exists';
+                    field.insertAdjacentElement('afterend', errorMessage);
+                    appendToOutput(`Game "${gamePackage}" already exists in device profile "${associatedDeviceName}"`, 'error');
+                    hasError = true;
+                    missingFields.push('Package Name (duplicate)');
+                    document.getElementById('error-message').textContent = `Game "${gamePackage}" is already associated with device profile "${associatedDeviceName}".`;
+                    showPopup('error-popup');
+                    break;
+                }
+            }
+        }
+    }
+    
+    if (hasError) {
+        if (missingFields.length > 0 && !missingFields.includes('Package Name (duplicate)')) {
+            const errorMessage = `Please fill in the following fields: ${missingFields.join(', ')}`;
+            appendToOutput(errorMessage, 'error');
+            document.getElementById('error-message').textContent = errorMessage;
+            showPopup('error-popup');
+        }
         return;
     }
-
+    
     if (!currentConfig[deviceKey]) {
         appendToOutput("Selected device profile does not exist", 'error');
+        document.getElementById('error-message').textContent = "Selected device profile does not exist.";
+        showPopup('error-popup');
         return;
     }
 
@@ -534,6 +616,8 @@ async function saveGame(e) {
         showPopup('reboot-popup');
     } catch (error) {
         appendToOutput(`Failed to save game: ${error}`, 'error');
+        document.getElementById('error-message').textContent = `Failed to save game: ${error}`;
+        showPopup('error-popup');
     }
 }
 
@@ -832,7 +916,7 @@ function setupSwipeNavigation() {
 
 async function updateGameList() {
     if (actionRunning) return;
-    actionRunning = true;
+    actionTermination = true;
     const btn = document.getElementById('update-config');
     btn.classList.add('loading');
     appendToOutput("Updating game list...");
@@ -963,6 +1047,10 @@ function applyEventListeners() {
 
     document.getElementById('game-device').addEventListener('click', () => {
         showPopup('device-picker-popup');
+    });
+
+    document.getElementById('error-ok').addEventListener('click', () => {
+        closePopup('error-popup');
     });
 
     document.getElementById('device-search').addEventListener('input', (e) => {
