@@ -111,43 +111,45 @@
     </div>
 
     <div id="device-modal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content device-form-content">
             <div class="modal-header">
                 <h3 id="device-modal-title">Add New Device Profile</h3>
-                <button class="close-btn">&times;</button>
+                <button class="close-btn">×</button>
             </div>
             <form id="device-form">
-                <div class="form-group">
-                    <label for="device-name">Device Name</label>
-                    <input type="text" id="device-name" placeholder="e.g., Galaxy S23" required>
-                </div>
-                <div class="form-group">
-                    <label for="device-brand">Brand</label>
-                    <input type="text" id="device-brand" placeholder="e.g., Samsung">
-                </div>
-                <div class="form-group">
-                    <label for="device-model">Model</label>
-                    <input type="text" id="device-model" placeholder="e.g., SM-S918B">
-                </div>
-                <div class="form-group">
-                    <label for="device-manufacturer">Manufacturer</label>
-                    <input type="text" id="device-manufacturer" placeholder="e.g., Samsung">
-                </div>
-                <div class="form-group">
-                    <label for="device-android-version">Android Version</label>
-                    <input type="text" id="device-android-version" placeholder="e.g., 14">
-                </div>
-                <div class="form-group">
-                    <label for="device-fingerprint">Fingerprint</label>
-                    <input type="text" id="device-fingerprint" placeholder="e.g., samsung/m23xqns/samsung:14/UP1A.231005.007/G990BXXU7EWD5:user/release-keys">
-                </div>
-                <div class="form-group">
-                    <label for="device-build-id">Build ID</label>
-                    <input type="text" id="device-build-id" placeholder="e.g., UP1A.231005.007">
-                </div>
-                <div class="form-group">
-                    <label for="device-cpu">CPU Info</label>
-                    <textarea id="device-cpu" rows="4" placeholder="e.g., Hardware: Qualcomm Snapdragon 8 Gen 2"></textarea>
+                <div class="scroll-container">
+                    <div class="form-group">
+                        <label for="device-name">Device Name</label>
+                        <input type="text" id="device-name" placeholder="e.g., Galaxy S23" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="device-brand">Brand</label>
+                        <input type="text" id="device-brand" placeholder="e.g., Samsung">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-model">Model</label>
+                        <input type="text" id="device-model" placeholder="e.g., SM-S918B">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-manufacturer">Manufacturer</label>
+                        <input type="text" id="device-manufacturer" placeholder="e.g., Samsung">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-android-version">Android Version</label>
+                        <input type="text" id="device-android-version" placeholder="e.g., 14">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-fingerprint">Fingerprint</label>
+                        <input type="text" id="device-fingerprint" placeholder="e.g., samsung/m23xqns/samsung:14/UP1A.231005.007/G990BXXU7EWD5:user/release-keys">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-build-id">Build ID</label>
+                        <input type="text" id="device-build-id" placeholder="e.g., UP1A.231005.007">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-cpu">CPU Info</label>
+                        <textarea id="device-cpu" rows="4" placeholder="e.g., Hardware: Qualcomm Snapdragon 8 Gen 2"></textarea>
+                    </div>
                 </div>
                 <div class="form-buttons">
                     <button type="button" class="cancel-btn">Cancel</button>
@@ -161,7 +163,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="game-modal-title">Add New Game</h3>
-                <button class="close-btn">&times;</button>
+                <button class="close-btn">×</button>
             </div>
             <form id="game-form">
                 <div class="form-group">
@@ -205,9 +207,26 @@
     <div id="device-picker-popup" class="popup">
         <div class="popup-content device-picker-content">
             <h3>Select Device Profile</h3>
-            <div id="device-picker-list" class="device-picker"></div>
+            <div class="search-container">
+                <input type="text" id="device-picker-search" placeholder="Search devices...">
+            </div>
+            <div class="scroll-container">
+                <div class="list-wrapper">
+                    <div id="device-picker-list" class="device-picker"></div>
+                </div>
+            </div>
             <div class="popup-buttons">
                 <button class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="error-popup" class="popup">
+        <div class="popup-content">
+            <h3>Error</h3>
+            <p>Please fill out the Device Name field.</p>
+            <div class="popup-buttons">
+                <button id="error-ok" class="action-btn">OK</button>
             </div>
         </div>
     </div>
