@@ -204,7 +204,7 @@ function renderGameList() {
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg>
+                                </svg>
                             </button>
                             <button class="delete-btn" data-game="${gamePackage}" data-device="${key}" title="Delete">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -259,10 +259,17 @@ function populateDevicePicker() {
                 <p>${value.BRAND || 'Unknown'} ${value.MODEL || 'Unknown'}</p>
             `;
             deviceCard.addEventListener('click', () => {
+                picker.querySelectorAll('.picker-device-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                deviceCard.classList.add('selected');
                 const selectedDeviceInput = document.getElementById('game-device');
                 selectedDeviceInput.value = deviceName;
                 selectedDeviceInput.dataset.key = key;
-                closePopup('device-picker-popup');
+                selectedDeviceInput.classList.add('highlighted');
+                setTimeout(() => {
+                    closePopup('device-picker-popup');
+                }, 200);
             });
             picker.appendChild(deviceCard);
         }
@@ -277,6 +284,15 @@ function openDeviceModal(deviceKey = null) {
     const modal = document.getElementById('device-modal');
     const title = document.getElementById('device-modal-title');
     const form = document.getElementById('device-form');
+    
+    // Clear existing error messages and error classes
+    form.querySelectorAll('input, textarea').forEach(field => {
+        field.classList.remove('error');
+        const existingError = field.nextElementSibling;
+        if (existingError && existingError.classList.contains('error-message')) {
+            existingError.remove();
+        }
+    });
     
     if (deviceKey) {
         title.textContent = 'Edit Device Profile';
@@ -297,7 +313,9 @@ function openDeviceModal(deviceKey = null) {
     }
     
     modal.style.display = 'flex';
-    modal.querySelector('.modal-content').classList.add('modal-enter');
+    requestAnimationFrame(() => {
+        modal.querySelector('.modal-content').classList.add('modal-enter');
+    });
 }
 
 function editGame(gamePackage, deviceKey) {
@@ -319,29 +337,115 @@ function openGameModal(gamePackage = null, deviceKey = null) {
         packageInput.value = gamePackage;
         deviceInput.value = currentConfig[`${deviceKey}_DEVICE`]?.DEVICE || '';
         deviceInput.dataset.key = `${deviceKey}_DEVICE`;
+        deviceInput.classList.add('highlighted');
     } else {
         title.textContent = 'Add New Game';
         editingGame = null;
         form.reset();
         deviceInput.value = '';
         deviceInput.dataset.key = '';
+        deviceInput.classList.remove('highlighted');
     }
     
     modal.style.display = 'flex';
-    modal.querySelector('.modal-content').classList.add('modal-enter');
+    requestAnimationFrame(() => {
+        modal.querySelector('.modal-content').classList.add('modal-enter');
+    });
 }
 
 async function saveDevice(e) {
     e.preventDefault();
-    const deviceName = document.getElementById('device-name').value.trim();
-    const deviceKey = `PACKAGES_${deviceName.toUpperCase().replace(/ /g, '_')}_DEVICE`;
-    const packageKey = deviceKey.replace('_DEVICE', '');
     
-    if (!editingDevice && Object.keys(currentConfig).some(key => key.endsWith('_DEVICE') && key !== deviceKey && currentConfig[key].DEVICE === deviceName)) {
-        appendToOutput(`Device profile "${deviceName}" already exists`, 'error');
+    const form = document.getElementById('device-form');
+    const requiredFieldIds = [
+        'device-name',
+        'device-brand',
+        'device-model',
+        'device-manufacturer',
+        'device-android-version',
+        'device-fingerprint',
+        'device-build-id',
+        'device-cpu'
+    ];
+    let hasError = false;
+    const missingFields = [];
+    
+    // Clear existing error messages
+    requiredFieldIds.forEach(id => {
+        const field = document.getElementById(id);
+        field.classList.remove('error');
+        const existingError = field.nextElementSibling;
+        if (existingError && existingError.classList.contains('error-message')) {
+            existingError.remove();
+        }
+    });
+    
+    // Validate required fields
+    requiredFieldIds.forEach(id => {
+        const field = document.getElementById(id);
+        if (!field.value.trim()) {
+            field.classList.add('error');
+            const errorMessage = document.createElement('span');
+            errorMessage.className = 'error-message';
+            errorMessage.textContent = 'This field is required';
+            field.insertAdjacentElement('afterend', errorMessage);
+            hasError = true;
+            missingFields.push(field.labels[0]?.textContent || id);
+        }
+    });
+    
+    // Validate duplicate name and model for new profiles
+    const deviceName = document.getElementById('device-name').value.trim();
+    const deviceModel = document.getElementById('device-model').value.trim();
+    const deviceKey = `PACKAGES_${deviceName.toUpperCase().replace(/ /g, '_')}_DEVICE`;
+    
+    if (!editingDevice) {
+        for (const [key, value] of Object.entries(currentConfig)) {
+            if (key.endsWith('_DEVICE') && key !== deviceKey) {
+                if (value.DEVICE === deviceName) {
+                    const field = document.getElementById('device-name');
+                    field.classList.add('error');
+                    const existingError = field.nextElementSibling;
+                    if (existingError && existingError.classList.contains('error-message')) {
+                        existingError.remove();
+                    }
+                    const errorMessage = document.createElement('span');
+                    errorMessage.className = 'error-message';
+                    errorMessage.textContent = 'Device name already exists';
+                    field.insertAdjacentElement('afterend', errorMessage);
+                    appendToOutput(`Device profile "${deviceName}" already exists`, 'error');
+                    hasError = true;
+                    if (!missingFields.includes('Device Name')) missingFields.push('Device Name (duplicate)');
+                }
+                if (value.MODEL === deviceModel) {
+                    const field = document.getElementById('device-model');
+                    field.classList.add('error');
+                    const existingError = field.nextElementSibling;
+                    if (existingError && existingError.classList.contains('error-message')) {
+                        existingError.remove();
+                    }
+                    const errorMessage = document.createElement('span');
+                    errorMessage.className = 'error-message';
+                    errorMessage.textContent = 'Device model already exists';
+                    field.insertAdjacentElement('afterend', errorMessage);
+                    appendToOutput(`Device model "${deviceModel}" already exists`, 'error');
+                    hasError = true;
+                    if (!missingFields.includes('Model')) missingFields.push('Model (duplicate)');
+                }
+            }
+        }
+    }
+    
+    if (hasError) {
+        const errorMessage = missingFields.length > 0 
+            ? `Please fill in the following fields: ${missingFields.join(', ')}`
+            : 'Please correct the errors in the form';
+        appendToOutput(errorMessage, 'error');
         return;
     }
-
+    
+    const packageKey = deviceKey.replace('_DEVICE', '');
+    
     const rawCpuInfo = document.getElementById('device-cpu').value.trim();
     const escapedCpuInfo = rawCpuInfo ? rawCpuInfo.replace(/\n/g, '\\n').replace(/\t/g, '\\t') : 'Unknown';
     const brand = document.getElementById('device-brand').value.trim() || 'Unknown';
@@ -441,23 +545,22 @@ async function deleteDevice(deviceKey) {
     if (!card) return;
     
     card.classList.add('fade-out');
-    setTimeout(async () => {
-        card.remove();
-        try {
-            appendToOutput(`Deleting device: ${deviceName}`, 'warning');
-            delete currentConfig[packageKey];
-            delete currentConfig[deviceKey];
-            await saveConfig();
-            renderDeviceList();
-            renderGameList();
-            appendToOutput(`Deleted device "${deviceName}"`, 'red');
-            showPopup('reboot-popup');
-        } catch (error) {
-            appendToOutput(`Failed to delete device: ${error}`, 'error');
-            renderDeviceList();
-            renderGameList();
-        }
-    }, 300);
+    await new Promise(resolve => setTimeout(resolve, 400)); // Wait for animation (400ms)
+    try {
+        appendToOutput(`Deleting device: ${deviceName}`, 'warning');
+        delete currentConfig[packageKey];
+        delete currentConfig[deviceKey];
+        await saveConfig();
+        appendToOutput(`Deleted device "${deviceName}"`, 'red');
+        renderDeviceList();
+        renderGameList();
+        showPopup('reboot-popup');
+    } catch (error) {
+        appendToOutput(`Failed to delete device: ${error}`, 'error');
+        card.classList.remove('fade-out');
+        renderDeviceList();
+        renderGameList();
+    }
 }
 
 async function deleteGame(gamePackage, deviceKey) {
@@ -467,31 +570,30 @@ async function deleteGame(gamePackage, deviceKey) {
     if (!card) return;
     
     card.classList.add('fade-out');
-    setTimeout(async () => {
-        card.remove();
-        try {
-            if (!Array.isArray(currentConfig[deviceKey]) || currentConfig[deviceKey].length === 0) {
-                appendToOutput(`No games found for "${deviceName}"`, 'warning');
-                return;
-            }
-            
-            const index = currentConfig[deviceKey].indexOf(gamePackage);
-            if (index === -1) {
-                appendToOutput(`Game "${gamePackage}" not found in "${deviceName}"`, 'error');
-                return;
-            }
-            
-            currentConfig[deviceKey].splice(index, 1);
-            await saveConfig();
-            renderGameList();
-            renderDeviceList();
-            appendToOutput(`Removed "${gamePackage}" from "${deviceName}"`, 'red');
-            showPopup('reboot-popup');
-        } catch (error) {
-            appendToOutput(`Failed to delete game: ${error}`, 'error');
-            renderGameList();
+    await new Promise(resolve => setTimeout(resolve, 400)); // Wait for animation (400ms)
+    try {
+        if (!Array.isArray(currentConfig[deviceKey]) || currentConfig[deviceKey].length === 0) {
+            appendToOutput(`No games found for "${deviceName}"`, 'warning');
+            return;
         }
-    }, 300);
+        
+        const index = currentConfig[deviceKey].indexOf(gamePackage);
+        if (index === -1) {
+            appendToOutput(`Game "${gamePackage}" not found in "${deviceName}"`, 'error');
+            return;
+        }
+        
+        currentConfig[deviceKey].splice(index, 1);
+        await saveConfig();
+        appendToOutput(`Removed "${gamePackage}" from "${deviceName}"`, 'red');
+        renderGameList();
+        renderDeviceList();
+        showPopup('reboot-popup');
+    } catch (error) {
+        appendToOutput(`Failed to delete game: ${error}`, 'error');
+        card.classList.remove('fade-out');
+        renderGameList();
+    }
 }
 
 async function saveConfig() {
@@ -530,6 +632,13 @@ function showPopup(popupId) {
         popup.querySelector('.popup-content').classList.remove('popup-exit');
         if (popupId === 'device-picker-popup') {
             populateDevicePicker();
+            const searchInput = document.getElementById('device-picker-search');
+            if (searchInput) {
+                searchInput.value = '';
+                document.querySelectorAll('.picker-device-card').forEach(card => {
+                    card.style.display = 'block';
+                });
+            }
         }
     }
 }
@@ -614,13 +723,12 @@ function switchTab(tabId, direction = null) {
         newTabElement.style.transform = 'translateX(0)';
         newTabElement.style.opacity = '1';
         
-        // Force reflow and re-render for Devices tab
         if (tabId === 'devices') {
             const devicesContent = document.getElementById('devices-tab');
             devicesContent.style.display = 'none';
-            devicesContent.offsetHeight; // Trigger reflow
+            devicesContent.offsetHeight;
             devicesContent.style.display = 'block';
-            renderDeviceList(); // Ensure content is rendered
+            renderDeviceList();
         }
     });
     
@@ -882,6 +990,25 @@ function applyEventListeners() {
             const name = card.querySelector('.game-name').textContent.toLowerCase();
             const device = card.querySelector('.game-details').textContent.toLowerCase().replace('spoofed as: ', '');
             card.style.display = (name.includes(searchTerm) || device.includes(searchTerm)) ? 'block' : 'none';
+        });
+    });
+
+    document.getElementById('device-picker-search').addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        document.querySelectorAll('.picker-device-card').forEach(card => {
+            const key = card.dataset.key;
+            const deviceData = currentConfig[key] || {};
+            const searchableText = [
+                deviceData.DEVICE || '',
+                deviceData.BRAND || '',
+                deviceData.MODEL || '',
+                deviceData.MANUFACTURER || '',
+                deviceData.FINGERPRINT || '',
+                deviceData.BUILD_ID || '',
+                deviceData.VERSION_RELEASE || '',
+                (deviceData.CPUINFO || '').replace(/\\n/g, ' ').replace(/\\t/g, ' ')
+            ].join(' ').toLowerCase();
+            card.style.display = searchableText.includes(searchTerm) ? 'block' : 'none';
         });
     });
 
