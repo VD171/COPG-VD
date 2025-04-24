@@ -40,6 +40,6 @@ fi
 echo "✅ Config downloaded successfully!"
 mv "$TEMP_CONFIG" "$CONFIG_PATH"
 echo "📍 Saved to: $CONFIG_PATH"
-chmod 644 "$CONFIG_PATH"
+chmod 0644 "$CONFIG_PATH"
 echo "🔄 Reboot required to apply changes"
 echo "✨ COPG config update complete!"
