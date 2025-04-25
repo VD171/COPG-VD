@@ -66,3 +66,11 @@ Edit `/data/adb/modules/COPG/config.json` with this format:
     "CPUINFO": "Qualcomm Snapdragon 8 Gen 3"
   }
 }
+## 🧩 Module Architecture
+graph TD
+    A[Zygote] --> B[COPG]
+    B --> C{Target App?}
+    C -->|Yes| D[Apply Spoof]
+    C -->|No| E[Pass Through]
+    D --> F[Runtime Hooks]
+    F --> G[Build Prop Override]
