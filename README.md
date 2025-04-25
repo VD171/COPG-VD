@@ -1,81 +1,68 @@
-# COPG
+# 🎮 COPG - Device Spoofer for Android Games
 
-COPG is a Zygisk module that spoofs device properties for specific Android games, like Call of Duty Mobile and PUBG Mobile. It tweaks the `android.os.Build` fields (e.g., model, brand) at runtime to trick games into thinking your phone is a different device—perfect for bypassing device checks or playing on unsupported hardware.
+![Zygisk](https://img.shields.io/badge/Zygisk-Compatible-brightgreen)
+![Android](https://img.shields.io/badge/Android-9.0%2B-blue)
+[![License](https://img.shields.io/github/license/AlirezaParsi/COPG)](LICENSE)
 
-## Features
-- Spoofs device info (model, brand, etc.) for targeted apps listed in `config.json`.
-- Super fast: Adds only ~1ms to app launch time with optimized lookups and cached JNI calls.
-- Flexible: Update the spoof list by editing `config.json`—no rebuild needed.
-- Lightweight: Built with Zygisk for smooth injection into app processes.
-- Works with Magisk (Zygisk enabled) or KernelSU with Zygisk Next.
+COPG is an advanced Zygisk module that dynamically spoofs device properties for Android games, bypassing device restrictions and compatibility checks.
 
-## Requirements
-- Rooted Android device with:
-  - Magisk v24+ (Zygisk enabled), or
-  - KernelSU with Zygisk Next (get it from [ZygiskNext releases](https://github.com/Dr-TSNG/ZygiskNext)).
-- Android 9.0 (API 28) or higher (tested up to Android 14).
+## ✨ Features
 
-## Installation
-1. **Download the Module**:
-   - Get the latest `COPG.zip` from the [Releases](https://github.com/AlirezaParsi/COPG/releases) page or build it yourself (see below).
+### Core Functionality
+- **Real-time Device Spoofing**: Modifies `android.os.Build` fields (model, brand, etc.) for targeted apps
+- **Optimized Performance**: Adds only ~1ms to app launch time with cached JNI calls
+- **Dynamic Configuration**: Update spoof list via `config.json` without recompiling
+- **Multi-Root Support**: Works with Magisk (Zygisk/Zygisk Next/Rezygisk) and KernelSU (Zygisk Next/Rezygisk) and APatch (Zygisk Next/Rezygisk)
 
-2. **Install via Magisk/KSU**:
-   - Open Magisk or KernelSU manager.
-   - Go to "Modules" > "Install from storage".
-   - Pick `COPG.zip` and flash it.
-   - Reboot your device.
+### Enhanced Features
+- **Smart State Management**:
+  - Auto-disable adaptive brightness
+  - Do Not Disturb mode toggle
+  - Screen timeout control
+  - System logging management
+- **Web UI Control**: Manage games and devices through a browser interface
+- **Debugging Tools**: Detailed logging via `logcat -s "SpoofModule"`
+- **Smart Updates**: In-app module updates with changelog support
 
-3. **Verify**:
-   - In Magisk/KSU, check the Modules tab—look for "✨ COPG spoof ✨" as enabled.
-   - In Zygisk settings, confirm COPG is active.
+## 📦 Installation
 
-## Usage
-- The module uses `/data/adb/modules/COPG/config.json` to decide which apps to spoof and what device info to use.
-- **Default Examples**:
-  - COD Mobile (`com.activision.callofduty.shooter`): Spoofs as Lenovo TB-9707F.
-  - PUBG Mobile (`com.tencent.ig`): Spoofs as Xiaomi Mi 13 Pro (2210132G).
-  - Mobile Legends (`com.mobile.legends`): Spoofs as POCO F5 (23049PCD8G).
-- **How It Works**:
-  - On boot, it loads `config.json` into a fast memory list (~150ms one-time).
-  - When you open a listed app, it spoofs in ~1ms—no noticeable delay.
-- **Adding Apps**: Edit `config.json` (see below), push it to `/data/adb/modules/COPG/`, and reboot.
+### Requirements
+- Rooted Android device (Android 9.0+)
+- One of:
+  - Magisk v24+ with Zygisk enabled or [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)/[Rezygisk](https://github.com/PerformanC/ReZygisk)
+  - KernelSU with [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)/[Rezygisk](https://github.com/PerformanC/ReZygisk)
+  - APatch with [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)/[Rezygisk](https://github.com/PerformanC/ReZygisk)
 
-### Customizing `config.json`
-- Format (example from full config):
-  ```json
-  {
-    "PACKAGES_REDMAGIC9": [
-        "com.mobilelegends.mi",
-        "com.supercell.brawlstars",
-        "com.blizzard.diablo.immortal",
-        "com.netease.newspike",
-        "com.activision.callofduty.warzone",
-        "com.pubg.newstate",
-        "com.gamedevltd.destinywarfare",
-        "com.pikpok.dr2.play",
-        "com.CarXTech.highWay",
-        "com.nekki.shadowfight3",
-        "com.nekki.shadowfightarena",
-        "com.gameloft.android.ANMP.GloftA8HM",
-        "com.nekki.shadowfight",
-        "com.ea.game.nfs14_row",
-        "com.ea.games.r3_row",
-        "com.supercell.squad",
-        "com.blitzteam.battleprime",
-        "com.tencent.tmgp.gnyx"
-    ],
-    "PACKAGES_REDMAGIC9_DEVICE": {
-        "BRAND": "ZTE",
-        "DEVICE": "NX769J",
-        "MANUFACTURER": "ZTE",
-        "MODEL": "NX769J",
-        "ro.product.model": "NX769J",
-        "FINGERPRINT": "ZTE/NX769J/NX769J:14/UP1A.231005.007/20240301:user/release-keys",
-        "BUILD_ID": "UP1A.231005.007",
-        "DISPLAY": "UP1A.231005.007.A1",
-        "PRODUCT": "NX769J",
-        "VERSION_RELEASE": "14",
-        "SERIAL": "ZTE12345678",
-        "CPUINFO": "processor\t: 0\nmodel name\t: ARMv8-A (REDMAGIC 9)\nHardware\t: Qualcomm Snapdragon 8 Gen 3\nSerial\t: ZTE12345678",
-        "SERIAL_CONTENT": "ZTE12345678"
-    }
+### Installation Steps
+1. Download the latest `COPG.zip` from [Releases](https://github.com/AlirezaParsi/COPG/releases)
+2. Install via your root manager:
+   - Magisk: Modules → Install from storage → Select ZIP
+   - KernelSU: Modules → Install → Select ZIP
+   - APatch: Modules → Install → Select ZIP
+3. Reboot your device
+4. Verify installation in your root manager (look for "✨ COPG spoof ✨")
+
+## 🛠️ Configuration
+
+### Example Default Configuration
+The module includes predefined spoof profiles for popular games:
+- **Call of Duty Mobile**: Spoofs as Lenovo TB-9707F
+- **PUBG Mobile**: Spoofs as Xiaomi Mi 13 Pro
+- **Mobile Legends**: Spoofs as POCO F5
+
+### Customizing Spoof Profiles
+Edit `/data/adb/modules/COPG/config.json` with this format:
+
+```json
+{
+  "PACKAGES_REDMAGIC9": [
+    "com.mobilelegends.mi",
+    "com.supercell.brawlstars"
+  ],
+  "PACKAGES_REDMAGIC9_DEVICE": {
+    "BRAND": "ZTE",
+    "MODEL": "NX769J",
+    "FINGERPRINT": "ZTE/NX769J...",
+    "CPUINFO": "Qualcomm Snapdragon 8 Gen 3"
+  }
+}
