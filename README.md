@@ -1,5 +1,6 @@
 # 🎮 COPG - Device Spoofer for Android Games
 
+![COPG Logo](https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/AlirezaParsi-patch-1/icon.png)
 ![Zygisk](https://img.shields.io/badge/Zygisk-Compatible-brightgreen)
 ![Android](https://img.shields.io/badge/Android-9.0%2B-blue)
 [![License](https://img.shields.io/github/license/AlirezaParsi/COPG)](LICENSE)
