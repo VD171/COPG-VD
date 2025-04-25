@@ -66,6 +66,7 @@ Edit `/data/adb/modules/COPG/config.json` with this format:
     "CPUINFO": "Qualcomm Snapdragon 8 Gen 3"
   }
 }
+```
 ## 🧩 Module Architecture
 graph TD
     A[Zygote] --> B[COPG]
