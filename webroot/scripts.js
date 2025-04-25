@@ -2,6 +2,8 @@ let actionRunning = false;
 let currentConfig = {};
 let editingDevice = null;
 let editingGame = null;
+let lastRender = { devices: 0, games: 0 };
+const RENDER_DEBOUNCE_MS = 150;
 
 async function execCommand(command) {
     const callbackName = `exec_callback_${Date.now()}`;
@@ -107,8 +109,6 @@ async function loadConfig() {
             }
         }
         appendToOutput("Config loaded successfully", 'success');
-        renderDeviceList();
-        renderGameList();
     } catch (error) {
         appendToOutput("Failed to load config: " + error, 'error');
         currentConfig = {};
@@ -116,10 +116,16 @@ async function loadConfig() {
 }
 
 function renderDeviceList() {
+    const now = Date.now();
+    if (now - lastRender.devices < RENDER_DEBOUNCE_MS) return;
+    lastRender.devices = now;
+
     const deviceList = document.getElementById('device-list');
     if (!deviceList) return appendToOutput("Error: 'device-list' not found", 'error');
-    deviceList.innerHTML = '';
+
+    const fragment = document.createDocumentFragment();
     let index = 0;
+    
     for (const [key, value] of Object.entries(currentConfig)) {
         if (key.endsWith('_DEVICE')) {
             const deviceName = value.DEVICE || key.replace('PACKAGES_', '').replace('_DEVICE', '');
@@ -154,10 +160,13 @@ function renderDeviceList() {
                     Games associated: ${gameCount}
                 </div>
             `;
-            deviceList.appendChild(deviceCard);
+            fragment.appendChild(deviceCard);
             index++;
         }
     }
+    
+    deviceList.innerHTML = '';
+    deviceList.appendChild(fragment);
     attachDeviceListeners();
 }
 
@@ -181,10 +190,16 @@ function deleteDeviceHandler(e) {
 }
 
 function renderGameList() {
+    const now = Date.now();
+    if (now - lastRender.games < RENDER_DEBOUNCE_MS) return;
+    lastRender.games = now;
+
     const gameList = document.getElementById('game-list');
     if (!gameList) return appendToOutput("Error: 'game-list' not found", 'error');
-    gameList.innerHTML = '';
+
+    const fragment = document.createDocumentFragment();
     let index = 0;
+    
     for (const [key, value] of Object.entries(currentConfig)) {
         if (Array.isArray(value) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
             const deviceKey = `${key}_DEVICE`;
@@ -218,11 +233,14 @@ function renderGameList() {
                         Spoofed as: ${deviceName}
                     </div>
                 `;
-                gameList.appendChild(gameCard);
+                fragment.appendChild(gameCard);
                 index++;
             });
         }
     }
+    
+    gameList.innerHTML = '';
+    gameList.appendChild(fragment);
     attachGameListeners();
 }
 
@@ -285,7 +303,6 @@ function openDeviceModal(deviceKey = null) {
     const title = document.getElementById('device-modal-title');
     const form = document.getElementById('device-form');
     
-    // Clear existing error messages and error classes
     form.querySelectorAll('input, textarea').forEach(field => {
         field.classList.remove('error');
         const existingError = field.nextElementSibling;
@@ -299,7 +316,7 @@ function openDeviceModal(deviceKey = null) {
         editingDevice = deviceKey;
         const deviceData = currentConfig[deviceKey];
         document.getElementById('device-name').value = deviceData.DEVICE || '';
-        document.getElementById('device-brand').value = deviceData.BRAND || '';
+        document.getElementById('device-brand').value = deviceData.BRAND ||= '';
         document.getElementById('device-model').value = deviceData.MODEL || '';
         document.getElementById('device-manufacturer').value = deviceData.MANUFACTURER || '';
         document.getElementById('device-android-version').value = deviceData.VERSION_RELEASE || '';
@@ -331,7 +348,6 @@ function openGameModal(gamePackage = null, deviceKey = null) {
     const packageInput = document.getElementById('game-package');
     const deviceInput = document.getElementById('game-device');
     
-    // Clear existing error messages and error classes
     form.querySelectorAll('input').forEach(field => {
         field.classList.remove('error');
         const existingError = field.nextElementSibling;
@@ -379,7 +395,6 @@ async function saveDevice(e) {
     let hasError = false;
     const missingFields = [];
     
-    // Clear existing error messages
     requiredFieldIds.forEach(id => {
         const field = document.getElementById(id);
         field.classList.remove('error');
@@ -389,7 +404,6 @@ async function saveDevice(e) {
         }
     });
     
-    // Validate required fields
     requiredFieldIds.forEach(id => {
         const field = document.getElementById(id);
         if (!field.value.trim()) {
@@ -403,7 +417,6 @@ async function saveDevice(e) {
         }
     });
     
-    // Validate duplicate name and model for new profiles
     const deviceName = document.getElementById('device-name').value.trim();
     const deviceModel = document.getElementById('device-model').value.trim();
     const deviceKey = `PACKAGES_${deviceName.toUpperCase().replace(/ /g, '_')}_DEVICE`;
@@ -513,7 +526,6 @@ async function saveGame(e) {
     const deviceKey = deviceInput.dataset.key;
     const packageKey = deviceKey.replace('_DEVICE', '');
     
-    // Clear existing error messages
     form.querySelectorAll('input').forEach(field => {
         field.classList.remove('error');
         const existingError = field.nextElementSibling;
@@ -522,7 +534,6 @@ async function saveGame(e) {
         }
     });
     
-    // Validate required fields
     let hasError = false;
     const missingFields = [];
     
@@ -547,7 +558,6 @@ async function saveGame(e) {
         missingFields.push('Device Profile');
     }
     
-    // Validate duplicate game package
     if (!editingGame || editingGame.package !== gamePackage) {
         for (const [key, value] of Object.entries(currentConfig)) {
             if (Array.isArray(value) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
@@ -564,11 +574,12 @@ async function saveGame(e) {
                     errorMessage.className = 'error-message';
                     errorMessage.textContent = 'Game package already exists';
                     field.insertAdjacentElement('afterend', errorMessage);
-                    appendToOutput(`Game "${gamePackage}" already exists in device profile "${associatedDeviceName}"`, 'error');
+                    const errorPopupMessage = `Game '${gamePackage}' is already associated with device profile '${associatedDeviceName}'.`;
+                    appendToOutput(errorPopupMessage, 'error');
+                    document.getElementById('error-message').textContent = errorPopupMessage;
+                    showPopup('error-popup');
                     hasError = true;
                     missingFields.push('Package Name (duplicate)');
-                    document.getElementById('error-message').textContent = `Game "${gamePackage}" is already associated with device profile "${associatedDeviceName}".`;
-                    showPopup('error-popup');
                     break;
                 }
             }
@@ -629,7 +640,7 @@ async function deleteDevice(deviceKey) {
     if (!card) return;
     
     card.classList.add('fade-out');
-    await new Promise(resolve => setTimeout(resolve, 400)); // Wait for animation (400ms)
+    await new Promise(resolve => setTimeout(resolve, 400));
     try {
         appendToOutput(`Deleting device: ${deviceName}`, 'warning');
         delete currentConfig[packageKey];
@@ -654,7 +665,7 @@ async function deleteGame(gamePackage, deviceKey) {
     if (!card) return;
     
     card.classList.add('fade-out');
-    await new Promise(resolve => setTimeout(resolve, 400)); // Wait for animation (400ms)
+    await new Promise(resolve => setTimeout(resolve, 400));
     try {
         if (!Array.isArray(currentConfig[deviceKey]) || currentConfig[deviceKey].length === 0) {
             appendToOutput(`No games found for "${deviceName}"`, 'warning');
@@ -776,48 +787,63 @@ function toggleLogSection(e) {
 
 function switchTab(tabId, direction = null) {
     const tabs = ['settings', 'devices', 'games'];
-    const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`).classList.contains('active'));
+    const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`)?.classList.contains('active'));
     if (currentTab === tabId) return;
 
     const currentTabElement = document.getElementById(`${currentTab}-tab`);
     const newTabElement = document.getElementById(`${tabId}-tab`);
-    
+    if (!newTabElement) return;
+
     const currentIndex = tabs.indexOf(currentTab);
     const newIndex = tabs.indexOf(tabId);
     const inferredDirection = direction || (newIndex > currentIndex ? 'left' : 'right');
-    
+
+    // Prepare tabs for transition
     if (currentTabElement) {
         currentTabElement.classList.remove('active');
-        currentTabElement.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-        currentTabElement.style.opacity = '0';
+        currentTabElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
         currentTabElement.style.transform = inferredDirection === 'left' ? 'translateX(-100%)' : 'translateX(100%)';
-        currentTabElement.addEventListener('transitionend', () => {
-            currentTabElement.style.display = 'none';
-            currentTabElement.style.transform = 'translateX(0)';
-            currentTabElement.style.opacity = '0';
-        }, { once: true });
+        currentTabElement.style.opacity = '0';
     }
-    
+
     newTabElement.style.display = 'block';
-    newTabElement.style.opacity = '0';
+    newTabElement.style.transition = 'none';
     newTabElement.style.transform = inferredDirection === 'left' ? 'translateX(100%)' : 'translateX(-100%)';
+    newTabElement.style.opacity = '0';
+
+    // Force reflow
+    void newTabElement.offsetHeight;
+
+    // Start animation
     requestAnimationFrame(() => {
         newTabElement.classList.add('active');
-        newTabElement.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        newTabElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
         newTabElement.style.transform = 'translateX(0)';
         newTabElement.style.opacity = '1';
-        
-        if (tabId === 'devices') {
-            const devicesContent = document.getElementById('devices-tab');
-            devicesContent.style.display = 'none';
-            devicesContent.offsetHeight;
-            devicesContent.style.display = 'block';
-            renderDeviceList();
+
+        // Clean up current tab after transition
+        if (currentTabElement) {
+            currentTabElement.addEventListener('transitionend', () => {
+                currentTabElement.style.display = 'none';
+                currentTabElement.style.transform = 'translateX(0)';
+                currentTabElement.style.opacity = '0';
+            }, { once: true });
         }
+
+        // Render content after transition with a slight delay
+        newTabElement.addEventListener('transitionend', () => {
+            setTimeout(() => {
+                if (tabId === 'devices') {
+                    renderDeviceList();
+                } else if (tabId === 'games') {
+                    renderGameList();
+                }
+            }, 100); // Increased delay for smoother transition
+        }, { once: true });
     });
-    
+
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`tab-${tabId}`).classList.add('active');
+    document.getElementById(`tab-${tabId}`)?.classList.add('active');
 }
 
 function setupSwipeNavigation() {
@@ -827,9 +853,11 @@ function setupSwipeNavigation() {
     let touchMoveX = 0;
     let touchMoveY = 0;
     const tabs = ['settings', 'devices', 'games'];
-    const swipeThreshold = 50;
+    const swipeThreshold = 30;
     const verticalThreshold = 50;
     let isSwiping = false;
+    let lastSwipeTime = 0;
+    const debounceTime = 150;
 
     function resetTabStates() {
         tabs.forEach(tab => {
@@ -844,6 +872,8 @@ function setupSwipeNavigation() {
     }
 
     container.addEventListener('touchstart', (e) => {
+        const now = Date.now();
+        if (now - lastSwipeTime < debounceTime) return;
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
         isSwiping = false;
@@ -854,7 +884,7 @@ function setupSwipeNavigation() {
         touchMoveY = e.touches[0].clientY;
         const diffX = touchMoveX - touchStartX;
         const diffY = touchMoveY - touchStartY;
-        const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`).classList.contains('active'));
+        const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`)?.classList.contains('active'));
         const currentIndex = tabs.indexOf(currentTab);
 
         if (Math.abs(diffY) > verticalThreshold || Math.abs(diffX) < 20) return;
@@ -865,9 +895,11 @@ function setupSwipeNavigation() {
         if ((currentIndex === 0 && diffX > 0) || (currentIndex === tabs.length - 1 && diffX < 0)) return;
 
         const currentTabElement = document.getElementById(`${currentTab}-tab`);
-        currentTabElement.style.transition = 'none';
-        currentTabElement.style.transform = `translateX(${diffX}px)`;
-        currentTabElement.style.opacity = Math.max(0.2, 1 - Math.abs(diffX) / window.innerWidth);
+        if (currentTabElement) {
+            currentTabElement.style.transition = 'none';
+            currentTabElement.style.transform = `translateX(${diffX}px)`;
+            currentTabElement.style.opacity = Math.max(0.2, 1 - Math.abs(diffX) / window.innerWidth);
+        }
 
         const nextTab = diffX < 0 ? tabs[currentIndex + 1] : tabs[currentIndex - 1];
         const nextTabElement = document.getElementById(`${nextTab}-tab`);
@@ -882,22 +914,28 @@ function setupSwipeNavigation() {
     container.addEventListener('touchend', (e) => {
         if (!isSwiping) return;
 
+        const now = Date.now();
+        if (now - lastSwipeTime < debounceTime) return;
+        lastSwipeTime = now;
+
         const diffX = touchMoveX - touchStartX;
         const diffY = touchMoveY - touchStartY;
-        const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`).classList.contains('active'));
+        const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`)?.classList.contains('active'));
         const currentIndex = tabs.indexOf(currentTab);
         const currentTabElement = document.getElementById(`${currentTab}-tab`);
         const nextTab = diffX < 0 ? tabs[currentIndex + 1] : tabs[currentIndex - 1];
         const nextTabElement = document.getElementById(`${nextTab}-tab`);
 
-        currentTabElement.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-        if (nextTabElement) nextTabElement.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        if (currentTabElement) currentTabElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+        if (nextTabElement) nextTabElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
 
         if (Math.abs(diffX) > swipeThreshold && Math.abs(diffY) <= verticalThreshold && nextTab) {
             switchTab(nextTab, diffX < 0 ? 'left' : 'right');
         } else {
-            currentTabElement.style.transform = 'translateX(0)';
-            currentTabElement.style.opacity = '1';
+            if (currentTabElement) {
+                currentTabElement.style.transform = 'translateX(0)';
+                currentTabElement.style.opacity = '1';
+            }
             if (nextTabElement) {
                 nextTabElement.style.transform = diffX < 0 ? 'translateX(100%)' : 'translateX(-100%)';
                 nextTabElement.style.opacity = '0';
@@ -916,7 +954,7 @@ function setupSwipeNavigation() {
 
 async function updateGameList() {
     if (actionRunning) return;
-    actionTermination = true;
+    actionRunning = true;
     const btn = document.getElementById('update-config');
     btn.classList.add('loading');
     appendToOutput("Updating game list...");
@@ -1089,7 +1127,6 @@ function applyEventListeners() {
             const searchableText = [
                 deviceData.DEVICE || '',
                 deviceData.BRAND || '',
-                deviceData.MODEL || '',
                 deviceData.MANUFACTURER || '',
                 deviceData.FINGERPRINT || '',
                 deviceData.BUILD_ID || '',
@@ -1114,8 +1151,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('theme-icon').textContent = '🌙';
     }
     appendToOutput("UI initialized", 'success');
-    loadVersion();
-    loadToggleStates();
-    loadConfig();
+    await loadVersion();
+    await loadToggleStates();
+    await loadConfig();
     applyEventListeners();
+    switchTab('settings');
 });
