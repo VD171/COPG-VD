@@ -68,6 +68,7 @@ Edit `/data/adb/modules/COPG/config.json` with this format:
 }
 ```
 ## 🧩 Module Architecture
+```mermaid
 graph TD
     A[Zygote] --> B[COPG]
     B --> C{Target App?}
@@ -75,3 +76,4 @@ graph TD
     C -->|No| E[Pass Through]
     D --> F[Runtime Hooks]
     F --> G[Build Prop Override]
+```
