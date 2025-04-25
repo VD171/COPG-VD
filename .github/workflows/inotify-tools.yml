@@ -30,7 +30,7 @@ jobs:
           ls -la $ANDROID_HOME/cmdline-tools || echo "Unzip failed!"
           if [ -d "$ANDROID_HOME/cmdline-tools/cmdline-tools" ]; then
             mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-          elif [ -d "$ANDROID הפה/tools" ]; then
+          elif [ -d "$ANDROID_HOME/cmdline-tools/tools" ]; then
             mv $ANDROID_HOME/cmdline-tools/tools $ANDROID_HOME/cmdline-tools/latest
           else
             echo "Unexpected directory structure after unzip:"
@@ -67,6 +67,15 @@ jobs:
           API: ${{ matrix.api_level }}
         run: |
           cd inotify-tools
+          export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/linux-x86_64
+          export CC=$TOOLCHAIN/bin/${TARGET}${API}-clang
+          export CXX=$TOOLCHAIN/bin/${TARGET}${API}-clang++
+          export AR=$TOOLCHAIN/bin/llvm-ar
+          export LD=$TOOLCHAIN/bin/ld
+          export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
+          export STRIP=$TOOLCHAIN/bin/llvm-strip
+          echo "Using CC: $CC"
+          $CC --version
           ./autogen.sh
           ./configure \
             --host="$TARGET" \
@@ -75,16 +84,17 @@ jobs:
             --enable-static \
             --disable-shared \
             --disable-doxygen \
-            CC="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/${TARGET}${API}-clang" \
-            AR="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" \
-            LD="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/ld" \
-            RANLIB="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib" \
-            STRIP="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" \
+            CC="$CC" \
+            CXX="$CXX" \
+            AR="$AR" \
+            LD="$LD" \
+            RANLIB="$RANLIB" \
+            STRIP="$STRIP" \
             CFLAGS="-static -O2 -fPIE" \
-            LDFLAGS="-pie"
+            LDFLAGS="-static -pie"
           make -j$(nproc)
           file ./src/inotifywait  # Debug: Check binary type
-          $NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip ./src/inotifywait
+          $STRIP ./src/inotifywait
           mv ./src/inotifywait "../inotifywait-$TARGET"
 
       - name: Upload artifacts
