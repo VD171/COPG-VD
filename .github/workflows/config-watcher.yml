@@ -60,6 +60,10 @@ jobs:
           mkdir -p src
           # Assumes config-watcher.c is in src/config-watcher.c in the repo
 
+      - name: Create linker script
+        run: |
+          echo "SECTIONS { .tdata : { *(.tdata) } .tbss : { *(.tbss) } : ALIGN(64) }" > src/tls-align.ld
+
       - name: Build config-watcher
         env:
           NDK: ${{ env.NDK_PATH }}
@@ -72,7 +76,7 @@ jobs:
           export READELF=$TOOLCHAIN/bin/llvm-readelf
           echo "Using CC: $CC"
           $CC --version
-          $CC -O2 -fPIE -static -static-libgcc -pie -Wl,-z,pack-relative-relocs -o src/config-watcher src/config-watcher.c
+          $CC -O2 -fPIE -static -static-libgcc -pie -Wl,-z,pack-relative-relocs -Wl,-T,src/tls-align.ld -o src/config-watcher src/config-watcher.c
           file src/config-watcher  # Debug: Check binary type
           ldd src/config-watcher || echo "ldd: Binary is statically linked"
           $READELF -l src/config-watcher | grep -A1 TLS  # Debug: Check TLS alignment
