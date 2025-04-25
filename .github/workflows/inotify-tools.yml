@@ -60,6 +60,7 @@ jobs:
           git clone https://github.com/inotify-tools/inotify-tools.git --depth=1
           cd inotify-tools
           
+
       - name: Build inotify-tools
         env:
           NDK: ${{ env.NDK_PATH }}
@@ -84,16 +85,18 @@ jobs:
             --enable-static \
             --disable-shared \
             --disable-doxygen \
+            --with-cxx=none \
             CC="$CC" \
             CXX="$CXX" \
             AR="$AR" \
             LD="$LD" \
             RANLIB="$RANLIB" \
             STRIP="$STRIP" \
-            CFLAGS="-static -O2 -fPIE" \
-            LDFLAGS="-static -pie"
+            CFLAGS="-O2 -fPIE" \
+            LDFLAGS="-static -static-libgcc -pie"
           make -j$(nproc)
           file ./src/inotifywait  # Debug: Check binary type
+          ldd ./src/inotifywait || echo "ldd: Binary is statically linked"
           $STRIP ./src/inotifywait
           mv ./src/inotifywait "../inotifywait-$TARGET"
 
