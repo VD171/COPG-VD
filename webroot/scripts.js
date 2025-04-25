@@ -1127,6 +1127,7 @@ function applyEventListeners() {
             const searchableText = [
                 deviceData.DEVICE || '',
                 deviceData.BRAND || '',
+                deviceData.MODEL || '',
                 deviceData.MANUFACTURER || '',
                 deviceData.FINGERPRINT || '',
                 deviceData.BUILD_ID || '',
