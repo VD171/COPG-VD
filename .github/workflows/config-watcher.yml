@@ -1,0 +1,85 @@
+name: Build config-watcher for Android
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        target: [aarch64-linux-android]  # Focus on aarch64; add armv7a-linux-androideabi if needed
+        api_level: [21]  # Android 5.0+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Android SDK and NDK
+        run: |
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+          ls -la cmdline-tools.zip || echo "Download failed!"
+          unzip -q cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+          ls -la $ANDROID_HOME/cmdline-tools || echo "Unzip failed!"
+          if [ -d "$ANDROID_HOME/cmdline-tools/cmdline-tools" ]; then
+            mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+          elif [ -d "$ANDROID_HOME/cmdline-tools/tools" ]; then
+            mv $ANDROID_HOME/cmdline-tools/tools $ANDROID_HOME/cmdline-tools/latest
+          else
+            echo "Unexpected directory structure after unzip:"
+            ls -la $ANDROID_HOME/cmdline-tools
+            exit 1
+          fi
+          ls -la $ANDROID_HOME/cmdline-tools/latest/bin || echo "latest/bin directory not found!"
+          if [ ! -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
+            echo "sdkmanager not found!"
+            exit 1
+          fi
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973"
+          echo "NDK_PATH=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
+
+      - name: Accept Android SDK licenses
+        run: |
+          JAVA_OPTS="--add-modules java.xml.bind" yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || echo "License acceptance failed!"
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential file
+
+      - name: Create source directory
+        run: |
+          mkdir -p src
+          # Copy config-watcher.c to src (assuming it's in the repo)
+          # If not, you can add it manually or use a checkout step for a separate repo
+
+      - name: Build config-watcher
+        env:
+          NDK: ${{ env.NDK_PATH }}
+          TARGET: ${{ matrix.target }}
+          API: ${{ matrix.api_level }}
+        run: |
+          export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/linux-x86_64
+          export CC=$TOOLCHAIN/bin/${TARGET}${API}-clang
+          export STRIP=$TOOLCHAIN/bin/llvm-strip
+          echo "Using CC: $CC"
+          $CC --version
+          $CC -O2 -fPIE -static -static-libgcc -pie -o src/config-watcher src/config-watcher.c
+          file src/config-watcher  # Debug: Check binary type
+          ldd src/config-watcher || echo "ldd: Binary is statically linked"
+          $STRIP src/config-watcher
+          mv src/config-watcher config-watcher-$TARGET
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: config-watcher-android-${{ matrix.target }}
+          path: config-watcher-${{ matrix.target }}
