@@ -4,11 +4,43 @@
 CONFIG_JSON="/data/adb/modules/COPG/config.json"
 TOGGLE_FILE="/data/adb/copg_state"
 DEFAULTS_FILE="/data/adb/copg_defaults"  # Base name for .brightness, .dnd, and .timeout
+SIGNAL_FILE="/data/adb/copg_config_updated"
 
 # Function to execute root commands
 exec_root() {
     su -c "$1" >/dev/null 2>&1
     return $?
+}
+
+# Function to start config_watcher
+start_config_watcher() {
+    # Check ABI list for architecture
+    ABI_LIST=$(getprop ro.product.cpu.abilist 2>/dev/null)
+    if echo "$ABI_LIST" | grep -q "arm64-v8a"; then
+        WATCHER_BIN="/data/adb/modules/COPG/bin/config_watcher_arm64"
+    else
+        # Fallback to uname -m for devices without arm64-v8a
+        ARCH=$(uname -m)
+        case "$ARCH" in
+            aarch64|arm64|armv8-a|armv8l|armv9-a)
+                WATCHER_BIN="/data/adb/modules/COPG/bin/config_watcher_arm64"
+                ;;
+            *)
+                WATCHER_BIN="/data/adb/modules/COPG/bin/config_watcher_arm32"
+                ;;
+        esac
+    fi
+
+    if [ -x "$WATCHER_BIN" ]; then
+        exec_root "$WATCHER_BIN > /data/adb/copg_watcher.log 2>&1 &"
+        [ $? -eq 0 ] || {
+            echo "Failed to start config_watcher" >> /data/adb/copg_watcher.log
+            return 1
+        }
+    else
+        echo "Config watcher binary not found or not executable: $WATCHER_BIN" >> /data/adb/copg_watcher.log
+        return 1
+    fi
 }
 
 # Function to save current DND, brightness, and timeout states
@@ -100,6 +132,9 @@ get_packages() {
 exec_root "whoami" >/dev/null || exit 1
 restore_saved_states
 
+# Start config_watcher
+start_config_watcher || exit 1
+
 # Main monitoring loop
 last_app=""
 debounce_count=0
@@ -110,6 +145,14 @@ PACKAGE_LIST=$(get_packages | tr '\n' '|' | sed 's/|$//')
 [ -z "$PACKAGE_LIST" ] && exit 1
 
 while true; do
+    # Check for config.json changes
+    if [ -f "$SIGNAL_FILE" ]; then
+        rm -f "$SIGNAL_FILE"
+        PACKAGE_LIST=$(get_packages | tr '\n' '|' | sed 's/|$//')
+        [ -z "$PACKAGE_LIST" ] && exit 1
+        echo "Reloaded package list due to config change"
+    fi
+
     window=$(su -c "dumpsys window" 2>/dev/null) || { sleep 1; continue; }
     current_app=$(echo "$window" | grep -E 'mCurrentFocus|mFocusedApp' | grep -Eo "$PACKAGE_LIST" | head -n 1)
 
