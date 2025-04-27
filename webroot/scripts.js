@@ -51,7 +51,7 @@ function appendToOutput(content, type = 'info') {
         } else if (content.includes('✅')) {
             colorClass = 'log-success';
             iconClass = 'icon-success';
-        } else if (content.includes('🔄') || content.includes('Rebooting') || content.includes('Deleting')) {
+        } else if (content.includes('📍') || content.includes('Rebooting') || content.includes('Deleting')) {
             colorClass = 'log-warning';
             iconClass = 'icon-warning';
         } else if (content.includes('Enabled')) {
@@ -630,7 +630,6 @@ async function saveGame(e) {
         renderGameList();
         renderDeviceList();
         appendToOutput(`Game "${gamePackage}" added to "${currentConfig[deviceKey].DEVICE}"`, 'success');
-        showPopup('reboot-popup');
     } catch (error) {
         appendToOutput(`Failed to save game: ${error}`, 'error');
         document.getElementById('error-message').textContent = `Failed to save game: ${error}`;
@@ -682,7 +681,7 @@ async function deleteDevice(deviceKey) {
     const card = document.querySelector(`.device-card[data-key="${deviceKey}"]`);
     
     if (!card) return;
-    
+
     const deviceEntries = Object.entries(currentConfig).filter(([key]) => key.endsWith('_DEVICE'));
     const deviceIndex = deviceEntries.findIndex(([key]) => key === deviceKey);
     if (deviceIndex === -1) {
@@ -697,11 +696,30 @@ async function deleteDevice(deviceKey) {
     const deletedPackageData = currentConfig[packageKey] ? [...currentConfig[packageKey]] : [];
     const deletedDeviceIndex = deviceIndex;
 
+    // Remove the device and associated packages from the configuration and save immediately
     delete currentConfig[packageKey];
     delete currentConfig[deviceKey];
+    try {
+        await saveConfig();
+        appendToOutput(`Deleted device "${deviceName}"`, 'red');
+    } catch (error) {
+        appendToOutput(`Failed to delete device: ${error}`, 'error');
+        // Revert the deletion in case of error
+        currentConfig = insertAtIndex(currentConfig, deviceKey, deletedDeviceData, deletedDeviceIndex * 2);
+        if (deletedPackageData.length > 0) {
+            currentConfig = insertAtIndex(currentConfig, packageKey, deletedPackageData, deletedDeviceIndex * 2);
+        }
+        card.classList.remove('fade-out');
+        renderDeviceList();
+        renderGameList();
+        return;
+    }
+
+    // Update UI after successful deletion
     renderDeviceList();
     renderGameList();
 
+    // Show snackbar with Undo option
     showSnackbar(`Deleted device "${deviceName}"`, async () => {
         currentConfig = insertAtIndex(currentConfig, deviceKey, deletedDeviceData, deletedDeviceIndex * 2);
         if (deletedPackageData.length > 0) {
@@ -724,32 +742,14 @@ async function deleteDevice(deviceKey) {
             }
         } catch (error) {
             appendToOutput(`Failed to restore device: ${error}`, 'error');
+            // Remove the device again if restoration fails
+            delete currentConfig[packageKey];
+            delete currentConfig[deviceKey];
+            await saveConfig();
+            renderDeviceList();
+            renderGameList();
         }
     });
-
-    try {
-        await new Promise(resolve => {
-            if (snackbarTimeout) {
-                setTimeout(resolve, 5000);
-            } else {
-                resolve();
-            }
-        });
-        if (!currentConfig[deviceKey]) {
-            await saveConfig();
-            appendToOutput(`Deleted device "${deviceName}"`, 'red');
-            showPopup('reboot-popup');
-        }
-    } catch (error) {
-        appendToOutput(`Failed to delete device: ${error}`, 'error');
-        currentConfig = insertAtIndex(currentConfig, deviceKey, deletedDeviceData, deletedDeviceIndex * 2);
-        if (deletedPackageData.length > 0) {
-            currentConfig = insertAtIndex(currentConfig, packageKey, deletedPackageData, deletedDeviceIndex * 2);
-        }
-        card.classList.remove('fade-out');
-        renderDeviceList();
-        renderGameList();
-    }
 }
 
 async function deleteGame(gamePackage, deviceKey) {
@@ -757,7 +757,7 @@ async function deleteGame(gamePackage, deviceKey) {
     const card = document.querySelector(`.game-card[data-package="${gamePackage}"][data-device="${deviceKey}"]`);
     
     if (!card) return;
-    
+
     card.classList.add('fade-out');
     await new Promise(resolve => setTimeout(resolve, 400));
 
@@ -769,10 +769,26 @@ async function deleteGame(gamePackage, deviceKey) {
         return;
     }
 
+    // Remove the game from the configuration and save immediately
     currentConfig[deviceKey].splice(originalIndex, 1);
+    try {
+        await saveConfig();
+        appendToOutput(`Removed "${gamePackage}" from "${deviceName}"`, 'red');
+    } catch (error) {
+        appendToOutput(`Failed to delete game: ${error}`, 'error');
+        // Revert the deletion in case of error
+        currentConfig[deviceKey].splice(originalIndex, 0, deletedGame);
+        card.classList.remove('fade-out');
+        renderGameList();
+        renderDeviceList();
+        return;
+    }
+
+    // Update UI after successful deletion
     renderGameList();
     renderDeviceList();
 
+    // Show snackbar with Undo option
     showSnackbar(`Removed "${gamePackage}" from "${deviceName}"`, async () => {
         if (!Array.isArray(currentConfig[deviceKey])) {
             currentConfig[deviceKey] = [];
@@ -795,33 +811,20 @@ async function deleteGame(gamePackage, deviceKey) {
             }
         } catch (error) {
             appendToOutput(`Failed to restore game: ${error}`, 'error');
+            // Remove the game again if restoration fails
+            currentConfig[deviceKey].splice(originalIndex, 1);
+            await saveConfig();
+            renderGameList();
+            renderDeviceList();
         }
     });
-
-    try {
-        await new Promise(resolve => {
-            if (snackbarTimeout) {
-                setTimeout(resolve, 5000);
-            } else {
-                resolve();
-            }
-        });
-        if (currentConfig[deviceKey].indexOf(gamePackage) === -1) {
-            await saveConfig();
-            appendToOutput(`Removed "${gamePackage}" from "${deviceName}"`, 'red');
-            showPopup('reboot-popup');
-        }
-    } catch (error) {
-        appendToOutput(`Failed to delete game: ${error}`, 'error');
-        currentConfig[deviceKey].splice(originalIndex, 0, deletedGame);
-        card.classList.remove('fade-out');
-        renderGameList();
-        renderDeviceList();
-    }
 }
 
 async function saveConfig() {
     try {
+        // Create a backup of the current config
+        await execCommand(`cp /data/adb/modules/COPG/config.json /data/adb/modules/COPG/config.json.bak || true`);
+        
         for (const key in currentConfig) {
             if (key.endsWith('_DEVICE') && currentConfig[key].CPUINFO) {
                 currentConfig[key].CPUINFO = currentConfig[key].CPUINFO.replace(/\n/g, '\\n').replace(/\t/g, '\\t');
@@ -831,6 +834,8 @@ async function saveConfig() {
         await execCommand(`echo '${configStr.replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/config.json`);
         appendToOutput("Config saved", 'info');
     } catch (error) {
+        // Restore from backup if save fails
+        await execCommand(`mv /data/adb/modules/COPG/config.json.bak /data/adb/modules/COPG/config.json || true`);
         appendToOutput(`Failed to save config: ${error}`, 'error');
         throw error;
     }
@@ -1094,11 +1099,9 @@ async function updateGameList() {
             if (line.includes('Your config is already up-to-date')) {
                 isUpToDate = true;
             }
-            if (line.includes('Reboot required')) showPopup('reboot-popup');
         });
 
         if (isUpToDate) {
-            // Suppress the "Your game list is already up-to-date" message
             appendToOutput("No updates found for game list", 'info');
         } else {
             appendToOutput("Game list updated successfully", 'success');
@@ -1170,16 +1173,6 @@ function applyEventListeners() {
     document.getElementById('update-no').addEventListener('click', () => {
         closePopup('update-confirm-popup');
         appendToOutput("Update canceled", 'info');
-    });
-
-    document.getElementById('reboot-yes').addEventListener('click', async () => {
-        hidePopup('reboot-popup');
-        await rebootDevice();
-    });
-
-    document.getElementById('reboot-no').addEventListener('click', () => {
-        closePopup('reboot-popup');
-        appendToOutput("Reboot canceled", 'info');
     });
 
     document.getElementById('log-header').addEventListener('click', toggleLogSection);
