@@ -4,6 +4,7 @@ let editingDevice = null;
 let editingGame = null;
 let lastRender = { devices: 0, games: 0 };
 const RENDER_DEBOUNCE_MS = 150;
+let snackbarTimeout = null;
 
 async function execCommand(command) {
     const callbackName = `exec_callback_${Date.now()}`;
@@ -316,7 +317,7 @@ function openDeviceModal(deviceKey = null) {
         editingDevice = deviceKey;
         const deviceData = currentConfig[deviceKey];
         document.getElementById('device-name').value = deviceData.DEVICE || '';
-        document.getElementById('device-brand').value = deviceData.BRAND ||= '';
+        document.getElementById('device-brand').value = deviceData.BRAND || '';
         document.getElementById('device-model').value = deviceData.MODEL || '';
         document.getElementById('device-manufacturer').value = deviceData.MANUFACTURER || '';
         document.getElementById('device-android-version').value = deviceData.VERSION_RELEASE || '';
@@ -512,7 +513,12 @@ async function saveDevice(e) {
         await saveConfig();
         closeModal('device-modal');
         renderDeviceList();
-        appendToOutput(`Device profile "${deviceName}" saved`, 'success');
+        appendToOutput(
+            editingDevice 
+                ? `Device profile "${deviceName}" saved` 
+                : `Device profile "${deviceName}" added`, 
+            'success'
+        );
     } catch (error) {
         appendToOutput(`Failed to save device: ${error}`, 'error');
     }
@@ -602,7 +608,7 @@ async function saveGame(e) {
         showPopup('error-popup');
         return;
     }
-
+    
     try {
         if (editingGame) {
             const oldIndex = currentConfig[editingGame.device]?.indexOf(editingGame.package);
@@ -632,6 +638,44 @@ async function saveGame(e) {
     }
 }
 
+function showSnackbar(message, onUndo) {
+    const snackbar = document.getElementById('snackbar');
+    const messageElement = document.getElementById('snackbar-message');
+    const undoButton = document.getElementById('snackbar-undo');
+
+    if (snackbarTimeout) {
+        clearTimeout(snackbarTimeout);
+    }
+
+    messageElement.textContent = message;
+    snackbar.classList.add('show');
+
+    const newUndoButton = undoButton.cloneNode(true);
+    undoButton.parentNode.replaceChild(newUndoButton, undoButton);
+
+    newUndoButton.addEventListener('click', () => {
+        if (onUndo) onUndo();
+        snackbar.classList.remove('show');
+        clearTimeout(snackbarTimeout);
+        snackbarTimeout = null;
+    });
+
+    snackbarTimeout = setTimeout(() => {
+        snackbar.classList.remove('show');
+        snackbarTimeout = null;
+    }, 5000);
+}
+
+function insertAtIndex(obj, key, value, index) {
+    const entries = Object.entries(obj);
+    const newEntries = [
+        ...entries.slice(0, index),
+        [key, value],
+        ...entries.slice(index)
+    ];
+    return Object.fromEntries(newEntries);
+}
+
 async function deleteDevice(deviceKey) {
     const deviceName = currentConfig[deviceKey]?.DEVICE || deviceKey.replace('PACKAGES_', '').replace('_DEVICE', '');
     const packageKey = deviceKey.replace('_DEVICE', '');
@@ -639,19 +683,69 @@ async function deleteDevice(deviceKey) {
     
     if (!card) return;
     
+    const deviceEntries = Object.entries(currentConfig).filter(([key]) => key.endsWith('_DEVICE'));
+    const deviceIndex = deviceEntries.findIndex(([key]) => key === deviceKey);
+    if (deviceIndex === -1) {
+        appendToOutput(`Device "${deviceName}" not found in config`, 'error');
+        return;
+    }
+    
     card.classList.add('fade-out');
     await new Promise(resolve => setTimeout(resolve, 400));
+
+    const deletedDeviceData = { ...currentConfig[deviceKey] };
+    const deletedPackageData = currentConfig[packageKey] ? [...currentConfig[packageKey]] : [];
+    const deletedDeviceIndex = deviceIndex;
+
+    delete currentConfig[packageKey];
+    delete currentConfig[deviceKey];
+    renderDeviceList();
+    renderGameList();
+
+    showSnackbar(`Deleted device "${deviceName}"`, async () => {
+        currentConfig = insertAtIndex(currentConfig, deviceKey, deletedDeviceData, deletedDeviceIndex * 2);
+        if (deletedPackageData.length > 0) {
+            currentConfig = insertAtIndex(currentConfig, packageKey, deletedPackageData, deletedDeviceIndex * 2);
+        }
+        try {
+            await saveConfig();
+            appendToOutput(`Restored device "${deviceName}"`, 'success');
+            renderDeviceList();
+            renderGameList();
+            const restoredCard = document.querySelector(`.device-card[data-key="${deviceKey}"]`);
+            if (restoredCard) {
+                restoredCard.style.opacity = '0';
+                restoredCard.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    restoredCard.style.opacity = '1';
+                    restoredCard.style.transform = 'translateY(0)';
+                    restoredCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                }, 10);
+            }
+        } catch (error) {
+            appendToOutput(`Failed to restore device: ${error}`, 'error');
+        }
+    });
+
     try {
-        appendToOutput(`Deleting device: ${deviceName}`, 'warning');
-        delete currentConfig[packageKey];
-        delete currentConfig[deviceKey];
-        await saveConfig();
-        appendToOutput(`Deleted device "${deviceName}"`, 'red');
-        renderDeviceList();
-        renderGameList();
-        showPopup('reboot-popup');
+        await new Promise(resolve => {
+            if (snackbarTimeout) {
+                setTimeout(resolve, 5000);
+            } else {
+                resolve();
+            }
+        });
+        if (!currentConfig[deviceKey]) {
+            await saveConfig();
+            appendToOutput(`Deleted device "${deviceName}"`, 'red');
+            showPopup('reboot-popup');
+        }
     } catch (error) {
         appendToOutput(`Failed to delete device: ${error}`, 'error');
+        currentConfig = insertAtIndex(currentConfig, deviceKey, deletedDeviceData, deletedDeviceIndex * 2);
+        if (deletedPackageData.length > 0) {
+            currentConfig = insertAtIndex(currentConfig, packageKey, deletedPackageData, deletedDeviceIndex * 2);
+        }
         card.classList.remove('fade-out');
         renderDeviceList();
         renderGameList();
@@ -666,28 +760,63 @@ async function deleteGame(gamePackage, deviceKey) {
     
     card.classList.add('fade-out');
     await new Promise(resolve => setTimeout(resolve, 400));
+
+    const deletedGame = gamePackage;
+    const originalIndex = currentConfig[deviceKey].indexOf(gamePackage);
+    if (originalIndex === -1) {
+        appendToOutput(`Game "${gamePackage}" not found in "${deviceName}"`, 'error');
+        card.classList.remove('fade-out');
+        return;
+    }
+
+    currentConfig[deviceKey].splice(originalIndex, 1);
+    renderGameList();
+    renderDeviceList();
+
+    showSnackbar(`Removed "${gamePackage}" from "${deviceName}"`, async () => {
+        if (!Array.isArray(currentConfig[deviceKey])) {
+            currentConfig[deviceKey] = [];
+        }
+        currentConfig[deviceKey].splice(originalIndex, 0, deletedGame);
+        try {
+            await saveConfig();
+            appendToOutput(`Restored game "${gamePackage}" to "${deviceName}"`, 'success');
+            renderGameList();
+            renderDeviceList();
+            const restoredCard = document.querySelector(`.game-card[data-package="${gamePackage}"][data-device="${deviceKey}"]`);
+            if (restoredCard) {
+                restoredCard.style.opacity = '0';
+                restoredCard.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    restoredCard.style.opacity = '1';
+                    restoredCard.style.transform = 'translateY(0)';
+                    restoredCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                }, 10);
+            }
+        } catch (error) {
+            appendToOutput(`Failed to restore game: ${error}`, 'error');
+        }
+    });
+
     try {
-        if (!Array.isArray(currentConfig[deviceKey]) || currentConfig[deviceKey].length === 0) {
-            appendToOutput(`No games found for "${deviceName}"`, 'warning');
-            return;
+        await new Promise(resolve => {
+            if (snackbarTimeout) {
+                setTimeout(resolve, 5000);
+            } else {
+                resolve();
+            }
+        });
+        if (currentConfig[deviceKey].indexOf(gamePackage) === -1) {
+            await saveConfig();
+            appendToOutput(`Removed "${gamePackage}" from "${deviceName}"`, 'red');
+            showPopup('reboot-popup');
         }
-        
-        const index = currentConfig[deviceKey].indexOf(gamePackage);
-        if (index === -1) {
-            appendToOutput(`Game "${gamePackage}" not found in "${deviceName}"`, 'error');
-            return;
-        }
-        
-        currentConfig[deviceKey].splice(index, 1);
-        await saveConfig();
-        appendToOutput(`Removed "${gamePackage}" from "${deviceName}"`, 'red');
-        renderGameList();
-        renderDeviceList();
-        showPopup('reboot-popup');
     } catch (error) {
         appendToOutput(`Failed to delete game: ${error}`, 'error');
+        currentConfig[deviceKey].splice(originalIndex, 0, deletedGame);
         card.classList.remove('fade-out');
         renderGameList();
+        renderDeviceList();
     }
 }
 
@@ -798,7 +927,6 @@ function switchTab(tabId, direction = null) {
     const newIndex = tabs.indexOf(tabId);
     const inferredDirection = direction || (newIndex > currentIndex ? 'left' : 'right');
 
-    // Prepare tabs for transition
     if (currentTabElement) {
         currentTabElement.classList.remove('active');
         currentTabElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
@@ -811,17 +939,14 @@ function switchTab(tabId, direction = null) {
     newTabElement.style.transform = inferredDirection === 'left' ? 'translateX(100%)' : 'translateX(-100%)';
     newTabElement.style.opacity = '0';
 
-    // Force reflow
     void newTabElement.offsetHeight;
 
-    // Start animation
     requestAnimationFrame(() => {
         newTabElement.classList.add('active');
         newTabElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
         newTabElement.style.transform = 'translateX(0)';
         newTabElement.style.opacity = '1';
 
-        // Clean up current tab after transition
         if (currentTabElement) {
             currentTabElement.addEventListener('transitionend', () => {
                 currentTabElement.style.display = 'none';
@@ -830,7 +955,6 @@ function switchTab(tabId, direction = null) {
             }, { once: true });
         }
 
-        // Render content after transition with a slight delay
         newTabElement.addEventListener('transitionend', () => {
             setTimeout(() => {
                 if (tabId === 'devices') {
@@ -838,7 +962,7 @@ function switchTab(tabId, direction = null) {
                 } else if (tabId === 'games') {
                     renderGameList();
                 }
-            }, 100); // Increased delay for smoother transition
+            }, 100);
         }, { once: true });
     });
 
@@ -957,17 +1081,31 @@ async function updateGameList() {
     actionRunning = true;
     const btn = document.getElementById('update-config');
     btn.classList.add('loading');
-    appendToOutput("Updating game list...");
+    appendToOutput("Checking for game list updates...", 'info');
     try {
         const output = await execCommand("sh /data/adb/modules/COPG/update_config.sh");
-        output.split('\n').forEach(line => {
-            if (line.trim()) appendToOutput(line);
-            if (line.includes('🔄 Reboot required')) showPopup('reboot-popup');
+        const outputLines = output.split('\n').filter(line => line.trim());
+        let isUpToDate = false;
+
+        outputLines.forEach(line => {
+            if (line.trim() && !line.includes('Your config is already up-to-date')) {
+                appendToOutput(line);
+            }
+            if (line.includes('Your config is already up-to-date')) {
+                isUpToDate = true;
+            }
+            if (line.includes('Reboot required')) showPopup('reboot-popup');
         });
-        await loadConfig();
-        appendToOutput("Game list updated successfully", 'success');
+
+        if (isUpToDate) {
+            // Suppress the "Your game list is already up-to-date" message
+            appendToOutput("No updates found for game list", 'info');
+        } else {
+            appendToOutput("Game list updated successfully", 'success');
+            await loadConfig();
+        }
     } catch (error) {
-        appendToOutput("Failed to update game list: " + error, 'error');
+        appendToOutput("Failed to check game list updates: " + error, 'error');
     }
     btn.classList.remove('loading');
     actionRunning = false;
@@ -1127,7 +1265,6 @@ function applyEventListeners() {
             const searchableText = [
                 deviceData.DEVICE || '',
                 deviceData.BRAND || '',
-                deviceData.MODEL || '',
                 deviceData.MANUFACTURER || '',
                 deviceData.FINGERPRINT || '',
                 deviceData.BUILD_ID || '',
