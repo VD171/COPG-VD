@@ -29,7 +29,7 @@ if [ -f "$CONFIG_PATH" ]; then
     NEW_HASH=$(md5sum "$TEMP_CONFIG" 2>/dev/null | awk '{print $1}')
     
     if [ "$OLD_HASH" = "$NEW_HASH" ]; then
-        echo "✓ Your config is already up-to-date!"
+        echo "✅ Your config is already up-to-date!"
         rm -f "$TEMP_CONFIG"
         echo "✨ COPG config check complete!"
         exit 0
@@ -37,54 +37,9 @@ if [ -f "$CONFIG_PATH" ]; then
 fi
 
 # If different or no local config exists, update it
-echo "✓ Config downloaded successfully!"
+echo "✅ Config downloaded successfully!"
 mv "$TEMP_CONFIG" "$CONFIG_PATH"
 echo "📍 Saved to: $CONFIG_PATH"
 chmod 0644 "$CONFIG_PATH"
 chcon u:object_r:system_file:s0 "$CONFIG_PATH"
-echo "🔄 Reboot required to apply changes"
-
-# Prompt for reboot with volume keys
-echo "❓ Reboot now to apply changes?"
-echo "➕ Volume Up: Yes"
-echo "➖ Volume Down: No"
-
-# Time-based timeout (10 seconds)
-TIMEOUT=10
-START_TIME=$(date +%s)
-
-while true; do
-    # Check elapsed time
-    CURRENT_TIME=$(date +%s)
-    ELAPSED=$((CURRENT_TIME - START_TIME))
-    if [ $ELAPSED -ge $TIMEOUT ]; then
-        echo "⏰ Timeout reached (10 seconds)."
-        echo "🔸No reboot initiated."
-        echo "✨ COPG config update complete!"
-        exit 0
-    fi
-
-    # Capture one input event with timeout (if available)
-    if command -v timeout >/dev/null 2>&1; then
-        EVENT=$(timeout 0.1 getevent -lc1 2>/dev/null | tr -d '\r')
-    else
-        EVENT=$(getevent -lc1 2>/dev/null | tr -d '\r')
-    fi
-    
-    # Check for volume key presses
-    if [ -n "$EVENT" ]; then
-        if echo "$EVENT" | grep -q "KEY_VOLUMEUP.*DOWN"; then
-            echo "✅ Volume Up pressed. Rebooting now..."
-            reboot
-            exit 0
-        elif echo "$EVENT" | grep -q "KEY_VOLUMEDOWN.*DOWN"; then
-            echo "❌ Volume Down pressed."
-            echo "🔸No reboot initiated."
-            echo "✨ COPG config update complete!"
-            exit 0
-        fi
-    fi
-    
-    # Short sleep to reduce CPU usage
-    sleep 0.05
-done
+echo "✨ COPG config update complete!"
