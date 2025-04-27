@@ -46,8 +46,8 @@ echo "🔄 Reboot required to apply changes"
 
 # Prompt for reboot with volume keys
 echo "❓ Reboot now to apply changes?"
-echo "Volume Up: Yes"
-echo "Volume Down: No"
+echo "➕ Volume Up: Yes"
+echo "➖ Volume Down: No"
 
 # Time-based timeout (10 seconds)
 TIMEOUT=10
