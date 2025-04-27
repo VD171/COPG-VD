@@ -1052,7 +1052,7 @@ h2 {
     background: rgba(248, 113, 113, 0.15);
 }
 
-.dark-theme .form-group input, .dark-theme .form-group textarea, .dark-theme .form-group select {
+.dark-theme .form-group input, .dark-theme .form-group textarea, .form-group select {
     background: var(--dark-bg);
     border-color: var(--dark-border);
     color: var(--dark-text);
@@ -1249,4 +1249,110 @@ h2 {
 
 .theme-btn:hover {
     transform: scale(1.2);
+}
+
+/* Snackbar Styles */
+.snackbar {
+    position: fixed;
+    bottom: calc(var(--safe-area-inset-bottom) + 16px);
+    left: calc(var(--safe-area-inset-left) + 16px);
+    right: calc(var(--safe-area-inset-right) + 16px);
+    background: var(--card-bg);
+    color: var(--text);
+    padding: 12px 16px 16px 16px; /* Extra padding-bottom for progress bar */
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1100;
+    opacity: 0;
+    transform: translateY(100px);
+    transition: all 0.3s ease;
+    max-width: 400px; /* Tightened max-width */
+    margin: 0 auto;
+    overflow: visible;
+}
+
+.snackbar.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.snackbar-message {
+    flex: 1;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 12px;
+}
+
+.snackbar::before {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 16px;
+    right: 16px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    z-index: 1;
+}
+
+.snackbar.show::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 16px;
+    width: calc(100% - 32px);
+    height: 4px;
+    background: var(--primary);
+    border-radius: 2px;
+    transform-origin: left;
+    animation: timer 5s linear forwards;
+    z-index: 2;
+}
+
+@keyframes timer {
+    0% { transform: scaleX(1); }
+    100% { transform: scaleX(0); }
+}
+
+.dark-theme .snackbar {
+    background: var(--dark-card);
+    color: var(--dark-text);
+}
+
+.dark-theme .snackbar::before {
+    background: var(--dark-border);
+}
+
+.dark-theme .snackbar.show::after {
+    background: var(--primary);
+}
+
+.snackbar-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.snackbar-btn:hover {
+    background: rgba(96, 165, 250, 0.1);
+    border-radius: 6px;
+}
+
+.dark-theme .snackbar-btn {
+    color: var(--primary);
+}
+
+.dark-theme .snackbar-btn:hover {
+    background: rgba(96, 165, 250, 0.15);
 }
