@@ -1,3 +1,5 @@
+#!/sbin/sh
+
 # ================================================
 # COPG Module Installation Script
 # ================================================
@@ -152,7 +154,7 @@ fi
 
 if $INSTALL_SUCCESS; then
   print_box_start
-  ui_print "      ✦ Installing Binary ✦     "
+  ui_print "      ✦ Installing Binaries ✦    "
   print_empty_line
   ui_print " ⚙ Detecting Device Architecture "
 
@@ -162,49 +164,88 @@ if $INSTALL_SUCCESS; then
   ABI_LIST=$(getprop ro.product.cpu.abilist)
   ui_print " 📜 Supported ABIs: $ABI_LIST"
 
-  mkdir -p "$MODPATH/system/bin" || {
+  mkdir -p "$MODPATH/system/bin" "$MODPATH/bin" || {
     ui_print " ✗ Failed to Create System Dir!   "
     print_failure_and_exit "binary"
   }
 
   if $INSTALL_SUCCESS; then
-    BINARY_INSTALLED=false
+    JQ_INSTALLED=false
+    CONFIG_WATCHER_INSTALLED=false
+
     for ABI in $(echo "$ABI_LIST" | tr ',' ' '); do
       if echo "$ABI" | grep -qE "$ARM64_VARIANTS"; then
+        # Install jq for ARM64
         if [ -f "$MODPATH/bin/arm64-v8a/jq" ]; then
           cp "$MODPATH/bin/arm64-v8a/jq" "$MODPATH/system/bin/jq" || {
-            ui_print " ✗ Failed to Copy ARM64 Binary!  "
+            ui_print " ✗ Failed to Copy ARM64 jq Binary!  "
             print_failure_and_exit "binary"
           }
           chmod 0755 "$MODPATH/system/bin/jq" || {
-            ui_print " ✗ Failed to Set Permissions!    "
+            ui_print " ✗ Failed to Set Permissions (jq)!  "
             print_failure_and_exit "binary"
           }
-          ui_print " ✔ Installed ARM64 Binary        "
+          ui_print " ✔ Installed ARM64 jq Binary     "
           ui_print " ➤ ($ABI)                        "
-          BINARY_INSTALLED=true
-          break
+          JQ_INSTALLED=true
+        fi
+        # Install config_watcher for ARM64
+        if [ -f "$MODPATH/bin/arm64-v8a/config_watcher" ]; then
+          cp "$MODPATH/bin/arm64-v8a/config_watcher" "$MODPATH/bin/config_watcher_arm64" || {
+            ui_print " ✗ Failed to Copy ARM64 config_watcher Binary!  "
+            print_failure_and_exit "binary"
+          }
+          chmod 0755 "$MODPATH/bin/config_watcher_arm64" || {
+            ui_print " ✗ Failed to Set Permissions (config_watcher)!  "
+            print_failure_and_exit "binary"
+          }
+          ui_print " ✔ Installed ARM64 config_watcher Binary  "
+          ui_print " ➤ ($ABI)                        "
+          CONFIG_WATCHER_INSTALLED=true
         fi
       elif echo "$ABI" | grep -qE "$ARM32_VARIANTS"; then
+        # Install jq for ARM32
         if [ -f "$MODPATH/bin/armeabi-v7a/jq" ]; then
           cp "$MODPATH/bin/armeabi-v7a/jq" "$MODPATH/system/bin/jq" || {
-            ui_print " ✗ Failed to Copy ARM32 Binary!  "
+            ui_print " ✗ Failed to Copy ARM32 jq Binary!  "
             print_failure_and_exit "binary"
           }
           chmod 0755 "$MODPATH/system/bin/jq" || {
-            ui_print " ✗ Failed to Set Permissions!    "
+            ui_print " ✗ Failed to Set Permissions (jq)!  "
             print_failure_and_exit "binary"
           }
-          ui_print " ✔ Installed ARM32 Binary        "
+          ui_print " ✔ Installed ARM32 jq Binary     "
           ui_print " ➤ ($ABI)                        "
-          BINARY_INSTALLED=true
-          break
+          JQ_INSTALLED=true
+        fi
+        # Install config_watcher for ARM32
+        if [ -f "$MODPATH/bin/armeabi-v7a/config_watcher" ]; then
+          cp "$MODPATH/bin/armeabi-v7a/config_watcher" "$MODPATH/bin/config_watcher_arm32" || {
+            ui_print " ✗ Failed to Copy ARM32 config_watcher Binary!  "
+            print_failure_and_exit "binary"
+          }
+          chmod 0755 "$MODPATH/bin/config_watcher_arm32" || {
+            ui_print " ✗ Failed to Set Permissions (config_watcher)!  "
+            print_failure_and_exit "binary"
+          }
+          ui_print " ✔ Installed ARM32 config_watcher Binary  "
+          ui_print " ➤ ($ABI)                        "
+          CONFIG_WATCHER_INSTALLED=true
         fi
       fi
+      [ "$JQ_INSTALLED" = true ] && [ "$CONFIG_WATCHER_INSTALLED" = true ] && break
     done
 
-    if ! $BINARY_INSTALLED; then
-      ui_print " ✗ No Compatible Binary Found!   "
+    if ! $JQ_INSTALLED; then
+      ui_print " ✗ No Compatible jq Binary Found! "
+      ui_print " ➤ Supported Architectures:      "
+      ui_print " ➤ • ARM64 (arm64-v8a)          "
+      ui_print " ➤ • ARM32 (armeabi-v7a)        "
+      print_failure_and_exit "binary"
+    fi
+
+    if ! $CONFIG_WATCHER_INSTALLED; then
+      ui_print " ✗ No Compatible config_watcher Binary Found! "
       ui_print " ➤ Supported Architectures:      "
       ui_print " ➤ • ARM64 (arm64-v8a)          "
       ui_print " ➤ • ARM32 (armeabi-v7a)        "
@@ -214,7 +255,7 @@ if $INSTALL_SUCCESS; then
 
   if $INSTALL_SUCCESS; then
     ui_print " 🗑 Cleaning Up Unused Binaries   "
-    rm -rf "$MODPATH/bin" || {
+    rm -rf "$MODPATH/bin/arm64-v8a" "$MODPATH/bin/armeabi-v7a" || {
       ui_print " ✗ Failed to Clean Up Binaries!  "
       print_failure_and_exit "binary"
     }
