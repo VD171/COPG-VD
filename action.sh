@@ -45,7 +45,9 @@ chcon u:object_r:system_file:s0 "$CONFIG_PATH"
 echo "🔄 Reboot required to apply changes"
 
 # Prompt for reboot with volume keys
-echo "❓ Reboot now to apply changes? (Volume Up: Yes, Volume Down: No)"
+echo "❓ Reboot now to apply changes?"
+echo "Volume Up: Yes"
+echo "Volume Down: No"
 
 # Time-based timeout (10 seconds)
 TIMEOUT=10
@@ -56,7 +58,8 @@ while true; do
     CURRENT_TIME=$(date +%s)
     ELAPSED=$((CURRENT_TIME - START_TIME))
     if [ $ELAPSED -ge $TIMEOUT ]; then
-        echo "⏰ Timeout reached (10 seconds). No reboot initiated."
+        echo "⏰ Timeout reached (10 seconds)."
+        echo "🔸No reboot initiated."
         echo "✨ COPG config update complete!"
         exit 0
     fi
