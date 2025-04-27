@@ -29,7 +29,7 @@ if [ -f "$CONFIG_PATH" ]; then
     NEW_HASH=$(md5sum "$TEMP_CONFIG" 2>/dev/null | awk '{print $1}')
     
     if [ "$OLD_HASH" = "$NEW_HASH" ]; then
-        echo "✅ Your config is already up-to-date!"
+        echo "✓ Your config is already up-to-date!"
         rm -f "$TEMP_CONFIG"
         echo "✨ COPG config check complete!"
         exit 0
@@ -37,7 +37,7 @@ if [ -f "$CONFIG_PATH" ]; then
 fi
 
 # If different or no local config exists, update it
-echo "✅ Config downloaded successfully!"
+echo "✓ Config downloaded successfully!"
 mv "$TEMP_CONFIG" "$CONFIG_PATH"
 echo "📍 Saved to: $CONFIG_PATH"
 chmod 0644 "$CONFIG_PATH"
@@ -78,7 +78,8 @@ while true; do
             reboot
             exit 0
         elif echo "$EVENT" | grep -q "KEY_VOLUMEDOWN.*DOWN"; then
-            echo "❌ Volume Down pressed. No reboot initiated."
+            echo "❌ Volume Down pressed."
+            echo "🔸No reboot initiated."
             echo "✨ COPG config update complete!"
             exit 0
         fi
