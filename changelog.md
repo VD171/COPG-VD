@@ -2,7 +2,7 @@
 - **Support Group**:
 https://t.me/TheAOSP
 ---
-## v4.0.0
+## v4.0.1
 - Improved error logging for SpoofModule and WebUI
 - Enhanced permission handling for config files
 - Added smoother UI animations and transitions
@@ -11,10 +11,12 @@ https://t.me/TheAOSP
 - Added prevention for game duplication
 - Fixed scroll bar overlapping issues
 - Enhanced UI with field highlighting
-- Added reboot support via volume key action button
 - Added Delta Force support in config
-- Added reboot/turnoff protection for general settings (DND, auto-brightness, etc.)
+- Removed reboot requiring 
 - Fixed APatch installation issues
+- Removed reboot popup
+- added snackbar with cooldown animation
+- 
 ## v3.3.4
 - Added apatch support
 - Added better architecture detection
