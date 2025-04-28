@@ -6,6 +6,12 @@ let lastRender = { devices: 0, games: 0 };
 const RENDER_DEBOUNCE_MS = 150;
 let snackbarTimeout = null;
 
+// Module ID for COPG
+const MODULE_ID = 'COPG';
+const SANITIZED_MODULE_ID = MODULE_ID.replace(/[^a-zA-Z0-9_.]/g, '_');
+const JS_INTERFACE = `$${SANITIZED_MODULE_ID}`; // e.g., $COPG
+const DEBUG_LOGS = false; // Set to true for detailed debug logs
+
 async function execCommand(command) {
     const callbackName = `exec_callback_${Date.now()}`;
     return new Promise((resolve, reject) => {
@@ -15,6 +21,20 @@ async function execCommand(command) {
         };
         ksu.exec(command, "{}", callbackName);
     });
+}
+
+async function checkWebUIConfig() {
+    try {
+        const configContent = await execCommand("cat /data/adb/modules/COPG/webroot/config.json");
+        const webuiConfig = JSON.parse(configContent);
+        if (!webuiConfig.title || !webuiConfig.icon) {
+            appendToOutput("Warning: Shortcut configuration is incomplete. Creation may fail.", 'warning');
+        }
+        return webuiConfig;
+    } catch (error) {
+        appendToOutput("Failed to load shortcut configuration: " + error, 'error');
+        return null;
+    }
 }
 
 function toggleTheme() {
@@ -57,7 +77,7 @@ function appendToOutput(content, type = 'info') {
         } else if (content.includes('Enabled')) {
             colorClass = 'log-green';
             iconClass = 'icon-success';
-        } else if (content.includes('saved') || content.includes('added') || content.includes('cleared')) {
+        } else if (content.includes('saved') || content.includes('added') || content.includes('cleared') || content.includes('shortcut created')) {
             colorClass = 'log-green';
             iconClass = 'icon-success';
         } else if (content.includes('canceled')) {
@@ -226,7 +246,7 @@ function renderGameList() {
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M3 6h18"></path>
                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                </svg>
+                            </svg>
                             </button>
                         </div>
                     </div>
@@ -1175,6 +1195,60 @@ function applyEventListeners() {
         appendToOutput("Update canceled", 'info');
     });
 
+    const shortcutButton = document.getElementById('shortcut-container');
+    if (shortcutButton) {
+        // Check module interface availability
+        const moduleInterface = window[JS_INTERFACE] || window.$copg; // Fallback to $copg
+        const isInterfaceAvailable = moduleInterface && Object.keys(moduleInterface).length > 0 && typeof moduleInterface.createShortcut === 'function';
+        
+        if (DEBUG_LOGS) {
+            appendToOutput(`Module interface check: ${JS_INTERFACE} = ${typeof moduleInterface}, createShortcut = ${typeof moduleInterface?.createShortcut}`, 'info');
+        }
+        
+        if (isInterfaceAvailable) {
+            shortcutButton.style.display = 'flex';
+            appendToOutput("Shortcut feature is ready", 'success');
+            shortcutButton.addEventListener('click', async () => {
+                if (actionRunning) return;
+                actionRunning = true;
+                shortcutButton.classList.add('loading');
+                appendToOutput("Creating shortcut, please wait...", 'info');
+                try {
+                    // Attempt to create shortcut with retries
+                    let attempts = 0;
+                    const maxAttempts = 5;
+                    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+                    
+                    while (attempts < maxAttempts) {
+                        if (window[JS_INTERFACE] && typeof window[JS_INTERFACE].createShortcut === 'function') {
+                            await window[JS_INTERFACE].createShortcut();
+                            appendToOutput("Home screen shortcut created successfully", 'success');
+                            return;
+                        }
+                        if (DEBUG_LOGS) {
+                            appendToOutput(`Attempt ${attempts + 1}: ${JS_INTERFACE} not ready`, 'warning');
+                        }
+                        await delay(500);
+                        attempts++;
+                    }
+                    
+                    throw new Error(`${JS_INTERFACE} not found after ${maxAttempts} attempts`);
+                } catch (error) {
+                    appendToOutput("Unable to create shortcut. Please try again or add it manually via your home screen.", 'error');
+                    if (DEBUG_LOGS) {
+                        appendToOutput(`Error: ${error.message || error}`, 'error');
+                    }
+                } finally {
+                    shortcutButton.classList.remove('loading');
+                    actionRunning = false;
+                }
+            });
+        } else {
+            appendToOutput("Shortcut feature not available", 'warning');
+            shortcutButton.style.display = 'none';
+        }
+    }
+
     document.getElementById('log-header').addEventListener('click', toggleLogSection);
     document.getElementById('clear-log').addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1281,6 +1355,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.body.classList.add('dark-theme');
         document.getElementById('theme-icon').textContent = '🌙';
     }
+    
+    // Check module interface and WebUI config on startup
+    const moduleInterface = window[JS_INTERFACE] || window.$copg;
+    if (DEBUG_LOGS) {
+        appendToOutput(`Initial module interface check: ${JS_INTERFACE} = ${typeof moduleInterface}, createShortcut = ${typeof moduleInterface?.createShortcut}`, 'info');
+    }
+    
+    await checkWebUIConfig();
+    
     appendToOutput("UI initialized", 'success');
     await loadVersion();
     await loadToggleStates();
