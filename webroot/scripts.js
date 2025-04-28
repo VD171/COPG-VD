@@ -1214,25 +1214,12 @@ function applyEventListeners() {
                 shortcutButton.classList.add('loading');
                 appendToOutput("Creating shortcut, please wait...", 'info');
                 try {
-                    // Attempt to create shortcut with retries
-                    let attempts = 0;
-                    const maxAttempts = 5;
-                    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-                    
-                    while (attempts < maxAttempts) {
-                        if (window[JS_INTERFACE] && typeof window[JS_INTERFACE].createShortcut === 'function') {
-                            await window[JS_INTERFACE].createShortcut();
-                            appendToOutput("Home screen shortcut created successfully", 'success');
-                            return;
-                        }
-                        if (DEBUG_LOGS) {
-                            appendToOutput(`Attempt ${attempts + 1}: ${JS_INTERFACE} not ready`, 'warning');
-                        }
-                        await delay(500);
-                        attempts++;
+                    if (window[JS_INTERFACE] && typeof window[JS_INTERFACE].createShortcut === 'function') {
+                        await window[JS_INTERFACE].createShortcut();
+                        appendToOutput("Home screen shortcut created successfully", 'success');
+                    } else {
+                        throw new Error(`${JS_INTERFACE}.createShortcut is not available`);
                     }
-                    
-                    throw new Error(`${JS_INTERFACE} not found after ${maxAttempts} attempts`);
                 } catch (error) {
                     appendToOutput("Unable to create shortcut. Please try again or add it manually via your home screen.", 'error');
                     if (DEBUG_LOGS) {
