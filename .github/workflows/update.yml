@@ -163,7 +163,7 @@ jobs:
           id=COPG
           name=✨ COPG spoof ✨
           version=4.0.2
-          versionCode=400
+          versionCode=402
           author=AlirezaParsi
           description=Spoof your device for games to unlock max fps.
           support=https://t.me/theaosp
