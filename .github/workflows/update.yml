@@ -151,6 +151,8 @@ jobs:
           cp webroot/index.html module/webroot/index.html
           cp webroot/scripts.js module/webroot/scripts.js
           cp webroot/styles.css module/webroot/styles.css
+          cp webroot/config.json module/webroot/config.json
+          cp webroot/icon.png module/webroot/icon.png
           cp webroot/assets/RobotoMono-Regular.ttf module/webroot/assets/RobotoMono-Regular.ttf
           cp bin/arm64-v8a/jq module/bin/arm64-v8a/jq
           cp bin/armeabi-v7a/jq module/bin/armeabi-v7a/jq
@@ -160,10 +162,10 @@ jobs:
           cat > module/module.prop << 'EOF'
           id=COPG
           name=✨ COPG spoof ✨
-          version=4.0.1
+          version=4.0.2
           versionCode=400
           author=AlirezaParsi
-          description=Spoof your device for games. Click Action button to update your config if needed.
+          description=Spoof your device for games to unlock max fps.
           support=https://t.me/theaosp
           updateJson=https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/update.json
           minMagisk=20.4
