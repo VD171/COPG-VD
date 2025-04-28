@@ -468,6 +468,15 @@ input:checked + .slider:before {
     transform: scale(1.05);
 }
 
+/* Button Group */
+.button-group {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
 /* Buttons */
 .action-btn {
     background: var(--primary-gradient);
@@ -475,27 +484,62 @@ input:checked + .slider:before {
     padding: 12px 20px;
     border: none;
     border-radius: 10px;
-    font-size: 15px;
+    font-size: clamp(14px, 3.5vw, 15px);
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 4px 12px var(--shadow);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    margin-top: 12px;
+    flex: 1;
+    min-width: 120px;
     transform: scale(1);
 }
 
-.action-btn:hover {
+.shortcut-btn {
+    background: var(--primary-gradient);
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: clamp(14px, 3.5vw, 15px);
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px var(--shadow);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transform: scale(1);
+}
+
+.shortcut-icon {
+    width: 20px;
+    height: 20px;
+    fill: #fff;
+    margin-right: 4px;
+    transition: transform 0.3s ease;
+}
+
+.action-btn:hover, .shortcut-btn:hover {
     transform: scale(1.05);
     box-shadow: 0 6px 16px var(--shadow);
 }
 
-.action-btn:active {
+.shortcut-btn:hover .shortcut-icon {
+    transform: scale(1.1);
+}
+
+.action-btn:active, .shortcut-btn:active {
     transform: scale(0.95);
 }
 
-.action-btn::after {
+.action-btn::after, .shortcut-btn::after {
     content: '';
     position: absolute;
     top: 50%;
@@ -508,7 +552,7 @@ input:checked + .slider:before {
     transition: width 0.3s ease, height 0.3s ease;
 }
 
-.action-btn:active::after {
+.action-btn:active::after, .shortcut-btn:active::after {
     width: 120px;
     height: 120px;
 }
@@ -537,11 +581,11 @@ input:checked + .slider:before {
     to { transform: rotate(360deg); }
 }
 
-.dark-theme .action-btn {
+.dark-theme .action-btn, .dark-theme .shortcut-btn {
     background: linear-gradient(135deg, #1E3A8A, #6B7280);
 }
 
-.dark-theme .action-btn:hover {
+.dark-theme .action-btn:hover, .dark-theme .shortcut-btn:hover {
     background: var(--primary-gradient);
 }
 
