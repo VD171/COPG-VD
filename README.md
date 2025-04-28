@@ -1,6 +1,6 @@
 <div align="center">
   
-![COPG Logo](https://via.placeholder.com/150x50?text=COPG+Logo) <!-- Replace with your actual logo -->
+<img src="https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/icon-v2.png" style="width: 500px; height: 200px; object-fit: fill;" />
 </div>
 <h1 align="center">🎮 COPG - Ultimate Device Spoofer for Android Games</h1>
 
