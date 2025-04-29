@@ -38,7 +38,7 @@
 ### 📋 Requirements
 - Rooted Android device (9.0+)
 - One of these root solutions:
-  - ![Magisk](https://img.shields.io/badge/Magisk-v24%2B-00B39B?style=flat&logo=android) with Zygisk enabled or [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)/[Rezygisk](https://github.com/PerformanC/ReZygisk)
+  - ![Magisk](https://img.shields.io/badge/Magisk-v24%2B-00B39B?style=flat&logo=android) Delta with Enabled Native Zygisk/[Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)/[Rezygisk](https://github.com/PerformanC/ReZygisk) ( currently normal magisk only works with Rezygisk)
   - ![KernelSU](https://img.shields.io/badge/KernelSU-0.6.6%2B-7D4698?style=flat) with [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)/[Rezygisk](https://github.com/PerformanC/ReZygisk)
   - ![APatch](https://img.shields.io/badge/APatch-0.10%2B-4285F4?style=flat) with [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)/[Rezygisk](https://github.com/PerformanC/ReZygisk)
 
