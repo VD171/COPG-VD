@@ -140,7 +140,7 @@ jobs:
           cp build/armeabi-v7a/libspoof.so module/zygisk/armeabi-v7a.so
           chmod 755 module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
           cp config.json module/config.json
-          cp sepolicy.rule module/sepolicy.rule
+          #cp sepolicy.rule module/sepolicy.rule
           cp customize.sh module/customize.sh
           cp service.sh module/service.sh
           cp action.sh module/action.sh
