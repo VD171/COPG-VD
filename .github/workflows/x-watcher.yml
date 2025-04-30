@@ -79,7 +79,7 @@ jobs:
           wget https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hpp
           wget https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp -O include/nlohmann/json.hpp
           # Fetch x-watcher headers
-          wget https://raw.githubusercontent.com/AlirezaParsi/x-watcher/main/x-watcher.h -O x-watcher.h
+          wget https://raw.githubusercontent.com/nikp123/x-watcher/refs/heads/main/x-watcher.h -O x-watcher.h
           wget https://raw.githubusercontent.com/AlirezaParsi/x-watcher/main/array.h -O array.h
 
       - name: Build Project (arm64-v8a) - Start
