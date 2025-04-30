@@ -73,10 +73,48 @@ jobs:
           sudo apt-get install -y build-essential cmake zip curl imagemagick python3 python3-pip
           pip3 install telethon
 
-      - name: Fetch Zygisk Headers, cJSON, and x-watcher Headers
+      - name: Create zygisk_c.h
         run: |
-          mkdir -p zygisk
-          wget https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hpp
+          cat > zygisk_c.h << 'EOF'
+          #ifndef ZYGISK_C_H
+          #define ZYGISK_C_H
+
+          #include <jni.h>
+
+          typedef struct ZygiskModule ZygiskModule;
+          typedef struct ZygiskProcess ZygiskProcess;
+
+          typedef enum {
+              ZYGISK_OPTION_DLCLOSE_MODULE_LIBRARY,
+          } ZygiskOption;
+
+          typedef struct {
+              jstring nice_name;
+          } ZygiskProcess;
+
+          void zygisk_set_option(ZygiskModule* module, ZygiskOption option);
+          void zygisk_set_app_data(ZygiskModule* module, void* data);
+          void* zygisk_get_app_data(ZygiskModule* module);
+
+          #define REGISTER_ZYGISK_MODULE(on_load, pre_specialize, post_specialize, cleanup) \
+              void zygisk_module_entry(ZygiskModule* module, JNIEnv* env, void* reserved) { \
+                  (on_load)(module, env, reserved); \
+              } \
+              void zygisk_module_pre_app_specialize(ZygiskModule* module, JNIEnv* env, const ZygiskProcess* args, void* reserved) { \
+                  (pre_specialize)(module, env, args, reserved); \
+              } \
+              void zygisk_module_post_app_specialize(ZygiskModule* module, JNIEnv* env, const ZygiskProcess* args, void* reserved) { \
+                  (post_specialize)(module, env, args, reserved); \
+              } \
+              void zygisk_module_cleanup(void* reserved) { \
+                  (cleanup)(reserved); \
+              }
+
+          #endif // ZYGISK_C_H
+          EOF
+
+      - name: Fetch cJSON and x-watcher Headers
+        run: |
           wget https://raw.githubusercontent.com/DaveGamble/cJSON/master/cJSON.h -O cJSON.h
           wget https://raw.githubusercontent.com/DaveGamble/cJSON/master/cJSON.c -O cJSON.c
           wget https://raw.githubusercontent.com/AlirezaParsi/x-watcher/main/x-watcher.h -O x-watcher.h
@@ -122,7 +160,7 @@ jobs:
             -CMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake
             -DANDROID_ABI=armeabi-v7a
             -DANDROID_PLATFORM=android-34
-            -DCMAKE_MAKE_PROGRAM=/usr/bin/make
+            -CMAKE_MAKE_PROGRAM=/usr/bin/make
 
       - name: Build Project (armeabi-v7a) - End
         id: arm32_end
