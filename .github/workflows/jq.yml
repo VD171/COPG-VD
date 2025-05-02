@@ -57,7 +57,7 @@ jobs:
 
       - name: Clone jq source
         run: |
-          git clone https://github.com/jqlang/jq.git --depth=1
+          git clone https://github.com/AlirezaParsi/jq --depth=1
           cd jq
           git submodule update --init  # For oniguruma
 
