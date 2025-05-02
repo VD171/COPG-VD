@@ -22,36 +22,21 @@ struct DeviceInfo {
     std::string manufacturer;
     std::string model;
     std::string fingerprint;
-    std::string build_id;
-    std::string display;
-    std::string product;
-    std::string version_release;
-    std::string serial;
-    std::string cpuinfo;
-    std::string serial_content;
 };
 
 typedef int (*orig_prop_get_t)(const char*, char*, const char*);
 static orig_prop_get_t orig_prop_get = nullptr;
-typedef ssize_t (*orig_read_t)(int, void*, size_t);
-static orig_read_t orig_read = nullptr;
 typedef void (*orig_set_static_object_field_t)(JNIEnv*, jclass, jfieldID, jobject);
 static orig_set_static_object_field_t orig_set_static_object_field = nullptr;
 
 static DeviceInfo current_info;
 static jclass buildClass = nullptr;
-static jclass versionClass = nullptr;
 static jfieldID modelField = nullptr;
 static jfieldID brandField = nullptr;
 static jfieldID deviceField = nullptr;
 static jfieldID manufacturerField = nullptr;
 static jfieldID fingerprintField = nullptr;
-static jfieldID buildIdField = nullptr;
-static jfieldID displayField = nullptr;
 static jfieldID productField = nullptr;
-static jfieldID versionReleaseField = nullptr;
-static jfieldID sdkIntField = nullptr;
-static jfieldID serialField = nullptr;
 
 class SpoofModule : public zygisk::ModuleBase {
 public:
@@ -69,35 +54,21 @@ public:
                 deviceField = env->GetStaticFieldID(buildClass, "DEVICE", "Ljava/lang/String;");
                 manufacturerField = env->GetStaticFieldID(buildClass, "MANUFACTURER", "Ljava/lang/String;");
                 fingerprintField = env->GetStaticFieldID(buildClass, "FINGERPRINT", "Ljava/lang/String;");
-                buildIdField = env->GetStaticFieldID(buildClass, "ID", "Ljava/lang/String;");
-                displayField = env->GetStaticFieldID(buildClass, "DISPLAY", "Ljava/lang/String;");
                 productField = env->GetStaticFieldID(buildClass, "PRODUCT", "Ljava/lang/String;");
-                serialField = env->GetStaticFieldID(buildClass, "SERIAL", "Ljava/lang/String;");
             } else {
                 LOGE("Failed to find android/os/Build class");
-            }
-        }
-        if (!versionClass) {
-            versionClass = (jclass)env->NewGlobalRef(env->FindClass("android/os/Build$VERSION"));
-            if (versionClass) {
-                versionReleaseField = env->GetStaticFieldID(versionClass, "RELEASE", "Ljava/lang/String;");
-                sdkIntField = env->GetStaticFieldID(versionClass, "SDK_INT", "I");
-            } else {
-                LOGE("Failed to find android/os/Build$VERSION class");
             }
         }
 
         void* handle = dlopen("libc.so", RTLD_LAZY);
         if (handle) {
             orig_prop_get = (orig_prop_get_t)dlsym(handle, "__system_property_get");
-            orig_read = (orig_read_t)dlsym(handle, "read");
             dlclose(handle);
         } else {
             LOGE("Failed to open libc.so");
         }
 
         hookNativeGetprop();
-        hookNativeRead();
         hookJniSetStaticObjectField();
         loadConfig();
     }
@@ -151,11 +122,9 @@ private:
     std::unordered_map<std::string, DeviceInfo> package_map;
 
     void loadConfig() {
-        // Hardcoded config path
         const std::string config_path = "/data/adb/modules/COPG/config.json";
         LOGD("Attempting to load config from: %s", config_path.c_str());
 
-        // Check if file exists and is readable
         if (access(config_path.c_str(), R_OK) != 0) {
             LOGE("Cannot access config.json at %s: %s", config_path.c_str(), strerror(errno));
             return;
@@ -187,14 +156,6 @@ private:
                 info.model = device["MODEL"].get<std::string>();
                 info.fingerprint = device.contains("FINGERPRINT") ? 
                     device["FINGERPRINT"].get<std::string>() : "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys";
-                info.build_id = device.contains("BUILD_ID") ? device["BUILD_ID"].get<std::string>() : "";
-                info.display = device.contains("DISPLAY") ? device["DISPLAY"].get<std::string>() : "";
-                info.product = device.contains("PRODUCT") ? device["PRODUCT"].get<std::string>() : info.device;
-                info.version_release = device.contains("VERSION_RELEASE") ? 
-                    device["VERSION_RELEASE"].get<std::string>() : "";
-                info.serial = device.contains("SERIAL") ? device["SERIAL"].get<std::string>() : "";
-                info.cpuinfo = device.contains("CPUINFO") ? device["CPUINFO"].get<std::string>() : "";
-                info.serial_content = device.contains("SERIAL_CONTENT") ? device["SERIAL_CONTENT"].get<std::string>() : "";
 
                 for (const auto& pkg : packages) {
                     package_map[pkg] = info;
@@ -215,14 +176,7 @@ private:
         if (deviceField) env->SetStaticObjectField(buildClass, deviceField, env->NewStringUTF(info.device.c_str()));
         if (manufacturerField) env->SetStaticObjectField(buildClass, manufacturerField, env->NewStringUTF(info.manufacturer.c_str()));
         if (fingerprintField) env->SetStaticObjectField(buildClass, fingerprintField, env->NewStringUTF(info.fingerprint.c_str()));
-        if (buildIdField && !info.build_id.empty()) env->SetStaticObjectField(buildClass, buildIdField, env->NewStringUTF(info.build_id.c_str()));
-        if (displayField && !info.display.empty()) env->SetStaticObjectField(buildClass, displayField, env->NewStringUTF(info.display.c_str()));
-        if (productField && !info.product.empty()) env->SetStaticObjectField(buildClass, productField, env->NewStringUTF(info.product.c_str()));
-        if (versionReleaseField && !info.version_release.empty()) 
-            env->SetStaticObjectField(versionClass, versionReleaseField, env->NewStringUTF(info.version_release.c_str()));
-        if (sdkIntField && !info.version_release.empty()) 
-            env->SetStaticIntField(versionClass, sdkIntField, info.version_release == "13" ? 33 : 34);
-        if (serialField && !info.serial.empty()) env->SetStaticObjectField(buildClass, serialField, env->NewStringUTF(info.serial.c_str()));
+        if (productField) env->SetStaticObjectField(buildClass, productField, env->NewStringUTF(info.device.c_str()));
     }
 
     void spoofSystemProperties(const DeviceInfo& info) {
@@ -277,65 +231,11 @@ private:
         }
     }
 
-    static ssize_t hooked_read(int fd, void* buf, size_t count) {
-        if (!orig_read) return -1;
-
-        char path[256];
-        ssize_t result = -1;
-        snprintf(path, sizeof(path), "/proc/self/fd/%d", fd);
-        char real_path[256];
-        ssize_t len = readlink(path, real_path, sizeof(real_path) - 1);
-        if (len != -1) {
-            real_path[len] = '\0';
-            std::string file_path(real_path);
-
-            if (file_path == "/proc/cpuinfo" && !current_info.cpuinfo.empty()) {
-                size_t bytes_to_copy = std::min(count, current_info.cpuinfo.length());
-                memcpy(buf, current_info.cpuinfo.c_str(), bytes_to_copy);
-                return bytes_to_copy;
-            } else if (file_path == "/sys/devices/soc0/serial_number" && !current_info.serial_content.empty()) {
-                size_t bytes_to_copy = std::min(count, current_info.serial_content.length());
-                memcpy(buf, current_info.serial_content.c_str(), bytes_to_copy);
-                return bytes_to_copy;
-            }
-        }
-
-        return orig_read(fd, buf, count);
-    }
-
-    void hookNativeRead() {
-        if (!orig_read) return;
-        void* handle = dlopen("libc.so", RTLD_LAZY);
-        if (handle) {
-            void* sym = dlsym(handle, "read");
-            if (sym) {
-                size_t page_size = sysconf(_SC_PAGE_SIZE);
-                void* page_start = (void*)((uintptr_t)sym & ~(page_size - 1));
-                if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == 0) {
-                    *(void**)&orig_read = (void*)hooked_read;
-                    mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
-                    LOGD("Successfully hooked read");
-                } else {
-                    LOGE("Failed to mprotect for read");
-                }
-            }
-            dlclose(handle);
-        } else {
-            LOGE("Failed to open libc.so for read hook");
-        }
-    }
-
     static void hooked_set_static_object_field(JNIEnv* env, jclass clazz, jfieldID fieldID, jobject value) {
         if (clazz == buildClass) {
             if (fieldID == modelField || fieldID == brandField || fieldID == deviceField ||
-                fieldID == manufacturerField || fieldID == fingerprintField || fieldID == buildIdField ||
-                fieldID == displayField || fieldID == productField || fieldID == serialField) {
+                fieldID == manufacturerField || fieldID == fingerprintField || fieldID == productField) {
                 LOGD("Blocked attempt to reset Build field");
-                return;
-            }
-        } else if (clazz == versionClass) {
-            if (fieldID == versionReleaseField) {
-                LOGD("Blocked attempt to reset VERSION.RELEASE");
                 return;
             }
         }
