@@ -124,11 +124,6 @@ async function loadConfig() {
     try {
         const configContent = await execCommand("cat /data/adb/modules/COPG/config.json");
         currentConfig = JSON.parse(configContent);
-        for (const key in currentConfig) {
-            if (key.endsWith('_DEVICE') && currentConfig[key].CPUINFO) {
-                currentConfig[key].CPUINFO = currentConfig[key].CPUINFO.replace(/\n/g, '\\n').replace(/\t/g, '\\t');
-            }
-        }
         appendToOutput("Config loaded successfully", 'success');
     } catch (error) {
         appendToOutput("Failed to load config: " + error, 'error');
@@ -324,7 +319,7 @@ function openDeviceModal(deviceKey = null) {
     const title = document.getElementById('device-modal-title');
     const form = document.getElementById('device-form');
     
-    form.querySelectorAll('input, textarea').forEach(field => {
+    form.querySelectorAll('input').forEach(field => {
         field.classList.remove('error');
         const existingError = field.nextElementSibling;
         if (existingError && existingError.classList.contains('error-message')) {
@@ -340,10 +335,7 @@ function openDeviceModal(deviceKey = null) {
         document.getElementById('device-brand').value = deviceData.BRAND || '';
         document.getElementById('device-model').value = deviceData.MODEL || '';
         document.getElementById('device-manufacturer').value = deviceData.MANUFACTURER || '';
-        document.getElementById('device-android-version').value = deviceData.VERSION_RELEASE || '';
         document.getElementById('device-fingerprint').value = deviceData.FINGERPRINT || '';
-        document.getElementById('device-build-id').value = deviceData.BUILD_ID || '';
-        document.getElementById('device-cpu').value = (deviceData.CPUINFO || '').replace(/\\n/g, '\n').replace(/\\t/g, '\t');
     } else {
         title.textContent = 'Add New Device Profile';
         editingDevice = null;
@@ -408,10 +400,7 @@ async function saveDevice(e) {
         'device-brand',
         'device-model',
         'device-manufacturer',
-        'device-android-version',
-        'device-fingerprint',
-        'device-build-id',
-        'device-cpu'
+        'device-fingerprint'
     ];
     let hasError = false;
     const missingFields = [];
@@ -491,26 +480,16 @@ async function saveDevice(e) {
     
     const packageKey = deviceKey.replace('_DEVICE', '');
     
-    const rawCpuInfo = document.getElementById('device-cpu').value.trim();
-    const escapedCpuInfo = rawCpuInfo ? rawCpuInfo.replace(/\n/g, '\\n').replace(/\t/g, '\\t') : 'Unknown';
     const brand = document.getElementById('device-brand').value.trim() || 'Unknown';
     const model = document.getElementById('device-model').value.trim() || 'Unknown';
-    const buildId = document.getElementById('device-build-id').value.trim() || 'Unknown';
-    const androidVersion = document.getElementById('device-android-version').value.trim() || '14';
     
     const deviceData = {
         BRAND: brand,
         DEVICE: deviceName,
         MANUFACTURER: document.getElementById('device-manufacturer').value.trim() || 'Unknown',
         MODEL: model,
-        FINGERPRINT: document.getElementById('device-fingerprint').value.trim() || `${brand}/${model}/${model}:${androidVersion}/${buildId}/20230101:user/release-keys`,
-        BUILD_ID: buildId,
-        DISPLAY: `${buildId}.A1`,
-        PRODUCT: model,
-        VERSION_RELEASE: androidVersion,
-        SERIAL: `${brand.substring(0, 3)}${Math.floor(100000 + Math.random() * 900000)}`,
-        CPUINFO: escapedCpuInfo,
-        SERIAL_CONTENT: `${brand.substring(0, 3)}${Math.floor(100000 + Math.random() * 900000)}`
+        FINGERPRINT: document.getElementById('device-fingerprint').value.trim() || `${brand}/${model}/${model}:14/UP1A.231005.007/20230101:user/release-keys`,
+        PRODUCT: model
     };
     
     try {
@@ -716,7 +695,6 @@ async function deleteDevice(deviceKey) {
     const deletedPackageData = currentConfig[packageKey] ? [...currentConfig[packageKey]] : [];
     const deletedDeviceIndex = deviceIndex;
 
-    // Remove the device and associated packages from the configuration and save immediately
     delete currentConfig[packageKey];
     delete currentConfig[deviceKey];
     try {
@@ -724,7 +702,6 @@ async function deleteDevice(deviceKey) {
         appendToOutput(`Deleted device "${deviceName}"`, 'red');
     } catch (error) {
         appendToOutput(`Failed to delete device: ${error}`, 'error');
-        // Revert the deletion in case of error
         currentConfig = insertAtIndex(currentConfig, deviceKey, deletedDeviceData, deletedDeviceIndex * 2);
         if (deletedPackageData.length > 0) {
             currentConfig = insertAtIndex(currentConfig, packageKey, deletedPackageData, deletedDeviceIndex * 2);
@@ -735,11 +712,9 @@ async function deleteDevice(deviceKey) {
         return;
     }
 
-    // Update UI after successful deletion
     renderDeviceList();
     renderGameList();
 
-    // Show snackbar with Undo option
     showSnackbar(`Deleted device "${deviceName}"`, async () => {
         currentConfig = insertAtIndex(currentConfig, deviceKey, deletedDeviceData, deletedDeviceIndex * 2);
         if (deletedPackageData.length > 0) {
@@ -762,7 +737,6 @@ async function deleteDevice(deviceKey) {
             }
         } catch (error) {
             appendToOutput(`Failed to restore device: ${error}`, 'error');
-            // Remove the device again if restoration fails
             delete currentConfig[packageKey];
             delete currentConfig[deviceKey];
             await saveConfig();
@@ -789,14 +763,12 @@ async function deleteGame(gamePackage, deviceKey) {
         return;
     }
 
-    // Remove the game from the configuration and save immediately
     currentConfig[deviceKey].splice(originalIndex, 1);
     try {
         await saveConfig();
         appendToOutput(`Removed "${gamePackage}" from "${deviceName}"`, 'red');
     } catch (error) {
         appendToOutput(`Failed to delete game: ${error}`, 'error');
-        // Revert the deletion in case of error
         currentConfig[deviceKey].splice(originalIndex, 0, deletedGame);
         card.classList.remove('fade-out');
         renderGameList();
@@ -804,11 +776,9 @@ async function deleteGame(gamePackage, deviceKey) {
         return;
     }
 
-    // Update UI after successful deletion
     renderGameList();
     renderDeviceList();
 
-    // Show snackbar with Undo option
     showSnackbar(`Removed "${gamePackage}" from "${deviceName}"`, async () => {
         if (!Array.isArray(currentConfig[deviceKey])) {
             currentConfig[deviceKey] = [];
@@ -831,7 +801,6 @@ async function deleteGame(gamePackage, deviceKey) {
             }
         } catch (error) {
             appendToOutput(`Failed to restore game: ${error}`, 'error');
-            // Remove the game again if restoration fails
             currentConfig[deviceKey].splice(originalIndex, 1);
             await saveConfig();
             renderGameList();
@@ -842,19 +811,11 @@ async function deleteGame(gamePackage, deviceKey) {
 
 async function saveConfig() {
     try {
-        // Create a backup of the current config
         await execCommand(`cp /data/adb/modules/COPG/config.json /data/adb/modules/COPG/config.json.bak || true`);
-        
-        for (const key in currentConfig) {
-            if (key.endsWith('_DEVICE') && currentConfig[key].CPUINFO) {
-                currentConfig[key].CPUINFO = currentConfig[key].CPUINFO.replace(/\n/g, '\\n').replace(/\t/g, '\\t');
-            }
-        }
         const configStr = JSON.stringify(currentConfig, null, 2);
         await execCommand(`echo '${configStr.replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/config.json`);
         appendToOutput("Config saved", 'info');
     } catch (error) {
-        // Restore from backup if save fails
         await execCommand(`mv /data/adb/modules/COPG/config.json.bak /data/adb/modules/COPG/config.json || true`);
         appendToOutput(`Failed to save config: ${error}`, 'error');
         throw error;
@@ -1197,8 +1158,7 @@ function applyEventListeners() {
 
     const shortcutButton = document.getElementById('shortcut-container');
     if (shortcutButton) {
-        // Check module interface availability
-        const moduleInterface = window[JS_INTERFACE] || window.$copg; // Fallback to $copg
+        const moduleInterface = window[JS_INTERFACE] || window.$copg;
         const isInterfaceAvailable = moduleInterface && Object.keys(moduleInterface).length > 0 && typeof moduleInterface.createShortcut === 'function';
         
         if (DEBUG_LOGS) {
@@ -1293,10 +1253,7 @@ function applyEventListeners() {
                 deviceData.BRAND || '',
                 deviceData.MODEL || '',
                 deviceData.MANUFACTURER || '',
-                deviceData.FINGERPRINT || '',
-                deviceData.BUILD_ID || '',
-                deviceData.VERSION_RELEASE || '',
-                (deviceData.CPUINFO || '').replace(/\\n/g, ' ').replace(/\\t/g, ' ')
+                deviceData.FINGERPRINT || ''
             ].join(' ').toLowerCase();
             card.style.display = searchableText.includes(searchTerm) ? 'block' : 'none';
         });
@@ -1320,10 +1277,7 @@ function applyEventListeners() {
                 deviceData.DEVICE || '',
                 deviceData.BRAND || '',
                 deviceData.MANUFACTURER || '',
-                deviceData.FINGERPRINT || '',
-                deviceData.BUILD_ID || '',
-                deviceData.VERSION_RELEASE || '',
-                (deviceData.CPUINFO || '').replace(/\\n/g, ' ').replace(/\\t/g, ' ')
+                deviceData.FINGERPRINT || ''
             ].join(' ').toLowerCase();
             card.style.display = searchableText.includes(searchTerm) ? 'block' : 'none';
         });
@@ -1343,7 +1297,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('theme-icon').textContent = '🌙';
     }
     
-    // Check module interface and WebUI config on startup
     const moduleInterface = window[JS_INTERFACE] || window.$copg;
     if (DEBUG_LOGS) {
         appendToOutput(`Initial module interface check: ${JS_INTERFACE} = ${typeof moduleInterface}, createShortcut = ${typeof moduleInterface?.createShortcut}`, 'info');
