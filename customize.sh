@@ -76,9 +76,9 @@ check_zygisk() {
   elif [ $ROOT_SOLUTION_COUNT -eq 0 ]; then
     ui_print " ✗ No Supported Root Solution!   "
     ui_print " ➤ Supported Solutions:          "
-    ui_print " ➤ • Magisk v26.4+ (Zygisk/Next) "
-    ui_print " ➤ • KernelSU v0.7.0+ (Next)    "
-    ui_print " ➤ • APatch v1.0.7+ (Next)      "
+    ui_print " ➤ • Magisk v26.4+ (ReZygisk/Zygisk Next)"
+    ui_print " ➤ • KernelSU v0.7.0+ (Zygisk Next)"
+    ui_print " ➤ • APatch v1.0.7+ (Zygisk Next)"
     print_failure_and_exit "zygisk"
   else
     ui_print " ➔ Root Solution: $ROOT_SOLUTION "
@@ -88,28 +88,29 @@ check_zygisk() {
     ZYGISK_STATUS=$(magisk --sqlite "SELECT value FROM settings WHERE key='zygisk';" 2>/dev/null)
     if [ "$ZYGISK_STATUS" = "value=1" ]; then
       if [ -d "$ZYGISK_MODULE" ] && [ -f "$ZYGISK_MODULE/disable" ]; then
-        ui_print " ⚠ Zygisk Next Installed but Disabled!  "
-        ui_print " ➤ Using Native Zygisk Instead ... "
-        print_empty_line
+        ui_print " ✗ Zygisk Next Installed but Disabled!"
+        ui_print " ➤ Enable Zygisk Next in Modules"
+        print_failure_and_exit "zygisk"
+      elif [ -d "$ZYGISK_MODULE" ]; then
+        ui_print " ✔ Magisk: Zygisk Next Active    "
+        print_box_end
+      else
+        ui_print " ✗ Magisk: Native Zygisk Not Supported!"
+        ui_print " ➤ Install ReZygisk or Zygisk Next"
+        ui_print " ➤ Disable Native Zygisk in Settings"
+        print_failure_and_exit "zygisk"
       fi
-      ui_print " ✔ Magisk: Native Zygisk Active  "
-      print_box_end
     elif [ -d "$ZYGISK_MODULE" ]; then
       if [ -f "$ZYGISK_MODULE/disable" ]; then
         ui_print " ✗ Zygisk Next Disabled!         "
-        ui_print " ✗ No Native Zygisk Active       "
-        ui_print " ➤ Enable One Of:                "
-        ui_print " ➤ 1. Settings → Zygisk         "
-        ui_print " ➤ 2. Modules → Zygisk Next     "
+        ui_print " ➤ Enable in $MANAGER_NAME       "
         print_failure_and_exit "zygisk"
       fi
       ui_print " ✔ Magisk: Zygisk Next Active    "
       print_box_end
     else
       ui_print " ✗ Magisk: No Zygisk Detected!   "
-      ui_print " ➤ Enable One Of:                "
-      ui_print " ➤ 1. Settings → Zygisk         "
-      ui_print " ➤ 2. Install Zygisk Next       "
+      ui_print " ➤ Install ReZygisk or Zygisk Next"
       print_failure_and_exit "zygisk"
     fi
   else
