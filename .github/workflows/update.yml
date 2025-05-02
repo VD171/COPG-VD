@@ -140,7 +140,7 @@ jobs:
           cp build/armeabi-v7a/libspoof.so module/zygisk/armeabi-v7a.so
           chmod 755 module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
           cp config.json module/config.json
-          cp sepolicy.rule module/sepolicy.rule
+          #cp sepolicy.rule module/sepolicy.rule
           cp customize.sh module/customize.sh
           cp service.sh module/service.sh
           cp action.sh module/action.sh
@@ -163,8 +163,8 @@ jobs:
           cat > module/module.prop << 'EOF'
           id=COPG
           name=✨ COPG spoof ✨
-          version=4.0.3
-          versionCode=403
+          version=4.1.1
+          versionCode=411
           author=AlirezaParsi
           description=Spoof your device for games to unlock max fps.
           support=https://t.me/theaosp
