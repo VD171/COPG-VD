@@ -108,7 +108,6 @@
     "FINGERPRINT": "POCO/23049PCD8G/POCOF5:13/TQ3A.230805.001/20230620:user/release-keys",
     "PRODUCT": "23049PCD8G"
   },
- Cookbook: {
     "PACKAGES_ROG": [
       "com.dts.freefireth",
       "com.dts.freefirethmax"
