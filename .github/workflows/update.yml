@@ -17,7 +17,7 @@ on:
         description: 'Branch to build from'
         type: string
         required: true
-        default: 'JSON'
+        default: 'alpha'
       title:
         description: 'Custom title for Telegram message'
         type: string
@@ -140,7 +140,7 @@ jobs:
           cp build/armeabi-v7a/libspoof.so module/zygisk/armeabi-v7a.so
           chmod 755 module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
           cp config.json module/config.json
-          #cp sepolicy.rule module/sepolicy.rule
+          cp ignorelist.txt module/ignorelist.txt
           cp -rf system/* module/system/
           cp customize.sh module/customize.sh
           cp service.sh module/service.sh
