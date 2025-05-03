@@ -108,77 +108,88 @@
     "FINGERPRINT": "POCO/23049PCD8G/POCOF5:13/TQ3A.230805.001/20230620:user/release-keys",
     "PRODUCT": "23049PCD8G"
   },
-    "PACKAGES_ROG": [
-      "com.dts.freefireth",
-      "com.dts.freefirethmax"
-    ],
-    "PACKAGES_ROG_DEVICE": {
-      "BRAND": "ASUS",
-      "DEVICE": "ROG Phone 5s",
-      "MANUFACTURER": "ASUS",
-      "MODEL": "ZS676KS",
-      "FINGERPRINT": "ASUS/ZS676KS/ROG Phone 5s:12/SKQ1.210821.001/20220810:user/release-keys",
-      "PRODUCT": "ZS676KS"
-    },
-    "PACKAGES_ROG6": [
-      "com.gameloft.android.ANMP.GloftA9HM",
-      "com.madfingergames.legends",
-      "com.pearlabyss.blackdesertm",
-      "com.pearlabyss.blackdesertm.gl"
-    ],
-    "PACKAGES_ROG6_DEVICE": {
-      "BRAND": "ASUS",
-      "DEVICE": "ROG Phone 6D Ultimate",
-      "MANUFACTURER": "ASUS",
-      "MODEL": "AI2203",
-      "FINGERPRINT": "ASUS/AI2203/ROG Phone 6D:14/UP1A.231005.007/20240315:user/release-keys",
-      "PRODUCT": "AI2203"
-    },
-    "PACKAGES_LENOVO_TABLET": [
-      "com.activision.callofduty.shooter",
-      "com.garena.game.codm",
-      "com.tencent.tmgp.kr.codm",
-      "com.vng.codmvn"
-    ],
-    "PACKAGES_LENOVO_TABLET_DEVICE": {
-      "BRAND": "Lenovo",
-      "DEVICE": "Legion Y700 (2023)",
-      "MANUFACTURER": "Lenovo",
-      "MODEL": "TB-9707F",
-      "FINGERPRINT": "Lenovo/TB-9707F/Lenovo TB-9707F:13/TQ3A.230805.001/20230901:user/release-keys",
-      "PRODUCT": "TB-9707F"
-    },
-    "PACKAGES_S24ULTRA": [
-      "com.ea.gp.fifamobile"
-    ],
-    "PACKAGES_S24ULTRA_DEVICE": {
-      "BRAND": "Samsung",
-      "DEVICE": "Galaxy S24 Ultra",
-      "MANUFACTURER": "Samsung",
-      "MODEL": "SM-S928B",
-      "FINGERPRINT": "samsung/SM-S928B/SM-S928B:14/UP1A.231005.007/20240225:user/release-keys",
-      "PRODUCT": "SM-S928B"
-    },
-    "PACKAGES_XIAOMI_13": [
-      "com.tencent.lolm"
-    ],
-    "PACKAGES_XIAOMI_13_DEVICE": {
-      "BRAND": "Xiaomi",
-      "DEVICE": "Xiaomi 13",
-      "MANUFACTURER": "Xiaomi",
-      "MODEL": "2211133G",
-      "FINGERPRINT": "Xiaomi/fuxi_eea/fuxi:13/TKQ1.221114.001/OS2.0.102.0.VMCEUXM:user/release-keys",
-      "PRODUCT": "2211133G"
-    },
-    "PACKAGES_ONEPLUS_13": [
-      "com.proxima.dfm"
-    ],
-    "PACKAGES_ONEPLUS_13_DEVICE": {
-      "BRAND": "OnePlus",
-      "DEVICE": "OnePlus 13",
-      "MANUFACTURER": "OnePlus",
-      "MODEL": "PJZ110",
-      "FINGERPRINT": "OnePlus/PJZ110/OP5D0DL1:15/AP3A.240617.008/V.1bd19a1-1-2:user/release-keys",
-      "PRODUCT": "PJZ110"
-    }
+  "PACKAGES_ROG": [
+    "com.dts.freefireth",
+    "com.dts.freefirethmax"
+  ],
+  "PACKAGES_ROG_DEVICE": {
+    "BRAND": "ASUS",
+    "DEVICE": "ROG Phone 5s",
+    "MANUFACTURER": "ASUS",
+    "MODEL": "ZS676KS",
+    "FINGERPRINT": "ASUS/ZS676KS/ROG Phone 5s:12/SKQ1.210821.001/20220810:user/release-keys",
+    "PRODUCT": "ZS676KS"
+  },
+  "PACKAGES_ROG6": [
+    "com.gameloft.android.ANMP.GloftA9HM",
+    "com.madfingergames.legends",
+    "com.pearlabyss.blackdesertm",
+    "com.pearlabyss.blackdesertm.gl"
+  ],
+  "PACKAGES_ROG6_DEVICE": {
+    "BRAND": "ASUS",
+    "DEVICE": "ROG Phone 6D Ultimate",
+    "MANUFACTURER": "ASUS",
+    "MODEL": "AI2203",
+    "FINGERPRINT": "ASUS/AI2203/ROG Phone 6D:14/UP1A.231005.007/20240315:user/release-keys",
+    "PRODUCT": "AI2203"
+  },
+  "PACKAGES_LENOVO_TABLET": [
+    "com.activision.callofduty.shooter",
+    "com.garena.game.codm",
+    "com.tencent.tmgp.kr.codm",
+    "com.vng.codmvn"
+  ],
+  "PACKAGES_LENOVO_TABLET_DEVICE": {
+    "BRAND": "Lenovo",
+    "DEVICE": "Legion Y700 (2023)",
+    "MANUFACTURER": "Lenovo",
+    "MODEL": "TB-9707F",
+    "FINGERPRINT": "Lenovo/TB-9707F/Lenovo TB-9707F:13/TQ3A.230805.001/20230901:user/release-keys",
+    "PRODUCT": "TB-9707F"
+  },
+  "PACKAGES_S24ULTRA": [
+    "com.ea.gp.fifamobile"
+  ],
+  "PACKAGES_S24ULTRA_DEVICE": {
+    "BRAND": "Samsung",
+    "DEVICE": "Galaxy S24 Ultra",
+    "MANUFACTURER": "Samsung",
+    "MODEL": "SM-S928B",
+    "FINGERPRINT": "samsung/SM-S928B/SM-S928B:14/UP1A.231005.007/20240225:user/release-keys",
+    "PRODUCT": "SM-S928B"
+  },
+  "PACKAGES_XIAOMI_13": [
+    "com.tencent.lolm"
+  ],
+  "PACKAGES_XIAOMI_13_DEVICE": {
+    "BRAND": "Xiaomi",
+    "DEVICE": "Xiaomi 13",
+    "MANUFACTURER": "Xiaomi",
+    "MODEL": "2211133G",
+    "FINGERPRINT": "Xiaomi/fuxi_eea/fuxi:13/TKQ1.221114.001/OS2.0.102.0.VMCEUXM:user/release-keys",
+    "PRODUCT": "2211133G"
+  },
+  "PACKAGES_ONEPLUS_13": [
+    "com.proxima.dfm"
+  ],
+  "PACKAGES_ONEPLUS_13_DEVICE": {
+    "BRAND": "OnePlus",
+    "DEVICE": "OnePlus 13",
+    "MANUFACTURER": "OnePlus",
+    "MODEL": "PJZ110",
+    "FINGERPRINT": "OnePlus/PJZ110/OP5D0DL1:15/AP3A.240617.008/V.1bd19a1-1-2:user/release-keys",
+    "PRODUCT": "PJZ110"
+  },
+  "PACKAGES_PIXEL_XL": [
+    "com.google.android.apps.photos"
+  ],
+  "PACKAGES_PIXEL_XL_DEVICE": {
+    "BRAND": "google",
+    "DEVICE": "Pixel XL",
+    "MANUFACTURER": "Google",
+    "MODEL": "marlin",
+    "FINGERPRINT": "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys",
+    "PRODUCT": "marlin"
+  }
 }
