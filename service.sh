@@ -5,10 +5,23 @@ CONFIG_JSON="/data/adb/modules/COPG/config.json"
 TOGGLE_FILE="/data/adb/copg_state"
 DEFAULTS_FILE="/data/adb/copg_defaults"  # Base name for .brightness, .dnd, and .timeout
 SIGNAL_FILE="/data/adb/copg_config_updated"
+IGNORE_LIST="/data/adb/modules/COPG/ignorelist.txt"  # New ignore list file
 
 # Function to execute root commands
 exec_root() {
     su -c "$1" >/dev/null 2>&1
+    return $?
+}
+
+# Function to check if package is in ignore list
+is_ignored_package() {
+    local package="$1"
+    if [ ! -f "$IGNORE_LIST" ]; then
+        return 1  # Not ignored if ignore list doesn't exist
+    fi
+    
+    # Check if package is in ignore list (exact match)
+    grep -q "^${package}$" "$IGNORE_LIST" 2>/dev/null
     return $?
 }
 
@@ -107,11 +120,13 @@ restore_saved_states() {
     fi
 }
 
-# Function to check if any package from the list is running
+# Function to check if any non-ignored package from the list is running
 is_any_package_running() {
     local package_list="$1"
     for package in $(echo "$package_list" | tr '|' ' '); do
-        pidof "$package" >/dev/null 2>&1 && return 0
+        if ! is_ignored_package "$package"; then
+            pidof "$package" >/dev/null 2>&1 && return 0
+        fi
     done
     return 1
 }
@@ -155,6 +170,12 @@ while true; do
 
     window=$(su -c "dumpsys window" 2>/dev/null) || { sleep 1; continue; }
     current_app=$(echo "$window" | grep -E 'mCurrentFocus|mFocusedApp' | grep -Eo "$PACKAGE_LIST" | head -n 1)
+
+    # Skip if current app is in ignore list
+    if [ -n "$current_app" ] && is_ignored_package "$current_app"; then
+        sleep 0.5
+        continue
+    fi
 
     if [ -n "$current_app" ] && [ "$current_app" != "$last_app" ] && [ "$states_saved" -eq 0 ]; then
         debounce_count=$((debounce_count + 1))
