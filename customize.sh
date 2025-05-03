@@ -167,7 +167,7 @@ setup_gphoto_spoof() {
       file=$(basename "$i")
       if grep -qE "PIXEL_2020_|PIXEL_2021_|PIXEL_2019_PRELOAD|PIXEL_2018_PRELOAD|PIXEL_2017_PRELOAD|PIXEL_2022_" "$i"; then
         if [ ! -f "$MODPATH/system/etc/sysconfig/$file" ]; then
-          cat "$i" | grep -v PIXEL_2020_ | grep -v PIXEL_2021_ | grep -v PIXEL_2022_ | grep -v PIXEL_2018_PRELOAD | grep -v PIXEL_2019_PRELOAD | grep -v PIXEL_201  grep -v PIXEL_2017_PRELOAD >"$MODPATH/system/etc/sysconfig/$file" || {
+          cat "$i" | grep -v PIXEL_2020_ | grep -v PIXEL_2021_ | grep -v PIXEL_2022_ | grep -v PIXEL_2018_PRELOAD | grep -v PIXEL_2019_PRELOAD | grep -v PIXEL_2017_PRELOAD >"$MODPATH/system/etc/sysconfig/$file" || {
             ui_print " ✗ Failed to Process $file!"
             print_failure_and_exit "gphoto"
           }
@@ -181,44 +181,20 @@ setup_gphoto_spoof() {
     fi
   done
 
-  # Copy files from PixelifyPhotos module (if present)
-  if [ -d /data/adb/modules/PixelifyPhotos/system/product/etc/sysconfig ]; then
-    for i in /data/adb/modules/PixelifyPhotos/system/product/etc/sysconfig/*; do
-      if [ -f "$i" ]; then
-        file=$(basename "$i")
-        if [ ! -f "$MODPATH/system/product/etc/sysconfig/$file" ]; then
-          cp -f "$i" "$MODPATH/system/product/etc/sysconfig/$file" || {
-            ui_print " ✗ Failed to Copy PixelifyPhotos $file!"
-            print_failure_and_exit "gphoto"
-          }
-          chmod 0644 "$MODPATH/system/product/etc/sysconfig/$file" || {
-            ui_print " ✗ Failed to Set Permissions ($file)!"
-            print_failure_and_exit "gphoto"
-          }
-          ui_print " ✔ Copied PixelifyPhotos $file"
-        fi
-      fi
-    done
-  fi
-
-  if [ -d /data/adb/modules/PixelifyPhotos/system/etc/sysconfig ]; then
-    for i in /data/adb/modules/PixelifyPhotos/system/etc/sysconfig/*; do
-      if [ -f "$i" ]; then
-        file=$(basename "$i")
-        if [ ! -f "$MODPATH/system/etc/sysconfig/$file" ]; then
-          cp -f "$i" "$MODPATH/system/etc/sysconfig/$file" || {
-            ui_print " ✗ Failed to Copy PixelifyPhotos $file!"
-            print_failure_and_exit "gphoto"
-          }
-          chmod 0644 "$MODPATH/system/etc/sysconfig/$file" || {
-            ui_print " ✗ Failed to Set Permissions ($file)!"
-            print_failure_and_exit "gphoto"
-          }
-          ui_print " ✔ Copied PixelifyPhotos $file"
-        fi
-      fi
-    done
-  fi
+  # Set permissions for any pre-included sysconfig files in the module
+  for i in "$MODPATH/system/product/etc/sysconfig/"* "$MODPATH/system/etc/sysconfig/"*; do
+    if [ -f "$i" ]; then
+      chmod 0644 "$i" || {
+        ui_print " ✗ Failed to Set Permissions for $(basename "$i")!"
+        print_failure_and_exit "gphoto"
+      }
+      chcon u:object_r:system_file:s0 "$i" || {
+        ui_print " ✗ Failed to Set SELinux Context for $(basename "$i")!"
+        print_failure_and_exit "gphoto"
+      }
+      ui_print " ✔ Configured $(basename "$i")"
+    fi
+  done
 
   ui_print " ✅ Google Photos Spoof Configured"
   print_box_end
