@@ -71,7 +71,7 @@ function appendToOutput(content, type = 'info') {
         } else if (content.includes('✅')) {
             colorClass = 'log-success';
             iconClass = 'icon-success';
-        } else if (content.includes('📍') || content.includes('Rebooting') || content.includes('Deleting')) {
+        } else if (content.includes('📍') || content.includes('Deleting')) {
             colorClass = 'log-warning';
             iconClass = 'icon-warning';
         } else if (content.includes('Enabled')) {
@@ -873,15 +873,6 @@ function hidePopup(popupId, callback) {
             content.classList.remove('popup-exit');
             if (callback) callback();
         }, { once: true });
-    }
-}
-
-async function rebootDevice() {
-    appendToOutput("Rebooting device...", 'warning');
-    try {
-        await execCommand("su -c reboot");
-    } catch (error) {
-        appendToOutput("Failed to reboot: " + error, 'error');
     }
 }
 
