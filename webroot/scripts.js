@@ -811,12 +811,10 @@ async function deleteGame(gamePackage, deviceKey) {
 
 async function saveConfig() {
     try {
-        await execCommand(`cp /data/adb/modules/COPG/config.json /data/adb/modules/COPG/config.json.bak || true`);
         const configStr = JSON.stringify(currentConfig, null, 2);
         await execCommand(`echo '${configStr.replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/config.json`);
         appendToOutput("Config saved", 'info');
     } catch (error) {
-        await execCommand(`mv /data/adb/modules/COPG/config.json.bak /data/adb/modules/COPG/config.json || true`);
         appendToOutput(`Failed to save config: ${error}`, 'error');
         throw error;
     }
