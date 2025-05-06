@@ -1,5 +1,6 @@
 {
-    "title": "COPG",
+    "title": "COPG Manager",
     "icon": "icon.png",
-    "backHandler": false
+    "backHandler": false,
+    "windowResize": false
 }
