@@ -18,6 +18,9 @@
     --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
     --safe-area-inset-left: env(safe-area-inset-left, 0px);
     --safe-area-inset-right: env(safe-area-inset-right, 0px);
+    /* Surface container variables for loaders */
+    --surfaceContainer: #E5E7EB; /* Gray 200 */
+    --surfaceContainerHigh: #D1D5DB; /* Gray 300 */
 
     /* Dark Theme (Matching One UI dark tones with detail) */
     --dark-bg: #111827; /* Gray 900 */
@@ -26,6 +29,8 @@
     --dark-text-secondary: #9CA3AF; /* Gray 400 */
     --dark-border: #4B5563; /* Gray 600 */
     --dark-shadow: rgba(0, 0, 0, 0.3);
+    --dark-surfaceContainer: #4B5563; /* Gray 600 */
+    --dark-surfaceContainerHigh: #6B7280; /* Gray 500 */
 }
 
 * {
@@ -73,7 +78,7 @@ body.dark-theme {
     background: var(--dark-bg);
 }
 
-body.dark-theme::before {
+body.dark-themeKILL::before {
     background: radial-gradient(circle, rgba(167, 139, 250, 0.15) 0%, transparent 70%);
 }
 
@@ -290,6 +295,16 @@ body.dark-theme::before {
     position: relative;
     -webkit-mask-image: -webkit-radial-gradient(white, black);
     mask-image: radial-gradient(white, black);
+}
+
+.scroll-container .loader {
+    width: 100%;
+    height: 40px;
+    background: linear-gradient(90deg, var(--surfaceContainer), var(--surfaceContainerHigh), var(--surfaceContainer));
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite linear;
+    border-radius: 8px;
+    margin: 16px 0;
 }
 
 #device-picker-popup .scroll-container {
@@ -616,6 +631,41 @@ input:checked + .slider:before {
     width: 16px;
     height: 16px;
     stroke: #fff;
+}
+
+.package-picker-btn {
+    padding: 10px 16px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 100px;
+    justify-content: center;
+    box-shadow: 0 3px 8px var(--shadow);
+}
+
+.package-picker-btn:hover {
+    transform: scale(1.05);
+    background: var(--primary-dark);
+}
+
+.package-picker-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: #fff;
+    transition: transform 0.3s ease;
+}
+
+.package-picker-btn:hover svg {
+    transform: scale(1.1);
+}
+
+.dark-theme .package-picker-btn {
+    background: linear-gradient(135deg, #1E3A8A, #6B7280);
+}
+
+.dark-theme .package-picker-btn:hover {
+    background: var(--primary-gradient);
 }
 
 /* Section Headers */
@@ -1399,4 +1449,96 @@ h2 {
 
 .dark-theme .snackbar-btn:hover {
     background: rgba(96, 165, 250, 0.15);
+}
+
+/* App List Styles */
+.app-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    width: 100%;
+}
+
+.app-card {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 2px 6px var(--shadow);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.dark-theme .app-card {
+    background: var(--dark-card);
+}
+
+.app-card:hover {
+    box-shadow: 0 4px 12px var(--shadow);
+    transform: translateY(-2px);
+}
+
+.app-card.added-game {
+    background: rgba(52, 211, 153, 0.1) !important;
+}
+
+.app-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    margin-right: 12px;
+    object-fit: contain;
+    background: var(--background);
+    transition: opacity 0.3s ease;
+}
+
+.dark-theme .app-icon {
+    background: var(--dark-bg);
+}
+
+.app-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.app-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.dark-theme .app-name {
+    color: var(--dark-text);
+}
+
+.app-package {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-family: 'Roboto Mono', monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dark-theme .app-package {
+    color: var(--dark-text-secondary);
+}
+
+.loader {
+    background: linear-gradient(90deg, var(--surfaceContainer), var(--surfaceContainerHigh), var(--surfaceContainer));
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite linear;
+    border-radius: 8px;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
 }
