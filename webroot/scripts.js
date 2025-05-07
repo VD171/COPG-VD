@@ -5,6 +5,8 @@ let editingGame = null;
 let lastRender = { devices: 0, games: 0 };
 const RENDER_DEBOUNCE_MS = 150;
 let snackbarTimeout = null;
+let appIndex = []; // Global index for app data
+let packagePickerObserver = null;
 
 // Module ID for COPG
 const MODULE_ID = 'COPG';
@@ -578,7 +580,7 @@ async function saveGame(e) {
                     const errorMessage = document.createElement('span');
                     errorMessage.className = 'error-message';
                     errorMessage.textContent = 'Game package already exists';
-                    field.insertAdjacentElement('afterend', errorMessage);
+                    document.getElementById('game-package').parentNode.insertAdjacentElement('afterend', errorMessage);
                     const errorPopupMessage = `Game '${gamePackage}' is already associated with device profile '${associatedDeviceName}'.`;
                     appendToOutput(errorPopupMessage, 'error');
                     document.getElementById('error-message').textContent = errorPopupMessage;
@@ -1085,7 +1087,7 @@ async function updateGameList() {
 }
 
 function applyEventListeners() {
-    document.getElementById('toggle-auto-brightness').addEventListener('change', async (e) => {
+    document.getElementById('toggle-auto-brightness').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
             await execCommand(`sed -i '/AUTO_BRIGHTNESS_OFF=/d' /data/adb/copg_state; echo "AUTO_BRIGHTNESS_OFF=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
@@ -1096,7 +1098,7 @@ function applyEventListeners() {
         }
     });
 
-    document.getElementById('toggle-dnd').addEventListener('change', async (e) => {
+    document.getElementById('toggle-dnd').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
             await execCommand(`sed -i '/DND_ON=/d' /data/adb/copg_state; echo "DND_ON=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
@@ -1107,7 +1109,7 @@ function applyEventListeners() {
         }
     });
 
-    document.getElementById('toggle-logging').addEventListener('change', async (e) => {
+    document.getElementById('toggle-logging').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
             await execCommand(`sed -i '/DISABLE_LOGGING=/d' /data/adb/copg_state; echo "DISABLE_LOGGING=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
@@ -1118,7 +1120,7 @@ function applyEventListeners() {
         }
     });
 
-    document.getElementById('toggle-keep-screen-on').addEventListener('change', async (e) => {
+    document.getElementById('toggle-keep-screen-on').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
             await execCommand(`sed -i '/KEEP_SCREEN_ON=/d' /data/adb/copg_state; echo "KEEP_SCREEN_ON=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
@@ -1299,4 +1301,253 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadConfig();
     applyEventListeners();
     switchTab('settings');
+});
+
+// Package Picker Functions
+const loadPackagePickerDependencies = async () => {
+    // Load required dependencies for package picker
+    if (typeof wrapInputStream === 'undefined') {
+        const { wrapInputStream } = await import("https://mui.kernelsu.org/internal/assets/ext/wrapInputStream.mjs");
+        window.wrapInputStream = wrapInputStream;
+    }
+};
+
+async function showPackagePicker() {
+    appendToOutput("Loading package picker...", 'info');
+    const popup = document.getElementById('package-picker-popup');
+    const searchInput = document.getElementById('package-picker-search');
+    const appList = document.getElementById('package-picker-list');
+    
+    // Set readonly to prevent keyboard on popup open
+    searchInput.setAttribute('readonly', 'true');
+    searchInput.value = '';
+    appList.innerHTML = '<div class="loader" style="width: 100%; height: 40px; margin: 16px 0;"></div>';
+    appIndex = []; // Reset index
+
+    // Add click handler to enable search input
+    const enableSearch = () => {
+        searchInput.removeAttribute('readonly');
+        searchInput.focus();
+        searchContainer.removeEventListener('click', enableSearch);
+    };
+    const searchContainer = popup.querySelector('.search-container');
+    searchContainer.addEventListener('click', enableSearch);
+
+    try {
+        let pkgList = [];
+        
+        // First try using the API method
+        try {
+            if (typeof $packageManager !== 'undefined' && typeof $packageManager.getInstalledPackages === 'function') {
+                pkgList = JSON.parse($packageManager.getInstalledPackages(0, 0));
+                appendToOutput("Loaded packages using API method", 'success');
+            } else {
+                throw new Error("PackageManager API not available");
+            }
+        } catch (apiError) {
+            appendToOutput("API method failed, falling back to pm command: " + apiError, 'warning');
+            // Fallback to pm list packages command
+            const pmOutput = await execCommand("pm list packages -3 | cut -d: -f2");
+            pkgList = pmOutput.trim().split('\n').filter(pkg => pkg.trim() !== '');
+            if (pkgList.length === 0) {
+                throw new Error("No packages found using pm command");
+            }
+            appendToOutput(`Loaded ${pkgList.length} packages using pm command`, 'success');
+        }
+        appendToOutput("Indexing apps for search...", 'info');
+
+        // Populate app index with package names and labels
+        for (const pkg of pkgList) {
+            let label = pkg; // Fallback to package name
+            try {
+                const info = $packageManager.getApplicationInfo(pkg, 0, 0);
+                if (info && info.getLabel()) {
+                    label = info.getLabel() || pkg;
+                }
+            } catch (e) {
+                console.error(`Error fetching label for ${pkg}:`, e);
+            }
+            appIndex.push({ package: pkg, label: label.toLowerCase() });
+        }
+
+        // Sort index by label for better UX
+        appIndex.sort((a, b) => a.label.localeCompare(b.label));
+
+        // Get list of already added games
+        const addedGames = [];
+        for (const [key, value] of Object.entries(currentConfig)) {
+            if (Array.isArray(value) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
+                value.forEach(gamePackage => {
+                    if (!addedGames.includes(gamePackage)) {
+                        addedGames.push(gamePackage);
+                    }
+                });
+            }
+        }
+
+        appList.innerHTML = '';
+
+        // Create IntersectionObserver for lazy loading icons
+        if (!packagePickerObserver) {
+            packagePickerObserver = new IntersectionObserver(async (entries) => {
+                for (const entry of entries) {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        const pkg = img.dataset.pkg;
+                        const appCard = img?.closest('.app-card');
+                        const nameEl = appCard.querySelector('.app-name');
+
+                        try {
+                            // Load app info (redundant but kept for consistency)
+                            const info = $packageManager.getApplicationInfo(pkg, 0, 0);
+                            if (info && info.getLabel()) {
+                                nameEl.textContent = info.getLabel();
+                            }
+
+                            // Try to load app icon if API is available
+                            if (typeof $packageManager !== 'undefined' && typeof $packageManager.getApplicationIcon === 'function') {
+                                const stream = $packageManager.getApplicationIcon(pkg, 0, 0);
+                                await loadPackagePickerDependencies();
+                                const response = await wrapInputStream(stream);
+                                const buffer = await response.arrayBuffer();
+                                img.src = 'data:image/png;base64,' + arrayBufferToBase64(buffer);
+                                img.style.opacity = '1';
+                            }
+                            
+                            // Remove loader
+                            const loader = img.nextElementSibling;
+                            if (loader && loader.classList.contains('loader')) {
+                                loader.remove();
+                            }
+                        } catch (e) {
+                            console.error('Error loading app info/icon:', e);
+                            const loader = img.nextElementSibling;
+                            if (loader && loader.classList.contains('loader')) {
+                                loader.style.background = 'var(--error)';
+                            }
+                        }
+
+                        packagePickerObserver.unobserve(img);
+                    }
+                }
+            }, { rootMargin: '100px', threshold: 0.1 });
+        }
+
+        // Render app cards
+        const fragment = document.createDocumentFragment();
+        pkgList.forEach(pkg => {
+            const appCard = document.createElement('div');
+            appCard.className = 'app-card';
+            appCard.dataset.package = pkg;
+
+            // Add class if package is already in the list
+            if (addedGames.includes(pkg)) {
+                appCard.classList.add('added-game');
+            }
+
+            const iconContainer = document.createElement('div');
+            iconContainer.style.position = 'relative';
+            iconContainer.style.width = '40px';
+            iconContainer.style.height = '40px';
+            iconContainer.style.flexShrink = '0';
+            iconContainer.style.marginRight = '12px';
+
+            const img = document.createElement('img');
+            img.className = 'app-icon';
+            img.dataset.pkg = pkg;
+            img.style.opacity = '0';
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.objectFit = 'contain';
+            img.style.borderRadius = '8px';
+
+            const loader = document.createElement('div');
+            loader.className = 'loader';
+            loader.style.position = 'absolute';
+            loader.style.top = '0';
+            loader.style.left = '0';
+            loader.style.width = '100%';
+            loader.style.height = '100%';
+            loader.style.background = 'linear-gradient(90deg, var(--surfaceContainer), var(--surfaceContainerHigh), var(--surfaceContainer))';
+            loader.style.backgroundSize = '200% 100%';
+            loader.style.animation = 'shimmer 1.2s infinite linear';
+            loader.style.borderRadius = '8px';
+
+            iconContainer.appendChild(img);
+            iconContainer.appendChild(loader);
+
+            const infoContainer = document.createElement('div');
+            infoContainer.className = 'app-info';
+            infoContainer.style.overflow = 'hidden';
+
+            const name = document.createElement('div');
+            name.className = 'app-name';
+            name.textContent = appIndex.find(app => app.package === pkg)?.label || pkg; // Use indexed label
+
+            const packageName = document.createElement('div');
+            packageName.className = 'app-package';
+            packageName.textContent = pkg;
+
+            infoContainer.appendChild(name);
+            infoContainer.appendChild(packageName);
+
+            appCard.appendChild(iconContainer);
+            appCard.appendChild(infoContainer);
+            fragment.appendChild(appCard);
+
+            // Observe the image for lazy loading
+            packagePickerObserver.observe(img);
+
+            // Set click handler
+            appCard.addEventListener('click', () => {
+                document.getElementById('game-package').value = pkg;
+                closePopup('package-picker-popup');
+            });
+        });
+
+        appList.appendChild(fragment);
+
+        // Search functionality using the index
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            const matchedPackages = appIndex
+                .filter(app => app.label.includes(searchTerm) || app.package.includes(searchTerm))
+                .map(app => app.package);
+
+            document.querySelectorAll('.app-card').forEach(card => {
+                const pkg = card.dataset.package;
+                card.style.display = matchedPackages.includes(pkg) ? 'flex' : 'none';
+            });
+        });
+
+        showPopup('package-picker-popup');
+        appendToOutput("App list loaded", 'success');
+    } catch (error) {
+        console.error("Failed to load package list:", error);
+        appList.innerHTML = '<div style="color: var(--error); text-align: center; padding: 16px;">Failed to load apps: ' + error.message + '</div>';
+        appendToOutput("Failed to load package list: " + error, 'error');
+    }
+}
+
+// Add event listener for package picker cancel button
+document.querySelector('#package-picker-popup .cancel-btn')?.addEventListener('click', () => {
+    document.getElementById('package-picker-search').value = '';
+    closePopup('package-picker-popup');
+});
+
+// Utility function for array buffer to base64
+function arrayBufferToBase64(buffer) {
+    const uint8Array = new Uint8Array(buffer);
+    let binary = '';
+    uint8Array.forEach(byte => binary += String.fromCharCode(byte));
+    return btoa(binary);
+}
+
+// Add event listener for package picker button
+document.addEventListener('DOMContentLoaded', () => {
+    const pickerBtn = document.getElementById('package-picker-btn');
+    if (pickerBtn) {
+        pickerBtn.addEventListener('click', showPackagePicker);
+        pickerBtn.style.padding = '0 8px'; // Smaller button
+    }
 });
