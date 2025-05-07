@@ -164,7 +164,15 @@
             <form id="game-form">
                 <div class="form-group">
                     <label for="game-package">Package Name</label>
-                    <input type="text" id="game-package" placeholder="e.g., com.example.game" required>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="game-package" placeholder="e.g., com.example.game" required>
+                        <button type="button" id="package-picker-btn" class="action-btn package-picker-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            Pick App
+                        </button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="game-device">Device Profile</label>
@@ -206,6 +214,26 @@
         </div>
     </div>
 
+    <div id="package-picker-popup" class="popup">
+        <div class="popup-content device-picker-content">
+            <div class="modal-header">
+                <h3>Select Application</h3>
+                <button class="close-btn">×</button>
+            </div>
+            <div class="search-container" onclick="document.getElementById('package-picker-search').removeAttribute('readonly')">
+                <input type="text" id="package-picker-search" placeholder="Search apps...">
+            </div>
+            <div class="scroll-container">
+                <div class="list-wrapper">
+                    <div id="package-picker-list" class="device-picker"></div>
+                </div>
+            </div>
+            <div class="popup-buttons">
+                <button class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <div id="error-popup" class="popup">
         <div class="popup-content">
             <h3>Error</h3>
@@ -222,6 +250,5 @@
     </div>
 
     <script src="scripts.js"></script>
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93444cafed71b02b',t:'MTc0NTMxNjI5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
