@@ -248,7 +248,26 @@
         <span id="snackbar-message"></span>
         <button id="snackbar-undo" class="snackbar-btn">Undo</button>
     </div>
-
+<!-- Custom Ignore List Popup -->
+<div id="ignore-popup" class="popup">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h3 id="ignore-popup-title">Manage Ignore List</h3>
+            <button class="close-popup-btn">×</button>
+        </div>
+        <div class="popup-body">
+            <div class="popup-icon" id="ignore-popup-icon"></div>
+            <p id="ignore-popup-message">This package will be added to ignore list</p>
+            <p class="popup-package" id="ignore-popup-package">com.example.game</p>
+        </div>
+        <div class="popup-footer">
+            <button id="ignore-popup-cancel" class="popup-btn cancel-btn">Cancel</button>
+            <button id="ignore-popup-confirm" class="popup-btn action-btn">Confirm</button>
+        </div>
+    </div>
+</div>
+    
+    
     <script src="scripts.js"></script>
 </body>
 </html>
