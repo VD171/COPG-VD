@@ -1542,3 +1542,127 @@ h2 {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
 }
+
+/* Ignored game card styles */
+.game-card.ignored {
+    background: rgba(248, 113, 113, 0.1);
+    border-left: 4px solid var(--error);
+}
+
+.dark-theme .game-card.ignored {
+    background: rgba(248, 113, 113, 0.15);
+}
+
+.ignored-badge {
+    display: inline-block;
+    background: var(--error);
+    color: white;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 8px;
+    font-weight: 500;
+}
+
+.dark-theme .ignored-badge {
+    background: var(--error);
+}
+
+/* Ignore Popup Specific Styles */
+#ignore-popup .popup-content {
+    max-width: 320px;
+    padding: 0;
+    overflow: hidden;
+}
+
+#ignore-popup .popup-header {
+    padding: 16px;
+    background: var(--primary-gradient);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#ignore-popup .popup-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+}
+
+#ignore-popup .close-popup-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px;
+}
+
+#ignore-popup .popup-body {
+    padding: 20px 16px;
+    text-align: center;
+}
+
+#ignore-popup .popup-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--success);
+}
+
+#ignore-popup .popup-icon.icon-remove {
+    background: var(--error);
+}
+
+#ignore-popup .popup-icon::before {
+    content: '';
+    width: 24px;
+    height: 24px;
+    background: white;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") no-repeat center;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") no-repeat center;
+}
+
+#ignore-popup .popup-icon.icon-remove::before {
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M18 6L6 18M6 6l12 12'/%3E%3C/svg%3E") no-repeat center;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M18 6L6 18M6 6l12 12'/%3E%3C/svg%3E") no-repeat center;
+}
+
+#ignore-popup .popup-package {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    word-break: break-all;
+}
+
+#ignore-popup .popup-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 16px;
+    gap: 8px;
+}
+
+/* Prevent text selection on game cards */
+.game-card {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* Make sure buttons still work */
+.game-actions button {
+    pointer-events: auto;
+}
+
+/* Prevent text selection on text elements */
+.game-header, .game-details {
+    user-select: none;
+    -webkit-user-select: none;
+}
