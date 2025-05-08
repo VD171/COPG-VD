@@ -8,6 +8,44 @@ let snackbarTimeout = null;
 let appIndex = []; // Global index for app data
 let packagePickerObserver = null;
 
+async function readIgnoreList() {
+    try {
+        const ignoreListContent = await execCommand("cat /data/adb/modules/COPG/ignorelist.txt || echo ''");
+        return ignoreListContent.trim().split('\n').filter(line => line.trim() !== '');
+    } catch (error) {
+        appendToOutput("Failed to read ignore list: " + error, 'error');
+        return [];
+    }
+}
+
+async function writeIgnoreList(ignoreList) {
+    try {
+        const content = ignoreList.join('\n');
+        await execCommand(`echo '${content.replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/ignorelist.txt`);
+        return true;
+    } catch (error) {
+        appendToOutput("Failed to write ignore list: " + error, 'error');
+        return false;
+    }
+}
+
+async function togglePackageInIgnoreList(packageName) {
+    const ignoreList = await readIgnoreList();
+    const index = ignoreList.indexOf(packageName);
+    
+    if (index === -1) {
+        // Add to ignore list
+        ignoreList.push(packageName);
+        await writeIgnoreList(ignoreList);
+        return true; // Added
+    } else {
+        // Remove from ignore list
+        ignoreList.splice(index, 1);
+        await writeIgnoreList(ignoreList);
+        return false; // Removed
+    }
+}
+
 // Module ID for COPG
 const MODULE_ID = 'COPG';
 const SANITIZED_MODULE_ID = MODULE_ID.replace(/[^a-zA-Z0-9_.]/g, '_');
@@ -126,6 +164,14 @@ async function loadConfig() {
     try {
         const configContent = await execCommand("cat /data/adb/modules/COPG/config.json");
         currentConfig = JSON.parse(configContent);
+        
+        // Ensure ignorelist.txt exists
+        try {
+            await execCommand("touch /data/adb/modules/COPG/ignorelist.txt");
+        } catch (error) {
+            appendToOutput("Failed to create ignorelist.txt: " + error, 'error');
+        }
+        
         appendToOutput("Config loaded successfully", 'success');
     } catch (error) {
         appendToOutput("Failed to load config: " + error, 'error');
@@ -260,6 +306,131 @@ function renderGameList() {
     gameList.innerHTML = '';
     gameList.appendChild(fragment);
     attachGameListeners();
+}
+
+function setupLongPressHandlers() {
+    let pressTimer;
+    const pressDuration = 500; // Reduced to 500ms for better responsiveness
+    let touchStartY = 0;
+    const scrollThreshold = 15; // Increased threshold for better scroll detection
+    let lastTapTime = 0;
+    const doubleTapThreshold = 300; // Time between taps to consider it a double tap
+
+    document.querySelectorAll('.game-card').forEach(card => {
+        const packageName = card.dataset.package;
+        const isIgnored = card.classList.contains('ignored');
+        let touchMoved = false;
+
+        const showPopup = () => {
+            const currentTime = Date.now();
+            // Prevent popup if this is a double tap
+            if (currentTime - lastTapTime < doubleTapThreshold) {
+                lastTapTime = 0;
+                return;
+            }
+            lastTapTime = currentTime;
+
+            const popup = document.getElementById('ignore-popup');
+            const title = document.getElementById('ignore-popup-title');
+            const message = document.getElementById('ignore-popup-message');
+            const packageEl = document.getElementById('ignore-popup-package');
+            const icon = document.getElementById('ignore-popup-icon');
+            const confirmBtn = document.getElementById('ignore-popup-confirm');
+
+            title.textContent = isIgnored ? 'Remove from Ignore List' : 'Add to Ignore List';
+            message.textContent = isIgnored 
+                ? 'This package will be removed from ignore list' 
+                : 'This package will be added to ignore list';
+            packageEl.textContent = packageName;
+
+            icon.className = 'popup-icon';
+            icon.classList.add(isIgnored ? 'icon-remove' : 'icon-add');
+
+            confirmBtn.dataset.package = packageName;
+            confirmBtn.dataset.action = isIgnored ? 'remove' : 'add';
+
+            popup.style.display = 'flex';
+        };
+
+        // Touch devices
+        card.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+            touchMoved = false;
+            pressTimer = setTimeout(() => {
+                if (!touchMoved) {
+                    showPopup();
+                }
+            }, pressDuration);
+        }, {passive: true});
+
+        card.addEventListener('touchmove', (e) => {
+            const touchY = e.touches[0].clientY;
+            if (Math.abs(touchY - touchStartY) > scrollThreshold) {
+                touchMoved = true;
+                clearTimeout(pressTimer);
+            }
+        }, {passive: true});
+
+        card.addEventListener('touchend', (e) => {
+            clearTimeout(pressTimer);
+            if (!touchMoved) {
+                const currentTime = Date.now();
+                if (currentTime - lastTapTime < doubleTapThreshold) {
+                    // This is a double tap - don't show popup
+                    lastTapTime = 0;
+                    return;
+                }
+                lastTapTime = currentTime;
+            }
+        }, {passive: false});
+
+        // Mouse devices
+        card.addEventListener('mousedown', (e) => {
+            if (e.button === 0) { // Left click only
+                pressTimer = setTimeout(() => {
+                    showPopup();
+                }, pressDuration);
+            }
+        });
+
+        card.addEventListener('mouseup', () => {
+            clearTimeout(pressTimer);
+        });
+
+        card.addEventListener('mouseleave', () => {
+            clearTimeout(pressTimer);
+        });
+
+        card.addEventListener('click', (e) => {
+            // Prevent click events from firing after long press
+            if (e.detail > 1) {
+                e.preventDefault();
+            }
+        });
+
+        // Prevent context menu on long press
+        card.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+    });
+
+    // Popup button handlers (keep your existing implementation)
+    document.getElementById('ignore-popup-cancel').addEventListener('click', () => {
+        document.getElementById('ignore-popup').style.display = 'none';
+    });
+
+    document.getElementById('ignore-popup-confirm').addEventListener('click', async function() {
+        const packageName = this.dataset.package;
+        const action = this.dataset.action;
+        const wasAdded = await togglePackageInIgnoreList(packageName);
+        appendToOutput(`${action === 'add' ? 'Added' : 'Removed'} ${packageName} ${action === 'add' ? 'to' : 'from'} ignore list`, 'success');
+        renderGameList();
+        document.getElementById('ignore-popup').style.display = 'none';
+    });
+
+    document.querySelector('.close-popup-btn').addEventListener('click', () => {
+        document.getElementById('ignore-popup').style.display = 'none';
+    });
 }
 
 function attachGameListeners() {
@@ -636,6 +807,67 @@ async function saveGame(e) {
         document.getElementById('error-message').textContent = `Failed to save game: ${error}`;
         showPopup('error-popup');
     }
+}
+
+async function renderGameList() {
+    const now = Date.now();
+    if (now - lastRender.games < RENDER_DEBOUNCE_MS) return;
+    lastRender.games = now;
+
+    const gameList = document.getElementById('game-list');
+    if (!gameList) return appendToOutput("Error: 'game-list' not found", 'error');
+
+    const ignoreList = await readIgnoreList();
+    
+    const fragment = document.createDocumentFragment();
+    let index = 0;
+    
+    for (const [key, value] of Object.entries(currentConfig)) {
+        if (Array.isArray(value) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
+            const deviceKey = `${key}_DEVICE`;
+            const deviceData = currentConfig[deviceKey] || {};
+            const deviceName = deviceData.DEVICE || key.replace('PACKAGES_', '');
+            value.forEach(gamePackage => {
+                const isIgnored = ignoreList.includes(gamePackage);
+                
+                const gameCard = document.createElement('div');
+                gameCard.className = `game-card ${isIgnored ? 'ignored' : ''}`;
+                gameCard.dataset.package = gamePackage;
+                gameCard.dataset.device = key;
+                gameCard.style.animationDelay = `${Math.min(index * 0.05, 0.5)}s`;
+                gameCard.innerHTML = `
+                    <div class="game-header">
+                        <h4 class="game-name">${gamePackage}</h4>
+                        <div class="game-actions">
+                            <button class="edit-btn" data-game="${gamePackage}" data-device="${key}" title="Edit">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                            <button class="delete-btn" data-game="${gamePackage}" data-device="${key}" title="Delete">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 6h18"></path>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="game-details">
+                        Spoofed as: ${deviceName}
+                        ${isIgnored ? '<span class="ignored-badge">(Ignored)</span>' : ''}
+                    </div>
+                `;
+                fragment.appendChild(gameCard);
+                index++;
+            });
+        }
+    }
+    
+    gameList.innerHTML = '';
+    gameList.appendChild(fragment);
+    attachGameListeners();
+    setupLongPressHandlers();
 }
 
 function showSnackbar(message, onUndo) {
