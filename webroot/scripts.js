@@ -311,17 +311,19 @@ function renderGameList() {
 function setupLongPressHandlers() {
     let pressTimer;
     const pressDuration = 500; // Long-press duration in milliseconds
+    const scrollThreshold = 15; // Reduced for stricter swipe detection
+    let touchStartX = 0;
     let touchStartY = 0;
-    const scrollThreshold = 20; // Increased to reduce sensitivity
-    let isLongPressActive = false; // Flag to track long-press state
+    let touchStartTime = 0;
+    let isLongPressActive = false;
 
     document.querySelectorAll('.game-card').forEach(card => {
         const packageName = card.dataset.package;
         const isIgnored = card.classList.contains('ignored');
 
         const showPopup = (e) => {
-            e.preventDefault(); // Prevent default browser actions
-            e.stopPropagation(); // Stop event from bubbling up
+            e.preventDefault();
+            e.stopPropagation();
             isLongPressActive = true;
 
             const popup = document.getElementById('ignore-popup');
@@ -352,15 +354,29 @@ function setupLongPressHandlers() {
         // Touch events
         card.addEventListener('touchstart', (e) => {
             if (isLongPressActive) return;
+            touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
+            touchStartTime = Date.now();
             pressTimer = setTimeout(() => {
                 showPopup(e);
             }, pressDuration);
         }, { passive: false });
 
         card.addEventListener('touchmove', (e) => {
+            const touchX = e.touches[0].clientX;
             const touchY = e.touches[0].clientY;
-            if (Math.abs(touchY - touchStartY) > scrollThreshold) {
+            const deltaX = Math.abs(touchX - touchStartX);
+            const deltaY = Math.abs(touchY - touchStartY);
+            const elapsedTime = Date.now() - touchStartTime;
+
+            // Cancel long-press for fast movements early on (swipe detection)
+            if (elapsedTime < 100 && (deltaX > 10 || deltaY > 10)) {
+                clearTimeout(pressTimer);
+                return;
+            }
+
+            // Cancel long-press if movement exceeds threshold
+            if (deltaX > scrollThreshold || deltaY > scrollThreshold) {
                 clearTimeout(pressTimer);
             }
         }, { passive: true });
@@ -368,7 +384,7 @@ function setupLongPressHandlers() {
         card.addEventListener('touchend', (e) => {
             clearTimeout(pressTimer);
             if (isLongPressActive) {
-                e.preventDefault(); // Prevent click events after long-press
+                e.preventDefault();
             }
         }, { passive: false });
 
