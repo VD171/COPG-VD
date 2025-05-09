@@ -634,12 +634,12 @@ input:checked + .slider:before {
 }
 
 .package-picker-btn {
-    padding: 10px 16px;
-    font-size: 14px;
+    padding: 4px 8px;
+    font-size: 0;
     display: flex;
     align-items: center;
     gap: 6px;
-    min-width: 100px;
+    min-width: 50px;
     justify-content: center;
     box-shadow: 0 3px 8px var(--shadow);
 }
@@ -650,8 +650,8 @@ input:checked + .slider:before {
 }
 
 .package-picker-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 26px;
+    height: 26px;
     stroke: #fff;
     transition: transform 0.3s ease;
 }
