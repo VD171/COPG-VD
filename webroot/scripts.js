@@ -310,25 +310,19 @@ function renderGameList() {
 
 function setupLongPressHandlers() {
     let pressTimer;
-    const pressDuration = 500; // Reduced to 500ms for better responsiveness
+    const pressDuration = 500; // Long-press duration in milliseconds
     let touchStartY = 0;
-    const scrollThreshold = 15; // Increased threshold for better scroll detection
-    let lastTapTime = 0;
-    const doubleTapThreshold = 300; // Time between taps to consider it a double tap
+    const scrollThreshold = 20; // Increased to reduce sensitivity
+    let isLongPressActive = false; // Flag to track long-press state
 
     document.querySelectorAll('.game-card').forEach(card => {
         const packageName = card.dataset.package;
         const isIgnored = card.classList.contains('ignored');
-        let touchMoved = false;
 
-        const showPopup = () => {
-            const currentTime = Date.now();
-            // Prevent popup if this is a double tap
-            if (currentTime - lastTapTime < doubleTapThreshold) {
-                lastTapTime = 0;
-                return;
-            }
-            lastTapTime = currentTime;
+        const showPopup = (e) => {
+            e.preventDefault(); // Prevent default browser actions
+            e.stopPropagation(); // Stop event from bubbling up
+            isLongPressActive = true;
 
             const popup = document.getElementById('ignore-popup');
             const title = document.getElementById('ignore-popup-title');
@@ -350,87 +344,116 @@ function setupLongPressHandlers() {
             confirmBtn.dataset.action = isIgnored ? 'remove' : 'add';
 
             popup.style.display = 'flex';
+            requestAnimationFrame(() => {
+                popup.querySelector('.popup-content').classList.add('modal-enter');
+            });
         };
 
-        // Touch devices
+        // Touch events
         card.addEventListener('touchstart', (e) => {
+            if (isLongPressActive) return;
             touchStartY = e.touches[0].clientY;
-            touchMoved = false;
             pressTimer = setTimeout(() => {
-                if (!touchMoved) {
-                    showPopup();
-                }
+                showPopup(e);
             }, pressDuration);
-        }, {passive: true});
+        }, { passive: false });
 
         card.addEventListener('touchmove', (e) => {
             const touchY = e.touches[0].clientY;
             if (Math.abs(touchY - touchStartY) > scrollThreshold) {
-                touchMoved = true;
                 clearTimeout(pressTimer);
             }
-        }, {passive: true});
+        }, { passive: true });
 
         card.addEventListener('touchend', (e) => {
             clearTimeout(pressTimer);
-            if (!touchMoved) {
-                const currentTime = Date.now();
-                if (currentTime - lastTapTime < doubleTapThreshold) {
-                    // This is a double tap - don't show popup
-                    lastTapTime = 0;
-                    return;
-                }
-                lastTapTime = currentTime;
+            if (isLongPressActive) {
+                e.preventDefault(); // Prevent click events after long-press
             }
-        }, {passive: false});
+        }, { passive: false });
 
-        // Mouse devices
-        card.addEventListener('mousedown', (e) => {
-            if (e.button === 0) { // Left click only
-                pressTimer = setTimeout(() => {
-                    showPopup();
-                }, pressDuration);
-            }
+        card.addEventListener('touchcancel', () => {
+            clearTimeout(pressTimer);
         });
 
-        card.addEventListener('mouseup', () => {
+        // Mouse events
+        card.addEventListener('mousedown', (e) => {
+            if (e.button !== 0 || isLongPressActive) return; // Left click only
+            pressTimer = setTimeout(() => {
+                showPopup(e);
+            }, pressDuration);
+        });
+
+        card.addEventListener('mouseup', (e) => {
             clearTimeout(pressTimer);
+            if (isLongPressActive) {
+                e.preventDefault();
+            }
         });
 
         card.addEventListener('mouseleave', () => {
             clearTimeout(pressTimer);
         });
 
-        card.addEventListener('click', (e) => {
-            // Prevent click events from firing after long press
-            if (e.detail > 1) {
+        // Prevent context menu and default click behavior during long-press
+        card.addEventListener('contextmenu', (e) => {
+            if (isLongPressActive) {
                 e.preventDefault();
             }
         });
 
-        // Prevent context menu on long press
-        card.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
+        card.addEventListener('click', (e) => {
+            if (isLongPressActive) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
         });
     });
 
-    // Popup button handlers (keep your existing implementation)
-    document.getElementById('ignore-popup-cancel').addEventListener('click', () => {
-        document.getElementById('ignore-popup').style.display = 'none';
+    // Popup button handlers
+    const popup = document.getElementById('ignore-popup');
+    const cancelBtn = document.getElementById('ignore-popup-cancel');
+    const confirmBtn = document.getElementById('ignore-popup-confirm');
+
+    cancelBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closePopup('ignore-popup');
+        isLongPressActive = false;
     });
 
-    document.getElementById('ignore-popup-confirm').addEventListener('click', async function() {
-        const packageName = this.dataset.package;
-        const action = this.dataset.action;
+    confirmBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const packageName = confirmBtn.dataset.package;
+        const action = confirmBtn.dataset.action;
         const wasAdded = await togglePackageInIgnoreList(packageName);
-        appendToOutput(`${action === 'add' ? 'Added' : 'Removed'} ${packageName} ${action === 'add' ? 'to' : 'from'} ignore list`, 'success');
+        appendToOutput(
+            `${action === 'add' ? 'Added' : 'Removed'} ${packageName} ${action === 'add' ? 'to' : 'from'} ignore list`,
+            'success'
+        );
         renderGameList();
-        document.getElementById('ignore-popup').style.display = 'none';
+        closePopup('ignore-popup');
+        isLongPressActive = false;
     });
 
-    document.querySelector('.close-popup-btn').addEventListener('click', () => {
-        document.getElementById('ignore-popup').style.display = 'none';
+    // Close popup when clicking outside
+    popup.addEventListener('click', (e) => {
+        if (e.target === popup) {
+            closePopup('ignore-popup');
+            isLongPressActive = false;
+        }
     });
+}
+
+function closePopup(popupId) {
+    const popup = document.getElementById(popupId);
+    if (popup) {
+        const content = popup.querySelector('.popup-content');
+        content.classList.add('popup-exit');
+        content.addEventListener('animationend', () => {
+            popup.style.display = 'none';
+            content.classList.remove('popup-exit');
+        }, { once: true });
+    }
 }
 
 function attachGameListeners() {
