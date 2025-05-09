@@ -1666,3 +1666,10 @@ h2 {
     user-select: none;
     -webkit-user-select: none;
 }
+
+#ignore-popup .popup-content {
+    max-width: 320px;
+    padding: 0;
+    overflow: hidden;
+    z-index: 1001; /* Ensure popup content is above other elements */
+}
