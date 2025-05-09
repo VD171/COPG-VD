@@ -188,10 +188,10 @@
   ],
   "PACKAGES_PIXEL_XL_DEVICE": {
     "BRAND": "google",
-    "DEVICE": "Pixel XL",
+    "DEVICE": "Pixel 9 Pro XL",
     "MANUFACTURER": "Google",
-    "MODEL": "marlin",
-    "FINGERPRINT": "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys",
-    "PRODUCT": "marlin"
+    "MODEL": "komodo",
+    "FINGERPRINT": "google/komodo/komodo:15/BP1A.250505.005/13277524:user/release-keys",
+    "PRODUCT": "komodo"
   }
 }
