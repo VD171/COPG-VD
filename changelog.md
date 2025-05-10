@@ -10,6 +10,8 @@ https://t.me/TheAOSP
 - Fixed some permission peroblems
 - Fixed some styles
 - Removed useless props (CPU info, Build id, display id)
+- Dropped support Zygisk Standard/Native ( Unsafe)
+- Fixed crashing on Older devices
 ## v4.0.2
 - Improved error logging for SpoofModule and WebUI
 - Enhanced permission handling for config files
