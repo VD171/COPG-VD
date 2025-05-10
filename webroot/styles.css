@@ -1577,18 +1577,22 @@ h2 {
 
 #ignore-popup .popup-header {
     padding: 16px;
-    background: var(--primary-gradient);
-    color: white;
+    background: var(--card-bg);
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+}
+
+.dark-theme #ignore-popup .popup-header {
+    background: var(--dark-card);
 }
 
 #ignore-popup .popup-header h3 {
     margin: 0;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
-    color: white;
+    color: var(--primary);
+    text-align: center;
 }
 
 #ignore-popup .close-popup-btn {
