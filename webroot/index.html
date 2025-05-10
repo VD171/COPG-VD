@@ -160,26 +160,30 @@
                 <h3 id="game-modal-title">Add New Game</h3>
             </div>
             <form id="game-form">
-                <div class="form-group">
-                    <label for="game-package">Package Name</label>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="game-package" placeholder="e.g., com.example.game" required>
-                        <button type="button" id="package-picker-btn" class="action-btn package-picker-btn">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M5 5h4v4H5V5zm10 0h4v4h-4V5zM5 15h4v4H5v-4zm10 0h4v4h-4v-4z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="game-device">Device Profile</label>
-                    <input type="text" id="game-device" placeholder="Select a device..." readonly required>
-                </div>
-                <div class="form-buttons">
-                    <button type="button" class="cancel-btn">Cancel</button>
-                    <button type="submit" class="action-btn">Save</button>
-                </div>
-            </form>
+    <div class="form-group">
+        <label for="game-package">Package Name</label>
+        <div style="display: flex; gap: 8px;">
+            <input type="text" id="game-package" placeholder="e.g., com.example.game" required>
+            <button type="button" id="package-picker-btn" class="action-btn package-picker-btn">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 5h4v4H5V5zm10 0h4v4h-4V5zM5 15h4v4H5v-4zm10 0h4v4h-4v-4z"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="game-name">Game Name</label>
+        <input type="text" id="game-name" placeholder="e.g., PUBG Mobile">
+    </div>
+    <div class="form-group">
+        <label for="game-device">Device Profile</label>
+        <input type="text" id="game-device" placeholder="Select a device..." readonly required>
+    </div>
+    <div class="form-buttons">
+        <button type="button" class="cancel-btn">Cancel</button>
+        <button type="submit" class="action-btn">Save</button>
+    </div>
+</form>
         </div>
     </div>
 
