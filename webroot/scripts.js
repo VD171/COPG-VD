@@ -1695,7 +1695,11 @@ async function showPackagePicker() {
             } catch (e) {
                 console.error(`Error fetching label for ${pkg}:`, e);
             }
-            appIndex.push({ package: pkg, label: label.toLowerCase() });
+            appIndex.push({ 
+            package: pkg, 
+            label: label.toLowerCase(), 
+            originalLabel: label 
+            });
         }
 
         // Sort index by label for better UX
@@ -1828,7 +1832,8 @@ async function showPackagePicker() {
 
           appCard.addEventListener('click', () => {
     document.getElementById('game-package').value = pkg;
-    const gameName = appIndex.find(app => app.package === pkg)?.label || pkg;
+    const appInfo = appIndex.find(app => app.package === pkg);
+    const gameName = appInfo?.originalLabel || appInfo?.label || pkg;
     document.getElementById('game-name').value = gameName;
     
     closePopup('package-picker-popup');
