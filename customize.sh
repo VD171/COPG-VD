@@ -350,12 +350,24 @@ if $INSTALL_SUCCESS; then
       ui_print " ✗ Failed to Set Permissions (config.json)! "
       print_failure_and_exit "binary"
     }
+    chmod 0644 "$MODPATH/list.json" || {
+      ui_print " ✗ Failed to Set Permissions (list.json)! "
+      print_failure_and_exit "binary"
+    }
     chmod 0644 "$MODPATH/ignorelist.txt" || {
       ui_print " ✗ Failed to Set Permissions (ignorelist.txt)! "
       print_failure_and_exit "binary"
     }
     chcon u:object_r:system_file:s0 "$MODPATH/config.json" || {
       ui_print " ✗ Failed to Set SELinux Context (config.json)! "
+      print_failure_and_exit "binary"
+    }
+    chcon u:object_r:system_file:s0 "$MODPATH/list.json" || {
+      ui_print " ✗ Failed to Set SELinux Context (list.json)! "
+      print_failure_and_exit "binary"
+    }
+    chcon u:object_r:system_file:s0 "$MODPATH/ignorelist.txt" || {
+      ui_print " ✗ Failed to Set SELinux Context (ignorelist.txt)! "
       print_failure_and_exit "binary"
     }
   fi
@@ -368,6 +380,7 @@ if $INSTALL_SUCCESS; then
 
   if $INSTALL_SUCCESS; then
     print_empty_line
+    print_box_start
     ui_print " ✅ Module Successfully Installed "
     print_box_end
   fi
