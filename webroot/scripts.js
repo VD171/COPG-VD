@@ -588,6 +588,21 @@ function openGameModal(gamePackage = null, deviceKey = null) {
         deviceInput.value = currentConfig[`${deviceKey}_DEVICE`]?.DEVICE || '';
         deviceInput.dataset.key = `${deviceKey}_DEVICE`;
         deviceInput.classList.add('highlighted');
+        
+        // Load game name if available
+        execCommand("cat /data/adb/modules/COPG/list.json")
+            .then(content => {
+                const listData = JSON.parse(content);
+                if (listData[gamePackage]) {
+                    const gameNameInput = document.getElementById('game-name');
+                    if (gameNameInput) {
+                        gameNameInput.value = listData[gamePackage];
+                    }
+                }
+            })
+            .catch(error => {
+                console.error("Failed to load game names:", error);
+            });
     } else {
         title.textContent = 'Add New Game';
         editingGame = null;
@@ -602,7 +617,6 @@ function openGameModal(gamePackage = null, deviceKey = null) {
         modal.querySelector('.modal-content').classList.add('modal-enter');
     });
 }
-
 async function saveDevice(e) {
     e.preventDefault();
     
@@ -834,6 +848,22 @@ async function saveGame(e) {
         
         if (!currentConfig[packageKey].includes(gamePackage)) {
             currentConfig[packageKey].push(gamePackage);
+            
+            // Update list.json with package name if it's a new game
+            try {
+                const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
+                const listData = JSON.parse(listContent);
+                if (!listData[gamePackage]) {
+                    // Ask for game name
+                    const gameName = prompt("Please enter the game name for this package:", gamePackage);
+                    if (gameName) {
+                        listData[gamePackage] = gameName;
+                        await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
+                    }
+                }
+            } catch (error) {
+                appendToOutput("Failed to update game names list: " + error, 'warning');
+            }
         }
         
         await saveConfig();
@@ -847,7 +877,6 @@ async function saveGame(e) {
         showPopup('error-popup');
     }
 }
-
 async function renderGameList() {
     const now = Date.now();
     if (now - lastRender.games < RENDER_DEBOUNCE_MS) return;
@@ -857,6 +886,15 @@ async function renderGameList() {
     if (!gameList) return appendToOutput("Error: 'game-list' not found", 'error');
 
     const ignoreList = await readIgnoreList();
+    
+    // Load game names mapping
+    let gameNamesMap = {};
+    try {
+        const gameNamesContent = await execCommand("cat /data/adb/modules/COPG/list.json");
+        gameNamesMap = JSON.parse(gameNamesContent);
+    } catch (error) {
+        appendToOutput("Failed to load game names mapping: " + error, 'warning');
+    }
     
     const fragment = document.createDocumentFragment();
     let index = 0;
@@ -868,6 +906,7 @@ async function renderGameList() {
             const deviceName = deviceData.DEVICE || key.replace('PACKAGES_', '');
             value.forEach(gamePackage => {
                 const isIgnored = ignoreList.includes(gamePackage);
+                const gameName = gameNamesMap[gamePackage] || gamePackage;
                 
                 const gameCard = document.createElement('div');
                 gameCard.className = `game-card ${isIgnored ? 'ignored' : ''}`;
@@ -876,7 +915,10 @@ async function renderGameList() {
                 gameCard.style.animationDelay = `${Math.min(index * 0.05, 0.5)}s`;
                 gameCard.innerHTML = `
                     <div class="game-header">
-                        <h4 class="game-name">${gamePackage}</h4>
+                        <div class="game-name-container">
+                            <h4 class="game-name">${gameName}</h4>
+                            <span class="game-package">${gamePackage}</span>
+                        </div>
                         <div class="game-actions">
                             <button class="edit-btn" data-game="${gamePackage}" data-device="${key}" title="Edit">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1037,8 +1079,23 @@ async function deleteGame(gamePackage, deviceKey) {
     }
 
     currentConfig[deviceKey].splice(originalIndex, 1);
+    
     try {
+        // Remove from config.json
         await saveConfig();
+        
+        // Remove from list.json if exists
+        try {
+            const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
+            const listData = JSON.parse(listContent);
+            if (listData[gamePackage]) {
+                delete listData[gamePackage];
+                await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
+            }
+        } catch (error) {
+            appendToOutput("Failed to update game names list: " + error, 'warning');
+        }
+        
         appendToOutput(`Removed "${gamePackage}" from "${deviceName}"`, 'red');
     } catch (error) {
         appendToOutput(`Failed to delete game: ${error}`, 'error');
@@ -1769,10 +1826,12 @@ async function showPackagePicker() {
             // Observe the image for lazy loading
             packagePickerObserver.observe(img);
 
-            // Set click handler
-            appCard.addEventListener('click', () => {
-                document.getElementById('game-package').value = pkg;
-                closePopup('package-picker-popup');
+          appCard.addEventListener('click', () => {
+    document.getElementById('game-package').value = pkg;
+    const gameName = appIndex.find(app => app.package === pkg)?.label || pkg;
+    document.getElementById('game-name').value = gameName;
+    
+    closePopup('package-picker-popup');
             });
         });
 
