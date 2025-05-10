@@ -2,7 +2,7 @@
   
 <img src="https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/icon-v2.png" style="width: 500px; height: 200px; object-fit: fill;" />
 </div>
-<h1 align="center">🎮 COPG - Ultimate Device Spoofer for Android Games</h1>
+<h1 align="center">🎮 COPG - Ultimate Device Spoofer for Android Games & Apps</h1>
 
 [![Zygisk](https://img.shields.io/badge/Zygisk-Compatible-brightgreen?style=for-the-badge)](https://github.com/topjohnwu/Magisk)
 [![Android](https://img.shields.io/badge/Android-9.0%2B-blue?style=for-the-badge&logo=android)](https://www.android.com/)
@@ -13,25 +13,23 @@
 
 **The most advanced device spoofer for Android gaming - bypass restrictions and play any game on any device!**
 
-## ✨ Why COPG Stands Out
-- 🚀 **Real-time Device Spoofing**: Transform your device model on-the-fly
-- ⚡ **Lightning Fast**: Adds just ~1ms to app launch time
-- 🛡️ **Universal Compatibility**: Works with Magisk, KernelSU, and APatch
-- 🌐 **Web Dashboard**: Control everything through a beautiful web interface
-- 🔄 **Smart Updates**: Get new device profiles automatically
-- 🔧 **Smart State Management**:
-  - Auto-disable adaptive brightness
-  - Do Not Disturb mode toggle
-  - Screen timeout control
-  - System logging management
-- ⚙️ **Debugging Tools**: Detailed logging via `logcat -s "SpoofModule"`
-
-## 🎮 Example Games
-| Game | Spoofed Device | Status |
-|------|---------------|--------|
-| Call of Duty Mobile | Lenovo TB-9707F | ✅ Perfect |
-| PUBG Mobile | Xiaomi Mi 13 Pro | ✅ Flawless |
-| Mobile Legends | POCO F5 | ⚡ Optimized |
+## 🌟 COPG - Ultimate Device Spoofer for Games & Apps 🌟
+**Unlock the full potential of your games and apps with COPG! Spoof your device to enjoy premium features, max performance, and exclusive benefits. 🚀**
+### 🎮 Maximize Your Gaming Experience
+- Call of Duty Mobile: 120 FPS (BR/MT)
+- PUBG/BGMI: 120 FPS + Haptic Feedback
+- Delta Force: 120 FPS/HD Graphics
+- Mobile Legends: Ultra 120 FPS
+- Fortnite 90 FPS
+- +52 games supported!
+### 📱 Exclusive App Enhancements
+Google Photos: Unlimited backup + AI generator
+TikTok: Stream in stunning 1080p
+### 🔧 Flexible & Future-Proof
+Add new devices or games anytime
+Beautiful WebUI to manage your spoofed apps
+💡 Why Choose COPG?
+Transform your device into a powerhouse for gaming and apps. Easy to use, fully customizable, and packed with features!
 
 ## 🛠️ Installation Made Simple
 
