@@ -9,7 +9,7 @@ https://t.me/TheAOSP
 - Added Ignorelist to prevent Apps/Games from general tweaks (e.g. DND, Timeout and ...)
 - Fixed some permission peroblems
 - Fixed some styles
-- Remived useless props (CPU info, Build id, display id)
+- Removed useless props (CPU info, Build id, display id)
 ## v4.0.2
 - Improved error logging for SpoofModule and WebUI
 - Enhanced permission handling for config files
