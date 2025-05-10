@@ -5,6 +5,7 @@ https://t.me/TheAOSP
 ## v4.2.1
 - Added Google photos spoof for unlimited backup and Ai reimagine feature
 - Added modern app picker (Use MMRL or WebUI-X)
+- Added Game names
 - Added TikTok to unlock 1080 streaming
 - Added Ignorelist to prevent Apps/Games from general tweaks (e.g. DND, Timeout and ...)
 - Fixed some permission peroblems
