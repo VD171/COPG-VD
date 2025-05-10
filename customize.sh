@@ -346,8 +346,12 @@ if $INSTALL_SUCCESS; then
       ui_print " ✗ Failed to Set Permissions (update_config.sh)! "
       print_failure_and_exit "binary"
     }
-    chmod 0644 "$MODPATH/config.json" && "chmod 0644 $MODPATH/ignorelist.txt" || {
-      ui_print " ✗ Failed to Set Permissions (config.json & ignorelist.txt)! "
+    chmod 0644 "$MODPATH/config.json" || {
+      ui_print " ✗ Failed to Set Permissions (config.json)! "
+      print_failure_and_exit "binary"
+    }
+    chmod 0644 "$MODPATH/ignorelist.txt" || {
+      ui_print " ✗ Failed to Set Permissions (ignorelist.txt)! "
       print_failure_and_exit "binary"
     }
     chcon u:object_r:system_file:s0 "$MODPATH/config.json" || {
