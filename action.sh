@@ -70,4 +70,4 @@ download_and_update "$CONFIG_URL" "$TEMP_CONFIG" "$CONFIG_PATH" "config.json"
 # Update list.json
 download_and_update "$LIST_URL" "$TEMP_LIST" "$LIST_PATH" "list.json"
 
-echo "✨ COPG files update complete!"
+echo "✨ COPG configs update complete!"
