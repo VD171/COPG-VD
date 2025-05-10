@@ -51,6 +51,8 @@ update_file() {
     echo "📍 Saved to: $final_path"
     chmod 0644 "$final_path"
     chcon u:object_r:system_file:s0 "$final_path"
+    chmod 0644 "$temp_path"
+    chcon u:object_r:system_file:s0 "$temp_path"
     return 0
 }
 
