@@ -1718,3 +1718,45 @@ h2 {
 .dark-theme .game-package {
     color: var(--dark-text-secondary);
 }
+
+.installed-badge {
+    display: inline-block;
+    background: var(--success);
+    color: white;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 8px;
+    font-weight: 500;
+}
+
+.dark-theme .installed-badge {
+    background: var(--success);
+}
+
+.game-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.game-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.badge-group {
+    display: flex;
+    gap: 6px;
+    margin-left: 8px;
+}
+
+.dark-theme .game-details {
+    color: var(--dark-text-secondary);
+}
