@@ -1092,12 +1092,10 @@ async function deleteGame(gamePackage, deviceKey) {
         return;
     }
 
-    // Store the game name before deletion
-    let gameName = "";
+    // Store the complete list.json content before deletion
+    let originalListContent = "";
     try {
-        const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
-        const listData = JSON.parse(listContent);
-        gameName = listData[gamePackage] || "";
+        originalListContent = await execCommand("cat /data/adb/modules/COPG/list.json");
     } catch (error) {
         appendToOutput("Failed to load game names list: " + error, 'warning');
     }
@@ -1137,41 +1135,48 @@ async function deleteGame(gamePackage, deviceKey) {
         if (!Array.isArray(currentConfig[deviceKey])) {
             currentConfig[deviceKey] = [];
         }
+        
+        // Insert back at the original position in config
         currentConfig[deviceKey].splice(originalIndex, 0, deletedGame);
+        
         try {
+            // Restore config.json
             await saveConfig();
             
-            // Restore game name to list.json if it existed before
-            if (gameName) {
+            // Restore the original list.json content completely
+            if (originalListContent) {
                 try {
-                    const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
-                    const listData = JSON.parse(listContent);
-                    listData[gamePackage] = gameName;
-                    await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
+                    await execCommand(`echo '${originalListContent.replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
                 } catch (error) {
-                    appendToOutput("Failed to restore game name in list: " + error, 'warning');
+                    appendToOutput("Failed to restore game names list: " + error, 'warning');
                 }
             }
             
             appendToOutput(`Restored game "${gamePackage}" to "${deviceName}"`, 'success');
-            renderGameList();
+            
+            // Force re-render of both lists
             renderDeviceList();
-            const restoredCard = document.querySelector(`.game-card[data-package="${gamePackage}"][data-device="${deviceKey}"]`);
-            if (restoredCard) {
-                restoredCard.style.opacity = '0';
-                restoredCard.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    restoredCard.style.opacity = '1';
-                    restoredCard.style.transform = 'translateY(0)';
-                    restoredCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                }, 10);
-            }
+            renderGameList();
+            
+            // Find and highlight the restored card
+            setTimeout(() => {
+                const restoredCard = document.querySelector(`.game-card[data-package="${gamePackage}"][data-device="${deviceKey}"]`);
+                if (restoredCard) {
+                    restoredCard.style.opacity = '0';
+                    restoredCard.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        restoredCard.style.opacity = '1';
+                        restoredCard.style.transform = 'translateY(0)';
+                        restoredCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    }, 10);
+                }
+            }, 100);
         } catch (error) {
             appendToOutput(`Failed to restore game: ${error}`, 'error');
             currentConfig[deviceKey].splice(originalIndex, 1);
             await saveConfig();
-            renderGameList();
             renderDeviceList();
+            renderGameList();
         }
     });
 }
