@@ -946,7 +946,7 @@ async function renderGameList() {
         </div>
     </div>
     <div class="game-details">
-        <span class="game-info">Spoofed as: ${deviceName}</span>
+        <span class="game-info">${deviceName}</span>
         <div class="badge-group">
             ${isIgnored ? '<span class="ignored-badge">Ignored</span>' : ''}
             ${isInstalled ? '<span class="installed-badge">Installed</span>' : ''}
