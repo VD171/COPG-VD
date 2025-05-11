@@ -877,6 +877,7 @@ async function saveGame(e) {
         showPopup('error-popup');
     }
 }
+
 async function renderGameList() {
     const now = Date.now();
     if (now - lastRender.games < RENDER_DEBOUNCE_MS) return;
@@ -896,6 +897,15 @@ async function renderGameList() {
         appendToOutput("Failed to load game names mapping: " + error, 'warning');
     }
     
+    // Get list of installed packages
+    let installedPackages = [];
+    try {
+        const pmOutput = await execCommand("pm list packages | cut -d: -f2");
+        installedPackages = pmOutput.trim().split('\n');
+    } catch (error) {
+        appendToOutput("Failed to get installed packages: " + error, 'warning');
+    }
+
     const fragment = document.createDocumentFragment();
     let index = 0;
     
@@ -906,6 +916,7 @@ async function renderGameList() {
             const deviceName = deviceData.DEVICE || key.replace('PACKAGES_', '');
             value.forEach(gamePackage => {
                 const isIgnored = ignoreList.includes(gamePackage);
+                const isInstalled = installedPackages.includes(gamePackage);
                 const gameName = gameNamesMap[gamePackage] || gamePackage;
                 
                 const gameCard = document.createElement('div');
@@ -914,31 +925,34 @@ async function renderGameList() {
                 gameCard.dataset.device = key;
                 gameCard.style.animationDelay = `${Math.min(index * 0.05, 0.5)}s`;
                 gameCard.innerHTML = `
-                    <div class="game-header">
-                        <div class="game-name-container">
-                            <h4 class="game-name">${gameName}</h4>
-                            <span class="game-package">${gamePackage}</span>
-                        </div>
-                        <div class="game-actions">
-                            <button class="edit-btn" data-game="${gamePackage}" data-device="${key}" title="Edit">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                </svg>
-                            </button>
-                            <button class="delete-btn" data-game="${gamePackage}" data-device="${key}" title="Delete">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M3 6h18"></path>
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="game-details">
-                        Spoofed as: ${deviceName}
-                        ${isIgnored ? '<span class="ignored-badge">(Ignored)</span>' : ''}
-                    </div>
-                `;
+    <div class="game-header">
+        <div class="game-name-container">
+            <h4 class="game-name">${gameName}</h4>
+            <span class="game-package">${gamePackage}</span>
+        </div>
+        <div class="game-actions">
+            <button class="edit-btn" data-game="${gamePackage}" data-device="${key}" title="Edit">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+            </button>
+            <button class="delete-btn" data-game="${gamePackage}" data-device="${key}" title="Delete">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <div class="game-details">
+        <span class="game-info">Spoofed as: ${deviceName}</span>
+        <div class="badge-group">
+            ${isIgnored ? '<span class="ignored-badge">Ignored</span>' : ''}
+            ${isInstalled ? '<span class="installed-badge">Installed</span>' : ''}
+        </div>
+    </div>
+`;
                 fragment.appendChild(gameCard);
                 index++;
             });
