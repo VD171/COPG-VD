@@ -1092,6 +1092,16 @@ async function deleteGame(gamePackage, deviceKey) {
         return;
     }
 
+    // Store the game name before deletion
+    let gameName = "";
+    try {
+        const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
+        const listData = JSON.parse(listContent);
+        gameName = listData[gamePackage] || "";
+    } catch (error) {
+        appendToOutput("Failed to load game names list: " + error, 'warning');
+    }
+
     currentConfig[deviceKey].splice(originalIndex, 1);
     
     try {
@@ -1130,6 +1140,19 @@ async function deleteGame(gamePackage, deviceKey) {
         currentConfig[deviceKey].splice(originalIndex, 0, deletedGame);
         try {
             await saveConfig();
+            
+            // Restore game name to list.json if it existed before
+            if (gameName) {
+                try {
+                    const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
+                    const listData = JSON.parse(listContent);
+                    listData[gamePackage] = gameName;
+                    await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
+                } catch (error) {
+                    appendToOutput("Failed to restore game name in list: " + error, 'warning');
+                }
+            }
+            
             appendToOutput(`Restored game "${gamePackage}" to "${deviceName}"`, 'success');
             renderGameList();
             renderDeviceList();
