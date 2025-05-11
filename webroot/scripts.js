@@ -488,7 +488,11 @@ function editGameHandler(e) {
 }
 
 function deleteGameHandler(e) {
-    deleteGame(e.currentTarget.dataset.game, e.currentTarget.dataset.device);
+    const gamePackage = e.currentTarget.dataset.game;
+    const gameName = e.currentTarget.closest('.game-card').querySelector('.game-name').textContent;
+    const deviceName = e.currentTarget.closest('.game-card').querySelector('.game-info').textContent;
+    
+    deleteGame(gamePackage, e.currentTarget.dataset.device, gameName, deviceName);
 }
 
 function populateDevicePicker() {
@@ -1075,8 +1079,7 @@ async function deleteDevice(deviceKey) {
     });
 }
 
-async function deleteGame(gamePackage, deviceKey) {
-    const deviceName = currentConfig[`${deviceKey}_DEVICE`]?.DEVICE || deviceKey.replace('PACKAGES_', '');
+async function deleteGame(gamePackage, deviceKey, gameName, deviceName) {
     const card = document.querySelector(`.game-card[data-package="${gamePackage}"][data-device="${deviceKey}"]`);
     
     if (!card) return;
@@ -1087,7 +1090,7 @@ async function deleteGame(gamePackage, deviceKey) {
     const deletedGame = gamePackage;
     const originalIndex = currentConfig[deviceKey].indexOf(gamePackage);
     if (originalIndex === -1) {
-        appendToOutput(`Game "${gamePackage}" not found in "${deviceName}"`, 'error');
+        appendToOutput(`Game "${gameName || gamePackage}" not found in "${deviceName}"`, 'error');
         card.classList.remove('fade-out');
         return;
     }
@@ -1131,7 +1134,7 @@ async function deleteGame(gamePackage, deviceKey) {
     renderGameList();
     renderDeviceList();
 
-    showSnackbar(`Removed "${gamePackage}" from "${deviceName}"`, async () => {
+    showSnackbar(`Removed "${gameName || gamePackage}" from "${deviceName}"`, async () => {
         if (!Array.isArray(currentConfig[deviceKey])) {
             currentConfig[deviceKey] = [];
         }
