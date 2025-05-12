@@ -1353,7 +1353,7 @@ h2 {
     right: calc(var(--safe-area-inset-right) + 16px);
     background: var(--card-bg);
     color: var(--text);
-    padding: 12px 16px 16px 16px; /* Extra padding-bottom for progress bar */
+    padding: 12px 16px 16px 16px;
     border-radius: 12px;
     box-shadow: 0 4px 12px var(--shadow);
     display: flex;
@@ -1362,10 +1362,12 @@ h2 {
     z-index: 1100;
     opacity: 0;
     transform: translateY(100px);
-    transition: all 0.3s ease;
-    max-width: 400px; /* Tightened max-width */
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    max-width: 400px;
     margin: 0 auto;
     overflow: visible;
+    will-change: transform, opacity;
+    font-family: 'Roboto', sans-serif; 
 }
 
 .snackbar.show {
@@ -1375,7 +1377,7 @@ h2 {
 
 .snackbar-message {
     flex: 1;
-    font-size: 14px;
+    font-size: 12px; 
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1394,7 +1396,7 @@ h2 {
     z-index: 1;
 }
 
-.snackbar.show::after {
+.snackbar.show-timer::after {
     content: '';
     position: absolute;
     bottom: 4px;
@@ -1416,13 +1418,14 @@ h2 {
 .dark-theme .snackbar {
     background: var(--dark-card);
     color: var(--dark-text);
+    font-family: 'Roboto', sans-serif; 
 }
 
 .dark-theme .snackbar::before {
     background: var(--dark-border);
 }
 
-.dark-theme .snackbar.show::after {
+.dark-theme .snackbar.show-timer::after {
     background: var(--primary);
 }
 
@@ -1430,12 +1433,13 @@ h2 {
     background: none;
     border: none;
     color: var(--primary);
-    font-size: 14px;
+    font-size: 14px; 
     font-weight: 600;
     padding: 6px 12px;
     cursor: pointer;
     transition: all 0.2s ease;
     flex-shrink: 0;
+    font-family: 'Roboto', sans-serif; 
 }
 
 .snackbar-btn:hover {
@@ -1445,6 +1449,7 @@ h2 {
 
 .dark-theme .snackbar-btn {
     color: var(--primary);
+    font-family: 'Roboto', sans-serif; 
 }
 
 .dark-theme .snackbar-btn:hover {
