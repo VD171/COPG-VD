@@ -1960,51 +1960,80 @@ h2 {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 10000;
+    z-index: 1000;
 }
 
-.explanation-content {
+.ignore-explanation-popup .popup-content {
     background: var(--card-bg);
     border-radius: 16px;
     padding: 20px;
     max-width: 400px;
     width: 90%;
     box-shadow: 0 4px 12px var(--shadow);
+    text-align: left;
+    direction: ltr;
+    transform: scale(0.9);
+    opacity: 0;
 }
 
-.dark-theme .explanation-content {
+.dark-theme .ignore-explanation-popup .popup-content {
     background: var(--dark-card);
 }
 
-.explanation-content h3 {
+.ignore-explanation-popup .popup-content h3 {
+    font-size: 17px;
+    font-weight: 600;
     color: var(--primary);
-    margin-bottom: 16px;
+    margin: 0 0 16px;
 }
 
-.explanation-text {
+.ignore-explanation-popup .explanation-text {
+    font-size: 14px;
+    color: var(--text);
     margin-bottom: 20px;
     line-height: 1.5;
 }
 
-.explanation-text strong {
+.dark-theme .ignore-explanation-popup .explanation-text {
+    color: var(--dark-text);
+}
+
+.ignore-explanation-popup .explanation-text strong {
     color: var(--primary);
 }
 
-.explanation-text ul {
+.ignore-explanation-popup .explanation-text ul {
     margin: 10px 0;
     padding-left: 20px;
 }
 
-/* Ignored Badge */
-.ignored-badge {
-    cursor: help;
-    position: relative;
+.ignore-explanation-popup .action-btn {
+    background: var(--primary-gradient);
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px var(--shadow);
+    transition: all 0.3s ease;
+    width: 100%;
 }
 
-.ignored-badge:hover {
-    text-decoration: underline;
+.ignore-explanation-popup .action-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px var(--shadow);
+}
+
+.dark-theme .ignore-explanation-popup .action-btn {
+    background: linear-gradient(135deg, #1E3A8A, #6B7280);
+}
+
+.dark-theme .ignore-explanation-popup .action-btn:hover {
+    background: var(--primary-gradient);
 }
