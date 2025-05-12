@@ -310,8 +310,8 @@ function renderGameList() {
 
 function setupLongPressHandlers() {
     let pressTimer;
-    const pressDuration = 500; // Long-press duration in milliseconds
-    const scrollThreshold = 15; // Reduced for stricter swipe detection
+    const pressDuration = 500;
+    const scrollThreshold = 15;
     let touchStartX = 0;
     let touchStartY = 0;
     let touchStartTime = 0;
@@ -320,6 +320,7 @@ function setupLongPressHandlers() {
     document.querySelectorAll('.game-card').forEach(card => {
         const packageName = card.dataset.package;
         const isIgnored = card.classList.contains('ignored');
+        const gameName = card.querySelector('.game-name').textContent; // دریافت نام بازی
 
         const showPopup = (e) => {
             e.preventDefault();
@@ -337,7 +338,10 @@ function setupLongPressHandlers() {
             message.textContent = isIgnored 
                 ? 'This package will be removed from ignore list' 
                 : 'This package will be added to ignore list';
-            packageEl.textContent = packageName;
+            packageEl.innerHTML = `
+                <span class="game-name-popup">${gameName}</span>
+                <span class="package-name-popup">${packageName}</span>
+            `;
 
             icon.className = 'popup-icon';
             icon.classList.add(isIgnored ? 'icon-remove' : 'icon-add');
@@ -350,7 +354,6 @@ function setupLongPressHandlers() {
                 popup.querySelector('.popup-content').classList.add('modal-enter');
             });
         };
-
         // Touch events
         card.addEventListener('touchstart', (e) => {
             if (isLongPressActive) return;
