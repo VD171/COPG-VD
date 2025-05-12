@@ -320,7 +320,7 @@ function setupLongPressHandlers() {
     document.querySelectorAll('.game-card').forEach(card => {
         const packageName = card.dataset.package;
         const isIgnored = card.classList.contains('ignored');
-        const gameName = card.querySelector('.game-name').textContent; // دریافت نام بازی
+        const gameName = card.querySelector('.game-name').textContent;
 
         const showPopup = (e) => {
             e.preventDefault();
@@ -842,12 +842,23 @@ async function saveGame(e) {
     }
     
     try {
-        if (editingGame) {
-            const oldIndex = currentConfig[editingGame.device]?.indexOf(editingGame.package);
-            if (oldIndex > -1) {
-                currentConfig[editingGame.device].splice(oldIndex, 1);
-            }
+if (editingGame) {
+    const oldIndex = currentConfig[editingGame.device]?.indexOf(editingGame.package);
+    if (oldIndex > -1) {
+        currentConfig[editingGame.device].splice(oldIndex, 1);
+    }
+    
+    try {
+        const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
+        const listData = JSON.parse(listContent);
+        if (listData[editingGame.package]) {
+            delete listData[editingGame.package];
+            await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
         }
+    } catch (error) {
+        appendToOutput("Failed to remove old game name: " + error, 'warning');
+    }
+}
         
         if (!Array.isArray(currentConfig[packageKey])) {
             currentConfig[packageKey] = [];
@@ -856,16 +867,18 @@ async function saveGame(e) {
         if (!currentConfig[packageKey].includes(gamePackage)) {
             currentConfig[packageKey].push(gamePackage);
             
-            // Update list.json with package name if it's a new game
+            
             try {
                 const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
                 const listData = JSON.parse(listContent);
+
                 if (!listData[gamePackage]) {
-                    // Ask for game name
-                    const gameName = prompt("Please enter the game name for this package:", gamePackage);
+                    const gameNameInput = document.getElementById('game-name');
+                    const gameName = gameNameInput.value.trim() || gamePackage;
                     if (gameName) {
                         listData[gamePackage] = gameName;
                         await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
+  
                     }
                 }
             } catch (error) {
