@@ -618,15 +618,34 @@ function openGameModal(gamePackage = null, deviceKey = null) {
     const form = document.getElementById('game-form');
     const packageInput = document.getElementById('game-package');
     const deviceInput = document.getElementById('game-device');
+    const errorPopup = document.getElementById('error-popup');
+    const errorMessage = document.getElementById('error-message');
+
+    
+    if (errorPopup && errorMessage) {
+        errorMessage.textContent = '';
+        errorPopup.style.display = 'none';
+    }
+
     
     form.querySelectorAll('input').forEach(field => {
         field.classList.remove('error');
-        const existingError = field.nextElementSibling;
-        if (existingError && existingError.classList.contains('error-message')) {
-            existingError.remove();
+        
+        let nextSibling = field.nextElementSibling;
+        while (nextSibling && nextSibling.classList.contains('error-message')) {
+            nextSibling.remove();
+            nextSibling = field.nextElementSibling;
         }
     });
+
     
+    const packageInputParent = packageInput.parentNode;
+    let parentError = packageInputParent.nextElementSibling;
+    while (parentError && parentError.classList.contains('error-message')) {
+        parentError.remove();
+        parentError = packageInputParent.nextElementSibling;
+    }
+
     if (gamePackage) {
         title.textContent = 'Edit Game Configuration';
         editingGame = { package: gamePackage, device: deviceKey };
@@ -663,6 +682,7 @@ function openGameModal(gamePackage = null, deviceKey = null) {
         modal.querySelector('.modal-content').classList.add('modal-enter');
     });
 }
+
 async function saveDevice(e) {
     e.preventDefault();
     
@@ -1732,6 +1752,41 @@ function applyEventListeners() {
 
     setupSwipeNavigation();
 }
+
+document.getElementById('game-package').addEventListener('input', (e) => {
+    const packageInput = e.target;
+    const packageValue = packageInput.value.trim();
+    
+    packageInput.classList.remove('error');
+    let nextSibling = packageInput.nextElementSibling;
+    while (nextSibling && nextSibling.classList.contains('error-message')) {
+        nextSibling.remove();
+        nextSibling = packageInput.nextElementSibling;
+    }
+    
+    const parentNode = packageInput.parentNode;
+    let parentError = parentNode.nextElementSibling;
+    while (parentError && parentError.classList.contains('error-message')) {
+        parentError.remove();
+        parentError = parentNode.nextElementSibling;
+    }
+    
+    
+    if (packageValue && (!editingGame || editingGame.package !== packageValue)) {
+        for (const [key, value] of Object.entries(currentConfig)) {
+            if (Array.isArray(value) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
+                if (value.includes(packageValue)) {
+                    packageInput.classList.add('error');
+                    const errorMessage = document.createElement('span');
+                    errorMessage.className = 'error-message';
+                    errorMessage.textContent = 'Game package already exists';
+                    parentNode.insertAdjacentElement('afterend', errorMessage);
+                    break;
+                }
+            }
+        }
+    }
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
     const savedTheme = localStorage.getItem('theme');
