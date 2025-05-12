@@ -1063,27 +1063,96 @@ function showSnackbar(message, onUndo) {
     const messageElement = document.getElementById('snackbar-message');
     const undoButton = document.getElementById('snackbar-undo');
 
-    if (snackbarTimeout) {
-        clearTimeout(snackbarTimeout);
-    }
+    // Reset snackbar to initial state
+    resetSnackbar();
 
+    // Set message
     messageElement.textContent = message;
     snackbar.classList.add('show');
+    snackbar.style.transform = 'translateY(0)';
+    snackbar.style.opacity = '1';
 
+    // Reset undo button event listeners
     const newUndoButton = undoButton.cloneNode(true);
     undoButton.parentNode.replaceChild(newUndoButton, undoButton);
 
     newUndoButton.addEventListener('click', () => {
         if (onUndo) onUndo();
-        snackbar.classList.remove('show');
-        clearTimeout(snackbarTimeout);
-        snackbarTimeout = null;
+        resetSnackbar();
     });
 
-    snackbarTimeout = setTimeout(() => {
-        snackbar.classList.remove('show');
-        snackbarTimeout = null;
-    }, 5000);
+    // Swipe variables
+    let touchStartX = 0;
+    let touchMoveX = 0;
+    const swipeThreshold = 100; // Minimum distance for swipe (pixels)
+
+    // Swipe event handlers
+    const handleTouchStart = (e) => {
+        touchStartX = e.touches[0].clientX;
+        snackbar.style.transition = 'none'; // Disable animation during swipe
+        snackbar.classList.remove('show-timer'); // Stop timer animation
+    };
+
+    const handleTouchMove = (e) => {
+        touchMoveX = e.touches[0].clientX;
+        const diffX = touchMoveX - touchStartX;
+        snackbar.style.transform = `translateX(${diffX}px) translateY(0)`;
+        snackbar.style.opacity = Math.max(0.2, 1 - Math.abs(diffX) / window.innerWidth);
+    };
+
+    const handleTouchEnd = () => {
+        const diffX = touchMoveX - touchStartX;
+        snackbar.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+
+        if (Math.abs(diffX) > swipeThreshold) {
+            // Complete swipe: hide snackbar
+            const direction = diffX > 0 ? '100%' : '-100%';
+            snackbar.style.transform = `translateX(${direction}) translateY(0)`;
+            snackbar.style.opacity = '0';
+            snackbar.addEventListener('transitionend', resetSnackbar, { once: true });
+        } else {
+            // Return to initial state
+            snackbar.style.transform = 'translateY(0)';
+            snackbar.style.opacity = '1';
+            // Restart timer animation
+            restartTimerAnimation();
+        }
+
+        // Remove swipe event listeners
+        snackbar.removeEventListener('touchstart', handleTouchStart);
+        snackbar.removeEventListener('touchmove', handleTouchMove);
+        snackbar.removeEventListener('touchend', handleTouchEnd);
+    };
+
+    // Add swipe event listeners
+    snackbar.addEventListener('touchstart', handleTouchStart, { passive: true });
+    snackbar.addEventListener('touchmove', handleTouchMove, { passive: true });
+    snackbar.addEventListener('touchend', handleTouchEnd);
+
+    // Start timer
+    restartTimerAnimation();
+
+    // Function to reset snackbar
+    function resetSnackbar() {
+        snackbar.classList.remove('show', 'show-timer');
+        snackbar.style.transform = 'translateY(100px)';
+        snackbar.style.opacity = '0';
+        snackbar.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        if (snackbarTimeout) {
+            clearTimeout(snackbarTimeout);
+            snackbarTimeout = null;
+        }
+    }
+
+    // Function to restart timer animation
+    function restartTimerAnimation() {
+        snackbar.classList.remove('show-timer');
+        // Force reflow to reset animation
+        void snackbar.offsetWidth;
+        snackbar.classList.add('show-timer');
+        // Set new timeout
+        snackbarTimeout = setTimeout(resetSnackbar, 5000);
+    }
 }
 
 function insertAtIndex(obj, key, value, index) {
