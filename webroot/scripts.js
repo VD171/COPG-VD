@@ -2124,13 +2124,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function showIgnoreExplanation(e) {
-    e.stopPropagation(); 
-    
-    
+    e.stopPropagation();
+
     const popup = document.createElement('div');
-    popup.className = 'ignore-explanation-popup';
+    popup.className = 'popup ignore-explanation-popup';
+    popup.id = 'ignore-explanation-popup';
     popup.innerHTML = `
-        <div class="explanation-content">
+        <div class="popup-content">
             <h3>About Ignored Apps</h3>
             <div class="explanation-text">
                 <strong>Ignored</strong> means this app <strong>WON'T</strong> receive these tweaks:
@@ -2142,16 +2142,34 @@ function showIgnoreExplanation(e) {
                 </ul>
                 <strong>Important:</strong> Spoofing <strong>WILL STILL WORK</strong> normally.
             </div>
-            <button class="action-btn" onclick="this.parentElement.parentElement.remove()">OK</button>
+            <button class="action-btn">OK</button>
         </div>
     `;
-    
+
     document.body.appendChild(popup);
-    
-    
+
+    requestAnimationFrame(() => {
+        popup.style.display = 'flex';
+        popup.querySelector('.popup-content').classList.add('modal-enter');
+    });
+
+    popup.querySelector('.action-btn').addEventListener('click', () => {
+        const content = popup.querySelector('.popup-content');
+        content.classList.remove('modal-enter');
+        content.classList.add('popup-exit');
+        content.addEventListener('animationend', () => {
+            popup.remove();
+        }, { once: true });
+    });
+
     popup.addEventListener('click', (e) => {
         if (e.target === popup) {
-            popup.remove();
+            const content = popup.querySelector('.popup-content');
+            content.classList.remove('modal-enter');
+            content.classList.add('popup-exit');
+            content.addEventListener('animationend', () => {
+                popup.remove();
+            }, { once: true });
         }
     });
 }
