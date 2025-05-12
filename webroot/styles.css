@@ -1573,6 +1573,9 @@ h2 {
     max-width: 320px;
     padding: 0;
     overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 #ignore-popup .popup-header {
@@ -1581,6 +1584,9 @@ h2 {
     display: flex;
     justify-content: center;
     align-items: center;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .dark-theme #ignore-popup .popup-header {
@@ -1607,6 +1613,9 @@ h2 {
 #ignore-popup .popup-body {
     padding: 20px 16px;
     text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 #ignore-popup .popup-icon {
@@ -1644,6 +1653,9 @@ h2 {
     color: var(--text-secondary);
     margin-top: 8px;
     word-break: break-all;
+    user-select: auto;
+    -webkit-user-select: auto;
+    -webkit-touch-callout: default;
 }
 
 #ignore-popup .popup-footer {
@@ -1651,6 +1663,9 @@ h2 {
     justify-content: flex-end;
     padding: 12px 16px;
     gap: 8px;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 /* Prevent text selection on game cards */
@@ -1768,6 +1783,9 @@ h2 {
     font-family: 'Poppins', sans-serif;
     color: var(--text);
     margin-bottom: 4px;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .package-name-popup {
@@ -1776,6 +1794,9 @@ h2 {
     font-family: 'Roboto Mono', monospace;
     color: var(--text-secondary);
     word-break: break-all;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .dark-theme .game-name-popup {
@@ -1925,4 +1946,60 @@ h2 {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Popup Styles */
+.ignore-explanation-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.explanation-content {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.dark-theme .explanation-content {
+    background: var(--dark-card);
+}
+
+.explanation-content h3 {
+    color: var(--primary);
+    margin-bottom: 16px;
+}
+
+.explanation-text {
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.explanation-text strong {
+    color: var(--primary);
+}
+
+.explanation-text ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+/* Ignored Badge */
+.ignored-badge {
+    cursor: help;
+    position: relative;
+}
+
+.ignored-badge:hover {
+    text-decoration: underline;
 }
