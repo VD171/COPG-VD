@@ -1744,9 +1744,9 @@ async function showPackagePicker() {
                 console.error(`Error fetching label for ${pkg}:`, e);
             }
             appIndex.push({ 
-            package: pkg, 
-            label: label.toLowerCase(), 
-            originalLabel: label 
+                package: pkg, 
+                label: label.toLowerCase(), 
+                originalLabel: label 
             });
         }
 
@@ -1772,48 +1772,47 @@ async function showPackagePicker() {
             packagePickerObserver = new IntersectionObserver(async (entries) => {
                 for (const entry of entries) {
                     if (entry.isIntersecting) {
-                        const img = entry.target;
-                        const pkg = img.dataset.pkg;
-                        const appCard = img?.closest('.app-card');
-                        const nameEl = appCard.querySelector('.app-name');
-
+                        const iconContainer = entry.target;
+                        const pkg = iconContainer.dataset.pkg;
+                        const appCard = iconContainer.closest('.app-card');
+                        
                         try {
-                            // Load app info (redundant but kept for consistency)
-                            const info = $packageManager.getApplicationInfo(pkg, 0, 0);
-                            if (info && info.getLabel()) {
-                                nameEl.textContent = info.getLabel();
-                            }
-
                             // Try to load app icon if API is available
                             if (typeof $packageManager !== 'undefined' && typeof $packageManager.getApplicationIcon === 'function') {
                                 const stream = $packageManager.getApplicationIcon(pkg, 0, 0);
                                 await loadPackagePickerDependencies();
                                 const response = await wrapInputStream(stream);
                                 const buffer = await response.arrayBuffer();
+                                
+                                // Create the actual image element
+                                const img = document.createElement('img');
+                                img.className = 'app-icon-loaded';
                                 img.src = 'data:image/png;base64,' + arrayBufferToBase64(buffer);
-                                img.style.opacity = '1';
-                            }
-                            
-                            // Remove loader
-                            const loader = img.nextElementSibling;
-                            if (loader && loader.classList.contains('loader')) {
-                                loader.remove();
+                                img.style.opacity = '0';
+                                img.style.transition = 'opacity 0.3s ease';
+                                
+                                // Replace placeholder with actual icon
+                                iconContainer.innerHTML = '';
+                                iconContainer.appendChild(img);
+                                
+                                // Fade in the icon
+                                setTimeout(() => {
+                                    img.style.opacity = '1';
+                                }, 10);
                             }
                         } catch (e) {
-                            console.error('Error loading app info/icon:', e);
-                            const loader = img.nextElementSibling;
-                            if (loader && loader.classList.contains('loader')) {
-                                loader.style.background = 'var(--error)';
-                            }
+                            console.error('Error loading app icon:', e);
+                            // Keep the placeholder if loading fails
+                            iconContainer.classList.add('load-failed');
                         }
 
-                        packagePickerObserver.unobserve(img);
+                        packagePickerObserver.unobserve(iconContainer);
                     }
                 }
             }, { rootMargin: '100px', threshold: 0.1 });
         }
 
-        // Render app cards
+        // Render app cards with beautiful placeholders
         const fragment = document.createDocumentFragment();
         pkgList.forEach(pkg => {
             const appCard = document.createElement('div');
@@ -1825,44 +1824,23 @@ async function showPackagePicker() {
                 appCard.classList.add('added-game');
             }
 
+            // Icon container with placeholder
             const iconContainer = document.createElement('div');
-            iconContainer.style.position = 'relative';
-            iconContainer.style.width = '40px';
-            iconContainer.style.height = '40px';
-            iconContainer.style.flexShrink = '0';
-            iconContainer.style.marginRight = '12px';
+            iconContainer.className = 'app-icon-container';
+            iconContainer.dataset.pkg = pkg;
+            
+            // Create the placeholder element
+            const placeholder = document.createElement('div');
+            placeholder.className = 'app-icon-placeholder';
+            iconContainer.appendChild(placeholder);
 
-            const img = document.createElement('img');
-            img.className = 'app-icon';
-            img.dataset.pkg = pkg;
-            img.style.opacity = '0';
-            img.style.width = '100%';
-            img.style.height = '100%';
-            img.style.objectFit = 'contain';
-            img.style.borderRadius = '8px';
-
-            const loader = document.createElement('div');
-            loader.className = 'loader';
-            loader.style.position = 'absolute';
-            loader.style.top = '0';
-            loader.style.left = '0';
-            loader.style.width = '100%';
-            loader.style.height = '100%';
-            loader.style.background = 'linear-gradient(90deg, var(--surfaceContainer), var(--surfaceContainerHigh), var(--surfaceContainer))';
-            loader.style.backgroundSize = '200% 100%';
-            loader.style.animation = 'shimmer 1.2s infinite linear';
-            loader.style.borderRadius = '8px';
-
-            iconContainer.appendChild(img);
-            iconContainer.appendChild(loader);
-
+            // Info container
             const infoContainer = document.createElement('div');
             infoContainer.className = 'app-info';
-            infoContainer.style.overflow = 'hidden';
 
             const name = document.createElement('div');
             name.className = 'app-name';
-            name.textContent = appIndex.find(app => app.package === pkg)?.label || pkg; // Use indexed label
+            name.textContent = appIndex.find(app => app.package === pkg)?.originalLabel || pkg;
 
             const packageName = document.createElement('div');
             packageName.className = 'app-package';
@@ -1875,16 +1853,15 @@ async function showPackagePicker() {
             appCard.appendChild(infoContainer);
             fragment.appendChild(appCard);
 
-            // Observe the image for lazy loading
-            packagePickerObserver.observe(img);
+            // Observe the icon container for lazy loading
+            packagePickerObserver.observe(iconContainer);
 
-          appCard.addEventListener('click', () => {
-    document.getElementById('game-package').value = pkg;
-    const appInfo = appIndex.find(app => app.package === pkg);
-    const gameName = appInfo?.originalLabel || appInfo?.label || pkg;
-    document.getElementById('game-name').value = gameName;
-    
-    closePopup('package-picker-popup');
+            appCard.addEventListener('click', () => {
+                document.getElementById('game-package').value = pkg;
+                const appInfo = appIndex.find(app => app.package === pkg);
+                const gameName = appInfo?.originalLabel || appInfo?.label || pkg;
+                document.getElementById('game-name').value = gameName;
+                closePopup('package-picker-popup');
             });
         });
 
@@ -1907,7 +1884,14 @@ async function showPackagePicker() {
         appendToOutput("App list loaded", 'success');
     } catch (error) {
         console.error("Failed to load package list:", error);
-        appList.innerHTML = '<div style="color: var(--error); text-align: center; padding: 16px;">Failed to load apps: ' + error.message + '</div>';
+        appList.innerHTML = `
+            <div style="color: var(--error); text-align: center; padding: 16px;">
+                Failed to load apps: ${error.message}
+                <button onclick="showPackagePicker()" style="margin-top: 8px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px;">
+                    Try Again
+                </button>
+            </div>
+        `;
         appendToOutput("Failed to load package list: " + error, 'error');
     }
 }
