@@ -1760,3 +1760,81 @@ h2 {
 .dark-theme .game-details {
     color: var(--dark-text-secondary);
 }
+
+.game-name-popup {
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.package-name-popup {
+    display: block;
+    font-size: 13px;
+    font-family: 'Roboto Mono', monospace;
+    color: var(--text-secondary);
+    word-break: break-all;
+}
+
+.dark-theme .game-name-popup {
+    color: var(--dark-text);
+}
+
+.dark-theme .package-name-popup {
+    color: var(--dark-text-secondary);
+}
+
+#ignore-popup .popup-package {
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.dark-theme #ignore-popup .popup-package {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Update Confirm Popup Icon Styles */
+.popup-icon-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.popup-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.update-icon {
+    background: var(--primary);
+}
+
+.update-icon::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    background: white;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M4 12a8 8 0 0 1 8-8V2.5M20 12a8 8 0 0 1-8 8v1.5M14 12h6m-6 0H4m0 0l3-3m-3 3l3 3'/%3E%3C/svg%3E") no-repeat center;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M4 12a8 8 0 0 1 8-8V2.5M20 12a8 8 0 0 1-8 8v1.5M14 12h6m-6 0H4m0 0l3-3m-3 3l3 3'/%3E%3C/svg%3E") no-repeat center;
+}
+
+.popup-content h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.dark-theme .popup-content h3 {
+    color: var(--dark-text);
+}
