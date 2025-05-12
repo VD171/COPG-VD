@@ -1,5 +1,5 @@
 {
-  "PACKAGES_REDMAGIC9": [
+  "PACKAGES_REDMAGIC_9_PRO": [
     "com.mobilelegends.mi",
     "com.supercell.brawlstars",
     "com.blizzard.diablo.immortal",
@@ -22,7 +22,7 @@
     "com.ss.android.ugc.trill",
     "com.zhiliaoapp.musically"
   ],
-  "PACKAGES_REDMAGIC9_DEVICE": {
+  "PACKAGES_REDMAGIC_9_PRO_DEVICE": {
     "BRAND": "nubia",
     "DEVICE": "REDMAGIC 9 Pro",
     "MANUFACTURER": "ZTE",
@@ -30,24 +30,24 @@
     "FINGERPRINT": "nubia/NX769J/NX769J:14/UKQ1.230917.001/20240813.173312:user/release-keys",
     "PRODUCT": "NX769J"
   },
-  "PACKAGES_BS4": [
+  "PACKAGES_BLACK_SHARK_4_(CHINA)": [
     "com.proximabeta.mf.uamo"
   ],
-  "PACKAGES_BS4_DEVICE": {
+  "PACKAGES_BLACK_SHARK_4_(CHINA)_DEVICE": {
     "BRAND": "Black Shark",
     "DEVICE": "Black Shark 4 (China)",
     "MANUFACTURER": "Xiaomi",
     "MODEL": "2SM-X706B",
     "FINGERPRINT": "BlackShark/PRS-H0/Black Shark 4:13/TQ3A.230805.001/20230315:user/release-keys",
-    "PRODUCT": "PRS-H0"
+    "PRODUCT": "2SM-X706B"
   },
-  "PACKAGES_MI11TP": [
+  "PACKAGES_XIAOMI_11T_PRO": [
     "com.ea.gp.apexlegendsmobilefps",
     "com.levelinfinite.hotta.gp",
     "com.supercell.clashofclans",
     "com.vng.mlbbvn"
   ],
-  "PACKAGES_MI11TP_DEVICE": {
+  "PACKAGES_XIAOMI_11T_PRO_DEVICE": {
     "BRAND": "Xiaomi",
     "DEVICE": "Xiaomi 11T Pro",
     "MANUFACTURER": "Xiaomi",
@@ -55,7 +55,7 @@
     "FINGERPRINT": "Xiaomi/2107113SI/Mi 11T Pro:13/RKQ1.211001.001/20230410:user/release-keys",
     "PRODUCT": "2107113SG"
   },
-  "PACKAGES_MI13P": [
+  "PACKAGES_XIAOMI_13_PRO": [
     "com.levelinfinite.sgameGlobal",
     "com.tencent.tmgp.sgame",
     "com.pubg.krmobile",
@@ -65,7 +65,7 @@
     "com.pubg.imobile",
     "com.tencent.ig"
   ],
-  "PACKAGES_MI13P_DEVICE": {
+  "PACKAGES_XIAOMI_13_PRO_DEVICE": {
     "BRAND": "Xiaomi",
     "DEVICE": "Xiaomi 13 Pro",
     "MANUFACTURER": "Xiaomi",
@@ -73,13 +73,13 @@
     "FINGERPRINT": "Xiaomi/fuxi_eea/fuxi:13/TKQ1.221114.001/OS2.0.102.0.VMCEUXM:user/release-keys",
     "PRODUCT": "2210132G"
   },
-  "PACKAGES_OP8P": [
+  "PACKAGES_ONEPLUS_8_PRO_5G": [
     "com.netease.lztgglobal",
     "com.riotgames.league.wildrift",
     "com.riotgames.league.wildrifttw",
     "com.riotgames.league.wildriftvn"
   ],
-  "PACKAGES_OP8P_DEVICE": {
+  "PACKAGES_ONEPLUS_8_PRO_5G_DEVICE": {
     "BRAND": "OnePlus",
     "DEVICE": "OnePlus 8 Pro 5G",
     "MANUFACTURER": "OnePlus",
@@ -87,11 +87,11 @@
     "FINGERPRINT": "OnePlus/IN2023/OnePlus8Pro:13/RKQ1.211119.001/20230501:user/release-keys",
     "PRODUCT": "IN2023"
   },
-  "PACKAGES_OP9P": [
+  "PACKAGES_ONEPLUS_9_PRO_5G": [
     "com.epicgames.fortnite",
     "com.epicgames.portal"
   ],
-  "PACKAGES_OP9P_DEVICE": {
+  "PACKAGES_ONEPLUS_9_PRO_5G_DEVICE": {
     "BRAND": "OnePlus",
     "DEVICE": "OnePlus 9 Pro 5G",
     "MANUFACTURER": "OnePlus",
@@ -99,10 +99,10 @@
     "FINGERPRINT": "OnePlus/LE2123/OnePlus9Pro:14/UP1A.231005.007/20240115:user/release-keys",
     "PRODUCT": "LE2123"
   },
-  "PACKAGES_F5": [
+  "PACKAGES_POCO_F5": [
     "com.mobile.legends"
   ],
-  "PACKAGES_F5_DEVICE": {
+  "PACKAGES_POCO_F5_DEVICE": {
     "BRAND": "POCO",
     "DEVICE": "POCO F5",
     "MANUFACTURER": "Xiaomi",
@@ -110,11 +110,11 @@
     "FINGERPRINT": "POCO/23049PCD8G/POCOF5:13/TQ3A.230805.001/20230620:user/release-keys",
     "PRODUCT": "23049PCD8G"
   },
-  "PACKAGES_ROG": [
+  "PACKAGES_ROG_PHONE_5S": [
     "com.dts.freefireth",
     "com.dts.freefirethmax"
   ],
-  "PACKAGES_ROG_DEVICE": {
+  "PACKAGES_ROG_PHONE_5S_DEVICE": {
     "BRAND": "ASUS",
     "DEVICE": "ROG Phone 5s",
     "MANUFACTURER": "ASUS",
@@ -122,13 +122,13 @@
     "FINGERPRINT": "ASUS/ZS676KS/ROG Phone 5s:12/SKQ1.210821.001/20220810:user/release-keys",
     "PRODUCT": "ZS676KS"
   },
-  "PACKAGES_ROG6": [
+  "PACKAGES_ROG_PHONE_6D_ULTIMATE": [
     "com.gameloft.android.ANMP.GloftA9HM",
     "com.madfingergames.legends",
     "com.pearlabyss.blackdesertm",
     "com.pearlabyss.blackdesertm.gl"
   ],
-  "PACKAGES_ROG6_DEVICE": {
+  "PACKAGES_ROG_PHONE_6D_ULTIMATE_DEVICE": {
     "BRAND": "ASUS",
     "DEVICE": "ROG Phone 6D Ultimate",
     "MANUFACTURER": "ASUS",
@@ -136,13 +136,13 @@
     "FINGERPRINT": "ASUS/AI2203/ROG Phone 6D:14/UP1A.231005.007/20240315:user/release-keys",
     "PRODUCT": "AI2203"
   },
-  "PACKAGES_LENOVO_TABLET": [
+  "PACKAGES_LEGION_Y700_(2023)": [
     "com.activision.callofduty.shooter",
     "com.garena.game.codm",
     "com.tencent.tmgp.kr.codm",
     "com.vng.codmvn"
   ],
-  "PACKAGES_LENOVO_TABLET_DEVICE": {
+  "PACKAGES_LEGION_Y700_(2023)_DEVICE": {
     "BRAND": "Lenovo",
     "DEVICE": "Legion Y700 (2023)",
     "MANUFACTURER": "Lenovo",
@@ -150,10 +150,10 @@
     "FINGERPRINT": "Lenovo/TB-9707F/Lenovo TB-9707F:13/TQ3A.230805.001/20230901:user/release-keys",
     "PRODUCT": "TB-9707F"
   },
-  "PACKAGES_S24ULTRA": [
+  "PACKAGES_GALAXY_S24_ULTRA": [
     "com.ea.gp.fifamobile"
   ],
-  "PACKAGES_S24ULTRA_DEVICE": {
+  "PACKAGES_GALAXY_S24_ULTRA_DEVICE": {
     "BRAND": "Samsung",
     "DEVICE": "Galaxy S24 Ultra",
     "MANUFACTURER": "Samsung",
@@ -183,10 +183,10 @@
     "FINGERPRINT": "OnePlus/PJZ110/OP5D0DL1:15/AP3A.240617.008/V.1bd19a1-1-2:user/release-keys",
     "PRODUCT": "PJZ110"
   },
-  "PACKAGES_PIXEL_XL": [
+  "PACKAGES_PIXEL_9_PRO_XL": [
     "com.google.android.apps.photos"
   ],
-  "PACKAGES_PIXEL_XL_DEVICE": {
+  "PACKAGES_PIXEL_9_PRO_XL_DEVICE": {
     "BRAND": "google",
     "DEVICE": "Pixel 9 Pro XL",
     "MANUFACTURER": "Google",
