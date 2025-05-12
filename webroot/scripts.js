@@ -1,4 +1,5 @@
 let actionRunning = false;
+let configKeyOrder = [];
 let currentConfig = {};
 let editingDevice = null;
 let editingGame = null;
@@ -163,9 +164,12 @@ async function loadToggleStates() {
 async function loadConfig() {
     try {
         const configContent = await execCommand("cat /data/adb/modules/COPG/config.json");
-        currentConfig = JSON.parse(configContent);
+        const parsedConfig = JSON.parse(configContent);
+        currentConfig = parsedConfig;
         
-        // Ensure ignorelist.txt exists
+        configKeyOrder = Object.keys(parsedConfig);
+        
+        
         try {
             await execCommand("touch /data/adb/modules/COPG/ignorelist.txt");
         } catch (error) {
@@ -176,6 +180,7 @@ async function loadConfig() {
     } catch (error) {
         appendToOutput("Failed to load config: " + error, 'error');
         currentConfig = {};
+        configKeyOrder = [];
     }
 }
 
@@ -190,12 +195,13 @@ function renderDeviceList() {
     const fragment = document.createDocumentFragment();
     let index = 0;
     
-    for (const [key, value] of Object.entries(currentConfig)) {
-        if (key.endsWith('_DEVICE')) {
-            const deviceName = value.DEVICE || key.replace('PACKAGES_', '').replace('_DEVICE', '');
+    // استفاده از configKeyOrder برای حفظ ترتیب
+    for (const key of configKeyOrder) {
+        if (key.endsWith('_DEVICE') && currentConfig[key]) {
+            const deviceName = currentConfig[key].DEVICE || key.replace('PACKAGES_', '').replace('_DEVICE', '');
             const packageKey = key.replace('_DEVICE', '');
             const gameCount = Array.isArray(currentConfig[packageKey]) ? currentConfig[packageKey].length : 0;
-            const model = value.MODEL || 'Unknown';
+            const model = currentConfig[key].MODEL || 'Unknown';
             
             const deviceCard = document.createElement('div');
             deviceCard.className = 'device-card';
@@ -253,7 +259,7 @@ function deleteDeviceHandler(e) {
     deleteDevice(e.currentTarget.dataset.device);
 }
 
-function renderGameList() {
+async function renderGameList() {
     const now = Date.now();
     if (now - lastRender.games < RENDER_DEBOUNCE_MS) return;
     lastRender.games = now;
@@ -261,23 +267,51 @@ function renderGameList() {
     const gameList = document.getElementById('game-list');
     if (!gameList) return appendToOutput("Error: 'game-list' not found", 'error');
 
+    const ignoreList = await readIgnoreList();
+    
+    
+    let gameNamesMap = {};
+    try {
+        const gameNamesContent = await execCommand("cat /data/adb/modules/COPG/list.json");
+        gameNamesMap = JSON.parse(gameNamesContent);
+    } catch (error) {
+        appendToOutput("Failed to load game names mapping: " + error, 'warning');
+    }
+    
+    
+    let installedPackages = [];
+    try {
+        const pmOutput = await execCommand("pm list packages | cut -d: -f2");
+        installedPackages = pmOutput.trim().split('\n');
+    } catch (error) {
+        appendToOutput("Failed to get installed packages: " + error, 'warning');
+    }
+
     const fragment = document.createDocumentFragment();
     let index = 0;
     
-    for (const [key, value] of Object.entries(currentConfig)) {
-        if (Array.isArray(value) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
+    
+    for (const key of configKeyOrder) {
+        if (Array.isArray(currentConfig[key]) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
             const deviceKey = `${key}_DEVICE`;
             const deviceData = currentConfig[deviceKey] || {};
             const deviceName = deviceData.DEVICE || key.replace('PACKAGES_', '');
-            value.forEach(gamePackage => {
+            currentConfig[key].forEach(gamePackage => {
+                const isIgnored = ignoreList.includes(gamePackage);
+                const isInstalled = installedPackages.includes(gamePackage);
+                const gameName = gameNamesMap[gamePackage] || gamePackage;
+                
                 const gameCard = document.createElement('div');
-                gameCard.className = 'game-card';
+                gameCard.className = `game-card ${isIgnored ? 'ignored' : ''}`;
                 gameCard.dataset.package = gamePackage;
                 gameCard.dataset.device = key;
                 gameCard.style.animationDelay = `${Math.min(index * 0.05, 0.5)}s`;
                 gameCard.innerHTML = `
                     <div class="game-header">
-                        <h4 class="game-name">${gamePackage}</h4>
+                        <div class="game-name-container">
+                            <h4 class="game-name">${gameName}</h4>
+                            <span class="game-package">${gamePackage}</span>
+                        </div>
                         <div class="game-actions">
                             <button class="edit-btn" data-game="${gamePackage}" data-device="${key}" title="Edit">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -289,12 +323,16 @@ function renderGameList() {
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M3 6h18"></path>
                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            </svg>
+                                </svg>
                             </button>
                         </div>
                     </div>
                     <div class="game-details">
-                        Spoofed as: ${deviceName}
+                        <span class="game-info">${deviceName}</span>
+                        <div class="badge-group">
+                            ${isIgnored ? '<span class="ignored-badge" onclick="showIgnoreExplanation(event)">Ignored</span>' : ''}
+                            ${isInstalled ? '<span class="installed-badge">Installed</span>' : ''}
+                        </div>
                     </div>
                 `;
                 fragment.appendChild(gameCard);
@@ -306,6 +344,7 @@ function renderGameList() {
     gameList.innerHTML = '';
     gameList.appendChild(fragment);
     attachGameListeners();
+    setupLongPressHandlers();
 }
 
 function setupLongPressHandlers() {
@@ -676,7 +715,7 @@ async function saveDevice(e) {
                     }
                     const errorMessage = document.createElement('span');
                     errorMessage.className = 'error-message';
-                    errorMessage.textContent = 'Device name already exists';
+                    errorMessage.textContent = 'Device collections already exists';
                     field.insertAdjacentElement('afterend', errorMessage);
                     appendToOutput(`Device profile "${deviceName}" already exists`, 'error');
                     hasError = true;
@@ -702,11 +741,11 @@ async function saveDevice(e) {
     }
     
     if (hasError) {
-        const errorMessage = missingFields.length > 0 
+        const poppyMessage = missingFields.length > 0 
             ? `Please fill in the following fields: ${missingFields.join(', ')}`
             : 'Please correct the errors in the form';
-        appendToOutput(errorMessage, 'error');
-        document.getElementById('error-message').textContent = errorMessage;
+        appendToOutput(poppyMessage, 'error');
+        document.getElementById('error-message').textContent = poppyMessage;
         showPopup('error-popup');
         return;
     }
@@ -728,13 +767,27 @@ async function saveDevice(e) {
     try {
         if (editingDevice && editingDevice !== deviceKey) {
             const oldPackageKey = editingDevice.replace('_DEVICE', '');
-            const newPackageKey = packageKey;
+            const oldIndex = configKeyOrder.indexOf(editingDevice);
+            const oldPackageIndex = configKeyOrder.indexOf(oldPackageKey);
+            
+            
+            if (oldIndex !== -1) {
+                configKeyOrder[oldIndex] = deviceKey;
+            }
+            if (oldPackageIndex !== -1) {
+                configKeyOrder[oldPackageIndex] = packageKey;
+            }
+            
+            
             if (currentConfig[oldPackageKey]) {
-                currentConfig[newPackageKey] = currentConfig[oldPackageKey];
+                currentConfig[packageKey] = currentConfig[oldPackageKey];
                 delete currentConfig[oldPackageKey];
             }
             delete currentConfig[editingDevice];
             appendToOutput(`Renamed device from "${editingDevice}" to "${deviceKey}"`, 'info');
+        } else if (!editingDevice) {
+            
+            configKeyOrder.push(packageKey, deviceKey);
         }
         
         if (!Array.isArray(currentConfig[packageKey])) {
@@ -760,6 +813,8 @@ async function saveGame(e) {
     e.preventDefault();
     const form = document.getElementById('game-form');
     const gamePackage = document.getElementById('game-package').value.trim();
+    const gameNameInput = document.getElementById('game-name');
+    const gameName = gameNameInput.value.trim() || gamePackage;
     const deviceInput = document.getElementById('game-device');
     const deviceKey = deviceInput.dataset.key;
     const packageKey = deviceKey.replace('_DEVICE', '');
@@ -842,55 +897,53 @@ async function saveGame(e) {
     }
     
     try {
-if (editingGame) {
-    const oldIndex = currentConfig[editingGame.device]?.indexOf(editingGame.package);
-    if (oldIndex > -1) {
-        currentConfig[editingGame.device].splice(oldIndex, 1);
-    }
-    
-    try {
-        const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
-        const listData = JSON.parse(listContent);
-        if (listData[editingGame.package]) {
-            delete listData[editingGame.package];
-            await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
+        let oldIndex = -1;
+        if (editingGame) {
+            oldIndex = currentConfig[editingGame.device]?.indexOf(editingGame.package);
+            if (oldIndex > -1) {
+                currentConfig[editingGame.device].splice(oldIndex, 1);
+            }
         }
-    } catch (error) {
-        appendToOutput("Failed to remove old game name: " + error, 'warning');
-    }
-}
         
         if (!Array.isArray(currentConfig[packageKey])) {
             currentConfig[packageKey] = [];
+            
+            if (!configKeyOrder.includes(packageKey)) {
+                const deviceIndex = configKeyOrder.indexOf(deviceKey);
+                if (deviceIndex !== -1) {
+                    configKeyOrder.splice(deviceIndex, 0, packageKey);
+                } else {
+                    configKeyOrder.push(packageKey);
+                }
+            }
         }
         
+        
         if (!currentConfig[packageKey].includes(gamePackage)) {
-            currentConfig[packageKey].push(gamePackage);
-            
-            
-            try {
-                const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
-                const listData = JSON.parse(listContent);
-
-                if (!listData[gamePackage]) {
-                    const gameNameInput = document.getElementById('game-name');
-                    const gameName = gameNameInput.value.trim() || gamePackage;
-                    if (gameName) {
-                        listData[gamePackage] = gameName;
-                        await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
-  
-                    }
-                }
-            } catch (error) {
-                appendToOutput("Failed to update game names list: " + error, 'warning');
+            if (editingGame && editingGame.device === packageKey && oldIndex !== -1) {
+                
+                currentConfig[packageKey].splice(oldIndex, 0, gamePackage);
+            } else {
+                
+                currentConfig[packageKey].push(gamePackage);
             }
+        }
+        
+        
+        try {
+            const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
+            const listData = JSON.parse(listContent);
+            listData[gamePackage] = gameName;
+            await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
+        } catch (error) {
+            appendToOutput("Failed to update game names list: " + error, 'warning');
         }
         
         await saveConfig();
         closeModal('game-modal');
         renderGameList();
         renderDeviceList();
-        appendToOutput(`Game "${gamePackage}" added to "${currentConfig[deviceKey].DEVICE}"`, 'success');
+        appendToOutput(`Game "${gameName}" added to "${currentConfig[deviceKey].DEVICE}"`, 'success');
     } catch (error) {
         appendToOutput(`Failed to save game: ${error}`, 'error');
         document.getElementById('error-message').textContent = `Failed to save game: ${error}`;
@@ -1202,7 +1255,21 @@ async function deleteGame(gamePackage, deviceKey, gameName, deviceName) {
 
 async function saveConfig() {
     try {
-        const configStr = JSON.stringify(currentConfig, null, 2);
+        
+        const orderedConfig = {};
+        for (const key of configKeyOrder) {
+            if (currentConfig[key] !== undefined) {
+                orderedConfig[key] = currentConfig[key];
+            }
+        }
+        
+        for (const key of Object.keys(currentConfig)) {
+            if (!configKeyOrder.includes(key)) {
+                configKeyOrder.push(key);
+                orderedConfig[key] = currentConfig[key];
+            }
+        }
+        const configStr = JSON.stringify(orderedConfig, null, 2);
         await execCommand(`echo '${configStr.replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/config.json`);
         appendToOutput("Config saved", 'info');
     } catch (error) {
