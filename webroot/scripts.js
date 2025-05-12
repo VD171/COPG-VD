@@ -1920,9 +1920,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function showIgnoreExplanation(e) {
-    e.stopPropagation(); // جلوگیری از اجرای سایر کلیک‌ها
+    e.stopPropagation(); 
     
-    // ساخت پاپ‌آپ
+    
     const popup = document.createElement('div');
     popup.className = 'ignore-explanation-popup';
     popup.innerHTML = `
@@ -1944,7 +1944,7 @@ function showIgnoreExplanation(e) {
     
     document.body.appendChild(popup);
     
-    // بستن پاپ‌آپ با کلیک خارج از آن
+    
     popup.addEventListener('click', (e) => {
         if (e.target === popup) {
             popup.remove();
