@@ -1838,3 +1838,91 @@ h2 {
 .dark-theme .popup-content h3 {
     color: var(--dark-text);
 }
+
+/* App Icon Styles */
+.app-icon-container {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    margin-right: 12px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.app-icon-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--surfaceContainer);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.app-icon-placeholder::after {
+    content: '';
+    width: 24px;
+    height: 24px;
+    background: var(--text-secondary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5'%3E%3C/path%3E%3Cpath d='M12 2v4'%3E%3C/path%3E%3Cpath d='M12 18v4'%3E%3C/path%3E%3Cpath d='M4.9 4.9l2.8 2.8'%3E%3C/path%3E%3Cpath d='M16.2 16.2l2.8 2.8'%3E%3C/path%3E%3Cpath d='M2 12h4'%3E%3C/path%3E%3Cpath d='M18 12h4'%3E%3C/path%3E%3Cpath d='M4.9 19.1l2.8-2.8'%3E%3C/path%3E%3Cpath d='M16.2 7.8l2.8-2.8'%3E%3C/path%3E%3C/svg%3E") no-repeat center;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5'%3E%3C/path%3E%3Cpath d='M12 2v4'%3E%3C/path%3E%3Cpath d='M12 18v4'%3E%3C/path%3E%3Cpath d='M4.9 4.9l2.8 2.8'%3E%3C/path%3E%3Cpath d='M16.2 16.2l2.8 2.8'%3E%3C/path%3E%3Cpath d='M2 12h4'%3E%3C/path%3E%3Cpath d='M18 12h4'%3E%3C/path%3E%3Cpath d='M4.9 19.1l2.8-2.8'%3E%3C/path%3E%3Cpath d='M16.2 7.8l2.8-2.8'%3E%3C/path%3E%3C/svg%3E") no-repeat center;
+}
+
+.app-icon-loaded {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    background: var(--background);
+}
+
+.dark-theme .app-icon-loaded {
+    background: var(--dark-bg);
+}
+
+.app-icon-container.load-failed .app-icon-placeholder::after {
+    background: var(--error);
+}
+
+/* App Card Styles */
+.app-card {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 2px 6px var(--shadow);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.app-card.added-game {
+    background: rgba(52, 211, 153, 0.1);
+}
+
+.app-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.app-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.app-package {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-family: 'Roboto Mono', monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
