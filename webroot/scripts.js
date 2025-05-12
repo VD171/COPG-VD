@@ -955,7 +955,7 @@ async function renderGameList() {
     <div class="game-details">
         <span class="game-info">${deviceName}</span>
         <div class="badge-group">
-            ${isIgnored ? '<span class="ignored-badge">Ignored</span>' : ''}
+            ${isIgnored ? '<span class="ignored-badge" onclick="showIgnoreExplanation(event)">Ignored</span>' : ''}
             ${isInstalled ? '<span class="installed-badge">Installed</span>' : ''}
         </div>
     </div>
@@ -1918,3 +1918,36 @@ document.addEventListener('DOMContentLoaded', () => {
         pickerBtn.style.padding = '0 8px'; // Smaller button
     }
 });
+
+function showIgnoreExplanation(e) {
+    e.stopPropagation(); // جلوگیری از اجرای سایر کلیک‌ها
+    
+    // ساخت پاپ‌آپ
+    const popup = document.createElement('div');
+    popup.className = 'ignore-explanation-popup';
+    popup.innerHTML = `
+        <div class="explanation-content">
+            <h3>About Ignored Apps</h3>
+            <div class="explanation-text">
+                <strong>Ignored</strong> means this app <strong>WON'T</strong> receive these tweaks:
+                <ul>
+                    <li>Do Not Disturb (DND)</li>
+                    <li>Auto-Brightness</li>
+                    <li>Disable Logging</li>
+                    <li>Keep Screen On</li>
+                </ul>
+                <strong>Important:</strong> Spoofing <strong>WILL STILL WORK</strong> normally.
+            </div>
+            <button class="action-btn" onclick="this.parentElement.parentElement.remove()">OK</button>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+    
+    // بستن پاپ‌آپ با کلیک خارج از آن
+    popup.addEventListener('click', (e) => {
+        if (e.target === popup) {
+            popup.remove();
+        }
+    });
+}
