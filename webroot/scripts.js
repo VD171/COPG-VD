@@ -1841,13 +1841,28 @@ function applyEventListeners() {
     });
 
     document.getElementById('game-search').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        document.querySelectorAll('.game-card').forEach(card => {
-            const name = card.querySelector('.game-name').textContent.toLowerCase();
-            const device = card.querySelector('.game-details').textContent.toLowerCase().replace('spoofed as: ', '');
-            card.style.display = (name.includes(searchTerm) || device.includes(searchTerm)) ? 'block' : 'none';
-        });
+    const searchTerm = e.target.value.toLowerCase().trim();
+    document.querySelectorAll('.game-card').forEach(card => {
+        const packageName = card.dataset.package;
+        const deviceKey = `${card.dataset.device}_DEVICE`;
+        const deviceData = currentConfig[deviceKey] || {};
+        
+        const gameName = card.querySelector('.game-name').textContent.toLowerCase();
+        
+        const searchableText = [
+            gameName,
+            deviceData.DEVICE?.toLowerCase() || '',
+            deviceData.BRAND?.toLowerCase() || '',
+            deviceData.MODEL?.toLowerCase() || '',
+            deviceData.MANUFACTURER?.toLowerCase() || '',
+            deviceData.FINGERPRINT?.toLowerCase() || '',
+            deviceData.PRODUCT?.toLowerCase() || ''
+        ].join(' ');
+
+        
+        card.style.display = searchableText.includes(searchTerm) ? 'block' : 'none';
     });
+});
 
     document.getElementById('device-picker-search').addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase().trim();
