@@ -2,7 +2,7 @@
 - **Support Group**:
 https://t.me/TheAOSP
 ---
-## v4.2.1
+## v4.3.1
 - Added Google photos spoof for unlimited backup and Ai reimagine feature
 - Added modern app picker (Use MMRL or WebUI-X)
 - Added Game names
@@ -13,10 +13,11 @@ https://t.me/TheAOSP
 - Removed useless props (CPU info, Build id, display id)
 - Dropped support Zygisk Standard/Native ( Unsafe)
 - Fixed crashing on Older devices
-- Added swipe snack bar to get rid of it
+- Added swipe snackbar to get rid of it
 - Added improvement to snackbar
 - Added installed label for installed items
 - Added ignore label with explaining popup
+- fixed visual bugs and improved packagename error
 ## v4.0.2
 - Improved error logging for SpoofModule and WebUI
 - Enhanced permission handling for config files
