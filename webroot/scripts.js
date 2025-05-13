@@ -1972,7 +1972,7 @@ async function showPackagePicker() {
         } catch (apiError) {
             appendToOutput("API method failed, falling back to pm command: " + apiError, 'warning');
             // Fallback to pm list packages command
-            const pmOutput = await execCommand("pm list packages -3 | cut -d: -f2");
+            const pmOutput = await execCommand("pm list packages | cut -d: -f2");
             pkgList = pmOutput.trim().split('\n').filter(pkg => pkg.trim() !== '');
             if (pkgList.length === 0) {
                 throw new Error("No packages found using pm command");
