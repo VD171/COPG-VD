@@ -126,7 +126,7 @@ Edit `/data/adb/modules/COPG/config.json` with this format:
 </div>
 
 ---
-Telegram group: t.me/theaosp
-Telegram channel: @COPG_module
+[Telegram group](https://t.me/TheAOSP)
+[Telegram channel](https://t.me/COPG_module)
 
 <div align="center"> Made with ❤️ by Alireza Parsi | © 2025 COPG Project </div> ```
