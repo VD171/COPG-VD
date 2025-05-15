@@ -125,6 +125,8 @@ Edit `/data/adb/modules/COPG/config.json` with this format:
   <img src="https://github.com/user-attachments/assets/4f80922a-dc68-48a5-80b5-b9523e47589b" width="180" hspace="10" alt="LoL">
 </div>
 
-
+---
+Telegram group: t.me/theaosp
+Telegram channel: @COPG_module
 
 <div align="center"> Made with ❤️ by Alireza Parsi | © 2025 COPG Project </div> ```
