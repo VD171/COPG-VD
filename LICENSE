@@ -1,7 +1,45 @@
-# License
+Open Integrity License (OIL) – Version 1.0
 
-Copyright (c) 2025 AlirezaParsi. All Rights Reserved.
+Issued On: 2025-05-19
+Project Name: COPG
+Author/Owner: The Owner (as defined in the project repository or documentation)
+Project URL: https://github.com/AlirezaParsi/COPG
 
-This software and its source code are proprietary. Unauthorized copying, modification, distribution, or use of this software, via any medium, is strictly prohibited without prior written permission from the author, AlirezaParsi.
+1. Ownership
+All rights to the original source code, including all derivatives, updates, and resulting products, are exclusively held by the Owner. No rights are transferred to any third party through use, viewing, or access to the code or its products.
 
-For permissions, contact AlirezaParsi via GitHub at https://github.com/AlirezaParsi.
+2. Personal Use
+- Personal use of versions officially released by the Owner is permitted, as long as the source code is not modified.
+- Any creation of derivative works or alterations requires explicit written permission from the Owner.
+
+3. Commercial Use
+- Commercial use is strictly forbidden unless authorized via a formal written agreement with the Owner.
+- If granted, such agreement must define the Owner’s share and supervisory rights in the distribution process.
+
+4. Attribution Requirement
+- When permission is granted to use or incorporate the source code, clear and visible attribution to the Owner is required, including a direct link to the original source.
+- Omitting, hiding, or misrepresenting the Owner's authorship is strictly prohibited.
+
+5. No Redistribution Without Permission
+- Redistribution of any part of the source code, binaries, or modified versions is forbidden without explicit, written consent from the Owner.
+- This includes unchanged, minified, modified, or repackaged versions.
+
+6. Open Source Integrity
+- The software must remain open source under this license.
+- It is forbidden to “close” the source, even when adding or modifying code. The full source must always be accessible under this license.
+
+7. Corporate Distribution
+- Corporate or institutional use requires a formal distribution contract with the Owner.
+- The Owner shall retain oversight and define any terms including licensing fees, revenue shares, support conditions, and limitations.
+
+8. Violation and Legal Action
+- Any breach of this license—such as unauthorized use, closed-source distribution, or commercial exploitation—may result in legal action.
+- The Owner reserves the right to enforce this license through applicable domestic or international legal systems.
+
+9. Governing Law
+- This license is governed by the laws of the jurisdiction declared by the Owner. If none is declared, the governing law defaults to the Owner’s country of residence.
+
+10. Disclaimer
+This software is provided "as is", without warranties of any kind. The Owner disclaims any liability for damages resulting from the use or misuse of the software.
+
+Note: This license may be reused by other developers by replacing “The Owner” with their own name or legal entity and linking to this license version or its future revisions.
