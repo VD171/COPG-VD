@@ -110,18 +110,6 @@
     "FINGERPRINT": "POCO/23049PCD8G/POCOF5:13/TQ3A.230805.001/20230620:user/release-keys",
     "PRODUCT": "23049PCD8G"
   },
-  "PACKAGES_ROG_PHONE_5S": [
-    "com.dts.freefireth",
-    "com.dts.freefirethmax"
-  ],
-  "PACKAGES_ROG_PHONE_5S_DEVICE": {
-    "BRAND": "ASUS",
-    "DEVICE": "ROG Phone 5s",
-    "MANUFACTURER": "ASUS",
-    "MODEL": "ZS676KS",
-    "FINGERPRINT": "ASUS/ZS676KS/ROG Phone 5s:12/SKQ1.210821.001/20220810:user/release-keys",
-    "PRODUCT": "ZS676KS"
-  },
   "PACKAGES_ROG_PHONE_6D_ULTIMATE": [
     "com.gameloft.android.ANMP.GloftA9HM",
     "com.madfingergames.legends",
@@ -193,5 +181,17 @@
     "MODEL": "komodo",
     "FINGERPRINT": "google/komodo/komodo:15/BP1A.250505.005/13277524:user/release-keys",
     "PRODUCT": "komodo"
+  },
+  "PACKAGES_REALME_P3_5G": [
+    "com.dts.freefireth",
+    "com.dts.freefirethmax"
+  ],
+  "PACKAGES_REALME_P3_5G_DEVICE": {
+    "BRAND": "realme",
+    "DEVICE": "Realme P3 5G",
+    "MANUFACTURER": "realme",
+    "MODEL": "RMX5070",
+    "FINGERPRINT": "realme/RMX5070/RMX5070:15/SKQ1.230119.001/eng.user.20250415.155201:user/release-keys",
+    "PRODUCT": "RMX5070"
   }
 }
