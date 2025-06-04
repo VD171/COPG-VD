@@ -1,0 +1,36 @@
+---
+support: "https://t.me/COPG_module"
+donate: "https://t.me/AlirezaParsi" # Replace with actual donation URL if available
+cover: "https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/icon-v2.png"
+icon: "https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/webroot/icon.png"
+license: "MIT" # Confirm actual license (e.g., MIT, GPL-3.0)
+readme: "https://github.com/AlirezaParsi/COPG#readme"
+homepage: "https://github.com/AlirezaParsi/COPG"
+screenshots:
+  - "https://github.com/user-attachments/assets/c31fa24e-9a67-43b5-b5e1-a4b65190bed4" # WebUI Main Dashboard
+  - "https://github.com/user-attachments/assets/61d2bf0e-72b2-4c01-ab8f-a536ffc3c3c4" # WebUI Settings Panel
+  - "https://github.com/user-attachments/assets/07b7b135-dddb-48ed-a699-0db8f0c0e758" # WebUI Device Profiles
+  - "https://github.com/user-attachments/assets/6b420621-fc81-4b9f-ad35-7c71f6165faf" # WebUI Game List
+  - "https://github.com/user-attachments/assets/735aa872-fbf0-4cd1-8299-1989c08b9b80" # Game: Delta Force
+  - "https://github.com/user-attachments/assets/9a9fd8b2-7449-404f-888a-dedeefbe670d" # Game: CODM
+  - "https://github.com/user-attachments/assets/d9d3398f-5944-44e6-8df6-312e099c9738" # Game: PUBG Mobile
+  - "https://github.com/user-attachments/assets/4f80922a-dc68-48a5-80b5-b9523e47589b" # Game: LoL
+categories:
+  - Gaming
+  - Tools
+arch:
+  - "arm64-v8a"
+  - "armeabi-v7a"
+note:
+  title: Important Notice
+  message: Standard/Native Zygisk is not supported due to safety concerns. Use Zygisk Next or ReZygisk.
+manager:
+  magisk:
+    require: ["ZygiskNext", "ReZygisk"]
+    min_version: "24.0"
+  kernelsu:
+    require: ["ZygiskNext", "ReZygisk"]
+    min_version: "0.6.6"
+  apatch:
+    require: ["ZygiskNext", "ReZygisk"]
+    min_version: "0.10"
