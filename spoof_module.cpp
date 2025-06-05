@@ -108,13 +108,6 @@ public:
             return;
         }
 
-        JNIEnv* env = api->getEnv();
-        if (!env) {
-            LOGE("Failed to get JNIEnv in preAppSpecialize");
-            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-            return;
-        }
-
         const char* package_name = env->GetStringUTFChars(args->nice_name, nullptr);
         if (!package_name) {
             LOGE("Failed to get package name");
@@ -143,12 +136,6 @@ public:
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
         if (!args || !args->nice_name || package_map.empty() || !buildClass) return;
-
-        JNIEnv* env = api->getEnv();
-        if (!env) {
-            LOGE("Failed to get JNIEnv in postAppSpecialize");
-            return;
-        }
 
         const char* package_name = env->GetStringUTFChars(args->nice_name, nullptr);
         if (!package_name) {
