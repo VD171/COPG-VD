@@ -181,17 +181,5 @@
     "MODEL": "komodo",
     "FINGERPRINT": "google/komodo/komodo:15/BP1A.250505.005/13277524:user/release-keys",
     "PRODUCT": "komodo"
-  },
-  "PACKAGES_REALME_P3_5G": [
-    "com.dts.freefireth",
-    "com.dts.freefiremax"
-  ],
-  "PACKAGES_REALME_P3_5G_DEVICE": {
-    "BRAND": "realme",
-    "DEVICE": "Realme P3 5G",
-    "MANUFACTURER": "realme",
-    "MODEL": "RMX5070",
-    "FINGERPRINT": "realme/RMX5070/RMX5070:15/SKQ1.230119.001/eng.user.20250415.155201:user/release-keys",
-    "PRODUCT": "RMX5070"
   }
 }
