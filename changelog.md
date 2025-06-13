@@ -2,6 +2,9 @@
 - **Support Group**:
 https://t.me/TheAOSP
 ---
+## v4.3.2
+- secure spoofing
+- fixed Rezygisk installation 
 ## v4.3.1
 - Added Google photos spoof for unlimited backup and Ai reimagine feature
 - Added modern app picker (Use MMRL or WebUI-X)
