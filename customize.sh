@@ -34,7 +34,9 @@ print_failure_and_exit() {
 }
 
 check_zygisk() {
-  ZYGISK_MODULE="/data/adb/modules/zygisksu"
+  # Define possible Zygisk module paths
+  ZYGISK_NEXT_PATH="/data/adb/modules/zygisksu"
+  REZYGISK_PATH="/data/adb/modules/rezygisk"
 
   print_box_start
   ui_print "      ✦ Zygisk Detection ✦      "
@@ -87,43 +89,78 @@ check_zygisk() {
   if [ "$ROOT_SOLUTION" = "Magisk" ]; then
     ZYGISK_STATUS=$(magisk --sqlite "SELECT value FROM settings WHERE key='zygisk';" 2>/dev/null)
     if [ "$ZYGISK_STATUS" = "value=1" ]; then
-      if [ -d "$ZYGISK_MODULE" ] && [ -f "$ZYGISK_MODULE/disable" ]; then
-        ui_print " ✗ Zygisk Next Installed but Disabled!"
-        ui_print " ➤ Enable Zygisk Next in Modules"
-        print_failure_and_exit "zygisk"
-      elif [ -d "$ZYGISK_MODULE" ]; then
-        ui_print " ✔ Magisk: Zygisk Next Active    "
-        print_box_end
+      # Check for ReZygisk first
+      if [ -d "$REZYGISK_PATH" ]; then
+        if [ -f "$REZYGISK_PATH/disable" ]; then
+          ui_print " ✗ ReZygisk Installed but Disabled!"
+          ui_print " ➤ Enable ReZygisk in Modules"
+          print_failure_and_exit "zygisk"
+        else
+          ui_print " ✔ Magisk: ReZygisk Active    "
+          print_box_end
+          return
+        fi
+      # Then check for Zygisk Next
+      elif [ -d "$ZYGISK_NEXT_PATH" ]; then
+        if [ -f "$ZYGISK_NEXT_PATH/disable" ]; then
+          ui_print " ✗ Zygisk Next Installed but Disabled!"
+          ui_print " ➤ Enable Zygisk Next in Modules"
+          print_failure_and_exit "zygisk"
+        else
+          ui_print " ✔ Magisk: Zygisk Next Active    "
+          print_box_end
+          return
+        fi
       else
         ui_print " ✗ Magisk: Native Zygisk Not Supported!"
         ui_print " ➤ Install ReZygisk or Zygisk Next"
         ui_print " ➤ Disable Native Zygisk in Settings"
         print_failure_and_exit "zygisk"
       fi
-    elif [ -d "$ZYGISK_MODULE" ]; then
-      if [ -f "$ZYGISK_MODULE/disable" ]; then
-        ui_print " ✗ Zygisk Next Disabled!         "
-        ui_print " ➤ Enable in $MANAGER_NAME       "
+    else
+      # Check for ReZygisk first when native Zygisk is disabled
+      if [ -d "$REZYGISK_PATH" ]; then
+        if [ -f "$REZYGISK_PATH/disable" ]; then
+          ui_print " ✗ ReZygisk Disabled!         "
+          ui_print " ➤ Enable in $MANAGER_NAME       "
+          print_failure_and_exit "zygisk"
+        else
+          ui_print " ✔ Magisk: ReZygisk Active    "
+          print_box_end
+          return
+        fi
+      # Then check for Zygisk Next
+      elif [ -d "$ZYGISK_NEXT_PATH" ]; then
+        if [ -f "$ZYGISK_NEXT_PATH/disable" ]; then
+          ui_print " ✗ Zygisk Next Disabled!         "
+          ui_print " ➤ Enable in $MANAGER_NAME       "
+          print_failure_and_exit "zygisk"
+        else
+          ui_print " ✔ Magisk: Zygisk Next Active    "
+          print_box_end
+          return
+        fi
+      else
+        ui_print " ✗ Magisk: No Zygisk Detected!   "
+        ui_print " ➤ Install ReZygisk or Zygisk Next"
         print_failure_and_exit "zygisk"
       fi
-      ui_print " ✔ Magisk: Zygisk Next Active    "
-      print_box_end
-    else
-      ui_print " ✗ Magisk: No Zygisk Detected!   "
-      ui_print " ➤ Install ReZygisk or Zygisk Next"
-      print_failure_and_exit "zygisk"
     fi
   else
-    if [ -f "$ZYGISK_MODULE/disable" ]; then
-      ui_print " ✗ $ROOT_SOLUTION: Zygisk Next Disabled! "
-      ui_print " ➤ Enable in $MANAGER_NAME    "
-      print_failure_and_exit "zygisk"
-    elif [ -d "$ZYGISK_MODULE" ]; then
-      ui_print " ✔ $ROOT_SOLUTION: Zygisk Next Active    "
-      print_box_end
+    # For KernelSU and APatch, check both possible paths
+    if [ -d "$ZYGISK_NEXT_PATH" ] || [ -d "$REZYGISK_PATH" ]; then
+      # Check if either is disabled
+      if [ -f "$ZYGISK_NEXT_PATH/disable" ] || [ -f "$REZYGISK_PATH/disable" ]; then
+        ui_print " ✗ $ROOT_SOLUTION: Zygisk Module Disabled! "
+        ui_print " ➤ Enable in $MANAGER_NAME    "
+        print_failure_and_exit "zygisk"
+      else
+        ui_print " ✔ $ROOT_SOLUTION: Zygisk Module Active    "
+        print_box_end
+      fi
     else
-      ui_print " ✗ $ROOT_SOLUTION: Zygisk Next Not Found! "
-      ui_print " ➤ Install Zygisk Next Module    "
+      ui_print " ✗ $ROOT_SOLUTION: Zygisk Module Not Found! "
+      ui_print " ➤ Install Zygisk Next/ReZygisk Module    "
       print_failure_and_exit "zygisk"
     fi
   fi
