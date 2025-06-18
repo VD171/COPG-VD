@@ -5,6 +5,8 @@
 #include <fstream>
 #include <unordered_map>
 #include <sys/system_properties.h>
+#include <dlfcn.h>        // Added for dlopen, dlsym, dlclose, dlerror, RTLD_LAZY
+#include <sys/mman.h>     // Added for mprotect, PROT_READ, PROT_WRITE, PROT_EXEC
 #include <unistd.h>
 #include <android/log.h>
 #include <mutex>
