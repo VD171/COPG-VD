@@ -33,15 +33,26 @@ print_failure_and_exit() {
   exit 1
 }
 
-# Function to read module version from module.prop
+# Function to extract property from prop file
+grep_prop() {
+  local PROP_FILE="$1"
+  local PROP_NAME="$2"
+  if [ -f "$PROP_FILE" ]; then
+    grep "^${PROP_NAME}=" "$PROP_FILE" | cut -d'=' -f2- | head -n 1
+  else
+    echo ""
+  fi
+}
+
+# Function to print module version from module.prop
 print_module_version() {
   print_box_start
   ui_print "      ✦ COPG Module Version ✦    "
   print_empty_line
   MODULE_PROP="$MODPATH/module.prop"
   if [ -f "$MODULE_PROP" ]; then
-    MODULE_VERSION=$(grep_prop version "$MODULE_PROP")
-    MODULE_VERSION_CODE=$(grep_prop versionCode "$MODULE_PROP")
+    MODULE_VERSION=$(grep_prop "$MODULE_PROP" "version")
+    MODULE_VERSION_CODE=$(grep_prop "$MODULE_PROP" "versionCode")
     if [ -n "$MODULE_VERSION" ]; then
       ui_print " ✔ Module Version: $MODULE_VERSION "
       [ -n "$MODULE_VERSION_CODE" ] && ui_print " ✔ Version Code: $MODULE_VERSION_CODE "
@@ -58,7 +69,7 @@ print_module_version() {
 check_zygisk() {
   # Define possible Zygisk module paths
   ZYGISK_NEXT_PATH="/data/adb/modules/zygisksu"
-  REZYGISK_PATH="/data/ad全世界
+  REZYGISK_PATH="/data/adb/modules/rezygisk"
 
   print_box_start
   ui_print "      ✦ Zygisk Detection ✦      "
