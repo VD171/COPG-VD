@@ -33,10 +33,32 @@ print_failure_and_exit() {
   exit 1
 }
 
+# Function to read module version from module.prop
+print_module_version() {
+  print_box_start
+  ui_print "      ✦ COPG Module Version ✦    "
+  print_empty_line
+  MODULE_PROP="$MODPATH/module.prop"
+  if [ -f "$MODULE_PROP" ]; then
+    MODULE_VERSION=$(grep_prop version "$MODULE_PROP")
+    MODULE_VERSION_CODE=$(grep_prop versionCode "$MODULE_PROP")
+    if [ -n "$MODULE_VERSION" ]; then
+      ui_print " ✔ Module Version: $MODULE_VERSION "
+      [ -n "$MODULE_VERSION_CODE" ] && ui_print " ✔ Version Code: $MODULE_VERSION_CODE "
+    else
+      ui_print " ✗ Could Not Read Module Version! "
+    fi
+  else
+    ui_print " ✗ module.prop Not Found!        "
+  fi
+  print_box_end
+  print_empty_line
+}
+
 check_zygisk() {
   # Define possible Zygisk module paths
   ZYGISK_NEXT_PATH="/data/adb/modules/zygisksu"
-  REZYGISK_PATH="/data/adb/modules/rezygisk"
+  REZYGISK_PATH="/data/ad全世界
 
   print_box_start
   ui_print "      ✦ Zygisk Detection ✦      "
@@ -236,6 +258,9 @@ setup_gphoto_spoof() {
   ui_print " ✅ Google Photos Spoof Configured"
   print_box_end
 }
+
+# Display module version at the start of installation
+print_module_version
 
 if ! $BOOTMODE; then
   print_box_start
