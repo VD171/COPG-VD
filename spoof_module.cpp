@@ -5,8 +5,6 @@
 #include <fstream>
 #include <unordered_map>
 #include <sys/system_properties.h>
-#include <dlfcn.h>
-#include <sys/mman.h>
 #include <unistd.h>
 #include <android/log.h>
 #include <mutex>
@@ -26,8 +24,6 @@ struct DeviceInfo {
     std::string product;
 };
 
-typedef int (*orig_prop_get_t)(const char*, char*, const char*);
-static orig_prop_get_t orig_prop_get = nullptr;
 typedef void (*orig_set_static_object_field_t)(JNIEnv*, jclass, jfieldID, jobject);
 static orig_set_static_object_field_t orig_set_static_object_field = nullptr;
 
@@ -77,21 +73,6 @@ public:
                 buildClass = nullptr;
                 return;
             }
-        }
-
-        void* handle = dlopen("libc.so", RTLD_LAZY);
-        if (handle) {
-            orig_prop_get = (orig_prop_get_t)dlsym(handle, "__system_property_get");
-            if (!orig_prop_get) {
-                LOGE("Failed to find __system_property_get symbol");
-            }
-            dlclose(handle);
-        } else {
-            LOGE("Failed to open libc.so: %s", dlerror());
-        }
-
-        if (!hookNativeGetprop()) {
-            LOGE("Failed to hook __system_property_get");
         }
 
         if (!hookJniSetStaticObjectField()) {
@@ -236,68 +217,6 @@ private:
         if (!info.model.empty()) __system_property_set("ro.product.model", info.model.c_str());
         if (!info.fingerprint.empty()) __system_property_set("ro.build.fingerprint", info.fingerprint.c_str());
         if (!info.product.empty()) __system_property_set("ro.product.product", info.product.c_str());
-    }
-
-    static int hooked_prop_get(const char* name, char* value, const char* default_value) {
-        if (!orig_prop_get) return -1;
-        
-        std::lock_guard<std::mutex> lock(info_mutex);
-        std::string prop_name(name);
-        
-        if (prop_name == "ro.product.brand" && !current_info.brand.empty()) {
-            strncpy(value, current_info.brand.c_str(), PROP_VALUE_MAX);
-            return current_info.brand.length();
-        } else if (prop_name == "ro.product.device" && !current_info.device.empty()) {
-            strncpy(value, current_info.device.c_str(), PROP_VALUE_MAX);
-            return current_info.device.length();
-        } else if (prop_name == "ro.product.manufacturer" && !current_info.manufacturer.empty()) {
-            strncpy(value, current_info.manufacturer.c_str(), PROP_VALUE_MAX);
-            return current_info.manufacturer.length();
-        } else if (prop_name == "ro.product.model" && !current_info.model.empty()) {
-            strncpy(value, current_info.model.c_str(), PROP_VALUE_MAX);
-            return current_info.model.length();
-        } else if (prop_name == "ro.build.fingerprint" && !current_info.fingerprint.empty()) {
-            strncpy(value, current_info.fingerprint.c_str(), PROP_VALUE_MAX);
-            return current_info.fingerprint.length();
-        } else if (prop_name == "ro.product.product" && !current_info.product.empty()) {
-            strncpy(value, current_info.product.c_str(), PROP_VALUE_MAX);
-            return current_info.product.length();
-        }
-        
-        return orig_prop_get(name, value, default_value);
-    }
-
-    bool hookNativeGetprop() {
-        if (!orig_prop_get) return false;
-        
-        void* handle = dlopen("libc.so", RTLD_LAZY);
-        if (!handle) {
-            LOGE("Failed to open libc.so: %s", dlerror());
-            return false;
-        }
-
-        void* sym = dlsym(handle, "__system_property_get");
-        if (!sym) {
-            LOGE("Failed to find __system_property_get: %s", dlerror());
-            dlclose(handle);
-            return false;
-        }
-
-        size_t page_size = sysconf(_SC_PAGE_SIZE);
-        void* page_start = (void*)((uintptr_t)sym & ~(page_size - 1));
-        
-        if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
-            LOGE("Failed to mprotect for __system_property_get: %s", strerror(errno));
-            dlclose(handle);
-            return false;
-        }
-
-        *(void**)&orig_prop_get = (void*)hooked_prop_get;
-        mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
-        dlclose(handle);
-        
-        LOGD("Successfully hooked __system_property_get");
-        return true;
     }
 
     static void hooked_set_static_object_field(JNIEnv* env, jclass clazz, jfieldID fieldID, jobject value) {
