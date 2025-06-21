@@ -165,7 +165,7 @@ jobs:
           cat > module/module.prop << 'EOF'
           id=COPG
           name=✨ COPG spoof ✨
-          version=4.3.3-beta
+          version=4.3.3
           versionCode=433
           author=AlirezaParsi
           description=Spoof your device for games to unlock max fps.
