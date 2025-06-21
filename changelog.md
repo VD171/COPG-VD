@@ -4,7 +4,7 @@ https://t.me/TheAOSP
 ---
 ## v4.3.3
 - Fixed root detection by apps because of COPG
-- Fixed Mx player, Telegram and some apps crashing because COPG
+- Fixed Mx player, Telegraph and some apps crashing because COPG
 - Add version info in installation script 
 ## v4.3.2
 - secure spoofing
