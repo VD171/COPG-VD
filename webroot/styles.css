@@ -2037,3 +2037,34 @@ h2 {
 .dark-theme .ignore-explanation-popup .action-btn:hover {
     background: var(--primary-gradient);
 }
+/* Device Select Field Styles */
+.device-select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.device-select-wrapper input {
+    padding-right: 32px; /* Space for the icon */
+    width: 100%;
+}
+
+.dropdown-icon {
+    position: absolute;
+    right: 12px;
+    pointer-events: none;
+    transition: transform 0.2s ease;
+    color: var(--text-secondary);
+}
+
+#game-device.highlighted ~ .dropdown-icon {
+    color: var(--primary);
+}
+
+.dark-theme .dropdown-icon {
+    color: var(--dark-text-secondary);
+}
+
+.dark-theme #game-device.highlighted ~ .dropdown-icon {
+    color: var(--primary);
+}
