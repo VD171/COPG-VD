@@ -12,7 +12,7 @@
     <div class="container">
         <div class="header">
             <h1>COPG Manager <span class="version" id="version-text">v0.0</span></h1>
-            <button id="theme-toggle" class="theme-btn" title="Toggle Theme"><span id="theme-icon">☀️</span></button>
+            <button id="theme-toggle" class="theme-btn" title="Toggle Theme"><span id="theme-icon">â˜€ï¸</span></button>
         </div>
 
         <div class="tab-nav">
@@ -176,9 +176,14 @@
         </div>
     </div>
     <div class="form-group">
-        <label for="game-device">Device Profile</label>
+    <label for="game-device">Device Profile</label>
+    <div class="device-select-wrapper">
         <input type="text" id="game-device" placeholder="Select a device..." readonly required>
+        <svg class="dropdown-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"></path>
+        </svg>
     </div>
+</div>
     <div class="form-buttons">
         <button type="button" class="cancel-btn">Cancel</button>
         <button type="submit" class="action-btn">Save</button>
