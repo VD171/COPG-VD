@@ -172,6 +172,7 @@ jobs:
           support=https://t.me/theaosp
           updateJson=https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/update.json
           minMagisk=20.4
+          banner=https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/icon-v2.png
           EOF
 
       - name: Package module into ZIP
