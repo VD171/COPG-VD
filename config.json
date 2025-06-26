@@ -171,15 +171,15 @@
     "FINGERPRINT": "OnePlus/PJZ110/OP5D0DL1:15/AP3A.240617.008/V.1bd19a1-1-2:user/release-keys",
     "PRODUCT": "PJZ110"
   },
-  "PACKAGES_PIXEL_9_PRO_XL": [
+  "PACKAGES_PIXEL_XL": [
     "com.google.android.apps.photos"
   ],
-  "PACKAGES_PIXEL_9_PRO_XL_DEVICE": {
+  "PACKAGES_PIXEL_XL_DEVICE": {
     "BRAND": "google",
-    "DEVICE": "Pixel 9 Pro XL",
+    "DEVICE": "Pixel XL",
     "MANUFACTURER": "Google",
-    "MODEL": "komodo",
-    "FINGERPRINT": "google/komodo/komodo:15/BP1A.250505.005/13277524:user/release-keys",
-    "PRODUCT": "komodo"
+    "MODEL": "marlin",
+    "FINGERPRINT": "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys",
+    "PRODUCT": "marlin"
   }
 }
