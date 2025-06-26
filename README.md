@@ -18,10 +18,9 @@
 ### 🎮 Maximize Your Gaming Experience
 - Call of Duty Mobile: 120 FPS (BR/MT)
 - PUBG/BGMI: 120 FPS + Haptic Feedback
-- Delta Force: 120 FPS/HD Graphics
 - Mobile Legends: Ultra 120 FPS
 - Fortnite 90 FPS
-- +52 games supported!
+- +51 games supported!
 ### 📱 Exclusive App Enhancements
 Google Photos: Unlimited backup + AI generator
 TikTok: Stream in stunning 1080p
@@ -119,7 +118,6 @@ Edit `/data/adb/modules/COPG/config.json` with this format:
 
 ### 🎮 Game Examples
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/735aa872-fbf0-4cd1-8299-1989c08b9b80" width="180" hspace="10" alt="Delta Force">
   <img src="https://github.com/user-attachments/assets/9a9fd8b2-7449-404f-888a-dedeefbe670d" width="180" hspace="10" alt="CODM">
   <img src="https://github.com/user-attachments/assets/d9d3398f-5944-44e6-8df6-312e099c9738" width="180" hspace="10" alt="PUBG Mobile">
   <img src="https://github.com/user-attachments/assets/4f80922a-dc68-48a5-80b5-b9523e47589b" width="180" hspace="10" alt="LoL">
