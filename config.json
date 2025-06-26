@@ -18,7 +18,6 @@
     "com.supercell.squad",
     "com.blitzteam.battleprime",
     "com.tencent.tmgp.gnyx",
-    "com.garena.game.df",
     "com.ss.android.ugc.trill",
     "com.zhiliaoapp.musically"
   ],
@@ -159,17 +158,6 @@
     "MODEL": "2211133G",
     "FINGERPRINT": "Xiaomi/fuxi_eea/fuxi:13/TKQ1.221114.001/OS2.0.102.0.VMCEUXM:user/release-keys",
     "PRODUCT": "2211133G"
-  },
-  "PACKAGES_ONEPLUS_13": [
-    "com.proxima.dfm"
-  ],
-  "PACKAGES_ONEPLUS_13_DEVICE": {
-    "BRAND": "OnePlus",
-    "DEVICE": "OnePlus 13",
-    "MANUFACTURER": "OnePlus",
-    "MODEL": "PJZ110",
-    "FINGERPRINT": "OnePlus/PJZ110/OP5D0DL1:15/AP3A.240617.008/V.1bd19a1-1-2:user/release-keys",
-    "PRODUCT": "PJZ110"
   },
   "PACKAGES_PIXEL_XL": [
     "com.google.android.apps.photos"
