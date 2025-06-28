@@ -63,6 +63,8 @@
     "com.tencent.tmgp.pubgmhd",
     "com.vng.pubgmobile",
     "com.pubg.imobile",
+    "com.netflix.mediaclient",
+    "com.netflix.ninja",
     "com.tencent.ig"
   ],
   "PACKAGES_XIAOMI_13_PRO_DEVICE": {
