@@ -19,7 +19,8 @@
     "com.blitzteam.battleprime",
     "com.tencent.tmgp.gnyx",
     "com.ss.android.ugc.trill",
-    "com.zhiliaoapp.musically"
+    "com.zhiliaoapp.musically",
+    "com.garena.game.df"
   ],
   "PACKAGES_REDMAGIC_9_PRO_DEVICE": {
     "BRAND": "nubia",
@@ -158,6 +159,29 @@
     "MODEL": "2211133G",
     "FINGERPRINT": "Xiaomi/fuxi_eea/fuxi:13/TKQ1.221114.001/OS2.0.102.0.VMCEUXM:user/release-keys",
     "PRODUCT": "2211133G"
+  },
+  "PACKAGES_REALME_P3_5G": [
+    "com.dts.freefireth",
+    "com.dts.freefiremax"
+  ],
+  "PACKAGES_REALME_P3_5G_DEVICE": {
+    "BRAND": "realme",
+    "DEVICE": "Realme P3 5G",
+    "MANUFACTURER": "realme",
+    "MODEL": "RMX5070",
+    "FINGERPRINT": "realme/RMX5070/RMX5070:15/SKQ1.230119.001/eng.user.20250415.155201:user/release-keys",
+    "PRODUCT": "RMX5070"
+  },
+  "PACKAGES_ONEPLUS_13": [
+    "com.proxima.dfm"
+  ],
+  "PACKAGES_ONEPLUS_13_DEVICE": {
+    "BRAND": "OnePlus",
+    "DEVICE": "OnePlus 13",
+    "MANUFACTURER": "OnePlus",
+    "MODEL": "PJZ110",
+    "FINGERPRINT": "OnePlus/PJZ110/OP5D0DL1:15/AP3A.240617.008/V.1bd19a1-1-2:user/release-keys",
+    "PRODUCT": "PJZ110"
   },
   "PACKAGES_PIXEL_XL": [
     "com.google.android.apps.photos"
