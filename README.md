@@ -126,7 +126,7 @@ Edit `/data/adb/modules/COPG/config.json` with this format:
   <img src="https://github.com/user-attachments/assets/4f80922a-dc68-48a5-80b5-b9523e47589b" width="180" hspace="10" alt="LoL">
 </div>
 
---
+---
 - [![Telegram Channel](https://img.shields.io/badge/Telegram_Channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/COPG_module)
 - [![Telegram Group](https://img.shields.io/badge/Telegram_Group-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/TheAOSP)
 ---
