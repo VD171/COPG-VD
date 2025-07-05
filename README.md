@@ -8,7 +8,6 @@
 [![Android](https://img.shields.io/badge/Android-9.0%2B-blue?style=for-the-badge&logo=android)](https://www.android.com/)
 [![License](https://img.shields.io/github/license/AlirezaParsi/COPG?style=for-the-badge)](LICENSE)
 [![Downloads](https://img.shields.io/github/downloads/AlirezaParsi/COPG/total?style=for-the-badge&color=orange)](https://github.com/AlirezaParsi/COPG/releases)
-[![Telegram](https://img.shields.io/badge/Telegram_Channel-2CA5E0?style=for-the-badge&logo=telegram)]([https://t.me/COPG_module])
 ![Built with](https://img.shields.io/badge/Made_with-❤-red?style=for-the-badge)
 
 **The most advanced device spoofer for Android gaming - bypass restrictions and play any game on any device!**
@@ -127,9 +126,9 @@ Edit `/data/adb/modules/COPG/config.json` with this format:
   <img src="https://github.com/user-attachments/assets/4f80922a-dc68-48a5-80b5-b9523e47589b" width="180" hspace="10" alt="LoL">
 </div>
 
----
-[Telegram group](https://t.me/TheAOSP)
-[Telegram channel](https://t.me/COPG_module)
+--
+- [![Telegram Channel](https://img.shields.io/badge/Telegram_Channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/COPG_module)
+- [![Telegram Group](https://img.shields.io/badge/Telegram_Group-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/TheAOSP)
 ---
 
 <div align="center"> Made with ❤️ by Alireza Parsi | © 2025 COPG Project </div> 
