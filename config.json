@@ -163,8 +163,7 @@
     "PRODUCT": "2211133G"
   },
   "PACKAGES_REALME_P3_5G": [
-    "com.dts.freefireth",
-    "com.dts.freefiremax"
+    "com.dts.freefireth"
   ],
   "PACKAGES_REALME_P3_5G_DEVICE": {
     "BRAND": "realme",
