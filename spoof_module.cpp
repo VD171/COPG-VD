@@ -5,8 +5,8 @@
 #include <fstream>
 #include <unordered_map>
 #include <sys/system_properties.h>
-#include <dlfcn.h>        // Added for dlopen, dlsym, dlclose, dlerror, RTLD_LAZY
-#include <sys/mman.h>     // Added for mprotect, PROT_READ, PROT_WRITE, PROT_EXEC
+#include <dlfcn.h>
+#include <sys/mman.h>
 #include <unistd.h>
 #include <android/log.h>
 #include <mutex>
@@ -25,9 +25,6 @@ struct DeviceInfo {
     std::string fingerprint;
     std::string product;
 };
-
-typedef void (*orig_set_static_object_field_t)(JNIEnv*, jclass, jfieldID, jobject);
-static orig_set_static_object_field_t orig_set_static_object_field = nullptr;
 
 static DeviceInfo current_info;
 static std::mutex info_mutex;
@@ -75,10 +72,6 @@ public:
                 buildClass = nullptr;
                 return;
             }
-        }
-
-        if (!hookJniSetStaticObjectField()) {
-            LOGE("Failed to hook JNI_SetStaticObjectField");
         }
 
         loadConfig();
@@ -219,52 +212,6 @@ private:
         if (!info.model.empty()) __system_property_set("ro.product.model", info.model.c_str());
         if (!info.fingerprint.empty()) __system_property_set("ro.build.fingerprint", info.fingerprint.c_str());
         if (!info.product.empty()) __system_property_set("ro.product.product", info.product.c_str());
-    }
-
-    static void hooked_set_static_object_field(JNIEnv* env, jclass clazz, jfieldID fieldID, jobject value) {
-        if (clazz == buildClass) {
-            if (fieldID == modelField || fieldID == brandField || fieldID == deviceField ||
-                fieldID == manufacturerField || fieldID == fingerprintField || fieldID == productField) {
-                LOGD("Blocked attempt to reset Build field");
-                return;
-            }
-        }
-        
-        if (orig_set_static_object_field) {
-            orig_set_static_object_field(env, clazz, fieldID, value);
-        }
-    }
-
-    bool hookJniSetStaticObjectField() {
-        void* handle = dlopen("libandroid_runtime.so", RTLD_LAZY);
-        if (!handle) {
-            LOGE("Failed to open libandroid_runtime.so: %s", dlerror());
-            return false;
-        }
-
-        void* sym = dlsym(handle, "JNI_SetStaticObjectField");
-        if (!sym) {
-            LOGE("Failed to find JNI_SetStaticObjectField: %s", dlerror());
-            dlclose(handle);
-            return false;
-        }
-
-        size_t page_size = sysconf(_SC_PAGE_SIZE);
-        void* page_start = (void*)((uintptr_t)sym & ~(page_size - 1));
-        
-        if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
-            LOGE("Failed to mprotect for JNI_SetStaticObjectField: %s", strerror(errno));
-            dlclose(handle);
-            return false;
-        }
-
-        orig_set_static_object_field = *(orig_set_static_object_field_t*)&sym;
-        *(void**)&sym = (void*)hooked_set_static_object_field;
-        mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
-        dlclose(handle);
-        
-        LOGD("Successfully hooked JNI_SetStaticObjectField");
-        return true;
     }
 };
 
