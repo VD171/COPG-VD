@@ -1,7 +1,15 @@
 # COPG Spoof Module
 - **Support Group**:
-https://t.me/TheAOSP
+- https://t.me/TheAOSP
+- https://t.me/COPG_module
 ---
+## v4.3.4
+- Added FreeFire 120 fps
+- Added delta force into game repo
+- Added Netflix spoof 
+- Cleanup and improving performance and safety
+- added KernelSU Next banner
+- UI improvement
 ## v4.3.3
 - Fixed root detection by apps because of COPG
 - Fixed Mx player, Telegraph and some apps crashing because COPG
