@@ -1537,6 +1537,31 @@ function switchTab(tabId, direction = null) {
     document.getElementById(`tab-${tabId}`)?.classList.add('active');
 }
 
+function copyLogContent() {
+    const output = document.getElementById('output');
+    const logContent = output.innerText || output.textContent;
+    
+    const textarea = document.createElement('textarea');
+    textarea.value = logContent;
+    document.body.appendChild(textarea);
+    textarea.select();
+    
+    try {
+        
+        const successful = document.execCommand('copy');
+        if (successful) {
+            appendToOutput("Logs copied to clipboard", 'success');
+        } else {
+            appendToOutput("Failed to copy logs", 'error');
+        }
+    } catch (err) {
+        appendToOutput("Error copying logs: " + err, 'error');
+    }
+    
+    
+    document.body.removeChild(textarea);
+}
+
 function setupSwipeNavigation() {
     const container = document.getElementById('tab-container');
     let touchStartX = 0;
@@ -1784,7 +1809,10 @@ function applyEventListeners() {
         output.innerHTML = '';
         appendToOutput("Log cleared", 'success');
     });
-
+    document.getElementById('copy-log').addEventListener('click', (e) => {
+    e.stopPropagation();
+    copyLogContent();
+});
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 
     document.getElementById('tab-settings').addEventListener('click', () => switchTab('settings'));
