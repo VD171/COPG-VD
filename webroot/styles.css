@@ -2068,3 +2068,20 @@ h2 {
 .dark-theme #game-device.highlighted ~ .dropdown-icon {
     color: var(--primary);
 }
+.log-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.copy-text {
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+	padding: 4px 8px;
+	transition: all 0.2s ease;
+}
+
+.copy-text:hover {
+	background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
