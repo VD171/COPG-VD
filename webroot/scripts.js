@@ -47,8 +47,7 @@ async function togglePackageInIgnoreList(packageName) {
     }
 }
 
-ksu.fullScreen(true)
-
+// ksu.fullScreen(true)
 // Module ID for COPG
 const MODULE_ID = 'COPG';
 const SANITIZED_MODULE_ID = MODULE_ID.replace(/[^a-zA-Z0-9_.]/g, '_');
@@ -2006,38 +2005,63 @@ async function showPackagePicker() {
 
     try {
         let pkgList = [];
+        let apiUsed = '';
         
-        // First try using the API method
+        // First try using WebUI-X API
         try {
             if (typeof $packageManager !== 'undefined' && typeof $packageManager.getInstalledPackages === 'function') {
                 pkgList = JSON.parse($packageManager.getInstalledPackages(0, 0));
-                appendToOutput("Loaded packages using API method", 'success');
+                apiUsed = 'WebUI-X';
+                appendToOutput("Loaded packages using WebUI-X API", 'success');
             } else {
-                throw new Error("PackageManager API not available");
+                throw new Error("WebUI-X PackageManager API not available");
             }
         } catch (apiError) {
-            appendToOutput("API method failed, falling back to pm command: " + apiError, 'warning');
-            // Fallback to pm list packages command
-            const pmOutput = await execCommand("pm list packages | cut -d: -f2");
-            pkgList = pmOutput.trim().split('\n').filter(pkg => pkg.trim() !== '');
-            if (pkgList.length === 0) {
-                throw new Error("No packages found using pm command");
+            // Fallback to Next-WebUI API
+            try {
+                if (typeof ksu !== 'undefined' && typeof ksu.listAllPackages === 'function') {
+                    pkgList = JSON.parse(ksu.listAllPackages());
+                    apiUsed = 'Next-WebUI';
+                    appendToOutput("Loaded packages using Next-WebUI API", 'success');
+                } else {
+                    throw new Error("Next-WebUI API not available");
+                }
+            } catch (nextApiError) {
+                // Final fallback to pm command
+                appendToOutput("APIs failed, falling back to pm command", 'warning');
+                const pmOutput = await execCommand("pm list packages | cut -d: -f2");
+                pkgList = pmOutput.trim().split('\n').filter(pkg => pkg.trim() !== '');
+                apiUsed = 'pm command';
+                if (pkgList.length === 0) {
+                    throw new Error("No packages found using pm command");
+                }
+                appendToOutput(`Loaded ${pkgList.length} packages using pm command`, 'success');
             }
-            appendToOutput(`Loaded ${pkgList.length} packages using pm command`, 'success');
         }
+
         appendToOutput("Indexing apps for search...", 'info');
 
         // Populate app index with package names and labels
         for (const pkg of pkgList) {
             let label = pkg; // Fallback to package name
+            
+            // Try to get app info using available APIs
             try {
-                const info = $packageManager.getApplicationInfo(pkg, 0, 0);
-                if (info && info.getLabel()) {
-                    label = info.getLabel() || pkg;
+                if (apiUsed === 'WebUI-X' && typeof $packageManager !== 'undefined') {
+                    const info = $packageManager.getApplicationInfo(pkg, 0, 0);
+                    if (info && info.getLabel()) {
+                        label = info.getLabel() || pkg;
+                    }
+                } else if (apiUsed === 'Next-WebUI' && typeof ksu !== 'undefined' && typeof ksu.getPackagesInfo === 'function') {
+                    const info = JSON.parse(ksu.getPackagesInfo(`[${pkg}]`));
+                    if (info && info[0] && info[0].appLabel) {
+                        label = info[0].appLabel || pkg;
+                    }
                 }
             } catch (e) {
                 console.error(`Error fetching label for ${pkg}:`, e);
             }
+            
             appIndex.push({ 
                 package: pkg, 
                 label: label.toLowerCase(), 
@@ -2073,31 +2097,43 @@ async function showPackagePicker() {
                         
                         try {
                             // Try to load app icon if API is available
-                            if (typeof $packageManager !== 'undefined' && typeof $packageManager.getApplicationIcon === 'function') {
+                            if (typeof $packageManager !== 'undefined') {
                                 const stream = $packageManager.getApplicationIcon(pkg, 0, 0);
                                 await loadPackagePickerDependencies();
                                 const response = await wrapInputStream(stream);
                                 const buffer = await response.arrayBuffer();
                                 
-                                // Create the actual image element
                                 const img = document.createElement('img');
                                 img.className = 'app-icon-loaded';
                                 img.src = 'data:image/png;base64,' + arrayBufferToBase64(buffer);
                                 img.style.opacity = '0';
                                 img.style.transition = 'opacity 0.3s ease';
                                 
-                                // Replace placeholder with actual icon
                                 iconContainer.innerHTML = '';
                                 iconContainer.appendChild(img);
                                 
-                                // Fade in the icon
                                 setTimeout(() => {
                                     img.style.opacity = '1';
                                 }, 10);
+                            } else if (typeof ksu !== 'undefined' && typeof ksu.getPackagesIcons === 'function') {
+                                const app = JSON.parse(ksu.getPackagesIcons(`[${pkg}]`, 100));
+                                if (app && app[0] && app[0].icon) {
+                                    const img = document.createElement('img');
+                                    img.className = 'app-icon-loaded';
+                                    img.src = app[0].icon;
+                                    img.style.opacity = '0';
+                                    img.style.transition = 'opacity 0.3s ease';
+                                    
+                                    iconContainer.innerHTML = '';
+                                    iconContainer.appendChild(img);
+                                    
+                                    setTimeout(() => {
+                                        img.style.opacity = '1';
+                                    }, 10);
+                                }
                             }
                         } catch (e) {
                             console.error('Error loading app icon:', e);
-                            // Keep the placeholder if loading fails
                             iconContainer.classList.add('load-failed');
                         }
 
