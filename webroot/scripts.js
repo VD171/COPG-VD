@@ -47,6 +47,8 @@ async function togglePackageInIgnoreList(packageName) {
     }
 }
 
+ksu.fullScreen(true)
+
 // Module ID for COPG
 const MODULE_ID = 'COPG';
 const SANITIZED_MODULE_ID = MODULE_ID.replace(/[^a-zA-Z0-9_.]/g, '_');
