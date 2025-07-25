@@ -2085,3 +2085,64 @@ h2 {
 	background: rgba(255, 255, 255, 0.2);
     border-radius: 4px;
 }
+
+.log-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.logcat-text {
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+}
+
+.logcat-text:hover {
+    background: rgba(96, 165, 250, 0.1);
+    border-radius: 4px;
+}
+
+.dark-theme .logcat-text {
+    color: var(--primary);
+}
+
+.dark-theme .logcat-text:hover {
+    background: rgba(96, 165, 250, 0.15);
+}
+
+#start-logcat {
+    color: var(--success); 
+    background: rgba(52, 211, 153, 0.1); 
+}
+
+#start-logcat:hover {
+    background: rgba(52, 211, 153, 0.2); 
+}
+
+#stop-logcat {
+    color: var(--error); 
+    background: rgba(248, 113, 113, 0.1); 
+}
+
+#stop-logcat:hover {
+    background: rgba(248, 113, 113, 0.2); 
+}
+
+.dark-theme #start-logcat {
+    background: rgba(52, 211, 153, 0.15); 
+}
+
+.dark-theme #start-logcat:hover {
+    background: rgba(52, 211, 153, 0.25); 
+}
+
+.dark-theme #stop-logcat {
+    background: rgba(248, 113, 113, 0.15); 
+}
+
+.dark-theme #stop-logcat:hover {
+    background: rgba(248, 113, 113, 0.25); 
+}
