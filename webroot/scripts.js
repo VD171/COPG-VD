@@ -27,7 +27,7 @@ async function startLogcat(e) {
     }
 
     try {
-        appendToOutput("Starting logcat for SpoofModule...", 'info');
+        appendToOutput("Starting logcat for SpoofModule... (open target game ...)", 'info');
         logcatRunning = true;
         
         document.getElementById('start-logcat').style.display = 'none';
