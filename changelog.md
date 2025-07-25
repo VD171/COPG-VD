@@ -3,6 +3,11 @@
 - https://t.me/TheAOSP
 - https://t.me/COPG_module
 ---
+## v4.3.5
+- Added Next-WebUI package manager
+- Removed shortcut button from WebUI (use WebUI-X app for creat shortcut)
+- added logcat to WebUI (Now you don't need terminal to send me logs)
+- added copy button to WebUI console/logs/output
 ## v4.3.4
 - Added FreeFire 120 fps
 - Added delta force into game repo
