@@ -9,6 +9,91 @@ let snackbarTimeout = null;
 let appIndex = []; // Global index for app data
 let packagePickerObserver = null;
 
+let logcatProcess = null;
+let logcatRunning = false;
+
+async function startLogcat(e) {
+    if (e) e.stopPropagation();
+    if (logcatRunning) return;
+
+    // Check if logging is disabled
+    const loggingToggle = document.getElementById('toggle-logging');
+    if (loggingToggle && loggingToggle.checked) {
+        // Show error popup
+        document.getElementById('error-message').textContent = "Please disable 'Disable Logging' option first to use logcat.";
+        showPopup('error-popup');
+        appendToOutput("Cannot start logcat - 'Disable Logging' is enabled", 'error');
+        return;
+    }
+
+    try {
+        appendToOutput("Starting logcat for SpoofModule...", 'info');
+        logcatRunning = true;
+        
+        document.getElementById('start-logcat').style.display = 'none';
+        document.getElementById('stop-logcat').style.display = 'inline-block';
+        
+        document.getElementById('log-content').classList.remove('collapsed');
+        document.querySelector('#settings-log-section .toggle-icon').classList.add('expanded');
+        
+        await execCommand("su -c 'logcat -c'");
+        
+        readLogcat();
+
+    } catch (error) {
+        appendToOutput(`Failed to start logcat: ${error}`, 'error');
+        stopLogcat();
+    }
+}
+
+async function readLogcat() {
+    if (!logcatRunning) return;
+
+    try {
+        const logs = await execCommand("su -c 'logcat -d -s SpoofModule'");
+        
+        if (logs && logs.trim()) {
+            const lines = logs.split('\n');
+            lines.forEach(line => {
+                if (line.trim()) {
+                    let logType = 'info';
+                    if (line.includes(' E ') || line.includes('ERROR')) logType = 'error';
+                    else if (line.includes(' W ') || line.includes('WARN')) logType = 'warning';
+                    
+                    appendToOutput(line.trim(), logType);
+                }
+            });
+        }
+        
+        await execCommand("su -c 'logcat -c'");
+        
+        if (logcatRunning) {
+            setTimeout(readLogcat, 10); 
+        }
+
+    } catch (error) {
+        appendToOutput(`Logcat error: ${error}`, 'error');
+        stopLogcat();
+    }
+}
+
+function stopLogcat(e) {
+    if (e) e.stopPropagation();
+    if (!logcatRunning) return;
+
+    logcatRunning = false;
+    
+    try {
+        execCommand("su -c 'logcat -c'").catch(() => {});
+        appendToOutput("Logcat stopped", 'info');
+    } catch (error) {
+        appendToOutput(`Error stopping logcat: ${error}`, 'error');
+    } finally {
+        document.getElementById('start-logcat').style.display = 'inline-block';
+        document.getElementById('stop-logcat').style.display = 'none';
+    }
+}
+
 async function readIgnoreList() {
     try {
         const ignoreListContent = await execCommand("cat /data/adb/modules/COPG/ignorelist.txt || echo ''");
@@ -35,15 +120,13 @@ async function togglePackageInIgnoreList(packageName) {
     const index = ignoreList.indexOf(packageName);
     
     if (index === -1) {
-        // Add to ignore list
         ignoreList.push(packageName);
         await writeIgnoreList(ignoreList);
-        return true; // Added
+        return true; 
     } else {
-        // Remove from ignore list
         ignoreList.splice(index, 1);
         await writeIgnoreList(ignoreList);
-        return false; // Removed
+        return false; 
     }
 }
 
@@ -55,13 +138,23 @@ const JS_INTERFACE = `$${SANITIZED_MODULE_ID}`; // e.g., $COPG
 const DEBUG_LOGS = false; // Set to true for detailed debug logs
 
 async function execCommand(command) {
-    const callbackName = `exec_callback_${Date.now()}`;
     return new Promise((resolve, reject) => {
+        const callbackName = `exec_callback_${Date.now()}`;
+        
         window[callbackName] = (errno, stdout, stderr) => {
             delete window[callbackName];
-            errno === 0 ? resolve(stdout) : reject(stderr);
+            if (errno === 0) {
+                resolve(stdout || "");
+            } else {
+                reject(stderr || `Command failed with error code ${errno}`);
+            }
         };
-        ksu.exec(command, "{}", callbackName);
+        
+        if (typeof ksu !== 'undefined' && ksu.exec) {
+            ksu.exec(command, "{}", callbackName);
+        } else {
+            reject("KSU API not available");
+        }
     });
 }
 
@@ -1802,7 +1895,8 @@ function applyEventListeners() {
             shortcutButton.style.display = 'none';
         }
     }
-
+	document.getElementById('start-logcat').addEventListener('click', startLogcat);
+	document.getElementById('stop-logcat').addEventListener('click', stopLogcat);
     document.getElementById('log-header').addEventListener('click', toggleLogSection);
     document.getElementById('clear-log').addEventListener('click', (e) => {
         e.stopPropagation();
