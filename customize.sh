@@ -1,10 +1,9 @@
-#!/sbin/sh
-
 # ================================================
 # COPG Module Installation Script
 # ================================================
 
 INSTALL_SUCCESS=true
+ENABLE_GPHOTO_SPOOF=true
 
 print_box_start() {
   ui_print "╔═════════════════════════════════╗"
@@ -197,6 +196,56 @@ check_zygisk() {
       print_failure_and_exit "zygisk"
     fi
   fi
+}
+
+prompt_gphoto_spoof() {
+  print_box_start
+  ui_print "      ✦ Google Photos Spoof ✦    "
+  print_empty_line
+  ui_print " ❓ Enable Google Photos Spoof?   "
+  ui_print " ➤ Volume Up: Yes                "
+  ui_print " ➤ Volume Down: No               "
+  print_empty_line
+  ui_print " ⏰ Waiting 10s for Input...      "
+  print_box_end
+
+  # Time-based timeout (10 seconds)
+  TIMEOUT=10
+  START_TIME=$(date +%s)
+
+  while true; do
+    # Check elapsed time
+    CURRENT_TIME=$(date +%s)
+    ELAPSED=$((CURRENT_TIME - START_TIME))
+    if [ $ELAPSED -ge $TIMEOUT ]; then
+      ui_print " ⏰ Timeout Reached (10s). Google Photos Spoof Disabled."
+      ENABLE_GPHOTO_SPOOF=false
+      return
+    fi
+
+    # Capture one input event with timeout (if available)
+    if command -v timeout >/dev/null 2>&1; then
+      EVENT=$(timeout 0.1 getevent -lc1 2>/dev/null | tr -d '\r')
+    else
+      EVENT=$(getevent -lc1 2>/dev/null | tr -d '\r')
+    fi
+
+    # Check for volume key presses
+    if [ -n "$EVENT" ]; then
+      if echo "$EVENT" | grep -q "KEY_VOLUMEUP.*DOWN"; then
+        ui_print " ✅ Volume Up Pressed. Enabling Google Photos Spoof."
+        ENABLE_GPHOTO_SPOOF=true
+        return
+      elif echo "$EVENT" | grep -q "KEY_VOLUMEDOWN.*DOWN"; then
+        ui_print " ❌ Volume Down Pressed. Disabling Google Photos Spoof."
+        ENABLE_GPHOTO_SPOOF=false
+        return
+      fi
+    fi
+
+    # Short sleep to reduce CPU usage
+    sleep 0.05
+  done
 }
 
 setup_gphoto_spoof() {
@@ -446,9 +495,63 @@ if $INSTALL_SUCCESS; then
   fi
 
   if $INSTALL_SUCCESS; then
-    setup_gphoto_spoof || {
-      INSTALL_SUCCESS=false
-    }
+    prompt_gphoto_spoof
+    if $ENABLE_GPHOTO_SPOOF; then
+      setup_gphoto_spoof || {
+        INSTALL_SUCCESS=false
+      }
+    else
+      print_box_start
+      ui_print "      ✦ Google Photos Spoof ✦    "
+      print_empty_line
+      ui_print " ⚙ Removing Google Photos from Config "
+      # Remove com.google.android.apps.photos from config.json
+      CONFIG_PATH="$MODPATH/config.json"
+      TEMP_CONFIG="$MODPATH/config_temp.json"
+      if [ -f "$CONFIG_PATH" ]; then
+        # Use sed to remove the line containing com.google.android.apps.photos
+        sed '/com\.google\.android\.apps\.photos/d' "$CONFIG_PATH" > "$TEMP_CONFIG" || {
+          ui_print " ✗ Failed to Modify config.json!"
+          print_failure_and_exit "gphoto"
+        }
+        mv "$TEMP_CONFIG" "$CONFIG_PATH" || {
+          ui_print " ✗ Failed to Update config.json!"
+          print_failure_and_exit "gphoto"
+        }
+        chmod 0644 "$CONFIG_PATH" || {
+          ui_print " ✗ Failed to Set Permissions (config.json)! "
+          print_failure_and_exit "gphoto"
+        }
+        chcon u:object_r:system_file:s0 "$CONFIG_PATH" || {
+          ui_print " ✗ Failed to Set SELinux Context (config.json)! "
+          print_failure_and_exit "gphoto"
+        }
+        ui_print " ✔ Removed Google Photos from Config "
+      else
+        ui_print " ⚠ config.json Not Found, Skipping "
+      fi
+      # Clean up Google Photos spoof directories and their parents if empty
+      for dir in "$MODPATH/system/etc/sysconfig" "$MODPATH/system/product/etc/sysconfig" "$MODPATH/product/etc/sysconfig"; do
+        if [ -d "$dir" ]; then
+          rm -rf "$dir" || {
+            ui_print " ✗ Failed to Remove $dir!"
+            print_failure_and_exit "gphoto"
+          }
+          ui_print " ✔ Removed $dir"
+        fi
+      done
+      # Attempt to remove parent directories if they are empty
+      for parent in "$MODPATH/system/etc" "$MODPATH/system/product/etc" "$MODPATH/system/product" "$MODPATH/system" "$MODPATH/product/etc" "$MODPATH/product"; do
+        if [ -d "$parent" ]; then
+          rmdir "$parent" 2>/dev/null && ui_print " ✔ Removed empty $parent" || {
+            # If rmdir fails, the directory is not empty, so skip silently
+            :
+          }
+        fi
+      done
+      ui_print " ✅ Google Photos Spoof Disabled "
+      print_box_end
+    fi
   fi
 
   if $INSTALL_SUCCESS; then
