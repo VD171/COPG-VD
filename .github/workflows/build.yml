@@ -1,4 +1,4 @@
-name: Builder
+name: Build COPG Module
 
 on:
   workflow_dispatch:
@@ -23,16 +23,14 @@ on:
         type: string
         required: false
         default: ''
-      version:
-        description: 'Module version (e.g., 4.3.5)'
+      custom_version:
+        description: 'Custom version (e.g. 4.3.5)'
         type: string
-        required: true
-        default: ''
-      versionCode:
-        description: 'Module version code (e.g., 435)'
+        required: false
+      custom_version_code:
+        description: 'Custom version code (e.g. 435)'
         type: string
-        required: true
-        default: ''
+        required: false
 
 permissions:
   contents: write
@@ -129,7 +127,7 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake
             -DANDROID_ABI=armeabi-v7a
             -DANDROID_PLATFORM=android-34
-            -CMAKE_MAKE_PROGRAM=/usr/bin/make
+            -DCMAKE_MAKE_PROGRAM=/usr/bin/make
 
       - name: Build Project (armeabi-v7a) - End
         id: arm32_end
@@ -172,11 +170,16 @@ jobs:
           cp bin/arm64-v8a/config_watcher module/bin/arm64-v8a/config_watcher
           cp bin/armeabi-v7a/config_watcher module/bin/armeabi-v7a/config_watcher
           chmod 755 module/customize.sh module/service.sh module/action.sh module/uninstall.sh module/update_config.sh module/bin/arm64-v8a/jq module/bin/armeabi-v7a/jq module/bin/arm64-v8a/config_watcher module/bin/armeabi-v7a/config_watcher module/META-INF/com/google/android/update-binary
-          cat > module/module.prop << 'EOF'
+          
+          # Set version and versionCode from inputs or use defaults
+          VERSION="${{ github.event.inputs.custom_version || '4.3.5' }}"
+          VERSION_CODE="${{ github.event.inputs.custom_version_code || '435' }}"
+          
+          cat > module/module.prop << EOF
           id=COPG
           name=✨ COPG spoof ✨
-          version=${{ github.event.inputs.version }}
-          versionCode=${{ github.event.inputs.versionCode }}
+          version=$VERSION
+          versionCode=$VERSION_CODE
           author=AlirezaParsi
           description=Spoof your device for games/apps to unlock new features.
           support=https://t.me/theaosp
@@ -187,7 +190,7 @@ jobs:
 
       - name: Package module into ZIP
         run: |
-          VERSION=${{ github.event.inputs.version }}
+          VERSION=$(grep "version=" module/module.prop | cut -d'=' -f2)
           ZIP_NAME="COPG-v$VERSION.zip"
           cd module
           zip -r "../$ZIP_NAME" .
