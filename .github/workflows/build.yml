@@ -1,4 +1,4 @@
-name: Build COPG Module
+name: Build COPG
 
 on:
   workflow_dispatch:
