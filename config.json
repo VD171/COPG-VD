@@ -162,17 +162,6 @@
     "FINGERPRINT": "Xiaomi/fuxi_eea/fuxi:13/TKQ1.221114.001/OS2.0.102.0.VMCEUXM:user/release-keys",
     "PRODUCT": "2211133G"
   },
-  "PACKAGES_REALME_P3_5G": [
-    "com.dts.freefireth"
-  ],
-  "PACKAGES_REALME_P3_5G_DEVICE": {
-    "BRAND": "realme",
-    "DEVICE": "Realme P3 5G",
-    "MANUFACTURER": "realme",
-    "MODEL": "RMX5070",
-    "FINGERPRINT": "realme/RMX5070/RMX5070:15/SKQ1.230119.001/eng.user.20250415.155201:user/release-keys",
-    "PRODUCT": "RMX5070"
-  },
   "PACKAGES_ONEPLUS_13": [
     "com.proxima.dfm"
   ],

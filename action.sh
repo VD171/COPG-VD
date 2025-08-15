@@ -61,6 +61,47 @@ download_and_update() {
     return 0
 }
 
+# Prompt for update confirmation with volume keys
+echo "❓ Do you want to update/reset the game and device list?"
+echo "➕ Volume Up: Yes"
+echo "➖ Volume Down: No"
+
+# Time-based timeout (10 seconds)
+TIMEOUT=10
+START_TIME=$(date +%s)
+
+while true; do
+    # Check elapsed time
+    CURRENT_TIME=$(date +%s)
+    ELAPSED=$((CURRENT_TIME - START_TIME))
+    if [ $ELAPSED -ge $TIMEOUT ]; then
+        echo "⏰ Timeout reached (10 seconds)."
+        echo "❌ Update canceled."
+        exit 0
+    fi
+
+    # Capture one input event with timeout (if available)
+    if command -v timeout >/dev/null 2>&1; then
+        EVENT=$(timeout 0.1 getevent -lc1 2>/dev/null | tr -d '\r')
+    else
+        EVENT=$(getevent -lc1 2>/dev/null | tr -d '\r')
+    fi
+    
+    # Check for volume key presses
+    if [ -n "$EVENT" ]; then
+        if echo "$EVENT" | grep -q "KEY_VOLUMEUP.*DOWN"; then
+            echo "✅ Volume Up pressed. Proceeding with update..."
+            break
+        elif echo "$EVENT" | grep -q "KEY_VOLUMEDOWN.*DOWN"; then
+            echo "❌ Volume Down pressed. Update canceled."
+            exit 0
+        fi
+    fi
+    
+    # Short sleep to reduce CPU usage
+    sleep 0.05
+done
+
 # Create module directory if it doesn't exist
 mkdir -p "$MODDIR"
 
