@@ -3,6 +3,11 @@
 - https://t.me/TheAOSP
 - https://t.me/COPG_module
 ---
+## v4.3.6
+- Removed freefire
+- Added volume control for action script
+- Added optional volume control for installing Google photos spoof
+- 
 ## v4.3.5
 - Added Next-WebUI package manager
 - Removed shortcut button from WebUI (use WebUI-X app to create shortcut)
