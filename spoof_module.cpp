@@ -4,7 +4,6 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <unordered_map>
-#include <sys/system_properties.h>
 #include <dlfcn.h>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -103,7 +102,6 @@ public:
                 current_info = it->second;
                 LOGD("Spoofing device for package %s: %s", package_name, current_info.model.c_str());
                 spoofDevice(current_info);
-                spoofSystemProperties(current_info);
             }
         }
         
@@ -126,7 +124,6 @@ public:
                 current_info = it->second;
                 LOGD("Post-specialize spoofing for %s: %s", package_name, current_info.model.c_str());
                 spoofDevice(current_info);
-                spoofSystemProperties(current_info);
             }
         }
 
@@ -202,16 +199,6 @@ private:
         if (manufacturerField) env->SetStaticObjectField(buildClass, manufacturerField, env->NewStringUTF(info.manufacturer.c_str()));
         if (fingerprintField) env->SetStaticObjectField(buildClass, fingerprintField, env->NewStringUTF(info.fingerprint.c_str()));
         if (productField) env->SetStaticObjectField(buildClass, productField, env->NewStringUTF(info.product.c_str()));
-    }
-
-    void spoofSystemProperties(const DeviceInfo& info) {
-        LOGD("Spoofing system properties for: %s", info.model.c_str());
-        if (!info.brand.empty()) __system_property_set("ro.product.brand", info.brand.c_str());
-        if (!info.device.empty()) __system_property_set("ro.product.device", info.device.c_str());
-        if (!info.manufacturer.empty()) __system_property_set("ro.product.manufacturer", info.manufacturer.c_str());
-        if (!info.model.empty()) __system_property_set("ro.product.model", info.model.c_str());
-        if (!info.fingerprint.empty()) __system_property_set("ro.build.fingerprint", info.fingerprint.c_str());
-        if (!info.product.empty()) __system_property_set("ro.product.product", info.product.c_str());
     }
 };
 
