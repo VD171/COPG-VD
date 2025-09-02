@@ -64,7 +64,7 @@ public:
         loadConfig();
     }
 
-    void onUnload() override {
+    void onUnload() { 
         std::lock_guard<std::mutex> lock(info_mutex);
         if (buildClass) {
             env->DeleteGlobalRef(buildClass);
