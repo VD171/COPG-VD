@@ -41,7 +41,6 @@
     "PRODUCT": "2SM-X706B"
   },
   "PACKAGES_XIAOMI_11T_PRO": [
-    "com.ea.gp.apexlegendsmobilefps",
     "com.levelinfinite.hotta.gp",
     "com.supercell.clashofclans",
     "com.vng.mlbbvn"
@@ -126,10 +125,7 @@
     "PRODUCT": "AI2203"
   },
   "PACKAGES_LEGION_Y700_(2023)": [
-    "com.activision.callofduty.shooter",
-    "com.garena.game.codm",
-    "com.tencent.tmgp.kr.codm",
-    "com.vng.codmvn"
+    "com.activision.callofduty.shooter"
   ],
   "PACKAGES_LEGION_Y700_(2023)_DEVICE": {
     "BRAND": "Lenovo",
@@ -172,7 +168,7 @@
     "FINGERPRINT": "OnePlus/PJZ110/OP5D0DL1:15/AP3A.240617.008/V.1bd19a1-1-2:user/release-keys",
     "PRODUCT": "PJZ110"
   },
-    "PACKAGES_REALME_P3_5G": [
+  "PACKAGES_REALME_P3_5G": [
     "com.garena.game.kgvn",
     "com.garena.game.kgid",
     "com.garena.game.kgth",
@@ -197,15 +193,18 @@
     "PRODUCT": "RMX5070"
   },
   "PACKAGES_REDMAGIC_10_PRO": [
-    "com.kurogame.wutheringwaves.global"
+    "com.kurogame.wutheringwaves.global",
+    "com.vng.codmvn",
+    "com.tencent.tmgp.kr.codm",
+    "com.garena.game.codm"
   ],
   "PACKAGES_REDMAGIC_10_PRO_DEVICE": {
     "BRAND": "nubia",
     "DEVICE": "RedMagic 10 Pro",
     "MANUFACTURER": "ZTE",
-    "MODEL": "NX769J", 
-    "FINGERPRINT": "nubia/RedMagic10Pro/RedMagic10Pro:15/UKQ1.230917.001/20250528:user/release-keys",
-    "PRODUCT": "NX769J"
+    "MODEL": "NX789J",
+    "FINGERPRINT": "nubia/NX789J-UN/NX789J:15/AQ3A.240812.002/20241212.194919:user/release-keys",
+    "PRODUCT": "NX789J"
   },
   "PACKAGES_PIXEL_XL": [
     "com.google.android.apps.photos"
