@@ -9,12 +9,15 @@
 #include <unistd.h>
 #include <android/log.h>
 #include <mutex>
+#include <functional>
 
 using json = nlohmann::json;
 
 #define LOG_TAG "SpoofModule"
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#define LOGD(...) if (debug_mode) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+static bool debug_mode = false; 
 
 struct DeviceInfo {
     std::string brand;
@@ -34,6 +37,20 @@ static jfieldID deviceField = nullptr;
 static jfieldID manufacturerField = nullptr;
 static jfieldID fingerprintField = nullptr;
 static jfieldID productField = nullptr;
+static std::once_flag build_once;
+
+struct JniString {
+    JNIEnv* env;
+    jstring jstr;
+    const char* chars;
+    JniString(JNIEnv* e, jstring s) : env(e), jstr(s), chars(nullptr) {
+        if (jstr) chars = env->GetStringUTFChars(jstr, nullptr);
+    }
+    ~JniString() {
+        if (jstr && chars) env->ReleaseStringUTFChars(jstr, chars);
+    }
+    const char* get() const { return chars; }
+};
 
 class SpoofModule : public zygisk::ModuleBase {
 public:
@@ -43,37 +60,17 @@ public:
 
         LOGD("Module loaded successfully");
 
-        if (!buildClass) {
-            jclass localBuildClass = env->FindClass("android/os/Build");
-            if (!localBuildClass) {
-                LOGE("Failed to find android/os/Build class");
-                return;
-            }
-            
-            buildClass = (jclass)env->NewGlobalRef(localBuildClass);
-            env->DeleteLocalRef(localBuildClass);
-            
-            if (!buildClass) {
-                LOGE("Failed to create global reference for Build class");
-                return;
-            }
-
-            modelField = env->GetStaticFieldID(buildClass, "MODEL", "Ljava/lang/String;");
-            brandField = env->GetStaticFieldID(buildClass, "BRAND", "Ljava/lang/String;");
-            deviceField = env->GetStaticFieldID(buildClass, "DEVICE", "Ljava/lang/String;");
-            manufacturerField = env->GetStaticFieldID(buildClass, "MANUFACTURER", "Ljava/lang/String;");
-            fingerprintField = env->GetStaticFieldID(buildClass, "FINGERPRINT", "Ljava/lang/String;");
-            productField = env->GetStaticFieldID(buildClass, "PRODUCT", "Ljava/lang/String;");
-
-            if (!modelField || !brandField || !deviceField || !manufacturerField || !fingerprintField || !productField) {
-                LOGE("Failed to get field IDs for Build class");
-                env->DeleteGlobalRef(buildClass);
-                buildClass = nullptr;
-                return;
-            }
-        }
-
+        ensureBuildClass();
         loadConfig();
+    }
+
+    void onUnload() override {
+        std::lock_guard<std::mutex> lock(info_mutex);
+        if (buildClass) {
+            env->DeleteGlobalRef(buildClass);
+            buildClass = nullptr;
+            LOGD("Global ref for Build class released");
+        }
     }
 
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
@@ -83,7 +80,8 @@ public:
             return;
         }
 
-        const char* package_name = env->GetStringUTFChars(args->nice_name, nullptr);
+        JniString pkg(env, args->nice_name);
+        const char* package_name = pkg.get();
         if (!package_name) {
             LOGE("Failed to get package name");
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
@@ -91,29 +89,43 @@ public:
         }
 
         LOGD("Processing package: %s", package_name);
-        
+
+        bool should_close = true;
         {
             std::lock_guard<std::mutex> lock(info_mutex);
             auto it = package_map.find(package_name);
-            if (it == package_map.end()) {
-                LOGD("Package %s not found in config, closing module", package_name);
-                api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-            } else {
+            if (it != package_map.end()) {
                 current_info = it->second;
                 LOGD("Spoofing device for package %s: %s", package_name, current_info.model.c_str());
                 spoofDevice(current_info);
+                should_close = false;
             }
         }
-        
-        env->ReleaseStringUTFChars(args->nice_name, package_name);
+
+        if (should_close) {
+            LOGD("Package %s not found in config, closing module", package_name);
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+        } else {
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            LOGD("Set DLCLOSE after spoofing for stealth");
+        }
     }
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
-        if (!args || !args->nice_name || package_map.empty() || !buildClass) return;
+        if (!args || !args->nice_name || package_map.empty()) return;
 
-        const char* package_name = env->GetStringUTFChars(args->nice_name, nullptr);
+        ensureBuildClass();
+        if (!buildClass) {
+            LOGE("Build class not initialized, skipping postAppSpecialize");
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            return;
+        }
+
+        JniString pkg(env, args->nice_name);
+        const char* package_name = pkg.get();
         if (!package_name) {
             LOGE("Failed to get package name in postAppSpecialize");
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
         }
 
@@ -127,13 +139,47 @@ public:
             }
         }
 
-        env->ReleaseStringUTFChars(args->nice_name, package_name);
+        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+        LOGD("Set DLCLOSE in postAppSpecialize for extra stealth");
     }
 
 private:
     zygisk::Api* api;
     JNIEnv* env;
     std::unordered_map<std::string, DeviceInfo> package_map;
+
+    void ensureBuildClass() {
+        std::call_once(build_once, [&] {
+            jclass localBuild = env->FindClass("android/os/Build");
+            if (!localBuild || env->ExceptionCheck()) {
+                env->ExceptionClear();
+                LOGE("Failed to find android/os/Build class");
+                return;
+            }
+
+            buildClass = static_cast<jclass>(env->NewGlobalRef(localBuild));
+            env->DeleteLocalRef(localBuild);
+            if (!buildClass) {
+                LOGE("Failed to create global reference for Build class");
+                return;
+            }
+
+            modelField = env->GetStaticFieldID(buildClass, "MODEL", "Ljava/lang/String;");
+            brandField = env->GetStaticFieldID(buildClass, "BRAND", "Ljava/lang/String;");
+            deviceField = env->GetStaticFieldID(buildClass, "DEVICE", "Ljava/lang/String;");
+            manufacturerField = env->GetStaticFieldID(buildClass, "MANUFACTURER", "Ljava/lang/String;");
+            fingerprintField = env->GetStaticFieldID(buildClass, "FINGERPRINT", "Ljava/lang/String;");
+            productField = env->GetStaticFieldID(buildClass, "PRODUCT", "Ljava/lang/String;");
+
+            if (env->ExceptionCheck() || !modelField || !brandField || !deviceField ||
+                !manufacturerField || !fingerprintField || !productField) {
+                env->ExceptionClear();
+                LOGE("Failed to get field IDs for Build class");
+                env->DeleteGlobalRef(buildClass);
+                buildClass = nullptr;
+            }
+        });
+    }
 
     void loadConfig() {
         const std::string config_path = "/data/adb/modules/COPG/config.json";
@@ -155,22 +201,25 @@ private:
             json config = json::parse(file);
             for (auto& [key, value] : config.items()) {
                 if (key.find("_DEVICE") != std::string::npos) continue;
+                if (!value.is_array()) {
+                    LOGE("Invalid package list for key %s", key.c_str());
+                    continue;
+                }
                 auto packages = value.get<std::vector<std::string>>();
                 std::string device_key = key + "_DEVICE";
-                if (!config.contains(device_key)) {
-                    LOGE("No device info for key %s", key.c_str());
+                if (!config.contains(device_key) || !config[device_key].is_object()) {
+                    LOGE("No valid device info for key %s", key.c_str());
                     continue;
                 }
                 auto device = config[device_key];
 
                 DeviceInfo info;
-                info.brand = device["BRAND"].get<std::string>();
-                info.device = device["DEVICE"].get<std::string>();
-                info.manufacturer = device["MANUFACTURER"].get<std::string>();
-                info.model = device["MODEL"].get<std::string>();
-                info.fingerprint = device.contains("FINGERPRINT") ? 
-                    device["FINGERPRINT"].get<std::string>() : "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys";
-                info.product = device.contains("PRODUCT") ? device["PRODUCT"].get<std::string>() : info.brand;
+                info.brand = device.value("BRAND", "generic");
+                info.device = device.value("DEVICE", "generic");
+                info.manufacturer = device.value("MANUFACTURER", "generic");
+                info.model = device.value("MODEL", "generic");
+                info.fingerprint = device.value("FINGERPRINT", "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys");
+                info.product = device.value("PRODUCT", info.brand);
 
                 for (const auto& pkg : packages) {
                     package_map[pkg] = info;
@@ -193,12 +242,28 @@ private:
         }
 
         LOGD("Spoofing device: %s", info.model.c_str());
-        if (modelField) env->SetStaticObjectField(buildClass, modelField, env->NewStringUTF(info.model.c_str()));
-        if (brandField) env->SetStaticObjectField(buildClass, brandField, env->NewStringUTF(info.brand.c_str()));
-        if (deviceField) env->SetStaticObjectField(buildClass, deviceField, env->NewStringUTF(info.device.c_str()));
-        if (manufacturerField) env->SetStaticObjectField(buildClass, manufacturerField, env->NewStringUTF(info.manufacturer.c_str()));
-        if (fingerprintField) env->SetStaticObjectField(buildClass, fingerprintField, env->NewStringUTF(info.fingerprint.c_str()));
-        if (productField) env->SetStaticObjectField(buildClass, productField, env->NewStringUTF(info.product.c_str()));
+        auto setStr = [&](jfieldID field, const std::string& value) {
+            if (!field) return;
+            jstring js = env->NewStringUTF(value.c_str());
+            if (!js || env->ExceptionCheck()) {
+                env->ExceptionClear();
+                LOGE("Failed to create string for field");
+                return;
+            }
+            env->SetStaticObjectField(buildClass, field, js);
+            env->DeleteLocalRef(js);
+            if (env->ExceptionCheck()) {
+                env->ExceptionClear();
+                LOGE("Failed to set field");
+            }
+        };
+
+        setStr(modelField, info.model);
+        setStr(brandField, info.brand);
+        setStr(deviceField, info.device);
+        setStr(manufacturerField, info.manufacturer);
+        setStr(fingerprintField, info.fingerprint);
+        setStr(productField, info.product);
     }
 };
 
