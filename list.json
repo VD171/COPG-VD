@@ -55,5 +55,20 @@
   "com.proxima.dfm": "Delta Force Mobile",
   "com.google.android.apps.photos": "Google Photos",
   "com.netflix.ninja": "Netflix beta",
-  "com.netflix.mediaclient": "Netflix"
+  "com.netflix.mediaclient": "Netflix",
+  "com.garena.game.kgvn": "Arena of Valor (Vietnam)",
+  "com.garena.game.kgid": "Arena of Valor (Indonesia)",
+  "com.garena.game.kgth": "Arena of Valor (Thailand)",
+  "com.tencent.ngjp": "Arena of Valor (Japan, Tencent)",
+  "com.garena.game.kgtw": "Arena of Valor (Taiwan)",
+  "com.ngame.allstar.eu": "Arena of Valor (Europe)",
+  "com.clashoftitansandroid.india": "Clash of Titans (India)",
+  "com.tencent.ngame.chty": "Arena of Valor (China, Tencent)",
+  "com.garena.game.kgvntest": "Arena of Valor (Vietnam Test)",
+  "com.levelinfinite.aov": "Arena of Valor (Global, Level Infinite)",
+  "com.tencent.aovindia": "Arena of Valor (India, Tencent)",
+  "com.garena.game.kgms": "Arena of Valor (Malaysia/Singapore)",
+  "com.tencent.aovjp": "Arena of Valor (Japan, Tencent)",
+  "com.garena.game.kgph": "Arena of Valor (Philippines)",
+  "com.kurogame.wutheringwaves.global": "Wuthering Waves (Global)"
 }
