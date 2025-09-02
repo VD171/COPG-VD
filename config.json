@@ -172,6 +172,30 @@
     "FINGERPRINT": "OnePlus/PJZ110/OP5D0DL1:15/AP3A.240617.008/V.1bd19a1-1-2:user/release-keys",
     "PRODUCT": "PJZ110"
   },
+    "PACKAGES_REALME_P3_5G": [
+    "com.garena.game.kgvn",
+    "com.garena.game.kgid",
+    "com.garena.game.kgth",
+    "com.tencent.ngjp",
+    "com.garena.game.kgtw",
+    "com.ngame.allstar.eu",
+    "com.clashoftitansandroid.india",
+    "com.tencent.ngame.chty",
+    "com.garena.game.kgvntest",
+    "com.levelinfinite.aov",
+    "com.tencent.aovindia",
+    "com.garena.game.kgms",
+    "com.tencent.aovjp",
+    "com.garena.game.kgph"
+  ],
+  "PACKAGES_REALME_P3_5G_DEVICE": {
+    "BRAND": "realme",
+    "DEVICE": "Realme P3 5G",
+    "MANUFACTURER": "realme",
+    "MODEL": "RMX5070",
+    "FINGERPRINT": "realme/RMX5070/RMX5070:15/SKQ1.230119.001/eng.user.20250415.155201:user/release-keys",
+    "PRODUCT": "RMX5070"
+  },
   "PACKAGES_PIXEL_XL": [
     "com.google.android.apps.photos"
   ],
