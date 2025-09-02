@@ -196,6 +196,18 @@
     "FINGERPRINT": "realme/RMX5070/RMX5070:15/SKQ1.230119.001/eng.user.20250415.155201:user/release-keys",
     "PRODUCT": "RMX5070"
   },
+  {
+  "PACKAGES_REDMAGIC_10_PRO": [
+    "com.kurogame.wutheringwaves.global"
+  ],
+  "PACKAGES_REDMAGIC_10_PRO_DEVICE": {
+    "BRAND": "nubia",
+    "DEVICE": "RedMagic 10 Pro",
+    "MANUFACTURER": "ZTE",
+    "MODEL": "NX769J", 
+    "FINGERPRINT": "nubia/RedMagic10Pro/RedMagic10Pro:15/UKQ1.230917.001/20250528:user/release-keys",
+    "PRODUCT": "NX769J"
+  },
   "PACKAGES_PIXEL_XL": [
     "com.google.android.apps.photos"
   ],
