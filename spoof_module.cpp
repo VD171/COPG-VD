@@ -10,6 +10,7 @@
 #include <android/log.h>
 #include <mutex>
 #include <functional>
+#include <sys/stat.h>  
 
 using json = nlohmann::json;
 
@@ -39,6 +40,9 @@ static jfieldID fingerprintField = nullptr;
 static jfieldID productField = nullptr;
 static std::once_flag build_once;
 
+static time_t last_config_mtime = 0;  
+static const std::string config_path = "/data/adb/modules/COPG/config.json";  
+
 struct JniString {
     JNIEnv* env;
     jstring jstr;
@@ -61,7 +65,7 @@ public:
         LOGD("Module loaded successfully");
 
         ensureBuildClass();
-        loadConfig();
+        reloadIfNeeded(true);  
     }
 
     void onUnload() { 
@@ -89,6 +93,8 @@ public:
         }
 
         LOGD("Processing package: %s", package_name);
+
+        reloadIfNeeded(false);  
 
         bool should_close = true;
         {
@@ -181,14 +187,20 @@ private:
         });
     }
 
-    void loadConfig() {
-        const std::string config_path = "/data/adb/modules/COPG/config.json";
-        LOGD("Attempting to load config from: %s", config_path.c_str());
-
-        if (access(config_path.c_str(), R_OK) != 0) {
-            LOGE("Cannot access config.json at %s: %s", config_path.c_str(), strerror(errno));
+    void reloadIfNeeded(bool force = false) {
+        struct stat file_stat;
+        if (stat(config_path.c_str(), &file_stat) != 0) {
+            LOGE("Failed to stat config file: %s", strerror(errno));
             return;
         }
+
+        time_t current_mtime = file_stat.st_mtime;
+        if (!force && current_mtime == last_config_mtime) {
+            LOGD("Config unchanged, skipping reload");
+            return;  
+        }
+
+        LOGD("Config changed or force load, reloading...");
 
         std::ifstream file(config_path);
         if (!file.is_open()) {
@@ -199,6 +211,8 @@ private:
 
         try {
             json config = json::parse(file);
+            std::unordered_map<std::string, DeviceInfo> new_map;  
+
             for (auto& [key, value] : config.items()) {
                 if (key.find("_DEVICE") != std::string::npos) continue;
                 if (!value.is_array()) {
@@ -222,11 +236,18 @@ private:
                 info.product = device.value("PRODUCT", info.brand);
 
                 for (const auto& pkg : packages) {
-                    package_map[pkg] = info;
+                    new_map[pkg] = info;
                     LOGD("Loaded package %s with model %s", pkg.c_str(), info.model.c_str());
                 }
             }
-            LOGD("Config loaded with %zu packages", package_map.size());
+
+            {
+                std::lock_guard<std::mutex> lock(info_mutex);
+                package_map = std::move(new_map);  
+            }
+
+            last_config_mtime = current_mtime;  
+            LOGD("Config reloaded with %zu packages", package_map.size());
         } catch (const json::exception& e) {
             LOGE("JSON parsing error: %s", e.what());
         } catch (const std::exception& e) {
