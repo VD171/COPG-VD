@@ -6,11 +6,93 @@ let editingGame = null;
 let lastRender = { devices: 0, games: 0 };
 const RENDER_DEBOUNCE_MS = 150;
 let snackbarTimeout = null;
-let appIndex = []; // Global index for app data
+let appIndex = []; 
 let packagePickerObserver = null;
 
 let logcatProcess = null;
 let logcatRunning = false;
+
+
+async function backupFile(filename) {
+    try {
+        
+        await execCommand(`mkdir -p /sdcard/Download/COPG`);
+        
+        const checkOriginal = await execCommand(`ls "/sdcard/Download/COPG/${filename}" 2>/dev/null || echo "not_found"`);
+        
+        let finalFilename = filename;
+        
+        if (checkOriginal.trim() !== 'not_found') {
+            
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+            const baseName = filename.split('.')[0];
+            const extension = filename.split('.')[1];
+            
+            let newFilename = `${baseName}-${dateStr}.${extension}`;
+            
+            
+            const checkDated = await execCommand(`ls "/sdcard/Download/COPG/${newFilename}" 2>/dev/null || echo "not_found"`);
+            
+            if (checkDated.trim() === 'not_found') {
+                
+                finalFilename = newFilename;
+            } else {
+                const timeStr = now.toTimeString().slice(0, 5).replace(/:/g, '');
+                newFilename = `${baseName}-${dateStr}-${timeStr}.${extension}`;
+                
+                
+                let checkTime = await execCommand(`ls "/sdcard/Download/COPG/${newFilename}" 2>/dev/null || echo "not_found"`);
+                
+                if (checkTime.trim() === 'not_found') {
+                    finalFilename = newFilename;
+                } else {
+                    const fullTimeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
+                    newFilename = `${baseName}-${dateStr}-${fullTimeStr}.${extension}`;
+                    
+                    
+                    let checkFullTime = await execCommand(`ls "/sdcard/Download/COPG/${newFilename}" 2>/dev/null || echo "not_found"`);
+                    
+                    if (checkFullTime.trim() === 'not_found') {
+                        
+                        finalFilename = newFilename;
+                    } else {
+                        
+                        let counter = 1;
+                        let checkNumbered = await execCommand(`ls "/sdcard/Download/COPG/${newFilename}" 2>/dev/null || echo "not_found"`);
+                        
+                        while (checkNumbered.trim() !== 'not_found') {
+                            
+                            newFilename = `${baseName}-${dateStr}-${fullTimeStr}(${counter}).${extension}`;
+                            checkNumbered = await execCommand(`ls "/sdcard/Download/COPG/${newFilename}" 2>/dev/null || echo "not_found"`);
+                            counter++;
+                        }
+                        
+                        finalFilename = newFilename;
+                    }
+                }
+            }
+        }
+        
+        
+        const result = await execCommand(`cp /data/adb/modules/COPG/${filename} "/sdcard/Download/COPG/${finalFilename}"`);
+        
+        appendToOutput(`Backup created: ${finalFilename}`, 'success');
+        
+        return true;
+    } catch (error) {
+        appendToOutput(`Failed to backup ${filename}: ${error}`, 'error');
+        return false;
+    }
+}
+
+function showBackupPopup() {
+    showPopup('backup-popup');
+}
+
+function closeBackupPopup() {
+    closePopup('backup-popup');
+}
 
 async function startLogcat(e) {
     if (e) e.stopPropagation();
@@ -289,7 +371,6 @@ function renderDeviceList() {
     const fragment = document.createDocumentFragment();
     let index = 0;
     
-    // استفاده از configKeyOrder برای حفظ ترتیب
     for (const key of configKeyOrder) {
         if (key.endsWith('_DEVICE') && currentConfig[key]) {
             const deviceName = currentConfig[key].DEVICE || key.replace('PACKAGES_', '').replace('_DEVICE', '');
@@ -1839,6 +1920,8 @@ function applyEventListeners() {
             e.target.checked = !isChecked;
         }
     });
+    
+    setupBackupListeners();
 
     document.getElementById('update-config').addEventListener('click', () => {
         if (actionRunning) return;
@@ -2326,6 +2409,425 @@ document.querySelector('#package-picker-popup .cancel-btn')?.addEventListener('c
     document.getElementById('package-picker-search').value = '';
     closePopup('package-picker-popup');
 });
+
+// Keep getPreferredStartPath unchanged
+async function getPreferredStartPath() {
+    const paths = ['/storage/emulated/0/Download', '/storage/emulated/0'];
+    for (const path of paths) {
+        try {
+            const lsOutput = await execCommand(`su -c 'ls -l "${path}"' || echo "ERROR: dir_not_found"`);
+            if (!lsOutput.includes('ERROR: dir_not_found') && !lsOutput.includes('No such file or directory')) {
+                appendToOutput(`Selected start path: ${path}`, 'info');
+                return path;
+            }
+        } catch (error) {
+            appendToOutput(`Failed to access ${path}: ${error.message}`, 'warning');
+        }
+    }
+    appendToOutput('No accessible storage path found, defaulting to /storage/emulated/0', 'warning');
+    return '/storage/emulated/0';
+}
+
+async function recursiveFileSearch(basePath, searchTerm = '') {
+    const results = [];
+    try {
+        const findOutput = await execCommand(`su -c 'find "${basePath}" -type f \\( -name "*.json" -o -name "*.txt" \\)' || echo ""`);
+        const files = findOutput.trim().split('\n').filter(f => f && (f.endsWith('.json') || f.endsWith('.txt')));
+        
+        for (const file of files) {
+            const fileName = file.split('/').pop();
+            if (!searchTerm || fileName.toLowerCase().includes(searchTerm.toLowerCase())) {
+                results.push({
+                    path: file,
+                    name: fileName
+                });
+            }
+        }
+        return results;
+    } catch (error) {
+        appendToOutput(`Failed to search files in ${basePath}: ${error}`, 'error');
+        return [];
+    }
+}
+
+async function restoreFile(sourcePath, targetFile) {
+    try {
+        // Validate paths
+        if (!sourcePath || !targetFile) {
+            throw new Error(`Invalid source or target path: source=${sourcePath}, target=${targetFile}`);
+        }
+
+        // Ensure target directory exists
+        await execCommand(`su -c 'mkdir -p /data/adb/modules/COPG'`);
+        
+        // Copy file with root access
+        const cpOutput = await execCommand(`su -c 'cp "${sourcePath}" "/data/adb/modules/COPG/${targetFile}"' || echo "ERROR: cp_failed"`);
+        if (cpOutput.includes('ERROR: cp_failed')) {
+            throw new Error(`Copy command failed: ${cpOutput}`);
+        }
+
+        appendToOutput(`Successfully restored ${sourcePath.split('/').pop()} as ${targetFile}`, 'success');
+
+        // Reload config if restoring config.json
+        if (targetFile === 'config.json') {
+            await loadConfig();
+            renderDeviceList();
+            renderGameList();
+        }
+        return true;
+    } catch (error) {
+        appendToOutput(`Failed to restore ${sourcePath ? sourcePath.split('/').pop() : 'unknown file'}: ${error.message}`, 'error');
+        return false;
+    }
+}
+
+async function showFilePicker(targetFile, startPath = null) {
+    // Fallback for undefined targetFile
+    if (!targetFile) {
+        targetFile = 'config.json'; // Default to config.json if undefined
+        appendToOutput('Warning: targetFile undefined, defaulting to config.json', 'warning');
+    }
+
+    appendToOutput(`Loading file picker for ${targetFile}...`, 'info');
+    const popup = document.getElementById('file-picker-popup');
+    const searchInput = document.getElementById('file-picker-search');
+    const fileList = document.getElementById('file-picker-list');
+    const pathElement = document.getElementById('file-picker-path');
+    const backBtn = document.getElementById('file-picker-back');
+
+    // Use preferred path if startPath is not provided
+    const currentPath = startPath || await getPreferredStartPath();
+
+    searchInput.setAttribute('readonly', 'true');
+    searchInput.value = '';
+    fileList.innerHTML = '<div class="loader" style="width: 100%; height: 40px; margin: 16px 0;"></div>';
+    pathElement.textContent = currentPath;
+
+    // Update back button visibility
+    backBtn.style.display = currentPath === '/storage/emulated/0' ? 'none' : 'flex';
+
+    const enableSearch = () => {
+        searchInput.removeAttribute('readonly');
+        searchInput.focus();
+        searchContainer.removeEventListener('click', enableSearch);
+    };
+    const searchContainer = popup.querySelector('.search-container');
+    searchContainer.addEventListener('click', enableSearch);
+
+    try {
+        // List files and directories
+        const lsOutput = await execCommand(`su -c 'ls -l "${currentPath}"' || echo "ERROR: dir_not_found"`);
+        if (lsOutput.includes('ERROR: dir_not_found') || lsOutput.includes('No such file or directory')) {
+            if (currentPath !== '/storage/emulated/0') {
+                appendToOutput(`Directory ${currentPath} not found, falling back to /storage/emulated/0`, 'warning');
+                return showFilePicker(targetFile, '/storage/emulated/0');
+            } else {
+                throw new Error(`Cannot access ${currentPath}: Directory not found or no permission`);
+            }
+        }
+
+        const lines = lsOutput.trim().split('\n').filter(line => line && !line.startsWith('total'));
+        const fileArray = [];
+        const dirArray = [];
+
+        // Parse ls -l output
+        lines.forEach(line => {
+            const parts = line.trim().split(/\s+/);
+            if (parts.length < 8) return; // Skip malformed lines
+            const permissions = parts[0];
+            const name = parts.slice(7).join(' '); // Handle filenames with spaces
+            if (permissions.startsWith('d')) {
+                dirArray.push(name);
+            } else if (name.endsWith('.json') || name.endsWith('.txt')) {
+                fileArray.push(name);
+            }
+        });
+
+        fileList.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+
+        // Render directories
+        dirArray.forEach(dir => {
+            const dirCard = document.createElement('div');
+            dirCard.className = 'app-card directory-card';
+            dirCard.dataset.path = `${currentPath}/${dir}`.replace('//', '/');
+            dirCard.innerHTML = `
+                <div class="app-icon-container">
+                    <div class="app-icon-placeholder folder-icon"></div>
+                </div>
+                <div class="app-info">
+                    <div class="app-name">${dir}</div>
+                </div>
+            `;
+            dirCard.addEventListener('click', () => {
+                showFilePicker(targetFile, `${currentPath}/${dir}`.replace('//', '/'));
+            });
+            fragment.appendChild(dirCard);
+        });
+
+        // Render files
+        fileArray.forEach(file => {
+            const fileCard = document.createElement('div');
+            fileCard.className = 'app-card';
+            fileCard.dataset.file = file;
+            fileCard.dataset.path = `${currentPath}/${file}`.replace('//', '/');
+            fileCard.innerHTML = `
+                <div class="app-icon-container">
+                    <div class="app-icon-placeholder file-icon"></div>
+                </div>
+                <div class="app-info">
+                    <div class="app-name">${file}</div>
+                </div>
+            `;
+            fileCard.addEventListener('click', async () => {
+                await restoreFile(`${currentPath}/${file}`.replace('//', '/'), targetFile);
+                closePopup('file-picker-popup');
+                searchInput.value = '';
+            });
+            fragment.appendChild(fileCard);
+        });
+
+        // If no items, show empty message
+        if (dirArray.length === 0 && fileArray.length === 0) {
+            fileList.innerHTML = `
+                <div class="error-message" style="color: var(--text-secondary); text-align: center; padding: 16px;">
+                    No files or folders found in ${currentPath}
+                </div>
+            `;
+        } else {
+            fileList.appendChild(fragment);
+        }
+
+        // Search functionality (recursive)
+        searchInput.addEventListener('input', async (e) => {
+            const searchTerm = e.target.value.trim();
+            if (!searchTerm) {
+                // Reload current directory only if search is cleared
+                fileList.innerHTML = '<div class="loader" style="width: 100%; height: 40px; margin: 16px 0;"></div>';
+                const tempFragment = document.createDocumentFragment();
+                
+                // Re-render directories
+                dirArray.forEach(dir => {
+                    const dirCard = document.createElement('div');
+                    dirCard.className = 'app-card directory-card';
+                    dirCard.dataset.path = `${currentPath}/${dir}`.replace('//', '/');
+                    dirCard.innerHTML = `
+                        <div class="app-icon-container">
+                            <div class="app-icon-placeholder folder-icon"></div>
+                        </div>
+                        <div class="app-info">
+                            <div class="app-name">${dir}</div>
+                        </div>
+                    `;
+                    dirCard.addEventListener('click', () => {
+                        showFilePicker(targetFile, `${currentPath}/${dir}`.replace('//', '/'));
+                    });
+                    tempFragment.appendChild(dirCard);
+                });
+
+                // Re-render files
+                fileArray.forEach(file => {
+                    const fileCard = document.createElement('div');
+                    fileCard.className = 'app-card';
+                    fileCard.dataset.file = file;
+                    fileCard.dataset.path = `${currentPath}/${file}`.replace('//', '/');
+                    fileCard.innerHTML = `
+                        <div class="app-icon-container">
+                            <div class="app-icon-placeholder file-icon"></div>
+                        </div>
+                        <div class="app-info">
+                            <div class="app-name">${file}</div>
+                        </div>
+                    `;
+                    fileCard.addEventListener('click', async () => {
+                        await restoreFile(`${currentPath}/${file}`.replace('//', '/'), targetFile);
+                        closePopup('file-picker-popup');
+                        searchInput.value = '';
+                    });
+                    tempFragment.appendChild(fileCard);
+                });
+
+                fileList.innerHTML = '';
+                if (dirArray.length === 0 && fileArray.length === 0) {
+                    fileList.innerHTML = `
+                        <div class="error-message" style="color: var(--text-secondary); text-align: center; padding: 16px;">
+                            No files or folders found in ${currentPath}
+                        </div>
+                    `;
+                } else {
+                    fileList.appendChild(tempFragment);
+                }
+                return;
+            }
+
+            fileList.innerHTML = '<div class="loader" style="width: 100%; height: 40px; margin: 16px 0;"></div>';
+            const baseSearchPath = (await getPreferredStartPath()).startsWith('/storage/emulated/0') 
+                ? '/storage/emulated/0/Download' 
+                : '/storage/emulated/0';
+            const searchResults = await recursiveFileSearch(baseSearchPath, searchTerm);
+            
+            fileList.innerHTML = '';
+            const searchFragment = document.createDocumentFragment();
+
+            if (searchResults.length === 0) {
+                fileList.innerHTML = `
+                    <div class="error-message" style="color: var(--text-secondary); text-align: center; padding: 16px;">
+                        No matching files found
+                    </div>
+                `;
+            } else {
+                searchResults.forEach(file => {
+                    const fileCard = document.createElement('div');
+                    fileCard.className = 'app-card';
+                    fileCard.dataset.file = file.name;
+                    fileCard.dataset.path = file.path;
+                    fileCard.innerHTML = `
+                        <div class="app-icon-container">
+                            <div class="app-icon-placeholder file-icon"></div>
+                        </div>
+                        <div class="app-info">
+                            <div class="app-name">${file.name}</div>
+                            <div class="app-package">${file.path}</div>
+                        </div>
+                    `;
+                    fileCard.addEventListener('click', async () => {
+                        await restoreFile(file.path, targetFile);
+                        closePopup('file-picker-popup');
+                        searchInput.value = '';
+                    });
+                    searchFragment.appendChild(fileCard);
+                });
+                fileList.appendChild(searchFragment);
+            }
+        });
+
+        showPopup('file-picker-popup');
+        appendToOutput(`File list loaded for ${currentPath}`, 'success');
+    } catch (error) {
+        fileList.innerHTML = `
+            <div class="error-message" style="color: var(--error); text-align: center; padding: 16px;">
+                Failed to load files in ${currentPath}: ${error.message}
+                <button onclick="showFilePicker('${targetFile}', '${currentPath}')" style="margin-top: 8px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px;">
+                    Try Again
+                </button>
+            </div>
+        `;
+        appendToOutput(`Failed to load file list in ${currentPath}: ${error}`, 'error');
+    }
+}
+
+function setupBackupListeners() {
+    const backupManagerBtn = document.getElementById('backup-manager');
+    if (backupManagerBtn) {
+        backupManagerBtn.replaceWith(backupManagerBtn.cloneNode(true));
+        const newBackupManagerBtn = document.getElementById('backup-manager');
+        newBackupManagerBtn.addEventListener('click', showBackupPopup);
+    }
+
+    // Ensure backup buttons have data-file attribute
+    document.querySelectorAll('.backup-btn').forEach(btn => {
+        const filename = btn.dataset.file;
+        if (!filename) {
+            // Skip buttons without data-file silently
+            return;
+        }
+        const newBtn = btn.cloneNode(true);
+        newBtn.dataset.file = filename; // Ensure attribute is preserved
+        btn.parentNode.replaceChild(newBtn, btn);
+    });
+
+    document.querySelectorAll('.backup-btn').forEach(btn => {
+        const filename = btn.dataset.file;
+        if (!filename) return; // Skip silently
+        btn.addEventListener('click', async (e) => {
+            e.target.classList.add('loading');
+            await backupFile(filename);
+            e.target.classList.remove('loading');
+        });
+    });
+
+    // Ensure restore buttons have data-file attribute
+    document.querySelectorAll('.restore-btn').forEach(btn => {
+        const filename = btn.dataset.file;
+        if (!filename) {
+            // Skip buttons without data-file silently
+            return;
+        }
+        const newBtn = btn.cloneNode(true);
+        newBtn.dataset.file = filename; // Ensure attribute is preserved
+        btn.parentNode.replaceChild(newBtn, btn);
+    });
+
+    document.querySelectorAll('.restore-btn').forEach(btn => {
+        const filename = btn.dataset.file;
+        if (!filename) return; // Skip silently
+        btn.addEventListener('click', async (e) => {
+            appendToOutput(`Opening file picker for ${filename}`, 'info');
+            const startPath = await getPreferredStartPath();
+            await showFilePicker(filename, startPath);
+        });
+    });
+
+    const backupAllBtn = document.getElementById('backup-all-btn');
+    if (backupAllBtn) {
+        backupAllBtn.replaceWith(backupAllBtn.cloneNode(true));
+        const newBackupAllBtn = document.getElementById('backup-all-btn');
+        newBackupAllBtn.addEventListener('click', async () => {
+            newBackupAllBtn.classList.add('loading');
+            const files = ['config.json', 'list.json', 'ignorelist.txt'];
+            let successCount = 0;
+
+            for (const file of files) {
+                if (await backupFile(file)) {
+                    successCount++;
+                }
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            newBackupAllBtn.classList.remove('loading');
+            appendToOutput(`Backup completed: ${successCount}/${files.length} files`, 
+                          successCount === files.length ? 'success' : 'warning');
+        });
+    }
+
+    const backupCancelBtn = document.querySelector('#backup-popup .cancel-btn');
+    if (backupCancelBtn) {
+        backupCancelBtn.replaceWith(backupCancelBtn.cloneNode(true));
+        const newBackupCancelBtn = document.querySelector('#backup-popup .cancel-btn');
+        newBackupCancelBtn.addEventListener('click', () => {
+            closePopup('backup-popup');
+        });
+    }
+
+    const filePickerCancelBtn = document.querySelector('#file-picker-popup .cancel-btn');
+    if (filePickerCancelBtn) {
+        filePickerCancelBtn.replaceWith(filePickerCancelBtn.cloneNode(true));
+        const newCancelBtn = document.querySelector('#file-picker-popup .cancel-btn');
+        newCancelBtn.addEventListener('click', () => {
+            document.getElementById('file-picker-search').value = '';
+            closePopup('file-picker-popup');
+        });
+    }
+
+    const filePickerBackBtn = document.getElementById('file-picker-back');
+    if (filePickerBackBtn) {
+        filePickerBackBtn.replaceWith(filePickerBackBtn.cloneNode(true));
+        const newBackBtn = document.getElementById('file-picker-back');
+        newBackBtn.addEventListener('click', () => {
+            const currentPath = document.getElementById('file-picker-path').textContent;
+            const searchInput = document.getElementById('file-picker-search');
+            const targetFile = document.querySelector('.restore-btn[data-file]:not([disabled])')?.dataset.file || 'config.json';
+            
+            if (searchInput.value.trim()) {
+                searchInput.value = '';
+                showFilePicker(targetFile, currentPath);
+            } else if (currentPath !== '/storage/emulated/0') {
+                const parentPath = currentPath.split('/').slice(0, -1).join('/') || '/storage/emulated/0';
+                showFilePicker(targetFile, parentPath);
+            }
+        });
+    }
+}
 
 // Utility function for array buffer to base64
 function arrayBufferToBase64(buffer) {
