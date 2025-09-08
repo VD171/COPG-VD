@@ -4,7 +4,9 @@ project(SpoofModule)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_library(spoof SHARED spoof_module.cpp)
+add_library(spoof SHARED
+            spoof_module.cpp
+            atexit.cpp)
 
 find_library(log-lib log)
 
