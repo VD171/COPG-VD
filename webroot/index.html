@@ -58,6 +58,7 @@
                     </div>
                     <div class="button-group">
                         <button id="update-config" class="action-btn">Update Game List</button>
+                        <button id="backup-manager" class="action-btn">Backup/Restore</button>
                     </div>
                 </div>
                 <div class="log-section" id="settings-log-section">
@@ -254,24 +255,120 @@
         <span id="snackbar-message"></span>
         <button id="snackbar-undo" class="snackbar-btn">Undo</button>
     </div>
-<!-- Custom Ignore List Popup -->
-<div id="ignore-popup" class="popup">
-    <div class="popup-content">
-        <div class="popup-header">
-            <h3 id="ignore-popup-title">Manage Ignore List</h3>
+    
+    <!-- Custom Ignore List Popup -->
+    <div id="ignore-popup" class="popup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 id="ignore-popup-title">Manage Ignore List</h3>
+            </div>
+            <div class="popup-body">
+                <div class="popup-icon" id="ignore-popup-icon"></div>
+                <p id="ignore-popup-message">This package will be added to ignore list</p>
+                <p class="popup-package" id="ignore-popup-package">com.example.game</p>
+            </div>
+            <div class="popup-footer">
+                <button id="ignore-popup-cancel" class="popup-btn cancel-btn">Cancel</button>
+                <button id="ignore-popup-confirm" class="popup-btn action-btn">Confirm</button>
+            </div>
         </div>
-        <div class="popup-body">
-            <div class="popup-icon" id="ignore-popup-icon"></div>
-            <p id="ignore-popup-message">This package will be added to ignore list</p>
-            <p class="popup-package" id="ignore-popup-package">com.example.game</p>
+    </div>
+    
+<div id="backup-popup" class="popup">
+    <div class="popup-content">
+        <h3>Backup/Restore</h3>
+        <div class="popup-body backup-grid">
+            <div class="backup-row">
+                <div class="backup-info">
+                    <div class="backup-title">config.json</div>
+                    <div class="backup-desc">Package names and devices</div>
+                </div>
+                <div class="button-group">
+                    <button class="small-btn backup-btn" data-file="config.json">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                    </button>
+                    <button class="small-btn restore-btn" data-file="config.json">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5-5-5 5M12 3.5V14"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="backup-row">
+                <div class="backup-info">
+                    <div class="backup-title">list.json</div>
+                    <div class="backup-desc">Game names mapping</div>
+                </div>
+                <div class="button-group">
+                    <button class="small-btn backup-btn" data-file="list.json">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                    </button>
+                    <button class="small-btn restore-btn" data-file="list.json">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5-5-5 5M12 3.5V14"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="backup-row">
+                <div class="backup-info">
+                    <div class="backup-title">ignorelist.txt</div>
+                    <div class="backup-desc">Ignored packages list</div>
+                </div>
+                <div class="button-group">
+                    <button class="small-btn backup-btn" data-file="ignorelist.txt">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                    </button>
+                    <button class="small-btn restore-btn" data-file="ignorelist.txt">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5-5-5 5M12 3.5V14"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
         </div>
         <div class="popup-footer">
-            <button id="ignore-popup-cancel" class="popup-btn cancel-btn">Cancel</button>
-            <button id="ignore-popup-confirm" class="popup-btn action-btn">Confirm</button>
+            <button id="backup-all-btn" class="action-btn">Backup All</button>
+            <button class="action-btn cancel-btn">Close</button>
         </div>
     </div>
 </div>
-    
+
+<div class="popup" id="file-picker-popup">
+    <div class="popup-content">
+        <h3>Select File</h3>
+        <div class="breadcrumb-container">
+            <button class="small-btn back-btn" id="file-picker-back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 18l-6-6 6-6"></path>
+                </svg>
+            </button>
+            <div class="breadcrumb-path" id="file-picker-path">/sdcard</div>
+        </div>
+        <div class="search-container">
+            <input type="text" id="file-picker-search" placeholder="Search files...">
+        </div>
+        <div class="popup-body">
+            <div class="scroll-container" id="file-picker-list">
+            </div>
+        </div>
+        <div class="popup-footer">
+            <button class="action-btn cancel-btn">Cancel</button>
+        </div>
+    </div>
+</div>
     
     <script src="scripts.js"></script>
 </body>
