@@ -2146,3 +2146,274 @@ h2 {
 .dark-theme #stop-logcat:hover {
     background: rgba(248, 113, 113, 0.25); 
 }
+
+
+.backup-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.backup-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: rgba(96, 165, 250, 0.05);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.backup-row:hover {
+    background: rgba(96, 165, 250, 0.1);
+    transform: translateY(-1px);
+}
+
+.dark-theme .backup-row {
+    background: rgba(96, 165, 250, 0.08);
+}
+
+.dark-theme .backup-row:hover {
+    background: rgba(96, 165, 250, 0.12);
+}
+
+.backup-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.backup-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+}
+
+.dark-theme .backup-title {
+    color: var(--dark-text);
+}
+
+.backup-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.dark-theme .backup-desc {
+    color: var(--dark-text-secondary);
+}
+
+.small-btn {
+    padding: 6px 8px;
+    min-width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.small-btn svg {
+    margin: 0;
+}
+
+/* Button Group Adjustment */
+.button-group {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.button-group .action-btn {
+    flex: 1;
+    min-width: 140px;
+}
+
+/* Popup Body Adjustment */
+.popup-body {
+    padding: 16px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Popup Footer Adjustment */
+.popup-footer {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.dark-theme .popup-footer {
+    border-color: var(--dark-border);
+}
+
+.backup-btn.loading::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.backup-btn.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.backup-btn.loading svg {
+    opacity: 0;
+}
+
+#file-picker-popup .popup-content {
+    max-width: 400px;
+    width: 90%;
+}
+
+#file-picker-popup .scroll-container {
+    min-height: 200px;
+    max-height: 300px;
+    padding: 8px;
+}
+
+#file-picker-popup .app-card {
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#file-picker-popup .app-card:hover {
+    background: rgba(96, 165, 250, 0.1);
+    transform: translateY(-1px);
+}
+
+.dark-theme #file-picker-popup .app-card:hover {
+    background: rgba(96, 165, 250, 0.12);
+}
+
+#file-picker-popup .app-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.dark-theme #file-picker-popup .app-name {
+    color: var(--dark-text);
+}
+
+.breadcrumb-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 6px var(--shadow);
+}
+
+.dark-theme .breadcrumb-container {
+    background: var(--dark-card);
+}
+
+.breadcrumb-path {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+}
+
+.dark-theme .breadcrumb-path {
+    color: var(--dark-text);
+}
+
+.back-btn {
+    padding: 6px;
+    min-width: auto;
+    background: var(--primary-gradient);
+    color: #fff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dark-theme .back-btn {
+    background: linear-gradient(135deg, #1E3A8A, #6B7280);
+}
+
+.back-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px var(--shadow);
+}
+
+.folder-icon::after {
+    content: '';
+    width: 24px;
+    height: 24px;
+    background: var(--text-secondary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E") no-repeat center;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E") no-repeat center;
+}
+
+.file-icon::after {
+    content: '';
+    width: 24px;
+    height: 24px;
+    background: var(--text-secondary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z'%3E%3C/path%3E%3Cpolyline points='13 2 13 9 20 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z'%3E%3C/path%3E%3Cpolyline points='13 2 13 9 20 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center;
+}
+
+.dark-theme .folder-icon::after,
+.dark-theme .file-icon::after {
+    background: var(--dark-text-secondary);
+}
+
+.popup-content h3 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--primary); 
+    margin-bottom: 12px;
+}
+
+
+#device-picker-popup .popup-content h3 {
+    color: var(--primary); 
+}
+
+#backup-popup .popup-content h3 {
+    color: var(--primary); 
+}
+
+#file-picker-popup .popup-content h3 {
+    color: var(--primary); 
+}
+
+#package-picker-popup .popup-content h3 {
+    color: var(--primary); 
+}
+
+.dark-theme .popup-content h3 {
+    color: var(--primary); 
+}
+
+#backup-popup .popup-content h3 {
+    text-align: left; 
+}
+
+#file-picker-popup .popup-content h3 {
+    text-align: left; 
+}
