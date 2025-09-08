@@ -88,7 +88,6 @@
     "PRODUCT": "IN2023"
   },
   "PACKAGES_ONEPLUS_9_PRO_5G": [
-    "com.epicgames.fortnite",
     "com.epicgames.portal"
   ],
   "PACKAGES_ONEPLUS_9_PRO_5G_DEVICE": {
@@ -216,5 +215,16 @@
     "MODEL": "marlin",
     "FINGERPRINT": "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys",
     "PRODUCT": "marlin"
+  },
+  "PACKAGES_POCO_F7_ULTRA": [
+    "com.epicgames.fortnite"
+  ],
+  "PACKAGES_POCO_F7_ULTRA_DEVICE": {
+    "BRAND": "POCO",
+    "DEVICE": "POCO F7 ULTRA",
+    "MANUFACTURER": "Xiaomi",
+    "MODEL": "24117RK2CC",
+    "FINGERPRINT": "POCO/24117RK2CC/POCOF7Ultra:15/AP3A.240805.001/20250315:user/release-keys",
+    "PRODUCT": "24117RK2CC"
   }
 }
