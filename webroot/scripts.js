@@ -25,33 +25,47 @@ async function saveLogToFile() {
     try {
         await execCommand(`mkdir -p /storage/emulated/0/Download/COPG/LOGS`);
         
+        let finalFilename = document.getElementById('save-log-popup').dataset.filename || await generateLogFilename();
+        
+        const escapedContent = logContent.replace(/'/g, "'\\''");
+        await execCommand(`echo '${escapedContent}' > "/storage/emulated/0/Download/COPG/LOGS/${finalFilename}"`);
+        
+        appendToOutput(`Log saved to: ${finalFilename}`, 'success');
+        return true;
+    } catch (error) {
+        appendToOutput(`Failed to save log: ${error}`, 'error');
+        return false;
+    }
+}
+
+async function generateLogFilename() {
+    try {
+        await execCommand(`mkdir -p /storage/emulated/0/Download/COPG/LOGS`);
+        
         const now = new Date();
         const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
-        const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
         const hours = now.getHours().toString().padStart(2, '0');
         const minutes = now.getMinutes().toString().padStart(2, '0');
         const seconds = now.getSeconds().toString().padStart(2, '0');
         
-        let finalFilename = "COPG-LOG.txt";
+        let filename = "COPG-LOG.txt";
         
-        const checkOriginal = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${finalFilename}" 2>/dev/null || echo "not_found"`);
+        const checkOriginal = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
         
         if (checkOriginal.trim() !== 'not_found') {
+            filename = `COPG-LOG-${dateStr}.txt`;
             
-            finalFilename = `COPG-LOG-${dateStr}.txt`;
-            
-            const checkDated = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${finalFilename}" 2>/dev/null || echo "not_found"`);
+            const checkDated = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
             
             if (checkDated.trim() !== 'not_found') {
+                filename = `COPG-LOG-${dateStr}-${hours}${minutes}.txt`;
                 
-                finalFilename = `COPG-LOG-${dateStr}-${hours}${minutes}.txt`;
-                
-                const checkTime = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${finalFilename}" 2>/dev/null || echo "not_found"`);
+                const checkTime = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
                 
                 if (checkTime.trim() !== 'not_found') {
-                    finalFilename = `COPG-LOG-${dateStr}-${hours}${minutes}${seconds}.txt`;
+                    filename = `COPG-LOG-${dateStr}-${hours}${minutes}${seconds}.txt`;
                     
-                    const checkSeconds = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${finalFilename}" 2>/dev/null || echo "not_found"`);
+                    const checkSeconds = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
                     
                     if (checkSeconds.trim() !== 'not_found') {
                         let counter = 1;
@@ -64,20 +78,16 @@ async function saveLogToFile() {
                             checkNumbered = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${newFilename}" 2>/dev/null || echo "not_found"`);
                         }
                         
-                        finalFilename = newFilename;
+                        filename = newFilename;
                     }
                 }
             }
         }
         
-        const escapedContent = logContent.replace(/'/g, "'\\''");
-        await execCommand(`echo '${escapedContent}' > "/storage/emulated/0/Download/COPG/LOGS/${finalFilename}"`);
-        
-        appendToOutput(`Log saved to: ${finalFilename}`, 'success');
-        return true;
+        return filename;
     } catch (error) {
-        appendToOutput(`Failed to save log: ${error}`, 'error');
-        return false;
+        appendToOutput(`Error generating filename: ${error}`, 'error');
+        return "COPG-LOG.txt"; 
     }
 }
 
@@ -242,7 +252,22 @@ function stopLogcat(e) {
         document.getElementById('start-logcat').style.display = 'inline-block';
         document.getElementById('stop-logcat').style.display = 'none';
         
-        // نمایش پاپ‌آپ برای ذخیره لاگ
+        
+        showSaveLogPopup();
+    }
+}
+
+async function showSaveLogPopup() {
+    try {
+        const filename = await generateLogFilename();
+        
+        document.getElementById('save-log-filename').textContent = filename;
+        
+        document.getElementById('save-log-popup').dataset.filename = filename;
+        
+        showPopup('save-log-popup');
+    } catch (error) {
+        appendToOutput(`Error determining filename: ${error}`, 'error');
         showPopup('save-log-popup');
     }
 }
@@ -2804,21 +2829,20 @@ function setupBackupListeners() {
         newBackupManagerBtn.addEventListener('click', showBackupPopup);
     }
 
-    // Ensure backup buttons have data-file attribute
     document.querySelectorAll('.backup-btn').forEach(btn => {
         const filename = btn.dataset.file;
         if (!filename) {
-            // Skip buttons without data-file silently
+            
             return;
         }
         const newBtn = btn.cloneNode(true);
-        newBtn.dataset.file = filename; // Ensure attribute is preserved
+        newBtn.dataset.file = filename; 
         btn.parentNode.replaceChild(newBtn, btn);
     });
 
     document.querySelectorAll('.backup-btn').forEach(btn => {
         const filename = btn.dataset.file;
-        if (!filename) return; // Skip silently
+        if (!filename) return; 
         btn.addEventListener('click', async (e) => {
             e.target.classList.add('loading');
             await backupFile(filename);
@@ -2826,11 +2850,11 @@ function setupBackupListeners() {
         });
     });
 
-    // Ensure restore buttons have data-file attribute
+    
     document.querySelectorAll('.restore-btn').forEach(btn => {
         const filename = btn.dataset.file;
         if (!filename) {
-            // Skip buttons without data-file silently
+            
             return;
         }
         const newBtn = btn.cloneNode(true);
