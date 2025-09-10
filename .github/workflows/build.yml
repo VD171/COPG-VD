@@ -280,15 +280,15 @@ jobs:
                   message = (
                       f"✨ **{title}** ✨\n\n"
                       f"{build_type}\n"
-                      f"▫️ **Version**: `v{os.getenv('VERSION')}`\n"
-                      f"▫️ **Branch**: `{os.getenv('BRANCH')}`\n"
-                      f"▫️ **Commit**: `{os.getenv('COMMIT')[:8]}`\n\n"
+                      f"▫️ **Version**: v{os.getenv('VERSION')}\n"
+                      f"▫️ **Branch**: {os.getenv('BRANCH')}\n"
+                      f"▫️ **Commit**: {os.getenv('COMMIT')[:8]}\n\n"
                   )
                   
                   # Add changelog section for releases
                   if os.getenv('UPLOAD_TO_RELEASE') == 'true':
                       changelog = os.getenv('CHANGELOG')
-                      if changelog and changelog != "No changelog found for v{os.getenv('VERSION')}" and changelog != "No changelog file available":
+                      if changelog and changelog != f"No changelog found for v{os.getenv('VERSION')}" and changelog != "No changelog file available":
                           message += f"📋 **Changelog**:\n{changelog}\n\n"
                   
                   # Add workflow link
