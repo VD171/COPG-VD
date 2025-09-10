@@ -13,6 +13,74 @@ let logcatProcess = null;
 let logcatRunning = false;
 
 
+async function saveLogToFile() {
+    const output = document.getElementById('output');
+    const logContent = output.innerText || output.textContent;
+    
+    if (!logContent.trim()) {
+        appendToOutput("No log content to save", 'warning');
+        return false;
+    }
+
+    try {
+        await execCommand(`mkdir -p /storage/emulated/0/Download/COPG/LOGS`);
+        
+        const now = new Date();
+        const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+        const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0');
+        
+        let finalFilename = "COPG-LOG.txt";
+        
+        const checkOriginal = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${finalFilename}" 2>/dev/null || echo "not_found"`);
+        
+        if (checkOriginal.trim() !== 'not_found') {
+            
+            finalFilename = `COPG-LOG-${dateStr}.txt`;
+            
+            const checkDated = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${finalFilename}" 2>/dev/null || echo "not_found"`);
+            
+            if (checkDated.trim() !== 'not_found') {
+                
+                finalFilename = `COPG-LOG-${dateStr}-${hours}${minutes}.txt`;
+                
+                const checkTime = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${finalFilename}" 2>/dev/null || echo "not_found"`);
+                
+                if (checkTime.trim() !== 'not_found') {
+                    finalFilename = `COPG-LOG-${dateStr}-${hours}${minutes}${seconds}.txt`;
+                    
+                    const checkSeconds = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${finalFilename}" 2>/dev/null || echo "not_found"`);
+                    
+                    if (checkSeconds.trim() !== 'not_found') {
+                        let counter = 1;
+                        let newFilename = `COPG-LOG-${dateStr}-${hours}${minutes}${seconds}(${counter}).txt`;
+                        let checkNumbered = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${newFilename}" 2>/dev/null || echo "not_found"`);
+                        
+                        while (checkNumbered.trim() !== 'not_found') {
+                            counter++;
+                            newFilename = `COPG-LOG-${dateStr}-${hours}${minutes}${seconds}(${counter}).txt`;
+                            checkNumbered = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${newFilename}" 2>/dev/null || echo "not_found"`);
+                        }
+                        
+                        finalFilename = newFilename;
+                    }
+                }
+            }
+        }
+        
+        const escapedContent = logContent.replace(/'/g, "'\\''");
+        await execCommand(`echo '${escapedContent}' > "/storage/emulated/0/Download/COPG/LOGS/${finalFilename}"`);
+        
+        appendToOutput(`Log saved to: ${finalFilename}`, 'success');
+        return true;
+    } catch (error) {
+        appendToOutput(`Failed to save log: ${error}`, 'error');
+        return false;
+    }
+}
+
 async function backupFile(filename) {
     try {
         
@@ -173,6 +241,9 @@ function stopLogcat(e) {
     } finally {
         document.getElementById('start-logcat').style.display = 'inline-block';
         document.getElementById('stop-logcat').style.display = 'none';
+        
+        // نمایش پاپ‌آپ برای ذخیره لاگ
+        showPopup('save-log-popup');
     }
 }
 
@@ -213,7 +284,6 @@ async function togglePackageInIgnoreList(packageName) {
 }
 
 // ksu.fullScreen(true)
-// Module ID for COPG
 const MODULE_ID = 'COPG';
 const SANITIZED_MODULE_ID = MODULE_ID.replace(/[^a-zA-Z0-9_.]/g, '_');
 const JS_INTERFACE = `$${SANITIZED_MODULE_ID}`; // e.g., $COPG
@@ -1922,6 +1992,17 @@ function applyEventListeners() {
     });
     
     setupBackupListeners();
+    
+document.getElementById('save-log-yes').addEventListener('click', async () => {
+    hidePopup('save-log-popup', async () => {
+        await saveLogToFile();
+    });
+});
+
+document.getElementById('save-log-no').addEventListener('click', () => {
+    closePopup('save-log-popup');
+    appendToOutput("Log not saved", 'info');
+});
 
     document.getElementById('update-config').addEventListener('click', () => {
         if (actionRunning) return;
@@ -2404,7 +2485,6 @@ async function showPackagePicker() {
     }
 }
 
-// Add event listener for package picker cancel button
 document.querySelector('#package-picker-popup .cancel-btn')?.addEventListener('click', () => {
     document.getElementById('package-picker-search').value = '';
     closePopup('package-picker-popup');
