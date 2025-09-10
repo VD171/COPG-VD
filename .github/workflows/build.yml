@@ -238,7 +238,7 @@ jobs:
           TAG="v${{ env.VERSION }}"
           gh release create "$TAG" \
             --title "Release $TAG" \
-            --notes "Built on $(date -u +'%Y-%m-%d %H:%M:%S UTC')" \
+            --notes "Built on $(date -u +'%Y-%m-%d %H:%M:%S UTC') \n read [changelog.md](https://github.com/AlirezaParsi/COPG/blob/JSON/changelog.md) for changes" \
             --draft \
             || gh release edit "$TAG" --draft
           gh release upload "$TAG" ${{ env.ZIP_NAME }} --clobber
