@@ -11,6 +11,7 @@
 #include <mutex>
 #include <functional>
 #include <sys/stat.h>  
+#include <cstring> 
 
 using json = nlohmann::json;
 
@@ -18,7 +19,7 @@ using json = nlohmann::json;
 #define LOGD(...) if (debug_mode) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-static bool debug_mode = false; 
+static bool debug_mode = true; 
 
 struct DeviceInfo {
     std::string brand;
@@ -99,12 +100,22 @@ public:
         bool should_close = true;
         {
             std::lock_guard<std::mutex> lock(info_mutex);
-            auto it = package_map.find(package_name);
-            if (it != package_map.end()) {
-                current_info = it->second;
-                LOGD("Spoofing device for package %s: %s", package_name, current_info.model.c_str());
+            auto exact_it = package_map.find(package_name);
+            if (exact_it != package_map.end()) {
+                current_info = exact_it->second;
+                LOGD("Exact match - Spoofing device for package %s: %s", package_name, current_info.model.c_str());
                 spoofDevice(current_info);
                 should_close = false;
+            } else {
+                for (const auto& [config_pkg, info] : package_map) {
+                    if (strncmp(package_name, config_pkg.c_str(), config_pkg.size()) == 0) {
+                        current_info = info;
+                        LOGD("Partial match - Spoofing sub-process %s using config for %s: %s", package_name, config_pkg.c_str(), current_info.model.c_str());
+                        spoofDevice(current_info);
+                        should_close = false;
+                        break; 
+                    }
+                }
             }
         }
 
@@ -137,11 +148,20 @@ public:
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
-            auto it = package_map.find(package_name);
-            if (it != package_map.end()) {
-                current_info = it->second;
-                LOGD("Post-specialize spoofing for %s: %s", package_name, current_info.model.c_str());
+            auto exact_it = package_map.find(package_name);
+            if (exact_it != package_map.end()) {
+                current_info = exact_it->second;
+                LOGD("Post-specialize exact match spoofing for %s: %s", package_name, current_info.model.c_str());
                 spoofDevice(current_info);
+            } else {
+                for (const auto& [config_pkg, info] : package_map) {
+                    if (strncmp(package_name, config_pkg.c_str(), config_pkg.size()) == 0) {
+                        current_info = info;
+                        LOGD("Post-specialize partial match spoofing for %s: %s", package_name, current_info.model.c_str());
+                        spoofDevice(current_info);
+                        break;
+                    }
+                }
             }
         }
 
