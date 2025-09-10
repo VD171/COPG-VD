@@ -181,7 +181,9 @@
     "com.tencent.aovindia",
     "com.garena.game.kgms",
     "com.tencent.aovjp",
-    "com.garena.game.kgph"
+    "com.garena.game.kgph",
+    "com.dts.freefireth",
+    "com.dts.freefiremax"
   ],
   "PACKAGES_REALME_P3_5G_DEVICE": {
     "BRAND": "realme",
