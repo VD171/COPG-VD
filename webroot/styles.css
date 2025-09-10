@@ -2417,3 +2417,41 @@ h2 {
 #file-picker-popup .popup-content h3 {
     text-align: left; 
 }
+
+#save-log-popup .popup-content {
+    max-width: 350px;
+    padding: 20px;
+    text-align: center;
+}
+
+#save-log-popup .popup-content h3 {
+    margin-bottom: 12px;
+    color: var(--primary);
+}
+
+#save-log-popup .popup-content p {
+    margin-bottom: 12px;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+#save-log-filename {
+    display: block;
+    margin-top: 8px;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 13px;
+}
+
+.dark-theme #save-log-filename {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+#save-log-popup .popup-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 16px;
+}
