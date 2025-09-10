@@ -9,6 +9,7 @@
 - Added better config loading with less overhead and better performance
 - Added Backup/Restore feature to WebUI
 - Added save logcat file feature to the WebUI
+- Better logcat output (now only shows errors)
 - Added Fortnite 120 fps (need to test)
 - Added Clash of Titans (India)
 - Added Wuthering Waves
