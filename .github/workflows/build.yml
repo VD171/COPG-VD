@@ -257,10 +257,7 @@ jobs:
           UPLOAD_TO_RELEASE: ${{ github.event.inputs.upload_to_release }}
           VERSION: ${{ env.VERSION }}
           BRANCH: ${{ github.event.inputs.branch }}
-          ARM64_BUILD_TIME: ${{ env.ARM64_BUILD_TIME }}
-          ARM32_BUILD_TIME: ${{ env.ARM32_BUILD_TIME }}
           COMMIT: ${{ github.sha }}
-          RUN_ID: ${{ github.run_id }}
           CHANGELOG: ${{ env.CHANGELOG }}
         run: |
           python3 - <<EOF
@@ -276,22 +273,26 @@ jobs:
 
           async def send_notification():
               try:
-                  # Build the message (Markdown, no emoji or hidden link)
+                  # Build the message with better formatting
                   title = os.getenv('TITLE')
-                  build_type = "Release" if os.getenv('UPLOAD_TO_RELEASE') == 'true' else "CI"
+                  build_type = "🚀 **Release Build**" if os.getenv('UPLOAD_TO_RELEASE') == 'true' else "🔧 **CI Build**"
+                  
                   message = (
-                      f"**{title}**\n"
-                      f"[View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})\n"
-                      f"**Build Type**: {build_type}\n"
-                      f"**Version**: {os.getenv('VERSION')}\n"
-                      f"**Branch**: {os.getenv('BRANCH')}\n"
-                      f"**Build Times**:\n"
-                      f"- arm64-v8a: {os.getenv('ARM64_BUILD_TIME')} seconds\n"
-                      f"- arm32-v7a: {os.getenv('ARM32_BUILD_TIME')} seconds\n"
-                      f"**Run ID**: {os.getenv('RUN_ID')}"
+                      f"✨ **{title}** ✨\n\n"
+                      f"{build_type}\n"
+                      f"▫️ **Version**: `v{os.getenv('VERSION')}`\n"
+                      f"▫️ **Branch**: `{os.getenv('BRANCH')}`\n"
+                      f"▫️ **Commit**: `{os.getenv('COMMIT')[:8]}`\n\n"
                   )
+                  
+                  # Add changelog section for releases
                   if os.getenv('UPLOAD_TO_RELEASE') == 'true':
-                      message += f"\n\n**Changelog (v{os.getenv('VERSION')})**:\n{os.getenv('CHANGELOG')}"
+                      changelog = os.getenv('CHANGELOG')
+                      if changelog and changelog != "No changelog found for v{os.getenv('VERSION')}" and changelog != "No changelog file available":
+                          message += f"📋 **Changelog**:\n{changelog}\n\n"
+                  
+                  # Add workflow link
+                  message += f"🔗 [View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})"
 
                   # Send the file with thumbnail
                   await client.send_file(
