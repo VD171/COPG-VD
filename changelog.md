@@ -4,7 +4,7 @@
 - https://t.me/COPG_module
 ---
 ## v4.5.0
-- Added better spoof method to hide from anticheat (no freefire ban anymore)
+- Added better spoof method to hide from anticheat (no freefire or delta force ban anymore)
 - Added [atexit](https://github.com/5ec1cff/local_cxa_atexit_finalize_impl) by [5ec1cff](https://github.com/5ec1cff) to prevent detection from banking apps/ Anti cheats
 - Added better config loading with less overhead and better performance
 - Added Backup/Restore feature to WebUI
