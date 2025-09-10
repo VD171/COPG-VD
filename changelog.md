@@ -8,7 +8,7 @@
 - Added [atexit](https://github.com/5ec1cff/local_cxa_atexit_finalize_impl) by [5ec1cff](https://github.com/5ec1cff) to prevent detection from banking apps/ Anti cheats
 - Added better config loading with less overhead and better performance
 - Added Backup/Restore feature to WebUI
-- Added save log file to WebUI
+- Added save logcat file feature to the WebUI
 - Added Fortnite 120 fps (need to test)
 - Added Clash of Titans (India)
 - Added Wuthering Waves
