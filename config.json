@@ -87,17 +87,6 @@
     "FINGERPRINT": "OnePlus/IN2023/OnePlus8Pro:13/RKQ1.211119.001/20230501:user/release-keys",
     "PRODUCT": "IN2023"
   },
-  "PACKAGES_ONEPLUS_9_PRO_5G": [
-    "com.epicgames.portal"
-  ],
-  "PACKAGES_ONEPLUS_9_PRO_5G_DEVICE": {
-    "BRAND": "OnePlus",
-    "DEVICE": "OnePlus 9 Pro 5G",
-    "MANUFACTURER": "OnePlus",
-    "MODEL": "LE2123",
-    "FINGERPRINT": "OnePlus/LE2123/OnePlus9Pro:14/UP1A.231005.007/20240115:user/release-keys",
-    "PRODUCT": "LE2123"
-  },
   "PACKAGES_POCO_F5": [
     "com.mobile.legends"
   ],
@@ -217,16 +206,5 @@
     "MODEL": "marlin",
     "FINGERPRINT": "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys",
     "PRODUCT": "marlin"
-  },
-  "PACKAGES_POCO_F7_ULTRA": [
-    "com.epicgames.fortnite"
-  ],
-  "PACKAGES_POCO_F7_ULTRA_DEVICE": {
-    "BRAND": "POCO",
-    "DEVICE": "POCO F7 ULTRA",
-    "MANUFACTURER": "Xiaomi",
-    "MODEL": "24117RK2CC",
-    "FINGERPRINT": "POCO/24117RK2CC/POCOF7Ultra:15/AP3A.240805.001/20250315:user/release-keys",
-    "PRODUCT": "24117RK2CC"
   }
 }
