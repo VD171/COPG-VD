@@ -9,13 +9,13 @@
 - Added better config loading with less overhead and better performance
 - Added Backup/Restore feature to WebUI
 - Added save logcat file feature to the WebUI
-- Better logcat output (now only shows errors)
+- Added Better logcat output (now only shows errors)
+- Added freeFire and freefire max 120 fps
 - Added Clash of Titans (India)
 - Added Wuthering Waves
 - Added Arena of Valor/Honor of Kings all regions
 - Removed Fortnite (because spoof doesn't work on it anymore) i will try to add it later with 120 fps support 
 - Removed Apex mobile because this game doesn't exist anymore 
-- Added freeFire and freefire max 120 fps
 ## v4.3.6
 - Removed freefire
 - Added volume control for action script
