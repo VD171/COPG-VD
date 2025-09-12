@@ -460,6 +460,10 @@ if $INSTALL_SUCCESS; then
       ui_print " ✗ Failed to Set Permissions (service.sh)! "
       print_failure_and_exit "binary"
     }
+    chmod 0755 "$MODPATH/fakecpu.sh" || {
+      ui_print " ✗ Failed to Set Permissions (fakecpu.sh)! "
+      print_failure_and_exit "binary"
+    }
     chmod 0755 "$MODPATH/action.sh" || {
       ui_print " ✗ Failed to Set Permissions (action.sh)! "
       print_failure_and_exit "binary"
