@@ -20,7 +20,8 @@
 - Delta Force: 120 FPS/HD Graphics
 - Mobile Legends: Ultra 120 FPS
 - Freefire / Freefire max 120 FPS
-- +52 games supported!
+- Fortnite 120 FPS
+- +60 games supported!
 ### 📱 Exclusive App Enhancements
 Google Photos: Unlimited backup + AI generator
 TikTok: Stream in stunning 1080p
