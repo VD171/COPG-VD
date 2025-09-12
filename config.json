@@ -146,7 +146,8 @@
     "PRODUCT": "2211133G"
   },
   "PACKAGES_ONEPLUS_13": [
-    "com.proxima.dfm"
+    "com.proxima.dfm",
+    "com.epicgames.fortnite"
   ],
   "PACKAGES_ONEPLUS_13_DEVICE": {
     "BRAND": "OnePlus",
