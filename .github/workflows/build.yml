@@ -154,6 +154,7 @@ jobs:
           cp customize.sh module/customize.sh
           cp service.sh module/service.sh
           cp action.sh module/action.sh
+          cp fakecpu.sh module.fakecpu.sh
           cp uninstall.sh module/uninstall.sh
           cp update_config.sh module/update_config.sh
           cp system.prop module/system.prop
@@ -169,7 +170,7 @@ jobs:
           cp bin/armeabi-v7a/jq module/bin/armeabi-v7a/jq
           cp bin/arm64-v8a/config_watcher module/bin/arm64-v8a/config_watcher
           cp bin/armeabi-v7a/config_watcher module/bin/armeabi-v7a/config_watcher
-          chmod 755 module/customize.sh module/service.sh module/action.sh module/uninstall.sh module/update_config.sh module/bin/arm64-v8a/jq module/bin/armeabi-v7a/jq module/bin/arm64-v8a/config_watcher module/bin/armeabi-v7a/config_watcher module/META-INF/com/google/android/update-binary
+          chmod 755 module/customize.sh module/fakecpu.sh module/service.sh module/action.sh module/uninstall.sh module/update_config.sh module/bin/arm64-v8a/jq module/bin/armeabi-v7a/jq module/bin/arm64-v8a/config_watcher module/bin/armeabi-v7a/config_watcher module/META-INF/com/google/android/update-binary
           
           # Set version and versionCode from inputs or use defaults
           VERSION="${{ github.event.inputs.custom_version || '4.3.5' }}"
