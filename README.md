@@ -19,7 +19,7 @@
 - PUBG/BGMI: 120 FPS + Haptic Feedback
 - Delta Force: 120 FPS/HD Graphics
 - Mobile Legends: Ultra 120 FPS
-- Fortnite 90 FPS
+- Freefire / Freefire max 120 FPS
 - +52 games supported!
 ### 📱 Exclusive App Enhancements
 Google Photos: Unlimited backup + AI generator
