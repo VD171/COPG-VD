@@ -5,7 +5,7 @@
 ---
 ## v4.5.1
 - Spoofed the /proc/cpuinfo file to report the device as a Snapdragon 8 Elite.
-· This workaround tricks games like Fortnite, which rely on a strict CPU model check, into enabling hidden graphics settings (e.g., 120 fps mode).
+   - This workaround tricks games like Fortnite, which rely on a strict CPU model check, into enabling hidden graphics settings (e.g., 120 fps mode).
 - Added Fortnite 120 fps
 - Updated icon for WebUI-X and mmrl repo Special Thanks to [AmbadeuZ](t.me/AmbadeuZ) for the new Icon
 - Updated banner for KernelSU-Next and mmrl Thanks to [AmbadeuZ](t.me/AmbadeuZ) for the new Banner
