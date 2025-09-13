@@ -143,12 +143,13 @@ jobs:
 
       - name: Prepare module structure
         run: |
-          mkdir -p module/zygisk module/META-INF/com/google/android module/webroot/assets module/bin/arm64-v8a module/bin/armeabi-v7a module/system/bin
+          mkdir -p module/zygisk module/META-INF/com/google/android module/webroot/assets module/bin/arm64-v8a module/bin/armeabi-v7a module/system/bin module/common
           cp build/arm64-v8a/libspoof.so module/zygisk/arm64-v8a.so
           cp build/armeabi-v7a/libspoof.so module/zygisk/armeabi-v7a.so
           chmod 755 module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
           cp config.json module/config.json
           cp banner.png module/banner.png
+          cp repo.yaml module/common/repo.yaml
           cp list.json module/list.json
           cp ignorelist.txt module/ignorelist.txt
           cp -rf system/* module/system/
