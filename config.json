@@ -89,7 +89,8 @@
     "PRODUCT": "IN2023"
   },
   "PACKAGES_POCO_F5": [
-    "com.mobile.legends"
+    "com.mobile.legends",
+    "com.mobile.legends.usa"
   ],
   "PACKAGES_POCO_F5_DEVICE": {
     "BRAND": "POCO",
