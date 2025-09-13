@@ -148,6 +148,7 @@ jobs:
           cp build/armeabi-v7a/libspoof.so module/zygisk/armeabi-v7a.so
           chmod 755 module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
           cp config.json module/config.json
+          cp banner.png module/banner.png
           cp list.json module/list.json
           cp ignorelist.txt module/ignorelist.txt
           cp -rf system/* module/system/
@@ -186,7 +187,7 @@ jobs:
           support=https://t.me/theaosp
           updateJson=https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/update.json
           minMagisk=20.4
-          banner=https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/banner.png
+          banner=banner.png
           EOF
 
       - name: Package module into ZIP
