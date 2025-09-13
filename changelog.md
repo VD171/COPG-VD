@@ -3,6 +3,12 @@
 - https://t.me/TheAOSP
 - https://t.me/COPG_module
 ---
+## v4.5.1
+- Spoofed the /proc/cpuinfo file to report the device as a Snapdragon 8 Elite.
+· This workaround tricks games like Fortnite, which rely on a strict CPU model check, into enabling hidden graphics settings (e.g., 120 fps mode).
+- Added Fortnite 120 fps
+- Updated icon for WebUI-X and mmrl repo Special Thanks to [AmbadeuZ](t.me/AmbadeuZ) for the new Icon
+- Updated banner for KernelSU-Next and mmrl Thanks to [AmbadeuZ](t.me/AmbadeuZ) for the new Banner
 ## v4.5.0
 - Added better spoof method to hide from anticheat (no freefire or delta force ban anymore)
 - Added [atexit](https://github.com/5ec1cff/local_cxa_atexit_finalize_impl) by [5ec1cff](https://github.com/5ec1cff) to prevent detection from banking apps/ Anti cheats
