@@ -137,7 +137,7 @@ get_packages() {
         exit 1
     fi
     if [ -f "$CONFIG_JSON" ]; then
-        jq -r 'to_entries[] | select(.key | startswith("PACKAGES_") and endswith("_DEVICE") | not) | .value[]' "$CONFIG_JSON" 2>/dev/null || exit 1
+        jq -r '.[] | select(type=="array")[]' "$CONFIG_JSON" 2>/dev/null || exit 1
     else
         exit 1
     fi
