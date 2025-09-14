@@ -20,7 +20,7 @@
 - Delta Force: 120 FPS/HD Graphics
 - Mobile Legends: Ultra 120 FPS
 - Freefire / Freefire max 120 FPS
-- +52 games supported!
+- +60 games supported!
 ### 📱 Exclusive App Enhancements
 Google Photos: Unlimited backup + AI generator
 TikTok: Stream in stunning 1080p
@@ -35,9 +35,9 @@ Transform your device into a powerhouse for gaming and apps. Easy to use, fully 
 ### 📋 Requirements
 - Rooted Android device (9.0+)
 - One of these root solutions:
-  - ![Magisk](https://img.shields.io/badge/Magisk-v24%2B-00B39B?style=flat&logo=android) with [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)/[Rezygisk](https://github.com/PerformanC/ReZygisk)
-  - ![KernelSU](https://img.shields.io/badge/KernelSU-0.6.6%2B-7D4698?style=flat) with [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)/[Rezygisk](https://github.com/PerformanC/ReZygisk)
-  - ![APatch](https://img.shields.io/badge/APatch-0.10%2B-4285F4?style=flat) with [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)/[Rezygisk](https://github.com/PerformanC/ReZygisk)
+  - ![Magisk](https://img.shields.io/badge/Magisk-v24%2B-00B39B?style=flat&logo=android) with [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)/[Rezygisk](https://github.com/PerformanC/ReZygisk)/[NeoZygisk](https://github.com/JingMatrix/NeoZygisk)
+  - ![KernelSU](https://img.shields.io/badge/KernelSU-0.6.6%2B-7D4698?style=flat) with [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)/[Rezygisk](https://github.com/PerformanC/ReZygisk)/[NeoZygisk](https://github.com/JingMatrix/NeoZygisk)
+  - ![APatch](https://img.shields.io/badge/APatch-0.10%2B-4285F4?style=flat) with [Zygisk Next](https://github.com/Dr-TSNG/ZygiskNext)/[Rezygisk](https://github.com/PerformanC/ReZygisk)/[NeoZygisk](https://github.com/JingMatrix/NeoZygisk)
 ## 📃 Note
 - Standard/Native Zygisk isn't supported because its not safe.
 - WebUI-X is recommended.
@@ -96,21 +96,21 @@ Edit `/data/adb/modules/COPG/config.json` with this format:
   <table>
     <tr>
       <td align="center">
-        <img src="https://github.com/user-attachments/assets/c31fa24e-9a67-43b5-b5e1-a4b65190bed4" width="300" alt="Main Dashboard">
+        <img src="https://github.com/AlirezaParsi/COPG/blob/JSON/screenshots/Screenshot_20250913-210930_WebUI%20X.png?raw=true" width="300" alt="Main Dashboard">
         <br><em>Settings Panel</em>
       </td>
       <td align="center">
-        <img src="https://github.com/user-attachments/assets/61d2bf0e-72b2-4c01-ab8f-a536ffc3c3c4" width="300" alt="Settings">
-        <br><em>Settings Panel</em>
+        <img src="https://github.com/AlirezaParsi/COPG/blob/JSON/screenshots/Screenshot_20250913-211818_WebUI%20X.png?raw=true" width="300" alt="Settings">
+        <br><em>Added new App/game</em>
       </td>
     </tr>
     <tr>
       <td align="center">
-        <img src="https://github.com/user-attachments/assets/07b7b135-dddb-48ed-a699-0db8f0c0e758" width="300" alt="Profiles">
+        <img src="https://github.com/AlirezaParsi/COPG/blob/JSON/screenshots/Screenshot_20250913-211418_WebUI%20X.png?raw=true" width="300" alt="Profiles">
         <br><em>Device Profiles</em>
       </td>
       <td align="center">
-        <img src="https://github.com/user-attachments/assets/6b420621-fc81-4b9f-ad35-7c71f6165faf" width="300" alt="Advanced">
+        <img src="https://github.com/AlirezaParsi/COPG/blob/JSON/screenshots/Screenshot_20250913-211454_WebUI%20X.png?raw=true" width="300" alt="Advanced">
         <br><em>Game list</em>
       </td>
     </tr>
@@ -122,7 +122,8 @@ Edit `/data/adb/modules/COPG/config.json` with this format:
   <img src="https://github.com/user-attachments/assets/735aa872-fbf0-4cd1-8299-1989c08b9b80" width="180" hspace="10" alt="Delta Force">
   <img src="https://github.com/user-attachments/assets/9a9fd8b2-7449-404f-888a-dedeefbe670d" width="180" hspace="10" alt="CODM">
   <img src="https://github.com/user-attachments/assets/d9d3398f-5944-44e6-8df6-312e099c9738" width="180" hspace="10" alt="PUBG Mobile">
-  <img src="https://github.com/user-attachments/assets/4f80922a-dc68-48a5-80b5-b9523e47589b" width="180" hspace="10" alt="LoL">
+  <img src="https://github.com/AlirezaParsi/COPG/blob/JSON/screenshots/Screenshot_20250914-131838_Free%20Fire%20MAX.png?raw=true" width="180" hspace="10" alt="FreeFire MAX">
+  <img src="https://github.com/AlirezaParsi/COPG/blob/JSON/screenshots/Screenshot_20250913-211947_Mobile%20Legends_%20Bang%20Bang.US.png?raw=true" width="180" hspace="10" alt="Mobile Legends Bang Bang.US">
 </div>
 
 ---
