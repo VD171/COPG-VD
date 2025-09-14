@@ -3,7 +3,7 @@
 - https://t.me/TheAOSP
 - https://t.me/COPG_module
 ---
-#$ 4.5.2
+## v4.5.2
 - Removed the `/proc/cpuinfo` spoofing method due to its reliance on a mount technique that was flagged as suspicious by certain banking applications.
 - Removed Fortnite 120 FPS unlock due to its dependency on `/proc/cpuinfo` spoofing.
 ## v4.5.1
