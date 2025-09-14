@@ -147,10 +147,6 @@ get_packages() {
 exec_root "whoami" >/dev/null || exit 1
 restore_saved_states
 
-MODDIR="/data/adb/modules/COPG"
-$MODDIR/fakecpu.sh
-exec_root "settings put system min_refresh_rate 120"
-
 # Start config_watcher
 start_config_watcher || exit 1
 
