@@ -101,7 +101,7 @@ Edit `/data/adb/modules/COPG/config.json` with this format:
       </td>
       <td align="center">
         <img src="https://github.com/AlirezaParsi/COPG/blob/JSON/screenshots/Screenshot_20250913-211818_WebUI%20X.png?raw=true" width="300" alt="Settings">
-        <br><em>Added new App/game</em>
+        <br><em>Add new App/game</em>
       </td>
     </tr>
     <tr>
