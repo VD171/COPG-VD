@@ -1,0 +1,364 @@
+name: test
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_to_release:
+        description: 'Upload ZIP to GitHub Release?'
+        type: boolean
+        required: true
+        default: false
+      upload_to_telegram:
+        description: 'Upload ZIP to Telegram?'
+        type: boolean
+        required: true
+        default: false
+      branch:
+        description: 'Branch to build from'
+        type: string
+        required: true
+        default: 'JSON'
+      title:
+        description: 'Custom title for Telegram message'
+        type: string
+        required: false
+        default: ''
+      custom_version:
+        description: 'Custom version (e.g. 4.3.5)'
+        type: string
+        required: false
+      custom_version_code:
+        description: 'Custom version code (e.g. 435)'
+        type: string
+        required: false
+      build_type:
+        description: 'Build type'
+        type: choice
+        options:
+          - Release
+          - Debug
+          - Both
+        default: 'Both'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    environment: Telegram
+    strategy:
+      matrix:
+        build_type: ${{ fromJSON(contains('["Release", "Both"]', github.event.inputs.build_type) ? '["Release"]' : contains('["Debug", "Both"]', github.event.inputs.build_type) ? '["Debug"]' : '["Release", "Debug"]') }}
+        abi: [arm64-v8a, armeabi-v7a]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Cache NDK and dependencies
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            ${{ env.HOME }}/android-sdk
+            ${{ env.HOME }}/.cache
+          key: ${{ runner.os }}-android-${{ hashFiles('**/CMakeLists.txt') }}-${{ matrix.build_type }}-${{ matrix.abi }}
+          restore-keys: |
+            ${{ runner.os }}-android-
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Android SDK and NDK
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+          unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+          if [ -d "$ANDROID_HOME/cmdline-tools/cmdline-tools" ]; then
+            mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+          elif [ -d "$ANDROID_HOME/cmdline-tools/tools" ]; then
+            mv $ANDROID_HOME/cmdline-tools/tools $ANDROID_HOME/cmdline-tools/latest
+          else
+            echo "Unexpected directory structure after unzip:"
+            ls -la $ANDROID_HOME/cmdline-tools
+            exit 1
+          fi
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973" "platforms;android-34" "build-tools;34.0.0"
+          echo "NDK_PATH=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
+
+      - name: Accept Android SDK licenses
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          JAVA_OPTS="--add-modules java.xml.bind" yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || echo "License acceptance failed!"
+
+      - name: Install build tools and Python dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake zip curl imagemagick python3 python3-pip
+          pip3 install telethon
+
+      - name: Fetch Zygisk Headers and JSON Library
+        run: |
+          mkdir -p zygisk include/nlohmann
+          wget https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hpp
+          wget https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp -O include/nlohmann/json.hpp
+
+      - name: Build ${{ matrix.abi }} (${{ matrix.build_type }})
+        uses: threeal/cmake-action@v2.1.0
+        with:
+          build-dir: build/${{ matrix.build_type }}/${{ matrix.abi }}
+          args: |
+            -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake
+            -DANDROID_ABI=${{ matrix.abi }}
+            -DANDROID_PLATFORM=android-34
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+            -DCMAKE_MAKE_PROGRAM=/usr/bin/make
+            ${{ matrix.build_type == 'Release' && '-DNDEBUG=1' || '' }}
+
+      - name: Verify build output and get file size
+        id: verify_build
+        run: |
+          if [ ! -f "build/${{ matrix.build_type }}/${{ matrix.abi }}/libspoof.so" ]; then
+            echo "Error: ${{ matrix.abi }} (${{ matrix.build_type }}) library not built!"
+            ls -la "build/${{ matrix.build_type }}/${{ matrix.abi }}"
+            exit 1
+          fi
+          
+          # Get file size for logging
+          FILE_SIZE=$(du -h "build/${{ matrix.build_type }}/${{ matrix.abi }}/libspoof.so" | cut -f1)
+          echo "FILE_SIZE_${{ matrix.abi }}_${{ matrix.build_type }}=$FILE_SIZE" >> $GITHUB_ENV
+          echo "file_size=$FILE_SIZE" >> $GITHUB_OUTPUT
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: build/${{ matrix.build_type }}/${{ matrix.abi }}/libspoof.so
+          retention-days: 1
+
+  package:
+    runs-on: ubuntu-24.04
+    needs: build
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: build
+
+      - name: Prepare module structure
+        run: |
+          # Create directories
+          mkdir -p module/zygisk module/META-INF/com/google/android module/webroot/assets 
+          mkdir -p module/bin/arm64-v8a module/bin/armeabi-v7a module/system/bin module/common
+
+          # Copy Release builds by default, fallback to Debug if Release not available
+          if [ -f "build/Release/arm64-v8a/libspoof.so" ]; then
+            cp build/Release/arm64-v8a/libspoof.so module/zygisk/arm64-v8a.so
+            echo "Using Release build for arm64-v8a"
+          elif [ -f "build/Debug/arm64-v8a/libspoof.so" ]; then
+            cp build/Debug/arm64-v8a/libspoof.so module/zygisk/arm64-v8a.so
+            echo "Using Debug build for arm64-v8a (Release not available)"
+          else
+            echo "Error: No arm64-v8a build found!"
+            exit 1
+          fi
+
+          if [ -f "build/Release/armeabi-v7a/libspoof.so" ]; then
+            cp build/Release/armeabi-v7a/libspoof.so module/zygisk/armeabi-v7a.so
+            echo "Using Release build for armeabi-v7a"
+          elif [ -f "build/Debug/armeabi-v7a/libspoof.so" ]; then
+            cp build/Debug/armeabi-v7a/libspoof.so module/zygisk/armeabi-v7a.so
+            echo "Using Debug build for armeabi-v7a (Release not available)"
+          else
+            echo "Error: No armeabi-v7a build found!"
+            exit 1
+          fi
+
+          chmod 755 module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
+
+          # Copy other files
+          cp config.json module/config.json
+          cp banner.png module/banner.png
+          cp repo.yaml module/common/repo.yaml
+          cp list.json module/list.json
+          cp ignorelist.txt module/ignorelist.txt
+          cp -rf system/* module/system/
+          cp customize.sh module/customize.sh
+          cp service.sh module/service.sh
+          cp action.sh module/action.sh
+          cp uninstall.sh module/uninstall.sh
+          cp update_config.sh module/update_config.sh
+          cp system.prop module/system.prop
+          cp META-INF/com/google/android/update-binary module/META-INF/com/google/android/update-binary
+          cp META-INF/com/google/android/updater-script module/META-INF/com/google/android/updater-script
+          cp webroot/index.html module/webroot/index.html
+          cp webroot/scripts.js module/webroot/scripts.js
+          cp webroot/styles.css module/webroot/styles.css
+          cp webroot/config.json module/webroot/config.json
+          cp webroot/icon.png module/webroot/icon.png
+          cp webroot/assets/RobotoMono-Regular.ttf module/webroot/assets/RobotoMono-Regular.ttf
+          cp bin/arm64-v8a/jq module/bin/arm64-v8a/jq
+          cp bin/armeabi-v7a/jq module/bin/armeabi-v7a/jq
+          cp bin/arm64-v8a/config_watcher module/bin/arm64-v8a/config_watcher
+          cp bin/armeabi-v7a/config_watcher module/bin/armeabi-v7a/config_watcher
+          
+          chmod 755 module/customize.sh module/service.sh module/action.sh module/uninstall.sh module/update_config.sh 
+          chmod 755 module/bin/arm64-v8a/jq module/bin/armeabi-v7a/jq module/bin/arm64-v8a/config_watcher module/bin/armeabi-v7a/config_watcher 
+          chmod 755 module/META-INF/com/google/android/update-binary
+          
+          # Set version and versionCode
+          VERSION="${{ github.event.inputs.custom_version || '4.3.5' }}"
+          VERSION_CODE="${{ github.event.inputs.custom_version_code || '435' }}"
+          
+          cat > module/module.prop << EOF
+id=COPG
+name=✨ COPG spoof ✨
+version=$VERSION
+versionCode=$VERSION_CODE
+author=AlirezaParsi
+description=Spoof your device for games/apps to unlock new features.
+support=https://t.me/theaosp
+updateJson=https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/update.json
+minMagisk=20.4
+banner=banner.png
+EOF
+
+      - name: Package module into ZIP
+        run: |
+          VERSION=$(grep "version=" module/module.prop | cut -d'=' -f2)
+          ZIP_NAME="COPG-v$VERSION.zip"
+          cd module
+          zip -r "../$ZIP_NAME" .
+          cd ..
+          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Extract changelog for current version
+        if: github.event.inputs.upload_to_telegram == 'true'
+        run: |
+          if [ -f "changelog.md" ]; then
+            VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
+            CHANGELOG=$(awk "/^## v$VERSION/{p=1;next}/^##/{p=0}p" changelog.md | sed '/^$/d')
+            if [ -z "$CHANGELOG" ]; then
+              echo "CHANGELOG=No changelog found for v${{ env.VERSION }}" >> $GITHUB_ENV
+            else
+              echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+              echo "$CHANGELOG" >> $GITHUB_ENV
+              echo "EOF" >> $GITHUB_ENV
+            fi
+          else
+            echo "CHANGELOG=No changelog file available" >> $GITHUB_ENV
+          fi
+
+      - name: Download and Prepare Thumbnail
+        if: github.event.inputs.upload_to_telegram == 'true'
+        run: |
+          cp icon.png icon_thumb.jpg
+          convert icon_thumb.jpg -resize 320x320 -quality 80 icon_thumb.jpg
+          if [ ! -f "icon_thumb.jpg" ]; then
+            echo "Error: Thumbnail creation failed!"
+            ls -la
+            exit 1
+          fi
+
+      - name: Upload Module ZIP as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: COPG
+          path: ${{ env.ZIP_NAME }}
+
+      - name: Upload ZIP to GitHub Release
+        if: github.event.inputs.upload_to_release == 'true'
+        run: |
+          TAG="v${{ env.VERSION }}"
+          gh release create "$TAG" \
+            --title "Release $TAG" \
+            --notes "Built on $(date -u +'%Y-%m-%d %H:%M:%S UTC') Read [changelog.md](https://github.com/AlirezaParsi/COPG/blob/JSON/changelog.md) for changes" \
+            --draft \
+            || gh release edit "$TAG" --draft
+          gh release upload "$TAG" ${{ env.ZIP_NAME }} --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Send Telegram Notification
+        if: github.event.inputs.upload_to_telegram == 'true'
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ZIP_NAME: ${{ env.ZIP_NAME }}
+          THUMBNAIL_PATH: icon_thumb.jpg
+          TITLE: ${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}
+          WORKFLOW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          UPLOAD_TO_RELEASE: ${{ github.event.inputs.upload_to_release }}
+          VERSION: ${{ env.VERSION }}
+          BRANCH: ${{ github.event.inputs.branch }}
+          COMMIT: ${{ github.sha }}
+          CHANGELOG: ${{ env.CHANGELOG }}
+          BUILD_TYPE: ${{ github.event.inputs.build_type || 'Both' }}
+        run: |
+          python3 - <<EOF
+          from telethon import TelegramClient
+          import os
+
+          # Telegram API credentials
+          bot_token = os.getenv('TELEGRAM_TOKEN')
+          chat_id = int(os.getenv('TELEGRAM_CHAT_ID'))
+
+          # Initialize the Telegram client
+          client = TelegramClient('github_bot', 2040, 'b18441a1ff607e10a989891a5462e627').start(bot_token=bot_token)
+
+          async def send_notification():
+              try:
+                  # Build the message with better formatting
+                  title = os.getenv('TITLE')
+                  build_type = os.getenv('BUILD_TYPE')
+                  build_type_str = "🚀 **Release Build**" if build_type == "Release" else "🔧 **Debug Build**" if build_type == "Debug" else "⚡ **Both Release & Debug Builds**"
+                  
+                  message = (
+                      f"✨ **{title}** ✨\n\n"
+                      f"{build_type_str}\n"
+                      f"▫️ **Version**: v{os.getenv('VERSION')}\n"
+                      f"▫️ **Branch**: {os.getenv('BRANCH')}\n"
+                      f"▫️ **Commit**: {os.getenv('COMMIT')[:8]}\n\n"
+                  )
+                  
+                  # Add changelog section for releases
+                  if os.getenv('UPLOAD_TO_RELEASE') == 'true':
+                      changelog = os.getenv('CHANGELOG')
+                      if changelog and changelog != f"No changelog found for v{os.getenv('VERSION')}" and changelog != "No changelog file available":
+                          message += f"📋 **Changelog**:\n{changelog}\n\n"
+                  
+                  # Add workflow link
+                  message += f"🔗 [View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})"
+
+                  # Send the file with thumbnail
+                  await client.send_file(
+                      chat_id,
+                      file=os.getenv('ZIP_NAME'),
+                      caption=message,
+                      thumb=os.getenv('THUMBNAIL_PATH'),
+                      parse_mode='markdown'
+                  )
+                  print("Message sent successfully!")
+              except Exception as e:
+                  print(f"Failed to send notification: {e}")
+                  exit(1)
+
+          with client:
+              client.loop.run_until_complete(send_notification())
+          EOF
