@@ -2455,3 +2455,12 @@ h2 {
     justify-content: center;
     margin-top: 16px;
 }
+
+.dark-theme #save-log-popup .popup-content p {
+    color: var(--dark-text);
+}
+
+.dark-theme #save-log-filename {
+    color: var(--dark-text);
+    background: rgba(255, 255, 255, 0.05);
+}
