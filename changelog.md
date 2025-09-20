@@ -4,6 +4,8 @@
 - https://t.me/COPG_module
 ---
 ## v4.5.4
+- Fixed config.json parsing when adding app/game with "_" character in thier packagenames
+- Decreased Zip file size and binaries
 - Add Realme 15 Pro 5G device and transfer Arena of Valor packages from Realme P3 5G
 ## v4.5.3 
 - Fix config.json parsing issue which causes DND/Timeout and other toggles not working correctly 
