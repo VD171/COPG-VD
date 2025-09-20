@@ -47,10 +47,40 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     environment: Telegram
+    
+    # Strategy برای مدیریت build types
     strategy:
       matrix:
-        build_type: ${{ fromJSON(contains('["Release", "Both"]', github.event.inputs.build_type) ? '["Release"]' : contains('["Debug", "Both"]', github.event.inputs.build_type) ? '["Debug"]' : '["Release", "Debug"]') }}
-        abi: [arm64-v8a, armeabi-v7a]
+        include:
+          - build_type: Release
+            abi: arm64-v8a
+          - build_type: Release
+            abi: armeabi-v7a
+          - build_type: Debug
+            abi: arm64-v8a
+          - build_type: Debug
+            abi: armeabi-v7a
+    
+    # Filter بر اساس input
+    steps:
+      - name: Determine build matrix
+        id: matrix_filter
+        run: |
+          BUILD_TYPE="${{ github.event.inputs.build_type || 'Both' }}"
+          echo "Selected build type: $BUILD_TYPE"
+          
+          # اگر Both انتخاب شده، همه build types اجرا میشن
+          if [ "$BUILD_TYPE" = "Both" ]; then
+            echo "matrix_include=[{\"build_type\":\"Release\",\"abi\":\"arm64-v8a\"},{\"build_type\":\"Release\",\"abi\":\"armeabi-v7a\"},{\"build_type\":\"Debug\",\"abi\":\"arm64-v8a\"},{\"build_type\":\"Debug\",\"abi\":\"armeabi-v7a\"}]" >> $GITHUB_OUTPUT
+          elif [ "$BUILD_TYPE" = "Release" ]; then
+            echo "matrix_include=[{\"build_type\":\"Release\",\"abi\":\"arm64-v8a\"},{\"build_type\":\"Release\",\"abi\":\"armeabi-v7a\"}]" >> $GITHUB_OUTPUT
+          else
+            echo "matrix_include=[{\"build_type\":\"Debug\",\"abi\":\"arm64-v8a\"},{\"build_type\":\"Debug\",\"abi\":\"armeabi-v7a\"}]" >> $GITHUB_OUTPUT
+          fi
+    
+    # استفاده از dynamic matrix
+    strategy:
+      matrix: ${{ fromJSON(steps.matrix_filter.outputs.matrix_include) }}
     
     steps:
       - name: Checkout code
@@ -135,13 +165,13 @@ jobs:
           
           # Get file size for logging
           FILE_SIZE=$(du -h "build/${{ matrix.build_type }}/${{ matrix.abi }}/libspoof.so" | cut -f1)
-          echo "FILE_SIZE_${{ matrix.abi }}_${{ matrix.build_type }}=$FILE_SIZE" >> $GITHUB_ENV
+          echo "FILE_SIZE=$FILE_SIZE" >> $GITHUB_ENV
           echo "file_size=$FILE_SIZE" >> $GITHUB_OUTPUT
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-output
+          name: build-output-${{ matrix.build_type }}-${{ matrix.abi }}
           path: build/${{ matrix.build_type }}/${{ matrix.abi }}/libspoof.so
           retention-days: 1
 
@@ -157,8 +187,30 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build-output
-          path: build
+          name: build-output-Release-arm64-v8a
+          path: build/Release/arm64-v8a
+        continue-on-error: true
+
+      - name: Download Debug arm64 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output-Debug-arm64-v8a
+          path: build/Debug/arm64-v8a
+        continue-on-error: true
+
+      - name: Download Release arm32 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output-Release-armeabi-v7a
+          path: build/Release/armeabi-v7a
+        continue-on-error: true
+
+      - name: Download Debug arm32 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output-Debug-armeabi-v7a
+          path: build/Debug/armeabi-v7a
+        continue-on-error: true
 
       - name: Prepare module structure
         run: |
