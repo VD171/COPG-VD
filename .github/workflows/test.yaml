@@ -192,9 +192,10 @@ jobs:
           
       - name: Strip Zygisk Binaries
         run: |
-          # Strip only Zygisk shared libraries
-          strip --strip-unneeded module/zygisk/arm64-v8a.so
-          strip --strip-unneeded module/zygisk/armeabi-v7a.so
+          # Use NDK's strip tool
+          NDK_STRIP=${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
+          $NDK_STRIP --strip-unneeded module/zygisk/arm64-v8a.so
+          $NDK_STRIP --strip-unneeded module/zygisk/armeabi-v7a.so
           # Verify file sizes after stripping
           ls -lh module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
       - name: Package module into ZIP
