@@ -1,4 +1,4 @@
-name: test
+name: Build COPG
 
 on:
   workflow_dispatch:
@@ -47,7 +47,7 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     environment: Telegram
-    
+
     strategy:
       matrix:
         build_type: ${{ fromJSON(github.event.inputs.build_type == 'Both' && '["Release", "Debug"]' || format('["{0}"]', github.event.inputs.build_type)) }}
@@ -113,7 +113,12 @@ jobs:
           wget https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hpp
           wget https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp -O include/nlohmann/json.hpp
 
-      - name: Build ${{ matrix.abi }} (${{ matrix.build_type }})
+      - name: Build Project (${{ matrix.abi }} - ${{ matrix.build_type }}) - Start
+        id: build_start
+        run: |
+          echo "BUILD_START_TIME=$(date -u +%s)" >> $GITHUB_ENV
+
+      - name: Build Project (${{ matrix.abi }} - ${{ matrix.build_type }})
         uses: threeal/cmake-action@v2.1.0
         with:
           build-dir: build/${{ matrix.build_type }}/${{ matrix.abi }}
@@ -125,19 +130,17 @@ jobs:
             -DCMAKE_MAKE_PROGRAM=/usr/bin/make
             ${{ matrix.build_type == 'Release' && '-DNDEBUG=1' || '' }}
 
-      - name: Verify build output and get file size
-        id: verify_build
+      - name: Build Project (${{ matrix.abi }} - ${{ matrix.build_type }}) - End
+        id: build_end
         run: |
+          BUILD_END_TIME=$(date -u +%s)
+          BUILD_DURATION=$((BUILD_END_TIME - BUILD_START_TIME))
+          echo "BUILD_TIME_${{ matrix.build_type }}_${{ matrix.abi }}=$BUILD_DURATION" >> $GITHUB_ENV
           if [ ! -f "build/${{ matrix.build_type }}/${{ matrix.abi }}/libspoof.so" ]; then
             echo "Error: ${{ matrix.abi }} (${{ matrix.build_type }}) library not built!"
-            ls -la "build/${{ matrix.build_type }}/${{ matrix.abi }}"
+            ls -la build/${{ matrix.build_type }}/${{ matrix.abi }}
             exit 1
           fi
-          
-          # Get file size for logging
-          FILE_SIZE=$(du -h "build/${{ matrix.build_type }}/${{ matrix.abi }}/libspoof.so" | cut -f1)
-          echo "FILE_SIZE=$FILE_SIZE" >> $GITHUB_ENV
-          echo "file_size=$FILE_SIZE" >> $GITHUB_OUTPUT
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -154,6 +157,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
+        with:
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -164,9 +169,7 @@ jobs:
 
       - name: Prepare module structure
         run: |
-          # Create directories
-          mkdir -p module/zygisk module/META-INF/com/google/android module/webroot/assets 
-          mkdir -p module/bin/arm64-v8a module/bin/armeabi-v7a module/system/bin module/common
+          mkdir -p module/zygisk module/META-INF/com/google/android module/webroot/assets module/bin/arm64-v8a module/bin/armeabi-v7a module/system/bin module/common
 
           # Copy Release builds by default, fallback to Debug if Release not available
           if [ -f "build/Release/arm64-v8a/libspoof.so" ]; then
@@ -192,8 +195,6 @@ jobs:
           fi
 
           chmod 755 module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
-
-          # Copy other files
           cp config.json module/config.json
           cp banner.png module/banner.png
           cp repo.yaml module/common/repo.yaml
@@ -218,15 +219,14 @@ jobs:
           cp bin/armeabi-v7a/jq module/bin/armeabi-v7a/jq
           cp bin/arm64-v8a/config_watcher module/bin/arm64-v8a/config_watcher
           cp bin/armeabi-v7a/config_watcher module/bin/armeabi-v7a/config_watcher
-          
-          chmod 755 module/customize.sh module/service.sh module/action.sh module/uninstall.sh module/update_config.sh 
-          chmod 755 module/bin/arm64-v8a/jq module/bin/armeabi-v7a/jq module/bin/arm64-v8a/config_watcher module/bin/armeabi-v7a/config_watcher 
+          chmod 755 module/customize.sh module/service.sh module/action.sh module/uninstall.sh module/update_config.sh
+          chmod 755 module/bin/arm64-v8a/jq module/bin/armeabi-v7a/jq module/bin/arm64-v8a/config_watcher module/bin/armeabi-v7a/config_watcher
           chmod 755 module/META-INF/com/google/android/update-binary
-          
-          # Set version and versionCode
+
+          # Set version and versionCode from inputs or use defaults
           VERSION="${{ github.event.inputs.custom_version || '4.3.5' }}"
           VERSION_CODE="${{ github.event.inputs.custom_version_code || '435' }}"
-          
+
           cat > module/module.prop << EOF
           id=COPG
           name=✨ COPG spoof ✨
