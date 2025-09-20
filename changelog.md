@@ -3,6 +3,9 @@
 - https://t.me/TheAOSP
 - https://t.me/COPG_module
 ---
+## v4.5.5
+- Fixed config parsing errors when you open a target app/game (e.g. Invalid package list for key PACKAGES_...)
+- Fixed font color of save log popup in dark mode 
 ## v4.5.4
 - Fixed config.json parsing for apps/games containing underscore ("_") characters in their package names (Zygisk)
 - Optimized CPU usage for the config_watcher binary
