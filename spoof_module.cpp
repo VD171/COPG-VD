@@ -214,7 +214,7 @@ private:
             std::unordered_map<std::string, DeviceInfo> new_map;
 
             for (auto& [key, value] : config.items()) {
-                if (key.find("PACKAGES_") != 0) continue; 
+                if (key.find("PACKAGES_") != 0 || key.rfind("_DEVICE") == (key.size() - 7)) continue;
                 if (!value.is_array()) {
                     LOGE("Invalid package list for key %s", key.c_str());
                     continue;
