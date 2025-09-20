@@ -4,14 +4,15 @@ project(SpoofModule)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(-Os -flto -ffunction-sections -fdata-sections)
-add_link_options(-flto -Wl,--gc-sections)
+add_compile_options(-Wall -Wextra -Werror)
 
+set(CMAKE_CXX_FLAGS_RELEASE "-Os -flto -ffunction-sections -fdata-sections -DNDEBUG")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-flto -Wl,--gc-sections -s")
+set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "-flto -Wl,--gc-sections -s")
 
-if(NOT DEBUG)
-    add_compile_options(-g0 -DNDEBUG)
-    add_link_options(-s)
-endif()
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG")
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
+set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "")
 
 add_library(spoof SHARED
             spoof_module.cpp
@@ -25,5 +26,5 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(spoof ${log-lib})
 
 set_target_properties(spoof PROPERTIES
-    LINK_FLAGS "-Wl,--exclude-libs,ALL"
+    RELEASE_LINK_FLAGS "-Wl,--exclude-libs,ALL"
 )
