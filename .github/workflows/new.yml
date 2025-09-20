@@ -48,40 +48,11 @@ jobs:
     runs-on: ubuntu-24.04
     environment: Telegram
     
-    # Strategy برای مدیریت build types
     strategy:
       matrix:
-        include:
-          - build_type: Release
-            abi: arm64-v8a
-          - build_type: Release
-            abi: armeabi-v7a
-          - build_type: Debug
-            abi: arm64-v8a
-          - build_type: Debug
-            abi: armeabi-v7a
-    
-    # Filter بر اساس input
-    steps:
-      - name: Determine build matrix
-        id: matrix_filter
-        run: |
-          BUILD_TYPE="${{ github.event.inputs.build_type || 'Both' }}"
-          echo "Selected build type: $BUILD_TYPE"
-          
-          # اگر Both انتخاب شده، همه build types اجرا میشن
-          if [ "$BUILD_TYPE" = "Both" ]; then
-            echo "matrix_include=[{\"build_type\":\"Release\",\"abi\":\"arm64-v8a\"},{\"build_type\":\"Release\",\"abi\":\"armeabi-v7a\"},{\"build_type\":\"Debug\",\"abi\":\"arm64-v8a\"},{\"build_type\":\"Debug\",\"abi\":\"armeabi-v7a\"}]" >> $GITHUB_OUTPUT
-          elif [ "$BUILD_TYPE" = "Release" ]; then
-            echo "matrix_include=[{\"build_type\":\"Release\",\"abi\":\"arm64-v8a\"},{\"build_type\":\"Release\",\"abi\":\"armeabi-v7a\"}]" >> $GITHUB_OUTPUT
-          else
-            echo "matrix_include=[{\"build_type\":\"Debug\",\"abi\":\"arm64-v8a\"},{\"build_type\":\"Debug\",\"abi\":\"armeabi-v7a\"}]" >> $GITHUB_OUTPUT
-          fi
-    
-    # استفاده از dynamic matrix
-    strategy:
-      matrix: ${{ fromJSON(steps.matrix_filter.outputs.matrix_include) }}
-    
+        build_type: ${{ fromJSON(github.event.inputs.build_type == 'Both' && '["Release", "Debug"]' || format('["{0}"]', github.event.inputs.build_type)) }}
+        abi: [arm64-v8a, armeabi-v7a]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
@@ -187,30 +158,9 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build-output-Release-arm64-v8a
-          path: build/Release/arm64-v8a
-        continue-on-error: true
-
-      - name: Download Debug arm64 artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output-Debug-arm64-v8a
-          path: build/Debug/arm64-v8a
-        continue-on-error: true
-
-      - name: Download Release arm32 artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output-Release-armeabi-v7a
-          path: build/Release/armeabi-v7a
-        continue-on-error: true
-
-      - name: Download Debug arm32 artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output-Debug-armeabi-v7a
-          path: build/Debug/armeabi-v7a
-        continue-on-error: true
+          pattern: build-output-*
+          path: build/
+          merge-multiple: true
 
       - name: Prepare module structure
         run: |
