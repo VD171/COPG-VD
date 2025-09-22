@@ -89,8 +89,15 @@ Edit `/data/adb/modules/COPG/config.json` with this format:
 ## Activity
 ![Alt](https://repobeats.axiom.co/api/embed/83b280d0986b3c023ed5f1fdf3f00f77288e3da3.svg "Repobeats analytics image")
 
-## Star History 
-https://www.star-history.com/#AlirezaParsi/COPG&Date
+## Star History
+
+<a href="https://www.star-history.com/#AlirezaParsi/COPG&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=AlirezaParsi/COPG&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=AlirezaParsi/COPG&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=AlirezaParsi/COPG&type=Date" />
+ </picture>
+</a>
 
 ## 🖼 Screenshots 
 
