@@ -84,7 +84,28 @@ Edit `/data/adb/modules/COPG/config.json` with this format:
 }
 ```
 ## ❓ FAQ
-<details> <summary>📌 Will this get me banned?</summary> While COPG is designed to be undetectable, I cannot guarantee safety. Use at your own risk. </details><details> <summary>⚡ Does it affect performance?</summary> Minimal impact! My optimized code adds just ~1ms to launch time. </details>
+<details>
+<summary>🤔 What does COPG stand for?</summary>
+COPG stands for CO (from Call of Duty) and PG (from PUBG). The module was initially created for these two games. Although it now supports all games and applications, the original name was kept to preserve its historical background.
+</details>
+
+<details>
+<summary>📌 Will this get me banned?</summary>
+While COPG is designed to be undetectable, I cannot guarantee safety. Use at your own risk.
+</details>
+
+<details>
+<summary>⚡ Does it affect performance?</summary>
+Minimal impact! The optimized code adds only ~1ms to the launch time.
+</details>
+
+<details>
+<summary>🔧 How to access WebUI?</summary>
+Use the WebUI X app:<br>
+<br>
+<a href="https://github.com/MMRLApp/WebUI-X-Portable"><img src="https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white" alt="GitHub"></a>
+<a href="https://play.google.com/store/apps/details?id=com.dergoogler.mmrl.wx"><img src="https://img.shields.io/badge/Google_Play-414141?logo=google-play&logoColor=white" alt="Play Store"></a>
+</details>
 
 ## Activity
 ![Alt](https://repobeats.axiom.co/api/embed/83b280d0986b3c023ed5f1fdf3f00f77288e3da3.svg "Repobeats analytics image")
