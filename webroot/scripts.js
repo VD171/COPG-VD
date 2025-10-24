@@ -12,6 +12,59 @@ let packagePickerObserver = null;
 let logcatProcess = null;
 let logcatRunning = false;
 
+function setupDonatePopup() {
+    const donateToggle = document.getElementById('donate-toggle');
+    const donatePopup = document.getElementById('donate-popup');
+    const closeDonateBtn = document.querySelector('.close-donate-btn');
+    
+    donateToggle.addEventListener('click', () => {
+        showPopup('donate-popup');
+    });
+    
+    closeDonateBtn.addEventListener('click', () => {
+        closePopup('donate-popup');
+    });
+    
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const address = btn.dataset.address;
+            copyToClipboard(address);
+            showCopyFeedback(btn);
+        });
+    });
+}
+
+function copyToClipboard(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            appendToOutput("Address copied to clipboard", 'success');
+        } else {
+            appendToOutput("Failed to copy address", 'error');
+        }
+    } catch (err) {
+        appendToOutput("Error copying address: " + err, 'error');
+    }
+    
+    document.body.removeChild(textarea);
+}
+
+
+function showCopyFeedback(element) {
+    const originalHTML = element.innerHTML;
+    element.innerHTML = '<span style="color: var(--success)">✓</span>';
+    
+    setTimeout(() => {
+        element.innerHTML = originalHTML;
+    }, 2000);
+}
+
 
 async function saveLogToFile() {
     const output = document.getElementById('output');
@@ -2228,6 +2281,10 @@ document.getElementById('game-package').addEventListener('input', (e) => {
             }
         }
     }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    setupDonatePopup();
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
