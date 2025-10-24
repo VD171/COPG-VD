@@ -11,9 +11,96 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>COPG Manager <span class="version" id="version-text">v0.0</span></h1>
-            <button id="theme-toggle" class="theme-btn" title="Toggle Theme"><span id="theme-icon">☀️</span></button>
+    <h1>COPG Manager <span class="version" id="version-text">v0.0</span></h1>
+    <div class="header-actions">
+        <button id="donate-toggle" class="theme-btn" title="Support Developer">
+            <span class="donate-icon">🎁</span>
+        </button>
+        <button id="theme-toggle" class="theme-btn" title="Toggle Theme">
+            <span id="theme-icon">☀️</span>
+        </button>
+    </div>
+</div>
+
+<div id="donate-popup" class="popup">
+    <div class="popup-content">
+        <div class="modal-header">
+            <h3>Support Developer</h3>
         </div>
+        <div class="popup-body">
+            <div class="donate-message">
+                <p>If you find this app helpful, consider supporting the developer:</p>
+            </div>
+            <div class="donate-options">
+                <div class="donate-option">
+                    <div class="crypto-icon usdt-icon">
+                        <svg width="20" height="20" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                            <g fill="none" fill-rule="evenodd">
+                                <circle cx="16" cy="16" r="16" fill="#26A17B"/>
+                                <path fill="#FFF" d="M17.922 17.383v-.002c-.11.008-.677.042-1.942.042-1.01 0-1.721-.03-1.971-.042v.003c-3.888-.171-6.79-.848-6.79-1.658 0-.809 2.902-1.486 6.79-1.66v2.644c.254.018.982.061 1.988.061 1.207 0 1.812-.05 1.925-.06v-2.643c3.88.173 6.775.85 6.775 1.658 0 .81-2.895 1.485-6.775 1.657m0-3.59v-2.366h5.414V7.819H8.595v3.608h5.414v2.365c-4.4.202-7.709 1.074-7.709 2.118 0 1.044 3.309 1.915 7.709 2.118v7.582h3.913v-7.584c4.393-.202 7.694-1.073 7.694-2.116 0-1.043-3.301-1.914-7.694-2.117"/>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="donate-info">
+                        <h4>USDT (TRC-20)/TRON (TRX)</h4>
+                        <p class="donate-address">TMMDAyJ9Fs3yQpidd2Q4eYLTMkM1hsrauV</p>
+                    </div>
+                    <button class="copy-btn" data-address="TMMDAyJ9Fs3yQpidd2Q4eYLTMkM1hsrauV">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="donate-option">
+                    <div class="crypto-icon ton-icon">
+                        <svg width="20" height="20" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M28,56c15.5,0,28-12.5,28-28S43.5,0,28,0S0,12.5,0,28S12.5,56,28,56z" fill="#0098EA"/>
+                            <path d="M37.6,15.6H18.4c-3.5,0-5.7,3.8-4,6.9l11.8,20.5c0.8,1.3,2.7,1.3,3.5,0l11.8-20.5 C43.3,19.4,41.1,15.6,37.6,15.6L37.6,15.6z M26.3,36.8l-2.6-5l-6.2-11.1c-0.4-0.7,0.1-1.6,1-1.6h7.8L26.3,36.8L26.3,36.8z M38.5,20.7l-6.2,11.1l-2.6,5V19.1h7.8C38.4,19.1,38.9,20,38.5,20.7z" fill="#FFFFFF"/>
+                        </svg>
+                    </div>
+                    <div class="donate-info">
+                        <h4>TON (TON)</h4>
+                        <p class="donate-address">UQDpCIV5E8O2uHg8TPr6PUf36BEDOAu42lr9YzJw2j7HONat</p>
+                    </div>
+                    <button class="copy-btn" data-address="UQDpCIV5E8O2uHg8TPr6PUf36BEDOAu42lr9YzJw2j7HONat">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="donate-option">
+                    <div class="crypto-icon telegram-icon">
+                        <svg width="20" height="20" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g>
+                                <path d="M128,0 C57.307,0 0,57.307 0,128 L0,128 C0,198.693 57.307,256 128,256 L128,256 C198.693,256 256,198.693 256,128 L256,128 C256,57.307 198.693,0 128,0 L128,0 Z" fill="#40B3E0"></path>
+                                <path d="M190.2826,73.6308 L167.4206,188.8978 C167.4206,188.8978 164.2236,196.8918 155.4306,193.0548 L102.6726,152.6068 L83.4886,143.3348 L51.1946,132.4628 C51.1946,132.4628 46.2386,130.7048 45.7586,126.8678 C45.2796,123.0308 51.3546,120.9528 51.3546,120.9528 L179.7306,70.5928 C179.7306,70.5928 190.2826,65.9568 190.2826,73.6308" fill="#FFFFFF"></path>
+                                <path d="M98.6178,187.6035 C98.6178,187.6035 97.0778,187.4595 95.1588,181.3835 C93.2408,175.3085 83.4888,143.3345 83.4888,143.3345 L161.0258,94.0945 C161.0258,94.0945 165.5028,91.3765 165.3428,94.0945 C165.3428,94.0945 166.1418,94.5735 163.7438,96.8115 C161.3458,99.0505 102.8328,151.6475 102.8328,151.6475" fill="#D2E5F1"></path>
+                                <path d="M122.9015,168.1154 L102.0335,187.1414 C102.0335,187.1414 100.4025,188.3794 98.6175,187.6034 L102.6135,152.2624" fill="#B5CFE4"></path>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="donate-info">
+                        <h4>Telegram Gifts</h4>
+                        <p class="donate-address">@AlirezaParsi</p>
+                    </div>
+                    <button class="copy-btn" data-address="@AlirezaParsi">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="popup-footer">
+            <button class="action-btn close-donate-btn">Close</button>
+        </div>
+    </div>
+</div>
 
         <div class="tab-nav">
             <button id="tab-settings" class="tab-btn active">Settings</button>
