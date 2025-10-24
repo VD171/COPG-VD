@@ -2464,3 +2464,312 @@ h2 {
     color: var(--dark-text);
     background: rgba(255, 255, 255, 0.05);
 }
+
+/* Header Actions */
+.header-actions {
+    display: flex;
+    gap: 8px;
+    z-index: 1;
+}
+
+.donate-icon {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+#donate-toggle:hover .donate-icon {
+    transform: scale(1.2);
+}
+
+/* Donate Popup Styles */
+#donate-popup .popup-content {
+    max-width: 500px;
+    max-height: 70vh;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Donate Popup */
+#donate-popup .modal-header {
+    background: transparent !important;
+    color: var(--text) !important;
+    padding: 0 0 16px 0 !important;
+    margin-bottom: 0 !important;
+    border-radius: 0 !important;
+    justify-content: center !important;
+}
+
+#donate-popup .modal-header h3 {
+    color: var(--primary) !important;
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+}
+
+#donate-popup .popup-content {
+    padding: 20px !important;
+}
+
+#donate-popup .popup-body {
+    padding: 0 !important;
+    max-height: none !important;
+}
+
+#donate-popup .popup-footer {
+    padding: 16px 0 0 0 !important;
+    border-top: 1px solid var(--border) !important;
+    margin-top: 16px !important;
+    justify-content: flex-end !important;
+}
+
+.dark-theme #donate-popup .popup-footer {
+    border-color: var(--dark-border) !important;
+}
+
+#donate-popup .popup-footer .close-donate-btn {
+    background: var(--border) !important;
+    color: var(--text) !important;
+    padding: 10px 20px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: none !important;
+    background-image: none !important;
+}
+
+#donate-popup .popup-footer .close-donate-btn:hover {
+    background: var(--text-secondary) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.dark-theme #donate-popup .popup-footer .close-donate-btn {
+    background: var(--dark-border) !important;
+    color: var(--dark-text) !important;
+}
+
+.dark-theme #donate-popup .popup-footer .close-donate-btn:hover {
+    background: var(--dark-text-secondary) !important;
+}
+
+#donate-popup .modal-header {
+    background: transparent !important;
+}
+
+.close-donate-btn {
+    background: var(--border) !important;
+    color: var(--text) !important;
+    box-shadow: none !important;
+}
+
+.close-donate-btn:hover {
+    background: var(--text-secondary) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.dark-theme .close-donate-btn {
+    background: var(--dark-border) !important;
+    color: var(--dark-text) !important;
+}
+
+.dark-theme .close-donate-btn:hover {
+    background: var(--dark-text-secondary) !important;
+}
+
+#donate-popup .popup-body {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(70vh - 120px);
+}
+
+.donate-message {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.dark-theme .donate-message {
+    color: var(--dark-text);
+}
+
+.donate-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.donate-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(96, 165, 250, 0.05);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.donate-option:hover {
+    background: rgba(96, 165, 250, 0.1);
+    transform: translateY(-1px);
+}
+
+.dark-theme .donate-option {
+    background: rgba(96, 165, 250, 0.08);
+}
+
+.dark-theme .donate-option:hover {
+    background: rgba(96, 165, 250, 0.12);
+}
+
+.crypto-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--surfaceContainer);
+}
+
+.dark-theme .crypto-icon {
+    background: var(--dark-surfaceContainer);
+}
+
+.crypto-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Specific icon styles */
+.usdt-icon {
+    background: #26A17B;
+}
+
+.ton-icon {
+    background: #0098EA;
+}
+
+.trx-icon {
+    background: #ff060a;
+}
+
+.telegram-icon {
+    background: #40B3E0;
+}
+
+.donate-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.donate-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.dark-theme .donate-info h4 {
+    color: var(--dark-text);
+}
+
+.donate-address {
+    margin: 0;
+    font-size: 12px;
+    font-family: 'Roboto Mono', monospace;
+    color: var(--text-secondary);
+    word-break: break-all;
+    padding: 4px 0;
+    line-height: 1.4;
+}
+
+.dark-theme .donate-address {
+    color: var(--dark-text-secondary);
+}
+
+.copy-btn {
+    background: none;
+    border: none;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.copy-btn:hover {
+    background: rgba(96, 165, 250, 0.1);
+    color: var(--primary);
+}
+
+.dark-theme .copy-btn {
+    color: var(--dark-text-secondary);
+}
+
+.dark-theme .copy-btn:hover {
+    background: rgba(96, 165, 250, 0.15);
+    color: var(--primary);
+}
+
+#donate-popup .popup-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.dark-theme #donate-popup .popup-footer {
+    border-color: var(--dark-border);
+}
+
+.close-donate-btn {
+    background: var(--primary-gradient);
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-donate-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.dark-theme .crypto-icon {
+    border-radius: 8px !important;
+    background: var(--surfaceContainer) !important;
+}
+
+.dark-theme .usdt-icon {
+    background: #26A17B !important;
+}
+
+.dark-theme .ton-icon {
+    background: #0098EA !important;
+}
+
+.dark-theme .telegram-icon {
+    background: #40B3E0 !important;
+}
+
+.dark-theme .crypto-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+    transform: none !important;
+}
