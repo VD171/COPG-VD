@@ -1,6 +1,7 @@
 # COPG Spoof Module
 - **Support Group**:
 - https://t.me/TheAOSP
+- **Telegram Channel**:
 - https://t.me/COPG_module
 ---
 ## v4.5.5
