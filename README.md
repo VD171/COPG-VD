@@ -78,8 +78,7 @@ Edit `/data/adb/modules/COPG/config.json` with this format:
   "PACKAGES_REDMAGIC9_DEVICE": {
     "BRAND": "ZTE",
     "MODEL": "NX769J",
-    "FINGERPRINT": "ZTE/NX769J...",
-    "CPUINFO": "Qualcomm Snapdragon 8 Gen 3"
+    "FINGERPRINT": "ZTE/NX769J..."
   }
 }
 ```
