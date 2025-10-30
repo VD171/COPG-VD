@@ -4,7 +4,8 @@ categories:
   - Tweaks and Spoofing
   - WebUI
   - Miscellaneous
-license: "OIL"
+  - Zygisk
+license: "AGPL-3.0"
 cover: https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/banner.png
 icon: https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/icon.png
 screenshots:
