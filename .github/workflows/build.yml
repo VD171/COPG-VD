@@ -220,7 +220,7 @@ jobs:
       - name: Download and Prepare Thumbnail
         if: github.event.inputs.upload_to_telegram == 'true'
         run: |
-          cp icon.png icon_thumb.jpg
+          cp webroot/icon.png icon_thumb.jpg
           convert icon_thumb.jpg -resize 320x320 -quality 80 icon_thumb.jpg
           if [ ! -f "icon_thumb.jpg" ]; then
             echo "Error: Thumbnail creation failed!"
