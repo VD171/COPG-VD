@@ -57,15 +57,6 @@ Transform your device into a powerhouse for gaming and apps. Easy to use, fully 
 3. Reboot your device
 4. Verify installation in your root manager (look for "✨ COPG spoof ✨")
 
-## 🧩 Module Architecture
-```mermaid
-graph TD
-    A[Game Launch] --> B{COPG Check}
-    B -->|Match Found| C[Apply Spoof]
-    B -->|No Match| D[Original Device]
-    C --> E[Modified Build Props]
-    E --> F[Game Runs!]
-```
 ### Customizing Spoof Profiles
 Edit `/data/adb/modules/COPG/config.json` with this format:
 
