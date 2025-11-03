@@ -68,8 +68,13 @@ jobs:
             exit 1
           fi
           echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973" "platforms;android-34" "build-tools;34.0.0"
-          echo "NDK_PATH=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
+          mkdir -p $ANDROID_HOME/ndk
+          wget https://dl.google.com/android/repository/android-ndk-r29-linux.zip -O ndk.zip
+          unzip -q ndk.zip -d $ANDROID_HOME/ndk
+          NDK_DIR=$(find $ANDROID_HOME/ndk -maxdepth 1 -type d -name "android-ndk-r29*" | head -n 1)
+          echo "NDK_PATH=$NDK_DIR" >> $GITHUB_ENV
+          echo "Installed NDK at $NDK_DIR"
 
       - name: Accept Android SDK licenses
         run: |
@@ -172,11 +177,8 @@ jobs:
           cp bin/arm64-v8a/config_watcher module/bin/arm64-v8a/config_watcher
           cp bin/armeabi-v7a/config_watcher module/bin/armeabi-v7a/config_watcher
           chmod 755 module/customize.sh module/service.sh module/action.sh module/uninstall.sh module/update_config.sh module/bin/arm64-v8a/jq module/bin/armeabi-v7a/jq module/bin/arm64-v8a/config_watcher module/bin/armeabi-v7a/config_watcher module/META-INF/com/google/android/update-binary
-          
-          # Set version and versionCode from inputs or use defaults
           VERSION="${{ github.event.inputs.custom_version || '4.3.5' }}"
           VERSION_CODE="${{ github.event.inputs.custom_version_code || '435' }}"
-          
           cat > module/module.prop << EOF
           id=COPG
           name=✨ COPG spoof ✨
@@ -266,19 +268,15 @@ jobs:
           from telethon import TelegramClient
           import os
 
-          # Telegram API credentials
           bot_token = os.getenv('TELEGRAM_TOKEN')
           chat_id = int(os.getenv('TELEGRAM_CHAT_ID'))
 
-          # Initialize the Telegram client
           client = TelegramClient('github_bot', 2040, 'b18441a1ff607e10a989891a5462e627').start(bot_token=bot_token)
 
           async def send_notification():
               try:
-                  # Build the message with better formatting
                   title = os.getenv('TITLE')
                   build_type = "🚀 **Release Build**" if os.getenv('UPLOAD_TO_RELEASE') == 'true' else "🔧 **CI Build**"
-                  
                   message = (
                       f"✨ **{title}** ✨\n\n"
                       f"{build_type}\n"
@@ -286,17 +284,11 @@ jobs:
                       f"▫️ **Branch**: {os.getenv('BRANCH')}\n"
                       f"▫️ **Commit**: {os.getenv('COMMIT')[:8]}\n\n"
                   )
-                  
-                  # Add changelog section for releases
                   if os.getenv('UPLOAD_TO_RELEASE') == 'true':
                       changelog = os.getenv('CHANGELOG')
                       if changelog and changelog != f"No changelog found for v{os.getenv('VERSION')}" and changelog != "No changelog file available":
                           message += f"📋 **Changelog**:\n{changelog}\n\n"
-                  
-                  # Add workflow link
                   message += f"🔗 [View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})"
-
-                  # Send the file with thumbnail
                   await client.send_file(
                       chat_id,
                       file=os.getenv('ZIP_NAME'),
