@@ -59,7 +59,7 @@ Transform your device into a powerhouse for gaming and apps. Easy to use, fully 
 
 ## 🧩 Module Architecture
 ```mermaid
-graph LR
+graph TD
     A[Game Launch] --> B{COPG Check}
     B -->|Match Found| C[Apply Spoof]
     B -->|No Match| D[Original Device]
