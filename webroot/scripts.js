@@ -12,6 +12,301 @@ let packagePickerObserver = null;
 let logcatProcess = null;
 let logcatRunning = false;
 
+function setupInfoPopup() {
+    const versionText = document.getElementById('version-text');
+    
+    versionText.addEventListener('click', () => {
+        showPopup('info-popup');
+        loadMarkdownContent();
+        
+        setTimeout(() => {
+            setInfoTabHeights();
+            document.querySelectorAll('.info-tab-content').forEach(tab => {
+                if (tab.id === 'info-about') {
+                    tab.scrollTop = 0;
+                } else {
+                    const markdownContainer = tab.querySelector('.markdown-container');
+                    if (markdownContainer) {
+                        markdownContainer.scrollTop = 0;
+                    }
+                }
+            });
+        }, 100);
+    });
+
+    document.querySelector('.close-info-btn').addEventListener('click', () => {
+        closePopup('info-popup');
+    });
+    
+    document.querySelectorAll('.info-tab-nav .tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            activateInfoTab(tabId);
+        });
+    });
+    
+    const infoPopup = document.getElementById('info-popup');
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                const displayStyle = infoPopup.style.display;
+                if (displayStyle === 'flex') {
+                    setTimeout(() => {
+                        setInfoTabHeights();
+                    }, 50);
+                }
+            }
+        });
+    });
+    
+    observer.observe(infoPopup, { attributes: true });
+}
+
+function setInfoTabHeights() {
+    const tabContainer = document.querySelector('.info-tab-container');
+    if (!tabContainer) return;
+    
+    const containerHeight = tabContainer.clientHeight;
+    
+    document.querySelectorAll('.info-tab-content').forEach(tab => {
+        tab.style.height = containerHeight + 'px';
+        if (tab.id === 'info-about') {
+            tab.style.overflowY = 'auto';
+            tab.style.overflowX = 'hidden';
+        } else {
+            const markdownContainer = tab.querySelector('.markdown-container');
+            if (markdownContainer) {
+                markdownContainer.style.height = '100%';
+                markdownContainer.style.overflowY = 'auto';
+                markdownContainer.style.overflowX = 'auto';
+            }
+        }
+    });
+}
+
+function activateInfoTab(tabId) {
+    document.querySelectorAll('.info-tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.info-tab-nav .tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    const activeTab = document.getElementById(tabId);
+    const activeBtn = document.querySelector(`.info-tab-nav .tab-btn[data-tab="${tabId}"]`);
+    
+    if (activeTab && activeBtn) {
+        activeTab.classList.add('active');
+        activeBtn.classList.add('active');
+        
+        setTimeout(() => {
+            setInfoTabHeights();
+            
+            if (tabId === 'info-about') {
+                activeTab.scrollTop = 0;
+            } else {
+                const markdownContainer = activeTab.querySelector('.markdown-container');
+                if (markdownContainer) {
+                    markdownContainer.scrollTop = 0;
+                    markdownContainer.scrollLeft = 0;
+                }
+            }
+        }, 50);
+        
+        console.log('Tab switched to:', tabId);
+    }
+}
+
+async function loadMarkdownContent() {
+    const contents = {
+        'license-content': 'https://raw.githubusercontent.com/AlirezaParsi/COPG/JSON/LICENSE',
+        'readme-content': 'https://raw.githubusercontent.com/AlirezaParsi/COPG/JSON/README.md',
+        'changelog-content': 'https://raw.githubusercontent.com/AlirezaParsi/COPG/JSON/changelog.md'
+    };
+    
+    setTimeout(() => {
+        setInfoTabHeights();
+    }, 200);
+    
+    for (const [id, url] of Object.entries(contents)) {
+        const container = document.getElementById(id);
+        if (!container || container.dataset.loaded) continue;
+
+        try {
+            container.innerHTML = '<div style="text-align:center; padding:16px; color:var(--text-secondary);">Loading...</div>';
+            
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            let text = await response.text();
+            
+            text = text.replace(/<center>([\s\S]*?)<\/center>/g, (match, content) => {
+                const cleanedContent = content.replace(/^\s+/gm, '');
+                return `<div class="centered-text">${cleanedContent}</div>`;
+            });
+            
+            text = text.replace(/<div align="center">([\s\S]*?)<\/div>/g, (match, content) => {
+                const cleanedContent = content.replace(/^\s+/gm, '');
+                return `<div class="centered-text">${cleanedContent}</div>`;
+            });
+            
+            text = text.replace(/<p align="center">([\s\S]*?)<\/p>/g, (match, content) => {
+                const cleanedContent = content.replace(/^\s+/gm, '');
+                return `<p class="centered-text">${cleanedContent}</p>`;
+            });
+            
+            text = text.replace(/ style="text-align: ?center;?"/g, ' class="centered-text"');
+            
+            text = text.replace(/```mermaid\n([\s\S]*?)\n```/g, '```\n$1\n```');
+            
+            let html = marked.parse(text);
+            html = processCallouts(html);
+            container.innerHTML = html;
+            container.dataset.loaded = 'true';
+            
+            const centeredElements = container.querySelectorAll('.centered-text, center, [align="center"], [style*="text-align: center"], [style*="text-align:center"]');
+            centeredElements.forEach(el => {
+                const processTextNodes = (element) => {
+                    const walker = document.createTreeWalker(
+                        element,
+                        NodeFilter.SHOW_TEXT,
+                        null,
+                        false
+                    );
+                    
+                    let textNode;
+                    while (textNode = walker.nextNode()) {
+                        if (textNode.textContent.trim()) {
+                            textNode.textContent = textNode.textContent.replace(/^\s+/gm, '');
+                        }
+                    }
+                };
+                
+                processTextNodes(el);
+                
+                el.classList.add('centered-text');
+                el.style.maxWidth = '100%';
+                el.style.overflowX = 'hidden';
+                el.style.wordWrap = 'break-word';
+                el.style.wordBreak = 'break-word';
+                el.style.textAlign = 'center';
+                el.style.width = '100%';
+                el.style.boxSizing = 'border-box';
+                el.style.display = 'block';
+                el.style.whiteSpace = 'normal';
+                el.style.marginLeft = 'auto';
+                el.style.marginRight = 'auto';
+                el.style.paddingLeft = '0';
+                el.style.paddingRight = '0';
+            });
+            const preElements = container.querySelectorAll('pre');
+            preElements.forEach(pre => {
+                const walker = document.createTreeWalker(
+                    pre,
+                    NodeFilter.SHOW_TEXT,
+                    null,
+                    false
+                );
+                
+                let textNode;
+                while (textNode = walker.nextNode()) {
+                    if (textNode.textContent.trim()) {
+                        textNode.textContent = textNode.textContent.replace(/^\s+/gm, '');
+                    }
+                }
+            });
+            const images = container.querySelectorAll('img');
+            images.forEach(img => {
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                img.style.borderRadius = '8px';
+                img.style.boxShadow = '0 2px 8px var(--shadow)';
+            });
+            
+            const centeredImages = container.querySelectorAll('.centered-text img, center img, [align="center"] img');
+            centeredImages.forEach(img => {
+                img.style.display = 'block';
+                img.style.margin = '16px auto';
+            });
+            
+            const tables = container.querySelectorAll('table');
+            tables.forEach(table => {
+                table.style.width = '100%';
+                table.style.borderCollapse = 'collapse';
+                table.style.display = 'block';
+                table.style.overflowX = 'auto';
+                table.style.whiteSpace = 'nowrap';
+            });
+            
+            container.querySelectorAll('a').forEach(link => {
+                link.style.cursor = 'pointer';
+                link.onclick = (e) => {
+                    e.preventDefault();
+                    openLink(link.href);
+                };
+            });
+
+        } catch (err) {
+            container.innerHTML = `<div style="color:var(--error); padding:16px;">Failed to load: ${err.message}</div>`;
+        }
+    }
+    
+    setTimeout(() => {
+        setInfoTabHeights();
+    }, 300);
+}
+
+function processCallouts(html) {
+    const calloutMap = {
+        'TIP': { icon: 'lightbulb', color: '#10B981', title: 'Tip' },
+        'NOTE': { icon: 'note', color: '#3B82F6', title: 'Note' },
+        'WARNING': { icon: 'warning', color: '#F59E0B', title: 'Warning' },
+        'IMPORTANT': { icon: 'exclamation', color: '#EF4444', title: 'Important' },
+        'CAUTION': { icon: 'alert', color: '#DC2626', title: 'Caution' }
+    };
+
+    const iconSvg = {
+        lightbulb: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21h6m-3-2v2m0-6c-2.8 0-5-2.2-5-5 0-1.7.8-3.2 2-4.2.4-1.3 1.6-2.2 3-2.2s2.6.9 3 2.2c1.2 1 2 2.5 2 4.2 0 2.8-2.2 5-5 5z"></path></svg>',
+        note: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>',
+        warning: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+        exclamation: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>',
+        alert: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>'
+    };
+    
+    html = html.replace(
+        /\[!([A-Z]+)\](?:\s*<br>)?\s*(?:<p>)?([\s\S]*?)(?:<\/p>)?/g,
+        (match, type, content) => {
+            const config = calloutMap[type.toUpperCase()] || calloutMap.NOTE;
+            content = content
+                .replace(/<blockquote>\s*<p>/g, '')
+                .replace(/<\/p>\s*<\/blockquote>/g, '')
+                .replace(/&gt;/g, '>')
+                .trim();
+
+            return `
+                <div class="callout callout-${type.toLowerCase()}" style="border-left-color: ${config.color};">
+                    <div class="callout-header">
+                        ${iconSvg[config.icon]}
+                        <strong>${config.title}</strong>
+                    </div>
+                    <div class="callout-body">
+                        ${content}
+                    </div>
+                </div>
+            `.trim();
+        }
+    );
+    
+    html = html.replace(/<blockquote>\s*<p>([\s\S]*?)<\/p>\s*<\/blockquote>/g, '<blockquote><p>$1</p></blockquote>');
+
+    return html;
+}
+
+function openLink(url) {
+    execCommand(`am start -a android.intent.action.VIEW -d "${url}"`).catch(() => {
+        window.open(url, '_blank');
+    });
+}
+
 function setupDonatePopup() {
     const donateToggle = document.getElementById('donate-toggle');
     const donatePopup = document.getElementById('donate-popup');
@@ -2057,6 +2352,7 @@ function applyEventListeners() {
             e.target.checked = !isChecked;
         }
     });
+    
 
     document.getElementById('toggle-keep-screen-on').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
@@ -2074,6 +2370,14 @@ function applyEventListeners() {
 document.getElementById('save-log-yes').addEventListener('click', async () => {
     hidePopup('save-log-popup', async () => {
         await saveLogToFile();
+    });
+});
+
+// در event listener برای تب‌ها
+document.querySelectorAll('.info-tab-nav .tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const tabId = this.getAttribute('data-tab');
+        activateInfoTab(tabId);
     });
 });
 
@@ -2283,8 +2587,16 @@ document.getElementById('game-package').addEventListener('input', (e) => {
     }
 });
 
+window.addEventListener('resize', () => {
+    const infoPopup = document.getElementById('info-popup');
+    if (infoPopup.style.display === 'flex') {
+        setInfoTabHeights();
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     setupDonatePopup();
+    setupInfoPopup();
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
