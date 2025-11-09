@@ -18,7 +18,7 @@ using json = nlohmann::json;
 #define LOGD(...) if (debug_mode) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-static bool debug_mode = false;
+static bool debug_mode = true;
 
 struct DeviceInfo {
     std::string brand;
