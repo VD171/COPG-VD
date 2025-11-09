@@ -101,6 +101,28 @@ static std::string findResetpropPath() {
     return "";
 }
 
+static std::string getSystemProperty(const std::string& prop) {
+    std::string cmd = "/system/bin/getprop " + prop;
+    FILE* pipe = popen(cmd.c_str(), "r");
+    if (!pipe) {
+        LOGE("Failed to execute getprop for %s", prop.c_str());
+        return "";
+    }
+    
+    char buffer[128];
+    std::string result = "";
+    if (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+        result = buffer;
+    }
+    pclose(pipe);
+    
+    result.erase(std::remove(result.begin(), result.end(), '\n'), result.end());
+    result.erase(std::remove(result.begin(), result.end(), '\r'), result.end());
+    
+    LOGD("getprop %s: %s", prop.c_str(), result.c_str());
+    return result;
+}
+
 static void companion(int fd) {
     LOGD("[COMPANION] Companion started");
     
@@ -237,14 +259,6 @@ private:
     std::unordered_map<std::string, DeviceInfo> package_map;
     std::map<std::string, std::string> original_props;
     bool props_backed_up = false;
-
-    std::string getSystemProperty(const std::string& prop) {
-        char value[92] = {0};
-        if (__system_property_get(prop.c_str(), value) > 0) {
-            return std::string(value);
-        }
-        return "";
-    }
 
     void backupOriginalProps() {
         if (props_backed_up) return;
