@@ -70,7 +70,8 @@ public:
         reloadIfNeeded(true);
     }
 
-    void onUnload() override {
+    // درست شده: onUnload بدون override
+    void onUnload() {
         std::lock_guard<std::mutex> lock(info_mutex);
         if (buildClass) {
             env->DeleteGlobalRef(buildClass);
@@ -291,13 +292,14 @@ private:
         setStr(productField, info.product);
     }
 
-    // فقط su -c resetprop با مسیر واقعی
     void spoofProps(const DeviceInfo& info) {
+        // همه مسیرهای واقعی resetprop در سال ۲۰۲۵
         const char* paths[] = {
-            "/data/adb/magisk/resetprop",
-            "/data/adb/ksu/bin/resetprop",
-            "/data/adb/apatch/bin/resetprop",
-            "/system/bin/resetprop",
+            "/debug_ramdisk/resetprop",           // Magisk Delta / Kitsune / Alpha
+            "/data/adb/magisk/resetprop",         // Magisk رسمی
+            "/data/adb/ksu/bin/resetprop",        // KernelSU
+            "/data/adb/apatch/bin/resetprop",     // APatch
+            "/system/bin/resetprop",              // رام‌های قدیمی
             nullptr
         };
 
@@ -312,7 +314,7 @@ private:
                     return;
                 }
             }
-            LOGD("resetprop not found in any path! Skipping prop spoofing.");
+            LOGD("resetprop not found anywhere! Skipping prop spoofing.");
         });
 
         if (!resetprop_cmd) {
@@ -336,7 +338,7 @@ private:
             if (ret == 0) {
                 LOGD("Success: %s = %s", key, val.c_str());
             } else {
-                LOGE("Failed: %s = %s (code: %d)", key, val.c_str(), ret);
+                LOGE("Failed: %s = %s (ret=%d)", key, val.c_str(), ret);
             }
         };
 
