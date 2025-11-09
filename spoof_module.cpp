@@ -1,3 +1,5 @@
+// merged_spoof_with_prop_hook.cpp
+
 #include <jni.h>
 #include <string>
 #include <zygisk.hpp>
@@ -11,6 +13,10 @@
 #include <mutex>
 #include <functional>
 #include <sys/stat.h>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+#include <cerrno>
 
 using json = nlohmann::json;
 
@@ -18,7 +24,15 @@ using json = nlohmann::json;
 #define LOGD(...) if (debug_mode) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-static bool debug_mode = true;
+// debug_mode default (user set to false in original)
+static bool debug_mode = false;
+
+#ifndef PROP_VALUE_MAX
+#define PROP_VALUE_MAX 92
+#endif
+#ifndef PROP_NAME_MAX
+#define PROP_NAME_MAX 32
+#endif
 
 struct DeviceInfo {
     std::string brand;
@@ -56,27 +70,146 @@ struct JniString {
     const char* get() const { return chars; }
 };
 
-// 🔥 اضافه شده: تابع برای اجرای کامند
-bool exec_command_silent(const std::string& cmd) {
-    return system(cmd.c_str()) == 0;
+// ------------------------------------------------------------
+// Exec capture helper (useful for debug; optional)
+// ------------------------------------------------------------
+static std::string exec_capture(const std::string &cmd) {
+    std::string result;
+    FILE* pipe = popen(cmd.c_str(), "r");
+    if (!pipe) {
+        result = "popen failed";
+        return result;
+    }
+    char buffer[256];
+    while (fgets(buffer, sizeof(buffer), pipe)) {
+        result += buffer;
+    }
+    int rc = pclose(pipe);
+    result += "\nexit_code=" + std::to_string(rc);
+    return result;
 }
 
-// 🔥 اضافه شده: کلاس برای اسپوف با resetprop
-class ResetpropSpoofer {
-public:
-    static void apply_spoof(const DeviceInfo& info) {
-        LOGD("Applying resetprop spoof for model: %s", info.model.c_str());
-        
-        exec_command_silent("resetprop ro.product.model " + info.model);
-        exec_command_silent("resetprop ro.product.brand " + info.brand);
-        exec_command_silent("resetprop ro.product.device " + info.device);
-        exec_command_silent("resetprop ro.product.manufacturer " + info.manufacturer);
-        exec_command_silent("resetprop ro.build.fingerprint " + info.fingerprint);
-        
-        LOGD("Resetprop spoof completed");
-    }
-};
+// ------------------------------------------------------------
+// Property hook implementations (property_get and __system_property_get)
+// ------------------------------------------------------------
 
+// Typedefs for original functions
+using fn_property_get = int(*)(const char *key, char *value, const char *def);
+using fn___system_property_get = int(*)(const char *name, char *value);
+
+// Saved original pointers (resolved lazily)
+static fn_property_get real_property_get = nullptr;
+static fn___system_property_get real___system_property_get = nullptr;
+
+// Helper: check if we should spoof this key and fill out_value
+static bool check_and_fill_spoof(const char* key, char* out_value, size_t out_len) {
+    if (!key || !out_value || out_len == 0) return false;
+
+    std::string skey(key);
+    std::lock_guard<std::mutex> lock(info_mutex);
+
+    // If current_info is empty, don't spoof
+    if (current_info.model.empty() && current_info.brand.empty() && current_info.device.empty()
+        && current_info.manufacturer.empty() && current_info.fingerprint.empty() && current_info.product.empty()) {
+        return false;
+    }
+
+    if (skey == "ro.product.model") {
+        strncpy(out_value, current_info.model.c_str(), out_len - 1);
+        out_value[out_len - 1] = '\0';
+        return true;
+    }
+    if (skey == "ro.product.brand") {
+        strncpy(out_value, current_info.brand.c_str(), out_len - 1);
+        out_value[out_len - 1] = '\0';
+        return true;
+    }
+    if (skey == "ro.product.device") {
+        strncpy(out_value, current_info.device.c_str(), out_len - 1);
+        out_value[out_len - 1] = '\0';
+        return true;
+    }
+    if (skey == "ro.product.manufacturer" || skey == "ro.product.manufacturer.name") {
+        strncpy(out_value, current_info.manufacturer.c_str(), out_len - 1);
+        out_value[out_len - 1] = '\0';
+        return true;
+    }
+    if (skey == "ro.build.fingerprint" || skey == "ro.build.fingerprint.override") {
+        strncpy(out_value, current_info.fingerprint.c_str(), out_len - 1);
+        out_value[out_len - 1] = '\0';
+        return true;
+    }
+    if (skey == "ro.product.name" || skey == "ro.product.product" || skey == "ro.product") {
+        strncpy(out_value, current_info.product.c_str(), out_len - 1);
+        out_value[out_len - 1] = '\0';
+        return true;
+    }
+
+    return false;
+}
+
+// Replacement for property_get
+extern "C" int property_get(const char *key, char *value, const char *def) {
+    if (!real_property_get) {
+        real_property_get = (fn_property_get)dlsym(RTLD_NEXT, "property_get");
+        if (!real_property_get && debug_mode) {
+            LOGE("real property_get not found via dlsym");
+        }
+    }
+
+    if (value) {
+        if (check_and_fill_spoof(key, value, PROP_VALUE_MAX)) {
+            if (debug_mode) LOGD("property_get -> spoofed %s = %s", key, value);
+            return (int)strlen(value);
+        }
+    }
+
+    if (real_property_get) {
+        return real_property_get(key, value, def);
+    }
+
+    if (value) {
+        if (def) {
+            strncpy(value, def, PROP_VALUE_MAX - 1);
+            value[PROP_VALUE_MAX - 1] = '\0';
+            return (int)strlen(value);
+        } else {
+            value[0] = '\0';
+            return 0;
+        }
+    }
+    return 0;
+}
+
+// Replacement for __system_property_get
+extern "C" int __system_property_get(const char *name, char *value) {
+    if (!real___system_property_get) {
+        real___system_property_get = (fn___system_property_get)dlsym(RTLD_NEXT, "__system_property_get");
+        if (!real___system_property_get && debug_mode) {
+            LOGE("real __system_property_get not found via dlsym");
+        }
+    }
+
+    if (value) {
+        if (check_and_fill_spoof(name, value, PROP_VALUE_MAX)) {
+            if (debug_mode) LOGD("__system_property_get -> spoofed %s = %s", name, value);
+            return (int)strlen(value);
+        }
+    }
+
+    if (real___system_property_get) {
+        return real___system_property_get(name, value);
+    }
+
+    if (value) {
+        value[0] = '\0';
+    }
+    return 0;
+}
+
+// ------------------------------------------------------------
+// The original SpoofModule (mostly unchanged) but now uses hooks above
+// ------------------------------------------------------------
 class SpoofModule : public zygisk::ModuleBase {
 public:
     void onLoad(zygisk::Api* api, JNIEnv* env) override {
@@ -85,8 +218,16 @@ public:
 
         LOGD("Module loaded successfully");
 
+        // Make sure Build class is ready and config loaded
         ensureBuildClass();
         reloadIfNeeded(true);
+
+        // (Optional) If you want to warm-resolve original property functions for clearer logs:
+        if (debug_mode) {
+            real_property_get = (fn_property_get)dlsym(RTLD_NEXT, "property_get");
+            real___system_property_get = (fn___system_property_get)dlsym(RTLD_NEXT, "__system_property_get");
+            LOGD("dlsym property_get=%p __system_property_get=%p", (void*)real_property_get, (void*)real___system_property_get);
+        }
     }
 
     void onUnload() {
@@ -124,13 +265,11 @@ public:
             if (it != package_map.end()) {
                 current_info = it->second;
                 LOGD("Spoofing device for package %s: %s", package_name, current_info.model.c_str());
-                
-                // 🔥 اضافه شده: اسپوف با resetprop قبل از هوک‌های اصلی
-                ResetpropSpoofer::apply_spoof(current_info);
-                
-                // ✅ هوک‌های اصلی شما - کاملاً دست نخورده
+
+                // Set JNI Build.* fields (for Java-level checks)
                 spoofDevice(current_info);
-                
+
+                // Note: property_get/__system_property_get hooks will now return spoofed values
                 should_close = false;
             }
         }
@@ -139,6 +278,7 @@ public:
             LOGD("Package %s not found in config, closing module", package_name);
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
         } else {
+            // Keep stealth: close library from loader after we've done necessary inits/hooks
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             LOGD("Set DLCLOSE after spoofing for stealth");
         }
@@ -181,7 +321,6 @@ private:
     JNIEnv* env;
     std::unordered_map<std::string, DeviceInfo> package_map;
 
-    // ✅ کاملاً دست نخورده
     void ensureBuildClass() {
         std::call_once(build_once, [&] {
             jclass localBuild = env->FindClass("android/os/Build");
@@ -215,7 +354,6 @@ private:
         });
     }
 
-    // ✅ کاملاً دست نخورده
     void reloadIfNeeded(bool force = false) {
         struct stat file_stat;
         if (stat(config_path.c_str(), &file_stat) != 0) {
@@ -243,6 +381,7 @@ private:
             std::unordered_map<std::string, DeviceInfo> new_map;
 
             for (auto& [key, value] : config.items()) {
+                // Expect keys like "PACKAGES_X" and "PACKAGES_X_DEVICE"
                 if (key.find("PACKAGES_") != 0 || key.rfind("_DEVICE") == (key.size() - 7)) continue;
                 if (!value.is_array()) {
                     LOGE("Invalid package list for key %s", key.c_str());
@@ -285,7 +424,6 @@ private:
         file.close();
     }
 
-    // ✅ کاملاً دست نخورده
     void spoofDevice(const DeviceInfo& info) {
         if (!buildClass) {
             LOGE("Build class is not initialized!");
