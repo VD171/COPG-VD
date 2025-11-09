@@ -70,7 +70,6 @@ public:
         reloadIfNeeded(true);
     }
 
-    // درست شده: onUnload بدون override
     void onUnload() {
         std::lock_guard<std::mutex> lock(info_mutex);
         if (buildClass) {
@@ -292,14 +291,14 @@ private:
         setStr(productField, info.product);
     }
 
+    // نسخه نهایی و درست شده برای KernelSU + APatch + Magisk Delta
     void spoofProps(const DeviceInfo& info) {
-        // همه مسیرهای واقعی resetprop در سال ۲۰۲۵
         const char* paths[] = {
-            "/debug_ramdisk/resetprop",           // Magisk Delta / Kitsune / Alpha
+            "/debug_ramdisk/resetprop",           // Magisk Delta / Alpha / Kitsune
             "/data/adb/magisk/resetprop",         // Magisk رسمی
-            "/data/adb/ksu/bin/resetprop",        // KernelSU
-            "/data/adb/apatch/bin/resetprop",     // APatch
-            "/system/bin/resetprop",              // رام‌های قدیمی
+            "/data/adb/ksu/bin/resetprop",        // KernelSU (باینری ELF)
+            "/data/adb/ap/bin/resetprop",         // APatch (درست شده!)
+            "/system/bin/resetprop",
             nullptr
         };
 
@@ -310,21 +309,22 @@ private:
             for (int i = 0; paths[i]; ++i) {
                 if (access(paths[i], X_OK) == 0) {
                     resetprop_cmd = paths[i];
-                    LOGD("resetprop found at: %s", resetprop_cmd);
+                    LOGD("resetprop found (executable): %s", resetprop_cmd);
                     return;
                 }
             }
-            LOGD("resetprop not found anywhere! Skipping prop spoofing.");
+            LOGD("resetprop not found or not executable anywhere!");
         });
 
         if (!resetprop_cmd) {
-            LOGD("No resetprop available, skipping system props");
+            LOGD("No executable resetprop found, skipping prop spoofing");
             return;
         }
 
         auto set = [&](const char* key, const std::string& val) {
             if (val.empty() || val == "generic") return;
 
+            // مستقیم اجرا کن، بدون sh — چون باینری هست
             std::string cmd = "su -c \"";
             cmd += resetprop_cmd;
             cmd += " --no-reload ";
