@@ -4,115 +4,173 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <unordered_map>
+#include <dlfcn.h>
 #include <unistd.h>
 #include <android/log.h>
 #include <mutex>
+#include <functional>
 #include <sys/stat.h>
-#include <dlfcn.h>
+#include <cerrno>
 
 using json = nlohmann::json;
 
 #define LOG_TAG "SpoofModule"
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#define LOGD(...) if (debug_mode) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 static bool debug_mode = true;
 
-// نوع تابع resetprop از libc
-typedef int (*resetprop_t)(const char*, const char*);
-
 struct DeviceInfo {
-    std::string brand, device, manufacturer, model, fingerprint, product;
+    std::string brand;
+    std::string device;
+    std::string manufacturer;
+    std::string model;
+    std::string fingerprint;
+    std::string product;
 };
 
 static DeviceInfo current_info;
 static std::mutex info_mutex;
 static jclass buildClass = nullptr;
-static jfieldID modelField = nullptr, brandField = nullptr, deviceField = nullptr;
-static jfieldID manufacturerField = nullptr, fingerprintField = nullptr, productField = nullptr;
+static jfieldID modelField = nullptr;
+static jfieldID brandField = nullptr;
+static jfieldID deviceField = nullptr;
+static jfieldID manufacturerField = nullptr;
+static jfieldID fingerprintField = nullptr;
+static jfieldID productField = nullptr;
 static std::once_flag build_once;
 
 static time_t last_config_mtime = 0;
 static const std::string config_path = "/data/adb/modules/COPG/config.json";
 
 struct JniString {
-    JNIEnv* env; jstring jstr; const char* chars;
+    JNIEnv* env;
+    jstring jstr;
+    const char* chars;
     JniString(JNIEnv* e, jstring s) : env(e), jstr(s), chars(nullptr) {
         if (jstr) chars = env->GetStringUTFChars(jstr, nullptr);
     }
-    ~JniString() { if (jstr && chars) env->ReleaseStringUTFChars(jstr, chars); }
+    ~JniString() {
+        if (jstr && chars) env->ReleaseStringUTFChars(jstr, chars);
+    }
     const char* get() const { return chars; }
 };
 
 class SpoofModule : public zygisk::ModuleBase {
 public:
     void onLoad(zygisk::Api* api, JNIEnv* env) override {
-        this->api = api; this->env = env;
+        this->api = api;
+        this->env = env;
+
         LOGD("Module loaded successfully");
+
         ensureBuildClass();
         reloadIfNeeded(true);
-        
-        // هوک کردن resetprop از libc
-        api->pltHookRegister(".*libutils\\.so$", "android::resetprop::set", (void*)hooked_resetprop, nullptr);
-        LOGD("resetprop hook registered");
+    }
+
+    void onUnload() {
+        std::lock_guard<std::mutex> lock(info_mutex);
+        if (buildClass) {
+            env->DeleteGlobalRef(buildClass);
+            buildClass = nullptr;
+            LOGD("Global ref for Build class released");
+        }
     }
 
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
-        if (!args || !args->nice_name) { api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY); return; }
-        JniString pkg(env, args->nice_name); const char* name = pkg.get();
-        if (!name) { api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY); return; }
+        if (!args || !args->nice_name) {
+            LOGD("No package name provided, closing module");
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            return;
+        }
 
-        LOGD("Processing package: %s", name);
+        JniString pkg(env, args->nice_name);
+        const char* package_name = pkg.get();
+        if (!package_name) {
+            LOGE("Failed to get package name");
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            return;
+        }
+
+        LOGD("Processing package: %s", package_name);
+
         reloadIfNeeded(false);
 
         bool should_close = true;
-        { std::lock_guard<std::mutex> lock(info_mutex);
-            auto it = package_map.find(name);
+        {
+            std::lock_guard<std::mutex> lock(info_mutex);
+            auto it = package_map.find(package_name);
             if (it != package_map.end()) {
                 current_info = it->second;
-                LOGD("Spoofing device: %s", current_info.model.c_str());
+                LOGD("Spoofing device for package %s: %s", package_name, current_info.model.c_str());
                 spoofDevice(current_info);
-                spoofPropsLibc(current_info);  // مستقیم از libc
+                spoofProps(current_info);  // libc resetprop
                 should_close = false;
             }
         }
 
         if (should_close) {
-            LOGD("Package %s not in config, closing", name);
+            LOGD("Package %s not found in config, closing module", package_name);
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
         } else {
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-            LOGD("DLCLOSE after spoofing");
+            LOGD("Set DLCLOSE after spoofing for stealth");
         }
     }
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
-        if (!args || !args->nice_name) return;
-        JniString pkg(env, args->nice_name); const char* name = pkg.get();
-        if (!name) return;
+        if (!args || !args->nice_name || package_map.empty()) return;
 
-        { std::lock_guard<std::mutex> lock(info_mutex);
-            auto it = package_map.find(name);
+        ensureBuildClass();
+        if (!buildClass) {
+            LOGE("Build class not initialized, skipping postAppSpecialize");
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            return;
+        }
+
+        JniString pkg(env, args->nice_name);
+        const char* package_name = pkg.get();
+        if (!package_name) {
+            LOGE("Failed to get package name in postAppSpecialize");
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            return;
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(info_mutex);
+            auto it = package_map.find(package_name);
             if (it != package_map.end()) {
                 current_info = it->second;
-                LOGD("Post-spoof: %s", current_info.model.c_str());
+                LOGD("Post-specialize spoofing for %s: %s", package_name, current_info.model.c_str());
                 spoofDevice(current_info);
-                spoofPropsLibc(current_info);
+                spoofProps(current_info);  // دوباره برای اطمینان
             }
         }
+
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+        LOGD("Set DLCLOSE in postAppSpecialize for extra stealth");
     }
 
 private:
-    zygisk::Api* api; JNIEnv* env;
+    zygisk::Api* api;
+    JNIEnv* env;
     std::unordered_map<std::string, DeviceInfo> package_map;
 
     void ensureBuildClass() {
-        std::call_once(build_once, [&]() {
-            jclass local = env->FindClass("android/os/Build");
-            if (!local) return;
-            buildClass = (jclass)env->NewGlobalRef(local);
-            env->DeleteLocalRef(local);
+        std::call_once(build_once, [&] {
+            jclass localBuild = env->FindClass("android/os/Build");
+            if (!localBuild || env->ExceptionCheck()) {
+                env->ExceptionClear();
+                LOGE("Failed to find android/os/Build class");
+                return;
+            }
+
+            buildClass = static_cast<jclass>(env->NewGlobalRef(localBuild));
+            env->DeleteLocalRef(localBuild);
+            if (!buildClass) {
+                LOGE("Failed to create global reference for Build class");
+                return;
+            }
 
             modelField = env->GetStaticFieldID(buildClass, "MODEL", "Ljava/lang/String;");
             brandField = env->GetStaticFieldID(buildClass, "BRAND", "Ljava/lang/String;");
@@ -120,71 +178,149 @@ private:
             manufacturerField = env->GetStaticFieldID(buildClass, "MANUFACTURER", "Ljava/lang/String;");
             fingerprintField = env->GetStaticFieldID(buildClass, "FINGERPRINT", "Ljava/lang/String;");
             productField = env->GetStaticFieldID(buildClass, "PRODUCT", "Ljava/lang/String;");
+
+            if (env->ExceptionCheck() || !modelField || !brandField || !deviceField ||
+                !manufacturerField || !fingerprintField || !productField) {
+                env->ExceptionClear();
+                LOGE("Failed to get field IDs for Build class");
+                env->DeleteGlobalRef(buildClass);
+                buildClass = nullptr;
+            }
         });
     }
 
     void reloadIfNeeded(bool force = false) {
-        struct stat st{}; if (stat(config_path.c_str(), &st) != 0) return;
-        if (!force && st.st_mtime == last_config_mtime) { LOGD("Config unchanged"); return; }
+        struct stat file_stat;
+        if (stat(config_path.c_str(), &file_stat) != 0) {
+            LOGE("Failed to stat config file: %s", strerror(errno));
+            return;
+        }
 
-        std::ifstream f(config_path); if (!f.is_open()) return;
+        time_t current_mtime = file_stat.st_mtime;
+        if (!force && current_mtime == last_config_mtime) {
+            LOGD("Config unchanged, skipping reload");
+            return;
+        }
+
+        LOGD("Config changed or force load, reloading...");
+
+        std::ifstream file(config_path);
+        if (!file.is_open()) {
+            LOGE("Failed to open config.json at %s", config_path.c_str());
+            return;
+        }
+        LOGD("Config file opened successfully");
+
         try {
-            json j = json::parse(f); std::unordered_map<std::string, DeviceInfo> map;
-            for (auto& [k, v] : j.items()) {
-                if (k.find("PACKAGES_") != 0 || (k.size() >= 7 && k.substr(k.size()-7) == "_DEVICE")) continue;
-                if (!v.is_array()) continue;
-                std::string devk = k + "_DEVICE"; if (!j.contains(devk)) continue;
-                auto d = j[devk];
-                DeviceInfo info{
-                    .brand = d.value("BRAND", "generic"),
-                    .device = d.value("DEVICE", "generic"),
-                    .manufacturer = d.value("MANUFACTURER", "generic"),
-                    .model = d.value("MODEL", "generic"),
-                    .fingerprint = d.value("FINGERPRINT", ""),
-                    .product = d.value("PRODUCT", "generic")
-                };
-                for (auto& p : v.get<std::vector<std::string>>()) map[p] = info;
+            json config = json::parse(file);
+            std::unordered_map<std::string, DeviceInfo> new_map;
+
+            for (auto& [key, value] : config.items()) {
+                if (key.find("PACKAGES_") != 0) continue;
+                if (key.size() >= 7 && key.substr(key.size() - 7) == "_DEVICE") continue;
+                if (!value.is_array()) {
+                    LOGE("Invalid package list for key %s", key.c_str());
+                    continue;
+                }
+                auto packages = value.get<std::vector<std::string>>();
+                std::string device_key = key + "_DEVICE";
+                if (!config.contains(device_key) || !config[device_key].is_object()) {
+                    LOGE("No valid device info for key %s", key.c_str());
+                    continue;
+                }
+                auto device = config[device_key];
+
+                DeviceInfo info;
+                info.brand = device.value("BRAND", "generic");
+                info.device = device.value("DEVICE", "generic");
+                info.manufacturer = device.value("MANUFACTURER", "generic");
+                info.model = device.value("MODEL", "generic");
+                info.fingerprint = device.value("FINGERPRINT", "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys");
+                info.product = device.value("PRODUCT", info.brand);
+
+                for (const auto& pkg : packages) {
+                    new_map[pkg] = info;
+                    LOGD("Loaded package %s with model %s", pkg.c_str(), info.model.c_str());
+                }
             }
-            package_map = std::move(map);
-            last_config_mtime = st.st_mtime;
-            LOGD("Config reloaded: %zu packages", package_map.size());
-        } catch (...) { LOGE("Config parse failed"); }
+
+            {
+                std::lock_guard<std::mutex> lock(info_mutex);
+                package_map = std::move(new_map);
+            }
+
+            last_config_mtime = current_mtime;
+            LOGD("Config reloaded with %zu packages", package_map.size());
+        } catch (const json::exception& e) {
+            LOGE("JSON parsing error: %s", e.what());
+        } catch (const std::exception& e) {
+            LOGE("Error loading config: %s", e.what());
+        }
+        file.close();
     }
 
-    void spoofDevice(const DeviceInfo& i) {
-        if (!buildClass) return;
-        auto set = [&](jfieldID f, const std::string& v) {
-            if (f) env->SetStaticObjectField(buildClass, f, env->NewStringUTF(v.c_str()));
-        };
-        set(modelField, i.model); set(brandField, i.brand); set(deviceField, i.device);
-        set(manufacturerField, i.manufacturer); set(fingerprintField, i.fingerprint); set(productField, i.product);
-    }
+    void spoofDevice(const DeviceInfo& info) {
+        if (!buildClass) {
+            LOGE("Build class is not initialized!");
+            return;
+        }
 
-    // روش نهایی: مستقیم از libc.resetprop
-    static int hooked_resetprop(const char* name, const char* value) {
-        LOGD("resetprop intercepted: %s = %s", name, value);
-        // همیشه موفقیت برگردون
-        return 0;
-    }
-
-    void spoofPropsLibc(const DeviceInfo& info) {
-        void* handle = dlopen("libc.so", RTLD_LAZY);
-        if (!handle) { LOGE("Failed to dlopen libc.so"); return; }
-
-        resetprop_t real_resetprop = (resetprop_t)dlsym(handle, "resetprop");
-        if (!real_resetprop) {
-            real_resetprop = (resetprop_t)dlsym(handle, "_ZN7android10resetprop3setEPKcS2_");
-            if (!real_resetprop) {
-                LOGE("resetprop symbol not found");
-                dlclose(handle);
+        LOGD("Spoofing device: %s", info.model.c_str());
+        auto setStr = [&](jfieldID field, const std::string& value) {
+            if (!field) return;
+            jstring js = env->NewStringUTF(value.c_str());
+            if (!js || env->ExceptionCheck()) {
+                env->ExceptionClear();
+                LOGE("Failed to create string for field");
                 return;
             }
+            env->SetStaticObjectField(buildClass, field, js);
+            env->DeleteLocalRef(js);
+            if (env->ExceptionCheck()) {
+                env->ExceptionClear();
+                LOGE("Failed to set field");
+            }
+        };
+
+        setStr(modelField, info.model);
+        setStr(brandField, info.brand);
+        setStr(deviceField, info.device);
+        setStr(manufacturerField, info.manufacturer);
+        setStr(fingerprintField, info.fingerprint);
+        setStr(productField, info.product);
+    }
+
+    // نهایی: مستقیم از libc.resetprop با dlsym — بدون fork/su/system
+    void spoofProps(const DeviceInfo& info) {
+        void* libc_handle = dlopen("libc.so", RTLD_LAZY);
+        if (!libc_handle) {
+            LOGE("Failed to dlopen libc.so");
+            return;
         }
+
+        // اول اسم ساده
+        typedef int (*resetprop_func)(const char*, const char*);
+        resetprop_func resetprop = (resetprop_func)dlsym(libc_handle, "resetprop");
+        if (!resetprop) {
+            // اسم mangled برای AOSP
+            resetprop = (resetprop_func)dlsym(libc_handle, "_ZN7android11resetprop3setEPKcS2_");
+        }
+        if (!resetprop) {
+            LOGE("resetprop symbol not found in libc.so");
+            dlclose(libc_handle);
+            return;
+        }
+
+        LOGD("libc.resetprop found and ready");
 
         auto set = [&](const char* key, const std::string& val) {
             if (val.empty() || val == "generic") return;
-            int ret = real_resetprop(key, val.c_str());
-            LOGD(ret == 0 ? "Success (libc): %s = %s" : "Failed (libc): %s = %s (ret=%d)", key, val.c_str(), ret);
+            int ret = resetprop(key, val.c_str());
+            if (ret == 0) {
+                LOGD("Success (libc): %s = %s", key, val.c_str());
+            } else {
+                LOGE("Failed (libc): %s = %s (ret=%d)", key, val.c_str(), ret);
+            }
         };
 
         set("ro.product.model", info.model);
@@ -197,7 +333,7 @@ private:
         set("ro.product.name", info.product);
         set("ro.build.fingerprint", info.fingerprint);
 
-        dlclose(handle);
+        dlclose(libc_handle);
     }
 };
 
