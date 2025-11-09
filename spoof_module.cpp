@@ -56,6 +56,27 @@ struct JniString {
     const char* get() const { return chars; }
 };
 
+// 🔥 اضافه شده: تابع برای اجرای کامند
+bool exec_command_silent(const std::string& cmd) {
+    return system(cmd.c_str()) == 0;
+}
+
+// 🔥 اضافه شده: کلاس برای اسپوف با resetprop
+class ResetpropSpoofer {
+public:
+    static void apply_spoof(const DeviceInfo& info) {
+        LOGD("Applying resetprop spoof for model: %s", info.model.c_str());
+        
+        exec_command_silent("resetprop ro.product.model " + info.model);
+        exec_command_silent("resetprop ro.product.brand " + info.brand);
+        exec_command_silent("resetprop ro.product.device " + info.device);
+        exec_command_silent("resetprop ro.product.manufacturer " + info.manufacturer);
+        exec_command_silent("resetprop ro.build.fingerprint " + info.fingerprint);
+        
+        LOGD("Resetprop spoof completed");
+    }
+};
+
 class SpoofModule : public zygisk::ModuleBase {
 public:
     void onLoad(zygisk::Api* api, JNIEnv* env) override {
@@ -103,7 +124,13 @@ public:
             if (it != package_map.end()) {
                 current_info = it->second;
                 LOGD("Spoofing device for package %s: %s", package_name, current_info.model.c_str());
+                
+                // 🔥 اضافه شده: اسپوف با resetprop قبل از هوک‌های اصلی
+                ResetpropSpoofer::apply_spoof(current_info);
+                
+                // ✅ هوک‌های اصلی شما - کاملاً دست نخورده
                 spoofDevice(current_info);
+                
                 should_close = false;
             }
         }
@@ -154,6 +181,7 @@ private:
     JNIEnv* env;
     std::unordered_map<std::string, DeviceInfo> package_map;
 
+    // ✅ کاملاً دست نخورده
     void ensureBuildClass() {
         std::call_once(build_once, [&] {
             jclass localBuild = env->FindClass("android/os/Build");
@@ -187,6 +215,7 @@ private:
         });
     }
 
+    // ✅ کاملاً دست نخورده
     void reloadIfNeeded(bool force = false) {
         struct stat file_stat;
         if (stat(config_path.c_str(), &file_stat) != 0) {
@@ -256,6 +285,7 @@ private:
         file.close();
     }
 
+    // ✅ کاملاً دست نخورده
     void spoofDevice(const DeviceInfo& info) {
         if (!buildClass) {
             LOGE("Build class is not initialized!");
