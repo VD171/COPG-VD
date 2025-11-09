@@ -1,4 +1,4 @@
-name: new
+name: new builder
 
 on:
   workflow_dispatch:
@@ -36,8 +36,76 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-controller:
     runs-on: ubuntu-24.04
+    outputs:
+      arm64-binary: ${{ steps.upload.outputs.arm64-binary }}
+      armv7-binary: ${{ steps.upload.outputs.armv7-binary }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Setup Android NDK r29
+        run: |
+          mkdir -p android-ndk
+          wget -q https://dl.google.com/android/repository/android-ndk-r29-linux.zip
+          unzip -q android-ndk-r29-linux.zip -d android-ndk
+          NDK_PATH="$(pwd)/android-ndk/android-ndk-r29"
+          echo "NDK_PATH=$NDK_PATH" >> $GITHUB_ENV
+
+      - name: Download json.hpp
+        run: |
+          wget -q https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O json.hpp
+
+      - name: Install UPX
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y upx-ucl
+
+      - name: Build arm64-v8a
+        run: |
+          CLANG="${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++"
+          STRIP="${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip"
+
+          "$CLANG" -std=c++17 -O3 -Os -fPIE -pie -static-libstdc++ \
+            -fdata-sections -ffunction-sections -Wl,--gc-sections \
+            -I. unified_controller.cpp -o controller_arm64
+
+          "$STRIP" --strip-unneeded controller_arm64
+          upx --best --lzma -q controller_arm64
+
+      - name: Build armeabi-v7a (32-bit)
+        run: |
+          CLANG="${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi34-clang++"
+          STRIP="${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip"
+
+          "$CLANG" -std=c++17 -O3 -Os -fPIE -pie -static-libstdc++ \
+            -fdata-sections -ffunction-sections -Wl,--gc-sections \
+            -I. unified_controller.cpp -o controller_armv7
+
+          "$STRIP" --strip-unneeded controller_armv7
+          upx --best --lzma -q controller_armv7
+
+      - name: Upload controller binaries
+        id: upload
+        run: |
+          echo "arm64-binary=controller_arm64" >> $GITHUB_OUTPUT
+          echo "armv7-binary=controller_armv7" >> $GITHUB_OUTPUT
+
+      - name: Upload controller artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: COPG_Controller
+          path: |
+            controller_arm64
+            controller_armv7
+
+  build-module:
+    runs-on: ubuntu-24.04
+    needs: build-controller
     environment: Telegram
 
     steps:
@@ -45,6 +113,12 @@ jobs:
         uses: actions/checkout@v4.2.2
         with:
           ref: ${{ github.event.inputs.branch }}
+
+      - name: Download controller binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: COPG_Controller
+          path: ./downloaded_controller/
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -79,21 +153,7 @@ jobs:
       - name: Install build tools and Python dependencies
         run: |
           sudo apt-get update
-          sudo mkdir -p /etc/apt/apt.conf.d
-          echo 'DPkg::Post-Invoke {"";};' | sudo tee /etc/apt/apt.conf.d/80disable-triggers
-          echo 'DPkg::Options {"--force-confdef";"--force-confold";"--force-confmiss";};' | sudo tee -a /etc/apt/apt.conf.d/80disable-triggers
-          
-          sudo apt-get install -y --no-install-recommends \
-            build-essential \
-            cmake \
-            zip \
-            curl \
-            imagemagick \
-            python3 \
-            python3-pip
-          
-          sudo apt-get clean
-          sudo rm -rf /var/lib/apt/lists/*
+          sudo apt-get install -y build-essential cmake zip curl imagemagick python3 python3-pip
           pip3 install telethon
 
       - name: Fetch Zygisk Headers and JSON Library
@@ -162,6 +222,12 @@ jobs:
           cp build/arm64-v8a/libspoof.so module/zygisk/arm64-v8a.so
           cp build/armeabi-v7a/libspoof.so module/zygisk/armeabi-v7a.so
           chmod 755 module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
+          
+          # استفاده از unified controller به جای jq و config_watcher
+          cp downloaded_controller/controller_arm64 module/bin/arm64-v8a/controller
+          cp downloaded_controller/controller_armv7 module/bin/armeabi-v7a/controller
+          chmod 755 module/bin/arm64-v8a/controller module/bin/armeabi-v7a/controller
+          
           cp config.json module/config.json
           cp banner.png module/banner.png
           cp repo.yaml module/common/repo.yaml
@@ -182,11 +248,7 @@ jobs:
           cp webroot/config.json module/webroot/config.json
           cp webroot/icon.png module/webroot/icon.png
           cp webroot/assets/RobotoMono-Regular.ttf module/webroot/assets/RobotoMono-Regular.ttf
-          cp bin/arm64-v8a/jq module/bin/arm64-v8a/jq
-          cp bin/armeabi-v7a/jq module/bin/armeabi-v7a/jq
-          cp bin/arm64-v8a/config_watcher module/bin/arm64-v8a/config_watcher
-          cp bin/armeabi-v7a/config_watcher module/bin/armeabi-v7a/config_watcher
-          chmod 755 module/customize.sh module/service.sh module/action.sh module/uninstall.sh module/update_config.sh module/bin/arm64-v8a/jq module/bin/armeabi-v7a/jq module/bin/arm64-v8a/config_watcher module/bin/armeabi-v7a/config_watcher module/META-INF/com/google/android/update-binary
+
           VERSION="${{ github.event.inputs.custom_version || '4.3.5' }}"
           VERSION_CODE="${{ github.event.inputs.custom_version_code || '435' }}"
           cat > module/module.prop << EOF
