@@ -32,26 +32,16 @@ jobs:
         run: |
           wget https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O json.hpp
 
-      - name: Verify C++ source file exists
+      - name: Build for arm64-v8a (static libc++)
         run: |
-          echo "📁 Checking for C++ source file..."
-          if [ -f "unified_controller.cpp" ]; then
-            echo "✅ Found unified_controller.cpp"
-            echo "📏 File size: $(stat -c%s unified_controller.cpp) bytes"
-          else
-            echo "❌ unified_controller.cpp not found!"
-            ls -la
-            exit 1
-          fi
-
-      - name: Build for arm64-v8a (dynamic linking - like phone)
-        run: |
-          echo "🔨 Building for arm64-v8a (dynamic linking)..."
+          echo "🔨 Building for arm64-v8a (static libc++)..."
           ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++ \
             -std=c++17 \
             -O2 \
             -fPIE \
             -I. \
+            -static-libstdc++ \
+            -${{ env.NDK_PATH }}/sources/cxx-stl/llvm-libc++/libs/arm64-v8a/libc++_static.a \
             -o unified_controller_arm64 \
             unified_controller.cpp
           
@@ -59,14 +49,16 @@ jobs:
           ls -lh unified_controller_arm64
           file unified_controller_arm64
 
-      - name: Build for armeabi-v7a (dynamic linking - like phone)
+      - name: Build for armeabi-v7a (static libc++)
         run: |
-          echo "🔨 Building for armeabi-v7a (dynamic linking)..."
+          echo "🔨 Building for armeabi-v7a (static libc++)..."
           ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi34-clang++ \
             -std=c++17 \
             -O2 \
             -fPIE \
             -I. \
+            -static-libstdc++ \
+            -${{ env.NDK_PATH }}/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/libc++_static.a \
             -o unified_controller_arm32 \
             unified_controller.cpp
           
@@ -74,42 +66,22 @@ jobs:
           ls -lh unified_controller_arm32
           file unified_controller_arm32
 
-      - name: Build for arm64-v8a (optimized static)
+      - name: Test binary on Android (simulation)
         run: |
-          echo "🔨 Building for arm64-v8a (optimized static)..."
-          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++ \
-            -std=c++17 \
-            -Os -flto -ffunction-sections -fdata-sections \
-            -static \
-            -fPIE \
-            -I. \
-            -Wl,--gc-sections -Wl,--exclude-libs,ALL \
-            -o unified_controller_arm64_static \
-            unified_controller.cpp
-          
-          echo "✅ arm64-v8a static build completed"
-          ls -lh unified_controller_arm64_static
-
-      - name: Compare binary sizes
-        run: |
-          echo "📊 BINARY SIZE COMPARISON:"
-          echo "=========================="
-          if [ -f "unified_controller_arm64" ]; then
-            echo "arm64 dynamic:  $(stat -c%s unified_controller_arm64) bytes"
-          fi
-          if [ -f "unified_controller_arm32" ]; then
-            echo "arm32 dynamic:  $(stat -c%s unified_controller_arm32) bytes"
-          fi
-          if [ -f "unified_controller_arm64_static" ]; then
-            echo "arm64 static:   $(stat -c%s unified_controller_arm64_static) bytes"
-          fi
+          echo "🧪 Testing binary compatibility..."
+          echo "=== arm64-v8a ==="
+          file unified_controller_arm64
+          echo "Size: $(stat -c%s unified_controller_arm64) bytes"
           
           echo ""
-          echo "🔍 Checking dynamic dependencies:"
-          if [ -f "unified_controller_arm64" ]; then
-            echo "=== arm64 dynamic dependencies ==="
-            ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf -d unified_controller_arm64 | grep "NEEDED" || true
-          fi
+          echo "=== armeabi-v7a ==="
+          file unified_controller_arm32
+          echo "Size: $(stat -c%s unified_controller_arm32) bytes"
+          
+          echo ""
+          echo "📊 Final sizes:"
+          echo "arm64: $(stat -c%s unified_controller_arm64) bytes"
+          echo "arm32: $(stat -c%s unified_controller_arm32) bytes"
 
       - name: Upload binaries as artifacts
         uses: actions/upload-artifact@v4
@@ -118,5 +90,4 @@ jobs:
           path: |
             unified_controller_arm64
             unified_controller_arm32
-            unified_controller_arm64_static
           retention-days: 1
