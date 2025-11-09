@@ -132,8 +132,8 @@ public:
                 // اسپوف اصلی
                 spoofDevice(current_info);
                 
-                // اسپوف اضافی با resetprop (غیرهمزمان)
-                asyncSpoofSystemProps(current_info);
+                // اسپوف اضافی با resetprop (همزمان ساده)
+                spoofSystemProps(current_info);
                 
                 should_close = false;
             }
@@ -204,33 +204,43 @@ private:
         return result == 0;
     }
 
-    // اسپوف system properties با resetprop (غیرهمزمان)
-    void asyncSpoofSystemProps(const DeviceInfo& info) {
-        std::thread([info, this]() {
-            LOGD("Starting async system props spoofing");
-            
-            // لیست دستورات resetprop
-            std::vector<std::string> commands = {
-                "ro.product.brand \"" + info.brand + "\"",
-                "ro.product.manufacturer \"" + info.manufacturer + "\"",
-                "ro.product.model \"" + info.model + "\"",
-                "ro.product.device \"" + info.device + "\"",
-                "ro.product.name \"" + info.product + "\"",
-                "ro.build.fingerprint \"" + info.fingerprint + "\""
-            };
-            
-            // اجرای تدریجی دستورات
-            for (const auto& cmd : commands) {
-                if (executeResetprop(cmd)) {
-                    LOGD("Resetprop successful: %s", cmd.c_str());
-                } else {
-                    LOGE("Resetprop failed: %s", cmd.c_str());
-                }
-                usleep(2000); // تاخیر کوتاه 2ms
+    // اسپوف system properties با resetprop (نسخه ساده و همزمان)
+    void spoofSystemProps(const DeviceInfo& info) {
+        LOGD("Starting system props spoofing with resetprop");
+        
+        // لیست دستورات resetprop
+        const char* commands[] = {
+            "ro.product.brand",
+            "ro.product.manufacturer", 
+            "ro.product.model",
+            "ro.product.device",
+            "ro.product.name",
+            "ro.build.fingerprint"
+        };
+        
+        const char* values[] = {
+            info.brand.c_str(),
+            info.manufacturer.c_str(),
+            info.model.c_str(),
+            info.device.c_str(),
+            info.product.c_str(),
+            info.fingerprint.c_str()
+        };
+        
+        const int num_commands = sizeof(commands) / sizeof(commands[0]);
+        
+        // اجرای دستورات
+        for (int i = 0; i < num_commands; i++) {
+            std::string cmd = std::string(commands[i]) + " \"" + values[i] + "\"";
+            if (executeResetprop(cmd)) {
+                LOGD("Resetprop successful: %s", cmd.c_str());
+            } else {
+                LOGE("Resetprop failed: %s", cmd.c_str());
             }
-            
-            LOGD("Async system props spoofing completed");
-        }).detach();
+            usleep(1000); // تاخیر کوتاه 1ms
+        }
+        
+        LOGD("System props spoofing completed");
     }
 
     void ensureBuildClass() {
