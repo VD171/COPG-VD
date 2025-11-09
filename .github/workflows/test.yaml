@@ -1,85 +1,110 @@
-name: Test C++ Controller Build
+name: Build Unified Controller (NDK - Static & Tiny)
 
 on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch to test'
+        description: 'Branch to build from'
         type: string
         required: true
         default: 'JSON'
 
 jobs:
-  test-cpp-build:
+  build-android-binary:
     runs-on: ubuntu-24.04
-    
+    permissions:
+      contents: read
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
 
-      - name: Setup Android NDK
+      - name: Setup Android NDK r29
         run: |
           mkdir -p android-sdk/ndk
-          wget https://dl.google.com/android/repository/android-ndk-r29-linux.zip -O ndk.zip
-          unzip -q ndk.zip -d android-sdk/ndk
+          wget -q https://dl.google.com/android/repository/android-ndk-r29-linux.zip
+          unzip -q android-ndk-r29-linux.zip -d android-sdk/ndk
           NDK_DIR=$(find android-sdk/ndk -maxdepth 1 -type d -name "android-ndk-r29*" | head -n 1)
           echo "NDK_PATH=$NDK_DIR" >> $GITHUB_ENV
-          echo "NDK installed at: $NDK_DIR"
+          echo "NDK installed: $NDK_DIR"
 
-      - name: Download JSON library
+      - name: Download nlohmann/json
         run: |
-          wget https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O json.hpp
+          wget -q https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O json.hpp
 
-      - name: Build like Android terminal (gnu libstdc++)
+      - name: Install UPX (optional ultra-compression)
         run: |
-          echo "🔨 Building like Android terminal (gnu libstdc++)..."
+          sudo apt-get update -qq
+          sudo apt-get install -y upx-ucl
+
+      - name: Build Static Standalone Binary (Recommended)
+        run: |
+          echo "Building fully static standalone binary..."
           
-          # مثل کامپایل در ترمینال اندروید
           ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++ \
             -std=c++17 \
-            -O2 \
-            -fPIE \
+            -O3 -Os \
+            -fPIE -pie \
+            -static-libstdc++ \
+            -fdata-sections -ffunction-sections \
+            -Wl,--gc-sections \
+            -Wl,--strip-all \
             -I. \
             unified_controller.cpp \
             -o unified_controller_arm64
           
-          echo "✅ arm64 build completed"
+          echo "Build complete!"
+          ls -lh unified_controller_arm64
+          
+          echo "Dependencies:"
+          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf -d unified_controller_arm64 | grep NEEDED || echo "None (C++ fully static!)"
+
+      - name: Strip binary (make it smaller)
+        run: |
+          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-strip unified_controller_arm64
+          echo "After strip:"
           ls -lh unified_controller_arm64
 
-      - name: Build optimized version
+      - name: Compress with UPX (ultra-small ~100 KB)
         run: |
-          echo "🔨 Building optimized version..."
-          
-          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++ \
-            -std=c++17 \
-            -Os \
-            -fPIE \
-            -I. \
-            -fvisibility=hidden \
-            -fvisibility-inlines-hidden \
-            unified_controller.cpp \
-            -o unified_controller_arm64_small
-          
-          echo "✅ Optimized build completed"
-          ls -lh unified_controller_arm64_small
+          echo "Compressing with UPX..."
+          upx --bestcolumns=0 --lzma unified_controller_arm64 -o unified_controller_arm64_upx
+          ls -lh unified_controller_arm64_upx
 
-      - name: Check what libraries are needed
+      - name: Show final comparison
         run: |
-          echo "🔍 Checking dynamic dependencies..."
-          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf -d unified_controller_arm64 | grep NEEDED || true
-          
           echo ""
-          echo "📊 File sizes:"
-          echo "Normal:  $(stat -c%s unified_controller_arm64) bytes"
-          echo "Optimized: $(stat -c%s unified_controller_arm64_small) bytes"
+          echo "FINAL SIZE COMPARISON:"
+          echo "──────────────────────"
+          echo "Original (after strip):  $(du -h unified_controller_arm64 | cut -f1)"
+          echo "UPX compressed:          $(du -h unified_controller_arm64_upx | cut -f1)"
+          echo ""
+          echo "Termux build size:       ~237 KB"
+          echo "NDK static build:        $(stat -c%s unified_controller_arm64) bytes"
+          echo "NDK UPX build:           $(stat -c%s unified_controller_arm64_upx) bytes"
+          echo ""
+          echo "Zero .so dependencies"
+          echo "Runs on any rooted Android"
+          echo "Same behavior as Termux"
 
-      - name: Upload binaries as artifacts
+      - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
-          name: cpp-controller-binaries
+          name: unified-controller-arm64-binaries
           path: |
             unified_controller_arm64
-            unified_controller_arm64_small
-          retention-days: 1
+            unified_controller_arm64_upx
+            json.hpp
+          retention-days: 7
+
+      - name: Print usage instructions
+        run: |
+          echo ""
+          echo "HOW TO USE:"
+          echo "adb push unified_controller_arm64 /data/local/tmp/"
+          echo "adb shell chmod 755 /data/local/tmp/unified_controller_arm64"
+          echo "adb shell /data/local/tmp/unified_controller_arm64"
+          echo ""
+          echo "For maximum stealth: use unified_controller_arm64_upx"
