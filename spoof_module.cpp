@@ -11,6 +11,9 @@
 #include <mutex>
 #include <functional>
 #include <sys/stat.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <vector>
 
 using json = nlohmann::json;
 
@@ -56,6 +59,30 @@ struct JniString {
     const char* get() const { return chars; }
 };
 
+// Companion برای اجرای resetprop
+static void companion(int fd) {
+    LOGD("[COMPANION] Companion started");
+    
+    char buffer[2048];
+    ssize_t bytes = read(fd, buffer, sizeof(buffer)-1);
+    
+    if (bytes > 0) {
+        buffer[bytes] = '\0';
+        std::string command = buffer;
+        
+        LOGD("[COMPANION] Executing: %s", command.c_str());
+        
+        // اجرای resetprop
+        std::string full_cmd = "/data/adb/ksu/bin/resetprop " + command;
+        int result = system(full_cmd.c_str());
+        
+        LOGD("[COMPANION] Result: %d", result);
+        write(fd, &result, sizeof(result));
+    }
+    
+    close(fd);
+}
+
 class SpoofModule : public zygisk::ModuleBase {
 public:
     void onLoad(zygisk::Api* api, JNIEnv* env) override {
@@ -63,7 +90,6 @@ public:
         this->env = env;
 
         LOGD("Module loaded successfully");
-
         ensureBuildClass();
         reloadIfNeeded(true);
     }
@@ -93,7 +119,6 @@ public:
         }
 
         LOGD("Processing package: %s", package_name);
-
         reloadIfNeeded(false);
 
         bool should_close = true;
@@ -103,7 +128,13 @@ public:
             if (it != package_map.end()) {
                 current_info = it->second;
                 LOGD("Spoofing device for package %s: %s", package_name, current_info.model.c_str());
+                
+                // اسپوف اصلی
                 spoofDevice(current_info);
+                
+                // اسپوف اضافی با resetprop (غیرهمزمان)
+                asyncSpoofSystemProps(current_info);
+                
                 should_close = false;
             }
         }
@@ -153,6 +184,54 @@ private:
     zygisk::Api* api;
     JNIEnv* env;
     std::unordered_map<std::string, DeviceInfo> package_map;
+
+    // تابع برای اجرای resetprop از طریق companion
+    bool executeResetprop(const std::string& args) {
+        auto fd = api->connectCompanion();
+        if (fd < 0) {
+            LOGE("Failed to connect to companion");
+            return false;
+        }
+        
+        // ارسال دستور
+        write(fd, args.c_str(), args.size());
+        
+        // دریافت نتیجه
+        int result = -1;
+        read(fd, &result, sizeof(result));
+        close(fd);
+        
+        return result == 0;
+    }
+
+    // اسپوف system properties با resetprop (غیرهمزمان)
+    void asyncSpoofSystemProps(const DeviceInfo& info) {
+        std::thread([info, this]() {
+            LOGD("Starting async system props spoofing");
+            
+            // لیست دستورات resetprop
+            std::vector<std::string> commands = {
+                "ro.product.brand \"" + info.brand + "\"",
+                "ro.product.manufacturer \"" + info.manufacturer + "\"",
+                "ro.product.model \"" + info.model + "\"",
+                "ro.product.device \"" + info.device + "\"",
+                "ro.product.name \"" + info.product + "\"",
+                "ro.build.fingerprint \"" + info.fingerprint + "\""
+            };
+            
+            // اجرای تدریجی دستورات
+            for (const auto& cmd : commands) {
+                if (executeResetprop(cmd)) {
+                    LOGD("Resetprop successful: %s", cmd.c_str());
+                } else {
+                    LOGE("Resetprop failed: %s", cmd.c_str());
+                }
+                usleep(2000); // تاخیر کوتاه 2ms
+            }
+            
+            LOGD("Async system props spoofing completed");
+        }).detach();
+    }
 
     void ensureBuildClass() {
         std::call_once(build_once, [&] {
@@ -289,3 +368,4 @@ private:
 };
 
 REGISTER_ZYGISK_MODULE(SpoofModule)
+REGISTER_ZYGISK_COMPANION(companion)
