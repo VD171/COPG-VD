@@ -1,4 +1,4 @@
-name: new builder
+name: Build COPG
 
 on:
   workflow_dispatch:
@@ -36,219 +36,141 @@ permissions:
   contents: write
 
 jobs:
-  build-controller:
+  build:
     runs-on: ubuntu-24.04
-    outputs:
-      arm64-binary: ${{ steps.upload.outputs.arm64-binary }}
-      armv7-binary: ${{ steps.upload.outputs.armv7-binary }}
-    
+    environment: Telegram
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
 
-      - name: Setup Android NDK r29
+      - name: Setup Android NDK and Build Tools
         run: |
-          mkdir -p android-ndk
-          wget -q https://dl.google.com/android/repository/android-ndk-r29-linux.zip
-          unzip -q android-ndk-r29-linux.zip -d android-ndk
-          NDK_PATH="$(pwd)/android-ndk/android-ndk-r29"
-          echo "NDK_PATH=$NDK_PATH" >> $GITHUB_ENV
-
-      - name: Download json.hpp
-        run: |
-          wget -q https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O json.hpp
-
-      - name: Install UPX
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y upx-ucl
-
-      - name: Build arm64-v8a
-        run: |
-          CLANG="${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++"
-          STRIP="${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip"
-
-          "$CLANG" -std=c++17 -O3 -Os -fPIE -pie -static-libstdc++ \
-            -fdata-sections -ffunction-sections -Wl,--gc-sections \
-            -I. unified_controller.cpp -o controller_arm64
-
-          "$STRIP" --strip-unneeded controller_arm64
-          upx --best --lzma -q controller_arm64
-
-      - name: Build armeabi-v7a (32-bit)
-        run: |
-          CLANG="${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi34-clang++"
-          STRIP="${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip"
-
-          "$CLANG" -std=c++17 -O3 -Os -fPIE -pie -static-libstdc++ \
-            -fdata-sections -ffunction-sections -Wl,--gc-sections \
-            -I. unified_controller.cpp -o controller_armv7
-
-          "$STRIP" --strip-unneeded controller_armv7
-          upx --best --lzma -q controller_armv7
-
-      - name: Upload controller binaries
-        id: upload
-        run: |
-          echo "arm64-binary=controller_arm64" >> $GITHUB_OUTPUT
-          echo "armv7-binary=controller_armv7" >> $GITHUB_OUTPUT
-
-      - name: Upload controller artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: COPG_Controller
-          path: |
-            controller_arm64
-            controller_armv7
-
-  build-module:
-    runs-on: ubuntu-24.04
-    needs: build-controller
-    environment: Telegram
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4.2.2
-        with:
-          ref: ${{ github.event.inputs.branch }}
-
-      - name: Download controller binaries
-        uses: actions/download-artifact@v4
-        with:
-          name: COPG_Controller
-          path: ./downloaded_controller/
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Set up Android SDK and NDK
-        run: |
+          # Setup Android SDK
           echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
           mkdir -p $ANDROID_HOME/cmdline-tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
-          unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
-          if [ -d "$ANDROID_HOME/cmdline-tools/cmdline-tools" ]; then
-            mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-          elif [ -d "$ANDROID_HOME/cmdline-tools/tools" ]; then
-            mv $ANDROID_HOME/cmdline-tools/tools $ANDROID_HOME/cmdline-tools/latest
-          else
-            echo "Unexpected directory structure after unzip:"
-            ls -la $ANDROID_HOME/cmdline-tools
-            exit 1
-          fi
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+          unzip -q cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+          mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
           echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
+          
+          # Install platform and build tools
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" > /dev/null 2>&1
+          
+          # Setup NDK
           mkdir -p $ANDROID_HOME/ndk
-          wget https://dl.google.com/android/repository/android-ndk-r29-linux.zip -O ndk.zip
+          wget -q https://dl.google.com/android/repository/android-ndk-r29-linux.zip -O ndk.zip
           unzip -q ndk.zip -d $ANDROID_HOME/ndk
           NDK_DIR=$(find $ANDROID_HOME/ndk -maxdepth 1 -type d -name "android-ndk-r29*" | head -n 1)
           echo "NDK_PATH=$NDK_DIR" >> $GITHUB_ENV
-          echo "Installed NDK at $NDK_DIR"
 
-      - name: Install build tools and Python dependencies
+      - name: Install Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake zip curl imagemagick python3 python3-pip
+          sudo apt-get update -qq
+          sudo apt-get install -y build-essential cmake zip curl imagemagick python3 python3-pip upx-ucl
           pip3 install telethon
 
-      - name: Fetch Zygisk Headers and JSON Library
+      - name: Build Unified Controller
+        run: |
+          # Download json.hpp
+          wget -q https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O json.hpp
+          
+          # Build arm64 controller
+          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++ \
+            -std=c++17 -O3 -Os -fPIE -pie -static-libstdc++ \
+            -fdata-sections -ffunction-sections -Wl,--gc-sections \
+            -I. unified_controller.cpp -o controller_arm64
+          
+          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded controller_arm64
+          upx --best --lzma -q controller_arm64
+          
+          # Build armv7 controller
+          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi34-clang++ \
+            -std=c++17 -O3 -Os -fPIE -pie -static-libstdc++ \
+            -fdata-sections -ffunction-sections -Wl,--gc-sections \
+            -I. unified_controller.cpp -o controller_armv7
+          
+          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded controller_armv7
+          upx --best --lzma -q controller_armv7
+          
+          echo "Controller sizes:"
+          echo "arm64: $(du -h controller_arm64 | cut -f1)"
+          echo "armv7: $(du -h controller_armv7 | cut -f1)"
+
+      - name: Fetch Zygisk Headers
         run: |
           mkdir -p zygisk include/nlohmann
-          wget https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hpp
-          wget https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp -O include/nlohmann/json.hpp
+          wget -q https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hpp
+          wget -q https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp -O include/nlohmann/json.hpp
 
-      - name: Build Project (arm64-v8a) - Start
-        id: arm64_start
+      - name: Build Zygisk Module
         run: |
-          echo "ARM64_START_TIME=$(date -u +%s)" >> $GITHUB_ENV
-
-      - name: Build Project (arm64-v8a)
-        uses: threeal/cmake-action@v2.1.0
-        with:
-          build-dir: build/arm64-v8a
-          args: |
-            -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake
-            -DANDROID_ABI=arm64-v8a
+          # Build arm64-v8a
+          cmake -B build/arm64-v8a \
+            -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake \
+            -DANDROID_ABI=arm64-v8a \
             -DANDROID_PLATFORM=android-34
-            -DCMAKE_MAKE_PROGRAM=/usr/bin/make
-
-      - name: Build Project (arm64-v8a) - End
-        id: arm64_end
-        run: |
-          ARM64_END_TIME=$(date -u +%s)
-          ARM64_DURATION=$((ARM64_END_TIME - ARM64_START_TIME))
-          echo "ARM64_BUILD_TIME=$ARM64_DURATION" >> $GITHUB_ENV
-          if [ ! -f "build/arm64-v8a/libspoof.so" ]; then
-            echo "Error: arm64-v8a library not built!"
-            ls -la build/arm64-v8a
-            exit 1
-          fi
-
-      - name: Build Project (armeabi-v7a) - Start
-        id: arm32_start
-        run: |
-          echo "ARM32_START_TIME=$(date -u +%s)" >> $GITHUB_ENV
-
-      - name: Build Project (armeabi-v7a)
-        uses: threeal/cmake-action@v2.1.0
-        with:
-          build-dir: build/armeabi-v7a
-          args: |
-            -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake
-            -DANDROID_ABI=armeabi-v7a
+          cmake --build build/arm64-v8a -j4
+          
+          # Build armeabi-v7a  
+          cmake -B build/armeabi-v7a \
+            -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake \
+            -DANDROID_ABI=armeabi-v7a \
             -DANDROID_PLATFORM=android-34
-            -DCMAKE_MAKE_PROGRAM=/usr/bin/make
+          cmake --build build/armeabi-v7a -j4
+          
+          # Verify builds
+          ls -la build/arm64-v8a/libspoof.so build/armeabi-v7a/libspoof.so
 
-      - name: Build Project (armeabi-v7a) - End
-        id: arm32_end
+      - name: Prepare Module Structure
         run: |
-          ARM32_END_TIME=$(date -u +%s)
-          ARM32_DURATION=$((ARM32_END_TIME - ARM32_START_TIME))
-          echo "ARM32_BUILD_TIME=$ARM32_DURATION" >> $GITHUB_ENV
-          if [ ! -f "build/armeabi-v7a/libspoof.so" ]; then
-            echo "Error: armeabi-v7a library not built!"
-            ls -la build/armeabi-v7a
-            exit 1
-          fi
-
-      - name: Prepare module structure
-        run: |
-          mkdir -p module/zygisk module/META-INF/com/google/android module/webroot/assets module/bin/arm64-v8a module/bin/armeabi-v7a module/system/bin module/common
+          mkdir -p module/zygisk module/META-INF/com/google/android module/webroot/assets module/common
+          
+          # Copy Zygisk libraries
           cp build/arm64-v8a/libspoof.so module/zygisk/arm64-v8a.so
           cp build/armeabi-v7a/libspoof.so module/zygisk/armeabi-v7a.so
           chmod 755 module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
           
-          # استفاده از unified controller به جای jq و config_watcher
-          cp downloaded_controller/controller_arm64 module/bin/arm64-v8a/controller
-          cp downloaded_controller/controller_armv7 module/bin/armeabi-v7a/controller
-          chmod 755 module/bin/arm64-v8a/controller module/bin/armeabi-v7a/controller
+          # Copy unified controllers to ROOT (not in bin/)
+          cp controller_arm64 module/controller_arm64
+          cp controller_armv7 module/controller_armv7
+          chmod 755 module/controller_arm64 module/controller_armv7
           
+          # Copy config files
           cp config.json module/config.json
           cp banner.png module/banner.png
           cp repo.yaml module/common/repo.yaml
           cp list.json module/list.json
           cp ignorelist.txt module/ignorelist.txt
-          cp -rf system/* module/system/
+          cp system.prop module/system.prop
+          
+          # Copy scripts
           cp customize.sh module/customize.sh
           cp service.sh module/service.sh
           cp action.sh module/action.sh
           cp uninstall.sh module/uninstall.sh
           cp update_config.sh module/update_config.sh
-          cp system.prop module/system.prop
-          cp META-INF/com/google/android/update-binary module/META-INF/com/google/android/update-binary
-          cp META-INF/com/google/android/updater-script module/META-INF/com/google/android/updater-script
-          cp webroot/index.html module/webroot/index.html
-          cp webroot/scripts.js module/webroot/scripts.js
-          cp webroot/styles.css module/webroot/styles.css
-          cp webroot/config.json module/webroot/config.json
-          cp webroot/icon.png module/webroot/icon.png
-          cp webroot/assets/RobotoMono-Regular.ttf module/webroot/assets/RobotoMono-Regular.ttf
-
+          chmod 755 module/*.sh
+          
+          # Copy system files
+          cp -rf system/* module/system/
+          
+          # Copy META-INF
+          cp META-INF/com/google/android/update-binary module/META-INF/com/google/android/
+          cp META-INF/com/google/android/updater-script module/META-INF/com/google/android/
+          chmod 755 module/META-INF/com/google/android/update-binary
+          
+          # Copy web files
+          cp webroot/index.html module/webroot/
+          cp webroot/scripts.js module/webroot/
+          cp webroot/styles.css module/webroot/
+          cp webroot/config.json module/webroot/
+          cp webroot/icon.png module/webroot/
+          cp webroot/assets/RobotoMono-Regular.ttf module/webroot/assets/
+          
+          # Create module.prop
           VERSION="${{ github.event.inputs.custom_version || '4.3.5' }}"
           VERSION_CODE="${{ github.event.inputs.custom_version_code || '435' }}"
           cat > module/module.prop << EOF
@@ -264,22 +186,28 @@ jobs:
           banner=banner.png
           EOF
 
-      - name: Package module into ZIP
+      - name: Create ZIP Package
         run: |
           VERSION=$(grep "version=" module/module.prop | cut -d'=' -f2)
           ZIP_NAME="COPG-v$VERSION.zip"
           cd module
-          zip -r "../$ZIP_NAME" .
+          zip -r9 "../$ZIP_NAME" . > /dev/null
           cd ..
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "ZIP size: $(du -h $ZIP_NAME | cut -f1)"
 
-      - name: Extract changelog for current version
+      - name: Prepare Telegram Assets
         if: github.event.inputs.upload_to_telegram == 'true'
         run: |
+          # Create thumbnail
+          cp webroot/icon.png icon_thumb.jpg
+          convert icon_thumb.jpg -resize 320x320 -quality 80 icon_thumb.jpg
+          
+          # Extract changelog
           if [ -f "changelog.md" ]; then
-            VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
-            CHANGELOG=$(awk "/^## v$VERSION/{p=1;next}/^##/{p=0}p" changelog.md | sed '/^$/d')
+            VERSION_ESCAPED=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
+            CHANGELOG=$(awk "/^## v$VERSION_ESCAPED/{p=1;next}/^##/{p=0}p" changelog.md | sed '/^$/d')
             if [ -z "$CHANGELOG" ]; then
               echo "CHANGELOG=No changelog found for v${{ env.VERSION }}" >> $GITHUB_ENV
             else
@@ -291,88 +219,65 @@ jobs:
             echo "CHANGELOG=No changelog file available" >> $GITHUB_ENV
           fi
 
-      - name: Download and Prepare Thumbnail
-        if: github.event.inputs.upload_to_telegram == 'true'
-        run: |
-          cp webroot/icon.png icon_thumb.jpg
-          convert icon_thumb.jpg -resize 320x320 -quality 80 icon_thumb.jpg
-          if [ ! -f "icon_thumb.jpg" ]; then
-            echo "Error: Thumbnail creation failed!"
-            ls -la
-            exit 1
-          fi
-
-      - name: Upload Module ZIP as Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: COPG
-          path: ${{ env.ZIP_NAME }}
-
-      - name: Upload ZIP to GitHub Release
+      - name: Upload to GitHub Release
         if: github.event.inputs.upload_to_release == 'true'
         run: |
           TAG="v${{ env.VERSION }}"
           gh release create "$TAG" \
-            --title "Release $TAG" \
-            --notes "Built on $(date -u +'%Y-%m-%d %H:%M:%S UTC') Read [changelog.md](https://github.com/AlirezaParsi/COPG/blob/JSON/changelog.md) for changes" \
-            --draft \
-            || gh release edit "$TAG" --draft
-          gh release upload "$TAG" ${{ env.ZIP_NAME }} --clobber
+            --title "COPG $TAG" \
+            --notes "Automated build from GitHub Actions\n- Version: $TAG\n- Branch: ${{ github.event.inputs.branch }}\n- Commit: ${{ github.sha }}\n- Built: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" \
+            --draft
+          gh release upload "$TAG" "${{ env.ZIP_NAME }}" --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: COPG-Module
+          path: ${{ env.ZIP_NAME }}
 
       - name: Send Telegram Notification
         if: github.event.inputs.upload_to_telegram == 'true'
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          ZIP_NAME: ${{ env.ZIP_NAME }}
-          THUMBNAIL_PATH: icon_thumb.jpg
-          TITLE: ${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}
-          WORKFLOW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          UPLOAD_TO_RELEASE: ${{ github.event.inputs.upload_to_release }}
-          VERSION: ${{ env.VERSION }}
-          BRANCH: ${{ github.event.inputs.branch }}
-          COMMIT: ${{ github.sha }}
-          CHANGELOG: ${{ env.CHANGELOG }}
         run: |
           python3 - <<EOF
           from telethon import TelegramClient
           import os
 
-          bot_token = os.getenv('TELEGRAM_TOKEN')
-          chat_id = int(os.getenv('TELEGRAM_CHAT_ID'))
+          async def main():
+              client = TelegramClient('bot', 2040, 'b18441a1ff607e10a989891a5462e627')
+              await client.start(bot_token=os.getenv('TELEGRAM_TOKEN'))
+              
+              title = "${{ github.event.inputs.title || 'COPG Build Complete' }}"
+              build_type = "🚀 RELEASE" if "${{ github.event.inputs.upload_to_release }}" == "true" else "🔧 CI BUILD"
+              
+              message = f"""✨ **{title}** ✨
 
-          client = TelegramClient('github_bot', 2040, 'b18441a1ff607e10a989891a5462e627').start(bot_token=bot_token)
+{build_type}
+▫️ **Version**: v${{ env.VERSION }}
+▫️ **Branch**: ${{ github.event.inputs.branch }}
+▫️ **Commit**: ${{ github.sha[:8] }}
 
-          async def send_notification():
-              try:
-                  title = os.getenv('TITLE')
-                  build_type = "🚀 **Release Build**" if os.getenv('UPLOAD_TO_RELEASE') == 'true' else "🔧 **CI Build**"
-                  message = (
-                      f"✨ **{title}** ✨\n\n"
-                      f"{build_type}\n"
-                      f"▫️ **Version**: v{os.getenv('VERSION')}\n"
-                      f"▫️ **Branch**: {os.getenv('BRANCH')}\n"
-                      f"▫️ **Commit**: {os.getenv('COMMIT')[:8]}\n\n"
-                  )
-                  if os.getenv('UPLOAD_TO_RELEASE') == 'true':
-                      changelog = os.getenv('CHANGELOG')
-                      if changelog and changelog != f"No changelog found for v{os.getenv('VERSION')}" and changelog != "No changelog file available":
-                          message += f"📋 **Changelog**:\n{changelog}\n\n"
-                  message += f"🔗 [View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})"
-                  await client.send_file(
-                      chat_id,
-                      file=os.getenv('ZIP_NAME'),
-                      caption=message,
-                      thumb=os.getenv('THUMBNAIL_PATH'),
-                      parse_mode='markdown'
-                  )
-                  print("Message sent successfully!")
-              except Exception as e:
-                  print(f"Failed to send notification: {e}")
-                  exit(1)
+📦 **Module Size**: $(du -h ${{ env.ZIP_NAME }} | cut -f1)
+🔗 [View Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"""
+              
+              if "${{ github.event.inputs.upload_to_release }}" == "true":
+                  changelog = """${{ env.CHANGELOG }}"""
+                  if changelog and "No changelog" not in changelog:
+                      message += f"\n\n📋 **Changelog**:\n{changelog}"
+              
+              await client.send_file(
+                  int(os.getenv('TELEGRAM_CHAT_ID')),
+                  file="${{ env.ZIP_NAME }}",
+                  caption=message,
+                  thumb="icon_thumb.jpg",
+                  parse_mode='markdown'
+              )
+              await client.disconnect()
 
-          with client:
-              client.loop.run_until_complete(send_notification())
+          import asyncio
+          asyncio.run(main())
           EOF
