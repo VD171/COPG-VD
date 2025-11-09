@@ -8,10 +8,7 @@
 #include <android/log.h>
 #include <mutex>
 #include <sys/stat.h>
-#include <sys/wait.h>
-#include <errno.h>
-#include <cstring>
-#include <cstdlib>
+#include <dlfcn.h>
 
 using json = nlohmann::json;
 
@@ -20,6 +17,9 @@ using json = nlohmann::json;
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 static bool debug_mode = true;
+
+// نوع تابع resetprop از libc
+typedef int (*resetprop_t)(const char*, const char*);
 
 struct DeviceInfo {
     std::string brand, device, manufacturer, model, fingerprint, product;
@@ -51,6 +51,10 @@ public:
         LOGD("Module loaded successfully");
         ensureBuildClass();
         reloadIfNeeded(true);
+        
+        // هوک کردن resetprop از libc
+        api->pltHookRegister(".*libutils\\.so$", "android::resetprop::set", (void*)hooked_resetprop, nullptr);
+        LOGD("resetprop hook registered");
     }
 
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
@@ -68,7 +72,7 @@ public:
                 current_info = it->second;
                 LOGD("Spoofing device: %s", current_info.model.c_str());
                 spoofDevice(current_info);
-                spoofPropsDirect(current_info);  // مستقیم و بدون su
+                spoofPropsLibc(current_info);  // مستقیم از libc
                 should_close = false;
             }
         }
@@ -93,7 +97,7 @@ public:
                 current_info = it->second;
                 LOGD("Post-spoof: %s", current_info.model.c_str());
                 spoofDevice(current_info);
-                spoofPropsDirect(current_info);
+                spoofPropsLibc(current_info);
             }
         }
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
@@ -156,73 +160,44 @@ private:
         set(manufacturerField, i.manufacturer); set(fingerprintField, i.fingerprint); set(productField, i.product);
     }
 
-    // روش نهایی: مستقیم resetprop رو ران کن (حتی بدون su)
-    void spoofPropsDirect(const DeviceInfo& info) {
-        static const char* resetprop = nullptr;
-        static std::once_flag once;
-        std::call_once(once, [&]() {
-            const char* paths[] = {
-                "/data/adb/ksu/bin/resetprop",
-                "/data/adb/magisk/resetprop",
-                "/data/adb/ap/bin/resetprop",
-                "/debug_ramdisk/resetprop",
-                "/system/bin/resetprop",
-                nullptr
-            };
-            for (int i = 0; paths[i]; ++i) {
-                if (access(paths[i], X_OK) == 0) {
-                    resetprop = paths[i];
-                    LOGD("resetprop found: %s", resetprop);
-                    return;
-                }
-            }
-            LOGD("resetprop NOT found!");
-        });
-        if (!resetprop) return;
+    // روش نهایی: مستقیم از libc.resetprop
+    static int hooked_resetprop(const char* name, const char* value) {
+        LOGD("resetprop intercepted: %s = %s", name, value);
+        // همیشه موفقیت برگردون
+        return 0;
+    }
 
-        auto try_set = [&](const char* key, const std::string& val) {
+    void spoofPropsLibc(const DeviceInfo& info) {
+        void* handle = dlopen("libc.so", RTLD_LAZY);
+        if (!handle) { LOGE("Failed to dlopen libc.so"); return; }
+
+        resetprop_t real_resetprop = (resetprop_t)dlsym(handle, "resetprop");
+        if (!real_resetprop) {
+            real_resetprop = (resetprop_t)dlsym(handle, "_ZN7android10resetprop3setEPKcS2_");
+            if (!real_resetprop) {
+                LOGE("resetprop symbol not found");
+                dlclose(handle);
+                return;
+            }
+        }
+
+        auto set = [&](const char* key, const std::string& val) {
             if (val.empty() || val == "generic") return;
-
-            // روش 1: با su (اگه Zygisk اجازه بده)
-            pid_t pid = fork();
-            if (pid == 0) {
-                execl("/system/bin/su", "su", "-c", resetprop, key, val.c_str(), (char*)nullptr);
-                _exit(127);
-            } else if (pid > 0) {
-                int status; waitpid(pid, &status, 0);
-                if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-                    LOGD("Success (su): %s = %s", key, val.c_str());
-                    return;
-                }
-            }
-
-            // روش 2: مستقیم resetprop (بدون su) — فقط اگه Zygisk root داشته باشه
-            pid = fork();
-            if (pid == 0) {
-                char* const args[] = {(char*)resetprop, (char*)key, (char*)val.c_str(), nullptr};
-                execve(resetprop, args, environ);
-                _exit(127);
-            } else if (pid > 0) {
-                int status; waitpid(pid, &status, 0);
-                if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-                    LOGD("Success (direct): %s = %s", key, val.c_str());
-                } else {
-                    LOGE("Failed (direct): %s = %s (status=%d)", key, val.c_str(), status);
-                }
-            } else {
-                LOGE("fork failed: %s", strerror(errno));
-            }
+            int ret = real_resetprop(key, val.c_str());
+            LOGD(ret == 0 ? "Success (libc): %s = %s" : "Failed (libc): %s = %s (ret=%d)", key, val.c_str(), ret);
         };
 
-        try_set("ro.product.model", info.model);
-        try_set("ro.product.system.model", info.model);
-        try_set("ro.product.vendor.model", info.model);
-        try_set("ro.product.brand", info.brand);
-        try_set("ro.product.system.brand", info.brand);
-        try_set("ro.product.device", info.device);
-        try_set("ro.product.manufacturer", info.manufacturer);
-        try_set("ro.product.name", info.product);
-        try_set("ro.build.fingerprint", info.fingerprint);
+        set("ro.product.model", info.model);
+        set("ro.product.system.model", info.model);
+        set("ro.product.vendor.model", info.model);
+        set("ro.product.brand", info.brand);
+        set("ro.product.system.brand", info.brand);
+        set("ro.product.device", info.device);
+        set("ro.product.manufacturer", info.manufacturer);
+        set("ro.product.name", info.product);
+        set("ro.build.fingerprint", info.fingerprint);
+
+        dlclose(handle);
     }
 };
 
