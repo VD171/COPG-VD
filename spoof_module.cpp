@@ -15,8 +15,6 @@
 #include <sys/un.h>
 #include <vector>
 #include <map>
-#include <thread>
-#include <chrono>
 
 using json = nlohmann::json;
 
@@ -242,10 +240,7 @@ public:
                 LOGD("Post-specialize spoofing for %s: %s", package_name, current_info.model.c_str());
                 spoofDevice(current_info);
                 
-                std::thread([this]() {
-                    std::this_thread::sleep_for(std::chrono::seconds(1));
-                    restoreOriginalProps();
-                }).detach();
+                restoreOriginalProps();
             }
         }
 
