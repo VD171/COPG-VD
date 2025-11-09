@@ -11,6 +11,8 @@
 #include <mutex>
 #include <functional>
 #include <sys/stat.h>
+#include <cstdlib>    // برای system()
+#include <cerrno>     // برای errno
 
 using json = nlohmann::json;
 
@@ -104,6 +106,7 @@ public:
                 current_info = it->second;
                 LOGD("Spoofing device for package %s: %s", package_name, current_info.model.c_str());
                 spoofDevice(current_info);
+                spoofProps(current_info);  // اضافه شد: اسپوف propها
                 should_close = false;
             }
         }
@@ -142,6 +145,7 @@ public:
                 current_info = it->second;
                 LOGD("Post-specialize spoofing for %s: %s", package_name, current_info.model.c_str());
                 spoofDevice(current_info);
+                spoofProps(current_info);  // دوباره اجرا میشه برای اطمینان
             }
         }
 
@@ -285,6 +289,59 @@ private:
         setStr(manufacturerField, info.manufacturer);
         setStr(fingerprintField, info.fingerprint);
         setStr(productField, info.product);
+    }
+
+    // تابع جدید: اسپوف propها با resetprop
+    void spoofProps(const DeviceInfo& info) {
+        // چک کن resetprop وجود داره یا نه
+        if (access("/system/bin/resetprop", X_OK) != 0 && access("/system/xbin/resetprop", X_OK) != 0) {
+            LOGD("resetprop not found in /system/bin or /system/xbin, skipping prop spoofing");
+            return;
+        }
+
+        auto setProp = [&](const char* prop, const std::string& value) {
+            if (value.empty() || value == "generic") return;
+
+            std::string cmd = "su -c resetprop \"";
+            cmd += prop;
+            cmd += "\" \"";
+            cmd += value;
+            cmd += "\"";
+
+            LOGD("Executing: %s", cmd.c_str());
+            int ret = system(cmd.c_str());
+
+            if (ret == 0) {
+                LOGD("Successfully set %s = %s", prop, value.c_str());
+            } else {
+                LOGE("Failed to set prop %s (return code: %d)", prop, ret);
+            }
+        };
+
+        // مدل
+        setProp("ro.product.model", info.model);
+        setProp("ro.product.system.model", info.model);
+        setProp("ro.product.vendor.model", info.model);
+        setProp("ro.product.odm.model", info.model);
+
+        // برند
+        setProp("ro.product.brand", info.brand);
+        setProp("ro.product.system.brand", info.brand);
+        setProp("ro.product.vendor.brand", info.brand);
+
+        // دیوایس و سازنده
+        setProp("ro.product.device", info.device);
+        setProp("ro.product.manufacturer", info.manufacturer);
+        setProp("ro.product.name", info.product);
+        setProp("ro.product.system.name", info.product);
+
+        // فینگرپرینت
+        setProp("ro.build.fingerprint", info.fingerprint);
+
+        // چندتا prop دیگه که بعضی اپ‌ها چک می‌کنن
+        setProp("ro.bootloader", info.device);
+        setProp("ro.build.product", info.product);
+        setProp("ro.vendor.product.model", info.model);
     }
 };
 
