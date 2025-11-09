@@ -18,10 +18,10 @@
 using json = nlohmann::json;
 
 #define LOG_TAG "SpoofModule"
-#define LOGD(...) if (debug_mode) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-static bool debug_mode = false;
+static bool debug_mode = true;
 
 struct DeviceInfo {
     std::string brand;
@@ -59,9 +59,54 @@ struct JniString {
     const char* get() const { return chars; }
 };
 
-// Companion برای اجرای resetprop
+static std::string findResetpropPath() {
+    const char* possible_paths[] = {
+        "/data/adb/ksu/bin/resetprop",
+        "/data/adb/magisk/resetprop",
+        "/debug_ramdisk/resetprop",
+        "/data/adb/ap/bin/resetprop",
+        "/system/bin/resetprop",
+        "/vendor/bin/resetprop",
+        nullptr
+    };
+    
+    for (int i = 0; possible_paths[i] != nullptr; i++) {
+        if (access(possible_paths[i], X_OK) == 0) {
+            LOGD("Found resetprop at: %s", possible_paths[i]);
+            return possible_paths[i];
+        }
+    }
+    
+    FILE* pipe = popen("which resetprop", "r");
+    if (pipe) {
+        char path[256];
+        if (fgets(path, sizeof(path), pipe) != nullptr) {
+            size_t len = strlen(path);
+            if (len > 0 && path[len-1] == '\n') {
+                path[len-1] = '\0';
+            }
+            if (access(path, X_OK) == 0) {
+                LOGD("Found resetprop via which: %s", path);
+                pclose(pipe);
+                return path;
+            }
+        }
+        pclose(pipe);
+    }
+    
+    LOGE("Could not find resetprop in any known location!");
+    return "";
+}
+
 static void companion(int fd) {
     LOGD("[COMPANION] Companion started");
+    
+    std::string resetprop_path = findResetpropPath();
+    if (resetprop_path.empty()) {
+        LOGE("[COMPANION] No resetprop found, companion cannot function");
+        close(fd);
+        return;
+    }
     
     char buffer[2048];
     ssize_t bytes = read(fd, buffer, sizeof(buffer)-1);
@@ -72,8 +117,7 @@ static void companion(int fd) {
         
         LOGD("[COMPANION] Executing: %s", command.c_str());
         
-        // اجرای resetprop
-        std::string full_cmd = "/data/adb/ksu/bin/resetprop " + command;
+        std::string full_cmd = resetprop_path + " " + command;
         int result = system(full_cmd.c_str());
         
         LOGD("[COMPANION] Result: %d", result);
@@ -90,6 +134,7 @@ public:
         this->env = env;
 
         LOGD("Module loaded successfully");
+        
         ensureBuildClass();
         reloadIfNeeded(true);
     }
@@ -129,10 +174,8 @@ public:
                 current_info = it->second;
                 LOGD("Spoofing device for package %s: %s", package_name, current_info.model.c_str());
                 
-                // اسپوف اصلی
                 spoofDevice(current_info);
                 
-                // اسپوف اضافی با resetprop (همزمان ساده)
                 spoofSystemProps(current_info);
                 
                 should_close = false;
@@ -185,7 +228,6 @@ private:
     JNIEnv* env;
     std::unordered_map<std::string, DeviceInfo> package_map;
 
-    // تابع برای اجرای resetprop از طریق companion
     bool executeResetprop(const std::string& args) {
         auto fd = api->connectCompanion();
         if (fd < 0) {
@@ -193,10 +235,8 @@ private:
             return false;
         }
         
-        // ارسال دستور
         write(fd, args.c_str(), args.size());
         
-        // دریافت نتیجه
         int result = -1;
         read(fd, &result, sizeof(result));
         close(fd);
@@ -204,11 +244,9 @@ private:
         return result == 0;
     }
 
-    // اسپوف system properties با resetprop (نسخه ساده و همزمان)
     void spoofSystemProps(const DeviceInfo& info) {
         LOGD("Starting system props spoofing with resetprop");
         
-        // لیست دستورات resetprop
         const char* commands[] = {
             "ro.product.brand",
             "ro.product.manufacturer", 
@@ -229,7 +267,6 @@ private:
         
         const int num_commands = sizeof(commands) / sizeof(commands[0]);
         
-        // اجرای دستورات
         for (int i = 0; i < num_commands; i++) {
             std::string cmd = std::string(commands[i]) + " \"" + values[i] + "\"";
             if (executeResetprop(cmd)) {
@@ -237,7 +274,7 @@ private:
             } else {
                 LOGE("Resetprop failed: %s", cmd.c_str());
             }
-            usleep(1000); // تاخیر کوتاه 1ms
+            usleep(1000);
         }
         
         LOGD("System props spoofing completed");
