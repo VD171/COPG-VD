@@ -1,4 +1,4 @@
-name: Build Unified Controller (NDK - Static & Tiny)
+name: Build COPG Controller - arm64 + armv7 (Ultra Small)
 
 on:
   workflow_dispatch:
@@ -10,10 +10,8 @@ on:
         default: 'JSON'
 
 jobs:
-  build-android-binary:
+  build:
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
 
     steps:
       - name: Checkout code
@@ -26,82 +24,54 @@ jobs:
           mkdir -p android-sdk/ndk
           wget -q https://dl.google.com/android/repository/android-ndk-r29-linux.zip
           unzip -q android-ndk-r29-linux.zip -d android-sdk/ndk
-          NDK_DIR=$(find android-sdk/ndk -maxdepth 1 -type d -name "android-ndk-r29*" | head -n 1)
-          echo "NDK_PATH=$NDK_DIR" >> $GITHUB_ENV
-          echo "NDK installed: $NDK_DIR"
+          NDK=$(find android-sdk/ndk -maxdepth 1 -type d -name "android-ndk-r29*" | head -n 1)
+          echo "NDK_PATH=$NDK" >> $GITHUB_ENV
 
-      - name: Download nlohmann/json
+      - name: Download json.hpp (header-only, will be compiled in)
         run: |
           wget -q https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O json.hpp
 
-      - name: Install UPX (ultra-compression)
+      - name: Install UPX
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y upx-ucl
 
-      - name: Build Fully Static Binary (Zero Dependencies)
+      - name: Build arm64-v8a (64-bit)
         run: |
-          echo "Building fully static standalone binary..."
+          $NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++ \
+            -std=c++17 -O3 -Os -fPIE -pie -static-libstdc++ \
+            -fdata-sections -ffunction-sections -Wl,--gc-sections \
+            -I. unified_controller.cpp -o controller_arm64
           
-          CLANG="${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++"
-          STRIP="${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip"
-          
-          $CLANG \
-            -std=c++17 \
-            -O3 -Os \
-            -fPIE -pie \
-            -static-libstdc++ \
-            -fdata-sections -ffunction-sections \
-            -Wl,--gc-sections \
-            -Wl,--strip-all \
-            -I. \
-            unified_controller.cpp \
-            -o unified_controller_arm64
-          
-          echo "Build done!"
-          ls -lh unified_controller_arm64
-          
-          echo "Dependencies (should be only libc.so):"
-          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf -d unified_controller_arm64 | grep NEEDED || echo "None! (Perfect)"
+          $NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded controller_arm64
+          upx --best --lzma -q controller_arm64
+          echo "arm64: $(du -h controller_arm64)"
 
-      - name: Strip binary (correct path!)
+      - name: Build armeabi-v7a (32-bit)
         run: |
-          STRIP="${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip"
-          $STRIP --strip-unneeded unified_controller_arm64
-          echo "Stripped:"
-          ls -lh unified_controller_arm64
+          $NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi34-clang++ \
+            -std=c++17 -O3 -Os -fPIE -pie -static-libstdc++ \
+            -fdata-sections -ffunction-sections -Wl,--gc-sections \
+            -I. unified_controller.cpp -o controller_armv7
+          
+          $NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded controller_armv7
+          upx --best --lzma -q controller_armv7
+          echo "armv7: $(du -h controller_armv7)"
 
-      - name: Compress with UPX (~100 KB!)
-        run: |
-          echo "Compressing with UPX (this takes ~10s)..."
-          upx --best --lzma -q unified_controller_arm64 -o unified_controller_arm64_upx
-          echo "UPX compressed:"
-          ls -lh unified_controller_arm64_upx
-
-      - name: Final report
+      - name: Final sizes
         run: |
           echo ""
-          echo "FINAL BUILD REPORT"
-          echo "════════════════════════════════"
-          echo "Binary:           unified_controller_arm64"
-          echo "Size (stripped):  $(du -h unified_controller_arm64 | cut -f1)"
-          echo "Size (UPX):       $(du -h unified_controller_arm64_upx | cut -f1)"
-          echo "Termux size:      ~237 KB"
+          echo "BUILD COMPLETE"
+          echo "controller_arm64 → $(du -h controller_arm64 | cut -f1) ($(stat -c%s controller_arm64) bytes)"
+          echo "controller_armv7 → $(du -h controller_armv7 | cut -f1) ($(stat -c%s controller_armv7) bytes)"
           echo ""
-          echo "No libc++_shared.so needed"
-          echo "Runs on any Android 8.0+ device"
-          echo "Zero runtime dependencies"
-          echo ""
-          echo "Push & run:"
-          echo "adb push unified_controller_arm64_upx /data/local/tmp/c"
-          echo "adb shell chmod 755 /data/local/tmp/c && /data/local/tmp/c"
+          echo "Zero dependencies. No libc++_shared.so. Runs anywhere."
 
-      - name: Upload artifacts
+      - name: Upload binaries only
         uses: actions/upload-artifact@v4
         with:
-          name: unified-controller-arm64-v3
+          name: COPG_Controller_Binaries_ONLY
           path: |
-            unified_controller_arm64
-            unified_controller_arm64_upx
-            json.hpp
-          retention-days: 14
+            controller_arm64
+            controller_armv7
+          retention-days: 30
