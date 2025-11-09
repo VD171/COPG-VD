@@ -32,74 +32,48 @@ jobs:
         run: |
           wget https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O json.hpp
 
-      - name: Build for arm64-v8a (static libstdc++)
+      - name: Build like Android terminal (gnu libstdc++)
         run: |
-          echo "🔨 Building for arm64-v8a (static libstdc++)..."
+          echo "🔨 Building like Android terminal (gnu libstdc++)..."
+          
+          # مثل کامپایل در ترمینال اندروید
           ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++ \
             -std=c++17 \
             -O2 \
             -fPIE \
             -I. \
-            -static-libstdc++ \
             unified_controller.cpp \
             -o unified_controller_arm64
           
-          echo "✅ arm64-v8a build completed"
+          echo "✅ arm64 build completed"
           ls -lh unified_controller_arm64
-          file unified_controller_arm64
 
-      - name: Build for armeabi-v7a (static libstdc++)
+      - name: Build optimized version
         run: |
-          echo "🔨 Building for armeabi-v7a (static libstdc++)..."
-          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi34-clang++ \
-            -std=c++17 \
-            -O2 \
-            -fPIE \
-            -I. \
-            -static-libstdc++ \
-            unified_controller.cpp \
-            -o unified_controller_arm32
+          echo "🔨 Building optimized version..."
           
-          echo "✅ armeabi-v7a build completed"
-          ls -lh unified_controller_arm32
-          file unified_controller_arm32
-
-      - name: Build optimized versions (smaller size)
-        run: |
-          echo "🔨 Building optimized versions..."
-          
-          # arm64 optimized
           ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++ \
             -std=c++17 \
-            -Os -flto -ffunction-sections -fdata-sections \
+            -Os \
             -fPIE \
             -I. \
-            -static-libstdc++ \
-            -Wl,--gc-sections -Wl,--exclude-libs,ALL \
+            -fvisibility=hidden \
+            -fvisibility-inlines-hidden \
             unified_controller.cpp \
-            -o unified_controller_arm64_optimized
+            -o unified_controller_arm64_small
           
-          # arm32 optimized
-          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi34-clang++ \
-            -std=c++17 \
-            -Os -flto -ffunction-sections -fdata-sections \
-            -fPIE \
-            -I. \
-            -static-libstdc++ \
-            -Wl,--gc-sections -Wl,--exclude-libs,ALL \
-            unified_controller.cpp \
-            -o unified_controller_arm32_optimized
-          
-          echo "✅ Optimized builds completed"
+          echo "✅ Optimized build completed"
+          ls -lh unified_controller_arm64_small
 
-      - name: Compare binary sizes
+      - name: Check what libraries are needed
         run: |
-          echo "📊 BINARY SIZE COMPARISON:"
-          echo "=========================="
-          echo "arm64 normal:     $(stat -c%s unified_controller_arm64 2>/dev/null || echo 'N/A') bytes"
-          echo "arm64 optimized:  $(stat -c%s unified_controller_arm64_optimized 2>/dev/null || echo 'N/A') bytes"
-          echo "arm32 normal:     $(stat -c%s unified_controller_arm32 2>/dev/null || echo 'N/A') bytes"
-          echo "arm32 optimized:  $(stat -c%s unified_controller_arm32_optimized 2>/dev/null || echo 'N/A') bytes"
+          echo "🔍 Checking dynamic dependencies..."
+          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf -d unified_controller_arm64 | grep NEEDED || true
+          
+          echo ""
+          echo "📊 File sizes:"
+          echo "Normal:  $(stat -c%s unified_controller_arm64) bytes"
+          echo "Optimized: $(stat -c%s unified_controller_arm64_small) bytes"
 
       - name: Upload binaries as artifacts
         uses: actions/upload-artifact@v4
@@ -107,7 +81,5 @@ jobs:
           name: cpp-controller-binaries
           path: |
             unified_controller_arm64
-            unified_controller_arm32
-            unified_controller_arm64_optimized
-            unified_controller_arm32_optimized
+            unified_controller_arm64_small
           retention-days: 1
