@@ -14,7 +14,6 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <vector>
-#include <map>
 
 using json = nlohmann::json;
 
@@ -99,28 +98,6 @@ static std::string findResetpropPath() {
     return "";
 }
 
-static std::string getSystemProperty(const std::string& prop) {
-    std::string cmd = "/system/bin/getprop " + prop;
-    FILE* pipe = popen(cmd.c_str(), "r");
-    if (!pipe) {
-        LOGE("Failed to execute getprop for %s", prop.c_str());
-        return "";
-    }
-    
-    char buffer[128];
-    std::string result = "";
-    if (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-        result = buffer;
-    }
-    pclose(pipe);
-    
-    result.erase(std::remove(result.begin(), result.end(), '\n'), result.end());
-    result.erase(std::remove(result.begin(), result.end(), '\r'), result.end());
-    
-    LOGD("getprop %s: %s", prop.c_str(), result.c_str());
-    return result;
-}
-
 static void companion(int fd) {
     LOGD("[COMPANION] Companion started");
     
@@ -197,8 +174,8 @@ public:
                 current_info = it->second;
                 LOGD("Spoofing device for package %s: %s", package_name, current_info.model.c_str());
                 
-                backupOriginalProps();
                 spoofDevice(current_info);
+                
                 spoofSystemProps(current_info);
                 
                 should_close = false;
@@ -239,8 +216,6 @@ public:
                 current_info = it->second;
                 LOGD("Post-specialize spoofing for %s: %s", package_name, current_info.model.c_str());
                 spoofDevice(current_info);
-                
-                restoreOriginalProps();
             }
         }
 
@@ -252,49 +227,6 @@ private:
     zygisk::Api* api;
     JNIEnv* env;
     std::unordered_map<std::string, DeviceInfo> package_map;
-    std::map<std::string, std::string> original_props;
-    bool props_backed_up = false;
-
-    void backupOriginalProps() {
-        if (props_backed_up) return;
-        
-        const char* props[] = {
-            "ro.product.brand", "ro.product.manufacturer", "ro.product.model",
-            "ro.product.device", "ro.product.name", "ro.build.fingerprint"
-        };
-        
-        for (const char* prop : props) {
-            std::string value = getSystemProperty(prop);
-            if (!value.empty()) {
-                original_props[prop] = value;
-                LOGD("Backed up %s: %s", prop, value.c_str());
-            }
-        }
-        props_backed_up = true;
-        LOGD("Original props backed up");
-    }
-
-    void restoreOriginalProps() {
-        if (!props_backed_up) {
-            LOGD("No props to restore");
-            return;
-        }
-        
-        LOGD("Restoring original props");
-        for (const auto& [prop, value] : original_props) {
-            if (!value.empty()) {
-                std::string cmd = prop + " \"" + value + "\"";
-                if (executeResetprop(cmd)) {
-                    LOGD("Restored %s to %s", prop.c_str(), value.c_str());
-                } else {
-                    LOGE("Failed to restore %s", prop.c_str());
-                }
-            }
-        }
-        props_backed_up = false;
-        original_props.clear();
-        LOGD("All original props restored");
-    }
 
     bool executeResetprop(const std::string& args) {
         auto fd = api->connectCompanion();
