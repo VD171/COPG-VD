@@ -46,7 +46,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
 
-      - name: Setup Android NDK and Build Tools
+      - name: Setup Android SDK and NDK
         run: |
           # Setup Android SDK
           echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
@@ -56,14 +56,14 @@ jobs:
           mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
           echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
           
-          # Install platform and build tools
+          # Install platform and build tools silently
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" > /dev/null 2>&1
           
-          # Setup NDK
+          # Setup NDK r29
           mkdir -p $ANDROID_HOME/ndk
           wget -q https://dl.google.com/android/repository/android-ndk-r29-linux.zip -O ndk.zip
           unzip -q ndk.zip -d $ANDROID_HOME/ndk
-          NDK_DIR=$(find $ANDROID_HOME/ndk -maxdepth 1 -type d -name "android-ndk-r29*" | head -n 1)
+          NDK_DIR="$ANDROID_HOME/ndk/android-ndk-r29"
           echo "NDK_PATH=$NDK_DIR" >> $GITHUB_ENV
 
       - name: Install Dependencies
@@ -72,11 +72,14 @@ jobs:
           sudo apt-get install -y build-essential cmake zip curl imagemagick python3 python3-pip upx-ucl
           pip3 install telethon
 
+      - name: Download Required Headers
+        run: |
+          mkdir -p zygisk include/nlohmann
+          wget -q https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hpp
+          wget -q https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O include/nlohmann/json.hpp
+
       - name: Build Unified Controller
         run: |
-          # Download json.hpp
-          wget -q https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O json.hpp
-          
           # Build arm64 controller
           ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++ \
             -std=c++17 -O3 -Os -fPIE -pie -static-libstdc++ \
@@ -99,30 +102,20 @@ jobs:
           echo "arm64: $(du -h controller_arm64 | cut -f1)"
           echo "armv7: $(du -h controller_armv7 | cut -f1)"
 
-      - name: Fetch Zygisk Headers
+      - name: Build Zygisk Libraries
         run: |
-          mkdir -p zygisk include/nlohmann
-          wget -q https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hpp
-          wget -q https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp -O include/nlohmann/json.hpp
-
-      - name: Build Zygisk Module
-        run: |
-          # Build arm64-v8a
-          cmake -B build/arm64-v8a \
-            -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake \
-            -DANDROID_ABI=arm64-v8a \
-            -DANDROID_PLATFORM=android-34
-          cmake --build build/arm64-v8a -j4
+          # Build both architectures in one go
+          for arch in arm64-v8a armeabi-v7a; do
+            echo "Building $arch..."
+            cmake -B build/$arch \
+              -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake \
+              -DANDROID_ABI=$arch \
+              -DANDROID_PLATFORM=android-34
+            cmake --build build/$arch -j4
+          done
           
-          # Build armeabi-v7a  
-          cmake -B build/armeabi-v7a \
-            -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake \
-            -DANDROID_ABI=armeabi-v7a \
-            -DANDROID_PLATFORM=android-34
-          cmake --build build/armeabi-v7a -j4
-          
-          # Verify builds
-          ls -la build/arm64-v8a/libspoof.so build/armeabi-v7a/libspoof.so
+          # Verify both builds
+          ls -la build/*/libspoof.so
 
       - name: Prepare Module Structure
         run: |
@@ -133,7 +126,7 @@ jobs:
           cp build/armeabi-v7a/libspoof.so module/zygisk/armeabi-v7a.so
           chmod 755 module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
           
-          # Copy unified controllers to ROOT (not in bin/)
+          # Copy unified controllers to module root (not in bin/)
           cp controller_arm64 module/controller_arm64
           cp controller_armv7 module/controller_armv7
           chmod 755 module/controller_arm64 module/controller_armv7
@@ -163,28 +156,23 @@ jobs:
           chmod 755 module/META-INF/com/google/android/update-binary
           
           # Copy web files
-          cp webroot/index.html module/webroot/
-          cp webroot/scripts.js module/webroot/
-          cp webroot/styles.css module/webroot/
-          cp webroot/config.json module/webroot/
-          cp webroot/icon.png module/webroot/
-          cp webroot/assets/RobotoMono-Regular.ttf module/webroot/assets/
+          cp -r webroot/* module/webroot/
           
           # Create module.prop
           VERSION="${{ github.event.inputs.custom_version || '4.3.5' }}"
           VERSION_CODE="${{ github.event.inputs.custom_version_code || '435' }}"
           cat > module/module.prop << EOF
-          id=COPG
-          name=✨ COPG spoof ✨
-          version=$VERSION
-          versionCode=$VERSION_CODE
-          author=AlirezaParsi
-          description=Spoof your device for games/apps to unlock new features.
-          support=https://t.me/theaosp
-          updateJson=https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/update.json
-          minMagisk=20.4
-          banner=banner.png
-          EOF
+id=COPG
+name=✨ COPG spoof ✨
+version=$VERSION
+versionCode=$VERSION_CODE
+author=AlirezaParsi
+description=Spoof your device for games/apps to unlock new features.
+support=https://t.me/theaosp
+updateJson=https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/update.json
+minMagisk=20.4
+banner=banner.png
+EOF
 
       - name: Create ZIP Package
         run: |
