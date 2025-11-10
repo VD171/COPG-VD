@@ -11,6 +11,7 @@
 #include <csignal>
 #include <functional>
 #include <system_error>
+#include <dirent.h>
 #include "json.hpp"
 
 #ifdef __linux__
@@ -276,7 +277,7 @@ namespace xwatcher {
     };
 }
 
-class UnifiedAppController {
+class AdvancedAppController {
 private:
     const std::string CONFIG_JSON = "/data/adb/modules/COPG/config.json";
     const std::string TOGGLE_FILE = "/data/adb/copg_state";
@@ -291,9 +292,31 @@ private:
 
     xwatcher::Watcher config_watcher;
 
+    enum class AppState {
+        FOREGROUND,
+        BACKGROUND,
+        PAUSED,
+        CLOSED,
+        UNKNOWN
+    };
+
+    struct StateTracker {
+        std::map<std::string, AppState> last_states;
+        std::string last_active_app;
+        bool last_toggle_state{false};
+        int no_change_counter{0};
+        
+        void reset() {
+            last_states.clear();
+            last_active_app.clear();
+            last_toggle_state = false;
+            no_change_counter = 0;
+        }
+    } state_tracker;
+
 public:
-    UnifiedAppController() {
-        std::cout << "🚀 Initializing Unified App Controller..." << std::endl;
+    AdvancedAppController() {
+        std::cout << "🚀 Initializing Advanced App Controller..." << std::endl;
         
         if (!config_watcher.is_initialized()) {
             std::cerr << "❌ Config watcher failed to initialize" << std::endl;
@@ -318,7 +341,7 @@ public:
         std::cout << "✅ Controller initialized successfully" << std::endl;
     }
 
-    ~UnifiedAppController() {
+    ~AdvancedAppController() {
         stop();
     }
 
@@ -335,7 +358,7 @@ private:
     bool setup_config_watcher() {
         auto callback = [this](xwatcher::FileEvent event, const std::string& path, int context, void* additional_data) {
             if (event == xwatcher::FileEvent::Modified || event == xwatcher::FileEvent::Created) {
-                std::cout << "🔄 Config file changed" << std::endl;
+                std::cout << "🔄 Config file changed - reloading..." << std::endl;
                 safe_reload_config();
             }
         };
@@ -358,7 +381,8 @@ private:
         for (int attempt = 0; attempt < 3; attempt++) {
             if (load_config()) {
                 load_ignore_list();
-                std::cout << "✅ Configuration reloaded" << std::endl;
+                state_tracker.reset();
+                std::cout << "✅ Configuration reloaded successfully" << std::endl;
                 return;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100 * (attempt + 1)));
@@ -445,6 +469,125 @@ private:
     bool execute_command_bool(const std::string& cmd) {
         std::string full_cmd = "su -c \"" + cmd + "\"";
         return system(full_cmd.c_str()) == 0;
+    }
+
+    bool is_package_process_running(const std::string& package) {
+        std::string result = execute_command("pidof " + package);
+        if (!result.empty()) return true;
+        
+        result = execute_command("ps -A | grep " + package);
+        return !result.empty();
+    }
+
+    AppState get_exact_app_state(const std::string& package) {
+        if (is_ignored(package)) {
+            return AppState::UNKNOWN;
+        }
+
+        std::string visible_cmd = "dumpsys window visible-apps 2>/dev/null | grep -o -E 'package=[^ ]+' | cut -d'=' -f2 | grep '" + package + "'";
+        if (!execute_command(visible_cmd).empty()) {
+            return AppState::FOREGROUND;
+        }
+
+        std::string recent_cmd = "dumpsys activity recents 2>/dev/null | grep -E '" + package + "' | head -1";
+        if (!execute_command(recent_cmd).empty()) {
+            return AppState::BACKGROUND;
+        }
+
+        if (is_package_process_running(package)) {
+            return AppState::PAUSED;
+        }
+
+        return AppState::CLOSED;
+    }
+
+    std::map<std::string, AppState> get_active_monitored_apps() {
+        std::map<std::string, AppState> active_apps;
+        
+        for (const auto& package : monitored_packages) {
+            if (is_ignored(package)) continue;
+            
+            AppState state = get_exact_app_state(package);
+            if (state != AppState::CLOSED && state != AppState::UNKNOWN) {
+                active_apps[package] = state;
+            }
+        }
+        
+        return active_apps;
+    }
+
+    bool should_apply_toggles(const std::map<std::string, AppState>& active_apps) {
+        for (const auto& [package, state] : active_apps) {
+            if (state == AppState::FOREGROUND || state == AppState::BACKGROUND) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool should_restore_states(const std::map<std::string, AppState>& active_apps) {
+        if (active_apps.empty()) {
+            return true;
+        }
+        
+        for (const auto& [package, state] : active_apps) {
+            if (state == AppState::FOREGROUND || state == AppState::BACKGROUND) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    bool has_state_changed(const std::map<std::string, AppState>& current_states) {
+        if (current_states.size() != state_tracker.last_states.size()) {
+            return true;
+        }
+        
+        for (const auto& [package, state] : current_states) {
+            auto it = state_tracker.last_states.find(package);
+            if (it == state_tracker.last_states.end() || it->second != state) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    void log_state_changes(const std::map<std::string, AppState>& current_states) {
+        if (!has_state_changed(current_states)) {
+            state_tracker.no_change_counter++;
+            if (state_tracker.no_change_counter % 20 == 0) {
+                std::cout << "📱 System stable - No state changes (" << state_tracker.no_change_counter << " cycles)" << std::endl;
+            }
+            return;
+        }
+        
+        state_tracker.no_change_counter = 0;
+        
+        std::cout << "🔄 State changes detected:" << std::endl;
+        
+        for (const auto& [package, state] : current_states) {
+            auto it = state_tracker.last_states.find(package);
+            if (it == state_tracker.last_states.end()) {
+                std::cout << "   ➕ " << package << ": " << state_to_string(state) << std::endl;
+            } else if (it->second != state) {
+                std::cout << "   🔄 " << package << ": " << state_to_string(it->second) 
+                          << " → " << state_to_string(state) << std::endl;
+            } else {
+                if (state == AppState::FOREGROUND || state == AppState::BACKGROUND) {
+                    std::cout << "   📍 " << package << ": " << state_to_string(state) << " (active)" << std::endl;
+                }
+            }
+        }
+        
+        for (const auto& [package, old_state] : state_tracker.last_states) {
+            if (current_states.find(package) == current_states.end()) {
+                std::cout << "   ❌ " << package << ": CLOSED" << std::endl;
+            }
+        }
+        
+        state_tracker.last_states = current_states;
     }
 
     bool save_current_states() {
@@ -585,28 +728,14 @@ private:
         std::cout << "✅ System states restored" << std::endl;
     }
 
-    std::string get_focused_app() {
-        std::string result = execute_command("dumpsys window | grep -E 'mCurrentFocus|mFocusedApp'");
-        
-        for (const auto& pkg : monitored_packages) {
-            if (result.find(pkg) != std::string::npos) {
-                return pkg;
-            }
+    std::string state_to_string(AppState state) {
+        switch (state) {
+            case AppState::FOREGROUND: return "✅ FOREGROUND";
+            case AppState::BACKGROUND: return "🔵 BACKGROUND"; 
+            case AppState::PAUSED: return "⏸️ PAUSED";
+            case AppState::CLOSED: return "❌ CLOSED";
+            default: return "❓ UNKNOWN";
         }
-        
-        return "";
-    }
-
-    bool is_any_package_running() {
-        for (const auto& pkg : monitored_packages) {
-            if (is_ignored(pkg)) continue;
-            
-            std::string result = execute_command("pidof " + pkg);
-            if (!result.empty()) {
-                return true;
-            }
-        }
-        return false;
     }
 
 public:
@@ -616,48 +745,48 @@ public:
             return;
         }
 
-        std::cout << "🚀 Unified App Controller Started" << std::endl;
+        std::cout << "🚀 Advanced App Controller Started" << std::endl;
         std::cout << "📊 Monitoring " << monitored_packages.size() << " packages" << std::endl;
+        std::cout << "🎯 States: FOREGROUND, BACKGROUND, PAUSED, CLOSED" << std::endl;
+        std::cout << "🔧 Toggles apply only in FOREGROUND/BACKGROUND states" << std::endl;
+        std::cout << "📝 Logging: Only state changes and important events" << std::endl;
         
-        std::string last_app = "";
         int debounce_count = 0;
-        const int DEBOUNCE_THRESHOLD = 5;
+        const int DEBOUNCE_THRESHOLD = 3;
         
         while (running.load()) {
             try {
-                std::string current_app = get_focused_app();
+                auto active_apps = get_active_monitored_apps();
                 
-                if (!current_app.empty() && is_ignored(current_app)) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                    continue;
-                }
+                log_state_changes(active_apps);
                 
-                if (!current_app.empty() && current_app != last_app && !states_saved.load()) {
+                bool current_toggle_state = should_apply_toggles(active_apps);
+                
+                if (current_toggle_state && !state_tracker.last_toggle_state && !states_saved.load()) {
                     debounce_count++;
                     if (debounce_count >= DEBOUNCE_THRESHOLD) {
-                        std::cout << "🎯 App focused: " << current_app << std::endl;
+                        std::cout << "🎯 Active app detected - Applying toggles" << std::endl;
                         if (save_current_states()) {
                             apply_toggles();
                             states_saved.store(true);
-                            last_app = current_app;
+                            state_tracker.last_toggle_state = true;
                         }
                         debounce_count = 0;
                     }
-                } else if (!current_app.empty() && current_app != last_app && states_saved.load()) {
-                    last_app = current_app;
-                    debounce_count = 0;
-                } else if (current_app.empty() && states_saved.load()) {
+                } 
+                else if (!current_toggle_state && state_tracker.last_toggle_state && states_saved.load()) {
                     debounce_count++;
                     if (debounce_count >= DEBOUNCE_THRESHOLD) {
-                        if (!is_any_package_running()) {
-                            std::cout << "🏁 No app focused - Restoring states" << std::endl;
+                        if (should_restore_states(active_apps)) {
+                            std::cout << "🏁 All apps closed/paused - Restoring system states" << std::endl;
                             restore_saved_states();
                             states_saved.store(false);
-                            last_app = "";
+                            state_tracker.last_toggle_state = false;
                         }
                         debounce_count = 0;
                     }
-                } else {
+                } 
+                else {
                     debounce_count = 0;
                 }
                 
@@ -670,7 +799,7 @@ public:
     }
 };
 
-std::unique_ptr<UnifiedAppController> g_controller = nullptr;
+std::unique_ptr<AdvancedAppController> g_controller = nullptr;
 
 void signal_handler(int signal) {
     std::cout << "\n🛑 Received signal " << signal << ", shutting down..." << std::endl;
@@ -680,13 +809,13 @@ void signal_handler(int signal) {
 }
 
 int main() {
-    std::cout << "🎮 Starting Unified App Controller..." << std::endl;
+    std::cout << "🎮 Starting Advanced App Controller..." << std::endl;
     
     std::signal(SIGINT, signal_handler);
     std::signal(SIGTERM, signal_handler);
     
     try {
-        g_controller = std::make_unique<UnifiedAppController>();
+        g_controller = std::make_unique<AdvancedAppController>();
         
         if (!g_controller->is_ready()) {
             std::cerr << "💥 Controller initialization failed" << std::endl;
