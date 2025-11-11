@@ -11,14 +11,17 @@
 #include <mutex>
 #include <functional>
 #include <sys/stat.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <vector>
 
 using json = nlohmann::json;
 
 #define LOG_TAG "SpoofModule"
-#define LOGD(...) if (debug_mode) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-static bool debug_mode = false;
+static bool debug_mode = true;
 
 struct DeviceInfo {
     std::string brand;
@@ -56,6 +59,74 @@ struct JniString {
     const char* get() const { return chars; }
 };
 
+static std::string findResetpropPath() {
+    const char* possible_paths[] = {
+        "/data/adb/ksu/bin/resetprop",
+        "/data/adb/magisk/resetprop",
+        "/debug_ramdisk/resetprop",
+        "/data/adb/ap/bin/resetprop",
+        "/system/bin/resetprop",
+        "/vendor/bin/resetprop",
+        nullptr
+    };
+    
+    for (int i = 0; possible_paths[i] != nullptr; i++) {
+        if (access(possible_paths[i], X_OK) == 0) {
+            LOGD("Found resetprop at: %s", possible_paths[i]);
+            return possible_paths[i];
+        }
+    }
+    
+    FILE* pipe = popen("which resetprop", "r");
+    if (pipe) {
+        char path[256];
+        if (fgets(path, sizeof(path), pipe) != nullptr) {
+            size_t len = strlen(path);
+            if (len > 0 && path[len-1] == '\n') {
+                path[len-1] = '\0';
+            }
+            if (access(path, X_OK) == 0) {
+                LOGD("Found resetprop via which: %s", path);
+                pclose(pipe);
+                return path;
+            }
+        }
+        pclose(pipe);
+    }
+    
+    LOGE("Could not find resetprop in any known location!");
+    return "";
+}
+
+static void companion(int fd) {
+    LOGD("[COMPANION] Companion started");
+    
+    std::string resetprop_path = findResetpropPath();
+    if (resetprop_path.empty()) {
+        LOGE("[COMPANION] No resetprop found, companion cannot function");
+        close(fd);
+        return;
+    }
+    
+    char buffer[2048];
+    ssize_t bytes = read(fd, buffer, sizeof(buffer)-1);
+    
+    if (bytes > 0) {
+        buffer[bytes] = '\0';
+        std::string command = buffer;
+        
+        LOGD("[COMPANION] Executing: %s", command.c_str());
+        
+        std::string full_cmd = resetprop_path + " " + command;
+        int result = system(full_cmd.c_str());
+        
+        LOGD("[COMPANION] Result: %d", result);
+        write(fd, &result, sizeof(result));
+    }
+    
+    close(fd);
+}
+
 class SpoofModule : public zygisk::ModuleBase {
 public:
     void onLoad(zygisk::Api* api, JNIEnv* env) override {
@@ -63,7 +134,7 @@ public:
         this->env = env;
 
         LOGD("Module loaded successfully");
-
+        
         ensureBuildClass();
         reloadIfNeeded(true);
     }
@@ -93,7 +164,6 @@ public:
         }
 
         LOGD("Processing package: %s", package_name);
-
         reloadIfNeeded(false);
 
         bool should_close = true;
@@ -103,7 +173,11 @@ public:
             if (it != package_map.end()) {
                 current_info = it->second;
                 LOGD("Spoofing device for package %s: %s", package_name, current_info.model.c_str());
+                
                 spoofDevice(current_info);
+                
+                spoofSystemProps(current_info);
+                
                 should_close = false;
             }
         }
@@ -153,6 +227,58 @@ private:
     zygisk::Api* api;
     JNIEnv* env;
     std::unordered_map<std::string, DeviceInfo> package_map;
+
+    bool executeResetprop(const std::string& args) {
+        auto fd = api->connectCompanion();
+        if (fd < 0) {
+            LOGE("Failed to connect to companion");
+            return false;
+        }
+        
+        write(fd, args.c_str(), args.size());
+        
+        int result = -1;
+        read(fd, &result, sizeof(result));
+        close(fd);
+        
+        return result == 0;
+    }
+
+    void spoofSystemProps(const DeviceInfo& info) {
+        LOGD("Starting system props spoofing with resetprop");
+        
+        const char* commands[] = {
+            "ro.product.brand",
+            "ro.product.manufacturer", 
+            "ro.product.model",
+            "ro.product.device",
+            "ro.product.name",
+            "ro.build.fingerprint"
+        };
+        
+        const char* values[] = {
+            info.brand.c_str(),
+            info.manufacturer.c_str(),
+            info.model.c_str(),
+            info.device.c_str(),
+            info.product.c_str(),
+            info.fingerprint.c_str()
+        };
+        
+        const int num_commands = sizeof(commands) / sizeof(commands[0]);
+        
+        for (int i = 0; i < num_commands; i++) {
+            std::string cmd = std::string(commands[i]) + " \"" + values[i] + "\"";
+            if (executeResetprop(cmd)) {
+                LOGD("Resetprop successful: %s", cmd.c_str());
+            } else {
+                LOGE("Resetprop failed: %s", cmd.c_str());
+            }
+            usleep(1000);
+        }
+        
+        LOGD("System props spoofing completed");
+    }
 
     void ensureBuildClass() {
         std::call_once(build_once, [&] {
@@ -289,3 +415,4 @@ private:
 };
 
 REGISTER_ZYGISK_MODULE(SpoofModule)
+REGISTER_ZYGISK_COMPANION(companion)

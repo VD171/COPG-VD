@@ -32,7 +32,6 @@ print_failure_and_exit() {
   exit 1
 }
 
-# Function to extract property from prop file
 grep_prop() {
   local PROP_FILE="$1"
   local PROP_NAME="$2"
@@ -43,7 +42,6 @@ grep_prop() {
   fi
 }
 
-# Function to print module version from module.prop
 print_module_version() {
   print_box_start
   ui_print "      ✦ COPG Module Version ✦    "
@@ -66,7 +64,6 @@ print_module_version() {
 }
 
 check_zygisk() {
-  # Define possible Zygisk module paths
   ZYGISK_NEXT_PATH="/data/adb/modules/zygisksu"
   REZYGISK_PATH="/data/adb/modules/rezygisk"
 
@@ -121,7 +118,6 @@ check_zygisk() {
   if [ "$ROOT_SOLUTION" = "Magisk" ]; then
     ZYGISK_STATUS=$(magisk --sqlite "SELECT value FROM settings WHERE key='zygisk';" 2>/dev/null)
     if [ "$ZYGISK_STATUS" = "value=1" ]; then
-      # Check for ReZygisk first
       if [ -d "$REZYGISK_PATH" ]; then
         if [ -f "$REZYGISK_PATH/disable" ]; then
           ui_print " ✗ ReZygisk Installed but Disabled!"
@@ -132,7 +128,6 @@ check_zygisk() {
           print_box_end
           return
         fi
-      # Then check for Zygisk Next
       elif [ -d "$ZYGISK_NEXT_PATH" ]; then
         if [ -f "$ZYGISK_NEXT_PATH/disable" ]; then
           ui_print " ✗ Zygisk Next Installed but Disabled!"
@@ -150,7 +145,6 @@ check_zygisk() {
         print_failure_and_exit "zygisk"
       fi
     else
-      # Check for ReZygisk first when native Zygisk is disabled
       if [ -d "$REZYGISK_PATH" ]; then
         if [ -f "$REZYGISK_PATH/disable" ]; then
           ui_print " ✗ ReZygisk Disabled!         "
@@ -161,7 +155,6 @@ check_zygisk() {
           print_box_end
           return
         fi
-      # Then check for Zygisk Next
       elif [ -d "$ZYGISK_NEXT_PATH" ]; then
         if [ -f "$ZYGISK_NEXT_PATH/disable" ]; then
           ui_print " ✗ Zygisk Next Disabled!         "
@@ -179,9 +172,7 @@ check_zygisk() {
       fi
     fi
   else
-    # For KernelSU and APatch, check both possible paths
     if [ -d "$ZYGISK_NEXT_PATH" ] || [ -d "$REZYGISK_PATH" ]; then
-      # Check if either is disabled
       if [ -f "$ZYGISK_NEXT_PATH/disable" ] || [ -f "$REZYGISK_PATH/disable" ]; then
         ui_print " ✗ $ROOT_SOLUTION: Zygisk Module Disabled! "
         ui_print " ➤ Enable in $MANAGER_NAME    "
@@ -209,12 +200,10 @@ prompt_gphoto_spoof() {
   ui_print " ⏰ Waiting 10s for Input...      "
   print_box_end
 
-  # Time-based timeout (10 seconds)
   TIMEOUT=10
   START_TIME=$(date +%s)
 
   while true; do
-    # Check elapsed time
     CURRENT_TIME=$(date +%s)
     ELAPSED=$((CURRENT_TIME - START_TIME))
     if [ $ELAPSED -ge $TIMEOUT ]; then
@@ -223,14 +212,12 @@ prompt_gphoto_spoof() {
       return
     fi
 
-    # Capture one input event with timeout (if available)
     if command -v timeout >/dev/null 2>&1; then
       EVENT=$(timeout 0.1 getevent -lc1 2>/dev/null | tr -d '\r')
     else
       EVENT=$(getevent -lc1 2>/dev/null | tr -d '\r')
     fi
 
-    # Check for volume key presses
     if [ -n "$EVENT" ]; then
       if echo "$EVENT" | grep -q "KEY_VOLUMEUP.*DOWN"; then
         ui_print " ✅ Volume Up Pressed. Enabling Google Photos Spoof."
@@ -243,7 +230,6 @@ prompt_gphoto_spoof() {
       fi
     fi
 
-    # Short sleep to reduce CPU usage
     sleep 0.05
   done
 }
@@ -254,13 +240,11 @@ setup_gphoto_spoof() {
   print_empty_line
   ui_print " ⚙ Processing Sysconfig Files    "
 
-  # Create directories for sysconfig overlays
   mkdir -p "$MODPATH/system/product/etc/sysconfig" "$MODPATH/system/etc/sysconfig" || {
     ui_print " ✗ Failed to Create Sysconfig Dirs!"
     print_failure_and_exit "gphoto"
   }
 
-  # Process /system/product/etc/sysconfig/*
   for i in /system/product/etc/sysconfig/*; do
     if [ -f "$i" ]; then
       file=$(basename "$i")
@@ -280,7 +264,6 @@ setup_gphoto_spoof() {
     fi
   done
 
-  # Process /system/etc/sysconfig/*
   for i in /system/etc/sysconfig/*; do
     if [ -f "$i" ]; then
       file=$(basename "$i")
@@ -300,7 +283,6 @@ setup_gphoto_spoof() {
     fi
   done
 
-  # Set permissions for any pre-included sysconfig files in the module
   for i in "$MODPATH/system/product/etc/sysconfig/"* "$MODPATH/system/etc/sysconfig/"*; do
     if [ -f "$i" ]; then
       chmod 0644 "$i" || {
@@ -319,7 +301,20 @@ setup_gphoto_spoof() {
   print_box_end
 }
 
-# Display module version at the start of installation
+cleanup_gphoto_directories() {
+  for dir in "$MODPATH/system/etc/sysconfig" "$MODPATH/system/product/etc/sysconfig" "$MODPATH/product/etc/sysconfig"; do
+    if [ -d "$dir" ]; then
+      rm -rf "$dir" 2>/dev/null
+    fi
+  done
+  
+  for parent in "$MODPATH/system/etc" "$MODPATH/system/product/etc" "$MODPATH/system/product" "$MODPATH/system" "$MODPATH/product/etc" "$MODPATH/product"; do
+    if [ -d "$parent" ]; then
+      rmdir "$parent" 2>/dev/null
+    fi
+  done
+}
+
 print_module_version
 
 if ! $BOOTMODE; then
@@ -363,7 +358,6 @@ if $INSTALL_SUCCESS; then
 
     for ABI in $(echo "$ABI_LIST" | tr ',' ' '); do
       if echo "$ABI" | grep -qE "$ARM64_VARIANTS"; then
-        # Install controller for ARM64
         if [ -f "$MODPATH/controller_arm64" ]; then
           mv "$MODPATH/controller_arm64" "$MODPATH/controller" || {
             ui_print " ✗ Failed to Rename ARM64 Controller!  "
@@ -377,12 +371,10 @@ if $INSTALL_SUCCESS; then
           ui_print " ➤ ($ABI)                        "
           CONTROLLER_INSTALLED=true
           
-          # Clean up unused ARM32 controller
           rm -f "$MODPATH/controller_armv7" 2>/dev/null && ui_print " 🗑 Removed unused ARM32 controller"
           break
         fi
       elif echo "$ABI" | grep -qE "$ARM32_VARIANTS"; then
-        # Install controller for ARM32
         if [ -f "$MODPATH/controller_armv7" ]; then
           mv "$MODPATH/controller_armv7" "$MODPATH/controller" || {
             ui_print " ✗ Failed to Rename ARM32 Controller!  "
@@ -396,7 +388,6 @@ if $INSTALL_SUCCESS; then
           ui_print " ➤ ($ABI)                        "
           CONTROLLER_INSTALLED=true
           
-          # Clean up unused ARM64 controller
           rm -f "$MODPATH/controller_arm64" 2>/dev/null && ui_print " 🗑 Removed unused ARM64 controller"
           break
         fi
@@ -462,11 +453,9 @@ if $INSTALL_SUCCESS; then
       ui_print "      ✦ Google Photos Spoof ✦    "
       print_empty_line
       ui_print " ⚙ Removing Google Photos from Config "
-      # Remove com.google.android.apps.photos from config.json
       CONFIG_PATH="$MODPATH/config.json"
       TEMP_CONFIG="$MODPATH/config_temp.json"
       if [ -f "$CONFIG_PATH" ]; then
-        # Use sed to remove the line containing com.google.android.apps.photos
         sed '/com\.google\.android\.apps\.photos/d' "$CONFIG_PATH" > "$TEMP_CONFIG" || {
           ui_print " ✗ Failed to Modify config.json!"
           print_failure_and_exit "gphoto"
@@ -487,25 +476,9 @@ if $INSTALL_SUCCESS; then
       else
         ui_print " ⚠ config.json Not Found, Skipping "
       fi
-      # Clean up Google Photos spoof directories and their parents if empty
-      for dir in "$MODPATH/system/etc/sysconfig" "$MODPATH/system/product/etc/sysconfig" "$MODPATH/product/etc/sysconfig"; do
-        if [ -d "$dir" ]; then
-          rm -rf "$dir" || {
-            ui_print " ✗ Failed to Remove $dir!"
-            print_failure_and_exit "gphoto"
-          }
-          ui_print " ✔ Removed $dir"
-        fi
-      done
-      # Attempt to remove parent directories if they are empty
-      for parent in "$MODPATH/system/etc" "$MODPATH/system/product/etc" "$MODPATH/system/product" "$MODPATH/system" "$MODPATH/product/etc" "$MODPATH/product"; do
-        if [ -d "$parent" ]; then
-          rmdir "$parent" 2>/dev/null && ui_print " ✔ Removed empty $parent" || {
-            # If rmdir fails, the directory is not empty, so skip silently
-            :
-          }
-        fi
-      done
+      
+      cleanup_gphoto_directories
+      
       ui_print " ✅ Google Photos Spoof Disabled "
       print_box_end
     fi
