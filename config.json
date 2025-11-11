@@ -125,17 +125,6 @@
     "FINGERPRINT": "Lenovo/TB-9707F/Lenovo TB-9707F:13/TQ3A.230805.001/20230901:user/release-keys",
     "PRODUCT": "TB-9707F"
   },
-  "PACKAGES_GALAXY_S24_ULTRA": [
-    "com.ea.gp.fifamobile"
-  ],
-  "PACKAGES_GALAXY_S24_ULTRA_DEVICE": {
-    "BRAND": "Samsung",
-    "DEVICE": "Galaxy S24 Ultra",
-    "MANUFACTURER": "Samsung",
-    "MODEL": "SM-S928B",
-    "FINGERPRINT": "samsung/SM-S928B/SM-S928B:14/UP1A.231005.007/20240225:user/release-keys",
-    "PRODUCT": "SM-S928B"
-  },
   "PACKAGES_XIAOMI_13": [
     "com.tencent.lolm"
   ],
@@ -219,5 +208,16 @@
     "MODEL": "RMX5101",
     "FINGERPRINT": "realme/RMX5101IN/RE60B4L1:15/AP3A.240617.008/V.R4T2.26cec0e-80bb4e-80b757:user/release-keys",
     "PRODUCT": "RMX5101"
+  },
+  "PACKAGES_GALAXY_Z_FOLD_5": [
+    "com.ea.gp.fifamobile"
+  ],
+  "PACKAGES_GALAXY_Z_FOLD_5_DEVICE": {
+    "BRAND": "samsung",
+    "DEVICE": "Galaxy Z Fold 5",
+    "MANUFACTURER": "samsung",
+    "MODEL": "SM-F9460",
+    "FINGERPRINT": "samsung/q2qzh/q2q:15/UP1A.231005.007/F946BXXU1BWK4:user/release-keys",
+    "PRODUCT": "SM-F9460"
   }
 }
