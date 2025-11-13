@@ -86,7 +86,7 @@ While COPG is designed to be undetectable, I cannot guarantee safety. Use at you
 
 <details>
 <summary>⚡ Does it affect performance?</summary>
-Minimal impact! The optimized code adds only ~1ms to the launch time.
+Minimal impact! The optimized code works only on the launch time and has nothing to do with game performance.
 </details>
 
 <details>
