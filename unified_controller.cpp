@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <unordered_map>
 #include <thread>
 #include <chrono>
 #include <atomic>
@@ -284,38 +285,32 @@ private:
     const std::string DEFAULTS_FILE = "/data/adb/copg_defaults";
     const std::string IGNORE_LIST = "/data/adb/modules/COPG/ignorelist.txt";
     
-    std::set<std::string> monitored_packages;
+    std::unordered_map<std::string, bool> monitored_packages;
+    std::unordered_map<std::string, bool> previous_monitored_packages;
     std::set<std::string> ignored_packages;
+    std::set<std::string> previous_ignored_packages;
     std::atomic<bool> running{true};
     std::atomic<bool> config_loaded{false};
     std::atomic<bool> states_saved{false};
-    std::atomic<bool> config_changed{false};
 
     xwatcher::Watcher config_watcher;
+    xwatcher::Watcher ignore_watcher;
 
     enum class AppState {
         FOREGROUND,
         BACKGROUND,
-        PAUSED,
-        CLOSED,
         UNKNOWN
     };
 
     struct StateTracker {
-        std::map<std::string, AppState> last_states;
-        std::map<std::string, bool> last_process_states;
-        std::string last_active_app;
+        std::unordered_map<std::string, AppState> last_states;
         bool last_toggle_state{false};
-        bool last_should_apply_state{false};
         int no_change_counter{0};
         int cycle_counter{0};
         
         void reset() {
             last_states.clear();
-            last_process_states.clear();
-            last_active_app.clear();
             last_toggle_state = false;
-            last_should_apply_state = false;
             no_change_counter = 0;
             cycle_counter = 0;
         }
@@ -323,15 +318,15 @@ private:
 
 public:
     AdvancedAppController() {
-        std::cout << "Initializing Advanced App Controller..." << std::endl;
+        std::cout << "🚀 Initializing Advanced App Controller..." << std::endl;
         
-        if (!config_watcher.is_initialized()) {
-            std::cerr << "Config watcher failed to initialize" << std::endl;
+        if (!config_watcher.is_initialized() || !ignore_watcher.is_initialized()) {
+            std::cerr << "❌ Config watcher failed to initialize" << std::endl;
             return;
         }
 
         if (!load_config()) {
-            std::cerr << "Failed to load initial configuration" << std::endl;
+            std::cerr << "❌ Failed to load initial configuration" << std::endl;
             return;
         }
 
@@ -339,13 +334,13 @@ public:
         
         restore_saved_states();
         
-        if (!setup_config_watcher()) {
-            std::cerr << "Failed to setup config watcher" << std::endl;
+        if (!setup_config_watcher() || !setup_ignore_watcher()) {
+            std::cerr << "❌ Failed to setup config watcher" << std::endl;
             return;
         }
 
         config_loaded.store(true);
-        std::cout << "Controller initialized successfully" << std::endl;
+        std::cout << "✅ Controller initialized successfully" << std::endl;
     }
 
     ~AdvancedAppController() {
@@ -355,6 +350,7 @@ public:
     void stop() {
         running = false;
         config_watcher.stop();
+        ignore_watcher.stop();
     }
 
     bool is_ready() const {
@@ -365,97 +361,257 @@ private:
     bool setup_config_watcher() {
         auto callback = [this](xwatcher::FileEvent event, const std::string& path, int context, void* additional_data) {
             if (event == xwatcher::FileEvent::Modified || event == xwatcher::FileEvent::Created) {
-                std::cout << "Config file changed - reloading..." << std::endl;
-                config_changed.store(true);
+                std::cout << "🔄 Config file changed - reloading..." << std::endl;
+                safe_reload_config();
             }
         };
 
         if (!config_watcher.add_file(CONFIG_JSON, callback)) {
-            std::cerr << "Failed to add config file to watcher" << std::endl;
+            std::cerr << "❌ Failed to add config file to watcher" << std::endl;
             return false;
         }
 
         if (!config_watcher.start()) {
-            std::cerr << "Failed to start config watcher" << std::endl;
+            std::cerr << "❌ Failed to start config watcher" << std::endl;
             return false;
         }
 
-        std::cout << "Built-in config watcher started" << std::endl;
+        std::cout << "👀 Built-in config watcher started" << std::endl;
         return true;
     }
 
-    void handle_config_change() {
-        if (!config_changed.load()) return;
+    bool setup_ignore_watcher() {
+        auto callback = [this](xwatcher::FileEvent event, const std::string& path, int context, void* additional_data) {
+            if (event == xwatcher::FileEvent::Modified || event == xwatcher::FileEvent::Created) {
+                std::cout << "🔄 Ignore list changed - reloading..." << std::endl;
+                handle_ignore_list_change();
+            }
+        };
+
+        if (!ignore_watcher.add_file(IGNORE_LIST, callback)) {
+            std::cerr << "❌ Failed to add ignore list to watcher" << std::endl;
+            return false;
+        }
+
+        if (!ignore_watcher.start()) {
+            std::cerr << "❌ Failed to start ignore watcher" << std::endl;
+            return false;
+        }
+
+        std::cout << "👀 Built-in ignore list watcher started" << std::endl;
+        return true;
+    }
+
+    void handle_ignore_list_change() {
+        std::set<std::string> old_ignored = ignored_packages;
+        load_ignore_list();
         
-        config_changed.store(false);
-        safe_reload_config();
+        std::vector<std::string> newly_ignored;
+        std::vector<std::string> newly_unignored;
         
-        auto active_apps = get_active_monitored_apps();
-        bool current_toggle_state = should_apply_toggles(active_apps);
-        
-        if (current_toggle_state && !state_tracker.last_toggle_state && !states_saved.load()) {
-            std::cout << "Config changed with active app - Applying toggles" << std::endl;
-            if (save_current_states()) {
-                apply_toggles();
-                states_saved.store(true);
-                state_tracker.last_toggle_state = true;
+        for (const auto& package : ignored_packages) {
+            if (old_ignored.find(package) == old_ignored.end()) {
+                newly_ignored.push_back(package);
             }
         }
-        else if (!current_toggle_state && state_tracker.last_toggle_state && states_saved.load()) {
-            std::cout << "Config changed with no active app - Restoring states" << std::endl;
-            restore_saved_states();
-            states_saved.store(false);
-            state_tracker.last_toggle_state = false;
+        
+        for (const auto& package : old_ignored) {
+            if (ignored_packages.find(package) == ignored_packages.end()) {
+                newly_unignored.push_back(package);
+            }
         }
+        
+        if (!newly_ignored.empty()) {
+            std::cout << "🚫 Newly ignored packages: ";
+            for (size_t i = 0; i < newly_ignored.size(); ++i) {
+                std::cout << newly_ignored[i];
+                if (i < newly_ignored.size() - 1) std::cout << ", ";
+            }
+            std::cout << std::endl;
+            
+            auto active_apps = get_all_active_apps();
+            if (!should_apply_toggles(active_apps) && states_saved.load()) {
+                std::cout << "🔄 Immediately restoring system states due to package ignoring" << std::endl;
+                restore_saved_states();
+                states_saved.store(false);
+                state_tracker.last_toggle_state = false;
+            }
+        }
+        
+        if (!newly_unignored.empty()) {
+            std::cout << "✅ Newly unignored packages: ";
+            for (size_t i = 0; i < newly_unignored.size(); ++i) {
+                std::cout << newly_unignored[i];
+                if (i < newly_unignored.size() - 1) std::cout << ", ";
+            }
+            std::cout << std::endl;
+            
+            auto active_apps = get_all_active_apps();
+            if (should_apply_toggles(active_apps) && !states_saved.load()) {
+                std::cout << "🎯 Immediately applying toggles for newly unignored packages" << std::endl;
+                if (save_current_states()) {
+                    apply_toggles();
+                    states_saved.store(true);
+                    state_tracker.last_toggle_state = true;
+                }
+            }
+        }
+        
+        previous_ignored_packages = ignored_packages;
     }
 
     void safe_reload_config() {
         for (int attempt = 0; attempt < 3; attempt++) {
             if (load_config()) {
-                load_ignore_list();
-                std::cout << "Configuration reloaded successfully" << std::endl;
-                std::cout << "Now monitoring " << monitored_packages.size() << " packages" << std::endl;
+                handle_config_changes();
+                state_tracker.reset();
+                std::cout << "✅ Configuration reloaded successfully" << std::endl;
                 return;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100 * (attempt + 1)));
         }
-        std::cerr << "Failed to reload configuration" << std::endl;
+        std::cerr << "❌ Failed to reload configuration" << std::endl;
+    }
+
+    void handle_config_changes() {
+        if (previous_monitored_packages.empty()) {
+            previous_monitored_packages = monitored_packages;
+            return;
+        }
+        
+        std::vector<std::string> removed_packages;
+        std::vector<std::string> added_packages;
+        
+        for (const auto& [package, installed] : previous_monitored_packages) {
+            if (monitored_packages.find(package) == monitored_packages.end()) {
+                removed_packages.push_back(package);
+            }
+        }
+        
+        for (const auto& [package, installed] : monitored_packages) {
+            if (previous_monitored_packages.find(package) == previous_monitored_packages.end()) {
+                added_packages.push_back(package);
+            }
+        }
+        
+        if (!removed_packages.empty()) {
+            std::cout << "📋 Packages removed from config: ";
+            for (size_t i = 0; i < removed_packages.size(); ++i) {
+                std::cout << removed_packages[i];
+                if (i < removed_packages.size() - 1) std::cout << ", ";
+            }
+            std::cout << std::endl;
+            
+            if (states_saved.load()) {
+                auto active_apps = get_all_active_apps();
+                if (!should_apply_toggles(active_apps)) {
+                    std::cout << "🔄 Immediately restoring system states due to package removal" << std::endl;
+                    restore_saved_states();
+                    states_saved.store(false);
+                    state_tracker.last_toggle_state = false;
+                }
+            }
+        }
+        
+        if (!added_packages.empty()) {
+            std::cout << "📋 Packages added to config: ";
+            for (size_t i = 0; i < added_packages.size(); ++i) {
+                std::cout << added_packages[i];
+                if (i < added_packages.size() - 1) std::cout << ", ";
+            }
+            std::cout << std::endl;
+        }
+        
+        previous_monitored_packages = monitored_packages;
     }
 
     bool load_config() {
         try {
             std::ifstream config_file(CONFIG_JSON);
             if (!config_file.is_open()) {
-                std::cerr << "Cannot open config.json" << std::endl;
+                std::cerr << "❌ Cannot open config.json" << std::endl;
                 return false;
             }
             
             json config;
             config_file >> config;
             
-            std::set<std::string> new_packages;
+            std::unordered_map<std::string, bool> new_packages;
+            int total_packages = 0;
             
             for (auto& [key, value] : config.items()) {
                 if (value.is_array()) {
                     for (auto& package : value) {
                         if (package.is_string()) {
-                            new_packages.insert(package.get<std::string>());
+                            std::string package_name = package.get<std::string>();
+                            new_packages[package_name] = false;
+                            total_packages++;
                         }
                     }
                 }
             }
             
+            std::cout << "📋 Found " << total_packages << " packages in config" << std::endl;
+            
+            filter_installed_packages(new_packages);
+            
             monitored_packages = std::move(new_packages);
+            std::cout << "📦 Loaded " << monitored_packages.size() << " installed packages" << std::endl;
+            
             return true;
             
         } catch (const std::exception& e) {
-            std::cerr << "Error loading config: " << e.what() << std::endl;
+            std::cerr << "❌ Error loading config: " << e.what() << std::endl;
             return false;
         }
     }
 
+    void filter_installed_packages(std::unordered_map<std::string, bool>& packages) {
+        std::cout << "🔍 Checking installed packages using pm list packages..." << std::endl;
+        
+        std::string pm_result = execute_command("pm list packages");
+        
+        if (!pm_result.empty()) {
+            std::unordered_map<std::string, bool> installed_packages;
+            size_t pos = 0;
+            int found_count = 0;
+            
+            while ((pos = pm_result.find("package:", pos)) != std::string::npos) {
+                size_t end = pm_result.find("\n", pos);
+                if (end == std::string::npos) break;
+                
+                std::string package_line = pm_result.substr(pos + 8, end - pos - 8);
+                package_line.erase(std::remove(package_line.begin(), package_line.end(), '\r'), package_line.end());
+                
+                installed_packages[package_line] = true;
+                found_count++;
+                pos = end + 1;
+            }
+            
+            std::cout << "   📊 Found " << found_count << " total packages in system" << std::endl;
+            
+            int matched_count = 0;
+            for (auto it = packages.begin(); it != packages.end();) {
+                if (installed_packages.find(it->first) != installed_packages.end()) {
+                    it->second = true;
+                    matched_count++;
+                    ++it;
+                } else {
+                    it = packages.erase(it);
+                }
+            }
+            
+            std::cout << "   ✅ Package filtering completed: " << matched_count << " packages matched" << std::endl;
+        } else {
+            std::cerr << "   ❌ pm list packages failed" << std::endl;
+            for (auto& [package, installed] : packages) {
+                installed = true;
+            }
+        }
+    }
+
     void load_ignore_list() {
-        ignored_packages.clear();
+        std::set<std::string> new_ignored_packages;
         std::ifstream ignore_file(IGNORE_LIST);
         if (!ignore_file.is_open()) {
             return;
@@ -464,9 +620,11 @@ private:
         std::string package;
         while (std::getline(ignore_file, package)) {
             if (!package.empty()) {
-                ignored_packages.insert(package);
+                new_ignored_packages.insert(package);
             }
         }
+        
+        ignored_packages = std::move(new_ignored_packages);
     }
 
     bool is_ignored(const std::string& package) {
@@ -474,173 +632,78 @@ private:
     }
 
     std::string execute_command(const std::string& cmd) {
-        std::string full_cmd = "su -c \"" + cmd + "\"";
+        std::string full_cmd = cmd + " 2>/dev/null";
         FILE* pipe = popen(full_cmd.c_str(), "r");
         if (!pipe) {
             return "";
         }
         
-        char buffer[128];
+        char buffer[256];
         std::string result = "";
         while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
             result += buffer;
         }
         pclose(pipe);
         
-        result.erase(std::remove(result.begin(), result.end(), '\n'), result.end());
-        result.erase(std::remove(result.begin(), result.end(), '\r'), result.end());
-        
         return result;
     }
 
     bool execute_command_bool(const std::string& cmd) {
-        std::string full_cmd = "su -c \"" + cmd + "\"";
+        std::string full_cmd = cmd + " >/dev/null 2>&1";
         return system(full_cmd.c_str()) == 0;
     }
 
-    bool is_package_process_running(const std::string& package) {
-        std::string result = execute_command("pidof " + package);
-        if (!result.empty()) return true;
+    std::unordered_map<std::string, AppState> get_all_active_apps() {
+        std::unordered_map<std::string, AppState> active_apps;
         
-        result = execute_command("ps -A | grep " + package + " | grep -v grep");
-        return !result.empty();
-    }
-
-    AppState get_exact_app_state(const std::string& package) {
-        if (is_ignored(package)) {
-            return AppState::UNKNOWN;
-        }
-
-        std::string visible_cmd = "dumpsys window visible-apps 2>/dev/null | grep -o -E 'package=[^ ]+' | cut -d'=' -f2 | grep '" + package + "'";
-        if (!execute_command(visible_cmd).empty()) {
-            return AppState::FOREGROUND;
-        }
-
-        std::string recent_cmd = "dumpsys activity recents 2>/dev/null | grep -E '" + package + "' | head -1";
-        if (!execute_command(recent_cmd).empty()) {
-            if (is_package_process_running(package)) {
-                return AppState::BACKGROUND;
-            } else {
-                return AppState::PAUSED;
-            }
-        }
-
-        if (is_package_process_running(package)) {
-            return AppState::PAUSED;
-        }
-
-        return AppState::CLOSED;
-    }
-
-    std::map<std::string, AppState> get_active_monitored_apps() {
-        std::map<std::string, AppState> active_apps;
-        state_tracker.cycle_counter++;
+        std::string foreground_cmd = "dumpsys window visible-apps 2>/dev/null | grep -o -E 'package=[^ ]+' | cut -d'=' -f2";
+        std::string foreground_result = execute_command(foreground_cmd);
         
-        bool verbose_log = (state_tracker.cycle_counter % 10 == 1);
-
-        for (const auto& package : monitored_packages) {
-            if (is_ignored(package)) continue;
-            
-            AppState state = get_exact_app_state(package);
-            bool has_process = is_package_process_running(package);
-            
-            bool state_changed = false;
-            auto last_state_it = state_tracker.last_states.find(package);
-            
-            if (last_state_it == state_tracker.last_states.end() || last_state_it->second != state) {
-                state_changed = true;
-            }
-            
-            if (state != AppState::CLOSED && state != AppState::UNKNOWN) {
-                active_apps[package] = state;
-                
-                if (state_changed || verbose_log) {
-                    std::string state_emoji = "";
-                    switch (state) {
-                        case AppState::FOREGROUND: state_emoji = ""; break;
-                        case AppState::BACKGROUND: state_emoji = ""; break;
-                        case AppState::PAUSED: state_emoji = ""; break;
-                        default: state_emoji = "";
-                    }
-                    
-                    if (state_changed) {
-                        std::cout << state_emoji << " " << package << " is " << state_to_string(state);
-                        if (last_state_it != state_tracker.last_states.end()) {
-                            std::cout << " (was " << state_to_string(last_state_it->second) << ")";
-                        }
-                        std::cout << std::endl;
-                    } else if (verbose_log) {
-                        std::cout << state_emoji << " " << package << " is " << state_to_string(state) << std::endl;
-                    }
-                }
-            } else if (state == AppState::CLOSED) {
-                if (state_changed && last_state_it != state_tracker.last_states.end() &&
-                    last_state_it->second != AppState::CLOSED) {
-                    std::cout << "" << package << " is CLOSED (was " << state_to_string(last_state_it->second) << ")" << std::endl;
+        if (!foreground_result.empty()) {
+            std::istringstream iss(foreground_result);
+            std::string package;
+            while (std::getline(iss, package)) {
+                package.erase(std::remove(package.begin(), package.end(), '\r'), package.end());
+                if (!package.empty() && monitored_packages.find(package) != monitored_packages.end() && !is_ignored(package)) {
+                    active_apps[package] = AppState::FOREGROUND;
                 }
             }
-            
-            state_tracker.last_states[package] = state;
-            state_tracker.last_process_states[package] = has_process;
         }
         
-        if (verbose_log && state_tracker.cycle_counter % 50 == 1) {
-            log_system_summary(active_apps);
+        std::string background_cmd = "dumpsys window windows 2>/dev/null | grep -E 'Window #' | grep -o -E '[a-zA-Z0-9\\._-]+\\.[a-zA-Z0-9\\._-]+/[a-zA-Z0-9\\._-]+' | cut -d'/' -f1 | uniq";
+        std::string background_result = execute_command(background_cmd);
+        
+        if (!background_result.empty()) {
+            std::istringstream iss(background_result);
+            std::string package;
+            while (std::getline(iss, package)) {
+                package.erase(std::remove(package.begin(), package.end(), '\r'), package.end());
+                if (!package.empty() && 
+                    monitored_packages.find(package) != monitored_packages.end() && 
+                    !is_ignored(package) &&
+                    active_apps.find(package) == active_apps.end()) {
+                    active_apps[package] = AppState::BACKGROUND;
+                }
+            }
         }
         
         return active_apps;
     }
 
-    void log_system_summary(const std::map<std::string, AppState>& active_apps) {
-        int foreground_count = 0, background_count = 0, paused_count = 0;
-        for (const auto& [package, state] : active_apps) {
-            if (state == AppState::FOREGROUND) foreground_count++;
-            else if (state == AppState::BACKGROUND) background_count++;
-            else if (state == AppState::PAUSED) paused_count++;
-        }
-        
-        std::cout << "System Summary - Active: " << active_apps.size() 
-                  << " (F:" << foreground_count << " B:" << background_count 
-                  << " P:" << paused_count << ")" << std::endl;
-    }
-
-    bool should_apply_toggles(const std::map<std::string, AppState>& active_apps) {
-        bool current_state = false;
-        
+    bool should_apply_toggles(const std::unordered_map<std::string, AppState>& active_apps) {
         for (const auto& [package, state] : active_apps) {
             if (state == AppState::FOREGROUND || state == AppState::BACKGROUND) {
-                current_state = true;
-                break;
+                return true;
             }
         }
-        
-        if (current_state != state_tracker.last_should_apply_state) {
-            if (current_state) {
-                std::cout << "Should apply toggles - Active app detected" << std::endl;
-            } else {
-                std::cout << "Should restore states - No active apps" << std::endl;
-            }
-            state_tracker.last_should_apply_state = current_state;
-        }
-        
-        return current_state;
+        return false;
     }
 
-    bool should_restore_states(const std::map<std::string, AppState>& active_apps) {
-        if (active_apps.empty()) {
-            return true;
-        }
-        
-        for (const auto& [package, state] : active_apps) {
-            if (state == AppState::FOREGROUND || state == AppState::BACKGROUND) {
-                return false;
-            }
-        }
-        
-        return true;
+    bool should_restore_states(const std::unordered_map<std::string, AppState>& active_apps) {
+        return active_apps.empty();
     }
 
-    bool has_real_state_changed(const std::map<std::string, AppState>& current_states) {
+    bool has_state_changed(const std::unordered_map<std::string, AppState>& current_states) {
         if (current_states.size() != state_tracker.last_states.size()) {
             return true;
         }
@@ -655,16 +718,37 @@ private:
         return false;
     }
 
-    void log_state_changes(const std::map<std::string, AppState>& current_states) {
-        if (!has_real_state_changed(current_states)) {
+    void log_state_changes(const std::unordered_map<std::string, AppState>& current_states) {
+        state_tracker.cycle_counter++;
+        
+        if (!has_state_changed(current_states)) {
             state_tracker.no_change_counter++;
-            if (state_tracker.no_change_counter % 100 == 0) {
-                std::cout << "System stable (" << state_tracker.no_change_counter << " cycles)" << std::endl;
+            if (state_tracker.no_change_counter == 1 || state_tracker.no_change_counter % 50 == 0) {
+                std::cout << "📱 System stable - No state changes (" << state_tracker.no_change_counter << " cycles)" << std::endl;
             }
             return;
         }
         
         state_tracker.no_change_counter = 0;
+        
+        std::cout << "🔄 State changes detected (Cycle: " << state_tracker.cycle_counter << "):" << std::endl;
+        
+        for (const auto& [package, state] : current_states) {
+            auto it = state_tracker.last_states.find(package);
+            if (it == state_tracker.last_states.end()) {
+                std::cout << "   ➕ " << package << ": " << state_to_string(state) << std::endl;
+            } else if (it->second != state) {
+                std::cout << "   🔄 " << package << ": " << state_to_string(it->second) 
+                          << " → " << state_to_string(state) << std::endl;
+            }
+        }
+        
+        for (const auto& [package, old_state] : state_tracker.last_states) {
+            if (current_states.find(package) == current_states.end()) {
+                std::cout << "   ❌ " << package << ": CLOSED" << std::endl;
+            }
+        }
+        
         state_tracker.last_states = current_states;
     }
 
@@ -674,7 +758,6 @@ private:
         std::string timeout_val = execute_command("settings get system screen_off_timeout");
         
         if (brightness_val.empty() || dnd_val.empty() || timeout_val.empty()) {
-            std::cerr << "Failed to read system states" << std::endl;
             return false;
         }
         
@@ -691,13 +774,12 @@ private:
                 execute_command_bool("chmod 644 " + DEFAULTS_FILE + ".brightness");
                 execute_command_bool("chmod 644 " + DEFAULTS_FILE + ".dnd");
                 execute_command_bool("chmod 644 " + DEFAULTS_FILE + ".timeout");
-                execute_command_bool("sync");
                 
-                std::cout << "System states saved" << std::endl;
+                std::cout << "💾 System states saved" << std::endl;
                 return true;
             }
         } catch (const std::exception& e) {
-            std::cerr << "Error saving system state: " << e.what() << std::endl;
+            std::cerr << "❌ Error saving system state: " << e.what() << std::endl;
         }
         
         return false;
@@ -709,7 +791,7 @@ private:
             return;
         }
         
-        std::map<std::string, std::string> toggles;
+        std::unordered_map<std::string, std::string> toggles;
         std::string line;
         
         while (std::getline(toggle_file, line)) {
@@ -734,7 +816,7 @@ private:
             execute_command_bool("settings put system screen_off_timeout 300000000");
         }
         
-        std::cout << "Toggles applied" << std::endl;
+        std::cout << "🎛️ Toggles applied" << std::endl;
     }
 
     void restore_saved_states() {
@@ -746,7 +828,7 @@ private:
             return;
         }
         
-        std::cout << "Restoring system states..." << std::endl;
+        std::cout << "🔄 Restoring saved system states..." << std::endl;
         
         std::string brightness_str;
         brightness_file >> brightness_str;
@@ -774,44 +856,50 @@ private:
             execute_command_bool("settings put system screen_off_timeout " + timeout_str);
         }
         
-        execute_command_bool("start logd");
+        std::ifstream toggle_file(TOGGLE_FILE);
+        if (toggle_file.is_open()) {
+            std::string line;
+            while (std::getline(toggle_file, line)) {
+                if (line.find("DISABLE_LOGGING=1") != std::string::npos) {
+                    execute_command_bool("start logd");
+                    break;
+                }
+            }
+        }
         
         execute_command_bool("rm -f " + DEFAULTS_FILE + ".brightness " + 
                            DEFAULTS_FILE + ".dnd " + DEFAULTS_FILE + ".timeout");
         
-        std::cout << "System states restored" << std::endl;
+        std::cout << "✅ System states restored" << std::endl;
     }
 
     std::string state_to_string(AppState state) {
         switch (state) {
-            case AppState::FOREGROUND: return "FOREGROUND";
-            case AppState::BACKGROUND: return "BACKGROUND"; 
-            case AppState::PAUSED: return "PAUSED";
-            case AppState::CLOSED: return "CLOSED";
-            default: return "UNKNOWN";
+            case AppState::FOREGROUND: return "✅ FOREGROUND";
+            case AppState::BACKGROUND: return "🔵 BACKGROUND"; 
+            default: return "❓ UNKNOWN";
         }
     }
 
 public:
     void run_controller() {
         if (!is_ready()) {
-            std::cerr << "Controller not ready" << std::endl;
+            std::cerr << "❌ Controller not ready" << std::endl;
             return;
         }
 
-        std::cout << "Advanced App Controller Started" << std::endl;
-        std::cout << "Monitoring " << monitored_packages.size() << " packages" << std::endl;
-        std::cout << "Toggles apply in FOREGROUND/BACKGROUND states" << std::endl;
-        std::cout << "Smart logging with state information" << std::endl;
+        std::cout << "🚀 Advanced App Controller Started" << std::endl;
+        std::cout << "📊 Monitoring " << monitored_packages.size() << " installed packages" << std::endl;
+        std::cout << "🎯 States: FOREGROUND, BACKGROUND only" << std::endl;
+        std::cout << "🔧 Toggles apply only in FOREGROUND/BACKGROUND states" << std::endl;
+        std::cout << "🔄 Instant response to config and ignore list changes" << std::endl;
         
         int debounce_count = 0;
-        const int DEBOUNCE_THRESHOLD = 3;
+        const int DEBOUNCE_THRESHOLD = 2;
         
         while (running.load()) {
             try {
-                handle_config_change();
-                
-                auto active_apps = get_active_monitored_apps();
+                auto active_apps = get_all_active_apps();
                 
                 log_state_changes(active_apps);
                 
@@ -820,7 +908,10 @@ public:
                 if (current_toggle_state && !state_tracker.last_toggle_state && !states_saved.load()) {
                     debounce_count++;
                     if (debounce_count >= DEBOUNCE_THRESHOLD) {
-                        std::cout << "Applying toggles" << std::endl;
+                        std::cout << "🎯 Active app detected (" << active_apps.size() << " apps) - Applying toggles" << std::endl;
+                        for (const auto& [package, state] : active_apps) {
+                            std::cout << "   🎯 " << package << ": " << state_to_string(state) << std::endl;
+                        }
                         if (save_current_states()) {
                             apply_toggles();
                             states_saved.store(true);
@@ -833,7 +924,7 @@ public:
                     debounce_count++;
                     if (debounce_count >= DEBOUNCE_THRESHOLD) {
                         if (should_restore_states(active_apps)) {
-                            std::cout << "Restoring system states" << std::endl;
+                            std::cout << "🏁 Restoring system states" << std::endl;
                             restore_saved_states();
                             states_saved.store(false);
                             state_tracker.last_toggle_state = false;
@@ -847,7 +938,7 @@ public:
                 
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
             } catch (const std::exception& e) {
-                std::cerr << "Error in main loop: " << e.what() << std::endl;
+                std::cerr << "❌ Error in main loop: " << e.what() << std::endl;
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
         }
@@ -857,14 +948,14 @@ public:
 std::unique_ptr<AdvancedAppController> g_controller = nullptr;
 
 void signal_handler(int signal) {
-    std::cout << "\nShutting down..." << std::endl;
+    std::cout << "\n🛑 Received signal " << signal << ", shutting down..." << std::endl;
     if (g_controller) {
         g_controller->stop();
     }
 }
 
 int main() {
-    std::cout << "Starting Advanced App Controller..." << std::endl;
+    std::cout << "🎮 Starting Advanced App Controller..." << std::endl;
     
     std::signal(SIGINT, signal_handler);
     std::signal(SIGTERM, signal_handler);
@@ -873,16 +964,16 @@ int main() {
         g_controller = std::make_unique<AdvancedAppController>();
         
         if (!g_controller->is_ready()) {
-            std::cerr << "Controller initialization failed" << std::endl;
+            std::cerr << "💥 Controller initialization failed" << std::endl;
             return 1;
         }
         
         g_controller->run_controller();
         
-        std::cout << "Shutdown complete" << std::endl;
+        std::cout << "✅ Shutdown complete" << std::endl;
         
     } catch (const std::exception& e) {
-        std::cerr << "Fatal error: " << e.what() << std::endl;
+        std::cerr << "💥 Fatal error: " << e.what() << std::endl;
         return 1;
     }
     
