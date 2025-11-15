@@ -5,21 +5,20 @@
 - https://t.me/COPG_module
 ---
 ## v4.6.0
-- Added new spoof method with resetprop to the zygisk 
-- Rewrite COPG toggle manager with C++ from shell script 
-- imporved performance and ram usage COPG toggles manager
-- Fixed toggles not getting off after closing game with smarter toggle management
-- less cpu and ram and storage usage less overhead For COPG toggle manager
-- changed json parser with RapidJson for faster json loading (Zygisk and toggles manager)
-- Cleanup installation output log
-- Fixed fifa now it unlocks max fps
-- Added Galaxy Z Fold 5 for fifa 
-- removed jq binary
-- Removed copg_watcher binary
-- Rewrite copg_watcher with C++
-- Added Donation pop-up to the WebUI
-- Added Support pop-up to the WebUI
-- Changed License from OIL (private license) to AGPL-3.0 license now its 100% free software
+- Added new spoof method with resetprop to zygisk
+- Rewrote COPG toggle manager from shell script to C++
+- Rewrote config watcher from C to C++ and integrated into COPG toggle manager
+- Improved performance and reduced RAM usage for COPG toggle manager
+- Fixed toggle persistence issue with smarter toggle management (now toggles turns off when you close the game)
+- Reduced CPU, RAM, and storage overhead for COPG toggle manager
+- Cleaned up installation output logs
+- Fixed FIFA max FPS unlock
+- Added Galaxy Z Fold 5 support for FIFA
+- Removed jq binary dependency
+- Removed legacy copg_watcher binary
+- Added donation pop-up to WebUI
+- Added support pop-up to WebUI
+- Changed license from OIL to AGPL-3.0 (now 100% free software)
 ## v4.5.5
 - Fixed config parsing errors when you open a target app/game (e.g. Invalid package list for key PACKAGES_...)
 - Fixed font color of save log popup in dark mode 
