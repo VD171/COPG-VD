@@ -9,7 +9,7 @@
 - Rewrote COPG toggle manager from shell script to C++
 - Rewrote config watcher from C to C++ and integrated into COPG toggle manager
 - Improved performance for COPG toggle manager
-- Fixed toggle persistence issue with smarter toggle management (now toggles turns off when you close the game)
+- Fixed toggle persistence issue with smarter toggle management (now DND and screen time turns back to default when you close the game)
 - Reduced CPU, RAM, and storage overhead for COPG toggle manager
 - Cleaned up installation output logs
 - Fixed FIFA max FPS unlock
