@@ -8,7 +8,7 @@
 - Added new spoof method with resetprop to zygisk
 - Rewrote COPG toggle manager from shell script to C++
 - Rewrote config watcher from C to C++ and integrated into COPG toggle manager
-- Improved performance and reduced RAM usage for COPG toggle manager
+- Improved performance for COPG toggle manager
 - Fixed toggle persistence issue with smarter toggle management (now toggles turns off when you close the game)
 - Reduced CPU, RAM, and storage overhead for COPG toggle manager
 - Cleaned up installation output logs
