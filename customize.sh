@@ -401,8 +401,9 @@ if $INSTALL_SUCCESS; then
       ui_print " ➤ • ARM32 (armeabi-v7a)        "
       print_failure_and_exit "binary"
     fi
-  fi
-
+  print_box_end
+  print_empty_line
+fi
   if $INSTALL_SUCCESS; then
     chmod 0755 "$MODPATH/service.sh" || {
       ui_print " ✗ Failed to Set Permissions (service.sh)! "
