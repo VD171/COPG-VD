@@ -2373,7 +2373,6 @@ document.getElementById('save-log-yes').addEventListener('click', async () => {
     });
 });
 
-// در event listener برای تب‌ها
 document.querySelectorAll('.info-tab-nav .tab-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         const tabId = this.getAttribute('data-tab');
