@@ -1,5 +1,12 @@
 {
   "cover": "banner.png",
+  
+  "cpu_spoof": {
+    "blacklist": []
+  },
+
+  "cpu_only_packages": [],
+
   "PACKAGES_REDMAGIC_9_PRO": [
     "com.mobilelegends.mi",
     "com.supercell.brawlstars",
@@ -30,6 +37,7 @@
     "FINGERPRINT": "nubia/NX769J/NX769J:14/UKQ1.230917.001/20240813.173312:user/release-keys",
     "PRODUCT": "NX769J"
   },
+
   "PACKAGES_BLACK_SHARK_4_(CHINA)": [
     "com.proximabeta.mf.uamo"
   ],
@@ -41,6 +49,7 @@
     "FINGERPRINT": "BlackShark/PRS-H0/Black Shark 4:13/TQ3A.230805.001/20230315:user/release-keys",
     "PRODUCT": "2SM-X706B"
   },
+
   "PACKAGES_XIAOMI_11T_PRO": [
     "com.levelinfinite.hotta.gp",
     "com.supercell.clashofclans",
@@ -54,6 +63,7 @@
     "FINGERPRINT": "Xiaomi/2107113SI/Mi 11T Pro:13/RKQ1.211001.001/20230410:user/release-keys",
     "PRODUCT": "2107113SG"
   },
+
   "PACKAGES_XIAOMI_13_PRO": [
     "com.levelinfinite.sgameGlobal",
     "com.tencent.tmgp.sgame",
@@ -74,6 +84,7 @@
     "FINGERPRINT": "Xiaomi/fuxi_eea/fuxi:13/TKQ1.221114.001/OS2.0.102.0.VMCEUXM:user/release-keys",
     "PRODUCT": "2210132G"
   },
+
   "PACKAGES_ONEPLUS_8_PRO_5G": [
     "com.netease.lztgglobal",
     "com.riotgames.league.wildrift",
@@ -88,6 +99,7 @@
     "FINGERPRINT": "OnePlus/IN2023/OnePlus8Pro:13/RKQ1.211119.001/20230501:user/release-keys",
     "PRODUCT": "IN2023"
   },
+
   "PACKAGES_POCO_F5": [
     "com.mobile.legends",
     "com.mobile.legends.usa"
@@ -100,6 +112,7 @@
     "FINGERPRINT": "POCO/23049PCD8G/POCOF5:13/TQ3A.230805.001/20230620:user/release-keys",
     "PRODUCT": "23049PCD8G"
   },
+
   "PACKAGES_ROG_PHONE_6D_ULTIMATE": [
     "com.gameloft.android.ANMP.GloftA9HM",
     "com.madfingergames.legends",
@@ -114,6 +127,7 @@
     "FINGERPRINT": "ASUS/AI2203/ROG Phone 6D:14/UP1A.231005.007/20240315:user/release-keys",
     "PRODUCT": "AI2203"
   },
+
   "PACKAGES_LEGION_Y700_(2023)": [
     "com.activision.callofduty.shooter"
   ],
@@ -125,6 +139,7 @@
     "FINGERPRINT": "Lenovo/TB-9707F/Lenovo TB-9707F:13/TQ3A.230805.001/20230901:user/release-keys",
     "PRODUCT": "TB-9707F"
   },
+
   "PACKAGES_XIAOMI_13": [
     "com.tencent.lolm"
   ],
@@ -136,6 +151,7 @@
     "FINGERPRINT": "Xiaomi/fuxi_eea/fuxi:13/TKQ1.221114.001/OS2.0.102.0.VMCEUXM:user/release-keys",
     "PRODUCT": "2211133G"
   },
+
   "PACKAGES_ONEPLUS_13": [
     "com.proxima.dfm"
   ],
@@ -147,6 +163,7 @@
     "FINGERPRINT": "OnePlus/PJZ110/OP5D0DL1:15/AP3A.240617.008/V.1bd19a1-1-2:user/release-keys",
     "PRODUCT": "PJZ110"
   },
+
   "PACKAGES_REALME_P3_5G": [
     "com.dts.freefireth",
     "com.dts.freefiremax"
@@ -159,6 +176,7 @@
     "FINGERPRINT": "realme/RMX5070/RMX5070:15/SKQ1.230119.001/eng.user.20250415.155201:user/release-keys",
     "PRODUCT": "RMX5070"
   },
+
   "PACKAGES_REDMAGIC_10_PRO": [
     "com.kurogame.wutheringwaves.global",
     "com.vng.codmvn",
@@ -173,6 +191,7 @@
     "FINGERPRINT": "nubia/NX789J-UN/NX789J:15/AQ3A.240812.002/20241212.194919:user/release-keys",
     "PRODUCT": "NX789J"
   },
+
   "PACKAGES_PIXEL_XL": [
     "com.google.android.apps.photos"
   ],
@@ -184,6 +203,7 @@
     "FINGERPRINT": "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys",
     "PRODUCT": "marlin"
   },
+
   "PACKAGES_REALME_15_PRO_5G": [
     "com.ngame.allstar.eu",
     "com.clashoftitansandroid.india",
@@ -209,6 +229,7 @@
     "FINGERPRINT": "realme/RMX5101IN/RE60B4L1:15/AP3A.240617.008/V.R4T2.26cec0e-80bb4e-80b757:user/release-keys",
     "PRODUCT": "RMX5101"
   },
+
   "PACKAGES_GALAXY_Z_FOLD_5": [
     "com.ea.gp.fifamobile"
   ],
