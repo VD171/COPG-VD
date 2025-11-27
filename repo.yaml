@@ -5,7 +5,7 @@ categories:
   - WebUI
   - Miscellaneous
   - Zygisk
-license: "AGPL-3.0"
+license: "Apache-2.0 license"
 cover: https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/banner.png
 icon: https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/icon.png
 screenshots:
