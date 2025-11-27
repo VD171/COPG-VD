@@ -14,6 +14,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <vector>
+#include <unordered_set>
+#include <fcntl.h>
 
 using json = nlohmann::json;
 
@@ -45,6 +47,11 @@ static std::once_flag build_once;
 
 static time_t last_config_mtime = 0;
 static const std::string config_path = "/data/adb/modules/COPG/config.json";
+static const char* spoof_file_path = "/data/adb/modules/COPG/cpuinfo_spoof";
+
+// ساختارهای جدید برای CPU Spoof
+static std::unordered_set<std::string> cpu_blacklist;
+static std::unordered_set<std::string> cpu_only_packages;
 
 struct JniString {
     JNIEnv* env;
@@ -101,26 +108,41 @@ static std::string findResetpropPath() {
 static void companion(int fd) {
     LOGD("[COMPANION] Companion started");
     
-    std::string resetprop_path = findResetpropPath();
-    if (resetprop_path.empty()) {
-        LOGE("[COMPANION] No resetprop found, companion cannot function");
-        close(fd);
-        return;
-    }
-    
-    char buffer[2048];
+    char buffer[256];
     ssize_t bytes = read(fd, buffer, sizeof(buffer)-1);
     
     if (bytes > 0) {
         buffer[bytes] = '\0';
         std::string command = buffer;
         
-        LOGD("[COMPANION] Executing: %s", command.c_str());
+        LOGD("[COMPANION] Command: %s", command.c_str());
         
-        std::string full_cmd = resetprop_path + " " + command;
-        int result = system(full_cmd.c_str());
+        int result = -1;
         
-        LOGD("[COMPANION] Result: %d", result);
+        if (command.find("resetprop") == 0) {
+            // دستور resetprop
+            std::string resetprop_path = findResetpropPath();
+            if (!resetprop_path.empty()) {
+                std::string full_cmd = resetprop_path + " " + command.substr(9);
+                result = system(full_cmd.c_str());
+                LOGD("[COMPANION] Resetprop result: %d", result);
+            }
+        } else if (command == "unmount_spoof") {
+            result = system("/system/bin/umount /proc/cpuinfo 2>/dev/null");
+            LOGD("[COMPANION] Unmount result: %d", result);
+        } else if (command == "mount_spoof") {
+            if (access(spoof_file_path, F_OK) == 0) {
+                system("/system/bin/umount /proc/cpuinfo 2>/dev/null");
+                char mount_cmd[512];
+                snprintf(mount_cmd, sizeof(mount_cmd), 
+                        "/system/bin/mount --bind %s /proc/cpuinfo", spoof_file_path);
+                result = system(mount_cmd);
+                LOGD("[COMPANION] Mount result: %d", result);
+            } else {
+                LOGE("[COMPANION] Spoof file not found: %s", spoof_file_path);
+            }
+        }
+        
         write(fd, &result, sizeof(result));
     }
     
@@ -169,15 +191,76 @@ public:
         bool should_close = true;
         {
             std::lock_guard<std::mutex> lock(info_mutex);
-            auto it = package_map.find(package_name);
-            if (it != package_map.end()) {
-                current_info = it->second;
-                LOGD("Spoofing device for package %s: %s", package_name, current_info.model.c_str());
-                
+            
+            // منطق جدید با اولویت‌بندی صحیح
+            bool needs_device_spoof = false;
+            bool needs_cpu_spoof = false;
+            DeviceInfo device_info;
+            std::string package_setting = "";
+            bool found_in_device_list = false;
+
+            // 1. چک کردن Device Lists (بالاترین اولویت)
+            for (auto& device_entry : device_packages) {
+                auto it = device_entry.second.find(package_name);
+                if (it != device_entry.second.end()) {
+                    found_in_device_list = true;
+                    package_setting = it->second;
+                    needs_device_spoof = true;
+                    device_info = device_entry.first;
+                    current_info = device_info;
+                    
+                    // تصمیم‌گیری برای CPU Spoof بر اساس تگ
+                    if (package_setting == "with_cpu") {
+                        needs_cpu_spoof = true;
+                    } else if (package_setting == "blocked") {
+                        needs_cpu_spoof = false;
+                    }
+                    // برای حالت بدون تگ، نیاز به بررسی بیشتر داریم
+                    break;
+                }
+            }
+
+            // 2. چک کردن Global Blacklist (برای CPU Spoof)
+            bool is_globally_blacklisted = (cpu_blacklist.find(package_name) != cpu_blacklist.end());
+            
+            if (is_globally_blacklisted) {
+                LOGD("Package %s is globally blacklisted - CPU spoof disabled", package_name);
+                needs_cpu_spoof = false;
+            }
+
+            // 3. چک کردن CPU Only Packages (فقط اگر در device list نبوده)
+            if (!found_in_device_list && !is_globally_blacklisted) {
+                if (cpu_only_packages.find(package_name) != cpu_only_packages.end()) {
+                    needs_cpu_spoof = true;
+                    LOGD("Package %s found in CPU only list", package_name);
+                }
+            }
+
+            // 4. اگر در Device List هستیم اما تگ مشخص نشده، CPU Only را چک کنیم
+            if (found_in_device_list && package_setting.empty() && !is_globally_blacklisted) {
+                if (cpu_only_packages.find(package_name) != cpu_only_packages.end()) {
+                    needs_cpu_spoof = true;
+                    LOGD("Package %s has device spoof and found in CPU only list", package_name);
+                }
+            }
+
+            // 5. اجرای spoofing
+            if (needs_device_spoof) {
                 spoofDevice(current_info);
-                
                 spoofSystemProps(current_info);
-                
+                should_close = false;
+                LOGD("Device spoof applied for %s", package_name);
+            }
+
+            if (needs_cpu_spoof) {
+                executeCompanionCommand("mount_spoof");
+                LOGD("CPU spoof applied for %s", package_name);
+            } else {
+                executeCompanionCommand("unmount_spoof");
+                LOGD("CPU spoof unmounted for %s", package_name);
+            }
+
+            if (needs_device_spoof || needs_cpu_spoof) {
                 should_close = false;
             }
         }
@@ -192,7 +275,7 @@ public:
     }
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
-        if (!args || !args->nice_name || package_map.empty()) return;
+        if (!args || !args->nice_name || device_packages.empty()) return;
 
         ensureBuildClass();
         if (!buildClass) {
@@ -211,11 +294,16 @@ public:
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
-            auto it = package_map.find(package_name);
-            if (it != package_map.end()) {
-                current_info = it->second;
-                LOGD("Post-specialize spoofing for %s: %s", package_name, current_info.model.c_str());
-                spoofDevice(current_info);
+            
+            // فقط Device Spoof در postAppSpecialize
+            for (auto& device_entry : device_packages) {
+                auto it = device_entry.second.find(package_name);
+                if (it != device_entry.second.end()) {
+                    current_info = device_entry.first;
+                    LOGD("Post-specialize spoofing for %s: %s", package_name, current_info.model.c_str());
+                    spoofDevice(current_info);
+                    break;
+                }
             }
         }
 
@@ -226,16 +314,16 @@ public:
 private:
     zygisk::Api* api;
     JNIEnv* env;
-    std::unordered_map<std::string, DeviceInfo> package_map;
+    std::vector<std::pair<DeviceInfo, std::unordered_map<std::string, std::string>>> device_packages;
 
-    bool executeResetprop(const std::string& args) {
+    bool executeCompanionCommand(const std::string& command) {
         auto fd = api->connectCompanion();
         if (fd < 0) {
             LOGE("Failed to connect to companion");
             return false;
         }
         
-        write(fd, args.c_str(), args.size());
+        write(fd, command.c_str(), command.size());
         
         int result = -1;
         read(fd, &result, sizeof(result));
@@ -268,8 +356,8 @@ private:
         const int num_commands = sizeof(commands) / sizeof(commands[0]);
         
         for (int i = 0; i < num_commands; i++) {
-            std::string cmd = std::string(commands[i]) + " \"" + values[i] + "\"";
-            if (executeResetprop(cmd)) {
+            std::string cmd = std::string("resetprop ") + commands[i] + " \"" + values[i] + "\"";
+            if (executeCompanionCommand(cmd)) {
                 LOGD("Resetprop successful: %s", cmd.c_str());
             } else {
                 LOGE("Resetprop failed: %s", cmd.c_str());
@@ -333,47 +421,79 @@ private:
             LOGE("Failed to open config.json at %s", config_path.c_str());
             return;
         }
-        LOGD("Config file opened successfully");
 
         try {
             json config = json::parse(file);
-            std::unordered_map<std::string, DeviceInfo> new_map;
+            std::vector<std::pair<DeviceInfo, std::unordered_map<std::string, std::string>>> new_device_packages;
+            
+            // بارگذاری CPU blacklist و only packages
+            cpu_blacklist.clear();
+            cpu_only_packages.clear();
+            
+            if (config.contains("cpu_spoof") && config["cpu_spoof"].contains("blacklist")) {
+                for (const auto& pkg : config["cpu_spoof"]["blacklist"]) {
+                    cpu_blacklist.insert(pkg.get<std::string>());
+                    LOGD("Loaded blacklisted package: %s", pkg.get<std::string>().c_str());
+                }
+            }
+            
+            if (config.contains("cpu_only_packages")) {
+                for (const auto& pkg : config["cpu_only_packages"]) {
+                    cpu_only_packages.insert(pkg.get<std::string>());
+                    LOGD("Loaded CPU only package: %s", pkg.get<std::string>().c_str());
+                }
+            }
 
+            // بارگذاری دستگاه‌ها و پکیج‌ها
             for (auto& [key, value] : config.items()) {
-                if (key.find("PACKAGES_") != 0 || key.rfind("_DEVICE") == (key.size() - 7)) continue;
-                if (!value.is_array()) {
-                    LOGE("Invalid package list for key %s", key.c_str());
-                    continue;
-                }
-                auto packages = value.get<std::vector<std::string>>();
-                std::string device_key = key + "_DEVICE";
-                if (!config.contains(device_key) || !config[device_key].is_object()) {
-                    LOGE("No valid device info for key %s", key.c_str());
-                    continue;
-                }
-                auto device = config[device_key];
+                if (key.find("PACKAGES_") == 0 && key.rfind("_DEVICE") != key.size() - 7) {
+                    std::string device_key = key + "_DEVICE";
+                    if (!config.contains(device_key) || !config[device_key].is_object()) {
+                        LOGE("No valid device info for key %s", key.c_str());
+                        continue;
+                    }
+                    
+                    auto device = config[device_key];
+                    DeviceInfo info;
+                    info.brand = device.value("BRAND", "generic");
+                    info.device = device.value("DEVICE", "generic");
+                    info.manufacturer = device.value("MANUFACTURER", "generic");
+                    info.model = device.value("MODEL", "generic");
+                    info.fingerprint = device.value("FINGERPRINT", "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys");
+                    info.product = device.value("PRODUCT", info.brand);
 
-                DeviceInfo info;
-                info.brand = device.value("BRAND", "generic");
-                info.device = device.value("DEVICE", "generic");
-                info.manufacturer = device.value("MANUFACTURER", "generic");
-                info.model = device.value("MODEL", "generic");
-                info.fingerprint = device.value("FINGERPRINT", "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys");
-                info.product = device.value("PRODUCT", info.brand);
-
-                for (const auto& pkg : packages) {
-                    new_map[pkg] = info;
-                    LOGD("Loaded package %s with model %s", pkg.c_str(), info.model.c_str());
+                    std::unordered_map<std::string, std::string> package_settings;
+                    
+                    if (value.is_array()) {
+                        for (const auto& pkg_entry : value) {
+                            std::string pkg_str = pkg_entry.get<std::string>();
+                            std::string pkg_name = pkg_str;
+                            std::string setting = "";
+                            
+                            size_t colon_pos = pkg_str.find(':');
+                            if (colon_pos != std::string::npos) {
+                                pkg_name = pkg_str.substr(0, colon_pos);
+                                setting = pkg_str.substr(colon_pos + 1);
+                            }
+                            
+                            package_settings[pkg_name] = setting;
+                            LOGD("Loaded package %s with setting %s for device %s", 
+                                 pkg_name.c_str(), setting.c_str(), info.model.c_str());
+                        }
+                    }
+                    
+                    new_device_packages.emplace_back(info, package_settings);
                 }
             }
 
             {
                 std::lock_guard<std::mutex> lock(info_mutex);
-                package_map = std::move(new_map);
+                device_packages = std::move(new_device_packages);
             }
 
             last_config_mtime = current_mtime;
-            LOGD("Config reloaded with %zu packages", package_map.size());
+            LOGD("Config reloaded with %zu devices, %zu cpu_only, %zu blacklist", 
+                 device_packages.size(), cpu_only_packages.size(), cpu_blacklist.size());
         } catch (const json::exception& e) {
             LOGE("JSON parsing error: %s", e.what());
         } catch (const std::exception& e) {
