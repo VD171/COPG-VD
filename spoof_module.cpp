@@ -187,11 +187,11 @@ public:
         reloadIfNeeded(false);
 
         bool should_close = true;
+        bool current_needs_cpu_spoof = false;
         {
             std::lock_guard<std::mutex> lock(info_mutex);
             
             bool needs_device_spoof = false;
-            bool needs_cpu_spoof = false;
             DeviceInfo device_info;
             std::string package_setting = "";
             bool found_in_device_list = false;
@@ -206,9 +206,9 @@ public:
                     current_info = device_info;
                     
                     if (package_setting == "with_cpu") {
-                        needs_cpu_spoof = true;
+                        current_needs_cpu_spoof = true;
                     } else if (package_setting == "blocked") {
-                        needs_cpu_spoof = false;
+                        current_needs_cpu_spoof = false;
                     }
                     break;
                 }
@@ -218,19 +218,19 @@ public:
             
             if (is_globally_blacklisted) {
                 LOGD("Package %s is globally blacklisted - CPU spoof disabled", package_name);
-                needs_cpu_spoof = false;
+                current_needs_cpu_spoof = false;
             }
 
             if (!found_in_device_list && !is_globally_blacklisted) {
                 if (cpu_only_packages.find(package_name) != cpu_only_packages.end()) {
-                    needs_cpu_spoof = true;
+                    current_needs_cpu_spoof = true;
                     LOGD("Package %s found in CPU only list", package_name);
                 }
             }
 
             if (found_in_device_list && package_setting.empty() && !is_globally_blacklisted) {
                 if (cpu_only_packages.find(package_name) != cpu_only_packages.end()) {
-                    needs_cpu_spoof = true;
+                    current_needs_cpu_spoof = true;
                     LOGD("Package %s has device spoof and found in CPU only list", package_name);
                 }
             }
@@ -242,15 +242,17 @@ public:
                 LOGD("Device spoof applied for %s", package_name);
             }
 
-            if (needs_cpu_spoof) {
+            if (current_needs_cpu_spoof) {
                 executeCompanionCommand("mount_spoof");
-                LOGD("CPU spoof applied for %s", package_name);
-            } else {
+                cpu_spoof_mounted = true;
+                LOGD("CPU spoof MOUNTED for %s", package_name);
+            } else if (cpu_spoof_mounted && (package_setting == "blocked" || is_globally_blacklisted)) {
                 executeCompanionCommand("unmount_spoof");
-                LOGD("CPU spoof unmounted for %s", package_name);
+                cpu_spoof_mounted = false;
+                LOGD("CPU spoof UNMOUNTED for blocked package %s", package_name);
             }
 
-            if (needs_device_spoof || needs_cpu_spoof) {
+            if (needs_device_spoof || current_needs_cpu_spoof) {
                 should_close = false;
             }
         }
@@ -304,6 +306,7 @@ private:
     zygisk::Api* api;
     JNIEnv* env;
     std::vector<std::pair<DeviceInfo, std::unordered_map<std::string, std::string>>> device_packages;
+    bool cpu_spoof_mounted = false;
 
     std::pair<std::string, std::unordered_set<std::string>> parsePackageWithTags(const std::string& package_str) {
         std::string package_name = package_str;
