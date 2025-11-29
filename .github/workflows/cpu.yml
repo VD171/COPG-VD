@@ -192,6 +192,7 @@ jobs:
           cp customize.sh module/customize.sh
           cp service.sh module/service.sh
           cp action.sh module/action.sh
+          cp cpuinfo_spoof module/cpuinfo_spoof
           cp uninstall.sh module/uninstall.sh
           cp update_config.sh module/update_config.sh
           cp system.prop module/system.prop
