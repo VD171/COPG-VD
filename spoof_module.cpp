@@ -305,6 +305,45 @@ private:
     JNIEnv* env;
     std::vector<std::pair<DeviceInfo, std::unordered_map<std::string, std::string>>> device_packages;
 
+    std::pair<std::string, std::unordered_set<std::string>> parsePackageWithTags(const std::string& package_str) {
+        std::string package_name = package_str;
+        std::unordered_set<std::string> tags;
+        
+        size_t colon_pos = package_str.find(':');
+        if (colon_pos != std::string::npos) {
+            package_name = package_str.substr(0, colon_pos);
+            
+            std::string tags_part = package_str.substr(colon_pos + 1);
+            size_t start = 0;
+            size_t end = tags_part.find(':');
+            
+            while (end != std::string::npos) {
+                std::string tag = tags_part.substr(start, end - start);
+                if (!tag.empty()) {
+                    tags.insert(tag);
+                }
+                start = end + 1;
+                end = tags_part.find(':', start);
+            }
+            
+            std::string last_tag = tags_part.substr(start);
+            if (!last_tag.empty()) {
+                tags.insert(last_tag);
+            }
+        }
+        
+        return {package_name, tags};
+    }
+
+    std::string getZygiskSettingFromTags(const std::unordered_set<std::string>& tags) {
+        if (tags.find("blocked") != tags.end()) {
+            return "blocked";
+        } else if (tags.find("with_cpu") != tags.end()) {
+            return "with_cpu";
+        }
+        return "";
+    }
+
     bool executeCompanionCommand(const std::string& command) {
         auto fd = api->connectCompanion();
         if (fd < 0) {
@@ -458,18 +497,16 @@ private:
                     if (value.is_array()) {
                         for (const auto& pkg_entry : value) {
                             std::string pkg_str = pkg_entry.get<std::string>();
-                            std::string pkg_name = pkg_str;
-                            std::string setting = "";
                             
-                            size_t colon_pos = pkg_str.find(':');
-                            if (colon_pos != std::string::npos) {
-                                pkg_name = pkg_str.substr(0, colon_pos);
-                                setting = pkg_str.substr(colon_pos + 1);
-                            }
+                            auto [pkg_name, tags] = parsePackageWithTags(pkg_str);
+                            std::string setting = getZygiskSettingFromTags(tags);
                             
                             package_settings[pkg_name] = setting;
-                            LOGD("Loaded package %s with setting %s for device %s", 
-                                 pkg_name.c_str(), setting.c_str(), info.model.c_str());
+                            
+                            if (debug_mode && !setting.empty()) {
+                                LOGD("Loaded package %s with setting %s for device %s", 
+                                     pkg_name.c_str(), setting.c_str(), info.model.c_str());
+                            }
                         }
                     }
                     
