@@ -16,6 +16,7 @@
 #include <vector>
 #include <unordered_set>
 #include <fcntl.h>
+#include <sstream>
 
 using json = nlohmann::json;
 
@@ -310,38 +311,54 @@ private:
         std::string package_name = package_str;
         std::unordered_set<std::string> tags;
         
+        package_name.erase(0, package_name.find_first_not_of(" \t"));
+        package_name.erase(package_name.find_last_not_of(" \t") + 1);
+        
         size_t colon_pos = package_str.find(':');
-        if (colon_pos != std::string::npos) {
+        if (colon_pos != std::string::npos && colon_pos < package_str.length() - 1) {
             package_name = package_str.substr(0, colon_pos);
             
             std::string tags_part = package_str.substr(colon_pos + 1);
-            size_t start = 0;
-            size_t end = tags_part.find(':');
             
-            while (end != std::string::npos) {
-                std::string tag = tags_part.substr(start, end - start);
+            std::istringstream tag_stream(tags_part);
+            std::string tag;
+            while (std::getline(tag_stream, tag, ':')) {
+                tag.erase(0, tag.find_first_not_of(" \t"));
+                tag.erase(tag.find_last_not_of(" \t") + 1);
+                
                 if (!tag.empty()) {
                     tags.insert(tag);
+                    LOGD("Found tag '%s' for package %s", tag.c_str(), package_name.c_str());
                 }
-                start = end + 1;
-                end = tags_part.find(':', start);
-            }
-            
-            std::string last_tag = tags_part.substr(start);
-            if (!last_tag.empty()) {
-                tags.insert(last_tag);
             }
         }
+        
+        std::string tag_list;
+        for (const auto& tag : tags) {
+            if (!tag_list.empty()) tag_list += ", ";
+            tag_list += tag;
+        }
+        LOGD("Package '%s' has %zu tags: %s", package_name.c_str(), tags.size(), tag_list.c_str());
         
         return {package_name, tags};
     }
 
     std::string getZygiskSettingFromTags(const std::unordered_set<std::string>& tags) {
+        LOGD("Checking %zu tags for zygisk setting", tags.size());
+        
+        for (const auto& tag : tags) {
+            LOGD("Processing tag: %s", tag.c_str());
+        }
+        
         if (tags.find("blocked") != tags.end()) {
+            LOGD("Tag 'blocked' found, returning 'blocked'");
             return "blocked";
         } else if (tags.find("with_cpu") != tags.end()) {
+            LOGD("Tag 'with_cpu' found, returning 'with_cpu'");
             return "with_cpu";
         }
+        
+        LOGD("No relevant tags found, returning empty");
         return "";
     }
 
