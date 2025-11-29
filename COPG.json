@@ -1,6 +1,4 @@
 {
-  "cover": "banner.png",
-  
   "cpu_spoof": {
     "blacklist": [
       "com.bbl.mobilebanking"
