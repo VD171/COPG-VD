@@ -49,7 +49,6 @@ static time_t last_config_mtime = 0;
 static const std::string config_path = "/data/adb/modules/COPG/config.json";
 static const char* spoof_file_path = "/data/adb/modules/COPG/cpuinfo_spoof";
 
-// ساختارهای جدید برای CPU Spoof
 static std::unordered_set<std::string> cpu_blacklist;
 static std::unordered_set<std::string> cpu_only_packages;
 
@@ -120,7 +119,6 @@ static void companion(int fd) {
         int result = -1;
         
         if (command.find("resetprop") == 0) {
-            // دستور resetprop
             std::string resetprop_path = findResetpropPath();
             if (!resetprop_path.empty()) {
                 std::string full_cmd = resetprop_path + " " + command.substr(9);
@@ -192,14 +190,12 @@ public:
         {
             std::lock_guard<std::mutex> lock(info_mutex);
             
-            // منطق جدید با اولویت‌بندی صحیح
             bool needs_device_spoof = false;
             bool needs_cpu_spoof = false;
             DeviceInfo device_info;
             std::string package_setting = "";
             bool found_in_device_list = false;
 
-            // 1. چک کردن Device Lists (بالاترین اولویت)
             for (auto& device_entry : device_packages) {
                 auto it = device_entry.second.find(package_name);
                 if (it != device_entry.second.end()) {
@@ -209,18 +205,15 @@ public:
                     device_info = device_entry.first;
                     current_info = device_info;
                     
-                    // تصمیم‌گیری برای CPU Spoof بر اساس تگ
                     if (package_setting == "with_cpu") {
                         needs_cpu_spoof = true;
                     } else if (package_setting == "blocked") {
                         needs_cpu_spoof = false;
                     }
-                    // برای حالت بدون تگ، نیاز به بررسی بیشتر داریم
                     break;
                 }
             }
 
-            // 2. چک کردن Global Blacklist (برای CPU Spoof)
             bool is_globally_blacklisted = (cpu_blacklist.find(package_name) != cpu_blacklist.end());
             
             if (is_globally_blacklisted) {
@@ -228,7 +221,6 @@ public:
                 needs_cpu_spoof = false;
             }
 
-            // 3. چک کردن CPU Only Packages (فقط اگر در device list نبوده)
             if (!found_in_device_list && !is_globally_blacklisted) {
                 if (cpu_only_packages.find(package_name) != cpu_only_packages.end()) {
                     needs_cpu_spoof = true;
@@ -236,7 +228,6 @@ public:
                 }
             }
 
-            // 4. اگر در Device List هستیم اما تگ مشخص نشده، CPU Only را چک کنیم
             if (found_in_device_list && package_setting.empty() && !is_globally_blacklisted) {
                 if (cpu_only_packages.find(package_name) != cpu_only_packages.end()) {
                     needs_cpu_spoof = true;
@@ -244,7 +235,6 @@ public:
                 }
             }
 
-            // 5. اجرای spoofing
             if (needs_device_spoof) {
                 spoofDevice(current_info);
                 spoofSystemProps(current_info);
@@ -295,7 +285,6 @@ public:
         {
             std::lock_guard<std::mutex> lock(info_mutex);
             
-            // فقط Device Spoof در postAppSpecialize
             for (auto& device_entry : device_packages) {
                 auto it = device_entry.second.find(package_name);
                 if (it != device_entry.second.end()) {
@@ -426,25 +415,27 @@ private:
             json config = json::parse(file);
             std::vector<std::pair<DeviceInfo, std::unordered_map<std::string, std::string>>> new_device_packages;
             
-            // بارگذاری CPU blacklist و only packages
             cpu_blacklist.clear();
             cpu_only_packages.clear();
             
-            if (config.contains("cpu_spoof") && config["cpu_spoof"].contains("blacklist")) {
-                for (const auto& pkg : config["cpu_spoof"]["blacklist"]) {
-                    cpu_blacklist.insert(pkg.get<std::string>());
-                    LOGD("Loaded blacklisted package: %s", pkg.get<std::string>().c_str());
+            if (config.contains("cpu_spoof")) {
+                auto cpu_spoof_config = config["cpu_spoof"];
+                
+                if (cpu_spoof_config.contains("blacklist")) {
+                    for (const auto& pkg : cpu_spoof_config["blacklist"]) {
+                        cpu_blacklist.insert(pkg.get<std::string>());
+                        LOGD("Loaded blacklisted package: %s", pkg.get<std::string>().c_str());
+                    }
                 }
-            }
-            
-            if (config.contains("cpu_only_packages")) {
-                for (const auto& pkg : config["cpu_only_packages"]) {
-                    cpu_only_packages.insert(pkg.get<std::string>());
-                    LOGD("Loaded CPU only package: %s", pkg.get<std::string>().c_str());
+                
+                if (cpu_spoof_config.contains("cpu_only_packages")) {
+                    for (const auto& pkg : cpu_spoof_config["cpu_only_packages"]) {
+                        cpu_only_packages.insert(pkg.get<std::string>());
+                        LOGD("Loaded CPU only package: %s", pkg.get<std::string>().c_str());
+                    }
                 }
             }
 
-            // بارگذاری دستگاه‌ها و پکیج‌ها
             for (auto& [key, value] : config.items()) {
                 if (key.find("PACKAGES_") == 0 && key.rfind("_DEVICE") != key.size() - 7) {
                     std::string device_key = key + "_DEVICE";
