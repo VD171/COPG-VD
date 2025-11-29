@@ -206,6 +206,8 @@ public:
                     device_info = device_entry.first;
                     current_info = device_info;
                     
+                    LOGD("Package %s - setting: %s", package_name, package_setting.c_str());
+                    
                     if (package_setting == "with_cpu") {
                         current_needs_cpu_spoof = true;
                     } else if (package_setting == "blocked") {
@@ -229,6 +231,10 @@ public:
             if (found_in_device_list && package_setting.empty() && !is_globally_blacklisted && is_cpu_only) {
                 current_needs_cpu_spoof = true;
             }
+
+            LOGD("Final decision - device: %d, cpu: %d, unmount: %d, blacklist: %d, cpu_only: %d", 
+                 current_needs_device_spoof, current_needs_cpu_spoof, should_unmount_cpu, 
+                 is_globally_blacklisted, is_cpu_only);
 
             if (current_needs_device_spoof) {
                 spoofDevice(current_info);
@@ -498,10 +504,7 @@ private:
                             
                             package_settings[pkg_name] = setting;
                             
-                            if (debug_mode && !setting.empty()) {
-                                LOGD("Loaded package %s with setting %s for device %s", 
-                                     pkg_name.c_str(), setting.c_str(), info.model.c_str());
-                            }
+                            LOGD("Config loaded: %s -> %s", pkg_name.c_str(), setting.c_str());
                         }
                     }
                     
