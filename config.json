@@ -2,10 +2,9 @@
   "cover": "banner.png",
   
   "cpu_spoof": {
-    "blacklist": []
+    "blacklist": [],
+    "cpu_only_packages": []
   },
-
-  "cpu_only_packages": [],
 
   "PACKAGES_REDMAGIC_9_PRO": [
     "com.mobilelegends.mi",
