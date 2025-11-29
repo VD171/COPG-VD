@@ -7,7 +7,6 @@ LIST_PATH="$MODDIR/list.json"
 TEMP_CONFIG="/data/adb/copg_temp_config.json"
 TEMP_LIST="/data/adb/copg_temp_list.json"
 
-# Determine downloader
 if command -v curl >/dev/null 2>&1; then
     DOWNLOADER="curl -s -o"
 elif command -v wget >/dev/null 2>&1; then
@@ -17,7 +16,6 @@ else
     exit 1
 fi
 
-# Function to handle download and update process
 download_and_update() {
     local url="$1"
     local temp_path="$2"
@@ -33,14 +31,12 @@ download_and_update() {
         return 1
     fi
     
-    # Verify the downloaded file is valid JSON (basic check)
     if ! grep -q '{' "$temp_path" && ! grep -q '[' "$temp_path"; then
         echo "❌ Downloaded $file_name doesn't appear to be valid JSON"
         rm -f "$temp_path"
         return 1
     fi
     
-    # Compare with existing file if it exists
     if [ -f "$final_path" ]; then
         OLD_HASH=$(md5sum "$final_path" 2>/dev/null | awk '{print $1}')
         NEW_HASH=$(md5sum "$temp_path" 2>/dev/null | awk '{print $1}')
@@ -52,7 +48,6 @@ download_and_update() {
         fi
     fi
     
-    # If we got here, we need to update the file
     echo "🔄 Updating $file_name..."
     mv "$temp_path" "$final_path"
     chmod 0644 "$final_path"
@@ -61,17 +56,14 @@ download_and_update() {
     return 0
 }
 
-# Prompt for update confirmation with volume keys
 echo "❓ Do you want to update/reset the game and device list?"
 echo "➕ Volume Up: Yes"
 echo "➖ Volume Down: No"
 
-# Time-based timeout (10 seconds)
 TIMEOUT=10
 START_TIME=$(date +%s)
 
 while true; do
-    # Check elapsed time
     CURRENT_TIME=$(date +%s)
     ELAPSED=$((CURRENT_TIME - START_TIME))
     if [ $ELAPSED -ge $TIMEOUT ]; then
@@ -80,14 +72,12 @@ while true; do
         exit 0
     fi
 
-    # Capture one input event with timeout (if available)
     if command -v timeout >/dev/null 2>&1; then
         EVENT=$(timeout 0.1 getevent -lc1 2>/dev/null | tr -d '\r')
     else
         EVENT=$(getevent -lc1 2>/dev/null | tr -d '\r')
     fi
     
-    # Check for volume key presses
     if [ -n "$EVENT" ]; then
         if echo "$EVENT" | grep -q "KEY_VOLUMEUP.*DOWN"; then
             echo "✅ Volume Up pressed. Proceeding with update..."
@@ -98,17 +88,13 @@ while true; do
         fi
     fi
     
-    # Short sleep to reduce CPU usage
     sleep 0.05
 done
 
-# Create module directory if it doesn't exist
 mkdir -p "$MODDIR"
 
-# Update config.json
 download_and_update "$CONFIG_URL" "$TEMP_CONFIG" "$CONFIG_PATH" "config.json"
 
-# Update list.json
 download_and_update "$LIST_URL" "$TEMP_LIST" "$LIST_PATH" "list.json"
 
 echo "✨ COPG configs update complete!"
