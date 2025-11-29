@@ -1,36 +1,31 @@
 :root {
-    /* Light Theme (Softer One UI-inspired colors) */
-    --primary: #60A5FA; /* Soft Blue 400 */
-    --primary-dark: #1E3A8A; /* Blue 900 */
-    --primary-gradient: linear-gradient(135deg, #60A5FA, #A78BFA); /* Soft Blue to Lavender */
-    --background: #F9FAFB; /* Gray 50 */
+    --primary: #60A5FA;
+    --primary-dark: #1E3A8A;
+    --primary-gradient: linear-gradient(135deg, #60A5FA, #A78BFA);
+    --background: #F9FAFB;
     --card-bg: #FFFFFF;
-    --text: #1F2937; /* Gray 800 */
-    --text-secondary: #6B7280; /* Gray 500 */
-    --border: #E5E7EB; /* Gray 200 */
+    --text: #1F2937;
+    --text-secondary: #6B7280;
+    --border: #E5E7EB;
     --shadow: rgba(0, 0, 0, 0.05);
-    --success: #34D399; /* Green 400 */
-    --error: #F87171; /* Red 400 */
-    --warning: #FBBF24; /* Amber 400 */
-    --info: #60A5FA; /* Soft Blue 400 */
-    /* Inset variables */
+    --success: #34D399;
+    --error: #F87171;
+    --warning: #FBBF24;
+    --info: #60A5FA;
     --safe-area-inset-top: env(safe-area-inset-top, 0px);
     --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
     --safe-area-inset-left: env(safe-area-inset-left, 0px);
     --safe-area-inset-right: env(safe-area-inset-right, 0px);
-    /* Surface container variables for loaders */
-    --surfaceContainer: #E5E7EB; /* Gray 200 */
-    --surfaceContainerHigh: #D1D5DB; /* Gray 300 */
-
-    /* Dark Theme (Matching One UI dark tones with detail) */
-    --dark-bg: #111827; /* Gray 900 */
-    --dark-card: linear-gradient(145deg, #1F2937, #374151); /* Gradient for detail */
-    --dark-text: #F3F4F6; /* Gray 100 - Brighter for toggle text */
-    --dark-text-secondary: #9CA3AF; /* Gray 400 */
-    --dark-border: #4B5563; /* Gray 600 */
+    --surfaceContainer: #E5E7EB;
+    --surfaceContainerHigh: #D1D5DB;
+    --dark-bg: #111827;
+    --dark-card: linear-gradient(145deg, #1F2937, #374151);
+    --dark-text: #F3F4F6;
+    --dark-text-secondary: #9CA3AF;
+    --dark-border: #4B5563;
     --dark-shadow: rgba(0, 0, 0, 0.3);
-    --dark-surfaceContainer: #4B5563; /* Gray 600 */
-    --dark-surfaceContainerHigh: #6B7280; /* Gray 500 */
+    --dark-surfaceContainer: #4B5563;
+    --dark-surfaceContainerHigh: #6B7280;
 }
 
 * {
@@ -91,7 +86,6 @@ body.dark-themeKILL::before {
     min-height: calc(100% - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
 }
 
-/* Header */
 .header {
     background: var(--primary-gradient);
     color: #fff;
@@ -160,7 +154,6 @@ body.dark-themeKILL::before {
     display: inline-block;
 }
 
-/* Tab Navigation */
 .tab-nav {
     display: flex;
     gap: 8px;
@@ -251,7 +244,6 @@ body.dark-themeKILL::before {
     background: rgba(96, 165, 250, 0.15);
 }
 
-/* Tab Container */
 .tab-container {
     position: relative;
     overflow: hidden;
@@ -277,7 +269,6 @@ body.dark-themeKILL::before {
     opacity: 1;
 }
 
-/* Cards */
 .card {
     background: var(--card-bg);
     border-radius: 16px;
@@ -296,7 +287,6 @@ body.dark-themeKILL::before {
     border-color: var(--dark-border);
 }
 
-/* Scroll Container */
 .scroll-container {
     max-height: calc(90vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom) - 180px);
     overflow-y: auto;
@@ -370,7 +360,6 @@ body.dark-themeKILL::before {
     background: transparent;
 }
 
-/* Search Container */
 .search-container {
     display: flex;
     flex-direction: row;
@@ -414,7 +403,6 @@ body.dark-themeKILL::before {
     color: var(--dark-text-secondary);
 }
 
-/* Toggle Groups */
 .toggle-group {
     display: flex;
     justify-content: space-between;
@@ -449,7 +437,6 @@ body.dark-themeKILL::before {
     color: #F3F4F6;
 }
 
-/* Switches */
 .switch {
     position: relative;
     width: 48px;
@@ -497,7 +484,6 @@ input:checked + .slider:before {
     transform: scale(1.05);
 }
 
-/* Button Group */
 .button-group {
     display: flex;
     gap: 12px;
@@ -506,7 +492,6 @@ input:checked + .slider:before {
     margin-top: 16px;
 }
 
-/* Buttons */
 .action-btn {
     background: var(--primary-gradient);
     color: #fff;
@@ -682,7 +667,6 @@ input:checked + .slider:before {
     background: var(--primary-gradient);
 }
 
-/* Section Headers */
 .section-header {
     margin-bottom: 12px;
 }
@@ -693,13 +677,11 @@ input:checked + .slider:before {
     color: var(--primary);
 }
 
-/* List Wrapper */
 .list-wrapper {
     padding: 8px;
     width: 100%;
 }
 
-/* Lists */
 .device-list, .game-list, .device-picker {
     display: flex;
     flex-direction: column;
@@ -836,7 +818,6 @@ input:checked + .slider:before {
     color: var(--dark-text-secondary);
 }
 
-/* Picker Device Card Specific Styles */
 .picker-device-card h4 {
     font-size: 15px;
     font-weight: 500;
@@ -858,7 +839,6 @@ input:checked + .slider:before {
     color: var(--dark-text-secondary);
 }
 
-/* Log Section */
 .log-section {
     background: var(--card-bg);
     border-radius: 16px;
@@ -973,7 +953,6 @@ h2 {
     word-wrap: break-word;
 }
 
-/* Log Styles */
 .log-info { color: var(--info); }
 .log-success { color: var(--success); }
 .log-error { color: var(--error); }
@@ -981,7 +960,6 @@ h2 {
 .log-green { color: var(--success); }
 .log-red { color: var(--error); }
 
-/* Log Icons */
 .log-icon {
     display: inline-block;
     width: 12px;
@@ -1014,7 +992,6 @@ h2 {
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4m0-4h.01'/%3E%3C/svg%3E") no-repeat center;
 }
 
-/* Modal Styles */
 .modal {
     display: none;
     position: fixed;
@@ -1111,7 +1088,6 @@ h2 {
     color: var(--error);
 }
 
-/* Form Styles */
 .form-group {
     margin-bottom: 12px;
     position: relative;
@@ -1252,7 +1228,6 @@ h2 {
     background: var(--text-secondary);
 }
 
-/* Popup Styles */
 .popup {
     display: none;
     position: fixed;
@@ -1344,7 +1319,6 @@ h2 {
     justify-content: center;
 }
 
-/* Theme Button */
 .theme-btn {
     background: none;
     border: none;
@@ -1359,7 +1333,6 @@ h2 {
     transform: scale(1.2);
 }
 
-/* Snackbar Styles */
 .snackbar {
     position: fixed;
     bottom: calc(var(--safe-area-inset-bottom) + 16px);
@@ -1470,7 +1443,6 @@ h2 {
     background: rgba(96, 165, 250, 0.15);
 }
 
-/* App List Styles */
 .app-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -1562,7 +1534,6 @@ h2 {
     100% { background-position: 200% 0; }
 }
 
-/* Ignored game card styles */
 .game-card.ignored {
     background: rgba(248, 113, 113, 0.1);
     border-left: 4px solid var(--error);
@@ -1587,7 +1558,6 @@ h2 {
     background: var(--error);
 }
 
-/* Ignore Popup Specific Styles */
 #ignore-popup .popup-content {
     max-width: 320px;
     padding: 0;
@@ -1687,7 +1657,6 @@ h2 {
     -webkit-touch-callout: none;
 }
 
-/* Prevent text selection on game cards */
 .game-card {
     user-select: none;
     -webkit-user-select: none;
@@ -1695,13 +1664,11 @@ h2 {
     padding: 12px;
 }
 
-/* Make sure buttons still work */
 .game-actions button {
     pointer-events: auto;
     flex-shrink: 0;
 }
 
-/* Prevent text selection on text elements */
 .game-header, .game-details {
     user-select: none;
     -webkit-user-select: none;
@@ -1712,7 +1679,7 @@ h2 {
     max-width: 320px;
     padding: 0;
     overflow: hidden;
-    z-index: 1001; /* Ensure popup content is above other elements */
+    z-index: 1001;
 }
 
 .game-name-container {
@@ -1837,7 +1804,6 @@ h2 {
     background: rgba(255, 255, 255, 0.05);
 }
 
-/* Update Confirm Popup Icon Styles */
 .popup-icon-container {
     display: flex;
     align-items: center;
@@ -1879,7 +1845,6 @@ h2 {
     color: var(--dark-text);
 }
 
-/* App Icon Styles */
 .app-icon-container {
     width: 40px;
     height: 40px;
@@ -1925,7 +1890,6 @@ h2 {
     background: var(--error);
 }
 
-/* App Card Styles */
 .app-card {
     display: flex;
     align-items: center;
@@ -1967,7 +1931,6 @@ h2 {
     text-overflow: ellipsis;
 }
 
-/* Popup Styles */
 .ignore-explanation-popup {
     position: fixed;
     top: 0;
@@ -2051,7 +2014,7 @@ h2 {
 .dark-theme .ignore-explanation-popup .action-btn:hover {
     background: var(--primary-gradient);
 }
-/* Device Select Field Styles */
+
 .device-select-wrapper {
     position: relative;
     display: flex;
@@ -2059,7 +2022,7 @@ h2 {
 }
 
 .device-select-wrapper input {
-    padding-right: 32px; /* Space for the icon */
+    padding-right: 32px;
     width: 100%;
 }
 
@@ -2082,6 +2045,7 @@ h2 {
 .dark-theme #game-device.highlighted ~ .dropdown-icon {
     color: var(--primary);
 }
+
 .log-actions {
     display: flex;
     gap: 8px;
@@ -2161,7 +2125,6 @@ h2 {
     background: rgba(248, 113, 113, 0.25); 
 }
 
-
 .backup-grid {
     display: flex;
     flex-direction: column;
@@ -2230,7 +2193,6 @@ h2 {
     margin: 0;
 }
 
-/* Button Group Adjustment */
 .button-group {
     display: flex;
     gap: 12px;
@@ -2244,14 +2206,12 @@ h2 {
     min-width: 140px;
 }
 
-/* Popup Body Adjustment */
 .popup-body {
     padding: 16px;
     max-height: 60vh;
     overflow-y: auto;
 }
 
-/* Popup Footer Adjustment */
 .popup-footer {
     display: flex;
     gap: 8px;
@@ -2403,7 +2363,6 @@ h2 {
     margin-bottom: 12px;
 }
 
-
 #device-picker-popup .popup-content h3 {
     color: var(--primary); 
 }
@@ -2479,7 +2438,6 @@ h2 {
     background: rgba(255, 255, 255, 0.05);
 }
 
-/* Header Actions */
 .header-actions {
     display: flex;
     gap: 8px;
@@ -2495,7 +2453,6 @@ h2 {
     transform: scale(1.2);
 }
 
-/* Donate Popup Styles */
 #donate-popup .popup-content {
     max-width: 500px;
     max-height: 70vh;
@@ -2505,7 +2462,6 @@ h2 {
     flex-direction: column;
 }
 
-/* Donate Popup */
 #donate-popup .modal-header {
     background: transparent !important;
     color: var(--text) !important;
