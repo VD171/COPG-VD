@@ -2,8 +2,13 @@
   "cover": "banner.png",
   
   "cpu_spoof": {
-    "blacklist": [],
-    "cpu_only_packages": []
+    "blacklist": [
+      "com.bbl.mobilebanking"
+    ],
+    "cpu_only_packages": [
+      "com.epicgames.fortnite",
+      "com.miraclegames.farlight84"
+    ]
   },
 
   "PACKAGES_REDMAGIC_9_PRO": [
@@ -24,8 +29,8 @@
     "com.supercell.squad",
     "com.blitzteam.battleprime",
     "com.tencent.tmgp.gnyx",
-    "com.ss.android.ugc.trill",
-    "com.zhiliaoapp.musically",
+    "com.ss.android.ugc.trill:notweak",
+    "com.zhiliaoapp.musically:notweak",
     "com.garena.game.df"
   ],
   "PACKAGES_REDMAGIC_9_PRO_DEVICE": {
@@ -192,7 +197,7 @@
   },
 
   "PACKAGES_PIXEL_XL": [
-    "com.google.android.apps.photos"
+    "com.google.android.apps.photos:notweak"
   ],
   "PACKAGES_PIXEL_XL_DEVICE": {
     "BRAND": "google",
