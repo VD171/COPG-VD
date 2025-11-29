@@ -425,12 +425,32 @@ fi
       ui_print " ✗ Failed to Set Permissions (list.json)! "
       print_failure_and_exit "binary"
     }
+    chmod 0444 "$MODPATH/cpuinfo_spoof" || {
+      ui_print " ✗ Failed to Set Permissions (cpuinfo_spoof)! "
+      print_failure_and_exit "binary"
+    }
     chcon u:object_r:system_file:s0 "$MODPATH/config.json" || {
       ui_print " ✗ Failed to Set SELinux Context (config.json)! "
       print_failure_and_exit "binary"
     }
     chcon u:object_r:system_file:s0 "$MODPATH/list.json" || {
       ui_print " ✗ Failed to Set SELinux Context (list.json)! "
+      print_failure_and_exit "binary"
+    }
+    chcon u:object_r:system_file:s0 "$MODPATH/cpuinfo_spoof" || {
+      ui_print " ✗ Failed to Set SELinux Context (cpuinfo_spoof)! "
+      print_failure_and_exit "binary"
+    }
+    chcon u:object_r:system_file:s0 "$MODPATH/service.sh" || {
+      ui_print " ✗ Failed to Set Permissions (service.sh)! "
+      print_failure_and_exit "binary"
+    }
+    chcon u:object_r:system_file:s0 "$MODPATH/action.sh" || {
+      ui_print " ✗ Failed to Set Permissions (action.sh)! "
+      print_failure_and_exit "binary"
+    }
+    chcon u:object_r:system_file:s0 "$MODPATH/update_config.sh" || {
+      ui_print " ✗ Failed to Set Permissions (update_config.sh)! "
       print_failure_and_exit "binary"
     }
   fi
