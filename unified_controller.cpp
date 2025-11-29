@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <unordered_map>
+#include <unordered_set>
 #include <thread>
 #include <chrono>
 #include <atomic>
@@ -579,7 +580,6 @@ private:
                 }
             }
             
-            // اضافه کردن پکیج‌های blacklist به لیست notweak
             for (const auto& blacklisted_pkg : blacklist_packages) {
                 new_notweak_packages.insert(blacklisted_pkg);
                 std::cout << "🚫 Marked as notweak (from blacklist): " << blacklisted_pkg << std::endl;
