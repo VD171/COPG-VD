@@ -47,7 +47,7 @@ static jfieldID productField = nullptr;
 static std::once_flag build_once;
 
 static time_t last_config_mtime = 0;
-static const std::string config_path = "/data/adb/modules/COPG/config.json";
+static const std::string config_path = "/data/adb/modules/COPG/COPG.json";
 static const char* spoof_file_path = "/data/adb/modules/COPG/cpuinfo_spoof";
 
 static std::unordered_set<std::string> cpu_blacklist;
@@ -464,7 +464,7 @@ private:
 
         std::ifstream file(config_path);
         if (!file.is_open()) {
-            LOGE("Failed to open config.json at %s", config_path.c_str());
+            LOGE("Failed to open COPG.json at %s", config_path.c_str());
             return;
         }
 
