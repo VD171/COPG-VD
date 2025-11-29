@@ -527,7 +527,7 @@ private:
         try {
             std::ifstream config_file(CONFIG_JSON);
             if (!config_file.is_open()) {
-                std::cerr << "❌ Cannot open config.json" << std::endl;
+                std::cerr << "❌ Cannot open COPG.json" << std::endl;
                 return false;
             }
             
