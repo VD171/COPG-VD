@@ -281,7 +281,7 @@ namespace xwatcher {
 
 class AdvancedAppController {
 private:
-    const std::string CONFIG_JSON = "/data/adb/modules/COPG/config.json";
+    const std::string CONFIG_JSON = "/data/adb/modules/COPG/COPG.json";
     const std::string TOGGLE_FILE = "/data/adb/copg_state";
     const std::string DEFAULTS_FILE = "/data/adb/copg_defaults";
     
