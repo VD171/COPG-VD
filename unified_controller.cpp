@@ -537,15 +537,30 @@ private:
             std::unordered_map<std::string, bool> new_packages;
             std::set<std::string> new_notweak_packages;
             std::set<std::string> blacklist_packages;
+            std::set<std::string> cpu_only_packages;
             int total_packages = 0;
             int notweak_count = 0;
             int blacklist_count = 0;
+            int cpu_only_count = 0;
             
-            if (config.contains("cpu_spoof") && config["cpu_spoof"].contains("blacklist")) {
-                for (const auto& pkg : config["cpu_spoof"]["blacklist"]) {
-                    if (pkg.is_string()) {
-                        blacklist_packages.insert(pkg.get<std::string>());
-                        blacklist_count++;
+            if (config.contains("cpu_spoof")) {
+                auto cpu_spoof_config = config["cpu_spoof"];
+                
+                if (cpu_spoof_config.contains("blacklist")) {
+                    for (const auto& pkg : cpu_spoof_config["blacklist"]) {
+                        if (pkg.is_string()) {
+                            blacklist_packages.insert(pkg.get<std::string>());
+                            blacklist_count++;
+                        }
+                    }
+                }
+                
+                if (cpu_spoof_config.contains("cpu_only_packages")) {
+                    for (const auto& pkg : cpu_spoof_config["cpu_only_packages"]) {
+                        if (pkg.is_string()) {
+                            cpu_only_packages.insert(pkg.get<std::string>());
+                            cpu_only_count++;
+                        }
                     }
                 }
             }
@@ -580,6 +595,12 @@ private:
                 }
             }
             
+            for (const auto& cpu_only_pkg : cpu_only_packages) {
+                new_packages[cpu_only_pkg] = false;
+                total_packages++;
+                std::cout << "🔧 Added CPU only package to monitoring: " << cpu_only_pkg << std::endl;
+            }
+            
             for (const auto& blacklisted_pkg : blacklist_packages) {
                 new_notweak_packages.insert(blacklisted_pkg);
                 std::cout << "🚫 Marked as notweak (from blacklist): " << blacklisted_pkg << std::endl;
@@ -588,6 +609,7 @@ private:
             std::cout << "📋 Found " << total_packages << " packages in config" << std::endl;
             std::cout << "🚫 Found " << notweak_count << " notweak packages from tags" << std::endl;
             std::cout << "⚫ Found " << blacklist_count << " blacklisted packages" << std::endl;
+            std::cout << "🔧 Found " << cpu_only_count << " CPU only packages" << std::endl;
             std::cout << "📊 Total " << new_notweak_packages.size() << " packages excluded from toggles" << std::endl;
             
             filter_installed_packages(new_packages);
