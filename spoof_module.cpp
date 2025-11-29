@@ -237,16 +237,12 @@ public:
                 LOGD("Device spoof applied for %s", package_name);
             }
 
-            if (current_needs_cpu_spoof && !should_unmount_cpu) {
-                executeCompanionCommand("mount_spoof");
-                cpu_spoof_mounted = true;
-                LOGD("CPU spoof MOUNTED for %s", package_name);
-            }
-
-            if (cpu_spoof_mounted && should_unmount_cpu) {
+            if (should_unmount_cpu) {
                 executeCompanionCommand("unmount_spoof");
-                cpu_spoof_mounted = false;
                 LOGD("CPU spoof UNMOUNTED for %s", package_name);
+            } else if (current_needs_cpu_spoof) {
+                executeCompanionCommand("mount_spoof");
+                LOGD("CPU spoof MOUNTED for %s", package_name);
             }
 
             if (current_needs_device_spoof || current_needs_cpu_spoof) {
@@ -303,7 +299,6 @@ private:
     zygisk::Api* api;
     JNIEnv* env;
     std::vector<std::pair<DeviceInfo, std::unordered_map<std::string, std::string>>> device_packages;
-    bool cpu_spoof_mounted = false;
 
     std::pair<std::string, std::unordered_set<std::string>> parsePackageWithTags(const std::string& package_str) {
         std::string package_name = package_str;
