@@ -283,18 +283,16 @@ private:
     const std::string CONFIG_JSON = "/data/adb/modules/COPG/config.json";
     const std::string TOGGLE_FILE = "/data/adb/copg_state";
     const std::string DEFAULTS_FILE = "/data/adb/copg_defaults";
-    const std::string IGNORE_LIST = "/data/adb/modules/COPG/ignorelist.txt";
     
     std::unordered_map<std::string, bool> monitored_packages;
     std::unordered_map<std::string, bool> previous_monitored_packages;
-    std::set<std::string> ignored_packages;
-    std::set<std::string> previous_ignored_packages;
+    std::set<std::string> notweak_packages;
+    std::set<std::string> previous_notweak_packages;
     std::atomic<bool> running{true};
     std::atomic<bool> config_loaded{false};
     std::atomic<bool> states_saved{false};
 
     xwatcher::Watcher config_watcher;
-    xwatcher::Watcher ignore_watcher;
 
     enum class AppState {
         FOREGROUND,
@@ -320,7 +318,7 @@ public:
     AdvancedAppController() {
         std::cout << "🚀 Initializing Advanced App Controller..." << std::endl;
         
-        if (!config_watcher.is_initialized() || !ignore_watcher.is_initialized()) {
+        if (!config_watcher.is_initialized()) {
             std::cerr << "❌ Config watcher failed to initialize" << std::endl;
             return;
         }
@@ -329,12 +327,10 @@ public:
             std::cerr << "❌ Failed to load initial configuration" << std::endl;
             return;
         }
-
-        load_ignore_list();
         
         restore_saved_states();
         
-        if (!setup_config_watcher() || !setup_ignore_watcher()) {
+        if (!setup_config_watcher()) {
             std::cerr << "❌ Failed to setup config watcher" << std::endl;
             return;
         }
@@ -350,7 +346,6 @@ public:
     void stop() {
         running = false;
         config_watcher.stop();
-        ignore_watcher.stop();
     }
 
     bool is_ready() const {
@@ -358,6 +353,36 @@ public:
     }
 
 private:
+    std::pair<std::string, std::unordered_set<std::string>> parsePackageWithTags(const std::string& package_str) {
+        std::string package_name = package_str;
+        std::unordered_set<std::string> tags;
+        
+        size_t colon_pos = package_str.find(':');
+        if (colon_pos != std::string::npos) {
+            package_name = package_str.substr(0, colon_pos);
+            
+            std::string tags_part = package_str.substr(colon_pos + 1);
+            size_t start = 0;
+            size_t end = tags_part.find(':');
+            
+            while (end != std::string::npos) {
+                std::string tag = tags_part.substr(start, end - start);
+                if (!tag.empty()) {
+                    tags.insert(tag);
+                }
+                start = end + 1;
+                end = tags_part.find(':', start);
+            }
+            
+            std::string last_tag = tags_part.substr(start);
+            if (!last_tag.empty()) {
+                tags.insert(last_tag);
+            }
+        }
+        
+        return {package_name, tags};
+    }
+
     bool setup_config_watcher() {
         auto callback = [this](xwatcher::FileEvent event, const std::string& path, int context, void* additional_data) {
             if (event == xwatcher::FileEvent::Modified || event == xwatcher::FileEvent::Created) {
@@ -380,86 +405,6 @@ private:
         return true;
     }
 
-    bool setup_ignore_watcher() {
-        auto callback = [this](xwatcher::FileEvent event, const std::string& path, int context, void* additional_data) {
-            if (event == xwatcher::FileEvent::Modified || event == xwatcher::FileEvent::Created) {
-                std::cout << "🔄 Ignore list changed - reloading..." << std::endl;
-                handle_ignore_list_change();
-            }
-        };
-
-        if (!ignore_watcher.add_file(IGNORE_LIST, callback)) {
-            std::cerr << "❌ Failed to add ignore list to watcher" << std::endl;
-            return false;
-        }
-
-        if (!ignore_watcher.start()) {
-            std::cerr << "❌ Failed to start ignore watcher" << std::endl;
-            return false;
-        }
-
-        std::cout << "👀 Built-in ignore list watcher started" << std::endl;
-        return true;
-    }
-
-    void handle_ignore_list_change() {
-        std::set<std::string> old_ignored = ignored_packages;
-        load_ignore_list();
-        
-        std::vector<std::string> newly_ignored;
-        std::vector<std::string> newly_unignored;
-        
-        for (const auto& package : ignored_packages) {
-            if (old_ignored.find(package) == old_ignored.end()) {
-                newly_ignored.push_back(package);
-            }
-        }
-        
-        for (const auto& package : old_ignored) {
-            if (ignored_packages.find(package) == ignored_packages.end()) {
-                newly_unignored.push_back(package);
-            }
-        }
-        
-        if (!newly_ignored.empty()) {
-            std::cout << "🚫 Newly ignored packages: ";
-            for (size_t i = 0; i < newly_ignored.size(); ++i) {
-                std::cout << newly_ignored[i];
-                if (i < newly_ignored.size() - 1) std::cout << ", ";
-            }
-            std::cout << std::endl;
-            
-            auto active_apps = get_all_active_apps();
-            if (!should_apply_toggles(active_apps) && states_saved.load()) {
-                std::cout << "🔄 Immediately restoring system states due to package ignoring" << std::endl;
-                restore_saved_states();
-                states_saved.store(false);
-                state_tracker.last_toggle_state = false;
-            }
-        }
-        
-        if (!newly_unignored.empty()) {
-            std::cout << "✅ Newly unignored packages: ";
-            for (size_t i = 0; i < newly_unignored.size(); ++i) {
-                std::cout << newly_unignored[i];
-                if (i < newly_unignored.size() - 1) std::cout << ", ";
-            }
-            std::cout << std::endl;
-            
-            auto active_apps = get_all_active_apps();
-            if (should_apply_toggles(active_apps) && !states_saved.load()) {
-                std::cout << "🎯 Immediately applying toggles for newly unignored packages" << std::endl;
-                if (save_current_states()) {
-                    apply_toggles();
-                    states_saved.store(true);
-                    state_tracker.last_toggle_state = true;
-                }
-            }
-        }
-        
-        previous_ignored_packages = ignored_packages;
-    }
-
     void safe_reload_config() {
         for (int attempt = 0; attempt < 3; attempt++) {
             if (load_config()) {
@@ -476,11 +421,14 @@ private:
     void handle_config_changes() {
         if (previous_monitored_packages.empty()) {
             previous_monitored_packages = monitored_packages;
+            previous_notweak_packages = notweak_packages;
             return;
         }
         
         std::vector<std::string> removed_packages;
         std::vector<std::string> added_packages;
+        std::vector<std::string> newly_notweak;
+        std::vector<std::string> newly_tweakable;
         
         for (const auto& [package, installed] : previous_monitored_packages) {
             if (monitored_packages.find(package) == monitored_packages.end()) {
@@ -491,6 +439,18 @@ private:
         for (const auto& [package, installed] : monitored_packages) {
             if (previous_monitored_packages.find(package) == previous_monitored_packages.end()) {
                 added_packages.push_back(package);
+            }
+        }
+        
+        for (const auto& package : notweak_packages) {
+            if (previous_notweak_packages.find(package) == previous_notweak_packages.end()) {
+                newly_notweak.push_back(package);
+            }
+        }
+        
+        for (const auto& package : previous_notweak_packages) {
+            if (notweak_packages.find(package) == notweak_packages.end()) {
+                newly_tweakable.push_back(package);
             }
         }
         
@@ -522,7 +482,44 @@ private:
             std::cout << std::endl;
         }
         
+        if (!newly_notweak.empty()) {
+            std::cout << "🚫 Newly notweak packages: ";
+            for (size_t i = 0; i < newly_notweak.size(); ++i) {
+                std::cout << newly_notweak[i];
+                if (i < newly_notweak.size() - 1) std::cout << ", ";
+            }
+            std::cout << std::endl;
+            
+            auto active_apps = get_all_active_apps();
+            if (!should_apply_toggles(active_apps) && states_saved.load()) {
+                std::cout << "🔄 Immediately restoring system states due to notweak packages" << std::endl;
+                restore_saved_states();
+                states_saved.store(false);
+                state_tracker.last_toggle_state = false;
+            }
+        }
+        
+        if (!newly_tweakable.empty()) {
+            std::cout << "✅ Newly tweakable packages: ";
+            for (size_t i = 0; i < newly_tweakable.size(); ++i) {
+                std::cout << newly_tweakable[i];
+                if (i < newly_tweakable.size() - 1) std::cout << ", ";
+            }
+            std::cout << std::endl;
+            
+            auto active_apps = get_all_active_apps();
+            if (should_apply_toggles(active_apps) && !states_saved.load()) {
+                std::cout << "🎯 Immediately applying toggles for newly tweakable packages" << std::endl;
+                if (save_current_states()) {
+                    apply_toggles();
+                    states_saved.store(true);
+                    state_tracker.last_toggle_state = true;
+                }
+            }
+        }
+        
         previous_monitored_packages = monitored_packages;
+        previous_notweak_packages = notweak_packages;
     }
 
     bool load_config() {
@@ -537,25 +534,66 @@ private:
             config_file >> config;
             
             std::unordered_map<std::string, bool> new_packages;
+            std::set<std::string> new_notweak_packages;
+            std::set<std::string> blacklist_packages;
             int total_packages = 0;
+            int notweak_count = 0;
+            int blacklist_count = 0;
+            
+            if (config.contains("cpu_spoof") && config["cpu_spoof"].contains("blacklist")) {
+                for (const auto& pkg : config["cpu_spoof"]["blacklist"]) {
+                    if (pkg.is_string()) {
+                        blacklist_packages.insert(pkg.get<std::string>());
+                        blacklist_count++;
+                    }
+                }
+            }
             
             for (auto& [key, value] : config.items()) {
-                if (value.is_array()) {
-                    for (auto& package : value) {
-                        if (package.is_string()) {
-                            std::string package_name = package.get<std::string>();
+                if (key.find("PACKAGES_") == 0 && key.rfind("_DEVICE") != key.size() - 7) {
+                    for (auto& package_entry : value) {
+                        if (package_entry.is_string()) {
+                            std::string package_str = package_entry.get<std::string>();
+                            
+                            auto [package_name, tags] = parsePackageWithTags(package_str);
+                            
                             new_packages[package_name] = false;
                             total_packages++;
+                            
+                            if (tags.find("notweak") != tags.end()) {
+                                new_notweak_packages.insert(package_name);
+                                notweak_count++;
+                                
+                                std::cout << "🚫 Marked as notweak (from tag): " << package_name;
+                                if (tags.size() > 1) {
+                                    std::cout << " (Tags: ";
+                                    for (const auto& tag : tags) {
+                                        std::cout << tag << " ";
+                                    }
+                                    std::cout << ")";
+                                }
+                                std::cout << std::endl;
+                            }
                         }
                     }
                 }
             }
             
+            // اضافه کردن پکیج‌های blacklist به لیست notweak
+            for (const auto& blacklisted_pkg : blacklist_packages) {
+                new_notweak_packages.insert(blacklisted_pkg);
+                std::cout << "🚫 Marked as notweak (from blacklist): " << blacklisted_pkg << std::endl;
+            }
+            
             std::cout << "📋 Found " << total_packages << " packages in config" << std::endl;
+            std::cout << "🚫 Found " << notweak_count << " notweak packages from tags" << std::endl;
+            std::cout << "⚫ Found " << blacklist_count << " blacklisted packages" << std::endl;
+            std::cout << "📊 Total " << new_notweak_packages.size() << " packages excluded from toggles" << std::endl;
             
             filter_installed_packages(new_packages);
             
             monitored_packages = std::move(new_packages);
+            notweak_packages = std::move(new_notweak_packages);
             std::cout << "📦 Loaded " << monitored_packages.size() << " installed packages" << std::endl;
             
             return true;
@@ -610,25 +648,8 @@ private:
         }
     }
 
-    void load_ignore_list() {
-        std::set<std::string> new_ignored_packages;
-        std::ifstream ignore_file(IGNORE_LIST);
-        if (!ignore_file.is_open()) {
-            return;
-        }
-        
-        std::string package;
-        while (std::getline(ignore_file, package)) {
-            if (!package.empty()) {
-                new_ignored_packages.insert(package);
-            }
-        }
-        
-        ignored_packages = std::move(new_ignored_packages);
-    }
-
-    bool is_ignored(const std::string& package) {
-        return ignored_packages.find(package) != ignored_packages.end();
+    bool is_notweak(const std::string& package) {
+        return notweak_packages.find(package) != notweak_packages.end();
     }
 
     std::string execute_command(const std::string& cmd) {
@@ -664,7 +685,7 @@ private:
             std::string package;
             while (std::getline(iss, package)) {
                 package.erase(std::remove(package.begin(), package.end(), '\r'), package.end());
-                if (!package.empty() && monitored_packages.find(package) != monitored_packages.end() && !is_ignored(package)) {
+                if (!package.empty() && monitored_packages.find(package) != monitored_packages.end() && !is_notweak(package)) {
                     active_apps[package] = AppState::FOREGROUND;
                 }
             }
@@ -680,7 +701,7 @@ private:
                 package.erase(std::remove(package.begin(), package.end(), '\r'), package.end());
                 if (!package.empty() && 
                     monitored_packages.find(package) != monitored_packages.end() && 
-                    !is_ignored(package) &&
+                    !is_notweak(package) &&
                     active_apps.find(package) == active_apps.end()) {
                     active_apps[package] = AppState::BACKGROUND;
                 }
@@ -890,9 +911,10 @@ public:
 
         std::cout << "🚀 Advanced App Controller Started" << std::endl;
         std::cout << "📊 Monitoring " << monitored_packages.size() << " installed packages" << std::endl;
+        std::cout << "🚫 " << notweak_packages.size() << " packages marked as notweak" << std::endl;
         std::cout << "🎯 States: FOREGROUND, BACKGROUND only" << std::endl;
         std::cout << "🔧 Toggles apply only in FOREGROUND/BACKGROUND states" << std::endl;
-        std::cout << "🔄 Instant response to config and ignore list changes" << std::endl;
+        std::cout << "🔄 Instant response to config changes" << std::endl;
         
         int debounce_count = 0;
         const int DEBOUNCE_THRESHOLD = 2;
