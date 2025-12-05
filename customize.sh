@@ -417,8 +417,8 @@ fi
       ui_print " ✗ Failed to Set Permissions (update_config.sh)! "
       print_failure_and_exit "binary"
     }
-    chmod 0644 "$MODPATH/config.json" || {
-      ui_print " ✗ Failed to Set Permissions (config.json)! "
+    chmod 0644 "$MODPATH/COPG.json" || {
+      ui_print " ✗ Failed to Set Permissions (COPG.json)! "
       print_failure_and_exit "binary"
     }
     chmod 0644 "$MODPATH/list.json" || {
@@ -429,8 +429,8 @@ fi
       ui_print " ✗ Failed to Set Permissions (cpuinfo_spoof)! "
       print_failure_and_exit "binary"
     }
-    chcon u:object_r:system_file:s0 "$MODPATH/config.json" || {
-      ui_print " ✗ Failed to Set SELinux Context (config.json)! "
+    chcon u:object_r:system_file:s0 "$MODPATH/COPG.json" || {
+      ui_print " ✗ Failed to Set SELinux Context (COPG.json)! "
       print_failure_and_exit "binary"
     }
     chcon u:object_r:system_file:s0 "$MODPATH/list.json" || {
