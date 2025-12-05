@@ -184,7 +184,7 @@ jobs:
           cp controller_armv7 module/controller_armv7
           chmod 755 module/controller_arm64 module/controller_armv7
           
-          cp config.json module/config.json
+          # cp config.json module/config.json
           cp COPG.json module/COPG.json
           cp banner.png module/banner.png
           cp repo.yaml module/common/repo.yaml
