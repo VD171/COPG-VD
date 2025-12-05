@@ -90,7 +90,7 @@ static std::string findResetpropPath() {
     for (int i = 0; possible_paths[i] != nullptr; i++) {
         if (access(possible_paths[i], X_OK) == 0) {
             LOGD("Found resetprop at: %s", possible_paths[i]);
-            return possible_paths[i];
+            return std::string(possible_paths[i]);
         }
     }
     
@@ -105,7 +105,7 @@ static std::string findResetpropPath() {
             if (access(path, X_OK) == 0) {
                 LOGD("Found resetprop via which: %s", path);
                 pclose(pipe);
-                return path;
+                return std::string(path);
             }
         }
         pclose(pipe);
@@ -119,11 +119,9 @@ static std::string readBuildPropValue(const std::string& prop_name) {
     const char* build_prop_paths[] = {
         "/system/build.prop",
         "/vendor/build.prop",
-        "/product/etc/build.prop",
-        "/system_ext/etc/build.prop",
-        "/odm/etc/build.prop",
-        "/vendor/vendor_dlkm/etc/build.prop",
-        "
+        "/product/build.prop",
+        "/system_ext/build.prop",
+        "/odm/build.prop",
         nullptr
     };
     
@@ -224,29 +222,32 @@ static void companion(int fd) {
         } else if (command == "restore_build_props") {
             readOriginalBuildProps();
             
-            if (!original_build_props.ro_product_brand.empty()) {
-                std::string cmd = "resetprop ro.product.brand " + original_build_props.ro_product_brand;
-                system(findResetpropPath() + " " + cmd.substr(9).c_str());
-            }
-            if (!original_build_props.ro_product_manufacturer.empty()) {
-                std::string cmd = "resetprop ro.product.manufacturer " + original_build_props.ro_product_manufacturer;
-                system(findResetpropPath() + " " + cmd.substr(9).c_str());
-            }
-            if (!original_build_props.ro_product_model.empty()) {
-                std::string cmd = "resetprop ro.product.model " + original_build_props.ro_product_model;
-                system(findResetpropPath() + " " + cmd.substr(9).c_str());
-            }
-            if (!original_build_props.ro_product_device.empty()) {
-                std::string cmd = "resetprop ro.product.device " + original_build_props.ro_product_device;
-                system(findResetpropPath() + " " + cmd.substr(9).c_str());
-            }
-            if (!original_build_props.ro_product_name.empty()) {
-                std::string cmd = "resetprop ro.product.name " + original_build_props.ro_product_name;
-                system(findResetpropPath() + " " + cmd.substr(9).c_str());
-            }
-            if (!original_build_props.ro_build_fingerprint.empty()) {
-                std::string cmd = "resetprop ro.build.fingerprint " + original_build_props.ro_build_fingerprint;
-                system(findResetpropPath() + " " + cmd.substr(9).c_str());
+            std::string resetprop_path = findResetpropPath();
+            if (!resetprop_path.empty()) {
+                if (!original_build_props.ro_product_brand.empty()) {
+                    std::string cmd = resetprop_path + " ro.product.brand " + original_build_props.ro_product_brand;
+                    system(cmd.c_str());
+                }
+                if (!original_build_props.ro_product_manufacturer.empty()) {
+                    std::string cmd = resetprop_path + " ro.product.manufacturer " + original_build_props.ro_product_manufacturer;
+                    system(cmd.c_str());
+                }
+                if (!original_build_props.ro_product_model.empty()) {
+                    std::string cmd = resetprop_path + " ro.product.model " + original_build_props.ro_product_model;
+                    system(cmd.c_str());
+                }
+                if (!original_build_props.ro_product_device.empty()) {
+                    std::string cmd = resetprop_path + " ro.product.device " + original_build_props.ro_product_device;
+                    system(cmd.c_str());
+                }
+                if (!original_build_props.ro_product_name.empty()) {
+                    std::string cmd = resetprop_path + " ro.product.name " + original_build_props.ro_product_name;
+                    system(cmd.c_str());
+                }
+                if (!original_build_props.ro_build_fingerprint.empty()) {
+                    std::string cmd = resetprop_path + " ro.build.fingerprint " + original_build_props.ro_build_fingerprint;
+                    system(cmd.c_str());
+                }
             }
             
             result = 0;
@@ -353,6 +354,7 @@ public:
                  current_needs_device_spoof, current_needs_cpu_spoof, should_unmount_cpu, 
                  is_blacklisted, is_cpu_only);
 
+            // Restore original build props for blacklisted apps
             if (is_blacklisted) {
                 executeCompanionCommand("restore_build_props");
                 LOGD("Restored original build props for blacklisted package: %s", package_name);
@@ -410,6 +412,7 @@ public:
             
             bool is_blacklisted = (cpu_blacklist.find(package_name) != cpu_blacklist.end());
             
+            // Check if app is in blacklist and restore build props
             if (is_blacklisted) {
                 executeCompanionCommand("restore_build_props");
                 LOGD("Post-specialize: Restored original build props for blacklisted package: %s", package_name);
