@@ -35,7 +35,17 @@ struct DeviceInfo {
     std::string product;
 };
 
+struct BuildPropValues {
+    std::string ro_product_brand;
+    std::string ro_product_manufacturer;
+    std::string ro_product_model;
+    std::string ro_product_device;
+    std::string ro_product_name;
+    std::string ro_build_fingerprint;
+};
+
 static DeviceInfo current_info;
+static BuildPropValues original_build_props;
 static std::mutex info_mutex;
 static jclass buildClass = nullptr;
 static jfieldID modelField = nullptr;
@@ -80,7 +90,7 @@ static std::string findResetpropPath() {
     for (int i = 0; possible_paths[i] != nullptr; i++) {
         if (access(possible_paths[i], X_OK) == 0) {
             LOGD("Found resetprop at: %s", possible_paths[i]);
-            return possible_paths[i];
+            return std::string(possible_paths[i]);
         }
     }
     
@@ -95,7 +105,7 @@ static std::string findResetpropPath() {
             if (access(path, X_OK) == 0) {
                 LOGD("Found resetprop via which: %s", path);
                 pclose(pipe);
-                return path;
+                return std::string(path);
             }
         }
         pclose(pipe);
@@ -103,6 +113,94 @@ static std::string findResetpropPath() {
     
     LOGE("Could not find resetprop in any known location!");
     return "";
+}
+
+static std::string readBuildPropValue(const std::string& prop_name) {
+    const char* build_prop_paths[] = {
+        "/system/build.prop",
+        "/vendor/build.prop",
+        "/product/build.prop",
+        "/system_ext/build.prop",
+        "/odm/build.prop",
+        nullptr
+    };
+    
+    // بررسی همه پیشوندهای ممکن
+    const char* prefixes[] = {
+        "ro.product.",
+        "ro.product.system.",
+        "ro.product.vendor.",
+        "ro.product.odm.",
+        "ro.product.product.",
+        "ro.system.product.",
+        "ro.vendor.product.",
+        "ro.odm.product.",
+        "ro.product.board.",
+        ""
+    };
+    
+    for (int i = 0; build_prop_paths[i] != nullptr; i++) {
+        FILE* file = fopen(build_prop_paths[i], "r");
+        if (!file) continue;
+        
+        char line[512];
+        
+        while (fgets(line, sizeof(line), file)) {
+            // بررسی برای هر پیشوند
+            for (int j = 0; j < sizeof(prefixes)/sizeof(prefixes[0]); j++) {
+                std::string search_str;
+                if (strlen(prefixes[j]) > 0) {
+                    search_str = std::string(prefixes[j]) + prop_name + "=";
+                } else {
+                    search_str = prop_name + "=";
+                }
+                
+                if (strstr(line, search_str.c_str()) == line) {
+                    std::string value = line + search_str.length();
+                    size_t newline_pos = value.find('\n');
+                    if (newline_pos != std::string::npos) {
+                        value.erase(newline_pos);
+                    }
+                    
+                    size_t comment_pos = value.find('#');
+                    if (comment_pos != std::string::npos) {
+                        value.erase(comment_pos);
+                    }
+                    
+                    fclose(file);
+                    
+                    while (!value.empty() && value.back() == '\r') {
+                        value.pop_back();
+                    }
+                    
+                    LOGD("Read %s=%s from %s", search_str.c_str(), value.c_str(), build_prop_paths[i]);
+                    return value;
+                }
+            }
+        }
+        
+        fclose(file);
+    }
+    
+    LOGD("Property %s not found in build.prop files", prop_name.c_str());
+    return "";
+}
+
+static void readOriginalBuildProps() {
+    original_build_props.ro_product_brand = readBuildPropValue("brand");
+    original_build_props.ro_product_manufacturer = readBuildPropValue("manufacturer");
+    original_build_props.ro_product_model = readBuildPropValue("model");
+    original_build_props.ro_product_device = readBuildPropValue("device");
+    original_build_props.ro_product_name = readBuildPropValue("name");
+    original_build_props.ro_build_fingerprint = readBuildPropValue("fingerprint");
+    
+    LOGD("Original build props loaded:");
+    LOGD("  brand: %s", original_build_props.ro_product_brand.c_str());
+    LOGD("  manufacturer: %s", original_build_props.ro_product_manufacturer.c_str());
+    LOGD("  model: %s", original_build_props.ro_product_model.c_str());
+    LOGD("  device: %s", original_build_props.ro_product_device.c_str());
+    LOGD("  product: %s", original_build_props.ro_product_name.c_str());
+    LOGD("  fingerprint: %s", original_build_props.ro_build_fingerprint.c_str());
 }
 
 static void companion(int fd) {
@@ -140,6 +238,47 @@ static void companion(int fd) {
             } else {
                 LOGE("[COMPANION] Spoof file not found: %s", spoof_file_path);
             }
+        } else if (command == "read_build_props") {
+            readOriginalBuildProps();
+            result = 0;
+            LOGD("[COMPANION] Read original build props");
+        } else if (command == "restore_build_props") {
+            std::string resetprop_path = findResetpropPath();
+            if (!resetprop_path.empty()) {
+                if (!original_build_props.ro_product_brand.empty()) {
+                    std::string cmd = resetprop_path + " ro.product.brand " + original_build_props.ro_product_brand;
+                    system(cmd.c_str());
+                    LOGD("[COMPANION] Restored brand: %s", original_build_props.ro_product_brand.c_str());
+                }
+                if (!original_build_props.ro_product_manufacturer.empty()) {
+                    std::string cmd = resetprop_path + " ro.product.manufacturer " + original_build_props.ro_product_manufacturer;
+                    system(cmd.c_str());
+                    LOGD("[COMPANION] Restored manufacturer: %s", original_build_props.ro_product_manufacturer.c_str());
+                }
+                if (!original_build_props.ro_product_model.empty()) {
+                    std::string cmd = resetprop_path + " ro.product.model " + original_build_props.ro_product_model;
+                    system(cmd.c_str());
+                    LOGD("[COMPANION] Restored model: %s", original_build_props.ro_product_model.c_str());
+                }
+                if (!original_build_props.ro_product_device.empty()) {
+                    std::string cmd = resetprop_path + " ro.product.device " + original_build_props.ro_product_device;
+                    system(cmd.c_str());
+                    LOGD("[COMPANION] Restored device: %s", original_build_props.ro_product_device.c_str());
+                }
+                if (!original_build_props.ro_product_name.empty()) {
+                    std::string cmd = resetprop_path + " ro.product.name " + original_build_props.ro_product_name;
+                    system(cmd.c_str());
+                    LOGD("[COMPANION] Restored product: %s", original_build_props.ro_product_name.c_str());
+                }
+                if (!original_build_props.ro_build_fingerprint.empty()) {
+                    std::string cmd = resetprop_path + " ro.build.fingerprint " + original_build_props.ro_build_fingerprint;
+                    system(cmd.c_str());
+                    LOGD("[COMPANION] Restored fingerprint: %s", original_build_props.ro_build_fingerprint.c_str());
+                }
+            }
+            
+            result = 0;
+            LOGD("[COMPANION] Restored original build props");
         }
         
         write(fd, &result, sizeof(result));
@@ -191,6 +330,8 @@ public:
         bool current_needs_device_spoof = false;
         bool current_needs_cpu_spoof = false;
         bool should_unmount_cpu = false;
+        bool is_blacklisted = false;
+        
         {
             std::lock_guard<std::mutex> lock(info_mutex);
             
@@ -218,24 +359,32 @@ public:
                 }
             }
 
-            bool is_globally_blacklisted = (cpu_blacklist.find(package_name) != cpu_blacklist.end());
+            is_blacklisted = (cpu_blacklist.find(package_name) != cpu_blacklist.end());
             bool is_cpu_only = (cpu_only_packages.find(package_name) != cpu_only_packages.end());
 
-            if (is_globally_blacklisted) {
+            if (is_blacklisted) {
                 should_unmount_cpu = true;
+                LOGD("Package %s is in CPU blacklist", package_name);
             }
 
-            if (!found_in_device_list && !is_globally_blacklisted && is_cpu_only) {
+            if (!found_in_device_list && !is_blacklisted && is_cpu_only) {
                 current_needs_cpu_spoof = true;
             }
 
-            if (found_in_device_list && package_setting.empty() && !is_globally_blacklisted && is_cpu_only) {
+            if (found_in_device_list && package_setting.empty() && !is_blacklisted && is_cpu_only) {
                 current_needs_cpu_spoof = true;
             }
 
             LOGD("Final decision - device: %d, cpu: %d, unmount: %d, blacklist: %d, cpu_only: %d", 
                  current_needs_device_spoof, current_needs_cpu_spoof, should_unmount_cpu, 
-                 is_globally_blacklisted, is_cpu_only);
+                 is_blacklisted, is_cpu_only);
+
+            // First read build props for blacklisted apps
+            if (is_blacklisted) {
+                executeCompanionCommand("read_build_props");
+                executeCompanionCommand("restore_build_props");
+                LOGD("Restored original build props for blacklisted package: %s", package_name);
+            }
 
             if (current_needs_device_spoof) {
                 spoofDevice(current_info);
@@ -252,7 +401,7 @@ public:
                 LOGD("CPU spoof MOUNTED for %s", package_name);
             }
 
-            if (current_needs_device_spoof || current_needs_cpu_spoof) {
+            if (current_needs_device_spoof || current_needs_cpu_spoof || is_blacklisted) {
                 should_close = false;
             }
         }
@@ -272,7 +421,7 @@ public:
         ensureBuildClass();
         if (!buildClass) {
             LOGE("Build class not initialized, skipping postAppSpecialize");
-            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
             return;
         }
 
@@ -280,12 +429,21 @@ public:
         const char* package_name = pkg.get();
         if (!package_name) {
             LOGE("Failed to get package name in postAppSpecialize");
-            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
             return;
         }
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
+            
+            bool is_blacklisted = (cpu_blacklist.find(package_name) != cpu_blacklist.end());
+            
+            // Check if app is in blacklist and restore build props
+            if (is_blacklisted) {
+                executeCompanionCommand("read_build_props");
+                executeCompanionCommand("restore_build_props");
+                LOGD("Post-specialize: Restored original build props for blacklisted package: %s", package_name);
+            }
             
             for (auto& device_entry : device_packages) {
                 auto it = device_entry.second.find(package_name);
@@ -298,7 +456,7 @@ public:
             }
         }
 
-        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+        api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
         LOGD("Set DLCLOSE in postAppSpecialize for extra stealth");
     }
 
@@ -311,18 +469,29 @@ private:
         std::string package_name = package_str;
         std::unordered_set<std::string> tags;
         
+        // حذف فضای خالی از ابتدا و انتها
         package_name.erase(0, package_name.find_first_not_of(" \t"));
         package_name.erase(package_name.find_last_not_of(" \t") + 1);
         
-        size_t colon_pos = package_str.find(':');
-        if (colon_pos != std::string::npos && colon_pos < package_str.length() - 1) {
-            package_name = package_str.substr(0, colon_pos);
+        // بررسی وجود تگ‌ها با format: package:tag1:tag2
+        size_t first_colon = package_name.find(':');
+        if (first_colon != std::string::npos && first_colon < package_name.length() - 1) {
+            std::string original_name = package_name;
+            package_name = original_name.substr(0, first_colon);
             
-            std::string tags_part = package_str.substr(colon_pos + 1);
-            
-            std::istringstream tag_stream(tags_part);
-            std::string tag;
-            while (std::getline(tag_stream, tag, ':')) {
+            // استخراج تگ‌ها
+            size_t start = first_colon + 1;
+            while (start < original_name.length()) {
+                size_t end = original_name.find(':', start);
+                std::string tag;
+                if (end == std::string::npos) {
+                    tag = original_name.substr(start);
+                    start = original_name.length();
+                } else {
+                    tag = original_name.substr(start, end - start);
+                    start = end + 1;
+                }
+                
                 tag.erase(0, tag.find_first_not_of(" \t"));
                 tag.erase(tag.find_last_not_of(" \t") + 1);
                 
