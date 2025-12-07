@@ -287,7 +287,7 @@ static void companion(int fd) {
     close(fd);
 }
 
-class SpoofModule : public zygisk::ModuleBase {
+class COPGModule : public zygisk::ModuleBase {
 public:
     void onLoad(zygisk::Api* api, JNIEnv* env) override {
         this->api = api;
