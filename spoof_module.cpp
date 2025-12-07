@@ -42,6 +42,10 @@ struct DeviceInfo {
     std::string model;
     std::string fingerprint;
     std::string product;
+    std::string android_version;
+    int sdk_int;
+    bool should_spoof_android_version = false;
+    bool should_spoof_sdk_int = false;
 };
 
 struct BuildPropValues {
@@ -57,12 +61,15 @@ static DeviceInfo current_info;
 static BuildPropValues original_build_props;
 static std::mutex info_mutex;
 static jclass buildClass = nullptr;
+static jclass versionClass = nullptr;
 static jfieldID modelField = nullptr;
 static jfieldID brandField = nullptr;
 static jfieldID deviceField = nullptr;
 static jfieldID manufacturerField = nullptr;
 static jfieldID fingerprintField = nullptr;
 static jfieldID productField = nullptr;
+static jfieldID releaseField = nullptr;
+static jfieldID sdkIntField = nullptr;
 static std::once_flag build_once;
 
 static time_t last_config_mtime = 0;
@@ -255,6 +262,19 @@ static void companion(int fd) {
                     std::string cmd = resetprop_path + " ro.build.fingerprint " + original_build_props.ro_build_fingerprint;
                     system(cmd.c_str());
                 }
+                
+                std::string original_android_version = readBuildPropValue("version.release");
+                std::string original_sdk = readBuildPropValue("version.sdk");
+                
+                if (!original_android_version.empty()) {
+                    std::string cmd = resetprop_path + " ro.build.version.release " + original_android_version;
+                    system(cmd.c_str());
+                }
+                
+                if (!original_sdk.empty()) {
+                    std::string cmd = resetprop_path + " ro.build.version.sdk " + original_sdk;
+                    system(cmd.c_str());
+                }
             }
             
             result = 0;
@@ -283,6 +303,10 @@ public:
         if (buildClass) {
             env->DeleteGlobalRef(buildClass);
             buildClass = nullptr;
+        }
+        if (versionClass) {
+            env->DeleteGlobalRef(versionClass);
+            versionClass = nullptr;
         }
     }
 
@@ -528,6 +552,35 @@ private:
             executeCompanionCommand(cmd);
         }
         
+        if (info.should_spoof_android_version) {
+            const char* release_props[] = {
+                "ro.build.version.release",
+                "ro.system.build.version.release",
+                "ro.vendor.build.version.release",
+                "ro.product.build.version.release"
+            };
+            
+            for (const auto& prop : release_props) {
+                std::string cmd = std::string("resetprop ") + prop + " \"" + info.android_version + "\"";
+                executeCompanionCommand(cmd);
+            }
+        }
+        
+        if (info.should_spoof_sdk_int) {
+            std::string sdk_str = std::to_string(info.sdk_int);
+            const char* sdk_props[] = {
+                "ro.build.version.sdk",
+                "ro.system.build.version.sdk",
+                "ro.vendor.build.version.sdk",
+                "ro.product.build.version.sdk"
+            };
+            
+            for (const auto& prop : sdk_props) {
+                std::string cmd = std::string("resetprop ") + prop + " \"" + sdk_str + "\"";
+                executeCompanionCommand(cmd);
+            }
+        }
+        
         SPOOF_LOG("System props: model=%s, brand=%s", info.model.c_str(), info.brand.c_str());
     }
 
@@ -552,10 +605,23 @@ private:
             fingerprintField = env->GetStaticFieldID(buildClass, "FINGERPRINT", "Ljava/lang/String;");
             productField = env->GetStaticFieldID(buildClass, "PRODUCT", "Ljava/lang/String;");
 
+            jclass localVersion = env->FindClass("android/os/Build$VERSION");
+            if (localVersion) {
+                versionClass = static_cast<jclass>(env->NewGlobalRef(localVersion));
+                env->DeleteLocalRef(localVersion);
+                
+                if (versionClass) {
+                    releaseField = env->GetStaticFieldID(versionClass, "RELEASE", "Ljava/lang/String;");
+                    sdkIntField = env->GetStaticFieldID(versionClass, "SDK_INT", "I");
+                }
+            }
+
             if (env->ExceptionCheck()) {
                 env->ExceptionClear();
-                env->DeleteGlobalRef(buildClass);
+                if (buildClass) env->DeleteGlobalRef(buildClass);
+                if (versionClass) env->DeleteGlobalRef(versionClass);
                 buildClass = nullptr;
+                versionClass = nullptr;
             }
         });
     }
@@ -620,6 +686,43 @@ private:
                     info.fingerprint = device.value("FINGERPRINT", "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys");
                     info.product = device.value("PRODUCT", info.brand);
 
+                    if (device.contains("ANDROID_VERSION")) {
+                        try {
+                            if (device["ANDROID_VERSION"].is_string()) {
+                                info.android_version = device["ANDROID_VERSION"].get<std::string>();
+                                info.should_spoof_android_version = !info.android_version.empty();
+                            } else if (device["ANDROID_VERSION"].is_number()) {
+                                info.android_version = std::to_string(device["ANDROID_VERSION"].get<int>());
+                                info.should_spoof_android_version = true;
+                            }
+                        } catch (const std::exception& e) {
+                            LOGW("Failed to parse ANDROID_VERSION: %s", e.what());
+                            info.should_spoof_android_version = false;
+                        }
+                    } else {
+                        info.should_spoof_android_version = false;
+                    }
+
+                    if (device.contains("SDK_INT")) {
+                        try {
+                            if (device["SDK_INT"].is_number()) {
+                                info.sdk_int = device["SDK_INT"].get<int>();
+                                info.should_spoof_sdk_int = true;
+                            } else if (device["SDK_INT"].is_string()) {
+                                std::string sdk_str = device["SDK_INT"].get<std::string>();
+                                if (!sdk_str.empty()) {
+                                    info.sdk_int = std::stoi(sdk_str);
+                                    info.should_spoof_sdk_int = true;
+                                }
+                            }
+                        } catch (const std::exception& e) {
+                            LOGW("Failed to parse SDK_INT: %s", e.what());
+                            info.should_spoof_sdk_int = false;
+                        }
+                    } else {
+                        info.should_spoof_sdk_int = false;
+                    }
+
                     std::unordered_map<std::string, std::string> package_settings;
                     
                     if (value.is_array()) {
@@ -673,12 +776,28 @@ private:
             }
         };
 
+        auto setInt = [&](jfieldID field, int value) {
+            if (!field) return;
+            env->SetStaticIntField(versionClass, field, value);
+            if (env->ExceptionCheck()) {
+                env->ExceptionClear();
+            }
+        };
+
         setStr(modelField, info.model);
         setStr(brandField, info.brand);
         setStr(deviceField, info.device);
         setStr(manufacturerField, info.manufacturer);
         setStr(fingerprintField, info.fingerprint);
         setStr(productField, info.product);
+        
+        if (info.should_spoof_android_version && versionClass && releaseField) {
+            setStr(releaseField, info.android_version);
+        }
+        
+        if (info.should_spoof_sdk_int && versionClass && sdkIntField) {
+            setInt(sdkIntField, info.sdk_int);
+        }
         
         SPOOF_LOG("Device spoofed: %s (%s)", info.model.c_str(), info.brand.c_str());
     }
