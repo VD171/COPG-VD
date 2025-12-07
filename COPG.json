@@ -111,7 +111,6 @@
     "PRODUCT": "23049PCD8G"
   },
   "PACKAGES_ROG_PHONE_6D_ULTIMATE": [
-    "com.gameloft.android.ANMP.GloftA9HM",
     "com.madfingergames.legends",
     "com.pearlabyss.blackdesertm",
     "com.pearlabyss.blackdesertm.gl"
@@ -229,5 +228,16 @@
     "MODEL": "SM-F9460",
     "FINGERPRINT": "samsung/q2qzh/q2q:15/UP1A.231005.007/F946BXXU1BWK4:user/release-keys",
     "PRODUCT": "SM-F9460"
+  },
+  "PACKAGES_HONOR_MAGIC_V2_RSR": [
+    "com.gameloft.android.ANMP.GloftA9HM"
+  ],
+  "PACKAGES_HONOR_MAGIC_V2_RSR_DEVICE": {
+    "BRAND": "HONOR",
+    "DEVICE": "Honor Magic V2 RSR",
+    "MANUFACTURER": "HONOR",
+    "MODEL": "VER-N49DP",
+    "FINGERPRINT": "HONOR/VER-N49DP/VER:13/ENG.20240918.123456:user/release-keys",
+    "PRODUCT": "VER-N49DP"
   }
 }
