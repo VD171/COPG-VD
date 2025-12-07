@@ -125,9 +125,6 @@ static std::string readBuildPropValue(const std::string& prop_name) {
     const char* build_prop_paths[] = {
         "/system/build.prop",
         "/vendor/build.prop",
-        "/product/build.prop",
-        "/system_ext/build.prop",
-        "/odm/build.prop",
         nullptr
     };
     
@@ -135,12 +132,6 @@ static std::string readBuildPropValue(const std::string& prop_name) {
         "ro.product.",
         "ro.product.system.",
         "ro.product.vendor.",
-        "ro.product.odm.",
-        "ro.product.product.",
-        "ro.system.product.",
-        "ro.vendor.product.",
-        "ro.odm.product.",
-        "ro.product.board.",
         ""
     };
     
