@@ -1867,21 +1867,32 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
     
     if (gamePackage) {
         title.textContent = 'Edit Game Configuration';
-        editingGame = { package: gamePackage, device: deviceKey };
         
         const cleanPackageName = getPackageNameWithoutTags(gamePackage);
         packageInput.value = cleanPackageName;
         
         let detectedType = 'device';
-        const cpuSpoofData = currentConfig.cpu_spoof || {};
-        const blockedList = cpuSpoofData.blacklist || [];
-        const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
-        
-        if (blockedList.includes(cleanPackageName)) {
-            detectedType = 'blocked';
-        } else if (cpuOnlyList.includes(cleanPackageName)) {
-            detectedType = 'cpu_only';
+        if (gameType) {
+            detectedType = gameType;
+        } else {
+            const cpuSpoofData = currentConfig.cpu_spoof || {};
+            const blockedList = cpuSpoofData.blacklist || [];
+            const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
+            
+            if (blockedList.includes(cleanPackageName)) {
+                detectedType = 'blocked';
+            } else if (cpuOnlyList.includes(cleanPackageName)) {
+                detectedType = 'cpu_only';
+            } else if (deviceKey) {
+                detectedType = 'device';
+            }
         }
+        
+        editingGame = { 
+            package: gamePackage, 
+            device: deviceKey,
+            type: detectedType 
+        };
         
         selectedGameType = detectedType;
         typeInput.value = getTypeDisplayName(detectedType);
@@ -2186,7 +2197,7 @@ async function saveGame(e) {
     const blockCpuToggle = document.getElementById('block-cpu-toggle');
     
     const selectedType = typeInput.dataset.type;
-    const deviceKey = deviceInput.dataset.key;
+    const newDeviceKey = deviceInput.dataset.key;
     const disableTweaks = disableTweaksToggle ? disableTweaksToggle.checked : false;
     const withCpuSpoof = cpuSpoofToggle ? cpuSpoofToggle.checked : false;
     const blockCpuSpoof = blockCpuToggle ? blockCpuToggle.checked : false;
@@ -2223,7 +2234,7 @@ async function saveGame(e) {
         missingFields.push('Spoofing Type');
     }
     
-    if (selectedType === 'device' && !deviceKey) {
+    if (selectedType === 'device' && !newDeviceKey) {
         deviceInput.classList.add('error');
         const errorMessage = document.createElement('span');
         errorMessage.className = 'error-message';
@@ -2241,45 +2252,46 @@ async function saveGame(e) {
     
     const cleanPackageForCheck = getPackageNameWithoutTags(gamePackageInput);
     
+    let duplicateLocation = '';
+    
     if (editingGame) {
         const oldCleanPackage = getPackageNameWithoutTags(editingGame.package);
         if (oldCleanPackage !== cleanPackageForCheck) {
-            let duplicateFound = false;
             const cpuSpoofData = currentConfig.cpu_spoof || {};
             const blockedList = cpuSpoofData.blacklist || [];
             const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
             
             for (const blockedPackage of blockedList) {
                 if (getPackageNameWithoutTags(blockedPackage) === cleanPackageForCheck) {
-                    duplicateFound = true;
+                    duplicateLocation = 'blocklist';
                     break;
                 }
             }
             
-            if (!duplicateFound) {
+            if (!duplicateLocation) {
                 for (const cpuPackage of cpuOnlyList) {
                     if (getPackageNameWithoutTags(cpuPackage) === cleanPackageForCheck) {
-                        duplicateFound = true;
+                        duplicateLocation = 'CPU only list';
                         break;
                     }
                 }
             }
             
-            if (!duplicateFound) {
+            if (!duplicateLocation) {
                 for (const [key, value] of Object.entries(currentConfig)) {
                     if (Array.isArray(value) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
                         for (const pkg of value) {
                             if (getPackageNameWithoutTags(pkg) === cleanPackageForCheck) {
-                                duplicateFound = true;
+                                duplicateLocation = `device "${currentConfig[`${key}_DEVICE`]?.DEVICE || key}"`;
                                 break;
                             }
                         }
-                        if (duplicateFound) break;
+                        if (duplicateLocation) break;
                     }
                 }
             }
             
-            if (duplicateFound) {
+            if (duplicateLocation) {
                 const field = document.getElementById('game-package');
                 field.classList.add('error');
                 let parentError = field.parentNode.nextElementSibling;
@@ -2290,52 +2302,51 @@ async function saveGame(e) {
                 
                 const errorMessage = document.createElement('span');
                 errorMessage.className = 'error-message';
-                errorMessage.textContent = 'Game package already exists in configuration';
+                errorMessage.textContent = `Game package already exists in ${duplicateLocation}`;
                 field.parentNode.insertAdjacentElement('afterend', errorMessage);
                 
                 hasError = true;
                 missingFields.push('Package Name (duplicate)');
-                document.getElementById('error-message').textContent = 'Game package already exists in configuration';
+                document.getElementById('error-message').textContent = `Game package already exists in ${duplicateLocation}`;
                 showPopup('error-popup');
             }
         }
     } else {
-        let duplicateFound = false;
         const cpuSpoofData = currentConfig.cpu_spoof || {};
         const blockedList = cpuSpoofData.blacklist || [];
         const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
         
         for (const blockedPackage of blockedList) {
             if (getPackageNameWithoutTags(blockedPackage) === cleanPackageForCheck) {
-                duplicateFound = true;
+                duplicateLocation = 'blocklist';
                 break;
             }
         }
         
-        if (!duplicateFound) {
+        if (!duplicateLocation) {
             for (const cpuPackage of cpuOnlyList) {
                 if (getPackageNameWithoutTags(cpuPackage) === cleanPackageForCheck) {
-                    duplicateFound = true;
+                    duplicateLocation = 'CPU only list';
                     break;
                 }
             }
         }
         
-        if (!duplicateFound) {
+        if (!duplicateLocation) {
             for (const [key, value] of Object.entries(currentConfig)) {
                 if (Array.isArray(value) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
                     for (const pkg of value) {
                         if (getPackageNameWithoutTags(pkg) === cleanPackageForCheck) {
-                            duplicateFound = true;
+                            duplicateLocation = `device "${currentConfig[`${key}_DEVICE`]?.DEVICE || key}"`;
                             break;
                         }
                     }
-                    if (duplicateFound) break;
+                    if (duplicateLocation) break;
                 }
             }
         }
         
-        if (duplicateFound) {
+        if (duplicateLocation) {
             const field = document.getElementById('game-package');
             field.classList.add('error');
             let parentError = field.parentNode.nextElementSibling;
@@ -2346,12 +2357,12 @@ async function saveGame(e) {
             
             const errorMessage = document.createElement('span');
             errorMessage.className = 'error-message';
-            errorMessage.textContent = 'Game package already exists in configuration';
+            errorMessage.textContent = `Game package already exists in ${duplicateLocation}`;
             field.parentNode.insertAdjacentElement('afterend', errorMessage);
             
             hasError = true;
             missingFields.push('Package Name (duplicate)');
-            document.getElementById('error-message').textContent = 'Game package already exists in configuration';
+            document.getElementById('error-message').textContent = `Game package already exists in ${duplicateLocation}`;
             showPopup('error-popup');
         }
     }
@@ -2406,13 +2417,54 @@ async function saveGame(e) {
         }
         
         const oldCleanPackage = editingGame ? getPackageNameWithoutTags(editingGame.package) : null;
+        const oldDeviceKey = editingGame ? editingGame.device : null;
+        const oldGameType = editingGame ? editingGame.type : null;
+        
+        const cpuSpoofData = currentConfig.cpu_spoof;
+        const blockedList = cpuSpoofData.blacklist || [];
+        const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
+        
+        if (oldCleanPackage) {
+            const blockedIndex = blockedList.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
+            const cpuOnlyIndex = cpuOnlyList.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
+            
+            if (blockedIndex !== -1 && selectedType !== 'blocked') {
+                blockedList.splice(blockedIndex, 1);
+                appendToOutput(`Removed package from blocklist`, 'info');
+            }
+            
+            if (cpuOnlyIndex !== -1 && selectedType !== 'cpu_only') {
+                cpuOnlyList.splice(cpuOnlyIndex, 1);
+                appendToOutput(`Removed package from CPU only list`, 'info');
+            }
+        }
+        
+        if (oldDeviceKey && selectedType !== 'device') {
+            const oldPackageList = currentConfig[oldDeviceKey];
+            if (Array.isArray(oldPackageList)) {
+                const oldIndex = oldPackageList.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
+                if (oldIndex !== -1) {
+                    oldPackageList.splice(oldIndex, 1);
+                    appendToOutput(`Removed package from old device "${oldDeviceKey}"`, 'info');
+                }
+            }
+        } else if (selectedType === 'device' && oldDeviceKey && oldDeviceKey !== newDeviceKey.replace('_DEVICE', '')) {
+            const oldPackageList = currentConfig[oldDeviceKey];
+            if (Array.isArray(oldPackageList)) {
+                const oldIndex = oldPackageList.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
+                if (oldIndex !== -1) {
+                    oldPackageList.splice(oldIndex, 1);
+                    appendToOutput(`Removed package from old device "${oldDeviceKey}"`, 'info');
+                }
+            }
+        }
         
         if (selectedType === 'device') {
-            const packageKey = deviceKey.replace('_DEVICE', '');
+            const packageKey = newDeviceKey.replace('_DEVICE', '');
             if (!Array.isArray(currentConfig[packageKey])) {
                 currentConfig[packageKey] = [];
                 if (!configKeyOrder.includes(packageKey)) {
-                    const deviceIndex = configKeyOrder.indexOf(deviceKey);
+                    const deviceIndex = configKeyOrder.indexOf(newDeviceKey);
                     if (deviceIndex !== -1) {
                         configKeyOrder.splice(deviceIndex, 0, packageKey);
                     } else {
@@ -2421,18 +2473,13 @@ async function saveGame(e) {
                 }
             }
             
-            let originalIndex = -1;
-            if (editingGame && editingGame.device === packageKey) {
-                originalIndex = currentConfig[packageKey].findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
+            const newPackageList = currentConfig[packageKey];
+            const existingIndex = newPackageList.findIndex(pkg => getPackageNameWithoutTags(pkg) === getPackageNameWithoutTags(finalPackageName));
+            if (existingIndex !== -1) {
+                newPackageList.splice(existingIndex, 1);
             }
             
-            currentConfig[packageKey] = currentConfig[packageKey].filter(pkg => getPackageNameWithoutTags(pkg) !== oldCleanPackage);
-            
-            if (originalIndex !== -1 && originalIndex <= currentConfig[packageKey].length) {
-                currentConfig[packageKey].splice(originalIndex, 0, finalPackageName);
-            } else {
-                currentConfig[packageKey].push(finalPackageName);
-            }
+            newPackageList.push(finalPackageName);
             
             let tweaksMessage = '';
             if (disableTweaks && withCpuSpoof) {
@@ -2449,42 +2496,26 @@ async function saveGame(e) {
                 tweaksMessage = 'with all tweaks';
             }
             
-            appendToOutput(`Game "${gameName}" ${editingGame ? 'updated' : 'added'} to "${currentConfig[deviceKey].DEVICE}" ${tweaksMessage}`, 'success');
+            appendToOutput(`Game "${gameName}" ${editingGame ? 'updated' : 'added'} to "${currentConfig[newDeviceKey].DEVICE}" ${tweaksMessage}`, 'success');
             
         } else if (selectedType === 'cpu_only') {
-            const cpuSpoofData = currentConfig.cpu_spoof;
-            
-            let originalIndex = -1;
-            if (editingGame && editingGame.type === 'cpu_only') {
-                originalIndex = cpuSpoofData.cpu_only_packages.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
+            const existingIndex = cpuOnlyList.findIndex(pkg => getPackageNameWithoutTags(pkg) === getPackageNameWithoutTags(finalPackageName));
+            if (existingIndex !== -1) {
+                cpuOnlyList.splice(existingIndex, 1);
             }
             
-            cpuSpoofData.cpu_only_packages = cpuSpoofData.cpu_only_packages.filter(pkg => getPackageNameWithoutTags(pkg) !== oldCleanPackage);
-            
-            if (originalIndex !== -1 && originalIndex <= cpuSpoofData.cpu_only_packages.length) {
-                cpuSpoofData.cpu_only_packages.splice(originalIndex, 0, finalPackageName);
-            } else {
-                cpuSpoofData.cpu_only_packages.push(finalPackageName);
-            }
+            cpuOnlyList.push(finalPackageName);
             
             let tweaksMessage = disableTweaks ? 'with no tweaks' : 'with all tweaks';
             appendToOutput(`Game "${gameName}" ${editingGame ? 'updated' : 'added'} to CPU only spoofing ${tweaksMessage}`, 'success');
             
         } else if (selectedType === 'blocked') {
-            const cpuSpoofData = currentConfig.cpu_spoof;
-            
-            let originalIndex = -1;
-            if (editingGame && editingGame.type === 'blocked') {
-                originalIndex = cpuSpoofData.blacklist.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
+            const existingIndex = blockedList.findIndex(pkg => getPackageNameWithoutTags(pkg) === getPackageNameWithoutTags(cleanPackageForCheck));
+            if (existingIndex !== -1) {
+                blockedList.splice(existingIndex, 1);
             }
             
-            cpuSpoofData.blacklist = cpuSpoofData.blacklist.filter(pkg => getPackageNameWithoutTags(pkg) !== oldCleanPackage);
-            
-            if (originalIndex !== -1 && originalIndex <= cpuSpoofData.blacklist.length) {
-                cpuSpoofData.blacklist.splice(originalIndex, 0, cleanPackageForCheck);
-            } else {
-                cpuSpoofData.blacklist.push(cleanPackageForCheck);
-            }
+            blockedList.push(cleanPackageForCheck);
             
             appendToOutput(`Game "${gameName}" ${editingGame ? 'updated' : 'added'} to blocklist`, 'success');
         }
