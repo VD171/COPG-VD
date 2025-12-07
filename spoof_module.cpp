@@ -20,11 +20,20 @@
 
 using json = nlohmann::json;
 
-#define LOG_TAG "SpoofModule"
+#define LOG_TAG "COPGModule"
+
+#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__)
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-static bool debug_mode = true;
+#define CONFIG_LOG(...) LOGI("[CONFIG] " __VA_ARGS__)
+#define SPOOF_LOG(...) LOGI("[SPOOF] " __VA_ARGS__)
+#define COMPANION_LOG(...) LOGI("[COMPANION] " __VA_ARGS__)
+#define PKG_LOG(...) LOGI("[PKG] " __VA_ARGS__)
+
+static bool debug_mode = false;
 
 struct DeviceInfo {
     std::string brand;
@@ -89,7 +98,6 @@ static std::string findResetpropPath() {
     
     for (int i = 0; possible_paths[i] != nullptr; i++) {
         if (access(possible_paths[i], X_OK) == 0) {
-            LOGD("Found resetprop at: %s", possible_paths[i]);
             return std::string(possible_paths[i]);
         }
     }
@@ -103,7 +111,6 @@ static std::string findResetpropPath() {
                 path[len-1] = '\0';
             }
             if (access(path, X_OK) == 0) {
-                LOGD("Found resetprop via which: %s", path);
                 pclose(pipe);
                 return std::string(path);
             }
@@ -111,7 +118,6 @@ static std::string findResetpropPath() {
         pclose(pipe);
     }
     
-    LOGE("Could not find resetprop in any known location!");
     return "";
 }
 
@@ -125,7 +131,6 @@ static std::string readBuildPropValue(const std::string& prop_name) {
         nullptr
     };
     
-    // بررسی همه پیشوندهای ممکن
     const char* prefixes[] = {
         "ro.product.",
         "ro.product.system.",
@@ -146,7 +151,6 @@ static std::string readBuildPropValue(const std::string& prop_name) {
         char line[512];
         
         while (fgets(line, sizeof(line), file)) {
-            // بررسی برای هر پیشوند
             for (int j = 0; j < sizeof(prefixes)/sizeof(prefixes[0]); j++) {
                 std::string search_str;
                 if (strlen(prefixes[j]) > 0) {
@@ -173,7 +177,6 @@ static std::string readBuildPropValue(const std::string& prop_name) {
                         value.pop_back();
                     }
                     
-                    LOGD("Read %s=%s from %s", search_str.c_str(), value.c_str(), build_prop_paths[i]);
                     return value;
                 }
             }
@@ -182,7 +185,6 @@ static std::string readBuildPropValue(const std::string& prop_name) {
         fclose(file);
     }
     
-    LOGD("Property %s not found in build.prop files", prop_name.c_str());
     return "";
 }
 
@@ -194,17 +196,13 @@ static void readOriginalBuildProps() {
     original_build_props.ro_product_name = readBuildPropValue("name");
     original_build_props.ro_build_fingerprint = readBuildPropValue("fingerprint");
     
-    LOGD("Original build props loaded:");
-    LOGD("  brand: %s", original_build_props.ro_product_brand.c_str());
-    LOGD("  manufacturer: %s", original_build_props.ro_product_manufacturer.c_str());
-    LOGD("  model: %s", original_build_props.ro_product_model.c_str());
-    LOGD("  device: %s", original_build_props.ro_product_device.c_str());
-    LOGD("  product: %s", original_build_props.ro_product_name.c_str());
-    LOGD("  fingerprint: %s", original_build_props.ro_build_fingerprint.c_str());
+    CONFIG_LOG("Original props loaded: brand=%s, model=%s", 
+               original_build_props.ro_product_brand.c_str(),
+               original_build_props.ro_product_model.c_str());
 }
 
 static void companion(int fd) {
-    LOGD("[COMPANION] Companion started");
+    COMPANION_LOG("Started");
     
     char buffer[256];
     ssize_t bytes = read(fd, buffer, sizeof(buffer)-1);
@@ -213,8 +211,6 @@ static void companion(int fd) {
         buffer[bytes] = '\0';
         std::string command = buffer;
         
-        LOGD("[COMPANION] Command: %s", command.c_str());
-        
         int result = -1;
         
         if (command.find("resetprop") == 0) {
@@ -222,11 +218,11 @@ static void companion(int fd) {
             if (!resetprop_path.empty()) {
                 std::string full_cmd = resetprop_path + " " + command.substr(9);
                 result = system(full_cmd.c_str());
-                LOGD("[COMPANION] Resetprop result: %d", result);
+                COMPANION_LOG("Resetprop cmd: %s", command.substr(9).c_str());
             }
         } else if (command == "unmount_spoof") {
             result = system("/system/bin/umount /proc/cpuinfo 2>/dev/null");
-            LOGD("[COMPANION] Unmount result: %d", result);
+            COMPANION_LOG("CPU unmount");
         } else if (command == "mount_spoof") {
             if (access(spoof_file_path, F_OK) == 0) {
                 system("/system/bin/umount /proc/cpuinfo 2>/dev/null");
@@ -234,51 +230,44 @@ static void companion(int fd) {
                 snprintf(mount_cmd, sizeof(mount_cmd), 
                         "/system/bin/mount --bind %s /proc/cpuinfo", spoof_file_path);
                 result = system(mount_cmd);
-                LOGD("[COMPANION] Mount result: %d", result);
+                COMPANION_LOG("CPU mount");
             } else {
-                LOGE("[COMPANION] Spoof file not found: %s", spoof_file_path);
+                LOGE("Spoof file missing: %s", spoof_file_path);
             }
         } else if (command == "read_build_props") {
             readOriginalBuildProps();
             result = 0;
-            LOGD("[COMPANION] Read original build props");
         } else if (command == "restore_build_props") {
             std::string resetprop_path = findResetpropPath();
             if (!resetprop_path.empty()) {
                 if (!original_build_props.ro_product_brand.empty()) {
                     std::string cmd = resetprop_path + " ro.product.brand " + original_build_props.ro_product_brand;
                     system(cmd.c_str());
-                    LOGD("[COMPANION] Restored brand: %s", original_build_props.ro_product_brand.c_str());
                 }
                 if (!original_build_props.ro_product_manufacturer.empty()) {
                     std::string cmd = resetprop_path + " ro.product.manufacturer " + original_build_props.ro_product_manufacturer;
                     system(cmd.c_str());
-                    LOGD("[COMPANION] Restored manufacturer: %s", original_build_props.ro_product_manufacturer.c_str());
                 }
                 if (!original_build_props.ro_product_model.empty()) {
                     std::string cmd = resetprop_path + " ro.product.model " + original_build_props.ro_product_model;
                     system(cmd.c_str());
-                    LOGD("[COMPANION] Restored model: %s", original_build_props.ro_product_model.c_str());
                 }
                 if (!original_build_props.ro_product_device.empty()) {
                     std::string cmd = resetprop_path + " ro.product.device " + original_build_props.ro_product_device;
                     system(cmd.c_str());
-                    LOGD("[COMPANION] Restored device: %s", original_build_props.ro_product_device.c_str());
                 }
                 if (!original_build_props.ro_product_name.empty()) {
                     std::string cmd = resetprop_path + " ro.product.name " + original_build_props.ro_product_name;
                     system(cmd.c_str());
-                    LOGD("[COMPANION] Restored product: %s", original_build_props.ro_product_name.c_str());
                 }
                 if (!original_build_props.ro_build_fingerprint.empty()) {
                     std::string cmd = resetprop_path + " ro.build.fingerprint " + original_build_props.ro_build_fingerprint;
                     system(cmd.c_str());
-                    LOGD("[COMPANION] Restored fingerprint: %s", original_build_props.ro_build_fingerprint.c_str());
                 }
             }
             
             result = 0;
-            LOGD("[COMPANION] Restored original build props");
+            COMPANION_LOG("Build props restored");
         }
         
         write(fd, &result, sizeof(result));
@@ -293,8 +282,7 @@ public:
         this->api = api;
         this->env = env;
 
-        LOGD("Module loaded successfully");
-        
+        LOGI("Module loaded");
         ensureBuildClass();
         reloadIfNeeded(true);
     }
@@ -304,13 +292,12 @@ public:
         if (buildClass) {
             env->DeleteGlobalRef(buildClass);
             buildClass = nullptr;
-            LOGD("Global ref for Build class released");
         }
     }
 
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
         if (!args || !args->nice_name) {
-            LOGD("No package name provided, closing module");
+            LOGI("No package name, closing module");
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
         }
@@ -318,12 +305,11 @@ public:
         JniString pkg(env, args->nice_name);
         const char* package_name = pkg.get();
         if (!package_name) {
-            LOGE("Failed to get package name");
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
         }
 
-        LOGD("Processing package: %s", package_name);
+        PKG_LOG("Processing: %s", package_name);
         reloadIfNeeded(false);
 
         bool should_close = true;
@@ -348,8 +334,6 @@ public:
                     device_info = device_entry.first;
                     current_info = device_info;
                     
-                    LOGD("Package %s - setting: %s", package_name, package_setting.c_str());
-                    
                     if (package_setting == "with_cpu") {
                         current_needs_cpu_spoof = true;
                     } else if (package_setting == "blocked") {
@@ -364,7 +348,7 @@ public:
 
             if (is_blacklisted) {
                 should_unmount_cpu = true;
-                LOGD("Package %s is in CPU blacklist", package_name);
+                PKG_LOG("%s: CPU blacklisted", package_name);
             }
 
             if (!found_in_device_list && !is_blacklisted && is_cpu_only) {
@@ -375,30 +359,32 @@ public:
                 current_needs_cpu_spoof = true;
             }
 
-            LOGD("Final decision - device: %d, cpu: %d, unmount: %d, blacklist: %d, cpu_only: %d", 
-                 current_needs_device_spoof, current_needs_cpu_spoof, should_unmount_cpu, 
-                 is_blacklisted, is_cpu_only);
+            if (current_needs_device_spoof && current_needs_cpu_spoof) {
+                PKG_LOG("%s: Device+CPU spoof", package_name);
+            } else if (current_needs_device_spoof) {
+                PKG_LOG("%s: Device spoof only", package_name);
+            } else if (current_needs_cpu_spoof) {
+                PKG_LOG("%s: CPU spoof only", package_name);
+            } else if (should_unmount_cpu) {
+                PKG_LOG("%s: CPU blocked", package_name);
+            }
 
-            // First read build props for blacklisted apps
             if (is_blacklisted) {
                 executeCompanionCommand("read_build_props");
                 executeCompanionCommand("restore_build_props");
-                LOGD("Restored original build props for blacklisted package: %s", package_name);
+                PKG_LOG("%s: Original props restored", package_name);
             }
 
             if (current_needs_device_spoof) {
                 spoofDevice(current_info);
                 spoofSystemProps(current_info);
                 should_close = false;
-                LOGD("Device spoof applied for %s", package_name);
             }
 
             if (should_unmount_cpu) {
                 executeCompanionCommand("unmount_spoof");
-                LOGD("CPU spoof UNMOUNTED for %s", package_name);
             } else if (current_needs_cpu_spoof) {
                 executeCompanionCommand("mount_spoof");
-                LOGD("CPU spoof MOUNTED for %s", package_name);
             }
 
             if (current_needs_device_spoof || current_needs_cpu_spoof || is_blacklisted) {
@@ -407,11 +393,10 @@ public:
         }
 
         if (should_close) {
-            LOGD("Package %s not found in config, closing module", package_name);
+            LOGI("%s: Not in config, closing", package_name);
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
         } else {
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-            LOGD("Set DLCLOSE after spoofing for stealth");
         }
     }
 
@@ -420,7 +405,6 @@ public:
 
         ensureBuildClass();
         if (!buildClass) {
-            LOGE("Build class not initialized, skipping postAppSpecialize");
             api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
             return;
         }
@@ -428,7 +412,6 @@ public:
         JniString pkg(env, args->nice_name);
         const char* package_name = pkg.get();
         if (!package_name) {
-            LOGE("Failed to get package name in postAppSpecialize");
             api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
             return;
         }
@@ -438,18 +421,15 @@ public:
             
             bool is_blacklisted = (cpu_blacklist.find(package_name) != cpu_blacklist.end());
             
-            // Check if app is in blacklist and restore build props
             if (is_blacklisted) {
                 executeCompanionCommand("read_build_props");
                 executeCompanionCommand("restore_build_props");
-                LOGD("Post-specialize: Restored original build props for blacklisted package: %s", package_name);
             }
             
             for (auto& device_entry : device_packages) {
                 auto it = device_entry.second.find(package_name);
                 if (it != device_entry.second.end()) {
                     current_info = device_entry.first;
-                    LOGD("Post-specialize spoofing for %s: %s", package_name, current_info.model.c_str());
                     spoofDevice(current_info);
                     break;
                 }
@@ -457,7 +437,6 @@ public:
         }
 
         api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
-        LOGD("Set DLCLOSE in postAppSpecialize for extra stealth");
     }
 
 private:
@@ -469,17 +448,14 @@ private:
         std::string package_name = package_str;
         std::unordered_set<std::string> tags;
         
-        // حذف فضای خالی از ابتدا و انتها
         package_name.erase(0, package_name.find_first_not_of(" \t"));
         package_name.erase(package_name.find_last_not_of(" \t") + 1);
         
-        // بررسی وجود تگ‌ها با format: package:tag1:tag2
         size_t first_colon = package_name.find(':');
         if (first_colon != std::string::npos && first_colon < package_name.length() - 1) {
             std::string original_name = package_name;
             package_name = original_name.substr(0, first_colon);
             
-            // استخراج تگ‌ها
             size_t start = first_colon + 1;
             while (start < original_name.length()) {
                 size_t end = original_name.find(':', start);
@@ -497,44 +473,26 @@ private:
                 
                 if (!tag.empty()) {
                     tags.insert(tag);
-                    LOGD("Found tag '%s' for package %s", tag.c_str(), package_name.c_str());
                 }
             }
         }
-        
-        std::string tag_list;
-        for (const auto& tag : tags) {
-            if (!tag_list.empty()) tag_list += ", ";
-            tag_list += tag;
-        }
-        LOGD("Package '%s' has %zu tags: %s", package_name.c_str(), tags.size(), tag_list.c_str());
         
         return {package_name, tags};
     }
 
     std::string getZygiskSettingFromTags(const std::unordered_set<std::string>& tags) {
-        LOGD("Checking %zu tags for zygisk setting", tags.size());
-        
-        for (const auto& tag : tags) {
-            LOGD("Processing tag: %s", tag.c_str());
-        }
-        
         if (tags.find("blocked") != tags.end()) {
-            LOGD("Tag 'blocked' found, returning 'blocked'");
             return "blocked";
         } else if (tags.find("with_cpu") != tags.end()) {
-            LOGD("Tag 'with_cpu' found, returning 'with_cpu'");
             return "with_cpu";
         }
         
-        LOGD("No relevant tags found, returning empty");
         return "";
     }
 
     bool executeCompanionCommand(const std::string& command) {
         auto fd = api->connectCompanion();
         if (fd < 0) {
-            LOGE("Failed to connect to companion");
             return false;
         }
         
@@ -548,7 +506,11 @@ private:
     }
 
     void spoofSystemProps(const DeviceInfo& info) {
-        LOGD("Starting system props spoofing with resetprop");
+        std::string resetprop_path = findResetpropPath();
+        if (resetprop_path.empty()) {
+            LOGW("Resetprop not found, skipping system props");
+            return;
+        }
         
         const char* commands[] = {
             "ro.product.brand",
@@ -572,30 +534,23 @@ private:
         
         for (int i = 0; i < num_commands; i++) {
             std::string cmd = std::string("resetprop ") + commands[i] + " \"" + values[i] + "\"";
-            if (executeCompanionCommand(cmd)) {
-                LOGD("Resetprop successful: %s", cmd.c_str());
-            } else {
-                LOGE("Resetprop failed: %s", cmd.c_str());
-            }
-            usleep(1000);
+            executeCompanionCommand(cmd);
         }
         
-        LOGD("System props spoofing completed");
+        SPOOF_LOG("System props: model=%s, brand=%s", info.model.c_str(), info.brand.c_str());
     }
 
     void ensureBuildClass() {
         std::call_once(build_once, [&] {
             jclass localBuild = env->FindClass("android/os/Build");
-            if (!localBuild || env->ExceptionCheck()) {
+            if (!localBuild) {
                 env->ExceptionClear();
-                LOGE("Failed to find android/os/Build class");
                 return;
             }
 
             buildClass = static_cast<jclass>(env->NewGlobalRef(localBuild));
             env->DeleteLocalRef(localBuild);
             if (!buildClass) {
-                LOGE("Failed to create global reference for Build class");
                 return;
             }
 
@@ -606,10 +561,8 @@ private:
             fingerprintField = env->GetStaticFieldID(buildClass, "FINGERPRINT", "Ljava/lang/String;");
             productField = env->GetStaticFieldID(buildClass, "PRODUCT", "Ljava/lang/String;");
 
-            if (env->ExceptionCheck() || !modelField || !brandField || !deviceField ||
-                !manufacturerField || !fingerprintField || !productField) {
+            if (env->ExceptionCheck()) {
                 env->ExceptionClear();
-                LOGE("Failed to get field IDs for Build class");
                 env->DeleteGlobalRef(buildClass);
                 buildClass = nullptr;
             }
@@ -619,21 +572,20 @@ private:
     void reloadIfNeeded(bool force = false) {
         struct stat file_stat;
         if (stat(config_path.c_str(), &file_stat) != 0) {
-            LOGE("Failed to stat config file: %s", strerror(errno));
+            CONFIG_LOG("Config missing: %s", config_path.c_str());
             return;
         }
 
         time_t current_mtime = file_stat.st_mtime;
         if (!force && current_mtime == last_config_mtime) {
-            LOGD("Config unchanged, skipping reload");
             return;
         }
 
-        LOGD("Config changed or force load, reloading...");
+        CONFIG_LOG("Loading config...");
 
         std::ifstream file(config_path);
         if (!file.is_open()) {
-            LOGE("Failed to open COPG.json at %s", config_path.c_str());
+            CONFIG_LOG("Failed to open config");
             return;
         }
 
@@ -650,23 +602,21 @@ private:
                 if (cpu_spoof_config.contains("blacklist")) {
                     for (const auto& pkg : cpu_spoof_config["blacklist"]) {
                         cpu_blacklist.insert(pkg.get<std::string>());
-                        LOGD("Loaded blacklisted package: %s", pkg.get<std::string>().c_str());
                     }
                 }
                 
                 if (cpu_spoof_config.contains("cpu_only_packages")) {
                     for (const auto& pkg : cpu_spoof_config["cpu_only_packages"]) {
                         cpu_only_packages.insert(pkg.get<std::string>());
-                        LOGD("Loaded CPU only package: %s", pkg.get<std::string>().c_str());
                     }
                 }
             }
 
+            int device_count = 0;
             for (auto& [key, value] : config.items()) {
                 if (key.find("PACKAGES_") == 0 && key.rfind("_DEVICE") != key.size() - 7) {
                     std::string device_key = key + "_DEVICE";
                     if (!config.contains(device_key) || !config[device_key].is_object()) {
-                        LOGE("No valid device info for key %s", key.c_str());
                         continue;
                     }
                     
@@ -689,12 +639,11 @@ private:
                             std::string setting = getZygiskSettingFromTags(tags);
                             
                             package_settings[pkg_name] = setting;
-                            
-                            LOGD("Config loaded: %s -> %s", pkg_name.c_str(), setting.c_str());
                         }
                     }
                     
                     new_device_packages.emplace_back(info, package_settings);
+                    device_count++;
                 }
             }
 
@@ -704,36 +653,32 @@ private:
             }
 
             last_config_mtime = current_mtime;
-            LOGD("Config reloaded with %zu devices, %zu cpu_only, %zu blacklist", 
-                 device_packages.size(), cpu_only_packages.size(), cpu_blacklist.size());
+            CONFIG_LOG("Loaded: %d devices, %zu cpu_only, %zu blacklist", 
+                      device_count, cpu_only_packages.size(), cpu_blacklist.size());
         } catch (const json::exception& e) {
-            LOGE("JSON parsing error: %s", e.what());
+            LOGE("JSON error: %s", e.what());
         } catch (const std::exception& e) {
-            LOGE("Error loading config: %s", e.what());
+            LOGE("Config error: %s", e.what());
         }
         file.close();
     }
 
     void spoofDevice(const DeviceInfo& info) {
         if (!buildClass) {
-            LOGE("Build class is not initialized!");
             return;
         }
 
-        LOGD("Spoofing device: %s", info.model.c_str());
         auto setStr = [&](jfieldID field, const std::string& value) {
             if (!field) return;
             jstring js = env->NewStringUTF(value.c_str());
             if (!js || env->ExceptionCheck()) {
                 env->ExceptionClear();
-                LOGE("Failed to create string for field");
                 return;
             }
             env->SetStaticObjectField(buildClass, field, js);
             env->DeleteLocalRef(js);
             if (env->ExceptionCheck()) {
                 env->ExceptionClear();
-                LOGE("Failed to set field");
             }
         };
 
@@ -743,8 +688,10 @@ private:
         setStr(manufacturerField, info.manufacturer);
         setStr(fingerprintField, info.fingerprint);
         setStr(productField, info.product);
+        
+        SPOOF_LOG("Device spoofed: %s (%s)", info.model.c_str(), info.brand.c_str());
     }
 };
 
-REGISTER_ZYGISK_MODULE(SpoofModule)
+REGISTER_ZYGISK_MODULE(COPGModule)
 REGISTER_ZYGISK_COMPANION(companion)
