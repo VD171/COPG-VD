@@ -14,6 +14,8 @@
 #include <functional>
 #include <system_error>
 #include <dirent.h>
+#include <sys/stat.h>
+#include <cstring>
 #include "json.hpp"
 
 #ifdef __linux__
@@ -196,8 +198,8 @@ namespace xwatcher {
                 clean_path.pop_back();
             }
 
-            std::ifstream test_file(clean_path);
-            if (!test_file.good()) {
+            struct stat buffer;
+            if (stat(clean_path.c_str(), &buffer) != 0) {
                 std::cout << "File does not exist (may be created later): " << clean_path << std::endl;
             }
 
@@ -292,6 +294,7 @@ private:
     std::atomic<bool> running{true};
     std::atomic<bool> config_loaded{false};
     std::atomic<bool> states_saved{false};
+    std::atomic<bool> config_file_exists{false};
 
     xwatcher::Watcher config_watcher;
 
@@ -324,9 +327,15 @@ public:
             return;
         }
 
-        if (!load_config()) {
-            std::cerr << "❌ Failed to load initial configuration" << std::endl;
-            return;
+        if (!check_config_file()) {
+            std::cerr << "⚠️ Config file not found, waiting for creation..." << std::endl;
+            config_file_exists.store(false);
+        } else {
+            if (!load_config()) {
+                std::cerr << "❌ Failed to load initial configuration" << std::endl;
+                return;
+            }
+            config_file_exists.store(true);
         }
         
         restore_saved_states();
@@ -354,6 +363,11 @@ public:
     }
 
 private:
+    bool check_config_file() {
+        struct stat buffer;
+        return stat(CONFIG_JSON.c_str(), &buffer) == 0;
+    }
+
     std::pair<std::string, std::unordered_set<std::string>> parsePackageWithTags(const std::string& package_str) {
         std::string package_name = package_str;
         std::unordered_set<std::string> tags;
@@ -386,9 +400,16 @@ private:
 
     bool setup_config_watcher() {
         auto callback = [this](xwatcher::FileEvent event, const std::string& path, int context, void* additional_data) {
-            if (event == xwatcher::FileEvent::Modified || event == xwatcher::FileEvent::Created) {
-                std::cout << "🔄 Config file changed - reloading..." << std::endl;
-                safe_reload_config();
+            try {
+                if (event == xwatcher::FileEvent::Modified || event == xwatcher::FileEvent::Created) {
+                    std::cout << "🔄 Config file changed - reloading..." << std::endl;
+                    safe_reload_config();
+                } else if (event == xwatcher::FileEvent::Removed) {
+                    std::cout << "🗑️ Config file deleted - clearing packages..." << std::endl;
+                    handle_empty_config();
+                }
+            } catch (const std::exception& e) {
+                std::cerr << "❌ Error in config watcher callback: " << e.what() << std::endl;
             }
         };
 
@@ -407,22 +428,60 @@ private:
     }
 
     void safe_reload_config() {
+        struct stat buffer;
+        if (stat(CONFIG_JSON.c_str(), &buffer) != 0) {
+            std::cout << "⚠️ Config file deleted, clearing all packages" << std::endl;
+            handle_empty_config();
+            return;
+        }
+
         for (int attempt = 0; attempt < 3; attempt++) {
             if (load_config()) {
                 handle_config_changes();
                 state_tracker.reset();
+                config_file_exists.store(true);
                 std::cout << "✅ Configuration reloaded successfully" << std::endl;
                 return;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100 * (attempt + 1)));
         }
-        std::cerr << "❌ Failed to reload configuration" << std::endl;
+        std::cerr << "❌ Failed to reload configuration - invalid JSON" << std::endl;
+    }
+
+    void handle_empty_config() {
+        std::cout << "🔄 Handling empty config - clearing packages and restoring system states" << std::endl;
+        
+        monitored_packages.clear();
+        notweak_packages.clear();
+        previous_monitored_packages.clear();
+        previous_notweak_packages.clear();
+        
+        if (states_saved.load()) {
+            restore_saved_states();
+            states_saved.store(false);
+        }
+        
+        state_tracker.reset();
+        state_tracker.last_toggle_state = false;
+        config_file_exists.store(false);
+        
+        std::cout << "✅ All packages cleared, waiting for new config file..." << std::endl;
     }
 
     void handle_config_changes() {
         if (previous_monitored_packages.empty()) {
             previous_monitored_packages = monitored_packages;
             previous_notweak_packages = notweak_packages;
+            return;
+        }
+        
+        if (monitored_packages.empty() && notweak_packages.empty()) {
+            if (states_saved.load()) {
+                std::cout << "🔄 All packages removed - restoring system states" << std::endl;
+                restore_saved_states();
+                states_saved.store(false);
+                state_tracker.last_toggle_state = false;
+            }
             return;
         }
         
@@ -527,12 +586,21 @@ private:
         try {
             std::ifstream config_file(CONFIG_JSON);
             if (!config_file.is_open()) {
-                std::cerr << "❌ Cannot open COPG.json" << std::endl;
+                std::cerr << "⚠️ Config file not found or inaccessible: " << CONFIG_JSON << std::endl;
+                monitored_packages.clear();
+                notweak_packages.clear();
+                previous_monitored_packages.clear();
+                previous_notweak_packages.clear();
                 return false;
             }
             
             json config;
-            config_file >> config;
+            try {
+                config_file >> config;
+            } catch (const json::exception& e) {
+                std::cerr << "❌ Invalid JSON in config file: " << e.what() << std::endl;
+                return false;
+            }
             
             std::unordered_map<std::string, bool> new_packages;
             std::set<std::string> new_notweak_packages;
@@ -622,11 +690,17 @@ private:
             
         } catch (const std::exception& e) {
             std::cerr << "❌ Error loading config: " << e.what() << std::endl;
+            monitored_packages.clear();
+            notweak_packages.clear();
             return false;
         }
     }
 
     void filter_installed_packages(std::unordered_map<std::string, bool>& packages) {
+        if (packages.empty()) {
+            return;
+        }
+        
         std::cout << "🔍 Checking installed packages using pm list packages..." << std::endl;
         
         std::string pm_result = execute_command("pm list packages");
@@ -671,6 +745,9 @@ private:
     }
 
     bool is_notweak(const std::string& package) {
+        if (notweak_packages.empty()) {
+            return false;
+        }
         return notweak_packages.find(package) != notweak_packages.end();
     }
 
@@ -698,6 +775,10 @@ private:
 
     std::unordered_map<std::string, AppState> get_all_active_apps() {
         std::unordered_map<std::string, AppState> active_apps;
+        
+        if (monitored_packages.empty()) {
+            return active_apps;
+        }
         
         std::string foreground_cmd = "dumpsys window visible-apps 2>/dev/null | grep -o -E 'package=[^ ]+' | cut -d'=' -f2";
         std::string foreground_result = execute_command(foreground_cmd);
@@ -863,57 +944,62 @@ private:
     }
 
     void restore_saved_states() {
-        std::ifstream brightness_file(DEFAULTS_FILE + ".brightness");
-        std::ifstream dnd_file(DEFAULTS_FILE + ".dnd");
-        std::ifstream timeout_file(DEFAULTS_FILE + ".timeout");
-        
-        if (!brightness_file || !dnd_file || !timeout_file) {
-            return;
-        }
-        
         std::cout << "🔄 Restoring saved system states..." << std::endl;
         
-        std::string brightness_str;
-        brightness_file >> brightness_str;
-        if (!brightness_str.empty()) {
-            execute_command_bool("settings put system screen_brightness_mode " + brightness_str);
-        }
-        
-        std::string dnd_str;
-        dnd_file >> dnd_str;
-        if (!dnd_str.empty()) {
-            std::string dnd_cmd;
-            if (dnd_str == "0") dnd_cmd = "cmd notification set_dnd off";
-            else if (dnd_str == "1") dnd_cmd = "cmd notification set_dnd priority";
-            else if (dnd_str == "2") dnd_cmd = "cmd notification set_dnd total";
-            else if (dnd_str == "3") dnd_cmd = "cmd notification set_dnd alarms";
-            
-            if (!dnd_cmd.empty()) {
-                execute_command_bool(dnd_cmd);
-            }
-        }
-        
-        std::string timeout_str;
-        timeout_file >> timeout_str;
-        if (!timeout_str.empty()) {
-            execute_command_bool("settings put system screen_off_timeout " + timeout_str);
-        }
-        
-        std::ifstream toggle_file(TOGGLE_FILE);
-        if (toggle_file.is_open()) {
-            std::string line;
-            while (std::getline(toggle_file, line)) {
-                if (line.find("DISABLE_LOGGING=1") != std::string::npos) {
-                    execute_command_bool("start logd");
-                    break;
+        try {
+            std::ifstream brightness_file(DEFAULTS_FILE + ".brightness");
+            if (brightness_file) {
+                std::string brightness_str;
+                brightness_file >> brightness_str;
+                if (!brightness_str.empty()) {
+                    execute_command_bool("settings put system screen_brightness_mode " + brightness_str);
                 }
             }
+            
+            std::ifstream dnd_file(DEFAULTS_FILE + ".dnd");
+            if (dnd_file) {
+                std::string dnd_str;
+                dnd_file >> dnd_str;
+                if (!dnd_str.empty()) {
+                    std::string dnd_cmd;
+                    if (dnd_str == "0") dnd_cmd = "cmd notification set_dnd off";
+                    else if (dnd_str == "1") dnd_cmd = "cmd notification set_dnd priority";
+                    else if (dnd_str == "2") dnd_cmd = "cmd notification set_dnd total";
+                    else if (dnd_str == "3") dnd_cmd = "cmd notification set_dnd alarms";
+                    
+                    if (!dnd_cmd.empty()) {
+                        execute_command_bool(dnd_cmd);
+                    }
+                }
+            }
+            
+            std::ifstream timeout_file(DEFAULTS_FILE + ".timeout");
+            if (timeout_file) {
+                std::string timeout_str;
+                timeout_file >> timeout_str;
+                if (!timeout_str.empty()) {
+                    execute_command_bool("settings put system screen_off_timeout " + timeout_str);
+                }
+            }
+            
+            std::ifstream toggle_file(TOGGLE_FILE);
+            if (toggle_file.is_open()) {
+                std::string line;
+                while (std::getline(toggle_file, line)) {
+                    if (line.find("DISABLE_LOGGING=1") != std::string::npos) {
+                        execute_command_bool("start logd");
+                        break;
+                    }
+                }
+            }
+            
+            execute_command_bool("rm -f " + DEFAULTS_FILE + ".brightness " + 
+                               DEFAULTS_FILE + ".dnd " + DEFAULTS_FILE + ".timeout");
+            
+            std::cout << "✅ System states restored" << std::endl;
+        } catch (const std::exception& e) {
+            std::cerr << "❌ Error restoring system states: " << e.what() << std::endl;
         }
-        
-        execute_command_bool("rm -f " + DEFAULTS_FILE + ".brightness " + 
-                           DEFAULTS_FILE + ".dnd " + DEFAULTS_FILE + ".timeout");
-        
-        std::cout << "✅ System states restored" << std::endl;
     }
 
     std::string state_to_string(AppState state) {
@@ -940,9 +1026,30 @@ public:
         
         int debounce_count = 0;
         const int DEBOUNCE_THRESHOLD = 2;
+        int config_wait_counter = 0;
         
         while (running.load()) {
             try {
+                if (!config_file_exists.load()) {
+                    config_wait_counter++;
+                    if (config_wait_counter % 20 == 0) {
+                        std::cout << "⏳ Waiting for config file..." << std::endl;
+                    }
+                    
+                    struct stat buffer;
+                    if (stat(CONFIG_JSON.c_str(), &buffer) == 0) {
+                        std::cout << "📁 Config file detected - loading..." << std::endl;
+                        if (load_config()) {
+                            config_file_exists.store(true);
+                            config_wait_counter = 0;
+                            std::cout << "✅ Config loaded successfully" << std::endl;
+                        }
+                    }
+                    
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                    continue;
+                }
+                
                 auto active_apps = get_all_active_apps();
                 
                 log_state_changes(active_apps);
