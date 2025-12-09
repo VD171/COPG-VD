@@ -391,7 +391,7 @@ fi
       ui_print " ⚙ Removing Google Photos Config "
       if [ -f "$MODPATH/COPG.json" ]; then
         sed -i '/com\.google\.android\.apps\.photos/d' "$MODPATH/COPG.json" 2>/dev/null
-        chmod 0644 "$MODPATH/config.json" 2>/dev/null
+        chmod 0644 "$MODPATH/COPG.json" 2>/dev/null
         chcon u:object_r:system_file:s0 "$MODPATH/COPG.json" 2>/dev/null
       fi
       
