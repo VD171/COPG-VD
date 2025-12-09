@@ -483,7 +483,7 @@ input:checked + .slider:before {
     margin-top: 16px;
 }
 
-.action-btn {
+.action-btn, .shortcut-btn {
     background: var(--primary-gradient);
     color: #fff;
     padding: 12px 20px;
@@ -968,7 +968,7 @@ h2 {
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4m0-4h.01'/%3E%3C/svg%3E") no-repeat center;
 }
 
-.modal {
+.modal, .popup {
     display: none;
     position: fixed;
     top: 0;
@@ -1217,33 +1217,6 @@ h2 {
     background: var(--text-secondary);
 }
 
-.popup {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: var(--safe-area-inset-left);
-    width: calc(100% - var(--safe-area-inset-left) - var(--safe-area-inset-right));
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    padding: calc(var(--safe-area-inset-top) + 16px) 16px calc(var(--safe-area-inset-bottom) + 16px);
-}
-
-.popup-content {
-    background: var(--card-bg);
-    border-radius: 20px;
-    padding: 20px;
-    max-width: 400px;
-    width: 100%;
-    text-align: center;
-    box-shadow: 0 4px 12px var(--shadow);
-    transform: scale(0.9);
-    opacity: 0;
-    transition: all 0.3s ease;
-}
-
 #device-picker-popup .popup-content {
     min-height: 400px;
     display: flex;
@@ -1288,12 +1261,6 @@ h2 {
 
 .dark-theme .popup-content p {
     color: var(--dark-text-secondary);
-}
-
-.popup-buttons {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
 }
 
 .theme-btn {
@@ -1507,129 +1474,6 @@ h2 {
     100% { background-position: 200% 0; }
 }
 
-.game-card.ignored {
-    background: rgba(248, 113, 113, 0.1);
-    border-left: 4px solid var(--error);
-}
-
-.dark-theme .game-card.ignored {
-    background: rgba(248, 113, 113, 0.15);
-}
-
-.ignored-badge {
-    display: inline-block;
-    background: var(--error);
-    color: white;
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    margin-left: 8px;
-    font-weight: 500;
-}
-
-.dark-theme .ignored-badge {
-    background: var(--error);
-}
-
-#ignore-popup .popup-content {
-    max-width: 320px;
-    padding: 0;
-    overflow: hidden;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-}
-
-#ignore-popup .popup-header {
-    padding: 16px;
-    background: var(--card-bg);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-}
-
-.dark-theme #ignore-popup .popup-header {
-    background: var(--dark-card);
-}
-
-#ignore-popup .popup-header h3 {
-    margin: 0;
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--primary);
-    text-align: center;
-}
-
-#ignore-popup .close-popup-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 4px;
-}
-
-#ignore-popup .popup-body {
-    padding: 20px 16px;
-    text-align: center;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-}
-
-#ignore-popup .popup-icon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 16px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--success);
-}
-
-#ignore-popup .popup-icon.icon-remove {
-    background: var(--error);
-}
-
-#ignore-popup .popup-icon::before {
-    content: '';
-    width: 24px;
-    height: 24px;
-    background: white;
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") no-repeat center;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") no-repeat center;
-}
-
-#ignore-popup .popup-icon.icon-remove::before {
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M18 6L6 18M6 6l12 12'/%3E%3C/svg%3E") no-repeat center;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M18 6L6 18M6 6l12 12'/%3E%3C/svg%3E") no-repeat center;
-}
-
-#ignore-popup .popup-package {
-    font-family: 'Roboto Mono', monospace;
-    font-size: 14px;
-    color: var(--text-secondary);
-    margin-top: 8px;
-    word-break: break-all;
-    user-select: auto;
-    -webkit-user-select: auto;
-    -webkit-touch-callout: default;
-}
-
-#ignore-popup .popup-footer {
-    display: flex;
-    justify-content: flex-end;
-    padding: 12px 16px;
-    gap: 8px;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-}
-
 .game-card {
     user-select: none;
     -webkit-user-select: none;
@@ -1645,14 +1489,7 @@ h2 {
 .game-header, .game-details {
     user-select: none;
     -webkit-user-select: none;
-    gap: 8px; 
-}
-
-#ignore-popup .popup-content {
-    max-width: 320px;
-    padding: 0;
-    overflow: hidden;
-    z-index: 1001;
+    gap: 8px;
 }
 
 .game-name-container {
@@ -1766,17 +1603,6 @@ h2 {
     color: var(--dark-text-secondary);
 }
 
-#ignore-popup .popup-package {
-    padding: 8px;
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 8px;
-    margin-top: 8px;
-}
-
-.dark-theme #ignore-popup .popup-package {
-    background: rgba(255, 255, 255, 0.05);
-}
-
 .popup-icon-container {
     display: flex;
     align-items: center;
@@ -1863,7 +1689,12 @@ h2 {
     background: var(--error);
 }
 
-.app-card {
+.app-card.added-game {
+    background: rgba(52, 211, 153, 0.1);
+}
+
+.device-select-wrapper, .type-select-wrapper {
+    position: relative;
     display: flex;
     align-items: center;
 }
@@ -1890,118 +1721,8 @@ h2 {
     color: var(--dark-text-secondary);
 }
 
-.ignore-explanation-popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.ignore-explanation-popup .popup-content {
-    background: var(--card-bg);
-    border-radius: 16px;
-    padding: 20px;
-    max-width: 400px;
-    width: 90%;
-    box-shadow: 0 4px 12px var(--shadow);
-    text-align: left;
-    direction: ltr;
-    transform: scale(0.9);
-    opacity: 0;
-}
-
-.dark-theme .ignore-explanation-popup .popup-content {
-    background: var(--dark-card);
-}
-
-.ignore-explanation-popup .popup-content h3 {
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--primary);
-    margin: 0 0 16px;
-}
-
-.ignore-explanation-popup .explanation-text {
-    font-size: 14px;
-    color: var(--text);
-    margin-bottom: 20px;
-    line-height: 1.5;
-}
-
-.dark-theme .ignore-explanation-popup .explanation-text {
-    color: var(--dark-text);
-}
-
-.ignore-explanation-popup .explanation-text strong {
-    color: var(--primary);
-}
-
-.ignore-explanation-popup .explanation-text ul {
-    margin: 10px 0;
-    padding-left: 20px;
-}
-
-.ignore-explanation-popup .action-btn {
-    background: var(--primary-gradient);
-    color: #fff;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 12px var(--shadow);
-    transition: all 0.3s ease;
-    width: 100%;
-}
-
-.ignore-explanation-popup .action-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px var(--shadow);
-}
-
-.dark-theme .ignore-explanation-popup .action-btn {
-    background: linear-gradient(135deg, #1E3A8A, #6B7280);
-}
-
-.dark-theme .ignore-explanation-popup .action-btn:hover {
-    background: var(--primary-gradient);
-}
-
-.device-select-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.device-select-wrapper input {
-    padding-right: 32px;
-    width: 100%;
-}
-
-.dropdown-icon {
-    position: absolute;
-    right: 12px;
-    pointer-events: none;
-    transition: transform 0.2s ease;
-    color: var(--text-secondary);
-}
-
-#game-device.highlighted ~ .dropdown-icon {
-    color: var(--primary);
-}
-
-.dark-theme .dropdown-icon {
-    color: var(--dark-text-secondary);
-}
-
-.dark-theme #game-device.highlighted ~ .dropdown-icon {
+.dark-theme #game-device.highlighted ~ .dropdown-icon,
+.dark-theme .type-select-wrapper input.highlighted ~ .dropdown-icon {
     color: var(--primary);
 }
 
@@ -2140,19 +1861,6 @@ h2 {
 
 .small-btn svg {
     margin: 0;
-}
-
-.button-group {
-    display: flex;
-    gap: 12px;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    margin-top: 16px;
-}
-
-.button-group .action-btn {
-    flex: 1;
-    min-width: 140px;
 }
 
 .popup-body {
@@ -2303,41 +2011,6 @@ h2 {
 .dark-theme .folder-icon::after,
 .dark-theme .file-icon::after {
     background: var(--dark-text-secondary);
-}
-
-.popup-content h3 {
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--primary); 
-    margin-bottom: 12px;
-}
-
-#device-picker-popup .popup-content h3 {
-    color: var(--primary); 
-}
-
-#backup-popup .popup-content h3 {
-    color: var(--primary); 
-}
-
-#file-picker-popup .popup-content h3 {
-    color: var(--primary); 
-}
-
-#package-picker-popup .popup-content h3 {
-    color: var(--primary); 
-}
-
-.dark-theme .popup-content h3 {
-    color: var(--primary); 
-}
-
-#backup-popup .popup-content h3 {
-    text-align: left; 
-}
-
-#file-picker-popup .popup-content h3 {
-    text-align: left; 
 }
 
 #save-log-popup .popup-content {
