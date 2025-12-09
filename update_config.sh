@@ -2,12 +2,11 @@
 MODDIR="/data/adb/modules/COPG"
 CONFIG_URL="https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/config.json"
 LIST_URL="https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/list.json"
-CONFIG_PATH="$MODDIR/config.json"
+CONFIG_PATH="$MODDIR/COPG.json"
 LIST_PATH="$MODDIR/list.json"
 TEMP_CONFIG="/data/adb/copg_temp_config.json"
 TEMP_LIST="/data/adb/copg_temp_list.json"
 
-# Determine downloader
 if command -v curl >/dev/null 2>&1; then
     DOWNLOADER="curl -s -o"
 elif command -v wget >/dev/null 2>&1; then
@@ -17,10 +16,8 @@ else
     exit 1
 fi
 
-# Create module directory if it doesn't exist
 mkdir -p "$MODDIR"
 
-# Function to handle single file download and update
 update_file() {
     local url="$1"
     local temp_path="$2"
@@ -36,7 +33,6 @@ update_file() {
         return 1
     fi
 
-    # Compare with existing file (if it exists)
     if [ -f "$final_path" ]; then
         OLD_HASH=$(md5sum "$final_path" 2>/dev/null | awk '{print $1}')
         NEW_HASH=$(md5sum "$temp_path" 2>/dev/null | awk '{print $1}')
@@ -48,7 +44,6 @@ update_file() {
         fi
     fi
 
-    # If different or no local file exists, update it
     echo "✅ $name downloaded successfully!"
     mv "$temp_path" "$final_path"
     echo "📍 Saved to: $final_path"
@@ -57,10 +52,8 @@ update_file() {
     return 0
 }
 
-# Update config.json
 update_file "$CONFIG_URL" "$TEMP_CONFIG" "$CONFIG_PATH" "config.json"
 
-# Update list.json
 update_file "$LIST_URL" "$TEMP_LIST" "$LIST_PATH" "list.json"
 
 echo "✨ COPG gamelist update complete!"

@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <unordered_map>
+#include <unordered_set>
 #include <thread>
 #include <chrono>
 #include <atomic>
@@ -13,6 +14,8 @@
 #include <functional>
 #include <system_error>
 #include <dirent.h>
+#include <sys/stat.h>
+#include <cstring>
 #include "json.hpp"
 
 #ifdef __linux__
@@ -195,8 +198,8 @@ namespace xwatcher {
                 clean_path.pop_back();
             }
 
-            std::ifstream test_file(clean_path);
-            if (!test_file.good()) {
+            struct stat buffer;
+            if (stat(clean_path.c_str(), &buffer) != 0) {
                 std::cout << "File does not exist (may be created later): " << clean_path << std::endl;
             }
 
@@ -280,21 +283,20 @@ namespace xwatcher {
 
 class AdvancedAppController {
 private:
-    const std::string CONFIG_JSON = "/data/adb/modules/COPG/config.json";
+    const std::string CONFIG_JSON = "/data/adb/modules/COPG/COPG.json";
     const std::string TOGGLE_FILE = "/data/adb/copg_state";
     const std::string DEFAULTS_FILE = "/data/adb/copg_defaults";
-    const std::string IGNORE_LIST = "/data/adb/modules/COPG/ignorelist.txt";
     
     std::unordered_map<std::string, bool> monitored_packages;
     std::unordered_map<std::string, bool> previous_monitored_packages;
-    std::set<std::string> ignored_packages;
-    std::set<std::string> previous_ignored_packages;
+    std::set<std::string> notweak_packages;
+    std::set<std::string> previous_notweak_packages;
     std::atomic<bool> running{true};
     std::atomic<bool> config_loaded{false};
     std::atomic<bool> states_saved{false};
+    std::atomic<bool> config_file_exists{false};
 
     xwatcher::Watcher config_watcher;
-    xwatcher::Watcher ignore_watcher;
 
     enum class AppState {
         FOREGROUND,
@@ -320,21 +322,25 @@ public:
     AdvancedAppController() {
         std::cout << "🚀 Initializing Advanced App Controller..." << std::endl;
         
-        if (!config_watcher.is_initialized() || !ignore_watcher.is_initialized()) {
+        if (!config_watcher.is_initialized()) {
             std::cerr << "❌ Config watcher failed to initialize" << std::endl;
             return;
         }
 
-        if (!load_config()) {
-            std::cerr << "❌ Failed to load initial configuration" << std::endl;
-            return;
+        if (!check_config_file()) {
+            std::cerr << "⚠️ Config file not found, waiting for creation..." << std::endl;
+            config_file_exists.store(false);
+        } else {
+            if (!load_config()) {
+                std::cerr << "❌ Failed to load initial configuration" << std::endl;
+                return;
+            }
+            config_file_exists.store(true);
         }
-
-        load_ignore_list();
         
         restore_saved_states();
         
-        if (!setup_config_watcher() || !setup_ignore_watcher()) {
+        if (!setup_config_watcher()) {
             std::cerr << "❌ Failed to setup config watcher" << std::endl;
             return;
         }
@@ -350,7 +356,6 @@ public:
     void stop() {
         running = false;
         config_watcher.stop();
-        ignore_watcher.stop();
     }
 
     bool is_ready() const {
@@ -358,11 +363,53 @@ public:
     }
 
 private:
+    bool check_config_file() {
+        struct stat buffer;
+        return stat(CONFIG_JSON.c_str(), &buffer) == 0;
+    }
+
+    std::pair<std::string, std::unordered_set<std::string>> parsePackageWithTags(const std::string& package_str) {
+        std::string package_name = package_str;
+        std::unordered_set<std::string> tags;
+        
+        size_t colon_pos = package_str.find(':');
+        if (colon_pos != std::string::npos) {
+            package_name = package_str.substr(0, colon_pos);
+            
+            std::string tags_part = package_str.substr(colon_pos + 1);
+            size_t start = 0;
+            size_t end = tags_part.find(':');
+            
+            while (end != std::string::npos) {
+                std::string tag = tags_part.substr(start, end - start);
+                if (!tag.empty()) {
+                    tags.insert(tag);
+                }
+                start = end + 1;
+                end = tags_part.find(':', start);
+            }
+            
+            std::string last_tag = tags_part.substr(start);
+            if (!last_tag.empty()) {
+                tags.insert(last_tag);
+            }
+        }
+        
+        return {package_name, tags};
+    }
+
     bool setup_config_watcher() {
         auto callback = [this](xwatcher::FileEvent event, const std::string& path, int context, void* additional_data) {
-            if (event == xwatcher::FileEvent::Modified || event == xwatcher::FileEvent::Created) {
-                std::cout << "🔄 Config file changed - reloading..." << std::endl;
-                safe_reload_config();
+            try {
+                if (event == xwatcher::FileEvent::Modified || event == xwatcher::FileEvent::Created) {
+                    std::cout << "🔄 Config file changed - reloading..." << std::endl;
+                    safe_reload_config();
+                } else if (event == xwatcher::FileEvent::Removed) {
+                    std::cout << "🗑️ Config file deleted - clearing packages..." << std::endl;
+                    handle_empty_config();
+                }
+            } catch (const std::exception& e) {
+                std::cerr << "❌ Error in config watcher callback: " << e.what() << std::endl;
             }
         };
 
@@ -380,107 +427,68 @@ private:
         return true;
     }
 
-    bool setup_ignore_watcher() {
-        auto callback = [this](xwatcher::FileEvent event, const std::string& path, int context, void* additional_data) {
-            if (event == xwatcher::FileEvent::Modified || event == xwatcher::FileEvent::Created) {
-                std::cout << "🔄 Ignore list changed - reloading..." << std::endl;
-                handle_ignore_list_change();
-            }
-        };
-
-        if (!ignore_watcher.add_file(IGNORE_LIST, callback)) {
-            std::cerr << "❌ Failed to add ignore list to watcher" << std::endl;
-            return false;
-        }
-
-        if (!ignore_watcher.start()) {
-            std::cerr << "❌ Failed to start ignore watcher" << std::endl;
-            return false;
-        }
-
-        std::cout << "👀 Built-in ignore list watcher started" << std::endl;
-        return true;
-    }
-
-    void handle_ignore_list_change() {
-        std::set<std::string> old_ignored = ignored_packages;
-        load_ignore_list();
-        
-        std::vector<std::string> newly_ignored;
-        std::vector<std::string> newly_unignored;
-        
-        for (const auto& package : ignored_packages) {
-            if (old_ignored.find(package) == old_ignored.end()) {
-                newly_ignored.push_back(package);
-            }
-        }
-        
-        for (const auto& package : old_ignored) {
-            if (ignored_packages.find(package) == ignored_packages.end()) {
-                newly_unignored.push_back(package);
-            }
-        }
-        
-        if (!newly_ignored.empty()) {
-            std::cout << "🚫 Newly ignored packages: ";
-            for (size_t i = 0; i < newly_ignored.size(); ++i) {
-                std::cout << newly_ignored[i];
-                if (i < newly_ignored.size() - 1) std::cout << ", ";
-            }
-            std::cout << std::endl;
-            
-            auto active_apps = get_all_active_apps();
-            if (!should_apply_toggles(active_apps) && states_saved.load()) {
-                std::cout << "🔄 Immediately restoring system states due to package ignoring" << std::endl;
-                restore_saved_states();
-                states_saved.store(false);
-                state_tracker.last_toggle_state = false;
-            }
-        }
-        
-        if (!newly_unignored.empty()) {
-            std::cout << "✅ Newly unignored packages: ";
-            for (size_t i = 0; i < newly_unignored.size(); ++i) {
-                std::cout << newly_unignored[i];
-                if (i < newly_unignored.size() - 1) std::cout << ", ";
-            }
-            std::cout << std::endl;
-            
-            auto active_apps = get_all_active_apps();
-            if (should_apply_toggles(active_apps) && !states_saved.load()) {
-                std::cout << "🎯 Immediately applying toggles for newly unignored packages" << std::endl;
-                if (save_current_states()) {
-                    apply_toggles();
-                    states_saved.store(true);
-                    state_tracker.last_toggle_state = true;
-                }
-            }
-        }
-        
-        previous_ignored_packages = ignored_packages;
-    }
-
     void safe_reload_config() {
+        struct stat buffer;
+        if (stat(CONFIG_JSON.c_str(), &buffer) != 0) {
+            std::cout << "⚠️ Config file deleted, clearing all packages" << std::endl;
+            handle_empty_config();
+            return;
+        }
+
         for (int attempt = 0; attempt < 3; attempt++) {
             if (load_config()) {
                 handle_config_changes();
                 state_tracker.reset();
+                config_file_exists.store(true);
                 std::cout << "✅ Configuration reloaded successfully" << std::endl;
                 return;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100 * (attempt + 1)));
         }
-        std::cerr << "❌ Failed to reload configuration" << std::endl;
+        std::cerr << "❌ Failed to reload configuration - invalid JSON" << std::endl;
+    }
+
+    void handle_empty_config() {
+        std::cout << "🔄 Handling empty config - clearing packages and restoring system states" << std::endl;
+        
+        monitored_packages.clear();
+        notweak_packages.clear();
+        previous_monitored_packages.clear();
+        previous_notweak_packages.clear();
+        
+        if (states_saved.load()) {
+            restore_saved_states();
+            states_saved.store(false);
+        }
+        
+        state_tracker.reset();
+        state_tracker.last_toggle_state = false;
+        config_file_exists.store(false);
+        
+        std::cout << "✅ All packages cleared, waiting for new config file..." << std::endl;
     }
 
     void handle_config_changes() {
         if (previous_monitored_packages.empty()) {
             previous_monitored_packages = monitored_packages;
+            previous_notweak_packages = notweak_packages;
+            return;
+        }
+        
+        if (monitored_packages.empty() && notweak_packages.empty()) {
+            if (states_saved.load()) {
+                std::cout << "🔄 All packages removed - restoring system states" << std::endl;
+                restore_saved_states();
+                states_saved.store(false);
+                state_tracker.last_toggle_state = false;
+            }
             return;
         }
         
         std::vector<std::string> removed_packages;
         std::vector<std::string> added_packages;
+        std::vector<std::string> newly_notweak;
+        std::vector<std::string> newly_tweakable;
         
         for (const auto& [package, installed] : previous_monitored_packages) {
             if (monitored_packages.find(package) == monitored_packages.end()) {
@@ -491,6 +499,18 @@ private:
         for (const auto& [package, installed] : monitored_packages) {
             if (previous_monitored_packages.find(package) == previous_monitored_packages.end()) {
                 added_packages.push_back(package);
+            }
+        }
+        
+        for (const auto& package : notweak_packages) {
+            if (previous_notweak_packages.find(package) == previous_notweak_packages.end()) {
+                newly_notweak.push_back(package);
+            }
+        }
+        
+        for (const auto& package : previous_notweak_packages) {
+            if (notweak_packages.find(package) == notweak_packages.end()) {
+                newly_tweakable.push_back(package);
             }
         }
         
@@ -522,51 +542,165 @@ private:
             std::cout << std::endl;
         }
         
+        if (!newly_notweak.empty()) {
+            std::cout << "🚫 Newly notweak packages: ";
+            for (size_t i = 0; i < newly_notweak.size(); ++i) {
+                std::cout << newly_notweak[i];
+                if (i < newly_notweak.size() - 1) std::cout << ", ";
+            }
+            std::cout << std::endl;
+            
+            auto active_apps = get_all_active_apps();
+            if (!should_apply_toggles(active_apps) && states_saved.load()) {
+                std::cout << "🔄 Immediately restoring system states due to notweak packages" << std::endl;
+                restore_saved_states();
+                states_saved.store(false);
+                state_tracker.last_toggle_state = false;
+            }
+        }
+        
+        if (!newly_tweakable.empty()) {
+            std::cout << "✅ Newly tweakable packages: ";
+            for (size_t i = 0; i < newly_tweakable.size(); ++i) {
+                std::cout << newly_tweakable[i];
+                if (i < newly_tweakable.size() - 1) std::cout << ", ";
+            }
+            std::cout << std::endl;
+            
+            auto active_apps = get_all_active_apps();
+            if (should_apply_toggles(active_apps) && !states_saved.load()) {
+                std::cout << "🎯 Immediately applying toggles for newly tweakable packages" << std::endl;
+                if (save_current_states()) {
+                    apply_toggles();
+                    states_saved.store(true);
+                    state_tracker.last_toggle_state = true;
+                }
+            }
+        }
+        
         previous_monitored_packages = monitored_packages;
+        previous_notweak_packages = notweak_packages;
     }
 
     bool load_config() {
         try {
             std::ifstream config_file(CONFIG_JSON);
             if (!config_file.is_open()) {
-                std::cerr << "❌ Cannot open config.json" << std::endl;
+                std::cerr << "⚠️ Config file not found or inaccessible: " << CONFIG_JSON << std::endl;
+                monitored_packages.clear();
+                notweak_packages.clear();
+                previous_monitored_packages.clear();
+                previous_notweak_packages.clear();
                 return false;
             }
             
             json config;
-            config_file >> config;
+            try {
+                config_file >> config;
+            } catch (const json::exception& e) {
+                std::cerr << "❌ Invalid JSON in config file: " << e.what() << std::endl;
+                return false;
+            }
             
             std::unordered_map<std::string, bool> new_packages;
+            std::set<std::string> new_notweak_packages;
+            std::set<std::string> blacklist_packages;
+            std::set<std::string> cpu_only_packages;
             int total_packages = 0;
+            int notweak_count = 0;
+            int blacklist_count = 0;
+            int cpu_only_count = 0;
             
-            for (auto& [key, value] : config.items()) {
-                if (value.is_array()) {
-                    for (auto& package : value) {
-                        if (package.is_string()) {
-                            std::string package_name = package.get<std::string>();
-                            new_packages[package_name] = false;
-                            total_packages++;
+            if (config.contains("cpu_spoof")) {
+                auto cpu_spoof_config = config["cpu_spoof"];
+                
+                if (cpu_spoof_config.contains("blacklist")) {
+                    for (const auto& pkg : cpu_spoof_config["blacklist"]) {
+                        if (pkg.is_string()) {
+                            blacklist_packages.insert(pkg.get<std::string>());
+                            blacklist_count++;
+                        }
+                    }
+                }
+                
+                if (cpu_spoof_config.contains("cpu_only_packages")) {
+                    for (const auto& pkg : cpu_spoof_config["cpu_only_packages"]) {
+                        if (pkg.is_string()) {
+                            cpu_only_packages.insert(pkg.get<std::string>());
+                            cpu_only_count++;
                         }
                     }
                 }
             }
             
+            for (auto& [key, value] : config.items()) {
+                if (key.find("PACKAGES_") == 0 && key.rfind("_DEVICE") != key.size() - 7) {
+                    for (auto& package_entry : value) {
+                        if (package_entry.is_string()) {
+                            std::string package_str = package_entry.get<std::string>();
+                            
+                            auto [package_name, tags] = parsePackageWithTags(package_str);
+                            
+                            new_packages[package_name] = false;
+                            total_packages++;
+                            
+                            if (tags.find("notweak") != tags.end()) {
+                                new_notweak_packages.insert(package_name);
+                                notweak_count++;
+                                
+                                std::cout << "🚫 Marked as notweak (from tag): " << package_name;
+                                if (tags.size() > 1) {
+                                    std::cout << " (Tags: ";
+                                    for (const auto& tag : tags) {
+                                        std::cout << tag << " ";
+                                    }
+                                    std::cout << ")";
+                                }
+                                std::cout << std::endl;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            for (const auto& cpu_only_pkg : cpu_only_packages) {
+                new_packages[cpu_only_pkg] = false;
+                total_packages++;
+                std::cout << "🔧 Added CPU only package to monitoring: " << cpu_only_pkg << std::endl;
+            }
+            
+            for (const auto& blacklisted_pkg : blacklist_packages) {
+                new_notweak_packages.insert(blacklisted_pkg);
+                std::cout << "🚫 Marked as notweak (from blacklist): " << blacklisted_pkg << std::endl;
+            }
+            
             std::cout << "📋 Found " << total_packages << " packages in config" << std::endl;
+            std::cout << "🚫 Found " << notweak_count << " notweak packages from tags" << std::endl;
+            std::cout << "⚫ Found " << blacklist_count << " blacklisted packages" << std::endl;
+            std::cout << "🔧 Found " << cpu_only_count << " CPU only packages" << std::endl;
+            std::cout << "📊 Total " << new_notweak_packages.size() << " packages excluded from toggles" << std::endl;
             
             filter_installed_packages(new_packages);
             
             monitored_packages = std::move(new_packages);
+            notweak_packages = std::move(new_notweak_packages);
             std::cout << "📦 Loaded " << monitored_packages.size() << " installed packages" << std::endl;
             
             return true;
             
         } catch (const std::exception& e) {
             std::cerr << "❌ Error loading config: " << e.what() << std::endl;
+            monitored_packages.clear();
+            notweak_packages.clear();
             return false;
         }
     }
 
     void filter_installed_packages(std::unordered_map<std::string, bool>& packages) {
+        if (packages.empty()) {
+            return;
+        }
+        
         std::cout << "🔍 Checking installed packages using pm list packages..." << std::endl;
         
         std::string pm_result = execute_command("pm list packages");
@@ -610,25 +744,11 @@ private:
         }
     }
 
-    void load_ignore_list() {
-        std::set<std::string> new_ignored_packages;
-        std::ifstream ignore_file(IGNORE_LIST);
-        if (!ignore_file.is_open()) {
-            return;
+    bool is_notweak(const std::string& package) {
+        if (notweak_packages.empty()) {
+            return false;
         }
-        
-        std::string package;
-        while (std::getline(ignore_file, package)) {
-            if (!package.empty()) {
-                new_ignored_packages.insert(package);
-            }
-        }
-        
-        ignored_packages = std::move(new_ignored_packages);
-    }
-
-    bool is_ignored(const std::string& package) {
-        return ignored_packages.find(package) != ignored_packages.end();
+        return notweak_packages.find(package) != notweak_packages.end();
     }
 
     std::string execute_command(const std::string& cmd) {
@@ -656,6 +776,10 @@ private:
     std::unordered_map<std::string, AppState> get_all_active_apps() {
         std::unordered_map<std::string, AppState> active_apps;
         
+        if (monitored_packages.empty()) {
+            return active_apps;
+        }
+        
         std::string foreground_cmd = "dumpsys window visible-apps 2>/dev/null | grep -o -E 'package=[^ ]+' | cut -d'=' -f2";
         std::string foreground_result = execute_command(foreground_cmd);
         
@@ -664,7 +788,7 @@ private:
             std::string package;
             while (std::getline(iss, package)) {
                 package.erase(std::remove(package.begin(), package.end(), '\r'), package.end());
-                if (!package.empty() && monitored_packages.find(package) != monitored_packages.end() && !is_ignored(package)) {
+                if (!package.empty() && monitored_packages.find(package) != monitored_packages.end() && !is_notweak(package)) {
                     active_apps[package] = AppState::FOREGROUND;
                 }
             }
@@ -680,7 +804,7 @@ private:
                 package.erase(std::remove(package.begin(), package.end(), '\r'), package.end());
                 if (!package.empty() && 
                     monitored_packages.find(package) != monitored_packages.end() && 
-                    !is_ignored(package) &&
+                    !is_notweak(package) &&
                     active_apps.find(package) == active_apps.end()) {
                     active_apps[package] = AppState::BACKGROUND;
                 }
@@ -820,57 +944,62 @@ private:
     }
 
     void restore_saved_states() {
-        std::ifstream brightness_file(DEFAULTS_FILE + ".brightness");
-        std::ifstream dnd_file(DEFAULTS_FILE + ".dnd");
-        std::ifstream timeout_file(DEFAULTS_FILE + ".timeout");
-        
-        if (!brightness_file || !dnd_file || !timeout_file) {
-            return;
-        }
-        
         std::cout << "🔄 Restoring saved system states..." << std::endl;
         
-        std::string brightness_str;
-        brightness_file >> brightness_str;
-        if (!brightness_str.empty()) {
-            execute_command_bool("settings put system screen_brightness_mode " + brightness_str);
-        }
-        
-        std::string dnd_str;
-        dnd_file >> dnd_str;
-        if (!dnd_str.empty()) {
-            std::string dnd_cmd;
-            if (dnd_str == "0") dnd_cmd = "cmd notification set_dnd off";
-            else if (dnd_str == "1") dnd_cmd = "cmd notification set_dnd priority";
-            else if (dnd_str == "2") dnd_cmd = "cmd notification set_dnd total";
-            else if (dnd_str == "3") dnd_cmd = "cmd notification set_dnd alarms";
-            
-            if (!dnd_cmd.empty()) {
-                execute_command_bool(dnd_cmd);
-            }
-        }
-        
-        std::string timeout_str;
-        timeout_file >> timeout_str;
-        if (!timeout_str.empty()) {
-            execute_command_bool("settings put system screen_off_timeout " + timeout_str);
-        }
-        
-        std::ifstream toggle_file(TOGGLE_FILE);
-        if (toggle_file.is_open()) {
-            std::string line;
-            while (std::getline(toggle_file, line)) {
-                if (line.find("DISABLE_LOGGING=1") != std::string::npos) {
-                    execute_command_bool("start logd");
-                    break;
+        try {
+            std::ifstream brightness_file(DEFAULTS_FILE + ".brightness");
+            if (brightness_file) {
+                std::string brightness_str;
+                brightness_file >> brightness_str;
+                if (!brightness_str.empty()) {
+                    execute_command_bool("settings put system screen_brightness_mode " + brightness_str);
                 }
             }
+            
+            std::ifstream dnd_file(DEFAULTS_FILE + ".dnd");
+            if (dnd_file) {
+                std::string dnd_str;
+                dnd_file >> dnd_str;
+                if (!dnd_str.empty()) {
+                    std::string dnd_cmd;
+                    if (dnd_str == "0") dnd_cmd = "cmd notification set_dnd off";
+                    else if (dnd_str == "1") dnd_cmd = "cmd notification set_dnd priority";
+                    else if (dnd_str == "2") dnd_cmd = "cmd notification set_dnd total";
+                    else if (dnd_str == "3") dnd_cmd = "cmd notification set_dnd alarms";
+                    
+                    if (!dnd_cmd.empty()) {
+                        execute_command_bool(dnd_cmd);
+                    }
+                }
+            }
+            
+            std::ifstream timeout_file(DEFAULTS_FILE + ".timeout");
+            if (timeout_file) {
+                std::string timeout_str;
+                timeout_file >> timeout_str;
+                if (!timeout_str.empty()) {
+                    execute_command_bool("settings put system screen_off_timeout " + timeout_str);
+                }
+            }
+            
+            std::ifstream toggle_file(TOGGLE_FILE);
+            if (toggle_file.is_open()) {
+                std::string line;
+                while (std::getline(toggle_file, line)) {
+                    if (line.find("DISABLE_LOGGING=1") != std::string::npos) {
+                        execute_command_bool("start logd");
+                        break;
+                    }
+                }
+            }
+            
+            execute_command_bool("rm -f " + DEFAULTS_FILE + ".brightness " + 
+                               DEFAULTS_FILE + ".dnd " + DEFAULTS_FILE + ".timeout");
+            
+            std::cout << "✅ System states restored" << std::endl;
+        } catch (const std::exception& e) {
+            std::cerr << "❌ Error restoring system states: " << e.what() << std::endl;
         }
-        
-        execute_command_bool("rm -f " + DEFAULTS_FILE + ".brightness " + 
-                           DEFAULTS_FILE + ".dnd " + DEFAULTS_FILE + ".timeout");
-        
-        std::cout << "✅ System states restored" << std::endl;
     }
 
     std::string state_to_string(AppState state) {
@@ -890,15 +1019,37 @@ public:
 
         std::cout << "🚀 Advanced App Controller Started" << std::endl;
         std::cout << "📊 Monitoring " << monitored_packages.size() << " installed packages" << std::endl;
+        std::cout << "🚫 " << notweak_packages.size() << " packages marked as notweak" << std::endl;
         std::cout << "🎯 States: FOREGROUND, BACKGROUND only" << std::endl;
         std::cout << "🔧 Toggles apply only in FOREGROUND/BACKGROUND states" << std::endl;
-        std::cout << "🔄 Instant response to config and ignore list changes" << std::endl;
+        std::cout << "🔄 Instant response to config changes" << std::endl;
         
         int debounce_count = 0;
         const int DEBOUNCE_THRESHOLD = 2;
+        int config_wait_counter = 0;
         
         while (running.load()) {
             try {
+                if (!config_file_exists.load()) {
+                    config_wait_counter++;
+                    if (config_wait_counter % 20 == 0) {
+                        std::cout << "⏳ Waiting for config file..." << std::endl;
+                    }
+                    
+                    struct stat buffer;
+                    if (stat(CONFIG_JSON.c_str(), &buffer) == 0) {
+                        std::cout << "📁 Config file detected - loading..." << std::endl;
+                        if (load_config()) {
+                            config_file_exists.store(true);
+                            config_wait_counter = 0;
+                            std::cout << "✅ Config loaded successfully" << std::endl;
+                        }
+                    }
+                    
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                    continue;
+                }
+                
                 auto active_apps = get_all_active_apps();
                 
                 log_state_changes(active_apps);

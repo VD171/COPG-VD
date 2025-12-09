@@ -1,3 +1,0 @@
-com.google.android.apps.photos
-com.ss.android.ugc.trill
-com.zhiliaoapp.musically
