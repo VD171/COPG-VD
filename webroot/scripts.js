@@ -11,6 +11,13 @@ let packagePickerObserver = null;
 let logcatProcess = null;
 let logcatRunning = false;
 let selectedGameType = 'device';
+let currentDeviceSort = 'default';
+let deviceSortDropdown = null;
+let currentGameSort = 'default';
+let sortDropdown = null;
+let gameListOriginalOrder = [];
+let currentFilter = null;
+let activeFilter = null;
 
 const MODULE_ID = 'COPG';
 const SANITIZED_MODULE_ID = MODULE_ID.replace(/[^a-zA-Z0-9_.]/g, '_');
@@ -55,25 +62,20 @@ const templates = {
         if (data.hasNoTweak) {
             badgesHTML += '<span class="no-tweaks-badge" onclick="showNoTweaksExplanation(event)">No Tweaks</span>';
         }
-        
         if (data.hasWithCpu) {
-            badgesHTML += '<span class="cpu-badge">CPU Spoof</span>';
+            badgesHTML += '<span class="with-cpu-badge" onclick="showWithCpuExplanation(event)">With CPU</span>';
         }
-        
         if (data.hasBlocked) {
-            badgesHTML += '<span class="blocked-badge">Block CPU Spoof</span>';
+            badgesHTML += '<span class="blocked-cpu-badge" onclick="showBlockedCpuExplanation(event)">Block CPU</span>';
         }
-        
         if (data.isInstalled) {
             badgesHTML += '<span class="installed-badge">Installed</span>';
         }
-        
         if (data.additionalBadges) {
             badgesHTML += data.additionalBadges;
         }
-        
         if (data.hasWithCpu && data.hasBlocked) {
-            badgesHTML = badgesHTML.replace('<span class="blocked-badge">Block CPU Spoof</span>', '');
+            badgesHTML = badgesHTML.replace('<span class="blocked-cpu-badge" onclick="showBlockedCpuExplanation(event)">Block CPU</span>', '');
         }
         
         badgeGroup.innerHTML = badgesHTML;
@@ -212,6 +214,687 @@ async function execCommand(command) {
             reject("KSU API not available");
         }
     });
+}
+
+function getPackageNameWithoutTags(packageName) {
+    const parts = packageName.split(':');
+    return parts[0];
+}
+
+function getAllTags(packageName) {
+    const parts = packageName.split(':');
+    return parts.slice(1);
+}
+
+function addTagToPackage(packageName, tag) {
+    const cleanName = getPackageNameWithoutTags(packageName);
+    const existingTags = getAllTags(packageName);
+    if (!existingTags.includes(tag)) {
+        existingTags.push(tag);
+    }
+    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
+}
+
+function removeTagFromPackage(packageName, tag) {
+    const cleanName = getPackageNameWithoutTags(packageName);
+    const existingTags = getAllTags(packageName).filter(t => t !== tag);
+    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
+}
+
+function hasNoTweakTag(packageName) {
+    return packageName.includes(':notweak');
+}
+
+function hasWithCpuTag(packageName) {
+    return packageName.includes(':with_cpu');
+}
+
+function hasBlockedTag(packageName) {
+    return packageName.includes(':blocked');
+}
+
+function addCpuSpoofTag(packageName) {
+    const cleanName = getPackageNameWithoutTags(packageName);
+    const existingTags = getAllTags(packageName);
+    if (!existingTags.includes('with_cpu')) {
+        existingTags.push('with_cpu');
+    }
+    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
+}
+
+function removeCpuSpoofTag(packageName) {
+    const cleanName = getPackageNameWithoutTags(packageName);
+    const existingTags = getAllTags(packageName).filter(t => t !== 'with_cpu');
+    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
+}
+
+function addBlockedTag(packageName) {
+    const cleanName = getPackageNameWithoutTags(packageName);
+    const existingTags = getAllTags(packageName);
+    if (!existingTags.includes('blocked')) {
+        existingTags.push('blocked');
+    }
+    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
+}
+
+function removeBlockedTag(packageName) {
+    const cleanName = getPackageNameWithoutTags(packageName);
+    const existingTags = getAllTags(packageName).filter(t => t !== 'blocked');
+    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
+}
+
+function toggleCpuSpoofTag(packageName, enable) {
+    return enable ? addCpuSpoofTag(packageName) : removeCpuSpoofTag(packageName);
+}
+
+function toggleBlockedTag(packageName, enable) {
+    return enable ? addBlockedTag(packageName) : removeBlockedTag(packageName);
+}
+
+function createSortDropdown() {
+    const template = document.getElementById('sort-dropdown-template');
+    const clone = template.content.cloneNode(true);
+    sortDropdown = clone.querySelector('.sort-dropdown');
+    
+    sortDropdown.querySelectorAll('.sort-option[data-sort]').forEach(option => {
+        option.addEventListener('click', (e) => {
+            const sortType = option.dataset.sort;
+            setGameSort(sortType);
+            sortDropdown.classList.remove('show');
+            e.stopPropagation();
+        });
+    });
+    
+    sortDropdown.querySelectorAll('.sort-option[data-filter]').forEach(option => {
+        option.addEventListener('click', (e) => {
+            const filterType = option.dataset.filter;
+            
+            if (filterType === 'clear') {
+                clearGameFilter();
+            } else {
+                setGameFilter(filterType);
+            }
+            
+            sortDropdown.classList.remove('show');
+            e.stopPropagation();
+        });
+    });
+    
+    document.addEventListener('click', (e) => {
+        if (sortDropdown && sortDropdown.classList.contains('show') && 
+            !e.target.closest('.sort-btn') && !e.target.closest('.sort-dropdown')) {
+            sortDropdown.classList.remove('show');
+        }
+    });
+    
+    document.body.appendChild(sortDropdown);
+}
+
+function getFilterDisplayName(filterType) {
+    switch(filterType) {
+        case 'blocklist': return 'Blocklist';
+        case 'cpu_only': return 'CPU Only';
+        case 'installed': return 'Installed';
+        case 'no_tweaks': return 'No Tweaks';
+        default: return filterType;
+    }
+}
+
+function getSortTypeName(sortType) {
+    switch(sortType) {
+        case 'default': return 'Default';
+        case 'asc': return 'A → Z';
+        case 'desc': return 'Z → A';
+        case 'blocklist': return 'Blocklist';
+        case 'cpu_only': return 'CPU Only';
+        case 'installed': return 'Installed';
+        case 'no_tweaks': return 'No Tweaks';
+        default: return sortType;
+    }
+}
+
+function updateFilterCounts() {
+    const gameList = document.getElementById('game-list');
+    if (!gameList) return;
+    
+    const games = gameList.querySelectorAll('.game-card');
+    
+    const counts = {
+        blocklist: 0,
+        cpu_only: 0,
+        installed: 0,
+        no_tweaks: 0
+    };
+    
+    games.forEach(game => {
+        if (game.querySelector('.blocked-globally-badge') || game.querySelector('.blocked-badge')) {
+            counts.blocklist++;
+        }
+        if (game.querySelector('.cpu-only-badge') || game.querySelector('.cpu-badge')) {
+            counts.cpu_only++;
+        }
+        if (game.querySelector('.installed-badge')) {
+            counts.installed++;
+        }
+        if (game.querySelector('.no-tweaks-badge')) {
+            counts.no_tweaks++;
+        }
+    });
+    
+    const blocklistCount = document.getElementById('blocklist-count');
+    const cpuOnlyCount = document.getElementById('cpu-only-count');
+    const installedCount = document.getElementById('installed-count');
+    const noTweaksCount = document.getElementById('no-tweaks-count');
+    
+    if (blocklistCount) blocklistCount.textContent = counts.blocklist;
+    if (cpuOnlyCount) cpuOnlyCount.textContent = counts.cpu_only;
+    if (installedCount) installedCount.textContent = counts.installed;
+    if (noTweaksCount) noTweaksCount.textContent = counts.no_tweaks;
+}
+
+function setGameSort(sortType) {
+    currentGameSort = sortType;
+    
+    sortDropdown.querySelectorAll('.sort-option').forEach(option => {
+        option.classList.remove('active');
+        if (option.dataset.sort === sortType) {
+            option.classList.add('active');
+        }
+        if (activeFilter && option.dataset.filter === activeFilter) {
+            option.classList.add('active');
+        }
+    });
+    
+    sortGameList();
+    
+    const sortBtn = document.getElementById('game-sort-btn');
+    let title = 'Sort games';
+    if (sortType === 'asc') title = 'Sorted A→Z';
+    else if (sortType === 'desc') title = 'Sorted Z→A';
+    else if (activeFilter) {
+        title = `Filter: ${getFilterDisplayName(activeFilter)}`;
+    }
+    sortBtn.title = title;
+    
+    appendToOutput(`Games sorted: ${getSortTypeName(sortType)}`, 'info');
+}
+
+function setDeviceSort(sortType) {
+    currentDeviceSort = sortType;
+    
+    deviceSortDropdown.querySelectorAll('.sort-option').forEach(option => {
+        option.classList.remove('active');
+        if (option.dataset.sort === sortType) {
+            option.classList.add('active');
+        }
+    });
+    
+    sortDeviceList();
+    
+    const sortBtn = document.getElementById('device-sort-btn');
+    let title = 'Sort devices';
+    if (sortType === 'asc') title = 'Sorted A→Z';
+    else if (sortType === 'desc') title = 'Sorted Z→A';
+    sortBtn.title = title;
+    
+    appendToOutput(`Devices sorted: ${getSortTypeName(sortType)}`, 'info');
+}
+
+function createDeviceSortDropdown() {
+    const template = document.getElementById('sort-dropdown-template');
+    const clone = template.content.cloneNode(true);
+    deviceSortDropdown = clone.querySelector('.sort-dropdown');
+    
+    deviceSortDropdown.id = 'device-sort-dropdown';
+    
+    const sortOptionsToRemove = deviceSortDropdown.querySelectorAll(
+        '.sort-option[data-filter], .sort-separator, #clear-filter-btn'
+    );
+    
+    sortOptionsToRemove.forEach(option => option.remove());
+    
+    deviceSortDropdown.querySelectorAll('.sort-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            const sortType = option.dataset.sort;
+            setDeviceSort(sortType);
+            deviceSortDropdown.classList.remove('show');
+            e.stopPropagation();
+        });
+    });
+    
+    document.addEventListener('click', (e) => {
+        if (deviceSortDropdown && deviceSortDropdown.classList.contains('show') && 
+            !e.target.closest('#device-sort-btn') && !e.target.closest('#device-sort-dropdown')) {
+            deviceSortDropdown.classList.remove('show');
+        }
+    });
+    
+    document.body.appendChild(deviceSortDropdown);
+}
+
+function getOriginalDeviceOrder() {
+    const devices = [];
+    
+    for (const key of configKeyOrder) {
+        if (key.endsWith('_DEVICE') && currentConfig[key]) {
+            const deviceName = currentConfig[key].DEVICE || key.replace('PACKAGES_', '').replace('_DEVICE', '');
+            const model = currentConfig[key].MODEL || 'Unknown';
+            
+            devices.push({
+                key: key,
+                deviceName: deviceName,
+                model: model
+            });
+        }
+    }
+    
+    return devices;
+}
+
+function getOriginalGameOrder() {
+    const games = [];
+    const cpuSpoofData = currentConfig.cpu_spoof || {};
+    const blockedList = cpuSpoofData.blacklist || [];
+    const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
+    
+    blockedList.forEach((packageName, index) => {
+        games.push({
+            packageName: packageName,
+            type: 'blocked',
+            cleanPackageName: getPackageNameWithoutTags(packageName),
+            originalIndex: index,
+            list: 'blocked'
+        });
+    });
+    
+    cpuOnlyList.forEach((packageName, index) => {
+        games.push({
+            packageName: packageName,
+            type: 'cpu_only',
+            cleanPackageName: getPackageNameWithoutTags(packageName),
+            originalIndex: index,
+            list: 'cpu_only'
+        });
+    });
+    
+    for (const key of configKeyOrder) {
+        if (Array.isArray(currentConfig[key]) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
+            const deviceKey = `${key}_DEVICE`;
+            const deviceData = currentConfig[deviceKey] || {};
+            const deviceName = deviceData.DEVICE || key.replace('PACKAGES_', '');
+            
+            currentConfig[key].forEach((gamePackage, index) => {
+                games.push({
+                    packageName: gamePackage,
+                    type: 'device',
+                    deviceKey: key,
+                    deviceName: deviceName,
+                    cleanPackageName: getPackageNameWithoutTags(gamePackage),
+                    originalIndex: index,
+                    list: key
+                });
+            });
+        }
+    }
+    
+    return games;
+}
+
+function sortDeviceList() {
+    const deviceList = document.getElementById('device-list');
+    if (!deviceList) return;
+    
+    const devices = Array.from(deviceList.querySelectorAll('.device-card'));
+    
+    if (currentDeviceSort === 'default') {
+        const originalOrder = getOriginalDeviceOrder();
+        const deviceMap = new Map();
+        
+        devices.forEach(device => {
+            const deviceKey = device.dataset.key;
+            deviceMap.set(deviceKey, device);
+        });
+        
+        deviceList.innerHTML = '';
+        originalOrder.forEach(deviceInfo => {
+            const device = deviceMap.get(deviceInfo.key);
+            if (device) {
+                deviceList.appendChild(device);
+            }
+        });
+        
+        devices.forEach(device => {
+            const deviceKey = device.dataset.key;
+            if (!deviceMap.has(deviceKey)) {
+                deviceList.appendChild(device);
+            }
+        });
+    } else {
+        devices.sort((a, b) => {
+            const nameA = a.querySelector('.device-name').textContent.toLowerCase();
+            const nameB = b.querySelector('.device-name').textContent.toLowerCase();
+            
+            if (currentDeviceSort === 'asc') {
+                return nameA.localeCompare(nameB);
+            } else if (currentDeviceSort === 'desc') {
+                return nameB.localeCompare(nameA);
+            }
+            return 0;
+        });
+        
+        devices.forEach(device => {
+            deviceList.appendChild(device);
+        });
+    }
+    
+    attachDeviceListeners();
+}
+
+function sortGameList() {
+    const gameList = document.getElementById('game-list');
+    if (!gameList) return;
+    
+    if (activeFilter) {
+        const visibleGames = Array.from(gameList.querySelectorAll('.game-card[style*="display: block"], .game-card:not([style*="display: none"])'));
+        
+        if (currentGameSort === 'asc') {
+            visibleGames.sort((a, b) => {
+                const nameA = a.querySelector('.game-name').textContent.toLowerCase();
+                const nameB = b.querySelector('.game-name').textContent.toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+        } else if (currentGameSort === 'desc') {
+            visibleGames.sort((a, b) => {
+                const nameA = a.querySelector('.game-name').textContent.toLowerCase();
+                const nameB = b.querySelector('.game-name').textContent.toLowerCase();
+                return nameB.localeCompare(nameA);
+            });
+        }
+        
+        visibleGames.forEach((game, index) => {
+            game.style.order = index;
+        });
+        
+        attachGameListeners();
+        setupLongPressHandlers();
+        return;
+    }
+    
+    const games = Array.from(gameList.querySelectorAll('.game-card'));
+    
+    if (currentGameSort === 'default') {
+        const originalOrder = getOriginalGameOrder();
+        
+        const groupedGames = {};
+        originalOrder.forEach(gameInfo => {
+            const key = gameInfo.list || gameInfo.deviceKey || gameInfo.type;
+            if (!groupedGames[key]) {
+                groupedGames[key] = [];
+            }
+            groupedGames[key].push(gameInfo);
+        });
+        
+        const sortedGames = [];
+        
+        if (groupedGames['blocked']) {
+            groupedGames['blocked'].forEach(gameInfo => {
+                const game = games.find(g => 
+                    g.dataset.package === gameInfo.packageName && 
+                    g.dataset.type === 'blocked'
+                );
+                if (game) sortedGames.push(game);
+            });
+        }
+        
+        if (groupedGames['cpu_only']) {
+            groupedGames['cpu_only'].forEach(gameInfo => {
+                const game = games.find(g => 
+                    g.dataset.package === gameInfo.packageName && 
+                    g.dataset.type === 'cpu_only'
+                );
+                if (game) sortedGames.push(game);
+            });
+        }
+        
+        for (const key of configKeyOrder) {
+            if (key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE') && groupedGames[key]) {
+                groupedGames[key].forEach(gameInfo => {
+                    const game = games.find(g => 
+                        g.dataset.package === gameInfo.packageName && 
+                        g.dataset.device === gameInfo.deviceKey
+                    );
+                    if (game) sortedGames.push(game);
+                });
+            }
+        }
+        
+        games.forEach(game => {
+            if (!sortedGames.includes(game)) {
+                sortedGames.push(game);
+            }
+        });
+        
+        gameList.innerHTML = '';
+        sortedGames.forEach(game => gameList.appendChild(game));
+        
+    } else if (currentGameSort === 'asc') {
+        games.sort((a, b) => {
+            const nameA = a.querySelector('.game-name').textContent.toLowerCase();
+            const nameB = b.querySelector('.game-name').textContent.toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+        
+        gameList.innerHTML = '';
+        games.forEach(game => gameList.appendChild(game));
+    } else if (currentGameSort === 'desc') {
+        games.sort((a, b) => {
+            const nameA = a.querySelector('.game-name').textContent.toLowerCase();
+            const nameB = b.querySelector('.game-name').textContent.toLowerCase();
+            return nameB.localeCompare(nameA);
+        });
+        
+        gameList.innerHTML = '';
+        games.forEach(game => gameList.appendChild(game));
+    }
+    
+    attachGameListeners();
+    setupLongPressHandlers();
+    updateFilterCounts();
+}
+
+function applyGameFilter() {
+    const gameList = document.getElementById('game-list');
+    if (!gameList || !activeFilter) return;
+    
+    const games = gameList.querySelectorAll('.game-card');
+    let visibleCount = 0;
+    
+    games.forEach(game => {
+        let shouldShow = false;
+        
+        switch(activeFilter) {
+            case 'blocklist':
+                shouldShow = game.querySelector('.blocked-globally-badge') || 
+                            game.querySelector('.blocked-badge');
+                break;
+            case 'cpu_only':
+                shouldShow = game.querySelector('.cpu-only-badge') || 
+                            game.querySelector('.cpu-badge');
+                break;
+            case 'installed':
+                shouldShow = game.querySelector('.installed-badge');
+                break;
+            case 'no_tweaks':
+                shouldShow = game.querySelector('.no-tweaks-badge');
+                break;
+            default:
+                shouldShow = true;
+        }
+        
+        if (shouldShow) {
+            game.style.display = 'block';
+            visibleCount++;
+            game.style.order = '';
+        } else {
+            game.style.display = 'none';
+        }
+    });
+    
+    if (visibleCount > 0 && currentGameSort !== 'default') {
+        const visibleGames = Array.from(gameList.querySelectorAll('.game-card[style*="display: block"]'));
+        
+        if (currentGameSort === 'asc') {
+            visibleGames.sort((a, b) => {
+                const nameA = a.querySelector('.game-name').textContent.toLowerCase();
+                const nameB = b.querySelector('.game-name').textContent.toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+        } else if (currentGameSort === 'desc') {
+            visibleGames.sort((a, b) => {
+                const nameA = a.querySelector('.game-name').textContent.toLowerCase();
+                const nameB = b.querySelector('.game-name').textContent.toLowerCase();
+                return nameB.localeCompare(nameA);
+            });
+        }
+        
+        visibleGames.forEach((game, index) => {
+            game.style.order = index;
+        });
+    }
+    
+    attachGameListeners();
+    setupLongPressHandlers();
+    
+    if (visibleCount === 0) {
+        appendToOutput(`No games found with ${getFilterDisplayName(activeFilter)} filter`, 'warning');
+    }
+    
+    appendToOutput(`Filter applied: ${getFilterDisplayName(activeFilter)} (${visibleCount} games)`, 'info');
+}
+
+function removeGameFilter() {
+    activeFilter = null;
+    
+    const gameList = document.getElementById('game-list');
+    if (!gameList) return;
+    
+    const games = gameList.querySelectorAll('.game-card');
+    games.forEach(game => {
+        game.style.display = 'block';
+        game.style.order = '';
+    });
+    
+    if (currentGameSort !== 'default') {
+        const sortedGames = Array.from(games);
+        
+        if (currentGameSort === 'asc') {
+            sortedGames.sort((a, b) => {
+                const nameA = a.querySelector('.game-name').textContent.toLowerCase();
+                const nameB = b.querySelector('.game-name').textContent.toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+        } else if (currentGameSort === 'desc') {
+            sortedGames.sort((a, b) => {
+                const nameA = a.querySelector('.game-name').textContent.toLowerCase();
+                const nameB = b.querySelector('.game-name').textContent.toLowerCase();
+                return nameB.localeCompare(nameA);
+            });
+        }
+        
+        gameList.innerHTML = '';
+        sortedGames.forEach(game => gameList.appendChild(game));
+    }
+    
+    attachGameListeners();
+    setupLongPressHandlers();
+}
+
+function setGameFilter(filterType) {
+    activeFilter = filterType;
+    
+    sortDropdown.querySelectorAll('.sort-option[data-filter]').forEach(option => {
+        option.classList.remove('active');
+        if (option.dataset.filter === filterType) {
+            option.classList.add('active');
+        }
+    });
+    
+    if (currentGameSort !== 'default') {
+        sortDropdown.querySelectorAll('.sort-option[data-sort]').forEach(option => {
+            option.classList.remove('active');
+            if (option.dataset.sort === currentGameSort) {
+                option.classList.add('active');
+            }
+        });
+    }
+    
+    const clearBtn = document.getElementById('clear-filter-btn');
+    if (clearBtn) {
+        clearBtn.style.display = 'flex';
+    }
+    
+    const sortBtn = document.getElementById('game-sort-btn');
+    sortBtn.title = `Filter: ${getFilterDisplayName(filterType)}`;
+    
+    applyGameFilter();
+}
+
+function clearGameFilter() {
+    activeFilter = null;
+    
+    sortDropdown.querySelectorAll('.sort-option[data-filter]').forEach(option => {
+        option.classList.remove('active');
+    });
+    
+    const clearBtn = document.getElementById('clear-filter-btn');
+    if (clearBtn) {
+        clearBtn.style.display = 'none';
+    }
+    
+    const sortBtn = document.getElementById('game-sort-btn');
+    sortBtn.title = 'Sort & Filter games';
+    
+    removeGameFilter();
+    
+    appendToOutput('Filter cleared', 'success');
+}
+
+function initializeDeviceSort() {
+    createDeviceSortDropdown();
+    
+    const sortBtn = document.getElementById('device-sort-btn');
+    if (sortBtn) {
+        sortBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            const rect = sortBtn.getBoundingClientRect();
+            deviceSortDropdown.style.top = `${rect.bottom + window.scrollY + 8}px`;
+            deviceSortDropdown.style.right = `${window.innerWidth - rect.right}px`;
+            
+            deviceSortDropdown.classList.toggle('show');
+        });
+    }
+    
+    setDeviceSort('default');
+}
+
+function initializeGameSort() {
+    createSortDropdown();
+    
+    const sortBtn = document.getElementById('game-sort-btn');
+    if (sortBtn) {
+        sortBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            const rect = sortBtn.getBoundingClientRect();
+            sortDropdown.style.top = `${rect.bottom + window.scrollY + 8}px`;
+            sortDropdown.style.right = `${window.innerWidth - rect.right}px`;
+            
+            sortDropdown.classList.toggle('show');
+        });
+    }
+    
+    setGameSort('default');
 }
 
 function populateDevicePicker() {
@@ -715,7 +1398,7 @@ async function startLogcat(e) {
     }
 
     try {
-        appendToOutput("Starting logcat for SpoofModule... (open target app/game ...)", 'info');
+        appendToOutput("Starting logcat for COPGModule... (open target app/game ...)", 'info');
         logcatRunning = true;
         document.getElementById('start-logcat').style.display = 'none';
         document.getElementById('stop-logcat').style.display = 'inline-block';
@@ -734,7 +1417,7 @@ async function readLogcat() {
     if (!logcatRunning) return;
 
     try {
-        const logs = await execCommand("su -c 'logcat -d -s SpoofModule'");
+        const logs = await execCommand("su -c 'logcat -d -s COPGModule'");
         if (logs && logs.trim()) {
             const lines = logs.split('\n');
             lines.forEach(line => {
@@ -784,54 +1467,6 @@ async function showSaveLogPopup() {
         appendToOutput(`Error determining filename: ${error}`, 'error');
         showPopup('save-log-popup');
     }
-}
-
-function addCpuSpoofTag(packageName) {
-    const cleanName = getPackageNameWithoutTags(packageName);
-    const existingTags = getAllTags(packageName);
-    if (!existingTags.includes('with_cpu')) {
-        existingTags.push('with_cpu');
-    }
-    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
-}
-
-function removeCpuSpoofTag(packageName) {
-    const cleanName = getPackageNameWithoutTags(packageName);
-    const existingTags = getAllTags(packageName).filter(t => t !== 'with_cpu');
-    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
-}
-
-function toggleCpuSpoofTag(packageName, enable) {
-    return enable ? addCpuSpoofTag(packageName) : removeCpuSpoofTag(packageName);
-}
-
-function hasNoTweakTag(packageName) {
-    return packageName.includes(':notweak');
-}
-
-function getPackageNameWithoutTags(packageName) {
-    const parts = packageName.split(':');
-    return parts[0];
-}
-
-function getAllTags(packageName) {
-    const parts = packageName.split(':');
-    return parts.slice(1);
-}
-
-function addTagToPackage(packageName, tag) {
-    const cleanName = getPackageNameWithoutTags(packageName);
-    const existingTags = getAllTags(packageName);
-    if (!existingTags.includes(tag)) {
-        existingTags.push(tag);
-    }
-    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
-}
-
-function removeTagFromPackage(packageName, tag) {
-    const cleanName = getPackageNameWithoutTags(packageName);
-    const existingTags = getAllTags(packageName).filter(t => t !== tag);
-    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
 }
 
 async function checkWebUIConfig() {
@@ -979,6 +1614,12 @@ function renderDeviceList() {
     deviceList.innerHTML = '';
     deviceList.appendChild(fragment);
     attachDeviceListeners();
+    
+    if (currentDeviceSort !== 'default') {
+        setTimeout(() => {
+            sortDeviceList();
+        }, 100);
+    }
 }
 
 function attachDeviceListeners() {
@@ -1007,6 +1648,9 @@ async function renderGameList() {
 
     const gameList = document.getElementById('game-list');
     if (!gameList) return appendToOutput("Error: 'game-list' not found", 'error');
+    
+    const currentActiveFilter = activeFilter;
+    const currentGameSortState = currentGameSort;
     
     let gameNamesMap = {};
     try {
@@ -1138,33 +1782,40 @@ async function renderGameList() {
     gameList.appendChild(fragment);
     attachGameListeners();
     setupLongPressHandlers();
-}
-
-function hasWithCpuTag(packageName) {
-    return packageName.includes(':with_cpu');
-}
-
-function hasBlockedTag(packageName) {
-    return packageName.includes(':blocked');
-}
-
-function addBlockedTag(packageName) {
-    const cleanName = getPackageNameWithoutTags(packageName);
-    const existingTags = getAllTags(packageName);
-    if (!existingTags.includes('blocked')) {
-        existingTags.push('blocked');
+    updateFilterCounts();
+    
+    if (currentGameSortState !== 'default') {
+        setTimeout(() => {
+            currentGameSort = currentGameSortState;
+            sortGameList();
+        }, 100);
+    } else {
+        setTimeout(() => {
+            sortGameList();
+        }, 100);
     }
-    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
-}
-
-function removeBlockedTag(packageName) {
-    const cleanName = getPackageNameWithoutTags(packageName);
-    const existingTags = getAllTags(packageName).filter(t => t !== 'blocked');
-    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
-}
-
-function toggleBlockedTag(packageName, enable) {
-    return enable ? addBlockedTag(packageName) : removeBlockedTag(packageName);
+    
+    if (currentActiveFilter) {
+        setTimeout(() => {
+            activeFilter = currentActiveFilter;
+            
+            const sortBtn = document.getElementById('game-sort-btn');
+            if (sortBtn && activeFilter) {
+                sortBtn.title = `Filter: ${getFilterDisplayName(activeFilter)}`;
+            }
+            
+            applyGameFilter();
+            
+            const clearBtn = document.getElementById('clear-filter-btn');
+            if (clearBtn) {
+                clearBtn.style.display = 'flex';
+            }
+        }, 200);
+    } else if (currentFilter) {
+        setTimeout(() => {
+            applyGameFilter();
+        }, 200);
+    }
 }
 
 function showCpuSpoofInfo(packageName, type) {
@@ -1604,118 +2255,6 @@ function editCpuSpoofGameHandler(e) {
     editGame(packageName, null, type);
 }
 
-function deleteCpuSpoofGameHandler(e) {
-    e.stopPropagation();
-    const packageName = e.currentTarget.dataset.package;
-    const type = e.currentTarget.dataset.type;
-    const card = e.currentTarget.closest('.game-card');
-    const gameName = card.querySelector('.game-name').textContent;
-    deleteCpuSpoofGame(packageName, type, gameName);
-}
-
-async function deleteCpuSpoofGame(packageName, type, gameName) {
-    const card = document.querySelector(`.game-card.cpu-spoof-card[data-package="${packageName}"][data-type="${type}"]`);
-    if (!card) return;
-
-    card.classList.add('fade-out');
-    await new Promise(resolve => setTimeout(resolve, 400));
-
-    const cleanPackageName = getPackageNameWithoutTags(packageName);
-    const cpuSpoofData = currentConfig.cpu_spoof || {};
-    
-    let originalListData = {};
-    try {
-        const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
-        originalListData = JSON.parse(listContent);
-    } catch (error) {
-        appendToOutput("Failed to load game names list: " + error, 'warning');
-    }
-
-    if (type === 'blocked') {
-        const blockedList = cpuSpoofData.blacklist || [];
-        const index = blockedList.findIndex(pkg => getPackageNameWithoutTags(pkg) === cleanPackageName);
-        if (index !== -1) {
-            blockedList.splice(index, 1);
-        }
-    } else if (type === 'cpu_only') {
-        const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
-        const index = cpuOnlyList.findIndex(pkg => getPackageNameWithoutTags(pkg) === cleanPackageName);
-        if (index !== -1) {
-            cpuOnlyList.splice(index, 1);
-        }
-    }
-    
-    try {
-        await saveConfig();
-        try {
-            const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
-            let listData = JSON.parse(listContent);
-            if (listData[cleanPackageName]) {
-                delete listData[cleanPackageName];
-                await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
-            }
-        } catch (error) {
-            appendToOutput("Failed to update game names list: " + error, 'warning');
-        }
-        appendToOutput(`Removed "${cleanPackageName}" from ${type === 'blocked' ? 'blocklist' : 'CPU only list'}`, 'red');
-    } catch (error) {
-        appendToOutput(`Failed to delete game: ${error}`, 'error');
-        if (type === 'blocked') {
-            cpuSpoofData.blacklist.push(cleanPackageName);
-        } else if (type === 'cpu_only') {
-            cpuSpoofData.cpu_only_packages.push(cleanPackageName);
-        }
-        card.classList.remove('fade-out');
-        renderGameList();
-        return;
-    }
-
-    renderGameList();
-    const typeName = type === 'blocked' ? 'blocklist' : 'CPU only list';
-    showSnackbar(`Removed "${gameName || cleanPackageName}" from ${typeName}`, async () => {
-        if (type === 'blocked') {
-            cpuSpoofData.blacklist.push(cleanPackageName);
-        } else if (type === 'cpu_only') {
-            cpuSpoofData.cpu_only_packages.push(cleanPackageName);
-        }
-        
-        try {
-            await saveConfig();
-            try {
-                await execCommand(`echo '${JSON.stringify(originalListData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
-            } catch (error) {
-                appendToOutput("Failed to restore game names list: " + error, 'warning');
-            }
-            appendToOutput(`Restored game "${cleanPackageName}" to ${typeName}`, 'success');
-            renderGameList();
-            
-            setTimeout(() => {
-                const restoredCard = document.querySelector(`.game-card.cpu-spoof-card[data-package="${packageName}"][data-type="${type}"]`);
-                if (restoredCard) {
-                    restoredCard.style.opacity = '0';
-                    restoredCard.style.transform = 'translateY(20px)';
-                    setTimeout(() => {
-                        restoredCard.style.opacity = '1';
-                        restoredCard.style.transform = 'translateY(0)';
-                        restoredCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                    }, 10);
-                }
-            }, 100);
-        } catch (error) {
-            appendToOutput(`Failed to restore game: ${error}`, 'error');
-            if (type === 'blocked') {
-                const index = cpuSpoofData.blacklist.indexOf(cleanPackageName);
-                if (index !== -1) cpuSpoofData.blacklist.splice(index, 1);
-            } else if (type === 'cpu_only') {
-                const index = cpuSpoofData.cpu_only_packages.indexOf(cleanPackageName);
-                if (index !== -1) cpuSpoofData.cpu_only_packages.splice(index, 1);
-            }
-            await saveConfig();
-            renderGameList();
-        }
-    });
-}
-
 function editDevice(deviceKey) {
     openDeviceModal(deviceKey);
 }
@@ -1742,6 +2281,8 @@ function openDeviceModal(deviceKey = null) {
         document.getElementById('device-model').value = deviceData.MODEL || '';
         document.getElementById('device-manufacturer').value = deviceData.MANUFACTURER || '';
         document.getElementById('device-fingerprint').value = deviceData.FINGERPRINT || '';
+        document.getElementById('device-android-version').value = deviceData.ANDROID_VERSION || '';
+        document.getElementById('device-sdk-int').value = deviceData.SDK_INT || '';
     } else {
         title.textContent = 'Add New Device Profile';
         editingDevice = null;
@@ -1817,7 +2358,7 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
                 <label class="toggle-label" for="cpu-spoof-toggle">
                     <span>With CPU Spoofing</span>
                     <span class="badge-container">
-                        <span class="cpu-badge modal-badge">CPU Spoof</span>
+                        <span class="with-cpu-badge modal-badge">With CPU</span>
                     </span>
                 </label>
                 <label class="switch small-switch">
@@ -1839,7 +2380,7 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
                 <label class="toggle-label" for="block-cpu-toggle">
                     <span>Block CPU Spoofing</span>
                     <span class="badge-container">
-                        <span class="blocked-badge modal-badge">Block CPU Spoof</span>
+                        <span class="blocked-cpu-badge modal-badge">Block CPU</span>
                     </span>
                 </label>
                 <label class="switch small-switch">
@@ -1994,11 +2535,11 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
     });
     
     blockCpuToggle.addEventListener('change', () => {
-    if (blockCpuToggle.checked && cpuSpoofToggle.checked) {
-        cpuSpoofToggle.checked = false;
-    }
-    handleToggleConflicts();
-});
+        if (blockCpuToggle.checked && cpuSpoofToggle.checked) {
+            cpuSpoofToggle.checked = false;
+        }
+        handleToggleConflicts();
+    });
     
     modal.style.display = 'flex';
     requestAnimationFrame(() => {
@@ -2015,9 +2556,11 @@ function updateModalBadges(disableTweaksToggle, cpuSpoofToggle, blockCpuToggle) 
         if (disableTweaksToggle.checked) {
             noTweakBadge.style.opacity = '1';
             noTweakBadge.style.transform = 'scale(1.05)';
+            noTweakBadge.style.boxShadow = '0 2px 4px rgba(245, 158, 11, 0.2)';
         } else {
             noTweakBadge.style.opacity = '0.6';
             noTweakBadge.style.transform = 'scale(1)';
+            noTweakBadge.style.boxShadow = 'none';
         }
     }
     
@@ -2025,9 +2568,13 @@ function updateModalBadges(disableTweaksToggle, cpuSpoofToggle, blockCpuToggle) 
         if (cpuSpoofToggle.checked) {
             cpuBadge.style.opacity = '1';
             cpuBadge.style.transform = 'scale(1.05)';
+            cpuBadge.style.boxShadow = '0 2px 4px rgba(96, 165, 250, 0.2)';
+            cpuBadge.style.background = 'linear-gradient(135deg, #60A5FA 0%, #8B5CF6 100%)';
         } else {
             cpuBadge.style.opacity = '0.6';
             cpuBadge.style.transform = 'scale(1)';
+            cpuBadge.style.boxShadow = 'none';
+            cpuBadge.style.background = 'linear-gradient(135deg, #60A5FA 0%, #8B5CF6 100%)';
         }
     }
     
@@ -2035,9 +2582,13 @@ function updateModalBadges(disableTweaksToggle, cpuSpoofToggle, blockCpuToggle) 
         if (blockCpuToggle.checked) {
             blockedBadge.style.opacity = '1';
             blockedBadge.style.transform = 'scale(1.05)';
+            blockedBadge.style.boxShadow = '0 2px 4px rgba(245, 158, 11, 0.2)';
+            blockedBadge.style.background = 'linear-gradient(135deg, #F59E0B 0%, #DC2626 100%)';
         } else {
             blockedBadge.style.opacity = '0.6';
             blockedBadge.style.transform = 'scale(1)';
+            blockedBadge.style.boxShadow = 'none';
+            blockedBadge.style.background = 'linear-gradient(135deg, #F59E0B 0%, #DC2626 100%)';
         }
     }
 }
@@ -2133,6 +2684,9 @@ async function saveDevice(e) {
     const brand = document.getElementById('device-brand').value.trim() || 'Unknown';
     const model = document.getElementById('device-model').value.trim() || 'Unknown';
     
+    const androidVersion = document.getElementById('device-android-version').value.trim();
+    const sdkInt = document.getElementById('device-sdk-int').value.trim();
+    
     const deviceData = {
         BRAND: brand,
         DEVICE: deviceName,
@@ -2141,6 +2695,14 @@ async function saveDevice(e) {
         FINGERPRINT: document.getElementById('device-fingerprint').value.trim() || `${brand}/${model}/${model}:14/UP1A.231005.007/20230101:user/release-keys`,
         PRODUCT: model
     };
+    
+    if (androidVersion) {
+        deviceData.ANDROID_VERSION = androidVersion;
+    }
+    
+    if (sdkInt) {
+        deviceData.SDK_INT = sdkInt;
+    }
     
     try {
         if (editingDevice && editingDevice !== deviceKey) {
@@ -2424,6 +2986,25 @@ async function saveGame(e) {
         const blockedList = cpuSpoofData.blacklist || [];
         const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
         
+        let originalPosition = -1;
+        let originalList = null;
+        
+        if (editingGame) {
+            if (oldGameType === 'blocked') {
+                originalPosition = blockedList.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
+                originalList = 'blocked';
+            } else if (oldGameType === 'cpu_only') {
+                originalPosition = cpuOnlyList.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
+                originalList = 'cpu_only';
+            } else if (oldGameType === 'device' && oldDeviceKey) {
+                const oldPackageList = currentConfig[oldDeviceKey];
+                if (Array.isArray(oldPackageList)) {
+                    originalPosition = oldPackageList.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
+                    originalList = oldDeviceKey;
+                }
+            }
+        }
+        
         if (oldCleanPackage) {
             const blockedIndex = blockedList.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
             const cpuOnlyIndex = cpuOnlyList.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
@@ -2474,29 +3055,35 @@ async function saveGame(e) {
             }
             
             const newPackageList = currentConfig[packageKey];
+            
             const existingIndex = newPackageList.findIndex(pkg => getPackageNameWithoutTags(pkg) === getPackageNameWithoutTags(finalPackageName));
             if (existingIndex !== -1) {
                 newPackageList.splice(existingIndex, 1);
             }
             
-            newPackageList.push(finalPackageName);
-            
-            let tweaksMessage = '';
-            if (disableTweaks && withCpuSpoof) {
-                tweaksMessage = 'with no tweaks and CPU spoofing';
-            } else if (disableTweaks && blockCpuSpoof) {
-                tweaksMessage = 'with no tweaks and CPU spoofing blocked';
-            } else if (disableTweaks) {
-                tweaksMessage = 'with no tweaks';
-            } else if (withCpuSpoof) {
-                tweaksMessage = 'with CPU spoofing';
-            } else if (blockCpuSpoof) {
-                tweaksMessage = 'with CPU spoofing blocked';
+            if (editingGame && originalList === packageKey && originalPosition !== -1) {
+                newPackageList.splice(originalPosition, 0, finalPackageName);
+                appendToOutput(`Updated game "${gameName}" at position ${originalPosition + 1} in "${currentConfig[newDeviceKey].DEVICE}"`, 'success');
             } else {
-                tweaksMessage = 'with all tweaks';
+                newPackageList.push(finalPackageName);
+                
+                let tweaksMessage = '';
+                if (disableTweaks && withCpuSpoof) {
+                    tweaksMessage = 'with no tweaks and CPU spoofing';
+                } else if (disableTweaks && blockCpuSpoof) {
+                    tweaksMessage = 'with no tweaks and CPU spoofing blocked';
+                } else if (disableTweaks) {
+                    tweaksMessage = 'with no tweaks';
+                } else if (withCpuSpoof) {
+                    tweaksMessage = 'with CPU spoofing';
+                } else if (blockCpuSpoof) {
+                    tweaksMessage = 'with CPU spoofing blocked';
+                } else {
+                    tweaksMessage = 'with all tweaks';
+                }
+                
+                appendToOutput(`Game "${gameName}" ${editingGame ? 'updated' : 'added'} to "${currentConfig[newDeviceKey].DEVICE}" ${tweaksMessage}`, 'success');
             }
-            
-            appendToOutput(`Game "${gameName}" ${editingGame ? 'updated' : 'added'} to "${currentConfig[newDeviceKey].DEVICE}" ${tweaksMessage}`, 'success');
             
         } else if (selectedType === 'cpu_only') {
             const existingIndex = cpuOnlyList.findIndex(pkg => getPackageNameWithoutTags(pkg) === getPackageNameWithoutTags(finalPackageName));
@@ -2504,10 +3091,15 @@ async function saveGame(e) {
                 cpuOnlyList.splice(existingIndex, 1);
             }
             
-            cpuOnlyList.push(finalPackageName);
-            
-            let tweaksMessage = disableTweaks ? 'with no tweaks' : 'with all tweaks';
-            appendToOutput(`Game "${gameName}" ${editingGame ? 'updated' : 'added'} to CPU only spoofing ${tweaksMessage}`, 'success');
+            if (editingGame && originalList === 'cpu_only' && originalPosition !== -1) {
+                cpuOnlyList.splice(originalPosition, 0, finalPackageName);
+                appendToOutput(`Updated game "${gameName}" at position ${originalPosition + 1} in CPU only list`, 'success');
+            } else {
+                cpuOnlyList.push(finalPackageName);
+                
+                let tweaksMessage = disableTweaks ? 'with no tweaks' : 'with all tweaks';
+                appendToOutput(`Game "${gameName}" ${editingGame ? 'updated' : 'added'} to CPU only spoofing ${tweaksMessage}`, 'success');
+            }
             
         } else if (selectedType === 'blocked') {
             const existingIndex = blockedList.findIndex(pkg => getPackageNameWithoutTags(pkg) === getPackageNameWithoutTags(cleanPackageForCheck));
@@ -2515,9 +3107,14 @@ async function saveGame(e) {
                 blockedList.splice(existingIndex, 1);
             }
             
-            blockedList.push(cleanPackageForCheck);
-            
-            appendToOutput(`Game "${gameName}" ${editingGame ? 'updated' : 'added'} to blocklist`, 'success');
+            if (editingGame && originalList === 'blocked' && originalPosition !== -1) {
+                blockedList.splice(originalPosition, 0, cleanPackageForCheck);
+                appendToOutput(`Updated game "${gameName}" at position ${originalPosition + 1} in blocklist`, 'success');
+            } else {
+                blockedList.push(cleanPackageForCheck);
+                
+                appendToOutput(`Game "${gameName}" ${editingGame ? 'updated' : 'added'} to blocklist`, 'success');
+            }
         }
         
         await saveConfig();
@@ -2532,22 +3129,25 @@ async function saveGame(e) {
     }
 }
 
-async function deleteGame(gamePackage, deviceKey, gameName, deviceName, cleanPackageName = null) {
-    const card = document.querySelector(`.game-card[data-package="${gamePackage}"][data-device="${deviceKey}"]`);
+function deleteCpuSpoofGameHandler(e) {
+    e.stopPropagation();
+    const packageName = e.currentTarget.dataset.package;
+    const type = e.currentTarget.dataset.type;
+    const card = e.currentTarget.closest('.game-card');
+    const gameName = card.querySelector('.game-name').textContent;
+    deleteCpuSpoofGame(packageName, type, gameName);
+}
+
+async function deleteCpuSpoofGame(packageName, type, gameName) {
+    const card = document.querySelector(`.game-card.cpu-spoof-card[data-package="${packageName}"][data-type="${type}"]`);
     if (!card) return;
 
     card.classList.add('fade-out');
     await new Promise(resolve => setTimeout(resolve, 400));
 
-    const deletedGame = gamePackage;
-    const originalIndex = currentConfig[deviceKey].indexOf(gamePackage);
-    if (originalIndex === -1) {
-        const displayPackageName = cleanPackageName || getPackageNameWithoutTags(gamePackage);
-        appendToOutput(`Game "${gameName || displayPackageName}" not found in "${deviceName}"`, 'error');
-        card.classList.remove('fade-out');
-        return;
-    }
-
+    const cleanPackageName = getPackageNameWithoutTags(packageName);
+    const cpuSpoofData = currentConfig.cpu_spoof || {};
+    
     let originalListData = {};
     try {
         const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
@@ -2556,43 +3156,73 @@ async function deleteGame(gamePackage, deviceKey, gameName, deviceName, cleanPac
         appendToOutput("Failed to load game names list: " + error, 'warning');
     }
 
-    currentConfig[deviceKey].splice(originalIndex, 1);
+    let originalPosition = -1;
+    let originalPackage = null;
+    
+    if (type === 'blocked') {
+        const blockedList = cpuSpoofData.blacklist || [];
+        originalPosition = blockedList.findIndex(pkg => getPackageNameWithoutTags(pkg) === cleanPackageName);
+        if (originalPosition !== -1) {
+            originalPackage = blockedList[originalPosition];
+            blockedList.splice(originalPosition, 1);
+        }
+    } else if (type === 'cpu_only') {
+        const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
+        originalPosition = cpuOnlyList.findIndex(pkg => getPackageNameWithoutTags(pkg) === cleanPackageName);
+        if (originalPosition !== -1) {
+            originalPackage = cpuOnlyList[originalPosition];
+            cpuOnlyList.splice(originalPosition, 1);
+        }
+    }
+    
+    if (originalPosition === -1) {
+        const displayPackageName = cleanPackageName;
+        appendToOutput(`Package "${displayPackageName}" not found in ${type === 'blocked' ? 'blocklist' : 'CPU only list'}`, 'error');
+        card.classList.remove('fade-out');
+        return;
+    }
     
     try {
         await saveConfig();
         try {
             const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
             let listData = JSON.parse(listContent);
-            const cleanPackage = getPackageNameWithoutTags(gamePackage);
-            if (listData[cleanPackage]) {
-                delete listData[cleanPackage];
+            if (listData[cleanPackageName]) {
+                delete listData[cleanPackageName];
                 await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
             }
         } catch (error) {
             appendToOutput("Failed to update game names list: " + error, 'warning');
         }
-        
-        const displayPackageName = cleanPackageName || getPackageNameWithoutTags(gamePackage);
-        appendToOutput(`Removed "${displayPackageName}" from "${deviceName}"`, 'red');
+        appendToOutput(`Removed "${cleanPackageName}" from ${type === 'blocked' ? 'blocklist' : 'CPU only list'}`, 'red');
     } catch (error) {
         appendToOutput(`Failed to delete game: ${error}`, 'error');
-        currentConfig[deviceKey].splice(originalIndex, 0, deletedGame);
+        if (type === 'blocked') {
+            cpuSpoofData.blacklist.splice(originalPosition, 0, originalPackage);
+        } else if (type === 'cpu_only') {
+            cpuSpoofData.cpu_only_packages.splice(originalPosition, 0, originalPackage);
+        }
         card.classList.remove('fade-out');
         renderGameList();
-        renderDeviceList();
         return;
     }
 
     renderGameList();
-    renderDeviceList();
-
-    const displayPackageName = cleanPackageName || getPackageNameWithoutTags(gamePackage);
-    showSnackbar(`Removed "${gameName || displayPackageName}" from "${deviceName}"`, async () => {
-        if (!Array.isArray(currentConfig[deviceKey])) {
-            currentConfig[deviceKey] = [];
+    
+    const undoData = {
+        type: type,
+        package: originalPackage,
+        position: originalPosition,
+        cleanPackageName: cleanPackageName
+    };
+    
+    const typeName = type === 'blocked' ? 'blocklist' : 'CPU only list';
+    showSnackbar(`Removed "${gameName || cleanPackageName}" from ${typeName}`, async (undoData) => {
+        if (undoData.type === 'blocked') {
+            cpuSpoofData.blacklist.splice(undoData.position, 0, undoData.package);
+        } else if (undoData.type === 'cpu_only') {
+            cpuSpoofData.cpu_only_packages.splice(undoData.position, 0, undoData.package);
         }
-        
-        currentConfig[deviceKey].splice(originalIndex, 0, deletedGame);
         
         try {
             await saveConfig();
@@ -2601,13 +3231,11 @@ async function deleteGame(gamePackage, deviceKey, gameName, deviceName, cleanPac
             } catch (error) {
                 appendToOutput("Failed to restore game names list: " + error, 'warning');
             }
-            
-            appendToOutput(`Restored game "${displayPackageName}" to "${deviceName}"`, 'success');
-            renderDeviceList();
+            appendToOutput(`Restored game "${undoData.cleanPackageName}" to ${typeName} at position ${undoData.position + 1}`, 'success');
             renderGameList();
             
             setTimeout(() => {
-                const restoredCard = document.querySelector(`.game-card[data-package="${gamePackage}"][data-device="${deviceKey}"]`);
+                const restoredCard = document.querySelector(`.game-card.cpu-spoof-card[data-package="${packageName}"][data-type="${type}"]`);
                 if (restoredCard) {
                     restoredCard.style.opacity = '0';
                     restoredCard.style.transform = 'translateY(20px)';
@@ -2620,15 +3248,20 @@ async function deleteGame(gamePackage, deviceKey, gameName, deviceName, cleanPac
             }, 100);
         } catch (error) {
             appendToOutput(`Failed to restore game: ${error}`, 'error');
-            currentConfig[deviceKey].splice(originalIndex, 1);
+            if (undoData.type === 'blocked') {
+                const index = cpuSpoofData.blacklist.indexOf(undoData.package);
+                if (index !== -1) cpuSpoofData.blacklist.splice(index, 1);
+            } else if (undoData.type === 'cpu_only') {
+                const index = cpuSpoofData.cpu_only_packages.indexOf(undoData.package);
+                if (index !== -1) cpuSpoofData.cpu_only_packages.splice(index, 1);
+            }
             await saveConfig();
-            renderDeviceList();
             renderGameList();
         }
-    });
+    }, undoData);
 }
 
-function showSnackbar(message, onUndo) {
+function showSnackbar(message, onUndo, undoData = null) {
     const snackbar = document.getElementById('snackbar');
     const messageElement = document.getElementById('snackbar-message');
     const undoButton = document.getElementById('snackbar-undo');
@@ -2644,7 +3277,13 @@ function showSnackbar(message, onUndo) {
     undoButton.parentNode.replaceChild(newUndoButton, undoButton);
 
     newUndoButton.addEventListener('click', () => {
-        if (onUndo) onUndo();
+        if (onUndo) {
+            if (undoData) {
+                onUndo(undoData);
+            } else {
+                onUndo();
+            }
+        }
         resetSnackbar();
     });
 
@@ -2718,6 +3357,109 @@ function insertAtIndex(obj, key, value, index) {
         ...entries.slice(index)
     ];
     return Object.fromEntries(newEntries);
+}
+
+async function deleteGame(gamePackage, deviceKey, gameName, deviceName, cleanPackageName = null) {
+    const card = document.querySelector(`.game-card[data-package="${gamePackage}"][data-device="${deviceKey}"]`);
+    if (!card) return;
+
+    card.classList.add('fade-out');
+    await new Promise(resolve => setTimeout(resolve, 400));
+
+    const cleanPackage = cleanPackageName || getPackageNameWithoutTags(gamePackage);
+    const originalIndex = currentConfig[deviceKey].indexOf(gamePackage);
+    
+    if (originalIndex === -1) {
+        const displayPackageName = cleanPackage;
+        appendToOutput(`Game "${gameName || displayPackageName}" not found in "${deviceName}"`, 'error');
+        card.classList.remove('fade-out');
+        return;
+    }
+
+    const deletedGameData = {
+        package: gamePackage,
+        deviceKey: deviceKey,
+        position: originalIndex,
+        cleanPackage: cleanPackage
+    };
+
+    let originalListData = {};
+    try {
+        const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
+        originalListData = JSON.parse(listContent);
+    } catch (error) {
+        appendToOutput("Failed to load game names list: " + error, 'warning');
+    }
+
+    currentConfig[deviceKey].splice(originalIndex, 1);
+    
+    try {
+        await saveConfig();
+        try {
+            const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
+            let listData = JSON.parse(listContent);
+            if (listData[cleanPackage]) {
+                delete listData[cleanPackage];
+                await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
+            }
+        } catch (error) {
+            appendToOutput("Failed to update game names list: " + error, 'warning');
+        }
+        
+        const displayPackageName = cleanPackage;
+        appendToOutput(`Removed "${displayPackageName}" from "${deviceName}"`, 'red');
+    } catch (error) {
+        appendToOutput(`Failed to delete game: ${error}`, 'error');
+        currentConfig[deviceKey].splice(originalIndex, 0, gamePackage);
+        card.classList.remove('fade-out');
+        renderGameList();
+        renderDeviceList();
+        return;
+    }
+
+    renderGameList();
+    renderDeviceList();
+
+    const displayPackageName = cleanPackage;
+    showSnackbar(`Removed "${gameName || displayPackageName}" from "${deviceName}"`, async (undoData) => {
+        if (!Array.isArray(currentConfig[undoData.deviceKey])) {
+            currentConfig[undoData.deviceKey] = [];
+        }
+        
+        currentConfig[undoData.deviceKey].splice(undoData.position, 0, undoData.package);
+        
+        try {
+            await saveConfig();
+            try {
+                await execCommand(`echo '${JSON.stringify(originalListData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
+            } catch (error) {
+                appendToOutput("Failed to restore game names list: " + error, 'warning');
+            }
+            
+            appendToOutput(`Restored game "${undoData.cleanPackage}" to "${deviceName}" at position ${undoData.position + 1}`, 'success');
+            renderDeviceList();
+            renderGameList();
+            
+            setTimeout(() => {
+                const restoredCard = document.querySelector(`.game-card[data-package="${gamePackage}"][data-device="${deviceKey}"]`);
+                if (restoredCard) {
+                    restoredCard.style.opacity = '0';
+                    restoredCard.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        restoredCard.style.opacity = '1';
+                        restoredCard.style.transform = 'translateY(0)';
+                        restoredCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    }, 10);
+                }
+            }, 100);
+        } catch (error) {
+            appendToOutput(`Failed to restore game: ${error}`, 'error');
+            currentConfig[undoData.deviceKey].splice(undoData.position, 1);
+            await saveConfig();
+            renderDeviceList();
+            renderGameList();
+        }
+    }, deletedGameData);
 }
 
 async function deleteDevice(deviceKey) {
@@ -3342,47 +4084,53 @@ function applyEventListeners() {
             ].join(' ').toLowerCase();
             card.style.display = searchableText.includes(searchTerm) ? 'block' : 'none';
         });
+        sortDeviceList();
     });
 
     document.getElementById('game-search').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase().trim();
-        document.querySelectorAll('.game-card').forEach(card => {
-            const packageName = card.dataset.package ? card.dataset.package.toLowerCase() : '';
-            const deviceKey = card.dataset.device;
-            const type = card.dataset.type;
-            
-            let deviceData = {};
-            if (deviceKey) {
-                const deviceKeyFull = `${deviceKey}_DEVICE`;
-                deviceData = currentConfig[deviceKeyFull] || {};
-            }
-            
-            const gameName = card.querySelector('.game-name').textContent.toLowerCase();
-            
-            let searchableText = '';
-            if (type) {
-                searchableText = [
-                    gameName, 
-                    packageName,
-                    type === 'blocked' ? 'global blocklist blocked globally' : '',
-                    type === 'cpu_only' ? 'cpu only cpu' : ''
-                ].join(' ');
-            } else {
-                searchableText = [
-                    gameName, 
-                    packageName, 
-                    deviceData.DEVICE?.toLowerCase() || '', 
-                    deviceData.BRAND?.toLowerCase() || '', 
-                    deviceData.MODEL?.toLowerCase() || '', 
-                    deviceData.MANUFACTURER?.toLowerCase() || '',
-                    deviceData.FINGERPRINT?.toLowerCase() || '', 
-                    deviceData.PRODUCT?.toLowerCase() || '' 
-                ].join(' ');
-            }
+    const searchTerm = e.target.value.toLowerCase().trim();
+    document.querySelectorAll('.game-card').forEach(card => {
+        const packageName = card.dataset.package ? card.dataset.package.toLowerCase() : '';
+        const deviceKey = card.dataset.device;
+        const type = card.dataset.type;
+        
+        let deviceData = {};
+        if (deviceKey) {
+            const deviceKeyFull = `${deviceKey}_DEVICE`;
+            deviceData = currentConfig[deviceKeyFull] || {};
+        }
+        
+        const gameName = card.querySelector('.game-name').textContent.toLowerCase();
+        
+        let searchableText = '';
+        if (type) {
+            searchableText = [
+                gameName, 
+                packageName,
+                type === 'blocked' ? 'global blocklist blocked globally' : '',
+                type === 'cpu_only' ? 'cpu only cpu' : ''
+            ].join(' ');
+        } else {
+            searchableText = [
+                gameName, 
+                packageName, 
+                deviceData.DEVICE?.toLowerCase() || '', 
+                deviceData.BRAND?.toLowerCase() || '', 
+                deviceData.MODEL?.toLowerCase() || '', 
+                deviceData.MANUFACTURER?.toLowerCase() || '',
+                deviceData.FINGERPRINT?.toLowerCase() || '', 
+                deviceData.PRODUCT?.toLowerCase() || '' 
+            ].join(' ');
+        }
 
-            card.style.display = searchableText.includes(searchTerm) ? 'block' : 'none';
-        });
+        const matchesSearch = searchableText.includes(searchTerm);
+        const matchesFilter = shouldShowByCurrentFilter(card);
+        
+        card.style.display = (matchesSearch && matchesFilter) ? 'block' : 'none';
     });
+    
+    sortGameList();
+});
 
     document.getElementById('device-picker-search').addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase().trim();
@@ -3476,6 +4224,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadToggleStates();
     await loadConfig();
     applyEventListeners();
+    initializeDeviceSort(); 
+    initializeGameSort(); 
     switchTab('settings');
 });
 
@@ -3578,9 +4328,27 @@ async function getInstalledPackagesFallback() {
     }
 }
 
+function shouldShowByCurrentFilter(card) {
+    if (!currentFilter) return true;
+    
+    switch(currentFilter) {
+        case 'blocklist':
+            return card.querySelector('.blocked-globally-badge') || 
+                   card.querySelector('.blocked-badge');
+        case 'cpu_only':
+            return card.querySelector('.cpu-only-badge') || 
+                   card.querySelector('.cpu-badge');
+        case 'installed':
+            return card.querySelector('.installed-badge');
+        case 'no_tweaks':
+            return card.querySelector('.no-tweaks-badge');
+        default:
+            return true;
+    }
+}
+
 async function getPackageInfoNewKernelSU(packageName) {
     try {
-        // KernelSU package manager API
         if (typeof ksu !== 'undefined' && typeof ksu.getPackageInfo !== 'undefined') {
             const info = ksu.getPackageInfo(packageName);
             if (info && typeof info === 'object') {
@@ -3606,7 +4374,6 @@ async function getPackageInfoNewKernelSU(packageName) {
             }
         }
         
-        // WebUI-X package manager API
         if (typeof $packageManager !== 'undefined') {
             const info = $packageManager.getApplicationInfo(packageName, 0, 0);
             if (info) {
@@ -4273,6 +5040,127 @@ function showNoTweaksExplanation(e) {
     });
 
     popup.querySelector('.action-btn').addEventListener('click', () => {
+        const content = popup.querySelector('.popup-content');
+        content.classList.remove('modal-enter');
+        content.classList.add('popup-exit');
+        content.addEventListener('animationend', () => {
+            popup.remove();
+        }, { once: true });
+    });
+
+    popup.addEventListener('click', (e) => {
+        if (e.target === popup) {
+            const content = popup.querySelector('.popup-content');
+            content.classList.remove('modal-enter');
+            content.classList.add('popup-exit');
+            content.addEventListener('animationend', () => {
+                popup.remove();
+            }, { once: true });
+        }
+    });
+}
+
+function showWithCpuExplanation(e) {
+    e.stopPropagation();
+
+    const popup = document.createElement('div');
+    popup.className = 'popup cpu-explanation-popup';
+    popup.id = 'with-cpu-explanation-popup';
+    popup.innerHTML = `
+        <div class="popup-content">
+            <h3 class="explanation-title">With CPU Spoofing</h3>
+            <div class="explanation-text">
+                <span class="highlight">This application receives:</span>
+                <ul>
+                    <li>• Device Spoofing (Full device profile)</li>
+                    <li>• CPU Spoofing (CPU information modification)</li>
+                </ul>
+                
+                <div class="important-note">
+                    <span class="important-text">Use case:</span> 
+                    Games and applications that require both device and CPU spoofing for optimal performance and compatibility.
+                </div>
+                
+                <div class="important-note">
+                    <span class="important-text">Result:</span> 
+                    The application will see a different device with modified CPU specifications.
+                </div>
+            </div>
+            <button class="action-btn">OK</button>
+        </div>
+    `;
+
+    document.body.appendChild(popup);
+    requestAnimationFrame(() => {
+        popup.style.display = 'flex';
+        popup.querySelector('.popup-content').classList.add('modal-enter');
+    });
+
+    const okBtn = popup.querySelector('.action-btn');
+    okBtn.addEventListener('click', () => {
+        const content = popup.querySelector('.popup-content');
+        content.classList.remove('modal-enter');
+        content.classList.add('popup-exit');
+        content.addEventListener('animationend', () => {
+            popup.remove();
+        }, { once: true });
+    });
+
+    popup.addEventListener('click', (e) => {
+        if (e.target === popup) {
+            const content = popup.querySelector('.popup-content');
+            content.classList.remove('modal-enter');
+            content.classList.add('popup-exit');
+            content.addEventListener('animationend', () => {
+                popup.remove();
+            }, { once: true });
+        }
+    });
+}
+
+function showBlockedCpuExplanation(e) {
+    e.stopPropagation();
+
+    const popup = document.createElement('div');
+    popup.className = 'popup cpu-explanation-popup';
+    popup.id = 'blocked-cpu-explanation-popup';
+    popup.innerHTML = `
+        <div class="popup-content">
+            <h3 class="explanation-title">Block CPU Spoofing</h3>
+            <div class="explanation-text">
+                <span class="highlight">This application receives:</span>
+                <ul>
+                    <li>• Device Spoofing (Full device profile)</li>
+                    <li>• No CPU Spoofing (Real CPU information)</li>
+                </ul>
+                
+                <div class="important-note">
+                    <span class="important-text">Perfect for:</span> 
+                    Sensitive applications and games that may crash with CPU spoofing or display incorrect device information.
+                </div>
+                
+                <div class="important-note">
+                    <span class="important-text">Result:</span> 
+                    The application will see a different device but with real CPU specifications.
+                </div>
+                
+                <div class="important-note">
+                    <span class="important-text">Note:</span> 
+                    Prevents any remaining CPU spoofing before the application launches.
+                </div>
+            </div>
+            <button class="action-btn">OK</button>
+        </div>
+    `;
+
+    document.body.appendChild(popup);
+    requestAnimationFrame(() => {
+        popup.style.display = 'flex';
+        popup.querySelector('.popup-content').classList.add('modal-enter');
+    });
+
+    const okBtn = popup.querySelector('.action-btn');
+    okBtn.addEventListener('click', () => {
         const content = popup.querySelector('.popup-content');
         content.classList.remove('modal-enter');
         content.classList.add('popup-exit');
