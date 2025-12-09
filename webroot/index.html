@@ -138,6 +138,76 @@
         </div>
     </template>
 
+    <template id="sort-dropdown-template">
+        <div class="sort-dropdown">
+            <div class="sort-option" data-sort="default">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 6h13"></path>
+                    <path d="M8 12h13"></path>
+                    <path d="M8 18h13"></path>
+                    <path d="M3 6h.01"></path>
+                    <path d="M3 12h.01"></path>
+                    <path d="M3 18h.01"></path>
+                </svg>
+                <span>Default</span>
+            </div>
+            <div class="sort-option" data-sort="asc">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18"></path>
+                    <path d="M6 12h15"></path>
+                    <path d="M9 18h12"></path>
+                </svg>
+                <span>A → Z</span>
+            </div>
+            <div class="sort-option" data-sort="desc">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 18h18"></path>
+                    <path d="M6 12h15"></path>
+                    <path d="M9 6h12"></path>
+                </svg>
+                <span>Z → A</span>
+            </div>
+            <div class="sort-separator"></div>
+            <div class="sort-option" data-filter="blocklist">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M18 6L6 18"></path>
+                </svg>
+                <span>Blocklist Only</span>
+                <span class="filter-badge" id="blocklist-count">0</span>
+            </div>
+            <div class="sort-option" data-filter="cpu_only">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0m-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5zM6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5z"/>
+                </svg>
+                <span>CPU Only</span>
+                <span class="filter-badge" id="cpu-only-count">0</span>
+            </div>
+            <div class="sort-option" data-filter="installed">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <span>Installed Only</span>
+                <span class="filter-badge" id="installed-count">0</span>
+            </div>
+            <div class="sort-option" data-filter="no_tweaks">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                <span>No Tweaks Only</span>
+                <span class="filter-badge" id="no-tweaks-count">0</span>
+            </div>
+            <div class="sort-option" data-filter="clear" id="clear-filter-btn" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2"></path>
+                </svg>
+                <span>Clear Filter</span>
+            </div>
+        </div>
+    </template>
+
     <div class="container">
         <div class="header">
             <h1 class="header-title">COPG Manager <span class="version" id="version-text">v0.0</span></h1>
@@ -405,40 +475,56 @@
             </div>
 
             <div id="devices-tab" class="tab-content">
-                <div class="search-container">
-                    <input type="text" id="device-search" placeholder="Search devices...">
-                    <button id="add-device" class="add-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 5v14m-7-7h14"></path>
-                        </svg>
-                        Add Device
-                    </button>
-                </div>
-                <div class="scroll-container">
-                    <div class="list-wrapper">
-                        <div id="device-list" class="device-list"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="games-tab" class="tab-content">
-                <div class="search-container">
-                    <input type="text" id="game-search" placeholder="Search games...">
-                    <button id="add-game" class="add-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 5v14m-7-7h14"></path>
-                        </svg>
-                        Add Game
-                    </button>
-                </div>
-                <div class="scroll-container">
-                    <div class="list-wrapper">
-                        <div id="game-list" class="game-list"></div>
-                    </div>
-                </div>
-            </div>
+    <div class="search-container">
+        <div class="search-input-wrapper">
+            <input type="text" id="device-search" placeholder="Search devices...">
+            <button id="device-sort-btn" class="sort-btn" title="Sort devices">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18"></path>
+                    <path d="M8 12h8"></path>
+                    <path d="M13 18h3"></path>
+                </svg>
+            </button>
+        </div>
+        <button id="add-device" class="add-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14m-7-7h14"></path>
+            </svg>
+            Add Device
+        </button>
+    </div>
+    <div class="scroll-container">
+        <div class="list-wrapper">
+            <div id="device-list" class="device-list"></div>
         </div>
     </div>
+</div>
+
+<div id="games-tab" class="tab-content">
+    <div class="search-container">
+        <div class="search-input-wrapper">
+            <input type="text" id="game-search" placeholder="Search games...">
+            <button id="game-sort-btn" class="sort-btn" title="Sort games">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18"></path>
+                    <path d="M8 12h8"></path>
+                    <path d="M13 18h3"></path>
+                </svg>
+            </button>
+        </div>
+        <button id="add-game" class="add-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14m-7-7h14"></path>
+            </svg>
+            Add Game
+        </button>
+    </div>
+    <div class="scroll-container">
+        <div class="list-wrapper">
+            <div id="game-list" class="game-list"></div>
+        </div>
+    </div>
+</div>
 
     <div id="device-modal" class="modal">
         <div class="modal-content device-form-content">
@@ -448,24 +534,46 @@
             <form id="device-form">
                 <div class="scroll-container">
                     <div class="form-group">
-                        <label for="device-name">Device Name</label>
+                        <label for="device-name">
+                            Device Name<span class="required-badge">required</span>
+                        </label>
                         <input type="text" id="device-name" placeholder="e.g., Galaxy S23" required>
                     </div>
                     <div class="form-group">
-                        <label for="device-brand">Brand</label>
+                        <label for="device-brand">
+                            Brand<span class="required-badge">required</span>
+                        </label>
                         <input type="text" id="device-brand" placeholder="e.g., Samsung">
                     </div>
                     <div class="form-group">
-                        <label for="device-model">Model</label>
+                        <label for="device-model">
+                            Model<span class="required-badge">required</span>
+                        </label>
                         <input type="text" id="device-model" placeholder="e.g., SM-S918B">
                     </div>
                     <div class="form-group">
-                        <label for="device-manufacturer">Manufacturer</label>
+                        <label for="device-manufacturer">
+                            Manufacturer<span class="required-badge">required</span>
+                        </label>
                         <input type="text" id="device-manufacturer" placeholder="e.g., Samsung">
                     </div>
                     <div class="form-group">
-                        <label for="device-fingerprint">Fingerprint</label>
+                        <label for="device-fingerprint">
+                            Fingerprint<span class="required-badge">required</span>
+                        </label>
                         <input type="text" id="device-fingerprint" placeholder="e.g., samsung/m23xqns/samsung:14/UP1A.231005.007/G990BXXU7EWD5:user/release-keys">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-android-version">
+                            Android Version<span class="optional-badge">optional</span>
+                        </label>
+                        <input type="text" id="device-android-version" placeholder="e.g., 14">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-sdk-int">
+                            SDK Version<span class="optional-badge">optional</span>
+                        </label>
+                        <input type="text" id="device-sdk-int" placeholder="e.g., 34">
                     </div>
                 </div>
                 <div class="form-buttons">
@@ -528,36 +636,6 @@
                         </label>
                         <label class="switch small-switch">
                             <input type="checkbox" id="disable-tweaks-toggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group disable-tweaks-group" id="cpu-spoof-container">
-                    <div class="toggle-wrapper">
-                        <label class="toggle-label" for="cpu-spoof-toggle">
-                            <span>Add CPU Spoofing</span>
-                            <span class="badge-container">
-                                <span class="cpu-badge modal-badge">CPU Spoof</span>
-                            </span>
-                        </label>
-                        <label class="switch small-switch">
-                            <input type="checkbox" id="cpu-spoof-toggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group disable-tweaks-group" id="block-cpu-container">
-                    <div class="toggle-wrapper">
-                        <label class="toggle-label" for="block-cpu-toggle">
-                            <span>Block CPU Spoofing</span>
-                            <span class="badge-container">
-                                <span class="blocked-badge modal-badge">Block CPU Spoof</span>
-                            </span>
-                        </label>
-                        <label class="switch small-switch">
-                            <input type="checkbox" id="block-cpu-toggle">
                             <span class="slider"></span>
                         </label>
                     </div>
