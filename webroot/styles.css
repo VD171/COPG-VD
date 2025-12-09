@@ -5191,3 +5191,14 @@ input:checked ~ .slider ~ .toggle-label .modal-badge {
         height: 16px;
     }
 }
+
+.suggested-value {
+    border-color: #10B981 !important;
+    background-color: rgba(16, 185, 129, 0.05) !important;
+    box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2) !important;
+}
+
+.dark-theme .suggested-value {
+    background-color: rgba(16, 185, 129, 0.1) !important;
+    box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.3) !important;
+}
