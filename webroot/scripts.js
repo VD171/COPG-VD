@@ -23,6 +23,24 @@ const MODULE_ID = 'COPG';
 const SANITIZED_MODULE_ID = MODULE_ID.replace(/[^a-zA-Z0-9_.]/g, '_');
 const JS_INTERFACE = `$${SANITIZED_MODULE_ID}`;
 const DEBUG_LOGS = false;
+const androidToSdkMapping = {
+    '10': 29, '10.0': 29,
+    '11': 30, '11.0': 30,
+    '12': 31, '12.0': 31,
+    '12L': 32, '12.1': 32,
+    '13': 33, '13.0': 33,
+    '14': 34, '14.0': 34,
+    '15': 35, '15.0': 35,
+    '16': 36, '16.0': 36
+};
+
+const sdkToAndroidMapping = (function() {
+    const map = {};
+    for (const [android, sdk] of Object.entries(androidToSdkMapping)) {
+        map[sdk] = android.split('.')[0];
+    }
+    return map;
+})();
 
 const templates = {
     deviceCard: (data) => {
@@ -2283,15 +2301,111 @@ function openDeviceModal(deviceKey = null) {
         document.getElementById('device-fingerprint').value = deviceData.FINGERPRINT || '';
         document.getElementById('device-android-version').value = deviceData.ANDROID_VERSION || '';
         document.getElementById('device-sdk-int').value = deviceData.SDK_INT || '';
+        setupAndroidSdkLink();
     } else {
         title.textContent = 'Add New Device Profile';
         editingDevice = null;
         form.reset();
+        setupAndroidSdkLink();
     }
     
     modal.style.display = 'flex';
     requestAnimationFrame(() => {
         modal.querySelector('.modal-content').classList.add('modal-enter');
+    });
+}
+
+function setupAndroidSdkLink() {
+    const androidInput = document.getElementById('device-android-version');
+    const sdkInput = document.getElementById('device-sdk-int');
+    
+    if (!androidInput || !sdkInput) return;
+    
+    const newAndroidInput = androidInput.cloneNode(true);
+    const newSdkInput = sdkInput.cloneNode(true);
+    
+    androidInput.parentNode.replaceChild(newAndroidInput, androidInput);
+    sdkInput.parentNode.replaceChild(newSdkInput, sdkInput);
+    
+    function getSdkFromAndroid(androidValue) {
+        const cleanVersion = androidValue.replace(/[^0-9.L]/g, '');
+        
+        if (androidToSdkMapping[cleanVersion]) {
+            return androidToSdkMapping[cleanVersion];
+        }
+        
+        const mainVersion = cleanVersion.split('.')[0];
+        if (androidToSdkMapping[mainVersion]) {
+            return androidToSdkMapping[mainVersion];
+        }
+        
+        if (cleanVersion.endsWith('L')) {
+            const withoutL = cleanVersion.slice(0, -1);
+            if (androidToSdkMapping[withoutL]) {
+                return androidToSdkMapping[withoutL];
+            }
+        }
+        
+        return null;
+    }
+    
+    function getAndroidFromSdk(sdkValue) {
+        const cleanSdk = sdkValue.replace(/[^0-9]/g, '');
+        
+        if (sdkToAndroidMapping[cleanSdk]) {
+            return sdkToAndroidMapping[cleanSdk];
+        }
+        
+        for (const [android, sdk] of Object.entries(androidToSdkMapping)) {
+            if (sdk.toString() === cleanSdk) {
+                return android.split('.')[0];
+            }
+        }
+        
+        return null;
+    }
+    
+    newAndroidInput.addEventListener('input', function(e) {
+        const androidValue = e.target.value.trim();
+        if (!androidValue) return;
+        
+        const suggestedSdk = getSdkFromAndroid(androidValue);
+        if (suggestedSdk) {
+            const currentSdk = newSdkInput.value.trim();
+            if (!currentSdk || currentSdk === suggestedSdk.toString()) {
+                newSdkInput.value = suggestedSdk;
+                highlightField(newSdkInput);
+            }
+        }
+    });
+    
+    newSdkInput.addEventListener('input', function(e) {
+        const sdkValue = e.target.value.trim();
+        if (!sdkValue) return;
+        
+        const suggestedAndroid = getAndroidFromSdk(sdkValue);
+        if (suggestedAndroid) {
+            const currentAndroid = newAndroidInput.value.trim();
+            if (!currentAndroid || currentAndroid === suggestedAndroid) {
+                newAndroidInput.value = suggestedAndroid;
+                highlightField(newAndroidInput);
+            }
+        }
+    });
+    
+    function highlightField(field) {
+        field.classList.add('suggested-value');
+        setTimeout(() => {
+            field.classList.remove('suggested-value');
+        }, 3000);
+    }
+    
+    newAndroidInput.addEventListener('focus', function() {
+        this.classList.remove('suggested-value');
+    });
+    
+    newSdkInput.addEventListener('focus', function() {
+        this.classList.remove('suggested-value');
     });
 }
 
