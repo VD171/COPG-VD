@@ -193,11 +193,9 @@ prompt_gphoto_spoof() {
   print_box_start
   ui_print "      ✦ Google Photos Spoof ✦    "
   print_empty_line
-  ui_print " ❓ Enable Google Photos Spoof?   "
-  ui_print " ➤ Volume Up: Yes                "
+  ui_print " ❓ Enable Unlimited Photos?      "
+  ui_print " ➤ Volume Up: Yes (Recommended)  "
   ui_print " ➤ Volume Down: No               "
-  print_empty_line
-  ui_print " ⏰ Waiting 10s for Input...      "
   print_box_end
 
   TIMEOUT=10
@@ -207,7 +205,8 @@ prompt_gphoto_spoof() {
     CURRENT_TIME=$(date +%s)
     ELAPSED=$((CURRENT_TIME - START_TIME))
     if [ $ELAPSED -ge $TIMEOUT ]; then
-      ui_print " ⏰ Timeout Reached (10s). Google Photos Spoof Disabled."
+      print_empty_line
+      ui_print " ⏰ Timeout (10s) - Disabled"
       ENABLE_GPHOTO_SPOOF=false
       return
     fi
@@ -220,17 +219,19 @@ prompt_gphoto_spoof() {
 
     if [ -n "$EVENT" ]; then
       if echo "$EVENT" | grep -q "KEY_VOLUMEUP.*DOWN"; then
-        ui_print " ✅ Volume Up Pressed. Enabling Google Photos Spoof."
+        print_empty_line
+        ui_print " ✅ Enabled Unlimited Photos"
         ENABLE_GPHOTO_SPOOF=true
         return
       elif echo "$EVENT" | grep -q "KEY_VOLUMEDOWN.*DOWN"; then
-        ui_print " ❌ Volume Down Pressed. Disabling Google Photos Spoof."
+        print_empty_line
+        ui_print " ❌ Disabled Unlimited Photos"
         ENABLE_GPHOTO_SPOOF=false
         return
       fi
     fi
 
-    sleep 0.05
+    sleep 0.1
   done
 }
 
@@ -238,81 +239,41 @@ setup_gphoto_spoof() {
   print_box_start
   ui_print "      ✦ Google Photos Spoof ✦    "
   print_empty_line
-  ui_print " ⚙ Processing Sysconfig Files    "
-
-  mkdir -p "$MODPATH/system/product/etc/sysconfig" "$MODPATH/system/etc/sysconfig" || {
-    ui_print " ✗ Failed to Create Sysconfig Dirs!"
-    print_failure_and_exit "gphoto"
-  }
-
-  for i in /system/product/etc/sysconfig/*; do
-    if [ -f "$i" ]; then
-      file=$(basename "$i")
-      if grep -qE "PIXEL_2020_|PIXEL_2021_|PIXEL_2019_PRELOAD|PIXEL_2018_PRELOAD|PIXEL_2017_PRELOAD|PIXEL_2022_" "$i"; then
-        if [ ! -f "$MODPATH/system/product/etc/sysconfig/$file" ]; then
-          cat "$i" | grep -v PIXEL_2020_ | grep -v PIXEL_2021_ | grep -v PIXEL_2022_ | grep -v PIXEL_2018_PRELOAD | grep -v PIXEL_2019_PRELOAD | grep -v PIXEL_2017_PRELOAD >"$MODPATH/system/product/etc/sysconfig/$file" || {
-            ui_print " ✗ Failed to Process $file!"
-            print_failure_and_exit "gphoto"
-          }
-          chmod 0644 "$MODPATH/system/product/etc/sysconfig/$file" || {
-            ui_print " ✗ Failed to Set Permissions ($file)!"
-            print_failure_and_exit "gphoto"
-          }
-          ui_print " ✔ Processed $file"
-        fi
+  ui_print " ⚙ Configuring Sysconfig Files   "
+  mkdir -p "$MODPATH/system/product/etc/sysconfig" "$MODPATH/system/etc/sysconfig" 2>/dev/null
+  if [ -d "/system/product/etc/sysconfig" ]; then
+    find /system/product/etc/sysconfig -type f | while read -r file; do
+      if grep -qE "PIXEL_2020_|PIXEL_2021_|PIXEL_2019_PRELOAD|PIXEL_2018_PRELOAD|PIXEL_2017_PRELOAD|PIXEL_2022_" "$file"; then
+        filename=$(basename "$file")
+        grep -vE "PIXEL_2020_|PIXEL_2021_|PIXEL_2022_|PIXEL_2018_PRELOAD|PIXEL_2019_PRELOAD|PIXEL_2017_PRELOAD" "$file" > \
+          "$MODPATH/system/product/etc/sysconfig/$filename" 2>/dev/null
       fi
-    fi
-  done
-
-  for i in /system/etc/sysconfig/*; do
-    if [ -f "$i" ]; then
-      file=$(basename "$i")
-      if grep -qE "PIXEL_2020_|PIXEL_2021_|PIXEL_2019_PRELOAD|PIXEL_2018_PRELOAD|PIXEL_2017_PRELOAD|PIXEL_2022_" "$i"; then
-        if [ ! -f "$MODPATH/system/etc/sysconfig/$file" ]; then
-          cat "$i" | grep -v PIXEL_2020_ | grep -v PIXEL_2021_ | grep -v PIXEL_2022_ | grep -v PIXEL_2018_PRELOAD | grep -v PIXEL_2019_PRELOAD | grep -v PIXEL_2017_PRELOAD >"$MODPATH/system/etc/sysconfig/$file" || {
-            ui_print " ✗ Failed to Process $file!"
-            print_failure_and_exit "gphoto"
-          }
-          chmod 0644 "$MODPATH/system/etc/sysconfig/$file" || {
-            ui_print " ✗ Failed to Set Permissions ($file)!"
-            print_failure_and_exit "gphoto"
-          }
-          ui_print " ✔ Processed $file"
-        fi
+    done
+  fi
+  if [ -d "/system/etc/sysconfig" ]; then
+    find /system/etc/sysconfig -type f | while read -r file; do
+      if grep -qE "PIXEL_2020_|PIXEL_2021_|PIXEL_2019_PRELOAD|PIXEL_2018_PRELOAD|PIXEL_2017_PRELOAD|PIXEL_2022_" "$file"; then
+        filename=$(basename "$file")
+        grep -vE "PIXEL_2020_|PIXEL_2021_|PIXEL_2022_|PIXEL_2018_PRELOAD|PIXEL_2019_PRELOAD|PIXEL_2017_PRELOAD" "$file" > \
+          "$MODPATH/system/etc/sysconfig/$filename" 2>/dev/null
       fi
-    fi
+    done
+  fi
+  find "$MODPATH/system/product/etc/sysconfig" "$MODPATH/system/etc/sysconfig" -type f 2>/dev/null | while read -r file; do
+    chmod 0644 "$file" 2>/dev/null
+    chcon u:object_r:system_file:s0 "$file" 2>/dev/null
   done
 
-  for i in "$MODPATH/system/product/etc/sysconfig/"* "$MODPATH/system/etc/sysconfig/"*; do
-    if [ -f "$i" ]; then
-      chmod 0644 "$i" || {
-        ui_print " ✗ Failed to Set Permissions for $(basename "$i")!"
-        print_failure_and_exit "gphoto"
-      }
-      chcon u:object_r:system_file:s0 "$i" || {
-        ui_print " ✗ Failed to Set SELinux Context for $(basename "$i")!"
-        print_failure_and_exit "gphoto"
-      }
-      ui_print " ✔ Configured $(basename "$i")"
-    fi
-  done
-
-  ui_print " ✅ Google Photos Spoof Configured"
+  ui_print " ✔ Unlimited Photos Configured   "
   print_box_end
 }
 
 cleanup_gphoto_directories() {
-  for dir in "$MODPATH/system/etc/sysconfig" "$MODPATH/system/product/etc/sysconfig" "$MODPATH/product/etc/sysconfig"; do
-    if [ -d "$dir" ]; then
-      rm -rf "$dir" 2>/dev/null
-    fi
-  done
+  rm -rf "$MODPATH/system/etc/sysconfig" 2>/dev/null
+  rm -rf "$MODPATH/system/product/etc/sysconfig" 2>/dev/null
+  rm -rf "$MODPATH/product/etc/sysconfig" 2>/dev/null
   
-  for parent in "$MODPATH/system/etc" "$MODPATH/system/product/etc" "$MODPATH/system/product" "$MODPATH/system" "$MODPATH/product/etc" "$MODPATH/product"; do
-    if [ -d "$parent" ]; then
-      rmdir "$parent" 2>/dev/null
-    fi
-  done
+  find "$MODPATH" -type d -empty -delete 2>/dev/null
 }
 
 print_module_version
@@ -347,7 +308,7 @@ if $INSTALL_SUCCESS; then
   print_empty_line
   ui_print " ⚙ Detecting Device Architecture "
 
-  ARM64_VARIANTS="arm64-v8a|armv8-a|armv9-a|arm64"
+  ARM64_VARIANTS="arm64-v8a|armv8-a|arm64|aarch64"
   ARM32_VARIANTS="armeabi-v7a|armeabi|armv7-a|armv7l|armhf|arm"
 
   ABI_LIST=$(getprop ro.product.cpu.abilist)
@@ -371,7 +332,7 @@ if $INSTALL_SUCCESS; then
           ui_print " ➤ ($ABI)                        "
           CONTROLLER_INSTALLED=true
           
-          rm -f "$MODPATH/controller_armv7" 2>/dev/null && ui_print " 🗑 Removed unused ARM32 controller"
+          rm -f "$MODPATH/controller_armv7" 2>/dev/null
           break
         fi
       elif echo "$ABI" | grep -qE "$ARM32_VARIANTS"; then
@@ -388,7 +349,7 @@ if $INSTALL_SUCCESS; then
           ui_print " ➤ ($ABI)                        "
           CONTROLLER_INSTALLED=true
           
-          rm -f "$MODPATH/controller_arm64" 2>/dev/null && ui_print " 🗑 Removed unused ARM64 controller"
+          rm -f "$MODPATH/controller_arm64" 2>/dev/null
           break
         fi
       fi
@@ -405,54 +366,16 @@ if $INSTALL_SUCCESS; then
   print_empty_line
 fi
   if $INSTALL_SUCCESS; then
-    chmod 0755 "$MODPATH/service.sh" || {
-      ui_print " ✗ Failed to Set Permissions (service.sh)! "
-      print_failure_and_exit "binary"
-    }
-    chmod 0755 "$MODPATH/action.sh" || {
-      ui_print " ✗ Failed to Set Permissions (action.sh)! "
-      print_failure_and_exit "binary"
-    }
-    chmod 0755 "$MODPATH/update_config.sh" || {
-      ui_print " ✗ Failed to Set Permissions (update_config.sh)! "
-      print_failure_and_exit "binary"
-    }
-    chmod 0644 "$MODPATH/COPG.json" || {
-      ui_print " ✗ Failed to Set Permissions (COPG.json)! "
-      print_failure_and_exit "binary"
-    }
-    chmod 0644 "$MODPATH/list.json" || {
-      ui_print " ✗ Failed to Set Permissions (list.json)! "
-      print_failure_and_exit "binary"
-    }
-    chmod 0444 "$MODPATH/cpuinfo_spoof" || {
-      ui_print " ✗ Failed to Set Permissions (cpuinfo_spoof)! "
-      print_failure_and_exit "binary"
-    }
-    chcon u:object_r:system_file:s0 "$MODPATH/COPG.json" || {
-      ui_print " ✗ Failed to Set SELinux Context (COPG.json)! "
-      print_failure_and_exit "binary"
-    }
-    chcon u:object_r:system_file:s0 "$MODPATH/list.json" || {
-      ui_print " ✗ Failed to Set SELinux Context (list.json)! "
-      print_failure_and_exit "binary"
-    }
-    chcon u:object_r:system_file:s0 "$MODPATH/cpuinfo_spoof" || {
-      ui_print " ✗ Failed to Set SELinux Context (cpuinfo_spoof)! "
-      print_failure_and_exit "binary"
-    }
-    chcon u:object_r:system_file:s0 "$MODPATH/service.sh" || {
-      ui_print " ✗ Failed to Set Permissions (service.sh)! "
-      print_failure_and_exit "binary"
-    }
-    chcon u:object_r:system_file:s0 "$MODPATH/action.sh" || {
-      ui_print " ✗ Failed to Set Permissions (action.sh)! "
-      print_failure_and_exit "binary"
-    }
-    chcon u:object_r:system_file:s0 "$MODPATH/update_config.sh" || {
-      ui_print " ✗ Failed to Set Permissions (update_config.sh)! "
-      print_failure_and_exit "binary"
-    }
+    chmod 0755 "$MODPATH/service.sh" "$MODPATH/action.sh" "$MODPATH/update_config.sh" 2>/dev/null
+    chmod 0644 "$MODPATH/COPG.json" "$MODPATH/list.json" 2>/dev/null
+    chmod 0444 "$MODPATH/cpuinfo_spoof" 2>/dev/null
+    
+    for file in "$MODPATH/COPG.json" "$MODPATH/list.json" "$MODPATH/cpuinfo_spoof" \
+                "$MODPATH/service.sh" "$MODPATH/action.sh" "$MODPATH/update_config.sh"; do
+      if [ -f "$file" ]; then
+        chcon u:object_r:system_file:s0 "$file" 2>/dev/null
+      fi
+    done
   fi
 
   if $INSTALL_SUCCESS; then
@@ -465,34 +388,16 @@ fi
       print_box_start
       ui_print "      ✦ Google Photos Spoof ✦    "
       print_empty_line
-      ui_print " ⚙ Removing Google Photos from Config "
-      CONFIG_PATH="$MODPATH/config.json"
-      TEMP_CONFIG="$MODPATH/config_temp.json"
-      if [ -f "$CONFIG_PATH" ]; then
-        sed '/com\.google\.android\.apps\.photos/d' "$CONFIG_PATH" > "$TEMP_CONFIG" || {
-          ui_print " ✗ Failed to Modify config.json!"
-          print_failure_and_exit "gphoto"
-        }
-        mv "$TEMP_CONFIG" "$CONFIG_PATH" || {
-          ui_print " ✗ Failed to Update config.json!"
-          print_failure_and_exit "gphoto"
-        }
-        chmod 0644 "$CONFIG_PATH" || {
-          ui_print " ✗ Failed to Set Permissions (config.json)! "
-          print_failure_and_exit "gphoto"
-        }
-        chcon u:object_r:system_file:s0 "$CONFIG_PATH" || {
-          ui_print " ✗ Failed to Set SELinux Context (config.json)! "
-          print_failure_and_exit "gphoto"
-        }
-        ui_print " ✔ Removed Google Photos from Config "
-      else
-        ui_print " ⚠ config.json Not Found, Skipping "
+      ui_print " ⚙ Removing Google Photos Config "
+      if [ -f "$MODPATH/COPG.json" ]; then
+        sed -i '/com\.google\.android\.apps\.photos/d' "$MODPATH/COPG.json" 2>/dev/null
+        chmod 0644 "$MODPATH/config.json" 2>/dev/null
+        chcon u:object_r:system_file:s0 "$MODPATH/COPG.json" 2>/dev/null
       fi
       
       cleanup_gphoto_directories
       
-      ui_print " ✅ Google Photos Spoof Disabled "
+      ui_print " ✔ Unlimited Photos Disabled    "
       print_box_end
     fi
   fi
