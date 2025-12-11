@@ -236,8 +236,9 @@ jobs:
             if [ -n "$CHANGELOG_CONTENT" ]; then
               CLEAN_CHANGELOG=$(echo "$CHANGELOG_CONTENT" | sed '1d')
               if [ -n "$CLEAN_CHANGELOG" ]; then
+                CHANGELOG_CLEAN=$(echo "$CLEAN_CHANGELOG" | sed 's/\\n/ /g' | sed 's/  */ /g')
                 echo "CHANGELOG<<EOF" >> $GITHUB_ENV
-                echo "$CLEAN_CHANGELOG" >> $GITHUB_ENV
+                echo "$CHANGELOG_CLEAN" >> $GITHUB_ENV
                 echo "EOF" >> $GITHUB_ENV
               else
                 echo "CHANGELOG=No changelog body found for v${VERSION}" >> $GITHUB_ENV
@@ -271,24 +272,22 @@ jobs:
         run: |
           TAG="v${{ env.VERSION }}"
           
-          RELEASE_NOTES=""
+          RELEASE_NOTES="## COPG v${{ env.VERSION }}\n\n"
           
           if [ -f "changelog.md" ]; then
-            VERSION_ESCAPED=$(echo "${{ env.VERSION }}" | sed 's/\./\\\\./g')
-            CHANGELOG_SECTION=$(awk "/^## v$VERSION_ESCAPED/{flag=1;next}/^## v/{flag=0}flag" changelog.md)
+            VERSION_ESCAPED=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
+            CHANGELOG_SECTION=$(awk "/^## v$VERSION_ESCAPED/{p=1;next}/^##/{p=0}p" changelog.md)
             
             if [ -n "$CHANGELOG_SECTION" ]; then
-              RELEASE_NOTES="$CHANGELOG_SECTION"
+              CLEAN_SECTION=$(echo "$CHANGELOG_SECTION" | sed '1d' | sed 's/\\n\\n/\n/g' | sed 's/^\\s*//')
+              RELEASE_NOTES+="$CLEAN_SECTION\n\n"
             fi
           fi
           
-          if [ -z "$RELEASE_NOTES" ]; then
-            RELEASE_NOTES="## COPG v${{ env.VERSION }}"
-          fi
-          
-          RELEASE_NOTES+="\\n\\n---\\n**Build Date**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')\\n"
-          RELEASE_NOTES+="**Branch**: ${{ github.event.inputs.branch }}\\n"
-          RELEASE_NOTES+="**Commit**: ${{ github.sha }}\\n\\n"
+          RELEASE_NOTES+="---\n"
+          RELEASE_NOTES+="**Build Date**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')\n"
+          RELEASE_NOTES+="**Branch**: ${{ github.event.inputs.branch }}\n"
+          RELEASE_NOTES+="**Commit**: ${{ github.sha }}\n\n"
           RELEASE_NOTES+="Read the full changelog for all versions in [changelog.md](https://github.com/${{ github.repository }}/blob/${{ github.event.inputs.branch }}/changelog.md)"
           
           echo "🚀 Creating release $TAG..."
@@ -369,11 +368,11 @@ jobs:
                   
                   build_type = "🚀 **Release Build**" if is_release else "🔧 **CI Build**"
                   message = (
-                      f"✨ **{title}** ✨\\n\\n"
-                      f"{build_type}\\n"
-                      f"▫️ **Version**: v{version}\\n"
-                      f"▫️ **Branch**: {branch}\\n"
-                      f"▫️ **Commit**: {commit}\\n\\n"
+                      f"✨ **{title}** ✨\n\n"
+                      f"{build_type}\n"
+                      f"▫️ **Version**: v{version}\n"
+                      f"▫️ **Branch**: {branch}\n"
+                      f"▫️ **Commit**: {commit}\n\n"
                   )
                   
                   telegraph_url = ""
@@ -383,112 +382,38 @@ jobs:
                       
                       content_html = f"<h3>Changelog for COPG v{version}</h3>"
                       
-                      lines = changelog_raw.split('\\n')
+                      lines = changelog_raw.split('\n')
                       in_list = False
-                      in_sublist = False
                       
                       for line in lines:
-                          line = line.rstrip()
-                          
-                          if re.match(r'^###\s+\w+', line):
+                          line = line.strip()
+                          if not line:
                               if in_list:
                                   content_html += "</ul>"
                                   in_list = False
-                              if in_sublist:
-                                  content_html += "</ul>"
-                                  in_sublist = False
-                              content_html += f"<h4>{line[4:]}</h4>"
+                              continue
                           
-                          elif re.match(r'^\*\s+\*\*(.+?)\*\*:', line):
-                              if in_sublist:
+                          if line.startswith('###'):
+                              if in_list:
                                   content_html += "</ul>"
-                                  in_sublist = False
+                                  in_list = False
+                              content_html += f"<h4>{line[3:].strip()}</h4>"
+                          elif line.startswith('*'):
                               if not in_list:
                                   content_html += "<ul>"
                                   in_list = True
-                              match = re.match(r'^\*\s+\*\*(.+?)\*\*:\s*(.+)', line)
-                              if match:
-                                  content_html += f"<li><b>{match.group(1)}</b>: {match.group(2)}</li>"
-                          
-                          elif re.match(r'^\*\s+\*\*`(.+?)`\*\*:', line):
-                              if in_sublist:
-                                  content_html += "</ul>"
-                                  in_sublist = False
-                              if not in_list:
-                                  content_html += "<ul>"
-                                  in_list = True
-                              match = re.match(r'^\*\s+\*\*`(.+?)`\*\*:\s*(.+)', line)
-                              if match:
-                                  content_html += f"<li><b>{match.group(1)}</b>: {match.group(2)}</li>"
-                          
-                          elif re.match(r'^\*\s+\*\*(Updated Game Support|Permission & SELinux|Configuration Management)\*\*:', line):
+                              list_item = line[1:].strip()
+                              list_item = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', list_item)
+                              list_item = re.sub(r'\*(.*?)\*', r'<i>\1</i>', list_item)
+                              list_item = re.sub(r'`(.*?)`', r'<code>\1</code>', list_item)
+                              content_html += f"<li>{list_item}</li>"
+                          else:
                               if in_list:
                                   content_html += "</ul>"
                                   in_list = False
-                              if in_sublist:
-                                  content_html += "</ul>"
-                                  in_sublist = False
-                              match = re.match(r'^\*\s+\*\*(.+?)\*\*:\s*(.+)', line)
-                              if match:
-                                  content_html += f"<p><b>{match.group(1)}</b>: {match.group(2)}</p>"
-                          
-                          elif re.match(r'^\*\s+\*\*(Logging)\*\*:', line):
-                              if in_list:
-                                  content_html += "</ul>"
-                                  in_list = False
-                              if in_sublist:
-                                  content_html += "</ul>"
-                                  in_sublist = False
-                              content_html += "<p><b>Logging:</b></p><ul>"
-                              in_sublist = True
-                          
-                          elif re.match(r'^\*\s+Added support for \*\*(.+?)\*\*', line):
-                              if not in_sublist:
-                                  content_html += "<ul>"
-                                  in_sublist = True
-                              match = re.match(r'^\*\s+Added support for \*\*(.+?)\*\*', line)
-                              if match:
-                                  content_html += f"<li>Added support for <b>{match.group(1)}</b></li>"
-                          
-                          elif re.match(r'^\*\s+Removed support for \*\*(.+?)\*\*', line):
-                              if not in_sublist:
-                                  content_html += "<ul>"
-                                  in_sublist = True
-                              match = re.match(r'^\*\s+Removed support for \*\*(.+?)\*\*', line)
-                              if match:
-                                  content_html += f"<li>Removed support for <b>{match.group(1)}</b></li>"
-                          
-                          elif re.match(r'^\*\s+\*\*(Summary)\*\*', line):
-                              if in_list:
-                                  content_html += "</ul>"
-                                  in_list = False
-                              if in_sublist:
-                                  content_html += "</ul>"
-                                  in_sublist = False
-                              content_html += "<p><b>Summary</b></p>"
-                          
-                          elif re.match(r'^\*\s+', line):
-                              if in_list:
-                                  content_html += "</ul>"
-                                  in_list = False
-                              if in_sublist:
-                                  content_html += "</ul>"
-                                  in_sublist = False
-                              content_html += f"<p>{line[2:]}</p>"
-                          
-                          elif line.strip() and not line.startswith('    *'):
-                              if in_list:
-                                  content_html += "</ul>"
-                                  in_list = False
-                              if in_sublist:
-                                  content_html += "</ul>"
-                                  in_sublist = False
-                              if line.strip():
-                                  content_html += f"<p>{line}</p>"
+                              content_html += f"<p>{line}</p>"
                       
                       if in_list:
-                          content_html += "</ul>"
-                      if in_sublist:
                           content_html += "</ul>"
                       
                       response = telegraph.create_page(
@@ -499,7 +424,7 @@ jobs:
                       )
                       telegraph_url = f"https://telegra.ph/{response['path']}"
                       
-                      message += f"📋 **Changelog**: [View on Telegraph]({telegraph_url})\\n\\n"
+                      message += f"📋 **Changelog**: {telegraph_url}\n\n"
                   
                   message += f"🔗 [View Workflow Run]({workflow_url})"
                   
