@@ -278,6 +278,48 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Update update.json in JSON branch
+        if: github.event.inputs.upload_to_release == 'true'
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+    
+          VERSION="${{ env.VERSION }}"
+          VERSION_CODE="${{ env.VERSION_CODE || env.VERSION }}"
+          ZIP_URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/${{ env.ZIP_NAME }}"
+          CHANGELOG_URL="https://raw.githubusercontent.com/${{ github.repository }}/${{ github.event.inputs.branch }}/changelog.md"
+    
+    
+          cat > update.json << EOF
+          {
+            "version": "v${VERSION}",
+            "zipUrl": "${ZIP_URL}",
+            "versionCode": "${VERSION_CODE//./}",
+            "changelog": "${CHANGELOG_URL}"
+            }
+          EOF
+          
+          git fetch origin
+          git checkout JSON
+          git pull origin JSON
+    
+          if [ -f "update.json" ]; then
+            echo "Updating existing update.json"
+          else
+            echo "Creating new update.json"
+          fi
+    
+          mv -f update.json update.json.new
+          cp update.json.new update.json
+          rm -f update.json.new
+    
+          git add update.json
+          git commit -m "Update update.json to v${VERSION}"
+          git push origin JSON
+    
+          echo "✅ update.json updated successfully in JSON branch"
+          fi
+
       - name: Send Telegram Notification
         if: github.event.inputs.upload_to_telegram == 'true'
         env:
