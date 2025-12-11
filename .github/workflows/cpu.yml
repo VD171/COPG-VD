@@ -83,7 +83,7 @@ jobs:
           echo 'DPkg::Post-Invoke { ":"; };' | sudo tee /etc/apt/apt.conf.d/99noman >/dev/null
           sudo apt-get update
           sudo apt-get install -y build-essential cmake zip curl imagemagick python3 python3-pip upx-ucl
-          pip3 install telethon
+          pip3 install telethon telegraph-python
 
       - name: Build Unified Controller
         run: |
@@ -270,22 +270,30 @@ jobs:
         if: github.event.inputs.upload_to_release == 'true'
         run: |
           TAG="v${{ env.VERSION }}"
-          CHANGELOG_CONTENT=""
+          
+          RELEASE_NOTES="## COPG v${{ env.VERSION }}\\n\\n"
+          
           if [ -f "changelog.md" ]; then
-            ESCAPED_VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
-            CHANGELOG_CONTENT=$(awk "/^## v$ESCAPED_VERSION/{p=1;next}/^##/{p=0}p" changelog.md | sed -e 's/^[[:space:]]*//' -e '/^$/d')
+            VERSION_ESCAPED=$(echo "${{ env.VERSION }}" | sed 's/\\./\\\\./g')
+            CHANGELOG_SECTION=$(sed -n "/^## v${VERSION_ESCAPED}/,/^## v/p" changelog.md | sed '$d' | sed '1d')
+            
+            if [ -n "$CHANGELOG_SECTION" ]; then
+              RELEASE_NOTES+="$CHANGELOG_SECTION\\n\\n"
+            fi
           fi
-    
-          if [ -z "$CHANGELOG_CONTENT" ]; then
-            CHANGELOG_CONTENT="Built on $(date -u +'%Y-%m-%d %H:%M:%S UTC')\n\nRead full changelog: [changelog.md](https://github.com/${{ github.repository }}/blob/JSON/changelog.md)"
-          fi
-    
+          
+          RELEASE_NOTES+="---\\n"
+          RELEASE_NOTES+="**Build Date**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')\\n"
+          RELEASE_NOTES+="**Branch**: ${{ github.event.inputs.branch }}\\n"
+          RELEASE_NOTES+="**Commit**: ${{ github.sha }}\\n\\n"
+          RELEASE_NOTES+="Read the full changelog for all versions in [changelog.md](https://github.com/${{ github.repository }}/blob/${{ github.event.inputs.branch }}/changelog.md)"
+          
           echo "🚀 Creating release $TAG..."
           gh release create "$TAG" \
             --title "COPG v${{ env.VERSION }}" \
-            --notes "$CHANGELOG_CONTENT" \
+            --notes "$RELEASE_NOTES" \
             ${{ env.ZIP_NAME }}
-    
+          
           echo "✅ Release created successfully!"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -301,14 +309,13 @@ jobs:
           ZIP_URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/${{ env.ZIP_NAME }}"
           CHANGELOG_URL="https://raw.githubusercontent.com/${{ github.repository }}/${{ github.event.inputs.branch }}/changelog.md"
     
-    
           cat > update.json << EOF
           {
             "version": "v${VERSION}",
             "zipUrl": "${ZIP_URL}",
             "versionCode": "${VERSION_CODE//./}",
             "changelog": "${CHANGELOG_URL}"
-            }
+          }
           EOF
           
           git fetch origin
@@ -336,6 +343,7 @@ jobs:
         run: |
           cat > send_telegram.py << 'PYEOF'
           from telethon import TelegramClient
+          from telegraph import Telegraph
           import os
           import asyncio
           
@@ -343,40 +351,65 @@ jobs:
               try:
                   bot_token = os.getenv('TELEGRAM_TOKEN')
                   chat_id = int(os.getenv('TELEGRAM_CHAT_ID'))
+                  zip_name = os.getenv('ZIP_NAME')
+                  title = os.getenv('TITLE')
+                  version = os.getenv('VERSION')
+                  branch = os.getenv('BRANCH')
+                  commit = os.getenv('COMMIT')[:8]
+                  workflow_url = os.getenv('WORKFLOW_RUN_URL')
+                  changelog_raw = os.getenv('CHANGELOG', '').strip()
+                  is_release = os.getenv('UPLOAD_TO_RELEASE') == 'true'
                   
                   client = TelegramClient('github_bot', 2040, 'b18441a1ff607e10a989891a5462e627')
                   await client.start(bot_token=bot_token)
                   
-                  title = os.getenv('TITLE')
-                  build_type = "🚀 **Release Build**" if os.getenv('UPLOAD_TO_RELEASE') == 'true' else "🔧 **CI Build**"
+                  build_type = "🚀 **Release Build**" if is_release else "🔧 **CI Build**"
                   message = (
                       f"✨ **{title}** ✨\\n\\n"
                       f"{build_type}\\n"
-                      f"▫️ **Version**: v{os.getenv('VERSION')}\\n"
-                      f"▫️ **Branch**: {os.getenv('BRANCH')}\\n"
-                      f"▫️ **Commit**: {os.getenv('COMMIT')[:8]}\\n\\n"
+                      f"▫️ **Version**: v{version}\\n"
+                      f"▫️ **Branch**: {branch}\\n"
+                      f"▫️ **Commit**: {commit}\\n\\n"
                   )
                   
-                  if os.getenv('UPLOAD_TO_RELEASE') == 'true':
-                      changelog = os.getenv('CHANGELOG', '').strip()
-                      if changelog and not changelog.startswith("No changelog"):
-                          clean_changelog = changelog.replace('`', '').replace('_', '')
-                          message += f"📋 **Changelog**:\\n{clean_changelog}\\n\\n"
+                  telegraph_url = ""
+                  if is_release and changelog_raw and not changelog_raw.startswith("No changelog"):
+                      telegraph = Telegraph()
+                      telegraph.create_account(short_name='COPG-Bot')
+                      
+                      content_html = f"<h4>Changelog for COPG v{version}</h4>"
+                      for line in changelog_raw.split('\\n'):
+                          if line.strip().startswith('*'):
+                              content_html += f"<li>{line.strip()[1:].strip()}</li>"
+                          else:
+                              content_html += f"<p>{line}</p>" if line.strip() else "<br>"
+                      
+                      response = telegraph.create_page(
+                          title=f'COPG v{version} Changelog',
+                          author_name='COPG Build Bot',
+                          author_url='https://github.com/AlirezaParsi/COPG',
+                          html_content=content_html
+                      )
+                      telegraph_url = f"https://telegra.ph/{response['path']}"
+                      
+                      message += f"📋 **Full Changelog**: {telegraph_url}\\n\\n"
                   
-                  message += f"🔗 [View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})"
+                  message += f"🔗 [View Workflow Run]({workflow_url})"
                   
                   await client.send_file(
                       chat_id,
-                      file=os.getenv('ZIP_NAME'),
+                      file=zip_name,
                       caption=message,
                       thumb=os.getenv('THUMBNAIL_PATH'),
                       parse_mode='markdown'
                   )
-                  print("Message sent successfully!")
+                  print(f"✅ Message sent successfully!")
+                  if telegraph_url:
+                      print(f"📄 Changelog published at: {telegraph_url}")
                   await client.disconnect()
                   
               except Exception as e:
-                  print(f"Failed to send notification: {e}")
+                  print(f"❌ Failed to send notification: {e}")
                   exit(1)
           
           asyncio.run(send_notification())
