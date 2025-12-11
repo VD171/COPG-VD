@@ -2,7 +2,7 @@
   
 <img src="https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/banner.png" style="width: 500px; height: 200px; object-fit: fill;" />
 </div>
-<h1 align="center">🎮 COPG - Ultimate Device Spoofer for Android Games & Apps</h1>
+<h1 align="center">🎮 COPG - Ultimate Device Spoofer for Android Games/Apps + CPU Spoofer</h1>
 
 [![Zygisk](https://img.shields.io/badge/Zygisk-Compatible-brightgreen?style=for-the-badge)](https://github.com/topjohnwu/Magisk)
 [![Android](https://img.shields.io/badge/Android-9.0%2B-blue?style=for-the-badge&logo=android)](https://www.android.com/)
@@ -12,7 +12,7 @@
 
 **The most advanced device spoofer for Android gaming - bypass restrictions and play any game on any device!**
 
-## 🌟 COPG - Ultimate Device Spoofer for Games & Apps 🌟
+## 🌟 COPG - Ultimate Device Spoofer for Games/Apps + CPU Spoofer 🌟
 **Unlock the full potential of your games and apps with COPG! Spoof your device to enjoy premium features, max performance, and exclusive benefits. 🚀**
 ### 🎮 Maximize Your Gaming Experience
 - Call of Duty Mobile: 120 FPS (BR/MT)
@@ -20,6 +20,8 @@
 - Delta Force: 120 FPS/HD Graphics
 - Mobile Legends: Ultra 120 FPS
 - Freefire / Freefire max 120 FPS
+- Fortnite 120 FPS
+- Farlight84 max graphic
 - +69 games supported!
 ### 📱 Exclusive App Enhancements
 Google Photos: Unlimited backup + AI generator
@@ -28,7 +30,7 @@ TikTok: Stream in stunning 1080p
 Add new devices or games anytime
 Beautiful WebUI to manage your spoofed apps
 💡 Why Choose COPG?
-Transform your device into a powerhouse for gaming and apps. Easy to use, fully customizable, and packed with features!
+Transform your device into a powerhouse for gaming and apps. Easy to use, Added/Remove Games/Apps without Reboot, fully customizable, and packed with features!
 
 ## 🛠️ Installation Made Simple
 
@@ -144,8 +146,6 @@ Use the WebUI X app:<br>
   <img src="https://github.com/user-attachments/assets/9a9fd8b2-7449-404f-888a-dedeefbe670d" width="180" hspace="10" alt="CODM">
   <img src="https://github.com/user-attachments/assets/d9d3398f-5944-44e6-8df6-312e099c9738" width="180" hspace="10" alt="PUBG Mobile">
   <img src="https://github.com/AlirezaParsi/COPG/blob/JSON/screenshots/Screenshot_20250914-131838_Free%20Fire%20MAX.png?raw=true" width="180" hspace="10" alt="FreeFire MAX">
-  <img src="https://github.com/AlirezaParsi/COPG/blob/JSON/screenshots/Screenshot_20250913-211947_Mobile%20Legends_%20Bang%20Bang.US.png?raw=true" width="180" hspace="10" alt="Mobile Legends Bang Bang.US">
-</div>
 
 ---
 - [![Telegram Channel](https://img.shields.io/badge/Telegram_Channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/COPG_module)
