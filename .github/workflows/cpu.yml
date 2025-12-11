@@ -356,33 +356,35 @@ jobs:
           client = TelegramClient('github_bot', 2040, 'b18441a1ff607e10a989891a5462e627').start(bot_token=bot_token)
 
           async def send_notification():
-              try:
-                  title = os.getenv('TITLE')
-                  build_type = "🚀 **Release Build**" if os.getenv('UPLOAD_TO_RELEASE') == 'true' else "🔧 **CI Build**"
-                  message = (
-                      f"✨ **{title}** ✨\\n\\n"
-                      f"{build_type}\\n"
-                      f"▫️ **Version**: v{os.getenv('VERSION')}\\n"
-                      f"▫️ **Branch**: {os.getenv('BRANCH')}\\n"
-                      f"▫️ **Commit**: {os.getenv('COMMIT')[:8]}\\n\\n"
-                  )
-                  if os.getenv('UPLOAD_TO_RELEASE') == 'true':
-                      changelog = os.getenv('CHANGELOG', '').strip()
-                      if changelog and not changelog.startswith("No changelog") and not changelog.startswith("Error reading"):
-                          clean_changelog = changelog.replace('`', "'").replace('_', '\\\\_')
-                          message += f"📋 **Changelog**:\\n{clean_changelog}\\n\\n"
-                  message += f"🔗 [View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})"
-                  await client.send_file(
-                      chat_id,
-                      file=os.getenv('ZIP_NAME'),
-                      caption=message,
-                      thumb=os.getenv('THUMBNAIL_PATH'),
-                      parse_mode='markdown'
-                  )
-                  print("Message sent successfully!")
-              except Exception as e:
-                  print(f"Failed to send notification: {e}")
-                  exit(1)
+          try:
+              title = os.getenv('TITLE')
+              build_type = "🚀 **Release Build**" if os.getenv('UPLOAD_TO_RELEASE') == 'true' else "🔧 **CI Build**"
+              message = (
+                  f"✨ **{title}** ✨\n\n"
+                  f"{build_type}\n"
+                  f"▫️ **Version**: v{os.getenv('VERSION')}\n"
+                  f"▫️ **Branch**: {os.getenv('BRANCH')}\n"
+                  f"▫️ **Commit**: {os.getenv('COMMIT')[:8]}\n\n"
+              )
+              if os.getenv('UPLOAD_TO_RELEASE') == 'true':
+                  changelog = os.getenv('CHANGELOG', '').strip()
+                  if changelog and not changelog.startswith("No changelog"):
+                      clean_changelog = changelog.replace('`', '').replace('_', '')
+                      message += f"📋 **Changelog**:\n{clean_changelog}\n\n"
+        
+              message += f"🔗 [View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})"
+        
+              await client.send_file(
+                  chat_id,
+                  file=os.getenv('ZIP_NAME'),
+                  caption=message,
+                  thumb=os.getenv('THUMBNAIL_PATH'),
+                  parse_mode='markdown'
+              )
+              print("Message sent successfully!")
+          except Exception as e:
+              print(f"Failed to send notification: {e}")
+              exit(1)
 
           with client:
               client.loop.run_until_complete(send_notification())
