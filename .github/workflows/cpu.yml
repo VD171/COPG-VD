@@ -269,15 +269,27 @@ jobs:
         if: github.event.inputs.upload_to_release == 'true'
         run: |
           TAG="v${{ env.VERSION }}"
+          CHANGELOG_CONTENT=""
+          if [ -f "changelog.md" ]; then
+            ESCAPED_VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
+            CHANGELOG_CONTENT=$(awk "/^## v$ESCAPED_VERSION/{p=1;next}/^##/{p=0}p" changelog.md | sed -e 's/^[[:space:]]*//' -e '/^$/d')
+          fi
+    
+          if [ -z "$CHANGELOG_CONTENT" ]; then
+            CHANGELOG_CONTENT="Built on $(date -u +'%Y-%m-%d %H:%M:%S UTC')\n\nRead full changelog: [changelog.md](https://github.com/${{ github.repository }}/blob/JSON/changelog.md)"
+          fi
+    
+          echo "🚀 Creating release $TAG..."
           gh release create "$TAG" \
-            --title "Release $TAG" \
-            --notes "Built on $(date -u +'%Y-%m-%d %H:%M:%S UTC') Read [changelog.md](https://github.com/AlirezaParsi/COPG/blob/JSON/changelog.md) for changes" \
-            --draft \
-            || gh release edit "$TAG" --draft
-          gh release upload "$TAG" ${{ env.ZIP_NAME }} --clobber
+            --title "COPG v${{ env.VERSION }}" \
+            --notes "$CHANGELOG_CONTENT" \
+            ${{ env.ZIP_NAME }}
+    
+          echo "✅ Release created successfully!"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    
       - name: Update update.json in JSON branch
         if: github.event.inputs.upload_to_release == 'true'
         run: |
@@ -318,7 +330,6 @@ jobs:
           git push origin JSON
     
           echo "✅ update.json updated successfully in JSON branch"
-          fi
 
       - name: Send Telegram Notification
         if: github.event.inputs.upload_to_telegram == 'true'
