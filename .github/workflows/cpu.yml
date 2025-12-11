@@ -87,10 +87,8 @@ jobs:
 
       - name: Build Unified Controller
         run: |
-          # Download json.hpp for controller
           wget -q https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O json.hpp
           
-          # Build arm64 controller
           ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++ \
             -std=c++17 -O3 -Os -fPIE -pie -static-libstdc++ \
             -fdata-sections -ffunction-sections -Wl,--gc-sections \
@@ -99,7 +97,6 @@ jobs:
           ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded controller_arm64
           upx --best --lzma -q controller_arm64
           
-          # Build armv7 controller
           ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi34-clang++ \
             -std=c++17 -O3 -Os -fPIE -pie -static-libstdc++ \
             -fdata-sections -ffunction-sections -Wl,--gc-sections \
@@ -179,7 +176,6 @@ jobs:
           cp build/armeabi-v7a/libspoof.so module/zygisk/armeabi-v7a.so
           chmod 755 module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
           
-          # استفاده از unified controller به جای jq و config_watcher - در روت ماژول
           cp controller_arm64 module/controller_arm64
           cp controller_armv7 module/controller_armv7
           chmod 755 module/controller_arm64 module/controller_armv7
@@ -235,14 +231,19 @@ jobs:
         if: github.event.inputs.upload_to_telegram == 'true'
         run: |
           if [ -f "changelog.md" ]; then
-            VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
-            CHANGELOG=$(awk "/^## v$VERSION/{p=1;next}/^##/{p=0}p" changelog.md | sed '/^$/d')
-            if [ -z "$CHANGELOG" ]; then
-              echo "CHANGELOG=No changelog found for v${{ env.VERSION }}" >> $GITHUB_ENV
+            VERSION="${{ env.VERSION }}"
+            CHANGELOG_CONTENT=$(sed -n "/^## v${VERSION}/,/^## v/p" changelog.md | sed '$d')
+            if [ -n "$CHANGELOG_CONTENT" ]; then
+              CLEAN_CHANGELOG=$(echo "$CHANGELOG_CONTENT" | sed '1d')
+              if [ -n "$CLEAN_CHANGELOG" ]; then
+                echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+                echo "$CLEAN_CHANGELOG" >> $GITHUB_ENV
+                echo "EOF" >> $GITHUB_ENV
+              else
+                echo "CHANGELOG=No changelog body found for v${VERSION}" >> $GITHUB_ENV
+              fi
             else
-              echo "CHANGELOG<<EOF" >> $GITHUB_ENV
-              echo "$CHANGELOG" >> $GITHUB_ENV
-              echo "EOF" >> $GITHUB_ENV
+              echo "CHANGELOG=No changelog found for v${VERSION}" >> $GITHUB_ENV
             fi
           else
             echo "CHANGELOG=No changelog file available" >> $GITHUB_ENV
@@ -289,7 +290,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    
       - name: Update update.json in JSON branch
         if: github.event.inputs.upload_to_release == 'true'
         run: |
@@ -360,16 +360,17 @@ jobs:
                   title = os.getenv('TITLE')
                   build_type = "🚀 **Release Build**" if os.getenv('UPLOAD_TO_RELEASE') == 'true' else "🔧 **CI Build**"
                   message = (
-                      f"✨ **{title}** ✨\n\n"
-                      f"{build_type}\n"
-                      f"▫️ **Version**: v{os.getenv('VERSION')}\n"
-                      f"▫️ **Branch**: {os.getenv('BRANCH')}\n"
-                      f"▫️ **Commit**: {os.getenv('COMMIT')[:8]}\n\n"
+                      f"✨ **{title}** ✨\\n\\n"
+                      f"{build_type}\\n"
+                      f"▫️ **Version**: v{os.getenv('VERSION')}\\n"
+                      f"▫️ **Branch**: {os.getenv('BRANCH')}\\n"
+                      f"▫️ **Commit**: {os.getenv('COMMIT')[:8]}\\n\\n"
                   )
                   if os.getenv('UPLOAD_TO_RELEASE') == 'true':
-                      changelog = os.getenv('CHANGELOG')
-                      if changelog and changelog != f"No changelog found for v{os.getenv('VERSION')}" and changelog != "No changelog file available":
-                          message += f"📋 **Changelog**:\n{changelog}\n\n"
+                      changelog = os.getenv('CHANGELOG', '').strip()
+                      if changelog and not changelog.startswith("No changelog") and not changelog.startswith("Error reading"):
+                          clean_changelog = changelog.replace('`', "'").replace('_', '\\\\_')
+                          message += f"📋 **Changelog**:\\n{clean_changelog}\\n\\n"
                   message += f"🔗 [View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})"
                   await client.send_file(
                       chat_id,
