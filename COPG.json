@@ -3,6 +3,7 @@
     "blacklist": [
       "com.bbl.mobilebanking",
       "com.android.camera",
+      "com.sec.android.app.camera",
       "com.android.settings"
     ],
     "cpu_only_packages": [
