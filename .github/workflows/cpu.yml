@@ -331,6 +331,57 @@ jobs:
     
           echo "✅ update.json updated successfully in JSON branch"
 
+      - name: Create Telegram Notification Script
+        if: github.event.inputs.upload_to_telegram == 'true'
+        run: |
+          cat > send_telegram.py << 'PYEOF'
+          from telethon import TelegramClient
+          import os
+          import asyncio
+          
+          async def send_notification():
+              try:
+                  bot_token = os.getenv('TELEGRAM_TOKEN')
+                  chat_id = int(os.getenv('TELEGRAM_CHAT_ID'))
+                  
+                  client = TelegramClient('github_bot', 2040, 'b18441a1ff607e10a989891a5462e627')
+                  await client.start(bot_token=bot_token)
+                  
+                  title = os.getenv('TITLE')
+                  build_type = "🚀 **Release Build**" if os.getenv('UPLOAD_TO_RELEASE') == 'true' else "🔧 **CI Build**"
+                  message = (
+                      f"✨ **{title}** ✨\\n\\n"
+                      f"{build_type}\\n"
+                      f"▫️ **Version**: v{os.getenv('VERSION')}\\n"
+                      f"▫️ **Branch**: {os.getenv('BRANCH')}\\n"
+                      f"▫️ **Commit**: {os.getenv('COMMIT')[:8]}\\n\\n"
+                  )
+                  
+                  if os.getenv('UPLOAD_TO_RELEASE') == 'true':
+                      changelog = os.getenv('CHANGELOG', '').strip()
+                      if changelog and not changelog.startswith("No changelog"):
+                          clean_changelog = changelog.replace('`', '').replace('_', '')
+                          message += f"📋 **Changelog**:\\n{clean_changelog}\\n\\n"
+                  
+                  message += f"🔗 [View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})"
+                  
+                  await client.send_file(
+                      chat_id,
+                      file=os.getenv('ZIP_NAME'),
+                      caption=message,
+                      thumb=os.getenv('THUMBNAIL_PATH'),
+                      parse_mode='markdown'
+                  )
+                  print("Message sent successfully!")
+                  await client.disconnect()
+                  
+              except Exception as e:
+                  print(f"Failed to send notification: {e}")
+                  exit(1)
+          
+          asyncio.run(send_notification())
+          PYEOF
+
       - name: Send Telegram Notification
         if: github.event.inputs.upload_to_telegram == 'true'
         env:
@@ -346,46 +397,4 @@ jobs:
           COMMIT: ${{ github.sha }}
           CHANGELOG: ${{ env.CHANGELOG }}
         run: |
-          python3 - <<EOF
-          from telethon import TelegramClient
-          import os
-
-          bot_token = os.getenv('TELEGRAM_TOKEN')
-          chat_id = int(os.getenv('TELEGRAM_CHAT_ID'))
-
-          client = TelegramClient('github_bot', 2040, 'b18441a1ff607e10a989891a5462e627').start(bot_token=bot_token)
-
-          async def send_notification():
-          try:
-              title = os.getenv('TITLE')
-              build_type = "🚀 **Release Build**" if os.getenv('UPLOAD_TO_RELEASE') == 'true' else "🔧 **CI Build**"
-              message = (
-                  f"✨ **{title}** ✨\n\n"
-                  f"{build_type}\n"
-                  f"▫️ **Version**: v{os.getenv('VERSION')}\n"
-                  f"▫️ **Branch**: {os.getenv('BRANCH')}\n"
-                  f"▫️ **Commit**: {os.getenv('COMMIT')[:8]}\n\n"
-              )
-              if os.getenv('UPLOAD_TO_RELEASE') == 'true':
-                  changelog = os.getenv('CHANGELOG', '').strip()
-                  if changelog and not changelog.startswith("No changelog"):
-                      clean_changelog = changelog.replace('`', '').replace('_', '')
-                      message += f"📋 **Changelog**:\n{clean_changelog}\n\n"
-        
-              message += f"🔗 [View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})"
-        
-              await client.send_file(
-                  chat_id,
-                  file=os.getenv('ZIP_NAME'),
-                  caption=message,
-                  thumb=os.getenv('THUMBNAIL_PATH'),
-                  parse_mode='markdown'
-              )
-              print("Message sent successfully!")
-          except Exception as e:
-              print(f"Failed to send notification: {e}")
-              exit(1)
-
-          with client:
-              client.loop.run_until_complete(send_notification())
-          EOF
+          python3 send_telegram.py
