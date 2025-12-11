@@ -72,8 +72,8 @@
     "com.tencent.tmgp.pubgmhd:blocked",
     "com.vng.pubgmobile:blocked",
     "com.pubg.imobile:blocked",
-    "com.netflix.mediaclient:blocked",
-    "com.netflix.ninja:blocked",
+    "com.netflix.mediaclient:notweak",
+    "com.netflix.ninja:notweak",
     "com.tencent.ig:blocked"
   ],
   "PACKAGES_XIAOMI_13_PRO_DEVICE": {
