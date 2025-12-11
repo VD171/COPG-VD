@@ -236,9 +236,8 @@ jobs:
             if [ -n "$CHANGELOG_CONTENT" ]; then
               CLEAN_CHANGELOG=$(echo "$CHANGELOG_CONTENT" | sed '1d')
               if [ -n "$CLEAN_CHANGELOG" ]; then
-                CHANGELOG_CLEAN=$(echo "$CLEAN_CHANGELOG" | sed 's/\\n/ /g' | sed 's/  */ /g')
                 echo "CHANGELOG<<EOF" >> $GITHUB_ENV
-                echo "$CHANGELOG_CLEAN" >> $GITHUB_ENV
+                echo "$CLEAN_CHANGELOG" >> $GITHUB_ENV
                 echo "EOF" >> $GITHUB_ENV
               else
                 echo "CHANGELOG=No changelog body found for v${VERSION}" >> $GITHUB_ENV
@@ -276,11 +275,14 @@ jobs:
           
           if [ -f "changelog.md" ]; then
             VERSION_ESCAPED=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
-            CHANGELOG_SECTION=$(awk "/^## v$VERSION_ESCAPED/{p=1;next}/^##/{p=0}p" changelog.md)
+            CHANGELOG_SECTION=$(awk -v version="${{ env.VERSION }}" '
+              $0 ~ "^## v" version {flag=1; next}
+              flag && /^## v/ {flag=0}
+              flag {print}
+            ' changelog.md)
             
             if [ -n "$CHANGELOG_SECTION" ]; then
-              CLEAN_SECTION=$(echo "$CHANGELOG_SECTION" | sed '1d' | sed 's/\\n\\n/\n/g' | sed 's/^\\s*//')
-              RELEASE_NOTES+="$CLEAN_SECTION\n\n"
+              RELEASE_NOTES+="$CHANGELOG_SECTION\n\n"
             fi
           fi
           
@@ -290,7 +292,7 @@ jobs:
           RELEASE_NOTES+="**Commit**: ${{ github.sha }}\n\n"
           RELEASE_NOTES+="Read the full changelog for all versions in [changelog.md](https://github.com/${{ github.repository }}/blob/${{ github.event.inputs.branch }}/changelog.md)"
           
-          echo "🚀 Creating release $TAG..."
+          echo "Creating release $TAG with full changelog..."
           gh release create "$TAG" \
             --title "COPG v${{ env.VERSION }}" \
             --notes "$RELEASE_NOTES" \
@@ -424,7 +426,7 @@ jobs:
                       )
                       telegraph_url = f"https://telegra.ph/{response['path']}"
                       
-                      message += f"📋 **Changelog**: {telegraph_url}\n\n"
+                      message += f"📋 **[Full Changelog]({telegraph_url})**\n\n"
                   
                   message += f"🔗 [View Workflow Run]({workflow_url})"
                   
