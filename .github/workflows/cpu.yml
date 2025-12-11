@@ -278,8 +278,7 @@ jobs:
           if [ -f "changelog.md" ]; then
             VERSION="${{ env.VERSION }}"
             
-            python3 -c "
-            import re
+            python3 -c "import re
             import sys
 
             version = sys.argv[1]
