@@ -1,10 +1,10 @@
 #!/system/bin/sh
 MODDIR="/data/adb/modules/COPG"
-CONFIG_URL="https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/config.json"
+CONFIG_URL="https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/COPG.json"
 LIST_URL="https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/list.json"
 CONFIG_PATH="$MODDIR/COPG.json"
 LIST_PATH="$MODDIR/list.json"
-TEMP_CONFIG="/data/adb/copg_temp_config.json"
+TEMP_CONFIG="/data/adb/copg_temp_COPG.json"
 TEMP_LIST="/data/adb/copg_temp_list.json"
 
 if command -v curl >/dev/null 2>&1; then
@@ -52,7 +52,7 @@ update_file() {
     return 0
 }
 
-update_file "$CONFIG_URL" "$TEMP_CONFIG" "$CONFIG_PATH" "config.json"
+update_file "$CONFIG_URL" "$TEMP_CONFIG" "$CONFIG_PATH" "COPG.json"
 
 update_file "$LIST_URL" "$TEMP_LIST" "$LIST_PATH" "list.json"
 
