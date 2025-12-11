@@ -30,7 +30,7 @@
     "com.tencent.tmgp.gnyx",
     "com.ss.android.ugc.trill:notweak",
     "com.zhiliaoapp.musically:notweak",
-    "com.garena.game.df"
+    "com.garena.game.df:blocked"
   ],
   "PACKAGES_REDMAGIC_9_PRO_DEVICE": {
     "BRAND": "nubia",
@@ -134,7 +134,7 @@
     "PRODUCT": "2211133G"
   },
   "PACKAGES_ONEPLUS_13": [
-    "com.proxima.dfm"
+    "com.proxima.dfm:blocked"
   ],
   "PACKAGES_ONEPLUS_13_DEVICE": {
     "BRAND": "OnePlus",
