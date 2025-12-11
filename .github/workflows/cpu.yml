@@ -279,7 +279,7 @@ jobs:
               $0 ~ "^## v" version {flag=1; next}
               flag && /^## v/ {flag=0}
               flag {print}
-            ' changelog.md)
+            ' changelog.md | sed '1d')
             
             if [ -n "$CHANGELOG_SECTION" ]; then
               RELEASE_NOTES+="$CHANGELOG_SECTION\n\n"
