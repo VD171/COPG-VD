@@ -271,19 +271,22 @@ jobs:
         run: |
           TAG="v${{ env.VERSION }}"
           
-          RELEASE_NOTES="## COPG v${{ env.VERSION }}\\n\\n"
+          RELEASE_NOTES=""
           
           if [ -f "changelog.md" ]; then
-            VERSION_ESCAPED=$(echo "${{ env.VERSION }}" | sed 's/\\./\\\\./g')
-            CHANGELOG_SECTION=$(sed -n "/^## v${VERSION_ESCAPED}/,/^## v/p" changelog.md | sed '$d' | sed '1d')
+            VERSION_ESCAPED=$(echo "${{ env.VERSION }}" | sed 's/\./\\\\./g')
+            CHANGELOG_SECTION=$(awk "/^## v$VERSION_ESCAPED/{flag=1;next}/^## v/{flag=0}flag" changelog.md)
             
             if [ -n "$CHANGELOG_SECTION" ]; then
-              RELEASE_NOTES+="$CHANGELOG_SECTION\\n\\n"
+              RELEASE_NOTES="$CHANGELOG_SECTION"
             fi
           fi
           
-          RELEASE_NOTES+="---\\n"
-          RELEASE_NOTES+="**Build Date**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')\\n"
+          if [ -z "$RELEASE_NOTES" ]; then
+            RELEASE_NOTES="## COPG v${{ env.VERSION }}"
+          fi
+          
+          RELEASE_NOTES+="\\n\\n---\\n**Build Date**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')\\n"
           RELEASE_NOTES+="**Branch**: ${{ github.event.inputs.branch }}\\n"
           RELEASE_NOTES+="**Commit**: ${{ github.sha }}\\n\\n"
           RELEASE_NOTES+="Read the full changelog for all versions in [changelog.md](https://github.com/${{ github.repository }}/blob/${{ github.event.inputs.branch }}/changelog.md)"
@@ -346,6 +349,7 @@ jobs:
           from telegraph import Telegraph
           import os
           import asyncio
+          import re
           
           async def send_notification():
               try:
@@ -380,48 +384,112 @@ jobs:
                       content_html = f"<h3>Changelog for COPG v{version}</h3>"
                       
                       lines = changelog_raw.split('\\n')
-                      i = 0
-                      while i < len(lines):
-                          line = lines[i].strip()
-                          if line.startswith('### '):
+                      in_list = False
+                      in_sublist = False
+                      
+                      for line in lines:
+                          line = line.rstrip()
+                          
+                          if re.match(r'^###\s+\w+', line):
+                              if in_list:
+                                  content_html += "</ul>"
+                                  in_list = False
+                              if in_sublist:
+                                  content_html += "</ul>"
+                                  in_sublist = False
                               content_html += f"<h4>{line[4:]}</h4>"
-                          elif line.startswith('*   **'):
-                              content_html += f"<p><b>{line[5:-3]}</b>: {line.split(':')[1].strip()}</p>"
-                          elif line.startswith('*   **`'):
-                              content_html += f"<p><b>{line[6:-3]}</b>: {line.split(':')[1].strip()}</p>"
-                          elif line.startswith('*   **Updated Game Support:**'):
-                              content_html += f"<p><b>Updated Game Support:</b></p><ul>"
-                              i += 1
-                              while i < len(lines) and lines[i].strip().startswith('*   Added support for **'):
-                                  game_line = lines[i].strip()[23:-3]
-                                  content_html += f"<li>Added support for <b>{game_line}</b></li>"
-                                  i += 1
-                              content_html += "</ul>"
-                              i -= 1
-                          elif line.startswith('*   Added support for **'):
-                              content_html += f"<li>Added support for <b>{line[23:-3]}</b></li>"
-                          elif line.startswith('*   Removed support for **'):
-                              content_html += f"<li>Removed support for <b>{line[25:-3]}</b></li>"
-                          elif line.startswith('*   **Permission & SELinux:**'):
-                              content_html += f"<p><b>Permission & SELinux:</b> {line.split(':')[1].strip()}</p>"
-                          elif line.startswith('*   **Logging:**'):
-                              content_html += f"<p><b>Logging:</b></p><ul>"
-                              i += 1
-                              while i < len(lines) and lines[i].strip().startswith('*   Simplified'):
-                                  content_html += f"<li>{lines[i].strip()[4:]}</li>"
-                                  i += 1
-                              content_html += "</ul>"
-                              i -= 1
-                          elif line.startswith('*   **Configuration Management:**'):
-                              content_html += f"<p><b>Configuration Management:</b> {line.split(':')[1].strip()}</p>"
-                          elif line.startswith('*   **Summary**'):
-                              content_html += f"<p><b>Summary</b></p><p>{lines[i+1].strip()}</p>"
-                              i += 1
-                          elif line.startswith('*   '):
-                              content_html += f"<p>{line[4:]}</p>"
-                          elif line:
-                              content_html += f"<p>{line}</p>"
-                          i += 1
+                          
+                          elif re.match(r'^\*\s+\*\*(.+?)\*\*:', line):
+                              if in_sublist:
+                                  content_html += "</ul>"
+                                  in_sublist = False
+                              if not in_list:
+                                  content_html += "<ul>"
+                                  in_list = True
+                              match = re.match(r'^\*\s+\*\*(.+?)\*\*:\s*(.+)', line)
+                              if match:
+                                  content_html += f"<li><b>{match.group(1)}</b>: {match.group(2)}</li>"
+                          
+                          elif re.match(r'^\*\s+\*\*`(.+?)`\*\*:', line):
+                              if in_sublist:
+                                  content_html += "</ul>"
+                                  in_sublist = False
+                              if not in_list:
+                                  content_html += "<ul>"
+                                  in_list = True
+                              match = re.match(r'^\*\s+\*\*`(.+?)`\*\*:\s*(.+)', line)
+                              if match:
+                                  content_html += f"<li><b>{match.group(1)}</b>: {match.group(2)}</li>"
+                          
+                          elif re.match(r'^\*\s+\*\*(Updated Game Support|Permission & SELinux|Configuration Management)\*\*:', line):
+                              if in_list:
+                                  content_html += "</ul>"
+                                  in_list = False
+                              if in_sublist:
+                                  content_html += "</ul>"
+                                  in_sublist = False
+                              match = re.match(r'^\*\s+\*\*(.+?)\*\*:\s*(.+)', line)
+                              if match:
+                                  content_html += f"<p><b>{match.group(1)}</b>: {match.group(2)}</p>"
+                          
+                          elif re.match(r'^\*\s+\*\*(Logging)\*\*:', line):
+                              if in_list:
+                                  content_html += "</ul>"
+                                  in_list = False
+                              if in_sublist:
+                                  content_html += "</ul>"
+                                  in_sublist = False
+                              content_html += "<p><b>Logging:</b></p><ul>"
+                              in_sublist = True
+                          
+                          elif re.match(r'^\*\s+Added support for \*\*(.+?)\*\*', line):
+                              if not in_sublist:
+                                  content_html += "<ul>"
+                                  in_sublist = True
+                              match = re.match(r'^\*\s+Added support for \*\*(.+?)\*\*', line)
+                              if match:
+                                  content_html += f"<li>Added support for <b>{match.group(1)}</b></li>"
+                          
+                          elif re.match(r'^\*\s+Removed support for \*\*(.+?)\*\*', line):
+                              if not in_sublist:
+                                  content_html += "<ul>"
+                                  in_sublist = True
+                              match = re.match(r'^\*\s+Removed support for \*\*(.+?)\*\*', line)
+                              if match:
+                                  content_html += f"<li>Removed support for <b>{match.group(1)}</b></li>"
+                          
+                          elif re.match(r'^\*\s+\*\*(Summary)\*\*', line):
+                              if in_list:
+                                  content_html += "</ul>"
+                                  in_list = False
+                              if in_sublist:
+                                  content_html += "</ul>"
+                                  in_sublist = False
+                              content_html += "<p><b>Summary</b></p>"
+                          
+                          elif re.match(r'^\*\s+', line):
+                              if in_list:
+                                  content_html += "</ul>"
+                                  in_list = False
+                              if in_sublist:
+                                  content_html += "</ul>"
+                                  in_sublist = False
+                              content_html += f"<p>{line[2:]}</p>"
+                          
+                          elif line.strip() and not line.startswith('    *'):
+                              if in_list:
+                                  content_html += "</ul>"
+                                  in_list = False
+                              if in_sublist:
+                                  content_html += "</ul>"
+                                  in_sublist = False
+                              if line.strip():
+                                  content_html += f"<p>{line}</p>"
+                      
+                      if in_list:
+                          content_html += "</ul>"
+                      if in_sublist:
+                          content_html += "</ul>"
                       
                       response = telegraph.create_page(
                           title=f'COPG v{version} Changelog',
