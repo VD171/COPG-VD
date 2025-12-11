@@ -270,7 +270,7 @@ jobs:
       - name: Create Release Notes Script
         if: github.event.inputs.upload_to_release == 'true'
         run: |
-         cat > extract_changelog.py << 'PYEOF'
+         cat > extract_changelog.py << 'EOF'
          import re
          import sys
     
@@ -287,7 +287,7 @@ jobs:
          print(changelog_content)
          else:
              print('')
-         PYEOF
+         EOF
 
          - name: Upload ZIP to GitHub Release
            if: github.event.inputs.upload_to_release == 'true'
