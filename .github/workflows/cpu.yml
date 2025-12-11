@@ -266,71 +266,70 @@ jobs:
           name: COPG
           path: ${{ env.ZIP_NAME }}
 
-      
       - name: Create Release Notes Script
         if: github.event.inputs.upload_to_release == 'true'
         run: |
-         cat > extract_changelog.py << 'EOF'
-         import re
-         import sys
-    
-         version = sys.argv[1]
-    
-         with open('changelog.md', 'r', encoding='utf-8') as f:
-             content = f.read()
-    
-         pattern = rf'^## v{re.escape(version)}[^\n]*\n(.*?)(?=^## v|\Z)'
-         match = re.search(pattern, content, re.MULTILINE | re.DOTALL)
-    
-         if match:
-         changelog_content = match.group(1).strip()
-         print(changelog_content)
-         else:
-             print('')
-         EOF
+          cat > extract_changelog.py << 'EOF'
+          import re
+          import sys
 
-         - name: Upload ZIP to GitHub Release
-           if: github.event.inputs.upload_to_release == 'true'
-           run: |
-            TAG="v${{ env.VERSION }}"
-    
-            echo "📝 Preparing release notes for v${{ env.VERSION }}..."
-    
-            RELEASE_NOTES="## COPG v${{ env.VERSION }}\n\n"
-    
-            if [ -f "changelog.md" ]; then
+          version = sys.argv[1]
+
+          with open('changelog.md', 'r', encoding='utf-8') as f:
+              content = f.read()
+
+          pattern = rf'^## v{re.escape(version)}[^\n]*\n(.*?)(?=^## v|\Z)'
+          match = re.search(pattern, content, re.MULTILINE | re.DOTALL)
+
+          if match:
+              changelog_content = match.group(1).strip()
+              print(changelog_content)
+          else:
+              print('')
+          EOF
+
+      - name: Upload ZIP to GitHub Release
+        if: github.event.inputs.upload_to_release == 'true'
+        run: |
+          TAG="v${{ env.VERSION }}"
+          
+          echo "📝 Preparing release notes for v${{ env.VERSION }}..."
+          
+          RELEASE_NOTES="## COPG v${{ env.VERSION }}\n\n"
+          
+          if [ -f "changelog.md" ]; then
             VERSION="${{ env.VERSION }}"
-      
+            
             python3 extract_changelog.py "$VERSION" > changelog_section.txt
-      
+            
             CHANGELOG_SECTION=$(cat changelog_section.txt)
-      
+            
             if [ -n "$CHANGELOG_SECTION" ]; then
-            RELEASE_NOTES+="$CHANGELOG_SECTION\n\n"
+              RELEASE_NOTES+="$CHANGELOG_SECTION\n\n"
             else
-            RELEASE_NOTES+="No changelog found for this version.\n\n"
+              RELEASE_NOTES+="No changelog found for this version.\n\n"
             fi
-      
+            
             rm -f changelog_section.txt extract_changelog.py
-            else
+          else
             RELEASE_NOTES+="No changelog file available.\n\n"
-            fi
-    
-            RELEASE_NOTES+="---\n"
-            RELEASE_NOTES+="**Build Date**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')\n"
-            RELEASE_NOTES+="**Branch**: ${{ github.event.inputs.branch }}\n"
-            RELEASE_NOTES+="**Commit**: ${{ github.sha }}\n\n"
-            RELEASE_NOTES+="Read the full changelog for all versions in [changelog.md](https://github.com/${{ github.repository }}/blob/${{ github.event.inputs.branch }}/changelog.md)"
-    
-            echo "🚀 Creating release $TAG..."
-            gh release create "$TAG" \
-              --title "COPG v${{ env.VERSION }}" \
-              --notes "$RELEASE_NOTES" \
-              ${{ env.ZIP_NAME }}
-    
-            echo "✅ Release created successfully!"
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          fi
+          
+          RELEASE_NOTES+="---\n"
+          RELEASE_NOTES+="**Build Date**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')\n"
+          RELEASE_NOTES+="**Branch**: ${{ github.event.inputs.branch }}\n"
+          RELEASE_NOTES+="**Commit**: ${{ github.sha }}\n\n"
+          RELEASE_NOTES+="Read the full changelog for all versions in [changelog.md](https://github.com/${{ github.repository }}/blob/${{ github.event.inputs.branch }}/changelog.md)"
+          
+          echo "🚀 Creating release $TAG..."
+          gh release create "$TAG" \
+            --title "COPG v${{ env.VERSION }}" \
+            --notes "$RELEASE_NOTES" \
+            ${{ env.ZIP_NAME }}
+          
+          echo "✅ Release created successfully!"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update update.json in JSON branch
         if: github.event.inputs.upload_to_release == 'true'
@@ -381,7 +380,7 @@ jobs:
           import os
           import asyncio
           import re
-          
+
           async def send_notification():
               try:
                   bot_token = os.getenv('TELEGRAM_TOKEN')
@@ -394,10 +393,10 @@ jobs:
                   workflow_url = os.getenv('WORKFLOW_RUN_URL')
                   changelog_raw = os.getenv('CHANGELOG', '').strip()
                   is_release = os.getenv('UPLOAD_TO_RELEASE') == 'true'
-                  
+        
                   client = TelegramClient('github_bot', 2040, 'b18441a1ff607e10a989891a5462e627')
                   await client.start(bot_token=bot_token)
-                  
+        
                   build_type = "🚀 **Release Build**" if is_release else "🔧 **CI Build**"
                   message = (
                       f"✨ **{title}** ✨\n\n"
@@ -406,17 +405,17 @@ jobs:
                       f"▫️ **Branch**: {branch}\n"
                       f"▫️ **Commit**: {commit}\n\n"
                   )
-                  
+        
                   telegraph_url = ""
                   if is_release and changelog_raw and not changelog_raw.startswith("No changelog"):
                       telegraph = Telegraph()
                       telegraph.create_account(short_name='COPG-Bot')
-                      
+            
                       content_html = f"<h3>Changelog for COPG v{version}</h3>"
-                      
+            
                       lines = changelog_raw.split('\n')
                       in_list = False
-                      
+            
                       for line in lines:
                           line = line.strip()
                           if not line:
@@ -424,7 +423,7 @@ jobs:
                                   content_html += "</ul>"
                                   in_list = False
                               continue
-                          
+                
                           if line.startswith('###'):
                               if in_list:
                                   content_html += "</ul>"
@@ -444,22 +443,22 @@ jobs:
                                   content_html += "</ul>"
                                   in_list = False
                               content_html += f"<p>{line}</p>"
-                      
+            
                       if in_list:
                           content_html += "</ul>"
-                      
-                      response = telegraph.create_page(
+            
+                        response = telegraph.create_page(
                           title=f'COPG v{version} Changelog',
                           author_name='COPG Build Bot',
                           author_url='https://github.com/AlirezaParsi/COPG',
                           html_content=content_html
                       )
                       telegraph_url = f"https://telegra.ph/{response['path']}"
-                      
+            
                       message += f"📋 **[Full Changelog]({telegraph_url})**\n\n"
-                  
+        
                   message += f"🔗 [View Workflow Run]({workflow_url})"
-                  
+        
                   await client.send_file(
                       chat_id,
                       file=zip_name,
@@ -471,11 +470,11 @@ jobs:
                   if telegraph_url:
                       print(f"📄 Changelog published at: {telegraph_url}")
                   await client.disconnect()
-                  
+        
               except Exception as e:
                   print(f"❌ Failed to send notification: {e}")
                   exit(1)
-          
+
           asyncio.run(send_notification())
           PYEOF
 
