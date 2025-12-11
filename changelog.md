@@ -5,10 +5,11 @@
 - https://t.me/COPG_module
 ---
 ## v4.7.1
-###HOTFIX Update
+### HOTFIX Update
 - Added blocked tag to all device packages for safety
 - Fixed Update Gameslist and action button
-###Note: I recommend you add your game always as blocked package expect games those aren't working with device spoof only or they only work with CPU spoof
+### Note: 
+- I recommend you add your game always as blocked package expect games those aren't working with device spoof only or they only work with CPU spoof
 
 ## v4.7.0
 ### New Features
