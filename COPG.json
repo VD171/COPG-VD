@@ -12,7 +12,6 @@
     ]
   },
   "PACKAGES_REDMAGIC_9_PRO": [
-    "com.mobilelegends.mi",
     "com.supercell.brawlstars",
     "com.blizzard.diablo.immortal",
     "com.netease.newspike",
@@ -98,18 +97,6 @@
     "MODEL": "IN2023",
     "FINGERPRINT": "OnePlus/IN2023/OnePlus8Pro:13/RKQ1.211119.001/20230501:user/release-keys",
     "PRODUCT": "IN2023"
-  },
-  "PACKAGES_POCO_F5": [
-    "com.mobile.legends",
-    "com.mobile.legends.usa"
-  ],
-  "PACKAGES_POCO_F5_DEVICE": {
-    "BRAND": "POCO",
-    "DEVICE": "POCO F5",
-    "MANUFACTURER": "Xiaomi",
-    "MODEL": "23049PCD8G",
-    "FINGERPRINT": "POCO/23049PCD8G/POCOF5:13/TQ3A.230805.001/20230620:user/release-keys",
-    "PRODUCT": "23049PCD8G"
   },
   "PACKAGES_ROG_PHONE_6D_ULTIMATE": [
     "com.madfingergames.legends",
