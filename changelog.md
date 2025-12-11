@@ -4,6 +4,35 @@
 #### **Telegram Channel**:
 - https://t.me/COPG_module
 ---
+## v4.7.0
+### New Features
+*   **Safer Spoof Method:** Enhanced safety and reliability of the spoofing process.
+*   **Android/SDK Spoof:** Added optional Android SDK version spoofing capability.
+*   **Smart CPU Spoof (Snapdragon 8 Elite):** Introduces intelligent, app-targeted CPU information spoofing via `/proc/cpuinfo`.
+*   **Enhanced Configuration (`COPG.json`):**
+    *   Configuration file renamed from `config.json` to `COPG.json` (original `config.json` remains for MMRL app settings).
+    *   **`blocked` tag:** For apps/games where you want device model spoofing but need to hide/remove CPU spoof.
+    *   **`with_cpu` tag:** For apps/games where you want both device model spoofing and CPU spoofing applied together.
+    *   **`cpu_only_packages`:** For apps/games where you want **only** CPU spoofing applied (also resets device properties to original via `resetprop`).
+    *   **`blocklist`:** To hide/remove CPU spoof and reset properties for sensitive apps (e.g., banking apps, camera apps in Matrix ROM, system settings in some ROMs).
+    *   **`notweak` tag:** Significantly improves I/O performance and reduces overhead for specified packages.
+*   **Smarter Tweak Controller:** Improved configuration handling logic.
+*   **Enhanced WebUI:**
+    *   Added sorting and filtering capabilities.
+    *   Source code cleanup and full support for all new configuration changes.
+*   **Updated Game Support:**
+    *   Added support for **Fortnite** and **Farlight 84**.
+    *   Removed support for **Mobile Legends: Bang Bang**.
+
+### Improvements
+*   **Permission & SELinux:** Better handling during `COPG.json` restoration.
+*   **Logging:**
+    *   Simplified Zygisk logs.
+    *   Changed log tag from `SpoofModule` to `COPGModule`.
+*   **Configuration Management:** Removed deprecated `ignorelist.txt` and associated functions from the controller and WebUI.
+
+### Summary
+This major release focuses on intelligent, app-specific spoofing with the new Smart CPU feature, a more powerful and granular configuration system via `COPG.json`, a refined WebUI, and significant under-the-hood optimizations for performance and stability.
 ## v4.6.0
 - Added new spoof method with resetprop to zygisk
 - Rewrote COPG toggle manager from shell script to C++
