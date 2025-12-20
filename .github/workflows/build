@@ -8,21 +8,11 @@ on:
         type: boolean
         required: true
         default: false
-      upload_to_telegram:
-        description: 'Upload ZIP to Telegram?'
-        type: boolean
-        required: true
-        default: false
       branch:
         description: 'Branch to build from'
         type: string
         required: true
         default: 'JSON'
-      title:
-        description: 'Custom title for Telegram message'
-        type: string
-        required: false
-        default: ''
       custom_version:
         description: 'Custom version (e.g. 4.3.5)'
         type: string
@@ -79,8 +69,7 @@ jobs:
       - name: Install build tools and Python dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake zip curl imagemagick python3 python3-pip
-          pip3 install telethon
+          sudo apt-get install -y build-essential cmake zip curl imagemagick
 
       - name: Fetch Zygisk Headers and JSON Library
         run: |
@@ -198,34 +187,6 @@ jobs:
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Extract changelog for current version
-        if: github.event.inputs.upload_to_telegram == 'true'
-        run: |
-          if [ -f "changelog.md" ]; then
-            VERSION=$(echo "${{ env.VERSION }}" | sed 's/\./\\./g')
-            CHANGELOG=$(awk "/^## v$VERSION/{p=1;next}/^##/{p=0}p" changelog.md | sed '/^$/d')
-            if [ -z "$CHANGELOG" ]; then
-              echo "CHANGELOG=No changelog found for v${{ env.VERSION }}" >> $GITHUB_ENV
-            else
-              echo "CHANGELOG<<EOF" >> $GITHUB_ENV
-              echo "$CHANGELOG" >> $GITHUB_ENV
-              echo "EOF" >> $GITHUB_ENV
-            fi
-          else
-            echo "CHANGELOG=No changelog file available" >> $GITHUB_ENV
-          fi
-
-      - name: Download and Prepare Thumbnail
-        if: github.event.inputs.upload_to_telegram == 'true'
-        run: |
-          cp webroot/icon.png icon_thumb.jpg
-          convert icon_thumb.jpg -resize 320x320 -quality 80 icon_thumb.jpg
-          if [ ! -f "icon_thumb.jpg" ]; then
-            echo "Error: Thumbnail creation failed!"
-            ls -la
-            exit 1
-          fi
-
       - name: Upload Module ZIP as Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -244,59 +205,3 @@ jobs:
           gh release upload "$TAG" ${{ env.ZIP_NAME }} --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Send Telegram Notification
-        if: github.event.inputs.upload_to_telegram == 'true'
-        env:
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          ZIP_NAME: ${{ env.ZIP_NAME }}
-          THUMBNAIL_PATH: icon_thumb.jpg
-          TITLE: ${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}
-          WORKFLOW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          UPLOAD_TO_RELEASE: ${{ github.event.inputs.upload_to_release }}
-          VERSION: ${{ env.VERSION }}
-          BRANCH: ${{ github.event.inputs.branch }}
-          COMMIT: ${{ github.sha }}
-          CHANGELOG: ${{ env.CHANGELOG }}
-        run: |
-          python3 - <<EOF
-          from telethon import TelegramClient
-          import os
-
-          bot_token = os.getenv('TELEGRAM_TOKEN')
-          chat_id = int(os.getenv('TELEGRAM_CHAT_ID'))
-
-          client = TelegramClient('github_bot', 2040, 'b18441a1ff607e10a989891a5462e627').start(bot_token=bot_token)
-
-          async def send_notification():
-              try:
-                  title = os.getenv('TITLE')
-                  build_type = "🚀 **Release Build**" if os.getenv('UPLOAD_TO_RELEASE') == 'true' else "🔧 **CI Build**"
-                  message = (
-                      f"✨ **{title}** ✨\n\n"
-                      f"{build_type}\n"
-                      f"▫️ **Version**: v{os.getenv('VERSION')}\n"
-                      f"▫️ **Branch**: {os.getenv('BRANCH')}\n"
-                      f"▫️ **Commit**: {os.getenv('COMMIT')[:8]}\n\n"
-                  )
-                  if os.getenv('UPLOAD_TO_RELEASE') == 'true':
-                      changelog = os.getenv('CHANGELOG')
-                      if changelog and changelog != f"No changelog found for v{os.getenv('VERSION')}" and changelog != "No changelog file available":
-                          message += f"📋 **Changelog**:\n{changelog}\n\n"
-                  message += f"🔗 [View Workflow Run]({os.getenv('WORKFLOW_RUN_URL')})"
-                  await client.send_file(
-                      chat_id,
-                      file=os.getenv('ZIP_NAME'),
-                      caption=message,
-                      thumb=os.getenv('THUMBNAIL_PATH'),
-                      parse_mode='markdown'
-                  )
-                  print("Message sent successfully!")
-              except Exception as e:
-                  print(f"Failed to send notification: {e}")
-                  exit(1)
-
-          with client:
-              client.loop.run_until_complete(send_notification())
-          EOF
