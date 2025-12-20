@@ -8,21 +8,11 @@ on:
         type: boolean
         required: true
         default: false
-      upload_to_telegram:
-        description: 'Upload ZIP to Telegram?'
-        type: boolean
-        required: true
-        default: false
       branch:
         description: 'Branch to build from'
         type: string
         required: true
         default: 'JSON'
-      title:
-        description: 'Custom title for Telegram message'
-        type: string
-        required: false
-        default: ''
       custom_version:
         description: 'Custom version (e.g. 4.3.5)'
         type: string
@@ -82,8 +72,7 @@ jobs:
           sudo rm -rf /var/cache/man /var/lib/man-db /usr/share/man 2>/dev/null || true
           echo 'DPkg::Post-Invoke { ":"; };' | sudo tee /etc/apt/apt.conf.d/99noman >/dev/null
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake zip curl imagemagick python3 python3-pip upx-ucl
-          pip3 install telethon telegraph requests
+          sudo apt-get install -y build-essential cmake zip curl
 
       - name: Build Unified Controller
         run: |
@@ -227,39 +216,6 @@ jobs:
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Extract changelog for current version
-        if: github.event.inputs.upload_to_telegram == 'true'
-        run: |
-          if [ -f "changelog.md" ]; then
-            VERSION="${{ env.VERSION }}"
-            CHANGELOG_CONTENT=$(sed -n "/^## v${VERSION}/,/^## v/p" changelog.md | sed '$d')
-            if [ -n "$CHANGELOG_CONTENT" ]; then
-              CLEAN_CHANGELOG=$(echo "$CHANGELOG_CONTENT" | sed '1d')
-              if [ -n "$CLEAN_CHANGELOG" ]; then
-                echo "CHANGELOG<<EOF" >> $GITHUB_ENV
-                echo "$CLEAN_CHANGELOG" >> $GITHUB_ENV
-                echo "EOF" >> $GITHUB_ENV
-              else
-                echo "CHANGELOG=No changelog body found for v${VERSION}" >> $GITHUB_ENV
-              fi
-            else
-              echo "CHANGELOG=No changelog found for v${VERSION}" >> $GITHUB_ENV
-            fi
-          else
-            echo "CHANGELOG=No changelog file available" >> $GITHUB_ENV
-          fi
-
-      - name: Download and Prepare Thumbnail
-        if: github.event.inputs.upload_to_telegram == 'true'
-        run: |
-          cp webroot/icon.png icon_thumb.jpg
-          convert icon_thumb.jpg -resize 320x320 -quality 80 icon_thumb.jpg
-          if [ ! -f "icon_thumb.jpg" ]; then
-            echo "Error: Thumbnail creation failed!"
-            ls -la
-            exit 1
-          fi
-
       - name: Upload Module ZIP as Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -357,127 +313,3 @@ jobs:
           git push origin JSON
     
           echo "✅ update.json updated successfully in JSON branch"
-
-      - name: Create Telegram Notification Script
-        if: github.event.inputs.upload_to_telegram == 'true'
-        run: |
-          cat > send_telegram.py << 'PYEOF'
-          from telethon import TelegramClient
-          from telegraph import Telegraph
-          import os
-          import asyncio
-          import re
-          
-          async def send_notification():
-              try:
-                  bot_token = os.getenv('TELEGRAM_TOKEN')
-                  chat_id = int(os.getenv('TELEGRAM_CHAT_ID'))
-                  zip_name = os.getenv('ZIP_NAME')
-                  title = os.getenv('TITLE')
-                  version = os.getenv('VERSION')
-                  branch = os.getenv('BRANCH')
-                  commit = os.getenv('COMMIT')[:8]
-                  workflow_url = os.getenv('WORKFLOW_RUN_URL')
-                  changelog_raw = os.getenv('CHANGELOG', '').strip()
-                  is_release = os.getenv('UPLOAD_TO_RELEASE') == 'true'
-                  
-                  client = TelegramClient('github_bot', 2040, 'b18441a1ff607e10a989891a5462e627')
-                  await client.start(bot_token=bot_token)
-                  
-                  build_type = "🚀 **Release Build**" if is_release else "🔧 **CI Build**"
-                  message = (
-                      f"✨ **{title}** ✨\n\n"
-                      f"{build_type}\n"
-                      f"▫️ **Version**: v{version}\n"
-                      f"▫️ **Branch**: {branch}\n"
-                      f"▫️ **Commit**: {commit}\n\n"
-                  )
-                  
-                  telegraph_url = ""
-                  if is_release and changelog_raw and not changelog_raw.startswith("No changelog"):
-                      telegraph = Telegraph()
-                      telegraph.create_account(short_name='COPG-Bot')
-                      
-                      content_html = f"<h3>Changelog for COPG v{version}</h3>"
-                      
-                      lines = changelog_raw.split('\n')
-                      in_list = False
-                      
-                      for line in lines:
-                          line = line.strip()
-                          if not line:
-                              if in_list:
-                                  content_html += "</ul>"
-                                  in_list = False
-                              continue
-                          
-                          if line.startswith('###'):
-                              if in_list:
-                                  content_html += "</ul>"
-                                  in_list = False
-                              content_html += f"<h4>{line[3:].strip()}</h4>"
-                          elif line.startswith('*'):
-                              if not in_list:
-                                  content_html += "<ul>"
-                                  in_list = True
-                              list_item = line[1:].strip()
-                              list_item = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', list_item)
-                              list_item = re.sub(r'\*(.*?)\*', r'<i>\1</i>', list_item)
-                              list_item = re.sub(r'`(.*?)`', r'<code>\1</code>', list_item)
-                              content_html += f"<li>{list_item}</li>"
-                          else:
-                              if in_list:
-                                  content_html += "</ul>"
-                                  in_list = False
-                              content_html += f"<p>{line}</p>"
-                      
-                      if in_list:
-                          content_html += "</ul>"
-                      
-                      response = telegraph.create_page(
-                          title=f'COPG v{version} Changelog',
-                          author_name='COPG Build Bot',
-                          author_url='https://github.com/AlirezaParsi/COPG',
-                          html_content=content_html
-                      )
-                      telegraph_url = f"https://telegra.ph/{response['path']}"
-                      
-                      message += f"📋 **[Full Changelog]({telegraph_url})**\n\n"
-                  
-                  message += f"🔗 [View Workflow Run]({workflow_url})"
-                  
-                  await client.send_file(
-                      chat_id,
-                      file=zip_name,
-                      caption=message,
-                      thumb=os.getenv('THUMBNAIL_PATH'),
-                      parse_mode='markdown'
-                  )
-                  print(f"✅ Message sent successfully!")
-                  if telegraph_url:
-                      print(f"📄 Changelog published at: {telegraph_url}")
-                  await client.disconnect()
-                  
-              except Exception as e:
-                  print(f"❌ Failed to send notification: {e}")
-                  exit(1)
-          
-          asyncio.run(send_notification())
-          PYEOF
-
-      - name: Send Telegram Notification
-        if: github.event.inputs.upload_to_telegram == 'true'
-        env:
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          ZIP_NAME: ${{ env.ZIP_NAME }}
-          THUMBNAIL_PATH: icon_thumb.jpg
-          TITLE: ${{ github.event.inputs.title || 'New COPG Spoof Module Build' }}
-          WORKFLOW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          UPLOAD_TO_RELEASE: ${{ github.event.inputs.upload_to_release }}
-          VERSION: ${{ env.VERSION }}
-          BRANCH: ${{ github.event.inputs.branch }}
-          COMMIT: ${{ github.sha }}
-          CHANGELOG: ${{ env.CHANGELOG }}
-        run: |
-          python3 send_telegram.py
