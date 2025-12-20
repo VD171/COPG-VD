@@ -362,58 +362,9 @@ public:
                 }
             }
 
-            is_blacklisted = (cpu_blacklist.find(package_name) != cpu_blacklist.end());
-            is_cpu_only = (cpu_only_packages.find(package_name) != cpu_only_packages.end());
-
-            if (is_blacklisted) {
-                should_unmount_cpu = true;
-                PKG_LOG("%s: CPU blacklisted", package_name);
-            }
-
-            if (is_cpu_only && !found_in_device_list && !is_blacklisted) {
-                current_needs_cpu_spoof = true;
-                PKG_LOG("%s: CPU spoof only - will restore original build props", package_name);
-            }
-
-            if (found_in_device_list && package_setting.empty() && !is_blacklisted && is_cpu_only) {
-                current_needs_cpu_spoof = true;
-            }
-
-            if (current_needs_device_spoof && current_needs_cpu_spoof) {
-                PKG_LOG("%s: Device+CPU spoof", package_name);
-            } else if (current_needs_device_spoof) {
-                PKG_LOG("%s: Device spoof only", package_name);
-            } else if (current_needs_cpu_spoof) {
-                PKG_LOG("%s: CPU spoof only (will restore build props)", package_name);
-            } else if (should_unmount_cpu) {
-                PKG_LOG("%s: CPU blocked", package_name);
-            }
-
-            if (is_blacklisted) {
-                executeCompanionCommand("read_build_props");
-                executeCompanionCommand("restore_build_props");
-                PKG_LOG("%s: Original props restored (blacklist)", package_name);
-            }
-            
-            if (is_cpu_only && !found_in_device_list && !is_blacklisted) {
-                executeCompanionCommand("read_build_props");
-                executeCompanionCommand("restore_build_props");
-                PKG_LOG("%s: Original props restored (cpu_only)", package_name);
-            }
-
             if (current_needs_device_spoof) {
                 spoofDevice(current_info);
                 spoofSystemProps(current_info);
-                should_close = false;
-            }
-
-            if (should_unmount_cpu) {
-                executeCompanionCommand("unmount_spoof");
-            } else if (current_needs_cpu_spoof) {
-                executeCompanionCommand("mount_spoof");
-            }
-
-            if (current_needs_device_spoof || current_needs_cpu_spoof || is_blacklisted) {
                 should_close = false;
             }
         }
