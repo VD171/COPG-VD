@@ -171,51 +171,46 @@ if [ "$API" -lt 26 ]; then
 fi
 
 if $INSTALL_SUCCESS; then
-  print_box_start
-  ui_print " ⚙ Detecting Device Architecture "
-
-  if $INSTALL_SUCCESS; then
-    chmod 0755 "$MODPATH/service.sh" "$MODPATH/update_config.sh" 2>/dev/null
-    chmod 0644 "$MODPATH/COPG.json" "$MODPATH/list.json" 2>/dev/null
-    
-    for file in "$MODPATH/COPG.json" "$MODPATH/list.json" \
-                "$MODPATH/service.sh" "$MODPATH/update_config.sh"; do
-      if [ -f "$file" ]; then
-        chcon u:object_r:system_file:s0 "$file" 2>/dev/null
-      fi
-    done
-  fi
-
-  if $INSTALL_SUCCESS; then
-    prompt_gphoto_spoof
-    if $ENABLE_GPHOTO_SPOOF; then
-      setup_gphoto_spoof || {
-        INSTALL_SUCCESS=false
-      }
-    else
-      print_box_start
-      ui_print "      ✦ Google Photos Spoof ✦    "
-      print_empty_line
-      ui_print " ⚙ Removing Google Photos Config "
-      if [ -f "$MODPATH/COPG.json" ]; then
-        sed -i '/com\.google\.android\.apps\.photos/d' "$MODPATH/COPG.json" 2>/dev/null
-        chmod 0644 "$MODPATH/COPG.json" 2>/dev/null
-        chcon u:object_r:system_file:s0 "$MODPATH/COPG.json" 2>/dev/null
-      fi
-      
-      cleanup_gphoto_directories
-      
-      ui_print " ✔ Unlimited Photos Disabled    "
-      print_box_end
+  chmod 0755 "$MODPATH/service.sh" "$MODPATH/update_config.sh" 2>/dev/null
+  chmod 0644 "$MODPATH/COPG.json" "$MODPATH/list.json" 2>/dev/null
+  
+  for file in "$MODPATH/COPG.json" "$MODPATH/list.json" \
+              "$MODPATH/service.sh" "$MODPATH/update_config.sh"; do
+    if [ -f "$file" ]; then
+      chcon u:object_r:system_file:s0 "$file" 2>/dev/null
     fi
-  fi
+  done
+fi
 
-  if $INSTALL_SUCCESS; then
-    print_empty_line
+if $INSTALL_SUCCESS; then
+  prompt_gphoto_spoof
+  if $ENABLE_GPHOTO_SPOOF; then
+    setup_gphoto_spoof || {
+      INSTALL_SUCCESS=false
+    }
+  else
     print_box_start
-    ui_print " ✅ Module Successfully Installed "
+    ui_print "      ✦ Google Photos Spoof ✦    "
+    print_empty_line
+    ui_print " ⚙ Removing Google Photos Config "
+    if [ -f "$MODPATH/COPG.json" ]; then
+      sed -i '/com\.google\.android\.apps\.photos/d' "$MODPATH/COPG.json" 2>/dev/null
+      chmod 0644 "$MODPATH/COPG.json" 2>/dev/null
+      chcon u:object_r:system_file:s0 "$MODPATH/COPG.json" 2>/dev/null
+    fi
+    
+    cleanup_gphoto_directories
+    
+    ui_print " ✔ Unlimited Photos Disabled    "
     print_box_end
   fi
+fi
+
+if $INSTALL_SUCCESS; then
+  print_empty_line
+  print_box_start
+  ui_print " ✅ Module Successfully Installed "
+  print_box_end
 fi
 
 if ! $INSTALL_SUCCESS; then
