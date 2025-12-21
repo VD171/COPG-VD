@@ -112,7 +112,6 @@ const templates = {
             infoBadge.style.cursor = 'pointer';
             infoBadge.addEventListener('click', (e) => {
                 e.stopPropagation();
-                showCpuSpoofInfo(data.cleanPackageName, data.type);
             });
         }
         
@@ -1788,51 +1787,6 @@ async function renderGameList() {
     }
 }
 
-function showCpuSpoofInfo(packageName, type) {
-    let title = '';
-    let explanation = '';
-    
-    const popup = document.createElement('div');
-    popup.className = 'popup no-tweaks-explanation-popup';
-    popup.id = 'cpu-spoof-explanation-popup';
-    popup.innerHTML = `
-        <div class="popup-content">
-            <h3 class="explanation-title">${title}</h3>
-            <div class="explanation-text">
-                ${explanation}
-            </div>
-            <button class="action-btn">OK</button>
-        </div>
-    `;
-
-    document.body.appendChild(popup);
-    requestAnimationFrame(() => {
-        popup.style.display = 'flex';
-        popup.querySelector('.popup-content').classList.add('modal-enter');
-    });
-
-    const okBtn = popup.querySelector('.action-btn');
-    okBtn.addEventListener('click', () => {
-        const content = popup.querySelector('.popup-content');
-        content.classList.remove('modal-enter');
-        content.classList.add('popup-exit');
-        content.addEventListener('animationend', () => {
-            popup.remove();
-        }, { once: true });
-    });
-
-    popup.addEventListener('click', (e) => {
-        if (e.target === popup) {
-            const content = popup.querySelector('.popup-content');
-            content.classList.remove('modal-enter');
-            content.classList.add('popup-exit');
-            content.addEventListener('animationend', () => {
-                popup.remove();
-            }, { once: true });
-        }
-    });
-}
-
 function setupLongPressHandlers() {
     let pressTimer;
     const pressDuration = 500;
@@ -2428,13 +2382,6 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
     const cpuSpoofGroup = cpuSpoofContainer;
     const blockCpuGroup = blockCpuContainer;
     
-    const handleToggleConflicts = () => {
-        if (cpuSpoofToggle.checked && blockCpuToggle.checked) {
-            blockCpuToggle.checked = false;
-        }
-        updateModalBadges(disableTweaksToggle, cpuSpoofToggle, blockCpuToggle);
-    };
-    
     if (gamePackage) {
         title.textContent = 'Edit Game Configuration';
         
@@ -2474,7 +2421,6 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
         
         cpuSpoofToggle.checked = hasWithCpu;
         blockCpuToggle.checked = hasBlocked;
-        handleToggleConflicts();
         
         if (detectedType === 'device' && deviceKey) {
             deviceInput.value = currentConfig[`${deviceKey}_DEVICE`]?.DEVICE || '';
@@ -4070,12 +4016,12 @@ function applyEventListeners() {
             searchableText = [
                 gameName, 
                 packageName, 
-                deviceData.DEVICE?.toLowerCase() || '', 
-                deviceData.BRAND?.toLowerCase() || '', 
+                deviceData.DEVICE?.toLowerCase() || '',
+                deviceData.BRAND?.toLowerCase() || '',
                 deviceData.MODEL?.toLowerCase() || '',
-                deviceData.PRODUCT?.toLowerCase() || ''
+                deviceData.PRODUCT?.toLowerCase() || '',
                 deviceData.MANUFACTURER?.toLowerCase() || '',
-                deviceData.FINGERPRINT?.toLowerCase() || '', 
+                deviceData.FINGERPRINT?.toLowerCase() || '',
                 deviceData.BOARD?.toLowerCase() || '',
                 deviceData.BOOTLOADER?.toLowerCase() || '',
                 deviceData.HARDWARE?.toLowerCase() || '',
