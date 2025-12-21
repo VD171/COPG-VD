@@ -69,7 +69,7 @@ jobs:
       - name: Install build tools and Python dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake zip curl imagemagick
+          sudo apt-get install -y build-essential cmake zip curl
 
       - name: Fetch Zygisk Headers and JSON Library
         run: |
@@ -141,7 +141,6 @@ jobs:
           cp banner.png module/banner.png
           cp repo.yaml module/common/repo.yaml
           cp list.json module/list.json
-          cp ignorelist.txt module/ignorelist.txt
           cp -rf system/* module/system/
           cp customize.sh module/customize.sh
           cp service.sh module/service.sh
