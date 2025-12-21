@@ -74,7 +74,6 @@ static std::once_flag build_once;
 
 static time_t last_config_mtime = 0;
 static const std::string config_path = "/data/adb/modules/COPG/COPG.json";
-static const char* spoof_file_path = "/data/adb/modules/COPG/cpuinfo_spoof";
 
 static std::unordered_set<std::string> cpu_blacklist;
 static std::unordered_set<std::string> cpu_only_packages;
@@ -221,67 +220,6 @@ static void companion(int fd) {
                 COMPANION_LOG("Resetprop cmd: %s", command.substr(9).c_str());
                 result = system(full_cmd.c_str());
             }
-        } else if (command == "unmount_spoof") {
-            result = system("/system/bin/umount /proc/cpuinfo 2>/dev/null");
-            COMPANION_LOG("CPU unmount");
-        } else if (command == "mount_spoof") {
-            if (access(spoof_file_path, F_OK) == 0) {
-                system("/system/bin/umount /proc/cpuinfo 2>/dev/null");
-                char mount_cmd[512];
-                snprintf(mount_cmd, sizeof(mount_cmd), 
-                        "/system/bin/mount --bind %s /proc/cpuinfo", spoof_file_path);
-                result = system(mount_cmd);
-                COMPANION_LOG("CPU mount");
-            } else {
-                LOGE("Spoof file missing: %s", spoof_file_path);
-            }
-        } else if (command == "read_build_props") {
-            readOriginalBuildProps();
-            result = 0;
-        } else if (command == "restore_build_props") {
-            std::string resetprop_path = findResetpropPath();
-            if (!resetprop_path.empty()) {
-                if (!original_build_props.ro_product_brand.empty()) {
-                    std::string cmd = resetprop_path + " ro.product.brand " + original_build_props.ro_product_brand;
-                    system(cmd.c_str());
-                }
-                if (!original_build_props.ro_product_manufacturer.empty()) {
-                    std::string cmd = resetprop_path + " ro.product.manufacturer " + original_build_props.ro_product_manufacturer;
-                    system(cmd.c_str());
-                }
-                if (!original_build_props.ro_product_model.empty()) {
-                    std::string cmd = resetprop_path + " ro.product.model " + original_build_props.ro_product_model;
-                    system(cmd.c_str());
-                }
-                if (!original_build_props.ro_product_device.empty()) {
-                    std::string cmd = resetprop_path + " ro.product.device " + original_build_props.ro_product_device;
-                    system(cmd.c_str());
-                }
-                if (!original_build_props.ro_product_name.empty()) {
-                    std::string cmd = resetprop_path + " ro.product.name " + original_build_props.ro_product_name;
-                    system(cmd.c_str());
-                }
-                if (!original_build_props.ro_build_fingerprint.empty()) {
-                    std::string cmd = resetprop_path + " ro.build.fingerprint " + original_build_props.ro_build_fingerprint;
-                    system(cmd.c_str());
-                }
-                
-                std::string original_android_version = readBuildPropValue("version.release");
-                std::string original_sdk = readBuildPropValue("version.sdk");
-                
-                if (!original_android_version.empty()) {
-                    std::string cmd = resetprop_path + " ro.build.version.release " + original_android_version;
-                    system(cmd.c_str());
-                }
-                
-                if (!original_sdk.empty()) {
-                    std::string cmd = resetprop_path + " ro.build.version.sdk " + original_sdk;
-                    system(cmd.c_str());
-                }
-            }
-            
-            result = 0;
-            COMPANION_LOG("Build props restored");
         }
         
         write(fd, &result, sizeof(result));
