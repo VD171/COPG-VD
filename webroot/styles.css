@@ -51,24 +51,6 @@ body {
     overflow-x: hidden;
 }
 
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(96, 165, 250, 0.1) 0%, transparent 70%);
-    animation: bgPulse 8s infinite ease-in-out;
-    z-index: -1;
-    pointer-events: none;
-}
-
-@keyframes bgPulse {
-    0%, 100% { transform: scale(1); opacity: 0.5; }
-    50% { transform: scale(1.05); opacity: 0.8; }
-}
-
 body.dark-theme {
     background: var(--dark-bg);
     color: var(--dark-text);
@@ -98,23 +80,6 @@ body.dark-theme::before {
     align-items: center;
     position: relative;
     overflow: hidden;
-}
-
-.header::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-    animation: shine 3s infinite ease-in-out;
-}
-
-@keyframes shine {
-    0% { left: -100%; }
-    20% { left: 100%; }
-    100% { left: 100%; }
 }
 
 .dark-theme .header {
@@ -193,23 +158,6 @@ body.dark-theme::before {
     overflow: hidden;
 }
 
-.tab-btn::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
-    animation: tabShine 4s infinite ease-in-out;
-}
-
-@keyframes tabShine {
-    0% { left: -100%; }
-    10% { left: 100%; }
-    100% { left: 100%; }
-}
-
 .tab-btn.active {
     color: #fff;
     background: var(--primary-gradient);
@@ -264,13 +212,8 @@ body.dark-theme::before {
     background: var(--card-bg);
     border-radius: 16px;
     padding: 20px;
-    box-shadow: 0 4px 12px var(--shadow);
     border: none;
     transition: transform 0.2s ease;
-}
-
-.card:hover {
-    transform: translateY(-4px);
 }
 
 .dark-theme .card {
@@ -471,10 +414,6 @@ input:checked + .slider:before {
     transform: translateX(24px);
 }
 
-.toggle-group:hover .slider {
-    transform: scale(1.05);
-}
-
 .button-group {
     display: flex;
     gap: 12px;
@@ -517,12 +456,7 @@ input:checked + .slider:before {
 }
 
 .action-btn:hover, .shortcut-btn:hover {
-    transform: scale(1.05);
     box-shadow: 0 6px 16px var(--shadow);
-}
-
-.shortcut-btn:hover .shortcut-icon {
-    transform: scale(1.1);
 }
 
 .action-btn:active, .shortcut-btn:active {
@@ -599,7 +533,6 @@ input:checked + .slider:before {
 
 .add-btn:hover {
     background: var(--primary-dark);
-    transform: scale(1.05) translateX(2px);
 }
 
 .add-btn svg {
@@ -620,7 +553,6 @@ input:checked + .slider:before {
 }
 
 .package-picker-btn:hover {
-    transform: scale(1.05);
     background: var(--primary-dark);
 }
 
@@ -629,10 +561,6 @@ input:checked + .slider:before {
     height: 26px;
     stroke: #fff;
     transition: transform 0.3s ease;
-}
-
-.package-picker-btn:hover svg {
-    transform: scale(1.1);
 }
 
 .dark-theme .package-picker-btn {
@@ -709,7 +637,6 @@ input:checked + .slider:before {
 
 .device-card:hover, .game-card:hover, .picker-device-card:hover {
     box-shadow: 0 4px 12px var(--shadow);
-    transform: translateY(-4px);
 }
 
 .picker-device-card.selected {
@@ -1273,10 +1200,6 @@ h2 {
     z-index: 1;
 }
 
-.theme-btn:hover {
-    transform: scale(1.2);
-}
-
 .snackbar {
     position: fixed;
     bottom: calc(var(--safe-area-inset-bottom) + 16px);
@@ -1412,7 +1335,6 @@ h2 {
 
 .app-card:hover {
     box-shadow: 0 4px 12px var(--shadow);
-    transform: translateY(-2px);
 }
 
 .app-icon {
@@ -1813,7 +1735,6 @@ h2 {
 
 .backup-row:hover {
     background: rgba(96, 165, 250, 0.1);
-    transform: translateY(-1px);
 }
 
 .dark-theme .backup-row {
@@ -1924,7 +1845,6 @@ h2 {
 
 #file-picker-popup .app-card:hover {
     background: rgba(96, 165, 250, 0.1);
-    transform: translateY(-1px);
 }
 
 .dark-theme #file-picker-popup .app-card:hover {
@@ -1986,7 +1906,6 @@ h2 {
 }
 
 .back-btn:hover {
-    transform: scale(1.05);
     box-shadow: 0 4px 8px var(--shadow);
 }
 
@@ -2071,10 +1990,6 @@ h2 {
     transition: transform 0.3s ease;
 }
 
-#donate-toggle:hover .donate-icon {
-    transform: scale(1.2);
-}
-
 #donate-popup .popup-content {
     max-width: 500px;
     max-height: 70vh;
@@ -2136,7 +2051,6 @@ h2 {
 
 #donate-popup .popup-footer .close-donate-btn:hover {
     background: var(--text-secondary) !important;
-    transform: none !important;
     box-shadow: none !important;
 }
 
@@ -2161,7 +2075,6 @@ h2 {
 
 .close-donate-btn:hover {
     background: var(--text-secondary) !important;
-    transform: none !important;
     box-shadow: none !important;
 }
 
@@ -2211,7 +2124,6 @@ h2 {
 
 .donate-option:hover {
     background: rgba(96, 165, 250, 0.1);
-    transform: translateY(-1px);
 }
 
 .dark-theme .donate-option {
@@ -2338,7 +2250,6 @@ h2 {
 }
 
 .close-donate-btn:hover {
-    transform: scale(1.05);
     box-shadow: 0 4px 12px var(--shadow);
 }
 
@@ -2380,7 +2291,6 @@ h2 {
 
 .info-btn:hover {
     background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
 }
 
 .info-btn svg { stroke: #fff; }
@@ -2803,7 +2713,6 @@ h2 {
 .about-card:nth-child(3) { animation-delay: 0.3s; }
 
 .about-card:hover {
-    transform: translateY(-2px);
     box-shadow: 0 4px 16px var(--shadow);
     border-color: var(--primary);
 }
@@ -2856,7 +2765,6 @@ h2 {
 .about-card .info-link:hover {
     background: rgba(96, 165, 250, 0.1);
     color: var(--primary);
-    transform: translateX(4px);
 }
 
 .community-links {
@@ -3005,7 +2913,6 @@ h2 {
 
 .no-tweaks-badge:hover {
     background: #F59E0B;
-    transform: scale(1.05);
 }
 
 .cpu-badge {
@@ -3021,7 +2928,6 @@ h2 {
 
 .cpu-badge:hover {
     background: #3B82F6;
-    transform: scale(1.05);
 }
 
 .blocked-badge {
@@ -3066,7 +2972,6 @@ h2 {
 
 .blocked-badge:hover {
     background: #DC2626;
-    transform: scale(1.05);
 }
 
 .installed-badge {
@@ -3082,7 +2987,6 @@ h2 {
 
 .installed-badge:hover {
     background: #10B981;
-    transform: scale(1.05);
 }
 
 #no-tweaks-popup .popup-content {
@@ -3184,12 +3088,10 @@ h2 {
 
 #no-tweaks-popup .cancel-btn:hover {
     background: var(--text-secondary);
-    transform: scale(1.02);
 }
 
 #no-tweaks-popup .action-btn:hover {
     background: var(--primary-gradient);
-    transform: scale(1.05);
     box-shadow: 0 4px 12px var(--shadow);
 }
 
@@ -3330,7 +3232,6 @@ h2 {
 
 .no-tweaks-explanation-popup .action-btn:hover {
     background: var(--primary-gradient);
-    transform: scale(1.05);
     box-shadow: 0 6px 16px var(--shadow);
 }
 
@@ -3382,7 +3283,6 @@ h2 {
 
 .blocked-globally-badge:hover {
     background: #DC2626;
-    transform: scale(1.05);
 }
 
 .cpu-only-badge {
@@ -3399,7 +3299,6 @@ h2 {
 
 .cpu-only-badge:hover {
     background: #7C3AED;
-    transform: scale(1.05);
 }
 
 .cpu-spoof-card {
@@ -3435,7 +3334,6 @@ h2 {
 
 .cpu-spoof-card .info-btn:hover {
     background: rgba(96, 165, 250, 0.2);
-    transform: scale(1.1);
     color: var(--primary);
 }
 
@@ -3471,7 +3369,6 @@ h2 {
 .game-type-option:hover {
     border-color: var(--primary);
     background: rgba(96, 165, 250, 0.05);
-    transform: translateY(-2px);
 }
 
 .game-type-option.selected {
@@ -3597,7 +3494,6 @@ h2 {
 .type-option:hover {
     border-color: var(--primary);
     background: rgba(96, 165, 250, 0.05);
-    transform: translateY(-2px);
 }
 
 .type-option.selected {
@@ -3664,7 +3560,6 @@ h2 {
 .type-picker-card:hover {
     border-color: var(--primary);
     background: rgba(96, 165, 250, 0.05);
-    transform: translateY(-2px);
 }
 
 .type-picker-card.selected {
@@ -3894,7 +3789,6 @@ h2 {
 
 .cpu-spoof-explanation-popup .action-btn:hover {
     background: var(--primary-gradient);
-    transform: scale(1.05);
     box-shadow: 0 6px 16px var(--shadow);
 }
 
@@ -4876,7 +4770,6 @@ input:checked ~ .slider ~ .toggle-label .modal-badge {
 
 .with-cpu-badge:hover {
     background: linear-gradient(135deg, #3B82F6 0%, #7C3AED 100%);
-    transform: scale(1.05);
     box-shadow: 0 4px 8px rgba(96, 165, 250, 0.3);
 }
 
@@ -4897,7 +4790,6 @@ input:checked ~ .slider ~ .toggle-label .modal-badge {
 
 .blocked-cpu-badge:hover {
     background: linear-gradient(135deg, #D97706 0%, #B91C1C 100%);
-    transform: scale(1.05);
     box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
 }
 
@@ -4993,7 +4885,6 @@ input:checked ~ .slider ~ .toggle-label .modal-badge {
 
 .cpu-explanation-popup .action-btn:hover {
     background: var(--primary-gradient);
-    transform: scale(1.05);
     box-shadow: 0 6px 16px var(--shadow);
 }
 
@@ -5114,7 +5005,6 @@ input:checked ~ .slider ~ .toggle-label .modal-badge {
 
 .search-input-wrapper .sort-btn:hover {
     background: rgba(96, 165, 250, 0.2);
-    transform: translateY(-50%) scale(1.05);
 }
 
 .search-input-wrapper .sort-btn:active {
