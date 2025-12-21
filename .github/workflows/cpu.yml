@@ -134,10 +134,10 @@ jobs:
           VERSION_CODE=473
           cat > module/module.prop << EOF
           id=COPG
-          name=✨ COPG spoof ✨
+          name=✨ COPG spoof by VD171 ✨
           version=$VERSION
           versionCode=$VERSION_CODE
-          author=AlirezaParsi
+          author=VD171 & AlirezaParsi
           description=Spoof your device for games/apps to unlock new features.
           minMagisk=20.4
           EOF
