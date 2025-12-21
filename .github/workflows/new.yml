@@ -9,7 +9,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    environment: Telegram
+    environment: COPG
 
     steps:
       - name: Checkout code
@@ -47,14 +47,13 @@ jobs:
           echo "NDK_PATH=$NDK_DIR" >> $GITHUB_ENV
           echo "Installed NDK at $NDK_DIR"
 
-      - name: Install build tools and Python dependencies
+      - name: Install build tools
         run: |
           sudo apt-get purge -y man-db 2>/dev/null || true
           sudo rm -rf /var/cache/man /var/lib/man-db /usr/share/man 2>/dev/null || true
           echo 'DPkg::Post-Invoke { ":"; };' | sudo tee /etc/apt/apt.conf.d/99noman >/dev/null
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake zip curl imagemagick python3 python3-pip upx-ucl
-          pip3 install telethon
+          sudo apt-get install -y build-essential cmake zip curl
 
       - name: Build Unified Controller
         run: |
@@ -69,19 +68,9 @@ jobs:
           
           ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded controller_arm64
           upx --best --lzma -q controller_arm64
-          
-          # Build armv7 controller
-          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi34-clang++ \
-            -std=c++17 -O3 -Os -fPIE -pie -static-libstdc++ \
-            -fdata-sections -ffunction-sections -Wl,--gc-sections \
-            -I. unified_controller.cpp -o controller_armv7
-          
-          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded controller_armv7
-          upx --best --lzma -q controller_armv7
-          
+
           echo "Controller built successfully:"
           echo "arm64: $(du -h controller_arm64 | cut -f1)"
-          echo "armv7: $(du -h controller_armv7 | cut -f1)"
 
       - name: Fetch Zygisk Headers and JSON Library
         run: |
@@ -116,53 +105,22 @@ jobs:
             exit 1
           fi
 
-      - name: Build Project (armeabi-v7a) - Start
-        id: arm32_start
-        run: |
-          echo "ARM32_START_TIME=$(date -u +%s)" >> $GITHUB_ENV
-
-      - name: Build Project (armeabi-v7a)
-        uses: threeal/cmake-action@v2.1.0
-        with:
-          build-dir: build/armeabi-v7a
-          args: |
-            -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake
-            -DANDROID_ABI=armeabi-v7a
-            -DANDROID_PLATFORM=android-34
-            -DCMAKE_MAKE_PROGRAM=/usr/bin/make
-
-      - name: Build Project (armeabi-v7a) - End
-        id: arm32_end
-        run: |
-          ARM32_END_TIME=$(date -u +%s)
-          ARM32_DURATION=$((ARM32_END_TIME - ARM32_START_TIME))
-          echo "ARM32_BUILD_TIME=$ARM32_DURATION" >> $GITHUB_ENV
-          if [ ! -f "build/armeabi-v7a/libspoof.so" ]; then
-            echo "Error: armeabi-v7a library not built!"
-            ls -la build/armeabi-v7a
-            exit 1
-          fi
-
       - name: Prepare module structure
         run: |
           mkdir -p module/zygisk module/META-INF/com/google/android module/webroot/assets module/common module/system
           cp build/arm64-v8a/libspoof.so module/zygisk/arm64-v8a.so
-          cp build/armeabi-v7a/libspoof.so module/zygisk/armeabi-v7a.so
-          chmod 755 module/zygisk/arm64-v8a.so module/zygisk/armeabi-v7a.so
+          chmod 755 module/zygisk/arm64-v8a.so
           
           # استفاده از unified controller به جای jq و config_watcher - در روت ماژول
           cp controller_arm64 module/controller_arm64
-          cp controller_armv7 module/controller_armv7
-          chmod 755 module/controller_arm64 module/controller_armv7
+          chmod 755 module/controller_arm64
           
           cp config.json module/config.json
           cp banner.png module/banner.png
-          cp repo.yaml module/common/repo.yaml
           cp list.json module/list.json
           cp -rf system/* module/system/
           cp customize.sh module/customize.sh
           cp service.sh module/service.sh
-          cp action.sh module/action.sh
           cp uninstall.sh module/uninstall.sh
           cp update_config.sh module/update_config.sh
           cp system.prop module/system.prop
@@ -184,10 +142,7 @@ jobs:
           versionCode=$VERSION_CODE
           author=AlirezaParsi
           description=Spoof your device for games/apps to unlock new features.
-          support=https://t.me/theaosp
-          updateJson=https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/update.json
           minMagisk=20.4
-          banner=banner.png
           EOF
 
       - name: Package module into ZIP
