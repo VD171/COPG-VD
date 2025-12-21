@@ -284,8 +284,6 @@ namespace xwatcher {
 class AdvancedAppController {
 private:
     const std::string CONFIG_JSON = "/data/adb/modules/COPG/COPG.json";
-    const std::string TOGGLE_FILE = "/data/adb/copg_state";
-    const std::string DEFAULTS_FILE = "/data/adb/copg_defaults";
     
     std::unordered_map<std::string, bool> monitored_packages;
     std::unordered_map<std::string, bool> previous_monitored_packages;
@@ -337,9 +335,7 @@ public:
             }
             config_file_exists.store(true);
         }
-        
-        restore_saved_states();
-        
+
         if (!setup_config_watcher()) {
             std::cerr << "❌ Failed to setup config watcher" << std::endl;
             return;
@@ -457,7 +453,6 @@ private:
         previous_notweak_packages.clear();
         
         if (states_saved.load()) {
-            restore_saved_states();
             states_saved.store(false);
         }
         
@@ -478,7 +473,6 @@ private:
         if (monitored_packages.empty() && notweak_packages.empty()) {
             if (states_saved.load()) {
                 std::cout << "🔄 All packages removed - restoring system states" << std::endl;
-                restore_saved_states();
                 states_saved.store(false);
                 state_tracker.last_toggle_state = false;
             }
@@ -526,7 +520,6 @@ private:
                 auto active_apps = get_all_active_apps();
                 if (!should_apply_toggles(active_apps)) {
                     std::cout << "🔄 Immediately restoring system states due to package removal" << std::endl;
-                    restore_saved_states();
                     states_saved.store(false);
                     state_tracker.last_toggle_state = false;
                 }
@@ -553,7 +546,6 @@ private:
             auto active_apps = get_all_active_apps();
             if (!should_apply_toggles(active_apps) && states_saved.load()) {
                 std::cout << "🔄 Immediately restoring system states due to notweak packages" << std::endl;
-                restore_saved_states();
                 states_saved.store(false);
                 state_tracker.last_toggle_state = false;
             }
@@ -571,7 +563,6 @@ private:
             if (should_apply_toggles(active_apps) && !states_saved.load()) {
                 std::cout << "🎯 Immediately applying toggles for newly tweakable packages" << std::endl;
                 if (save_current_states()) {
-                    apply_toggles();
                     states_saved.store(true);
                     state_tracker.last_toggle_state = true;
                 }
@@ -884,122 +875,8 @@ private:
         if (brightness_val.empty() || dnd_val.empty() || timeout_val.empty()) {
             return false;
         }
-        
-        try {
-            std::ofstream brightness_file(DEFAULTS_FILE + ".brightness");
-            std::ofstream dnd_file(DEFAULTS_FILE + ".dnd");
-            std::ofstream timeout_file(DEFAULTS_FILE + ".timeout");
-            
-            if (brightness_file && dnd_file && timeout_file) {
-                brightness_file << brightness_val;
-                dnd_file << dnd_val;
-                timeout_file << timeout_val;
-                
-                execute_command_bool("chmod 644 " + DEFAULTS_FILE + ".brightness");
-                execute_command_bool("chmod 644 " + DEFAULTS_FILE + ".dnd");
-                execute_command_bool("chmod 644 " + DEFAULTS_FILE + ".timeout");
-                
-                std::cout << "💾 System states saved" << std::endl;
-                return true;
-            }
-        } catch (const std::exception& e) {
-            std::cerr << "❌ Error saving system state: " << e.what() << std::endl;
-        }
-        
+
         return false;
-    }
-
-    void apply_toggles() {
-        std::ifstream toggle_file(TOGGLE_FILE);
-        if (!toggle_file.is_open()) {
-            return;
-        }
-        
-        std::unordered_map<std::string, std::string> toggles;
-        std::string line;
-        
-        while (std::getline(toggle_file, line)) {
-            size_t pos = line.find('=');
-            if (pos != std::string::npos) {
-                std::string key = line.substr(0, pos);
-                std::string value = line.substr(pos + 1);
-                toggles[key] = value;
-            }
-        }
-        
-        if (toggles["AUTO_BRIGHTNESS_OFF"] == "1") {
-            execute_command_bool("settings put system screen_brightness_mode 0");
-        }
-        if (toggles["DND_ON"] == "1") {
-            execute_command_bool("cmd notification set_dnd priority");
-        }
-        if (toggles["DISABLE_LOGGING"] == "1") {
-            execute_command_bool("stop logd");
-        }
-        if (toggles["KEEP_SCREEN_ON"] == "1") {
-            execute_command_bool("settings put system screen_off_timeout 300000000");
-        }
-        
-        std::cout << "🎛️ Toggles applied" << std::endl;
-    }
-
-    void restore_saved_states() {
-        std::cout << "🔄 Restoring saved system states..." << std::endl;
-        
-        try {
-            std::ifstream brightness_file(DEFAULTS_FILE + ".brightness");
-            if (brightness_file) {
-                std::string brightness_str;
-                brightness_file >> brightness_str;
-                if (!brightness_str.empty()) {
-                    execute_command_bool("settings put system screen_brightness_mode " + brightness_str);
-                }
-            }
-            
-            std::ifstream dnd_file(DEFAULTS_FILE + ".dnd");
-            if (dnd_file) {
-                std::string dnd_str;
-                dnd_file >> dnd_str;
-                if (!dnd_str.empty()) {
-                    std::string dnd_cmd;
-                    if (dnd_str == "0") dnd_cmd = "cmd notification set_dnd off";
-                    else if (dnd_str == "1") dnd_cmd = "cmd notification set_dnd priority";
-                    else if (dnd_str == "2") dnd_cmd = "cmd notification set_dnd total";
-                    else if (dnd_str == "3") dnd_cmd = "cmd notification set_dnd alarms";
-                    
-                    if (!dnd_cmd.empty()) {
-                        execute_command_bool(dnd_cmd);
-                    }
-                }
-            }
-            
-            std::ifstream timeout_file(DEFAULTS_FILE + ".timeout");
-            if (timeout_file) {
-                std::string timeout_str;
-                timeout_file >> timeout_str;
-                if (!timeout_str.empty()) {
-                    execute_command_bool("settings put system screen_off_timeout " + timeout_str);
-                }
-            }
-            
-            std::ifstream toggle_file(TOGGLE_FILE);
-            if (toggle_file.is_open()) {
-                std::string line;
-                while (std::getline(toggle_file, line)) {
-                    if (line.find("DISABLE_LOGGING=1") != std::string::npos) {
-                        execute_command_bool("start logd");
-                        break;
-                    }
-                }
-            }
-            
-            execute_command_bool("rm -f " + DEFAULTS_FILE + ".brightness " + 
-                               DEFAULTS_FILE + ".dnd " + DEFAULTS_FILE + ".timeout");
-            
-            std::cout << "✅ System states restored" << std::endl;
-        } catch (const std::exception& e) {
-            std::cerr << "❌ Error restoring system states: " << e.what() << std::endl;
-        }
     }
 
     std::string state_to_string(AppState state) {
@@ -1064,7 +941,6 @@ public:
                             std::cout << "   🎯 " << package << ": " << state_to_string(state) << std::endl;
                         }
                         if (save_current_states()) {
-                            apply_toggles();
                             states_saved.store(true);
                             state_tracker.last_toggle_state = true;
                         }
@@ -1076,7 +952,6 @@ public:
                     if (debounce_count >= DEBOUNCE_THRESHOLD) {
                         if (should_restore_states(active_apps)) {
                             std::cout << "🏁 Restoring system states" << std::endl;
-                            restore_saved_states();
                             states_saved.store(false);
                             state_tracker.last_toggle_state = false;
                         }
