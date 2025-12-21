@@ -1567,22 +1567,6 @@ async function loadVersion() {
     }
 }
 
-async function loadToggleStates() {
-    try {
-        const autoBrightnessToggle = document.getElementById('toggle-auto-brightness');
-        const dndToggle = document.getElementById('toggle-dnd');
-        const loggingToggle = document.getElementById('toggle-logging');
-        const keepScreenOnToggle = document.getElementById('toggle-keep-screen-on');
-        const state = await execCommand("cat /data/adb/copg_state || echo ''");
-        autoBrightnessToggle.checked = state.includes("AUTO_BRIGHTNESS_OFF=1") || !state.includes("AUTO_BRIGHTNESS_OFF=");
-        dndToggle.checked = state.includes("DND_ON=1") || !state.includes("DND_ON=");
-        loggingToggle.checked = state.includes("DISABLE_LOGGING=1") || !state.includes("DISABLE_LOGGING=");
-        keepScreenOnToggle.checked = state.includes("KEEP_SCREEN_ON=1") || !state.includes("KEEP_SCREEN_ON=");
-    } catch (error) {
-        appendToOutput("Failed to load toggle states: " + error, 'error');
-    }
-}
-
 async function loadConfig() {
     try {
         const configContent = await execCommand("cat /data/adb/modules/COPG/COPG.json");
@@ -4379,7 +4363,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await checkWebUIConfig();
     appendToOutput("UI initialized", 'success');
     await loadVersion();
-    await loadToggleStates();
     await loadConfig();
     applyEventListeners();
     initializeDeviceSort(); 
