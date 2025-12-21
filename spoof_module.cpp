@@ -435,12 +435,12 @@ private:
             info.model.c_str(),
             info.device.c_str(),
             info.product.c_str(),
-            info.fingerprint.c_str()
-            info.build_board.c_str()
-            info.build_bootloader.c_str()
-            info.build_hardware.c_str()
-            info.build_id.c_str()
-            info.build_display.c_str()
+            info.fingerprint.c_str(),
+            info.build_board.c_str(),
+            info.build_bootloader.c_str(),
+            info.build_hardware.c_str(),
+            info.build_id.c_str(),
+            info.build_display.c_str(),
             info.build_host.c_str()
         };
         
