@@ -55,21 +55,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential cmake zip curl
 
-      - name: Build Unified Controller
-        run: |
-          wget -q https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O json.hpp
-          
-          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++ \
-            -std=c++17 -O3 -Os -fPIE -pie -static-libstdc++ \
-            -fdata-sections -ffunction-sections -Wl,--gc-sections \
-            -I. unified_controller.cpp -o controller_arm64
-          
-          ${{ env.NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded controller_arm64
-          upx --best --lzma -q controller_arm64
-
-          echo "Controller built successfully:"
-          echo "arm64: $(du -h controller_arm64 | cut -f1)"
-
       - name: Fetch Zygisk Headers and JSON Library
         run: |
           mkdir -p zygisk include/nlohmann
@@ -108,9 +93,6 @@ jobs:
           mkdir -p module/zygisk module/META-INF/com/google/android module/webroot/assets module/common module/system
           cp build/arm64-v8a/libspoof.so module/zygisk/arm64-v8a.so
           chmod 755 module/zygisk/arm64-v8a.so
-          
-          cp controller_arm64 module/controller_arm64
-          chmod 755 module/controller_arm64
           
           cp COPG.json module/COPG.json
           cp list.json module/list.json
