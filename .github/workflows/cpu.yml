@@ -114,7 +114,6 @@ jobs:
           
           cp config.json module/config.json
           cp COPG.json module/COPG.json
-          cp banner.png module/banner.png
           cp list.json module/list.json
           cp -rf system/* module/system/
           cp customize.sh module/customize.sh
