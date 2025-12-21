@@ -47,7 +47,7 @@ struct DeviceInfo {
     bool should_spoof_android_version = false;
     bool should_spoof_sdk_int = false;
     std::string build_board;
-    std::string build_bootloder;
+    std::string build_bootloader;
     std::string build_hardware;
     std::string build_id;
     std::string build_display;
@@ -61,6 +61,13 @@ struct BuildPropValues {
     std::string ro_product_device;
     std::string ro_product_name;
     std::string ro_build_fingerprint;
+    std::string ro_product_board;
+    std::string ro_bootloader;
+    std::string ro_hardware;
+    std::string ro_build_id;
+    std::string ro_build_display_id;
+    std::string ro_build_host;
+
 };
 
 static DeviceInfo current_info;
@@ -77,7 +84,7 @@ static jfieldID productField = nullptr;
 static jfieldID releaseField = nullptr;
 static jfieldID sdkIntField = nullptr;
 static jfieldID build_boardField = nullptr;
-static jfieldID build_bootloderField = nullptr;
+static jfieldID build_bootloaderField = nullptr;
 static jfieldID build_hardwareField = nullptr;
 static jfieldID build_idField = nullptr;
 static jfieldID build_displayField = nullptr;
@@ -169,6 +176,12 @@ static void readOriginalBuildProps() {
     original_build_props.ro_product_device = readBuildPropValue("device");
     original_build_props.ro_product_name = readBuildPropValue("name");
     original_build_props.ro_build_fingerprint = readBuildPropValue("fingerprint");
+    original_build_props.ro_product_board = readBuildPropValue("board");
+    original_build_props.ro_bootloader = readBuildPropValue("bootloader");
+    original_build_props.ro_hardware = readBuildPropValue("hardware");
+    original_build_props.ro_build_id = readBuildPropValue("id");
+    original_build_props.ro_build_display_id = readBuildPropValue("display.id");
+    original_build_props.ro_build_host = readBuildPropValue("host");
     
     CONFIG_LOG("Original props loaded: brand=%s, model=%s", 
                original_build_props.ro_product_brand.c_str(),
@@ -407,7 +420,13 @@ private:
             "ro.product.model",
             "ro.product.device",
             "ro.product.name",
-            "ro.build.fingerprint"
+            "ro.build.fingerprint",
+            "ro.product.board",
+            "ro.bootloder",
+            "ro.hardware",
+            "ro.build.id",
+            "ro.build.display.id",
+            "ro.build.host"
         };
         
         const char* values[] = {
@@ -418,7 +437,7 @@ private:
             info.product.c_str(),
             info.fingerprint.c_str()
             info.build_board.c_str()
-            info.build_bootloder.c_str()
+            info.build_bootloader.c_str()
             info.build_hardware.c_str()
             info.build_id.c_str()
             info.build_display.c_str()
@@ -493,7 +512,7 @@ private:
             fingerprintField = env->GetStaticFieldID(buildClass, "FINGERPRINT", "Ljava/lang/String;");
             productField = env->GetStaticFieldID(buildClass, "PRODUCT", "Ljava/lang/String;");
             build_boardField = env->GetStaticFieldID(buildClass, "BOARD", "Ljava/lang/String;");
-            build_bootloderField = env->GetStaticFieldID(buildClass, "BOOTLOADER", "Ljava/lang/String;");
+            build_bootloaderField = env->GetStaticFieldID(buildClass, "BOOTLOADER", "Ljava/lang/String;");
             build_hardwareField = env->GetStaticFieldID(buildClass, "HARDWARE", "Ljava/lang/String;");
             build_idField = env->GetStaticFieldID(buildClass, "ID", "Ljava/lang/String;");
             build_displayField = env->GetStaticFieldID(buildClass, "DISPLAY", "Ljava/lang/String;");
@@ -580,7 +599,7 @@ private:
                     info.fingerprint = device.value("FINGERPRINT", "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys");
                     info.product = device.value("PRODUCT", info.brand);
                     info.build_board = device.value("BOARD", info.build_boardbuild_board);
-                    info.build_bootloder = device.value("BOOTLOADER", "unknown");
+                    info.build_bootloader = device.value("BOOTLOADER", "unknown");
                     info.build_hardware = device.value("HARDWARE", info.build_hardware);
                     info.build_id = device.value("ID", info.build_id);
                     info.build_display = device.value("DISPLAY", info.build_display);
@@ -691,7 +710,7 @@ private:
         setStr(fingerprintField, info.fingerprint);
         setStr(productField, info.product);
         setStr(build_boardField, info.build_board);
-        setStr(build_bootloderField, info.build_bootloder);
+        setStr(build_bootloaderField, info.build_bootloader);
         setStr(build_hardwareField, info.build_hardware);
         setStr(build_idField, info.build_id);
         setStr(build_displayField, info.build_display);
