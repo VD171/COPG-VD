@@ -3,7 +3,7 @@
 # ================================================
 
 INSTALL_SUCCESS=true
-ENABLE_GPHOTO_SPOOF=true
+ENABLE_GPHOTO_SPOOF=false
 
 print_box_start() {
   ui_print "╔═════════════════════════════════╗"
@@ -61,132 +61,6 @@ print_module_version() {
   fi
   print_box_end
   print_empty_line
-}
-
-check_zygisk() {
-  ZYGISK_NEXT_PATH="/data/adb/modules/zygisksu"
-  REZYGISK_PATH="/data/adb/modules/rezygisk"
-
-  print_box_start
-  ui_print "      ✦ Zygisk Detection ✦      "
-  print_empty_line
-
-  DETECTED_ROOT_SOLUTIONS=""
-  ROOT_SOLUTION_COUNT=0
-
-  if command -v apd >/dev/null; then
-    DETECTED_ROOT_SOLUTIONS="$DETECTED_ROOT_SOLUTIONS APatch"
-    ROOT_SOLUTION_COUNT=$((ROOT_SOLUTION_COUNT + 1))
-    ROOT_SOLUTION="APatch"
-    MANAGER_NAME="APatch Manager"
-  fi
-
-  if command -v ksud >/dev/null; then
-    DETECTED_ROOT_SOLUTIONS="$DETECTED_ROOT_SOLUTIONS KernelSU"
-    ROOT_SOLUTION_COUNT=$((ROOT_SOLUTION_COUNT + 1))
-    if [ $ROOT_SOLUTION_COUNT -eq 1 ]; then
-      ROOT_SOLUTION="KernelSU"
-      MANAGER_NAME="KernelSU Manager"
-    fi
-  fi
-
-  if command -v magisk >/dev/null; then
-    DETECTED_ROOT_SOLUTIONS="$DETECTED_ROOT_SOLUTIONS Magisk"
-    ROOT_SOLUTION_COUNT=$((ROOT_SOLUTION_COUNT + 1))
-    if [ $ROOT_SOLUTION_COUNT -eq 1 ]; then
-      ROOT_SOLUTION="Magisk"
-      MANAGER_NAME="Magisk Manager"
-    fi
-  fi
-
-  if [ $ROOT_SOLUTION_COUNT -gt 1 ]; then
-    ui_print " ✗ Multiple Root Solutions Found!"
-    ui_print " ➤ Detected:$DETECTED_ROOT_SOLUTIONS"
-    ui_print " ➤ Only One Root Solution Allowed"
-    print_failure_and_exit "zygisk"
-  elif [ $ROOT_SOLUTION_COUNT -eq 0 ]; then
-    ui_print " ✗ No Supported Root Solution!   "
-    ui_print " ➤ Supported Solutions:          "
-    ui_print " ➤ • Magisk v26.4+ (ReZygisk/Zygisk Next)"
-    ui_print " ➤ • KernelSU v0.7.0+ (Zygisk Next)"
-    ui_print " ➤ • APatch v1.0.7+ (Zygisk Next)"
-    print_failure_and_exit "zygisk"
-  else
-    ui_print " ➔ Root Solution: $ROOT_SOLUTION "
-  fi
-
-  if [ "$ROOT_SOLUTION" = "Magisk" ]; then
-    ZYGISK_STATUS=$(magisk --sqlite "SELECT value FROM settings WHERE key='zygisk';" 2>/dev/null)
-    if [ "$ZYGISK_STATUS" = "value=1" ]; then
-      if [ -d "$REZYGISK_PATH" ]; then
-        if [ -f "$REZYGISK_PATH/disable" ]; then
-          ui_print " ✗ ReZygisk Installed but Disabled!"
-          ui_print " ➤ Enable ReZygisk in Modules"
-          print_failure_and_exit "zygisk"
-        else
-          ui_print " ✔ Magisk: ReZygisk Active    "
-          print_box_end
-          return
-        fi
-      elif [ -d "$ZYGISK_NEXT_PATH" ]; then
-        if [ -f "$ZYGISK_NEXT_PATH/disable" ]; then
-          ui_print " ✗ Zygisk Next Installed but Disabled!"
-          ui_print " ➤ Enable Zygisk Next in Modules"
-          print_failure_and_exit "zygisk"
-        else
-          ui_print " ✔ Magisk: Zygisk Next Active    "
-          print_box_end
-          return
-        fi
-      else
-        ui_print " ✗ Magisk: Native Zygisk Not Supported!"
-        ui_print " ➤ Install ReZygisk or Zygisk Next"
-        ui_print " ➤ Disable Native Zygisk in Settings"
-        print_failure_and_exit "zygisk"
-      fi
-    else
-      if [ -d "$REZYGISK_PATH" ]; then
-        if [ -f "$REZYGISK_PATH/disable" ]; then
-          ui_print " ✗ ReZygisk Disabled!         "
-          ui_print " ➤ Enable in $MANAGER_NAME       "
-          print_failure_and_exit "zygisk"
-        else
-          ui_print " ✔ Magisk: ReZygisk Active    "
-          print_box_end
-          return
-        fi
-      elif [ -d "$ZYGISK_NEXT_PATH" ]; then
-        if [ -f "$ZYGISK_NEXT_PATH/disable" ]; then
-          ui_print " ✗ Zygisk Next Disabled!         "
-          ui_print " ➤ Enable in $MANAGER_NAME       "
-          print_failure_and_exit "zygisk"
-        else
-          ui_print " ✔ Magisk: Zygisk Next Active    "
-          print_box_end
-          return
-        fi
-      else
-        ui_print " ✗ Magisk: No Zygisk Detected!   "
-        ui_print " ➤ Install ReZygisk or Zygisk Next"
-        print_failure_and_exit "zygisk"
-      fi
-    fi
-  else
-    if [ -d "$ZYGISK_NEXT_PATH" ] || [ -d "$REZYGISK_PATH" ]; then
-      if [ -f "$ZYGISK_NEXT_PATH/disable" ] || [ -f "$REZYGISK_PATH/disable" ]; then
-        ui_print " ✗ $ROOT_SOLUTION: Zygisk Module Disabled! "
-        ui_print " ➤ Enable in $MANAGER_NAME    "
-        print_failure_and_exit "zygisk"
-      else
-        ui_print " ✔ $ROOT_SOLUTION: Zygisk Module Active    "
-        print_box_end
-      fi
-    else
-      ui_print " ✗ $ROOT_SOLUTION: Zygisk Module Not Found! "
-      ui_print " ➤ Install Zygisk Next/ReZygisk Module    "
-      print_failure_and_exit "zygisk"
-    fi
-  fi
 }
 
 prompt_gphoto_spoof() {
@@ -294,12 +168,6 @@ if [ "$API" -lt 26 ]; then
   ui_print " ✗ Android Version Too Old!      "
   ui_print " ➤ Requires Android 9.0+         "
   print_failure_and_exit "initial"
-fi
-
-if $INSTALL_SUCCESS; then
-  check_zygisk || {
-    INSTALL_SUCCESS=false
-  }
 fi
 
 if $INSTALL_SUCCESS; then
