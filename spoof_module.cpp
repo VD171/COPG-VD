@@ -296,10 +296,6 @@ public:
 
         bool should_close = true;
         bool current_needs_device_spoof = false;
-        bool current_needs_cpu_spoof = false;
-        bool should_unmount_cpu = false;
-        bool is_blacklisted = false;
-        bool is_cpu_only = false;
         
         {
             std::lock_guard<std::mutex> lock(info_mutex);
@@ -316,12 +312,7 @@ public:
                     current_needs_device_spoof = true;
                     device_info = device_entry.first;
                     current_info = device_info;
-                    
-                    if (package_setting == "with_cpu") {
-                        current_needs_cpu_spoof = true;
-                    } else if (package_setting == "blocked") {
-                        should_unmount_cpu = true;
-                    }
+
                     break;
                 }
             }
@@ -416,17 +407,78 @@ private:
         
         const char* commands[] = {
             "ro.product.brand",
-            "ro.product.manufacturer", 
+            "ro.product.manufacturer",
             "ro.product.model",
             "ro.product.device",
             "ro.product.name",
-            "ro.build.fingerprint",
             "ro.product.board",
-            "ro.bootloder",
-            "ro.hardware",
+            
+            "ro.build.fingerprint",
             "ro.build.id",
             "ro.build.display.id",
-            "ro.build.host"
+            "ro.build.host",
+            "ro.build.user",
+            
+            "ro.bootloader",
+            "ro.hardware",
+            "ro.board.platform",
+            
+            "ro.boot.hardware",
+            "ro.boot.product.hardware.sku",
+            
+            "ro.product.build.fingerprint",
+            "ro.product.build.id",
+            
+            "ro.product.odm.brand",
+            "ro.product.odm.manufacturer",
+            "ro.product.odm.model",
+            "ro.product.odm.device",
+            "ro.product.odm.name",
+            
+            "ro.odm.build.fingerprint",
+            "ro.odm.build.id",
+            
+            "ro.product.product.brand",
+            "ro.product.product.manufacturer",
+            "ro.product.product.model",
+            "ro.product.product.device",
+            "ro.product.product.name",
+            
+            "ro.product.system.brand",
+            "ro.product.system.manufacturer",
+            "ro.product.system.model",
+            "ro.product.system.device",
+            "ro.product.system.name",
+            
+            "ro.system.build.fingerprint",
+            "ro.system.build.id",
+            
+            "ro.product.system_ext.brand",
+            "ro.product.system_ext.manufacturer",
+            "ro.product.system_ext.model",
+            "ro.product.system_ext.device",
+            "ro.product.system_ext.name",
+            
+            "ro.system_ext.build.fingerprint",
+            "ro.system_ext.build.id",
+            
+            "ro.product.vendor.brand",
+            "ro.product.vendor.manufacturer",
+            "ro.product.vendor.model",
+            "ro.product.vendor.device",
+            "ro.product.vendor.name",
+            
+            "ro.vendor.build.fingerprint",
+            "ro.vendor.build.id",
+            
+            "ro.product.vendor_dlkm.brand",
+            "ro.product.vendor_dlkm.manufacturer",
+            "ro.product.vendor_dlkm.model",
+            "ro.product.vendor_dlkm.device",
+            "ro.product.vendor_dlkm.name",
+            
+            "ro.vendor_dlkm.build.fingerprint",
+            "ro.vendor_dlkm.build.id"
         };
         
         const char* values[] = {
@@ -435,13 +487,74 @@ private:
             info.model.c_str(),
             info.device.c_str(),
             info.product.c_str(),
-            info.fingerprint.c_str(),
             info.build_board.c_str(),
-            info.build_bootloader.c_str(),
-            info.build_hardware.c_str(),
+            
+            info.fingerprint.c_str(),
             info.build_id.c_str(),
             info.build_display.c_str(),
-            info.build_host.c_str()
+            info.build_host.c_str(),
+            info.build_user.c_str(),
+            
+            info.build_bootloader.c_str(),
+            info.build_hardware.c_str(),
+            info.board_platform.c_str(),
+            
+            info.boot_hardware.c_str(),
+            info.boot_hardware_sku.c_str(),
+            
+            info.product_build_fingerprint.c_str(),
+            info.product_build_id.c_str(),
+            
+            info.odm_brand.c_str(),
+            info.odm_manufacturer.c_str(),
+            info.odm_model.c_str(),
+            info.odm_device.c_str(),
+            info.odm_name.c_str(),
+            
+            info.odm_build_fingerprint.c_str(),
+            info.odm_build_id.c_str(),
+            
+            info.product_product_brand.c_str(),
+            info.product_product_manufacturer.c_str(),
+            info.product_product_model.c_str(),
+            info.product_product_device.c_str(),
+            info.product_product_name.c_str(),
+            
+            info.product_system_brand.c_str(),
+            info.product_system_manufacturer.c_str(),
+            info.product_system_model.c_str(),
+            info.product_system_device.c_str(),
+            info.product_system_name.c_str(),
+            
+            info.system_build_fingerprint.c_str(),
+            info.system_build_id.c_str(),
+            
+            info.product_system_ext_brand.c_str(),
+            info.product_system_ext_manufacturer.c_str(),
+            info.product_system_ext_model.c_str(),
+            info.product_system_ext_device.c_str(),
+            info.product_system_ext_name.c_str(),
+            
+            info.system_ext_build_fingerprint.c_str(),
+            info.system_ext_build_id.c_str(),
+            
+            info.product_vendor_brand.c_str(),
+            info.product_vendor_manufacturer.c_str(),
+            info.product_vendor_model.c_str(),
+            info.product_vendor_device.c_str(),
+            info.product_vendor_name.c_str(),
+            
+            info.vendor_build_fingerprint.c_str(),
+            info.vendor_build_id.c_str(),
+            
+            info.product_vendor_dlkm_brand.c_str(),
+            info.product_vendor_dlkm_manufacturer.c_str(),
+            info.product_vendor_dlkm_model.c_str(),
+            info.product_vendor_dlkm_device.c_str(),
+            info.product_vendor_dlkm_name.c_str(),
+            
+            info.vendor_dlkm_build_fingerprint.c_str(),
+            info.vendor_dlkm_build_id.c_str()
         };
         
         const int num_commands = sizeof(commands) / sizeof(commands[0]);
