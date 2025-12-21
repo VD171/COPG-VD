@@ -7,7 +7,6 @@ let lastRender = { devices: 0, games: 0 };
 const RENDER_DEBOUNCE_MS = 150;
 let snackbarTimeout = null;
 let appIndex = [];
-let packagePickerObserver = null;
 let logcatProcess = null;
 let logcatRunning = false;
 let selectedGameType = 'device';
@@ -4655,58 +4654,6 @@ async function showPackagePicker() {
 
         appList.innerHTML = '';
 
-        if (!packagePickerObserver) {
-            packagePickerObserver = new IntersectionObserver(async (entries) => {
-                for (const entry of entries) {
-                    if (entry.isIntersecting) {
-                        const iconContainer = entry.target;
-                        const pkg = iconContainer.dataset.pkg;
-                        const appCard = iconContainer.closest('.app-card');
-                        
-                        try {
-                            if (apiUsed === 'KernelSU New') {
-                                const img = document.createElement('img');
-                                img.className = 'app-icon-loaded';
-                                img.src = `ksu://icon/${pkg}`;
-                                img.style.opacity = '0';
-                                img.style.transition = 'opacity 0.3s ease';
-                                img.onload = () => {
-                                    img.style.opacity = '1';
-                                };
-                                img.onerror = () => {
-                                    iconContainer.classList.add('load-failed');
-                                };
-                                iconContainer.innerHTML = '';
-                                iconContainer.appendChild(img);
-                            } else if (apiUsed === 'WebUI-X' && typeof $packageManager !== 'undefined') {
-                                const stream = $packageManager.getApplicationIcon(pkg, 0, 0);
-                                await loadPackagePickerDependencies();
-                                const response = await wrapInputStream(stream);
-                                const buffer = await response.arrayBuffer();
-                                const img = document.createElement('img');
-                                img.className = 'app-icon-loaded';
-                                img.src = 'data:image/png;base64,' + arrayBufferToBase64(buffer);
-                                img.style.opacity = '0';
-                                img.style.transition = 'opacity 0.3s ease';
-                                iconContainer.innerHTML = '';
-                                iconContainer.appendChild(img);
-                                setTimeout(() => {
-                                    img.style.opacity = '1';
-                                }, 10);
-                            } else {
-                                iconContainer.classList.add('load-failed');
-                            }
-                        } catch (e) {
-                            console.error('Error loading app icon:', e);
-                            iconContainer.classList.add('load-failed');
-                        }
-
-                        packagePickerObserver.unobserve(iconContainer);
-                    }
-                }
-            }, { rootMargin: '100px', threshold: 0.1 });
-        }
-
         const fragment = document.createDocumentFragment();
         appIndex.forEach(app => {
             const isAdded = addedGames.includes(app.package);
@@ -4725,8 +4672,6 @@ async function showPackagePicker() {
                 appCard.classList.add('cpuonly-game');
             }
             
-            packagePickerObserver.observe(appCard.querySelector('.app-icon-container'));
-
             appCard.addEventListener('click', () => {
                 document.getElementById('game-package').value = app.package;
                 const gameName = app.originalLabel || app.label || app.package;
