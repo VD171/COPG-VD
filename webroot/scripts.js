@@ -2297,8 +2297,15 @@ function openDeviceModal(deviceKey = null) {
         document.getElementById('device-name').value = deviceData.DEVICE || '';
         document.getElementById('device-brand').value = deviceData.BRAND || '';
         document.getElementById('device-model').value = deviceData.MODEL || '';
+        document.getElementById('device-product').value = deviceData.PRODUCT || '';
         document.getElementById('device-manufacturer').value = deviceData.MANUFACTURER || '';
         document.getElementById('device-fingerprint').value = deviceData.FINGERPRINT || '';
+        document.getElementById('device-board').value = deviceData.BOARD || '';
+        document.getElementById('device-bootloader').value = deviceData.BOOTLOADER || '';
+        document.getElementById('device-hardware').value = deviceData.HARDWARE || '';
+        document.getElementById('device-id').value = deviceData.ID || '';
+        document.getElementById('device-display').value = deviceData.DISPLAY || '';
+        document.getElementById('device-host').value = deviceData.HOST || '';
         document.getElementById('device-android-version').value = deviceData.ANDROID_VERSION || '';
         document.getElementById('device-sdk-int').value = deviceData.SDK_INT || '';
         setupAndroidSdkLink();
@@ -2715,8 +2722,15 @@ async function saveDevice(e) {
         'device-name',
         'device-brand',
         'device-model',
-        'device-manufacturer',
-        'device-fingerprint'
+        'device-product',
+        'device-manufacturer'
+        'device-fingerprint',
+        'device-board',
+        'device-bootloader',
+        'device-hardware',
+        'device-id',
+        'device-display',
+        'device-host'
     ];
     let hasError = false;
     const missingFields = [];
@@ -2797,7 +2811,13 @@ async function saveDevice(e) {
     const packageKey = deviceKey.replace('_DEVICE', '');
     const brand = document.getElementById('device-brand').value.trim() || 'Unknown';
     const model = document.getElementById('device-model').value.trim() || 'Unknown';
-    
+    const product = document.getElementById('device-product').value.trim() || 'Unknown';
+    const board = document.getElementById('device-board').value.trim() || 'Unknown';
+    const bootloader = document.getElementById('device-bootloader').value.trim() || 'Unknown';
+    const hardware = document.getElementById('device-hardware').value.trim() || 'Unknown';
+    const id = document.getElementById('device-id').value.trim() || 'Unknown';
+    const display = document.getElementById('device-display').value.trim() || 'Unknown';
+    const host = document.getElementById('device-host').value.trim() || 'Unknown';
     const androidVersion = document.getElementById('device-android-version').value.trim();
     const sdkInt = document.getElementById('device-sdk-int').value.trim();
     
@@ -2807,7 +2827,13 @@ async function saveDevice(e) {
         MANUFACTURER: document.getElementById('device-manufacturer').value.trim() || 'Unknown',
         MODEL: model,
         FINGERPRINT: document.getElementById('device-fingerprint').value.trim() || `${brand}/${model}/${model}:14/UP1A.231005.007/20230101:user/release-keys`,
-        PRODUCT: model
+        PRODUCT: product,
+        BOARD: board,
+        BOOTLOADER: bootloader,
+        HARDWARE: hardware,
+        ID: id,
+        DISPLAY: display,
+        HOST: host
     };
     
     if (androidVersion) {
@@ -4193,8 +4219,15 @@ function applyEventListeners() {
                 deviceData.DEVICE || '',
                 deviceData.BRAND || '',
                 deviceData.MODEL || '',
+                deviceData.PRODUCT || '',
                 deviceData.MANUFACTURER || '',
-                deviceData.FINGERPRINT || ''
+                deviceData.FINGERPRINT || '',
+                deviceData.BOARD || '',
+                deviceData.BOOTLOADER || '',
+                deviceData.HARDWARE || '',
+                deviceData.ID || '',
+                deviceData.DISPLAY || '',
+                deviceData.HOST || ''
             ].join(' ').toLowerCase();
             card.style.display = searchableText.includes(searchTerm) ? 'block' : 'none';
         });
@@ -4230,10 +4263,16 @@ function applyEventListeners() {
                 packageName, 
                 deviceData.DEVICE?.toLowerCase() || '', 
                 deviceData.BRAND?.toLowerCase() || '', 
-                deviceData.MODEL?.toLowerCase() || '', 
+                deviceData.MODEL?.toLowerCase() || '',
+                deviceData.PRODUCT?.toLowerCase() || ''
                 deviceData.MANUFACTURER?.toLowerCase() || '',
                 deviceData.FINGERPRINT?.toLowerCase() || '', 
-                deviceData.PRODUCT?.toLowerCase() || '' 
+                deviceData.BOARD?.toLowerCase() || '',
+                deviceData.BOOTLOADER?.toLowerCase() || '',
+                deviceData.HARDWARE?.toLowerCase() || '',
+                deviceData.ID?.toLowerCase() || '',
+                deviceData.DISPLAY?.toLowerCase() || '',
+                deviceData.HOST?.toLowerCase() || ''
             ].join(' ');
         }
 
@@ -4255,7 +4294,13 @@ function applyEventListeners() {
                 deviceData.DEVICE || '',
                 deviceData.BRAND || '',
                 deviceData.MANUFACTURER || '',
-                deviceData.FINGERPRINT || ''
+                deviceData.FINGERPRINT || '',
+                deviceData.BOARD || '',
+                deviceData.BOOTLOADER || '',
+                deviceData.HARDWARE || '',
+                deviceData.ID || '',
+                deviceData.DISPLAY || '',
+                deviceData.HOST || ''
             ].join(' ').toLowerCase();
             card.style.display = searchableText.includes(searchTerm) ? 'block' : 'none';
         });
