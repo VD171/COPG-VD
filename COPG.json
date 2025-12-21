@@ -10,6 +10,13 @@
     "MANUFACTURER": "Google",
     "MODEL": "comet",
     "FINGERPRINT": "google/comet_beta/comet:16/BP41.250916.015.A1/14394230:user/release-keys",
-    "PRODUCT": "comet"
+    "PRODUCT": "comet",
+    "BOOTLOADER":"unknown",
+    "BOARD":"mt6768",
+    "HARDWARE":"mt6768",
+    "DISPLAY":"BP2A.250805.005",
+    "ID":"BP2A.250805.005",
+    "HOST":"r-a06a74e0f133947d-zsc4"
   }
 }
+
