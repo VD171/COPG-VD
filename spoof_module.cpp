@@ -46,6 +46,12 @@ struct DeviceInfo {
     int sdk_int;
     bool should_spoof_android_version = false;
     bool should_spoof_sdk_int = false;
+    std::string build_board;
+    std::string build_bootloder;
+    std::string build_hardware;
+    std::string build_id;
+    std::string build_display;
+    std::string build_host;
 };
 
 struct BuildPropValues {
@@ -70,6 +76,13 @@ static jfieldID fingerprintField = nullptr;
 static jfieldID productField = nullptr;
 static jfieldID releaseField = nullptr;
 static jfieldID sdkIntField = nullptr;
+static jfieldID build_boardField = nullptr;
+static jfieldID build_bootloderField = nullptr;
+static jfieldID build_hardwareField = nullptr;
+static jfieldID build_idField = nullptr;
+static jfieldID build_displayField = nullptr;
+static jfieldID build_hostField = nullptr;
+
 static std::once_flag build_once;
 
 static time_t last_config_mtime = 0;
@@ -404,6 +417,12 @@ private:
             info.device.c_str(),
             info.product.c_str(),
             info.fingerprint.c_str()
+            info.build_board.c_str()
+            info.build_bootloder.c_str()
+            info.build_hardware.c_str()
+            info.build_id.c_str()
+            info.build_display.c_str()
+            info.build_host.c_str()
         };
         
         const int num_commands = sizeof(commands) / sizeof(commands[0]);
@@ -473,6 +492,12 @@ private:
             manufacturerField = env->GetStaticFieldID(buildClass, "MANUFACTURER", "Ljava/lang/String;");
             fingerprintField = env->GetStaticFieldID(buildClass, "FINGERPRINT", "Ljava/lang/String;");
             productField = env->GetStaticFieldID(buildClass, "PRODUCT", "Ljava/lang/String;");
+            build_boardField = env->GetStaticFieldID(buildClass, "BOARD", "Ljava/lang/String;");
+            build_bootloderField = env->GetStaticFieldID(buildClass, "BOOTLOADER", "Ljava/lang/String;");
+            build_hardwareField = env->GetStaticFieldID(buildClass, "HARDWARE", "Ljava/lang/String;");
+            build_idField = env->GetStaticFieldID(buildClass, "ID", "Ljava/lang/String;");
+            build_displayField = env->GetStaticFieldID(buildClass, "DISPLAY", "Ljava/lang/String;");
+            build_hostField = env->GetStaticFieldID(buildClass, "HOST", "Ljava/lang/String;");
 
             jclass localVersion = env->FindClass("android/os/Build$VERSION");
             if (localVersion) {
@@ -554,6 +579,12 @@ private:
                     info.model = device.value("MODEL", "generic");
                     info.fingerprint = device.value("FINGERPRINT", "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys");
                     info.product = device.value("PRODUCT", info.brand);
+                    info.build_board = device.value("BOARD", info.build_boardbuild_board);
+                    info.build_bootloder = device.value("BOOTLOADER", "unknown");
+                    info.build_hardware = device.value("HARDWARE", info.build_hardware);
+                    info.build_id = device.value("ID", info.build_id);
+                    info.build_display = device.value("DISPLAY", info.build_display);
+                    info.build_host = device.value("HOST", info.build_host);
 
                     if (device.contains("ANDROID_VERSION")) {
                         try {
@@ -659,6 +690,12 @@ private:
         setStr(manufacturerField, info.manufacturer);
         setStr(fingerprintField, info.fingerprint);
         setStr(productField, info.product);
+        setStr(build_boardField, info.build_board);
+        setStr(build_bootloderField, info.build_bootloder);
+        setStr(build_hardwareField, info.build_hardware);
+        setStr(build_idField, info.build_id);
+        setStr(build_displayField, info.build_display);
+        setStr(build_hostField, info.build_host);
         
         if (info.should_spoof_android_version && versionClass && releaseField) {
             setStr(releaseField, info.android_version);
