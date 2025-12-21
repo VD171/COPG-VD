@@ -1,7 +1,7 @@
 #!/system/bin/sh
 MODDIR="/data/adb/modules/COPG"
-CONFIG_URL="https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/COPG.json"
-LIST_URL="https://raw.githubusercontent.com/AlirezaParsi/COPG/refs/heads/JSON/list.json"
+CONFIG_URL="https://raw.githubusercontent.com/VD171/COPG/refs/heads/JSON/COPG.json"
+LIST_URL="https://raw.githubusercontent.com/VD171/COPG/refs/heads/JSON/list.json"
 CONFIG_PATH="$MODDIR/COPG.json"
 LIST_PATH="$MODDIR/list.json"
 TEMP_CONFIG="/data/adb/copg_temp_COPG.json"
