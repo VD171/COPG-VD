@@ -2706,7 +2706,7 @@ async function saveDevice(e) {
         'device-brand',
         'device-model',
         'device-product',
-        'device-manufacturer'
+        'device-manufacturer',
         'device-fingerprint',
         'device-board',
         'device-bootloader',
