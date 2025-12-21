@@ -1,4 +1,4 @@
-name: CPU
+name: COPG
 
 on:
   workflow_dispatch:
@@ -112,7 +112,6 @@ jobs:
           cp controller_arm64 module/controller_arm64
           chmod 755 module/controller_arm64
           
-          cp config.json module/config.json
           cp COPG.json module/COPG.json
           cp list.json module/list.json
           cp -rf system/* module/system/
@@ -130,15 +129,15 @@ jobs:
           cp webroot/icon.png module/webroot/icon.png
           cp webroot/assets/RobotoMono-Regular.ttf module/webroot/assets/RobotoMono-Regular.ttf
           chmod 755 module/customize.sh module/service.sh module/uninstall.sh module/update_config.sh module/META-INF/com/google/android/update-binary
-          VERSION='4.7.3'
-          VERSION_CODE=473
+          VERSION='4.7.4-vd'
+          VERSION_CODE=474
           cat > module/module.prop << EOF
           id=COPG
           name=✨ COPG spoof by VD171 ✨
           version=$VERSION
           versionCode=$VERSION_CODE
           author=VD171 & AlirezaParsi
-          description=Spoof your device for games/apps to unlock new features.
+          description=Spoof your device for games/apps to unlock new features. (Fork by VD171)
           minMagisk=20.4
           EOF
 
