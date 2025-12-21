@@ -2300,36 +2300,6 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
             nextSibling = field.nextElementSibling;
         }
     });
-
-    let disableTweaksContainer = document.getElementById('disable-tweaks-container');
-    if (!disableTweaksContainer) {
-        disableTweaksContainer = document.createElement('div');
-        disableTweaksContainer.id = 'disable-tweaks-container';
-        disableTweaksContainer.className = 'form-group disable-tweaks-group';
-        disableTweaksContainer.innerHTML = `
-            <div class="toggle-wrapper">
-                <label class="toggle-label" for="disable-tweaks-toggle">
-                    <span>Disable Tweaks</span>
-                    <span class="badge-container">
-                        <span class="no-tweaks-badge modal-badge">No Tweaks</span>
-                    </span>
-                </label>
-                <label class="switch small-switch">
-                    <input type="checkbox" id="disable-tweaks-toggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        `;
-        const deviceGroup = document.getElementById('device-select-group');
-        if (deviceGroup) {
-            deviceGroup.after(disableTweaksContainer);
-        } else {
-            const formButtons = form.querySelector('.form-buttons');
-            if (formButtons) {
-                formButtons.before(disableTweaksContainer);
-            }
-        }
-    }
     
     let cpuSpoofContainer = document.getElementById('cpu-spoof-container');
     if (!cpuSpoofContainer) {
@@ -2350,7 +2320,6 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
                 </label>
             </div>
         `;
-        disableTweaksContainer.after(cpuSpoofContainer);
     }
     
     let blockCpuContainer = document.getElementById('block-cpu-container');
@@ -2375,7 +2344,6 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
         cpuSpoofContainer.after(blockCpuContainer);
     }
     
-    const disableTweaksToggle = document.getElementById('disable-tweaks-toggle');
     const cpuSpoofToggle = document.getElementById('cpu-spoof-toggle');
     const blockCpuToggle = document.getElementById('block-cpu-toggle');
     const disableTweaksGroup = document.querySelector('.disable-tweaks-group');
@@ -2432,32 +2400,6 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
             blockCpuGroup.classList.remove('disabled');
             cpuSpoofToggle.disabled = false;
             blockCpuToggle.disabled = false;
-        } else if (detectedType === 'cpu_only') {
-            deviceGroup.classList.add('disabled');
-            deviceInput.value = '';
-            deviceInput.dataset.key = '';
-            deviceInput.classList.remove('highlighted');
-            disableTweaksGroup.classList.remove('disabled');
-            cpuSpoofGroup.classList.add('disabled');
-            blockCpuGroup.classList.add('disabled');
-            cpuSpoofToggle.disabled = true;
-            blockCpuToggle.disabled = true;
-            cpuSpoofToggle.checked = false;
-            blockCpuToggle.checked = false;
-        } else if (detectedType === 'blocked') {
-            deviceGroup.classList.add('disabled');
-            deviceInput.value = '';
-            deviceInput.dataset.key = '';
-            deviceInput.classList.remove('highlighted');
-            disableTweaksGroup.classList.add('disabled');
-            cpuSpoofGroup.classList.add('disabled');
-            blockCpuGroup.classList.add('disabled');
-            disableTweaksToggle.disabled = true;
-            cpuSpoofToggle.disabled = true;
-            blockCpuToggle.disabled = true;
-            disableTweaksToggle.checked = false;
-            cpuSpoofToggle.checked = false;
-            blockCpuToggle.checked = false;
         }
         
         execCommand("cat /data/adb/modules/COPG/list.json")
@@ -2484,7 +2426,6 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
         disableTweaksGroup.classList.remove('disabled');
         cpuSpoofGroup.classList.remove('disabled');
         blockCpuGroup.classList.remove('disabled');
-        disableTweaksToggle.checked = false;
         cpuSpoofToggle.checked = false;
         blockCpuToggle.checked = false;
         cpuSpoofToggle.disabled = false;
@@ -2682,13 +2623,11 @@ async function saveGame(e) {
     const gameName = gameNameInput.value.trim() || gamePackageInput;
     const typeInput = document.getElementById('game-type');
     const deviceInput = document.getElementById('game-device');
-    const disableTweaksToggle = document.getElementById('disable-tweaks-toggle');
     const cpuSpoofToggle = document.getElementById('cpu-spoof-toggle');
     const blockCpuToggle = document.getElementById('block-cpu-toggle');
     
     const selectedType = typeInput.dataset.type;
     const newDeviceKey = deviceInput.dataset.key;
-    const disableTweaks = disableTweaksToggle ? disableTweaksToggle.checked : false;
     const withCpuSpoof = cpuSpoofToggle ? cpuSpoofToggle.checked : false;
     const blockCpuSpoof = blockCpuToggle ? blockCpuToggle.checked : false;
     
@@ -5005,7 +4944,6 @@ function showGameTypePicker() {
             const deviceGroup = document.getElementById('device-select-group');
             const deviceInput = document.getElementById('game-device');
             const disableTweaksGroup = document.querySelector('.disable-tweaks-group');
-            const disableTweaksToggle = document.getElementById('disable-tweaks-toggle');
             const cpuSpoofGroup = document.getElementById('cpu-spoof-container');
             const cpuSpoofToggle = document.getElementById('cpu-spoof-toggle');
             const blockCpuGroup = document.getElementById('block-cpu-container');
@@ -5025,7 +4963,6 @@ function showGameTypePicker() {
                 }
                 
                 disableTweaksGroup.classList.remove('disabled');
-                disableTweaksToggle.disabled = false;
                 cpuSpoofGroup.classList.remove('disabled');
                 cpuSpoofToggle.disabled = false;
                 blockCpuGroup.classList.remove('disabled');
