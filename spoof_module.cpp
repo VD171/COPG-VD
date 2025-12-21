@@ -598,7 +598,7 @@ private:
                     info.model = device.value("MODEL", "generic");
                     info.fingerprint = device.value("FINGERPRINT", "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys");
                     info.product = device.value("PRODUCT", info.brand);
-                    info.build_board = device.value("BOARD", info.build_boardbuild_board);
+                    info.build_board = device.value("BOARD", info.build_board);
                     info.build_bootloader = device.value("BOOTLOADER", "unknown");
                     info.build_hardware = device.value("HARDWARE", info.build_hardware);
                     info.build_id = device.value("ID", info.build_id);
