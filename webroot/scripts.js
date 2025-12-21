@@ -1792,42 +1792,6 @@ function showCpuSpoofInfo(packageName, type) {
     let title = '';
     let explanation = '';
     
-    if (type === 'blocked') {
-        title = 'Global Blocklist - Complete Protection';
-        explanation = `
-            <div class="explanation-text">
-                <span class="highlight">Applications in this list will NOT receive:</span>
-                <ul>
-                    <li>CPU Spoofing</li>
-                    <li>Device Spoofing</li>
-                    <li>Any System Tweaks</li>
-                </ul>
-                
-                <div class="important-note">
-                    <span class="important-text">Perfect for:</span> Sensitive apps, banking apps, apps that crash on system modifications, apps sensitive to mount detection, or apps showing incorrect device information.
-                </div>
-                
-                <div class="important-note">
-                    <span class="important-text">Result:</span> These apps will always see <span class="highlight">REAL device specifications</span>.
-                </div>
-            </div>
-        `;
-    } else if (type === 'cpu_only') {
-        title = 'CPU Spoof Only';
-        explanation = `
-            <div class="explanation-text">
-                <span class="highlight">Applications in this list receive:</span>
-                <ul>
-                    <li>CPU Spoofing</li>
-                </ul>
-                
-                <div class="important-note">
-                    <span class="important-text">Note:</span> Only CPU information is modified. Device spoofing is disabled.
-                </div>
-            </div>
-        `;
-    }
-    
     const popup = document.createElement('div');
     popup.className = 'popup no-tweaks-explanation-popup';
     popup.id = 'cpu-spoof-explanation-popup';
@@ -2534,7 +2498,6 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
             blockCpuToggle.disabled = true;
             cpuSpoofToggle.checked = false;
             blockCpuToggle.checked = false;
-            updateModalBadges(disableTweaksToggle, cpuSpoofToggle, blockCpuToggle);
         } else if (detectedType === 'blocked') {
             deviceGroup.classList.add('disabled');
             deviceInput.value = '';
@@ -2549,7 +2512,6 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
             disableTweaksToggle.checked = false;
             cpuSpoofToggle.checked = false;
             blockCpuToggle.checked = false;
-            updateModalBadges(disableTweaksToggle, cpuSpoofToggle, blockCpuToggle);
         }
         
         execCommand("cat /data/adb/modules/COPG/list.json")
@@ -2581,28 +2543,12 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
         blockCpuToggle.checked = false;
         cpuSpoofToggle.disabled = false;
         blockCpuToggle.disabled = false;
-        updateModalBadges(disableTweaksToggle, cpuSpoofToggle, blockCpuToggle);
         
         deviceInput.value = '';
         deviceInput.dataset.key = '';
         deviceInput.classList.remove('highlighted');
         deviceInput.placeholder = 'Select a device...';
     }
-    
-    disableTweaksToggle.addEventListener('change', () => {
-        updateModalBadges(disableTweaksToggle, cpuSpoofToggle, blockCpuToggle);
-    });
-    
-    cpuSpoofToggle.addEventListener('change', () => {
-        handleToggleConflicts();
-    });
-    
-    blockCpuToggle.addEventListener('change', () => {
-        if (blockCpuToggle.checked && cpuSpoofToggle.checked) {
-            cpuSpoofToggle.checked = false;
-        }
-        handleToggleConflicts();
-    });
     
     modal.style.display = 'flex';
     requestAnimationFrame(() => {
