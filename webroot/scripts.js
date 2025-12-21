@@ -76,23 +76,11 @@ const templates = {
         const badgeGroup = card.querySelector('.badge-group');
         let badgesHTML = '';
         
-        if (data.hasNoTweak) {
-            badgesHTML += '<span class="no-tweaks-badge" onclick="showNoTweaksExplanation(event)">No Tweaks</span>';
-        }
-        if (data.hasWithCpu) {
-            badgesHTML += '<span class="with-cpu-badge" onclick="showWithCpuExplanation(event)">With CPU</span>';
-        }
-        if (data.hasBlocked) {
-            badgesHTML += '<span class="blocked-cpu-badge" onclick="showBlockedCpuExplanation(event)">Block CPU</span>';
-        }
         if (data.isInstalled) {
             badgesHTML += '<span class="installed-badge">Installed</span>';
         }
         if (data.additionalBadges) {
             badgesHTML += data.additionalBadges;
-        }
-        if (data.hasWithCpu && data.hasBlocked) {
-            badgesHTML = badgesHTML.replace('<span class="blocked-cpu-badge" onclick="showBlockedCpuExplanation(event)">Block CPU</span>', '');
         }
         
         badgeGroup.innerHTML = badgesHTML;
@@ -113,18 +101,9 @@ const templates = {
         
         const badgeGroup = card.querySelector('.badge-group');
         let typeBadge = '';
-        
-        if (data.type === 'blocked') {
-            typeBadge = '<span class="blocked-globally-badge">Blocked Globally</span>';
-        } else if (data.type === 'cpu_only') {
-            typeBadge = '<span class="cpu-only-badge">CPU</span>';
-        }
-        
-        const noTweakBadge = data.hasNoTweak ? '<span class="no-tweaks-badge" onclick="showNoTweaksExplanation(event)">No Tweaks</span>' : '';
-        
+               
         badgeGroup.innerHTML = `
             ${typeBadge}
-            ${noTweakBadge}
             ${data.isInstalled ? '<span class="installed-badge">Installed</span>' : ''}
         `;
         
@@ -256,10 +235,6 @@ function removeTagFromPackage(packageName, tag) {
     const cleanName = getPackageNameWithoutTags(packageName);
     const existingTags = getAllTags(packageName).filter(t => t !== tag);
     return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
-}
-
-function hasNoTweakTag(packageName) {
-    return packageName.includes(':notweak');
 }
 
 function hasWithCpuTag(packageName) {
@@ -1684,7 +1659,6 @@ async function renderGameList() {
         
         const isInstalled = installedPackages.includes(cleanPackageName);
         const gameName = gameNamesMap[cleanPackageName] || cleanPackageName;
-        const hasNoTweak = hasNoTweakTag(packageName);
         const hasBlocked = hasBlockedTag(packageName);
         
         const gameCard = templates.cpuSpoofCard({
@@ -1693,7 +1667,6 @@ async function renderGameList() {
             gameName: gameName,
             cleanPackageName: cleanPackageName,
             isInstalled: isInstalled,
-            hasNoTweak: hasNoTweak,
             hasBlocked: hasBlocked,
             delay: Math.min(index * 0.05, 0.5),
             typeLabel: 'Global Blocklist',
@@ -1711,7 +1684,6 @@ async function renderGameList() {
         
         const isInstalled = installedPackages.includes(cleanPackageName);
         const gameName = gameNamesMap[cleanPackageName] || cleanPackageName;
-        const hasNoTweak = hasNoTweakTag(packageName);
         const hasBlocked = hasBlockedTag(packageName);
         
         const gameCard = templates.cpuSpoofCard({
@@ -1720,7 +1692,6 @@ async function renderGameList() {
             gameName: gameName,
             cleanPackageName: cleanPackageName,
             isInstalled: isInstalled,
-            hasNoTweak: hasNoTweak,
             hasBlocked: hasBlocked,
             delay: Math.min(index * 0.05, 0.5),
             typeLabel: 'CPU Only',
@@ -1741,7 +1712,6 @@ async function renderGameList() {
                 const cleanPackageName = getPackageNameWithoutTags(gamePackage);
                 if (displayedPackages.has(cleanPackageName)) return;
                 
-                const hasNoTweak = hasNoTweakTag(gamePackage);
                 const hasWithCpu = hasWithCpuTag(gamePackage);
                 const hasBlocked = hasBlockedTag(gamePackage);
                 const isInstalled = installedPackages.includes(cleanPackageName);
@@ -1765,7 +1735,6 @@ async function renderGameList() {
                     gameName: gameName,
                     cleanPackageName: cleanPackageName,
                     deviceName: deviceName,
-                    hasNoTweak: hasNoTweak,
                     hasWithCpu: hasWithCpu,
                     hasBlocked: hasBlocked,
                     isInstalled: isInstalled,
@@ -2050,7 +2019,6 @@ function setupLongPressHandlers() {
         if (!packageName) return;
         
         isLongPressActive = true;
-        const hasNoTweak = hasNoTweakTag(packageName);
 
         const popup = document.getElementById('no-tweaks-popup');
         const title = document.getElementById('no-tweaks-popup-title');
@@ -2059,23 +2027,16 @@ function setupLongPressHandlers() {
         const icon = document.getElementById('no-tweaks-popup-icon');
         const confirmBtn = document.getElementById('no-tweaks-popup-confirm');
 
-        title.textContent = hasNoTweak ? 'Remove No Tweaks' : 'Add No Tweaks';
-        message.textContent = hasNoTweak 
-            ? 'This package will receive all tweaks (DND, Auto-Brightness, etc.)' 
-            : 'This package will NOT receive tweaks (DND, Auto-Brightness, etc.)';
-        
         packageEl.innerHTML = `
             <span class="game-name-popup">${gameName}</span>
             <span class="package-name-popup">${cleanPackageName}</span>
         `;
 
         icon.className = 'popup-icon';
-        icon.classList.add(hasNoTweak ? 'icon-remove' : 'icon-add');
 
         confirmBtn.dataset.package = packageName;
         confirmBtn.dataset.device = deviceKey;
         confirmBtn.dataset.type = spoofType || 'regular';
-        confirmBtn.dataset.action = hasNoTweak ? 'remove' : 'add';
 
         popup.style.display = 'flex';
         requestAnimationFrame(() => {
@@ -2544,11 +2505,9 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
         typeInput.dataset.type = detectedType;
         typeInput.classList.add('highlighted');
         
-        const hasNoTweak = hasNoTweakTag(gamePackage);
         const hasWithCpu = hasWithCpuTag(gamePackage);
         const hasBlocked = hasBlockedTag(gamePackage);
         
-        disableTweaksToggle.checked = hasNoTweak;
         cpuSpoofToggle.checked = hasWithCpu;
         blockCpuToggle.checked = hasBlocked;
         handleToggleConflicts();
@@ -2649,52 +2608,6 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
     requestAnimationFrame(() => {
         modal.querySelector('.modal-content').classList.add('modal-enter');
     });
-}
-
-function updateModalBadges(disableTweaksToggle, cpuSpoofToggle, blockCpuToggle) {
-    const noTweakBadge = document.querySelector('#disable-tweaks-container .modal-badge');
-    const cpuBadge = document.querySelector('#cpu-spoof-container .modal-badge');
-    const blockedBadge = document.querySelector('#block-cpu-container .modal-badge');
-    
-    if (noTweakBadge) {
-        if (disableTweaksToggle.checked) {
-            noTweakBadge.style.opacity = '1';
-            noTweakBadge.style.transform = 'scale(1.05)';
-            noTweakBadge.style.boxShadow = '0 2px 4px rgba(245, 158, 11, 0.2)';
-        } else {
-            noTweakBadge.style.opacity = '0.6';
-            noTweakBadge.style.transform = 'scale(1)';
-            noTweakBadge.style.boxShadow = 'none';
-        }
-    }
-    
-    if (cpuBadge) {
-        if (cpuSpoofToggle.checked) {
-            cpuBadge.style.opacity = '1';
-            cpuBadge.style.transform = 'scale(1.05)';
-            cpuBadge.style.boxShadow = '0 2px 4px rgba(96, 165, 250, 0.2)';
-            cpuBadge.style.background = 'linear-gradient(135deg, #60A5FA 0%, #8B5CF6 100%)';
-        } else {
-            cpuBadge.style.opacity = '0.6';
-            cpuBadge.style.transform = 'scale(1)';
-            cpuBadge.style.boxShadow = 'none';
-            cpuBadge.style.background = 'linear-gradient(135deg, #60A5FA 0%, #8B5CF6 100%)';
-        }
-    }
-    
-    if (blockedBadge) {
-        if (blockCpuToggle.checked) {
-            blockedBadge.style.opacity = '1';
-            blockedBadge.style.transform = 'scale(1.05)';
-            blockedBadge.style.boxShadow = '0 2px 4px rgba(245, 158, 11, 0.2)';
-            blockedBadge.style.background = 'linear-gradient(135deg, #F59E0B 0%, #DC2626 100%)';
-        } else {
-            blockedBadge.style.opacity = '0.6';
-            blockedBadge.style.transform = 'scale(1)';
-            blockedBadge.style.boxShadow = 'none';
-            blockedBadge.style.background = 'linear-gradient(135deg, #F59E0B 0%, #DC2626 100%)';
-        }
-    }
 }
 
 async function saveDevice(e) {
@@ -4013,28 +3926,6 @@ async function updateGameList() {
 }
 
 function applyEventListeners() {
-    document.getElementById('toggle-auto-brightness').addEventListener('click', async (e) => {
-        const isChecked = e.target.checked;
-        try {
-            await execCommand(`sed -i '/AUTO_BRIGHTNESS_OFF=/d' /data/adb/copg_state; echo "AUTO_BRIGHTNESS_OFF=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-            appendToOutput(isChecked ? "Auto-Brightness Disabled" : "Auto-Brightness Enabled", isChecked ? 'success' : 'error');
-        } catch (error) {
-            appendToOutput(`Failed to update auto-brightness: ${error}`, 'error');
-            e.target.checked = !isChecked;
-        }
-    });
-
-    document.getElementById('toggle-dnd').addEventListener('click', async (e) => {
-        const isChecked = e.target.checked;
-        try {
-            await execCommand(`sed -i '/DND_ON=/d' /data/adb/copg_state; echo "DND_ON=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-            appendToOutput(isChecked ? "DND Enabled" : "DND Disabled", isChecked ? 'success' : 'error');
-        } catch (error) {
-            appendToOutput(`Failed to update DND: ${error}`, 'error');
-            e.target.checked = !isChecked;
-        }
-    });
-
     document.getElementById('toggle-logging').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
@@ -4050,17 +3941,6 @@ function applyEventListeners() {
         showGameTypePicker();
     });
 
-    document.getElementById('toggle-keep-screen-on').addEventListener('click', async (e) => {
-        const isChecked = e.target.checked;
-        try {
-            await execCommand(`sed -i '/KEEP_SCREEN_ON=/d' /data/adb/copg_state; echo "KEEP_SCREEN_ON=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-            appendToOutput(isChecked ? "Keep Screen On Enabled" : "Keep Screen On Disabled", isChecked ? 'success' : 'error');
-        } catch (error) {
-            appendToOutput(`Failed to update keep screen on: ${error}`, 'error');
-            e.target.checked = !isChecked;
-        }
-    });
-    
     setupBackupListeners();
     
     document.getElementById('save-log-yes').addEventListener('click', async () => {
@@ -5106,10 +4986,7 @@ function showNoTweaksExplanation(e) {
             <div class="explanation-text">
                 <span class="highlight">No Tweaks</span> means this app <span class="highlight">WON'T</span> receive these tweaks:
                 <ul>
-                    <li>Do Not Disturb (DND)</li>
-                    <li>Auto-Brightness</li>
                     <li>Disable Logging</li>
-                    <li>Keep Screen On</li>
                 </ul>
                 <div class="important-note">
                     <span class="important-text">Important:</span> Spoofing <span class="highlight">WILL STILL WORK</span> normally.
@@ -5171,69 +5048,6 @@ function showWithCpuExplanation(e) {
                 <div class="important-note">
                     <span class="important-text">Result:</span> 
                     The application will see a different device with modified CPU specifications.
-                </div>
-            </div>
-            <button class="action-btn">OK</button>
-        </div>
-    `;
-
-    document.body.appendChild(popup);
-    requestAnimationFrame(() => {
-        popup.style.display = 'flex';
-        popup.querySelector('.popup-content').classList.add('modal-enter');
-    });
-
-    const okBtn = popup.querySelector('.action-btn');
-    okBtn.addEventListener('click', () => {
-        const content = popup.querySelector('.popup-content');
-        content.classList.remove('modal-enter');
-        content.classList.add('popup-exit');
-        content.addEventListener('animationend', () => {
-            popup.remove();
-        }, { once: true });
-    });
-
-    popup.addEventListener('click', (e) => {
-        if (e.target === popup) {
-            const content = popup.querySelector('.popup-content');
-            content.classList.remove('modal-enter');
-            content.classList.add('popup-exit');
-            content.addEventListener('animationend', () => {
-                popup.remove();
-            }, { once: true });
-        }
-    });
-}
-
-function showBlockedCpuExplanation(e) {
-    e.stopPropagation();
-
-    const popup = document.createElement('div');
-    popup.className = 'popup cpu-explanation-popup';
-    popup.id = 'blocked-cpu-explanation-popup';
-    popup.innerHTML = `
-        <div class="popup-content">
-            <h3 class="explanation-title">Block CPU Spoofing</h3>
-            <div class="explanation-text">
-                <span class="highlight">This application receives:</span>
-                <ul>
-                    <li>• Device Spoofing (Full device profile)</li>
-                    <li>• No CPU Spoofing (Real CPU information)</li>
-                </ul>
-                
-                <div class="important-note">
-                    <span class="important-text">Perfect for:</span> 
-                    Sensitive applications and games that may crash with CPU spoofing or display incorrect device information.
-                </div>
-                
-                <div class="important-note">
-                    <span class="important-text">Result:</span> 
-                    The application will see a different device but with real CPU specifications.
-                </div>
-                
-                <div class="important-note">
-                    <span class="important-text">Note:</span> 
-                    Prevents any remaining CPU spoofing before the application launches.
                 </div>
             </div>
             <button class="action-btn">OK</button>
@@ -5330,45 +5144,8 @@ function showGameTypePicker() {
                     blockCpuToggle.checked = false;
                 }
                 
-            } else if (type === 'cpu_only') {
-                deviceGroup.classList.add('disabled');
-                deviceInput.setAttribute('readonly', 'true');
-                deviceInput.style.cursor = 'not-allowed';
-                deviceInput.placeholder = 'Not required for this type';
-                deviceInput.value = '';
-                deviceInput.dataset.key = '';
-                deviceInput.classList.remove('highlighted');
-                
-                disableTweaksGroup.classList.remove('disabled');
-                disableTweaksToggle.disabled = false;
-                cpuSpoofGroup.classList.add('disabled');
-                blockCpuGroup.classList.add('disabled');
-                cpuSpoofToggle.disabled = true;
-                blockCpuToggle.disabled = true;
-                cpuSpoofToggle.checked = false;
-                blockCpuToggle.checked = false;
-                
-            } else if (type === 'blocked') {
-                deviceGroup.classList.add('disabled');
-                deviceInput.setAttribute('readonly', 'true');
-                deviceInput.style.cursor = 'not-allowed';
-                deviceInput.placeholder = 'Not required for this type';
-                deviceInput.value = '';
-                deviceInput.dataset.key = '';
-                deviceInput.classList.remove('highlighted');
-                
-                disableTweaksGroup.classList.add('disabled');
-                disableTweaksToggle.disabled = true;
-                disableTweaksToggle.checked = false;
-                cpuSpoofGroup.classList.add('disabled');
-                cpuSpoofToggle.disabled = true;
-                cpuSpoofToggle.checked = false;
-                blockCpuGroup.classList.add('disabled');
-                blockCpuToggle.disabled = true;
-                blockCpuToggle.checked = false;
             }
-            
-            updateModalBadges(disableTweaksToggle, cpuSpoofToggle, blockCpuToggle);
+
             closePopup('game-type-picker-popup');
         });
     });
@@ -5394,9 +5171,7 @@ function showGameTypePicker() {
 
 function getTypeDisplayName(type) {
     switch(type) {
-        case 'device': return 'Device Spoof + Extra';
-        case 'cpu_only': return 'CPU Spoof Only';
-        case 'blocked': return 'Block Spoofing';
+        case 'device': return 'Device Spoof';
         default: return type;
     }
 }
