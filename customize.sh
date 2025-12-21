@@ -309,8 +309,7 @@ if $INSTALL_SUCCESS; then
   ui_print " ⚙ Detecting Device Architecture "
 
   ARM64_VARIANTS="arm64-v8a|armv8-a|arm64|aarch64"
-  ARM32_VARIANTS="armeabi-v7a|armeabi|armv7-a|armv7l|armhf|arm"
-
+  
   ABI_LIST=$(getprop ro.product.cpu.abilist)
   ui_print " 📜 Supported ABIs: $ABI_LIST"
 
@@ -335,23 +334,6 @@ if $INSTALL_SUCCESS; then
           rm -f "$MODPATH/controller_armv7" 2>/dev/null
           break
         fi
-      elif echo "$ABI" | grep -qE "$ARM32_VARIANTS"; then
-        if [ -f "$MODPATH/controller_armv7" ]; then
-          mv "$MODPATH/controller_armv7" "$MODPATH/controller" || {
-            ui_print " ✗ Failed to Rename ARM32 Controller!  "
-            print_failure_and_exit "binary"
-          }
-          chmod 0755 "$MODPATH/controller" || {
-            ui_print " ✗ Failed to Set Permissions (controller)!  "
-            print_failure_and_exit "binary"
-          }
-          ui_print " ✔ Installed ARM32 Controller     "
-          ui_print " ➤ ($ABI)                        "
-          CONTROLLER_INSTALLED=true
-          
-          rm -f "$MODPATH/controller_arm64" 2>/dev/null
-          break
-        fi
       fi
     done
 
@@ -359,7 +341,6 @@ if $INSTALL_SUCCESS; then
       ui_print " ✗ No Compatible Controller Found! "
       ui_print " ➤ Supported Architectures:      "
       ui_print " ➤ • ARM64 (arm64-v8a)          "
-      ui_print " ➤ • ARM32 (armeabi-v7a)        "
       print_failure_and_exit "binary"
     fi
   print_box_end
@@ -368,9 +349,8 @@ fi
   if $INSTALL_SUCCESS; then
     chmod 0755 "$MODPATH/service.sh" "$MODPATH/action.sh" "$MODPATH/update_config.sh" 2>/dev/null
     chmod 0644 "$MODPATH/COPG.json" "$MODPATH/list.json" 2>/dev/null
-    chmod 0444 "$MODPATH/cpuinfo_spoof" 2>/dev/null
     
-    for file in "$MODPATH/COPG.json" "$MODPATH/list.json" "$MODPATH/cpuinfo_spoof" \
+    for file in "$MODPATH/COPG.json" "$MODPATH/list.json" \
                 "$MODPATH/service.sh" "$MODPATH/action.sh" "$MODPATH/update_config.sh"; do
       if [ -f "$file" ]; then
         chcon u:object_r:system_file:s0 "$file" 2>/dev/null
