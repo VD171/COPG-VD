@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#60A5FA" id="theme-color">
-    <title>COPG Manager</title>
+    <title>COPG</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -61,36 +61,6 @@
             <div class="game-details">
                 <span class="game-info">[DEVICE_NAME]</span>
                 <div class="badge-group">
-                    [HAS_NO_TWEAK_BADGE]
-                    [WITH_CPU_BADGE]
-                    [BLOCKED_BADGE]
-                    [INSTALLED_BADGE]
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <template id="cpu-spoof-card-template">
-        <div class="game-card cpu-spoof-card" data-package="[PACKAGE_NAME]" data-type="[TYPE]" style="animation-delay: [DELAY]s">
-            <div class="game-header">
-                <div class="game-name-container">
-                    <h4 class="game-name">[GAME_NAME]</h4>
-                    <span class="game-package">[CLEAN_PACKAGE_NAME]</span>
-                </div>
-                <div class="game-actions">
-                    <button class="info-btn" title="CPU Spoof Configuration">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M12 16v-4"></path>
-                            <path d="M12 8h.01"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            <div class="game-details">
-                <span class="game-info">[TYPE_LABEL]</span>
-                <div class="badge-group">
-                    [TYPE_BADGE]
                     [INSTALLED_BADGE]
                 </div>
             </div>
@@ -168,21 +138,6 @@
                 <span>Z → A</span>
             </div>
             <div class="sort-separator"></div>
-            <div class="sort-option" data-filter="blocklist">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M18 6L6 18"></path>
-                </svg>
-                <span>Blocklist Only</span>
-                <span class="filter-badge" id="blocklist-count">0</span>
-            </div>
-            <div class="sort-option" data-filter="cpu_only">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0m-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5zM6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5z"/>
-                </svg>
-                <span>CPU Only</span>
-                <span class="filter-badge" id="cpu-only-count">0</span>
-            </div>
             <div class="sort-option" data-filter="installed">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -190,14 +145,6 @@
                 </svg>
                 <span>Installed Only</span>
                 <span class="filter-badge" id="installed-count">0</span>
-            </div>
-            <div class="sort-option" data-filter="no_tweaks">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="8" y1="12" x2="16" y2="12"></line>
-                </svg>
-                <span>No Tweaks Only</span>
-                <span class="filter-badge" id="no-tweaks-count">0</span>
             </div>
             <div class="sort-option" data-filter="clear" id="clear-filter-btn" style="display: none;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -210,7 +157,7 @@
 
     <div class="container">
         <div class="header">
-            <h1 class="header-title">COPG Manager <span class="version" id="version-text">v0.0</span></h1>
+            <h1 class="header-title">COPG <span class="version" id="version-text">0.0</span></h1>
             <div class="header-actions">
                 <button id="donate-toggle" class="theme-btn" title="Support Developer">
                     <span class="donate-icon">🎁</span>
