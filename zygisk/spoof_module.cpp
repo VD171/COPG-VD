@@ -348,70 +348,67 @@ private:
             std::vector<std::pair<DeviceInfo, std::unordered_map<std::string, std::string>>> new_device_packages;
 
             int device_count = 0;
-            for (auto& [key, value] : config.items()) {
-                if (key.find("PACKAGES_") == 0 && key.rfind("_DEVICE") != key.size() - 7) {
-                    std::string device_key = key + "_DEVICE";
-                    if (!config.contains(device_key) || !config[device_key].is_object()) {
-                        continue;
-                    }
-                    
-                    auto device = config[device_key];
-                    DeviceInfo info;
-                    info.brand = device.value("BRAND", "generic");
-                    info.device = device.value("DEVICE", "generic");
-                    info.manufacturer = device.value("MANUFACTURER", "generic");
-                    info.model = device.value("MODEL", "generic");
-                    info.fingerprint = device.value("FINGERPRINT", "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys");
-                    info.product = device.value("PRODUCT", info.brand);
-                    info.build_board = device.value("BOARD", info.build_board);
-                    info.build_bootloader = device.value("BOOTLOADER", "unknown");
-                    info.build_hardware = device.value("HARDWARE", info.build_hardware);
-                    info.build_id = device.value("ID", info.build_id);
-                    info.build_display = device.value("DISPLAY", info.build_display);
-                    info.build_host = device.value("HOST", info.build_host);
 
-                    if (device.contains("ANDROID_VERSION")) {
-                        try {
-                            if (device["ANDROID_VERSION"].is_string()) {
-                                info.android_version = device["ANDROID_VERSION"].get<std::string>();
-                                info.should_spoof_android_version = !info.android_version.empty();
-                            } else if (device["ANDROID_VERSION"].is_number()) {
-                                info.android_version = std::to_string(device["ANDROID_VERSION"].get<int>());
-                                info.should_spoof_android_version = true;
-                            }
-                        } catch (const std::exception& e) {
-                            LOGW("Failed to parse ANDROID_VERSION: %s", e.what());
-                            info.should_spoof_android_version = false;
-                        }
-                    } else {
-                        info.should_spoof_android_version = false;
-                    }
-
-                    if (device.contains("SDK_INT")) {
-                        try {
-                            if (device["SDK_INT"].is_number()) {
-                                info.sdk_int = device["SDK_INT"].get<int>();
-                                info.should_spoof_sdk_int = true;
-                            } else if (device["SDK_INT"].is_string()) {
-                                std::string sdk_str = device["SDK_INT"].get<std::string>();
-                                if (!sdk_str.empty()) {
-                                    info.sdk_int = std::stoi(sdk_str);
-                                    info.should_spoof_sdk_int = true;
-                                }
-                            }
-                        } catch (const std::exception& e) {
-                            LOGW("Failed to parse SDK_INT: %s", e.what());
-                            info.should_spoof_sdk_int = false;
-                        }
-                    } else {
-                        info.should_spoof_sdk_int = false;
-                    }
-
-                    std::unordered_map<std::string, std::string> package_settings;
-                    new_device_packages.emplace_back(info, package_settings);
-                    device_count++;
-                }
+            std::string device_key = "DEVICE";
+            if (!config.contains(device_key) || !config[device_key].is_object()) {
+                continue;
             }
+            
+            auto device = config[device_key];
+            DeviceInfo info;
+            info.brand = device.value("BRAND", "generic");
+            info.device = device.value("DEVICE", "generic");
+            info.manufacturer = device.value("MANUFACTURER", "generic");
+            info.model = device.value("MODEL", "generic");
+            info.fingerprint = device.value("FINGERPRINT", "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys");
+            info.product = device.value("PRODUCT", info.brand);
+            info.build_board = device.value("BOARD", info.build_board);
+            info.build_bootloader = device.value("BOOTLOADER", "unknown");
+            info.build_hardware = device.value("HARDWARE", info.build_hardware);
+            info.build_id = device.value("ID", info.build_id);
+            info.build_display = device.value("DISPLAY", info.build_display);
+            info.build_host = device.value("HOST", info.build_host);
+
+            if (device.contains("ANDROID_VERSION")) {
+                try {
+                    if (device["ANDROID_VERSION"].is_string()) {
+                        info.android_version = device["ANDROID_VERSION"].get<std::string>();
+                        info.should_spoof_android_version = !info.android_version.empty();
+                    } else if (device["ANDROID_VERSION"].is_number()) {
+                        info.android_version = std::to_string(device["ANDROID_VERSION"].get<int>());
+                        info.should_spoof_android_version = true;
+                    }
+                } catch (const std::exception& e) {
+                    LOGW("Failed to parse ANDROID_VERSION: %s", e.what());
+                    info.should_spoof_android_version = false;
+                }
+            } else {
+                info.should_spoof_android_version = false;
+            }
+
+            if (device.contains("SDK_INT")) {
+                try {
+                    if (device["SDK_INT"].is_number()) {
+                        info.sdk_int = device["SDK_INT"].get<int>();
+                        info.should_spoof_sdk_int = true;
+                    } else if (device["SDK_INT"].is_string()) {
+                        std::string sdk_str = device["SDK_INT"].get<std::string>();
+                        if (!sdk_str.empty()) {
+                            info.sdk_int = std::stoi(sdk_str);
+                            info.should_spoof_sdk_int = true;
+                        }
+                    }
+                } catch (const std::exception& e) {
+                    LOGW("Failed to parse SDK_INT: %s", e.what());
+                    info.should_spoof_sdk_int = false;
+                }
+            } else {
+                info.should_spoof_sdk_int = false;
+            }
+
+            std::unordered_map<std::string, std::string> package_settings;
+            new_device_packages.emplace_back(info, package_settings);
+            device_count++;
 
             {
                 std::lock_guard<std::mutex> lock(info_mutex);
