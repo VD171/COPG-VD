@@ -3066,29 +3066,8 @@ async function updateGameList() {
     const btn = document.getElementById('update-config');
     btn.classList.add('loading');
     appendToOutput("Checking for game list updates...", 'info');
-    try {
-        const output = await execCommand("sh /data/adb/modules/COPG/update_config.sh");
-        const outputLines = output.split('\n').filter(line => line.trim());
-        let isUpToDate = false;
-
-        outputLines.forEach(line => {
-            if (line.trim() && !line.includes('Your config is already up-to-date')) {
-                appendToOutput(line);
-            }
-            if (line.includes('Your config is already up-to-date')) {
-                isUpToDate = true;
-            }
-        });
-
-        if (isUpToDate) {
-            appendToOutput("No updates found for game list", 'info');
-        } else {
-            appendToOutput("Game list updated successfully", 'success');
-            await loadConfig();
-        }
-    } catch (error) {
-        appendToOutput("Failed to check game list updates: " + error, 'error');
-    }
+    let isUpToDate = true;
+    appendToOutput("Your config is already up-to-date");
     btn.classList.remove('loading');
     actionRunning = false;
 }
