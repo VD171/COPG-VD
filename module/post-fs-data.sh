@@ -32,7 +32,6 @@ MAPPING
 resetprop=$(find_resetprop)
 json_content=$(cat "$COPG_JSON")
 getprop_output=$(getprop)
-changed=0
 while IFS='|' read -r json_key props; do
     [ -z "$json_key" ] && continue
     json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
@@ -44,9 +43,11 @@ while IFS='|' read -r json_key props; do
             current=$(echo "$getprop_output" | grep "^\[$prop\]:" | sed 's/.*: \[\(.*\)\]/\1/')
             if [ -n "$current" ] && [ "$current" != "$json_value" ]; then
                 "$resetprop" "$prop" "$json_value"
-                changed=$((changed + 1))
+                [ "$json_key" = "FINGERPRINT" ] && DESCRIPTION="$(echo "$json_value" | awk -F'[:/]' '{print $3"-"$7" "$4" "$5" "$6" "$8}')"
             fi
         done
         IFS="$old_ifs"
     fi
 done < <(get_prop_mapping)
+
+"$resetprop" ro.build.description "$DESCRIPTION"
