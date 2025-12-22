@@ -1,4 +1,4 @@
-name: COPG
+name: test
 
 on:
   workflow_dispatch:
@@ -95,7 +95,7 @@ jobs:
           chmod 755 module/zygisk/arm64-v8a.so
           
           chmod 755 module/customize.sh module/service.sh module/META-INF/com/google/android/update-binary
-          VERSION='v4.8.0-vd'
+          VERSION='v4.8.0-test'
           VERSION_CODE=480
           cat > module/module.prop << EOF
           id=COPG
