@@ -185,6 +185,45 @@ static void readOriginalBuildProps() {
                original_build_props.ro_product_model.c_str());
 }
 
+static std::string findResetpropPath() {
+    const char* possible_paths[] = {
+        "/data/adb/ksu/bin/resetprop",
+        "/data/adb/magisk/resetprop",
+        "/debug_ramdisk/resetprop",
+        "/data/adb/ap/bin/resetprop",
+        "/system/bin/resetprop",
+        "/vendor/bin/resetprop",
+        nullptr
+    };
+    
+    for (int i = 0; possible_paths[i] != nullptr; i++) {
+        if (access(possible_paths[i], X_OK) == 0) {
+            LOGD("Found resetprop at: %s", possible_paths[i]);
+            return std::string(possible_paths[i]);
+        }
+    }
+    
+    FILE* pipe = popen("which resetprop", "r");
+    if (pipe) {
+        char path[256];
+        if (fgets(path, sizeof(path), pipe) != nullptr) {
+            size_t len = strlen(path);
+            if (len > 0 && path[len-1] == '\n') {
+                path[len-1] = '\0';
+            }
+            if (access(path, X_OK) == 0) {
+                LOGD("Found resetprop via which: %s", path);
+                pclose(pipe);
+                return std::string(path);
+            }
+        }
+        pclose(pipe);
+    }
+    
+    LOGE("Could not find resetprop in any known location!");
+    return "";
+}
+
 static void companion(int fd) {
     COMPANION_LOG("Started");
     
@@ -274,33 +313,30 @@ public:
         }
     }
 
-    void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
-        if (!args || !args->nice_name) {
-            LOGI("No package name, closing module");
-            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-            return;
-        }
-
-        JniString pkg(env, args->nice_name);
-        const char* package_name = pkg.get();
-        if (!package_name) {
-            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-            return;
-        }
-
-        PKG_LOG("Processing: %s", package_name);
+    void preServerSpecialize(zygisk::ServerSpecializeArgs* args) override {
+        SPOOF_LOG("System server specializing - applying global spoof");
+        
         reloadIfNeeded(false);
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
             
             DeviceInfo device_info;
-           
+        
             if (!device_packages.empty()) {
                 current_info = device_info = device_packages.front().first;
                 spoofDevice(current_info);
                 spoofSystemProps(current_info);
             }
+        }
+
+        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+    }
+
+    void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
+        if (!args || !args->nice_name) {
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            return;
         }
 
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
@@ -368,6 +404,12 @@ private:
 
     void spoofSystemProps(const DeviceInfo& info) {
         SPOOF_LOG("Starting system props spoofing");
+        
+        std::string resetprop_path = findResetpropPath();
+        if (resetprop_path.empty()) {
+            LOGE("Cannot apply props: resetprop not found");
+            return;
+        }
                 
         const char* commands[] = {
             "Build.BRAND",
@@ -496,11 +538,12 @@ private:
         const int num_commands = sizeof(commands) / sizeof(commands[0]);
         
         for (int i = 0; i < num_commands; i++) {
-            std::string cmd = std::string("resetprop ") + commands[i] + " \"" + values[i] + "\"";
-            if (executeCompanionCommand(cmd)) {
-                LOGD("Resetprop successful: %s", cmd.c_str());
+            std::string cmd = resetprop_path + " " + commands[i] + " \"" + values[i] + "\"";
+            int result = system(cmd.c_str());
+            if (result == 0) {
+                LOGD("Resetprop successful: %s", commands[i]);
             } else {
-                LOGW("Resetprop failed: %s", cmd.c_str());
+                LOGW("Resetprop failed: %s", commands[i]);
             }
         }
         
@@ -513,9 +556,10 @@ private:
             };
             
             for (const auto& prop : release_props) {
-                std::string cmd = std::string("resetprop ") + prop + " \"" + info.android_version + "\"";
-                if (executeCompanionCommand(cmd)) {
-                    LOGD("Resetprop successful for Android version: %s", cmd.c_str());
+                std::string cmd = resetprop_path + " " + prop + " \"" + info.android_version + "\"";
+                int result = system(cmd.c_str());
+                if (result == 0) {
+                    LOGD("Resetprop successful for Android version: %s", prop);
                 }
             }
         }
@@ -530,9 +574,10 @@ private:
             };
             
             for (const auto& prop : sdk_props) {
-                std::string cmd = std::string("resetprop ") + prop + " \"" + sdk_str + "\"";
-                if (executeCompanionCommand(cmd)) {
-                    LOGD("Resetprop successful for SDK: %s", cmd.c_str());
+                std::string cmd = resetprop_path + " " + prop + " \"" + sdk_str + "\"";
+                int result = system(cmd.c_str());
+                if (result == 0) {
+                    LOGD("Resetprop successful for SDK: %s", prop);
                 }
             }
         }
