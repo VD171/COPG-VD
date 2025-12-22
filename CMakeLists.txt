@@ -13,9 +13,12 @@ if(NOT DEBUG)
     add_link_options(-s)
 endif()
 
-add_library(spoof SHARED
-            spoof_module.cpp
-            atexit.cpp)
+set(ZYGISK_SOURCES
+    zygisk/spoof_module.cpp
+    zygisk/atexit.cpp
+)
+
+add_library(spoof SHARED ${ZYGISK_SOURCES})
 
 find_library(log-lib log)
 
