@@ -1,5 +1,6 @@
 {
   "com.android.vending": "Play Store",
   "com.google.android.gsf": "Services Framework",
-  "com.google.android.gms": "Play Services"
+  "com.google.android.gms": "Play Services",
+  "com.google.android.apps.photos": "Google Photos"
 }
