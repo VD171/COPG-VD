@@ -31,7 +31,6 @@ using json = nlohmann::json;
 #define CONFIG_LOG(...) LOGI("[CONFIG] " __VA_ARGS__)
 #define SPOOF_LOG(...) LOGI("[SPOOF] " __VA_ARGS__)
 #define COMPANION_LOG(...) LOGI("[COMPANION] " __VA_ARGS__)
-#define PKG_LOG(...) LOGI("[PKG] " __VA_ARGS__)
 
 static bool debug_mode = false;
 
@@ -227,45 +226,6 @@ static std::string findResetpropPath() {
 static void companion(int fd) {
     COMPANION_LOG("Started");
     
-    auto findResetpropPath = []() -> std::string {
-        const char* possible_paths[] = {
-            "/data/adb/ksu/bin/resetprop",
-            "/data/adb/magisk/resetprop",
-            "/debug_ramdisk/resetprop",
-            "/data/adb/ap/bin/resetprop",
-            "/system/bin/resetprop",
-            "/vendor/bin/resetprop",
-            nullptr
-        };
-        
-        for (int i = 0; possible_paths[i] != nullptr; i++) {
-            if (access(possible_paths[i], X_OK) == 0) {
-                LOGD("Found resetprop at: %s", possible_paths[i]);
-                return std::string(possible_paths[i]);
-            }
-        }
-        
-        FILE* pipe = popen("which resetprop", "r");
-        if (pipe) {
-            char path[256];
-            if (fgets(path, sizeof(path), pipe) != nullptr) {
-                size_t len = strlen(path);
-                if (len > 0 && path[len-1] == '\n') {
-                    path[len-1] = '\0';
-                }
-                if (access(path, X_OK) == 0) {
-                    LOGD("Found resetprop via which: %s", path);
-                    pclose(pipe);
-                    return std::string(path);
-                }
-            }
-            pclose(pipe);
-        }
-        
-        LOGE("Could not find resetprop in any known location!");
-        return "";
-    };
-    
     char buffer[2048];
     ssize_t bytes = read(fd, buffer, sizeof(buffer)-1);
     
@@ -299,6 +259,20 @@ public:
         LOGI("Module loaded");
         ensureBuildClass();
         reloadIfNeeded(true);
+        
+        SPOOF_LOG("System server specializing - applying global spoof");
+
+        {
+            std::lock_guard<std::mutex> lock(info_mutex);
+            
+            DeviceInfo device_info;
+        
+            if (!device_packages.empty()) {
+                current_info = device_info = device_packages.front().first;
+                spoofDevice(current_info);
+                //spoofSystemProps(current_info);
+            }
+        }
     }
 
     void onUnload() {
@@ -312,33 +286,16 @@ public:
             versionClass = nullptr;
         }
     }
+       
+    void preServerSpecialize(zygisk::ServerSpecializeArgs*) override {
+        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+    }
 
-    void preServerSpecialize(zygisk::ServerSpecializeArgs* args) override {
-        SPOOF_LOG("System server specializing - applying global spoof");
-        
-        reloadIfNeeded(false);
-
-        {
-            std::lock_guard<std::mutex> lock(info_mutex);
-            
-            DeviceInfo device_info;
-        
-            if (!device_packages.empty()) {
-                current_info = device_info = device_packages.front().first;
-                spoofDevice(current_info);
-                spoofSystemProps(current_info);
-            }
-        }
-
+    void postServerSpecialize(const zygisk::ServerSpecializeArgs*) override {
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
 
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
-        if (!args || !args->nice_name) {
-            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-            return;
-        }
-
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
 
