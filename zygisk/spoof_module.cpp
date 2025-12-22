@@ -30,7 +30,6 @@ using json = nlohmann::json;
 
 #define CONFIG_LOG(...) LOGI("[CONFIG] " __VA_ARGS__)
 #define SPOOF_LOG(...) LOGI("[SPOOF] " __VA_ARGS__)
-#define COMPANION_LOG(...) LOGI("[COMPANION] " __VA_ARGS__)
 
 static bool debug_mode = false;
 
@@ -184,79 +183,12 @@ static void readOriginalBuildProps() {
                original_build_props.ro_product_model.c_str());
 }
 
-static std::string findResetpropPath() {
-    const char* possible_paths[] = {
-        "/data/adb/ksu/bin/resetprop",
-        "/data/adb/magisk/resetprop",
-        "/debug_ramdisk/resetprop",
-        "/data/adb/ap/bin/resetprop",
-        "/system/bin/resetprop",
-        "/vendor/bin/resetprop",
-        nullptr
-    };
-    
-    for (int i = 0; possible_paths[i] != nullptr; i++) {
-        if (access(possible_paths[i], X_OK) == 0) {
-            LOGD("Found resetprop at: %s", possible_paths[i]);
-            return std::string(possible_paths[i]);
-        }
-    }
-    
-    FILE* pipe = popen("which resetprop", "r");
-    if (pipe) {
-        char path[256];
-        if (fgets(path, sizeof(path), pipe) != nullptr) {
-            size_t len = strlen(path);
-            if (len > 0 && path[len-1] == '\n') {
-                path[len-1] = '\0';
-            }
-            if (access(path, X_OK) == 0) {
-                LOGD("Found resetprop via which: %s", path);
-                pclose(pipe);
-                return std::string(path);
-            }
-        }
-        pclose(pipe);
-    }
-    
-    LOGE("Could not find resetprop in any known location!");
-    return "";
-}
-
-static void companion(int fd) {
-    COMPANION_LOG("Started");
-    
-    char buffer[2048];
-    ssize_t bytes = read(fd, buffer, sizeof(buffer)-1);
-    
-    if (bytes > 0) {
-        buffer[bytes] = '\0';
-        std::string command = buffer;
-        
-        int result = -1;
-        
-        if (command.find("resetprop") == 0) {
-            std::string resetprop_path = findResetpropPath();
-            if (!resetprop_path.empty()) {
-                std::string full_cmd = resetprop_path + " " + command.substr(9);
-                COMPANION_LOG("Resetprop cmd: %s", command.substr(9).c_str());
-                result = system(full_cmd.c_str());
-            }
-        }
-        
-        write(fd, &result, sizeof(result));
-    }
-    
-    close(fd);
-}
-
 class COPGModule : public zygisk::ModuleBase {
 public:
     void onLoad(zygisk::Api* api, JNIEnv* env) override {
         this->api = api;
         this->env = env;
 
-        LOGI("Module loaded");
         ensureBuildClass();
         reloadIfNeeded(true);
         
@@ -270,7 +202,6 @@ public:
             if (!device_packages.empty()) {
                 current_info = device_info = device_packages.front().first;
                 spoofDevice(current_info);
-                //spoofSystemProps(current_info);
             }
         }
     }
@@ -342,204 +273,6 @@ private:
         }
         
         return {package_name, tags};
-    }
-
-    bool executeCompanionCommand(const std::string& command) {
-        auto fd = api->connectCompanion();
-        if (fd < 0) {
-            return false;
-        }
-        
-        write(fd, command.c_str(), command.size());
-        
-        int result = -1;
-        read(fd, &result, sizeof(result));
-        close(fd);
-        
-        return result == 0;
-    }
-
-    void spoofSystemProps(const DeviceInfo& info) {
-        SPOOF_LOG("Starting system props spoofing");
-        
-        std::string resetprop_path = findResetpropPath();
-        if (resetprop_path.empty()) {
-            LOGE("Cannot apply props: resetprop not found");
-            return;
-        }
-                
-        const char* commands[] = {
-            "Build.BRAND",
-            "ro.board.platform",
-            "ro.boot.hardware",
-            "ro.boot.product.hardware.sku",
-            "ro.bootloader",
-            "ro.build.display.id",
-            "ro.build.fingerprint",
-            "ro.build.host",
-            "ro.build.id",
-            "ro.build.user",
-            "ro.hardware",
-            "ro.odm.build.fingerprint",
-            "ro.odm.build.id",
-            "ro.product.board",
-            "ro.product.brand",
-            "ro.product.build.fingerprint",
-            "ro.product.build.id",
-            "ro.product.device",
-            "ro.product.manufacturer",
-            "ro.product.model",
-            "ro.product.name",
-            "ro.product.odm.brand",
-            "ro.product.odm.device",
-            "ro.product.odm.manufacturer",
-            "ro.product.odm.model",
-            "ro.product.odm.name",
-            "ro.product.product.brand",
-            "ro.product.product.device",
-            "ro.product.product.manufacturer",
-            "ro.product.product.model",
-            "ro.product.product.name",
-            "ro.product.system.brand",
-            "ro.product.system.device",
-            "ro.product.system.manufacturer",
-            "ro.product.system.model",
-            "ro.product.system.name",
-            "ro.product.system_ext.brand",
-            "ro.product.system_ext.device",
-            "ro.product.system_ext.manufacturer",
-            "ro.product.system_ext.model",
-            "ro.product.system_ext.name",
-            "ro.product.vendor.brand",
-            "ro.product.vendor.device",
-            "ro.product.vendor.manufacturer",
-            "ro.product.vendor.model",
-            "ro.product.vendor.name",
-            "ro.product.vendor_dlkm.brand",
-            "ro.product.vendor_dlkm.device",
-            "ro.product.vendor_dlkm.manufacturer",
-            "ro.product.vendor_dlkm.model",
-            "ro.product.vendor_dlkm.name",
-            "ro.system.build.fingerprint",
-            "ro.system.build.id",
-            "ro.system_ext.build.fingerprint",
-            "ro.system_ext.build.id",
-            "ro.vendor.build.fingerprint",
-            "ro.vendor.build.id",
-            "ro.vendor_dlkm.build.fingerprint",
-            "ro.vendor_dlkm.build.id"
-        };
-        
-        const char* values[] = {
-            info.brand.c_str(),
-            info.build_board.c_str(),
-            info.build_hardware.c_str(),
-            info.device.c_str(),
-            info.build_bootloader.c_str(),
-            info.build_display.c_str(),
-            info.fingerprint.c_str(),
-            info.build_host.c_str(),
-            info.build_id.c_str(),
-            info.build_host.c_str(),
-            info.build_hardware.c_str(),
-            info.fingerprint.c_str(),
-            info.build_id.c_str(),
-            info.build_board.c_str(),
-            info.brand.c_str(),
-            info.fingerprint.c_str(),
-            info.build_id.c_str(),
-            info.device.c_str(),
-            info.manufacturer.c_str(),
-            info.model.c_str(),
-            info.product.c_str(),
-            info.brand.c_str(),
-            info.device.c_str(),
-            info.manufacturer.c_str(),
-            info.model.c_str(),
-            info.product.c_str(),
-            info.brand.c_str(),
-            info.device.c_str(),
-            info.manufacturer.c_str(),
-            info.model.c_str(),
-            info.product.c_str(),
-            info.brand.c_str(),
-            info.device.c_str(),
-            info.manufacturer.c_str(),
-            info.model.c_str(),
-            info.product.c_str(),
-            info.brand.c_str(),
-            info.device.c_str(),
-            info.manufacturer.c_str(),
-            info.model.c_str(),
-            info.product.c_str(),
-            info.brand.c_str(),
-            info.device.c_str(),
-            info.manufacturer.c_str(),
-            info.model.c_str(),
-            info.product.c_str(),
-            info.brand.c_str(),
-            info.device.c_str(),
-            info.manufacturer.c_str(),
-            info.model.c_str(),
-            info.product.c_str(),
-            info.fingerprint.c_str(),
-            info.build_id.c_str(),
-            info.fingerprint.c_str(),
-            info.build_id.c_str(),
-            info.fingerprint.c_str(),
-            info.build_id.c_str(),
-            info.fingerprint.c_str(),
-            info.build_id.c_str()
-        };
-        
-        const int num_commands = sizeof(commands) / sizeof(commands[0]);
-        
-        for (int i = 0; i < num_commands; i++) {
-            std::string cmd = resetprop_path + " " + commands[i] + " \"" + values[i] + "\"";
-            int result = system(cmd.c_str());
-            if (result == 0) {
-                LOGD("Resetprop successful: %s", commands[i]);
-            } else {
-                LOGW("Resetprop failed: %s", commands[i]);
-            }
-        }
-        
-        if (info.should_spoof_android_version) {
-            const char* release_props[] = {
-                "ro.build.version.release",
-                "ro.system.build.version.release",
-                "ro.vendor.build.version.release",
-                "ro.product.build.version.release"
-            };
-            
-            for (const auto& prop : release_props) {
-                std::string cmd = resetprop_path + " " + prop + " \"" + info.android_version + "\"";
-                int result = system(cmd.c_str());
-                if (result == 0) {
-                    LOGD("Resetprop successful for Android version: %s", prop);
-                }
-            }
-        }
-        
-        if (info.should_spoof_sdk_int) {
-            std::string sdk_str = std::to_string(info.sdk_int);
-            const char* sdk_props[] = {
-                "ro.build.version.sdk",
-                "ro.system.build.version.sdk",
-                "ro.vendor.build.version.sdk",
-                "ro.product.build.version.sdk"
-            };
-            
-            for (const auto& prop : sdk_props) {
-                std::string cmd = resetprop_path + " " + prop + " \"" + sdk_str + "\"";
-                int result = system(cmd.c_str());
-                if (result == 0) {
-                    LOGD("Resetprop successful for SDK: %s", prop);
-                }
-            }
-        }
-        
-        SPOOF_LOG("System props: model=%s, brand=%s", info.model.c_str(), info.brand.c_str());
     }
 
     void ensureBuildClass() {
@@ -749,4 +482,3 @@ private:
 };
 
 REGISTER_ZYGISK_MODULE(COPGModule)
-REGISTER_ZYGISK_COMPANION(companion)
