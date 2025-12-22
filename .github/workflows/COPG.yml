@@ -90,26 +90,11 @@ jobs:
 
       - name: Prepare module structure
         run: |
-          mkdir -p module/zygisk module/META-INF/com/google/android module/webroot/assets module/common module/system
+          mkdir -p module/zygisk
           cp build/arm64-v8a/libspoof.so module/zygisk/arm64-v8a.so
           chmod 755 module/zygisk/arm64-v8a.so
           
-          cp COPG.json module/COPG.json
-          cp list.json module/list.json
-          cp -rf system/* module/system/
-          cp customize.sh module/customize.sh
-          cp service.sh module/service.sh
-          cp update_config.sh module/update_config.sh
-          cp system.prop module/system.prop
-          cp META-INF/com/google/android/update-binary module/META-INF/com/google/android/update-binary
-          cp META-INF/com/google/android/updater-script module/META-INF/com/google/android/updater-script
-          cp webroot/index.html module/webroot/index.html
-          cp webroot/scripts.js module/webroot/scripts.js
-          cp webroot/styles.css module/webroot/styles.css
-          cp webroot/config.json module/webroot/config.json
-          cp webroot/icon.png module/webroot/icon.png
-          cp webroot/assets/RobotoMono-Regular.ttf module/webroot/assets/RobotoMono-Regular.ttf
-          chmod 755 module/customize.sh module/service.sh module/update_config.sh module/META-INF/com/google/android/update-binary
+          chmod 755 module/customize.sh module/service.sh module/META-INF/com/google/android/update-binary
           VERSION='4.7.4-vd'
           VERSION_CODE=474
           cat > module/module.prop << EOF
