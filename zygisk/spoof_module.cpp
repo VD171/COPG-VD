@@ -52,24 +52,7 @@ struct DeviceInfo {
     std::string build_host;
 };
 
-struct BuildPropValues {
-    std::string ro_product_brand;
-    std::string ro_product_manufacturer;
-    std::string ro_product_model;
-    std::string ro_product_device;
-    std::string ro_product_name;
-    std::string ro_build_fingerprint;
-    std::string ro_product_board;
-    std::string ro_bootloader;
-    std::string ro_hardware;
-    std::string ro_build_id;
-    std::string ro_build_display_id;
-    std::string ro_build_host;
-
-};
-
 static DeviceInfo current_info;
-static BuildPropValues original_build_props;
 static std::mutex info_mutex;
 static jclass buildClass = nullptr;
 static jclass versionClass = nullptr;
@@ -106,83 +89,6 @@ struct JniString {
     const char* get() const { return chars; }
 };
 
-static std::string readBuildPropValue(const std::string& prop_name) {
-    const char* build_prop_paths[] = {
-        "/system/build.prop",
-        "/vendor/build.prop",
-        nullptr
-    };
-    
-    const char* prefixes[] = {
-        "ro.product.",
-        "ro.product.system.",
-        "ro.product.vendor.",
-        ""
-    };
-    
-    for (int i = 0; build_prop_paths[i] != nullptr; i++) {
-        FILE* file = fopen(build_prop_paths[i], "r");
-        if (!file) continue;
-        
-        char line[512];
-        
-        while (fgets(line, sizeof(line), file)) {
-            for (int j = 0; j < sizeof(prefixes)/sizeof(prefixes[0]); j++) {
-                std::string search_str;
-                if (strlen(prefixes[j]) > 0) {
-                    search_str = std::string(prefixes[j]) + prop_name + "=";
-                } else {
-                    search_str = prop_name + "=";
-                }
-                
-                if (strstr(line, search_str.c_str()) == line) {
-                    std::string value = line + search_str.length();
-                    size_t newline_pos = value.find('\n');
-                    if (newline_pos != std::string::npos) {
-                        value.erase(newline_pos);
-                    }
-                    
-                    size_t comment_pos = value.find('#');
-                    if (comment_pos != std::string::npos) {
-                        value.erase(comment_pos);
-                    }
-                    
-                    fclose(file);
-                    
-                    while (!value.empty() && value.back() == '\r') {
-                        value.pop_back();
-                    }
-                    
-                    return value;
-                }
-            }
-        }
-        
-        fclose(file);
-    }
-    
-    return "";
-}
-
-static void readOriginalBuildProps() {
-    original_build_props.ro_product_brand = readBuildPropValue("brand");
-    original_build_props.ro_product_manufacturer = readBuildPropValue("manufacturer");
-    original_build_props.ro_product_model = readBuildPropValue("model");
-    original_build_props.ro_product_device = readBuildPropValue("device");
-    original_build_props.ro_product_name = readBuildPropValue("name");
-    original_build_props.ro_build_fingerprint = readBuildPropValue("fingerprint");
-    original_build_props.ro_product_board = readBuildPropValue("board");
-    original_build_props.ro_bootloader = readBuildPropValue("bootloader");
-    original_build_props.ro_hardware = readBuildPropValue("hardware");
-    original_build_props.ro_build_id = readBuildPropValue("id");
-    original_build_props.ro_build_display_id = readBuildPropValue("display.id");
-    original_build_props.ro_build_host = readBuildPropValue("host");
-    
-    CONFIG_LOG("Original props loaded: brand=%s, model=%s", 
-               original_build_props.ro_product_brand.c_str(),
-               original_build_props.ro_product_model.c_str());
-}
-
 class COPGModule : public zygisk::ModuleBase {
 public:
     void onLoad(zygisk::Api* api, JNIEnv* env) override {
@@ -191,8 +97,6 @@ public:
 
         ensureBuildClass();
         reloadIfNeeded(true);
-        
-        SPOOF_LOG("System server specializing - applying global spoof");
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
@@ -200,6 +104,7 @@ public:
             DeviceInfo device_info;
         
             if (!device_packages.empty()) {
+                SPOOF_LOG("Applying global spoof");
                 current_info = device_info = device_packages.front().first;
                 spoofDevice(current_info);
             }
@@ -238,42 +143,6 @@ private:
     zygisk::Api* api;
     JNIEnv* env;
     std::vector<std::pair<DeviceInfo, std::unordered_map<std::string, std::string>>> device_packages;
-
-    std::pair<std::string, std::unordered_set<std::string>> parsePackageWithTags(const std::string& package_str) {
-        std::string package_name = package_str;
-        std::unordered_set<std::string> tags;
-        
-        package_name.erase(0, package_name.find_first_not_of(" \t"));
-        package_name.erase(package_name.find_last_not_of(" \t") + 1);
-        
-        size_t first_colon = package_name.find(':');
-        if (first_colon != std::string::npos && first_colon < package_name.length() - 1) {
-            std::string original_name = package_name;
-            package_name = original_name.substr(0, first_colon);
-            
-            size_t start = first_colon + 1;
-            while (start < original_name.length()) {
-                size_t end = original_name.find(':', start);
-                std::string tag;
-                if (end == std::string::npos) {
-                    tag = original_name.substr(start);
-                    start = original_name.length();
-                } else {
-                    tag = original_name.substr(start, end - start);
-                    start = end + 1;
-                }
-                
-                tag.erase(0, tag.find_first_not_of(" \t"));
-                tag.erase(tag.find_last_not_of(" \t") + 1);
-                
-                if (!tag.empty()) {
-                    tags.insert(tag);
-                }
-            }
-        }
-        
-        return {package_name, tags};
-    }
 
     void ensureBuildClass() {
         std::call_once(build_once, [&] {
