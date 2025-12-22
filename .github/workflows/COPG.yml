@@ -39,7 +39,7 @@ jobs:
             exit 1
           fi
           echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;35.0.1"
           mkdir -p $ANDROID_HOME/ndk
           wget https://dl.google.com/android/repository/android-ndk-r29-linux.zip -O ndk.zip
           unzip -q ndk.zip -d $ANDROID_HOME/ndk
@@ -73,7 +73,7 @@ jobs:
           args: |
             -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake
             -DANDROID_ABI=arm64-v8a
-            -DANDROID_PLATFORM=android-34
+            -DANDROID_PLATFORM=android-35
             -DCMAKE_MAKE_PROGRAM=/usr/bin/make
 
       - name: Build Project (arm64-v8a) - End
@@ -95,7 +95,7 @@ jobs:
           chmod 755 module/zygisk/arm64-v8a.so
           
           chmod 755 module/customize.sh module/service.sh module/META-INF/com/google/android/update-binary
-          VERSION='4.8.0-vd'
+          VERSION='v4.8.0-vd'
           VERSION_CODE=480
           cat > module/module.prop << EOF
           id=COPG
@@ -107,18 +107,14 @@ jobs:
           minMagisk=20.4
           EOF
 
-      - name: Package module into ZIP
+      - name: Update version with grep
         run: |
           VERSION=$(grep "version=" module/module.prop | cut -d'=' -f2)
-          ZIP_NAME="COPG-v$VERSION.zip"
-          cd module
-          zip -r "../$ZIP_NAME" .
-          cd ..
-          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Upload Module ZIP as Artifact
+      - name: Upload module artifact
         uses: actions/upload-artifact@v4
         with:
-          name: COPG
-          path: ${{ env.ZIP_NAME }}
+          name: COPG-${{ env.VERSION }}
+          path: |
+            module/**
