@@ -95,11 +95,11 @@ jobs:
           chmod 755 module/zygisk/arm64-v8a.so
           
           chmod 755 module/customize.sh module/service.sh module/META-INF/com/google/android/update-binary
-          VERSION='4.7.4-vd'
-          VERSION_CODE=474
+          VERSION='4.8.0-vd'
+          VERSION_CODE=480
           cat > module/module.prop << EOF
           id=COPG
-          name=✨ COPG spoof by VD171 ✨
+          name=COPG by VD171
           version=$VERSION
           versionCode=$VERSION_CODE
           author=VD171 & AlirezaParsi
