@@ -627,15 +627,7 @@
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="game-type">Spoofing Type</label>
-                    <div class="type-select-wrapper">
-                        <input type="text" id="game-type" placeholder="Select spoofing type..." readonly required>
-                        <svg class="dropdown-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M6 9l6 6 6-6"></path>
-                        </svg>
-                    </div>
-                </div>
+                <input type="hidden" id="game-type" value="device">
                 
                 <div class="form-group device-select-group" id="device-select-group">
                     <label for="game-device">Device Profile</label>
@@ -667,63 +659,6 @@
                     <button type="submit" class="action-btn">Save</button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <div id="game-type-picker-popup" class="popup">
-        <div class="popup-content device-picker-content">
-            <div class="modal-header">
-                <h3>Select Spoofing Type</h3>
-            </div>
-            <div class="search-container">
-                <input type="text" id="game-type-picker-search" placeholder="Search types...">
-            </div>
-            <div class="scroll-container">
-                <div class="list-wrapper">
-                    <div id="game-type-picker-list" class="device-picker">
-                        <div class="type-picker-card" data-type="device">
-                            <div class="type-icon device-icon">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                                    <path d="M12 18h.01"></path>
-                                </svg>
-                            </div>
-                            <div class="type-info">
-                                <h4>Device Spoof + Extra</h4>
-                                <p>Spoof device + Extra Abilities</p>
-                            </div>
-                        </div>
-                        
-                        <div class="type-picker-card" data-type="cpu_only">
-                            <div class="type-icon cpu-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0m-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5zM6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5z"/>
-                                </svg>
-                            </div>
-                            <div class="type-info">
-                                <h4>CPU Spoof Only</h4>
-                                <p>Only spoof CPU model</p>
-                            </div>
-                        </div>
-                        
-                        <div class="type-picker-card" data-type="blocked">
-                            <div class="type-icon blocked-icon">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <path d="M18 6L6 18"></path>
-                                </svg>
-                            </div>
-                            <div class="type-info">
-                                <h4>Block Spoofing</h4>
-                                <p>Block/Hide all spoofing Traces for this package</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="popup-buttons">
-                <button class="cancel-btn">Cancel</button>
-            </div>
         </div>
     </div>
 
