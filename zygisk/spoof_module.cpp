@@ -95,9 +95,6 @@ static std::once_flag build_once;
 static time_t last_config_mtime = 0;
 static const std::string config_path = "/data/adb/modules/COPG/COPG.json";
 
-static std::unordered_set<std::string> cpu_blacklist;
-static std::unordered_set<std::string> cpu_only_packages;
-
 struct JniString {
     JNIEnv* env;
     jstring jstr;
@@ -300,14 +297,12 @@ public:
             std::lock_guard<std::mutex> lock(info_mutex);
             
             DeviceInfo device_info;
-            std::string package_setting = "";
             bool found_in_device_list = false;
 
             for (auto& device_entry : device_packages) {
                 auto it = device_entry.second.find(package_name);
                 if (it != device_entry.second.end()) {
                     found_in_device_list = true;
-                    package_setting = it->second;
                     current_needs_device_spoof = true;
                     device_info = device_entry.first;
                     current_info = device_info;
@@ -703,8 +698,8 @@ private:
             }
 
             last_config_mtime = current_mtime;
-            CONFIG_LOG("Loaded: %d devices, %zu cpu_only, %zu blacklist", 
-                      device_count, cpu_only_packages.size(), cpu_blacklist.size());
+            CONFIG_LOG("Loaded: %d devices", 
+                      device_count);
         } catch (const json::exception& e) {
             LOGE("JSON error: %s", e.what());
         } catch (const std::exception& e) {
