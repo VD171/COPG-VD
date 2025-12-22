@@ -87,57 +87,6 @@ const templates = {
         return card;
     },
     
-    cpuSpoofCard: (data) => {
-        const template = document.getElementById('cpu-spoof-card-template');
-        const clone = template.content.cloneNode(true);
-        const card = clone.querySelector('.game-card');
-        
-        card.dataset.package = data.packageName;
-        card.dataset.type = data.type;
-        card.style.animationDelay = `${data.delay}s`;
-        card.querySelector('.game-name').textContent = data.gameName;
-        card.querySelector('.game-package').textContent = data.cleanPackageName;
-        card.querySelector('.game-info').textContent = data.typeLabel;
-        
-        const badgeGroup = card.querySelector('.badge-group');
-        let typeBadge = '';
-               
-        badgeGroup.innerHTML = `
-            ${typeBadge}
-            ${data.isInstalled ? '<span class="installed-badge">Installed</span>' : ''}
-        `;
-        
-        const infoBadge = badgeGroup.querySelector('.blocked-globally-badge, .cpu-only-badge');
-        if (infoBadge) {
-            infoBadge.style.cursor = 'pointer';
-            infoBadge.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-        }
-        
-        const gameActions = card.querySelector('.game-actions');
-        const editSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-        </svg>`;
-        
-        const deleteSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 6h18"></path>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-        </svg>`;
-        
-        gameActions.innerHTML = `
-            <button class="edit-btn" data-package="${data.packageName}" data-type="${data.type}" title="Edit">
-                ${editSvg}
-            </button>
-            <button class="delete-btn" data-package="${data.packageName}" data-type="${data.type}" title="Delete">
-                ${deleteSvg}
-            </button>
-        `;
-        
-        return card;
-    },
-    
     pickerDeviceCard: (data) => {
         const template = document.getElementById('picker-device-card-template');
         const clone = template.content.cloneNode(true);
@@ -236,52 +185,6 @@ function removeTagFromPackage(packageName, tag) {
     return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
 }
 
-function hasWithCpuTag(packageName) {
-    return packageName.includes(':with_cpu');
-}
-
-function hasBlockedTag(packageName) {
-    return packageName.includes(':blocked');
-}
-
-function addCpuSpoofTag(packageName) {
-    const cleanName = getPackageNameWithoutTags(packageName);
-    const existingTags = getAllTags(packageName);
-    if (!existingTags.includes('with_cpu')) {
-        existingTags.push('with_cpu');
-    }
-    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
-}
-
-function removeCpuSpoofTag(packageName) {
-    const cleanName = getPackageNameWithoutTags(packageName);
-    const existingTags = getAllTags(packageName).filter(t => t !== 'with_cpu');
-    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
-}
-
-function addBlockedTag(packageName) {
-    const cleanName = getPackageNameWithoutTags(packageName);
-    const existingTags = getAllTags(packageName);
-    if (!existingTags.includes('blocked')) {
-        existingTags.push('blocked');
-    }
-    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
-}
-
-function removeBlockedTag(packageName) {
-    const cleanName = getPackageNameWithoutTags(packageName);
-    const existingTags = getAllTags(packageName).filter(t => t !== 'blocked');
-    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
-}
-
-function toggleCpuSpoofTag(packageName, enable) {
-    return enable ? addCpuSpoofTag(packageName) : removeCpuSpoofTag(packageName);
-}
-
-function toggleBlockedTag(packageName, enable) {
-    return enable ? addBlockedTag(packageName) : removeBlockedTag(packageName);
-}
-
 function createSortDropdown() {
     const template = document.getElementById('sort-dropdown-template');
     const clone = template.content.cloneNode(true);
@@ -323,10 +226,7 @@ function createSortDropdown() {
 
 function getFilterDisplayName(filterType) {
     switch(filterType) {
-        case 'blocklist': return 'Blocklist';
-        case 'cpu_only': return 'CPU Only';
         case 'installed': return 'Installed';
-        case 'no_tweaks': return 'No Tweaks';
         default: return filterType;
     }
 }
@@ -336,10 +236,7 @@ function getSortTypeName(sortType) {
         case 'default': return 'Default';
         case 'asc': return 'A → Z';
         case 'desc': return 'Z → A';
-        case 'blocklist': return 'Blocklist';
-        case 'cpu_only': return 'CPU Only';
         case 'installed': return 'Installed';
-        case 'no_tweaks': return 'No Tweaks';
         default: return sortType;
     }
 }
@@ -351,36 +248,18 @@ function updateFilterCounts() {
     const games = gameList.querySelectorAll('.game-card');
     
     const counts = {
-        blocklist: 0,
-        cpu_only: 0,
-        installed: 0,
-        no_tweaks: 0
+        installed: 0
     };
     
     games.forEach(game => {
-        if (game.querySelector('.blocked-globally-badge') || game.querySelector('.blocked-badge')) {
-            counts.blocklist++;
-        }
-        if (game.querySelector('.cpu-only-badge') || game.querySelector('.cpu-badge')) {
-            counts.cpu_only++;
-        }
         if (game.querySelector('.installed-badge')) {
             counts.installed++;
         }
-        if (game.querySelector('.no-tweaks-badge')) {
-            counts.no_tweaks++;
-        }
     });
     
-    const blocklistCount = document.getElementById('blocklist-count');
-    const cpuOnlyCount = document.getElementById('cpu-only-count');
     const installedCount = document.getElementById('installed-count');
-    const noTweaksCount = document.getElementById('no-tweaks-count');
-    
-    if (blocklistCount) blocklistCount.textContent = counts.blocklist;
-    if (cpuOnlyCount) cpuOnlyCount.textContent = counts.cpu_only;
+
     if (installedCount) installedCount.textContent = counts.installed;
-    if (noTweaksCount) noTweaksCount.textContent = counts.no_tweaks;
 }
 
 function setGameSort(sortType) {
@@ -484,30 +363,7 @@ function getOriginalDeviceOrder() {
 
 function getOriginalGameOrder() {
     const games = [];
-    const cpuSpoofData = currentConfig.cpu_spoof || {};
-    const blockedList = cpuSpoofData.blacklist || [];
-    const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
-    
-    blockedList.forEach((packageName, index) => {
-        games.push({
-            packageName: packageName,
-            type: 'blocked',
-            cleanPackageName: getPackageNameWithoutTags(packageName),
-            originalIndex: index,
-            list: 'blocked'
-        });
-    });
-    
-    cpuOnlyList.forEach((packageName, index) => {
-        games.push({
-            packageName: packageName,
-            type: 'cpu_only',
-            cleanPackageName: getPackageNameWithoutTags(packageName),
-            originalIndex: index,
-            list: 'cpu_only'
-        });
-    });
-    
+
     for (const key of configKeyOrder) {
         if (Array.isArray(currentConfig[key]) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
             const deviceKey = `${key}_DEVICE`;
@@ -627,26 +483,6 @@ function sortGameList() {
         
         const sortedGames = [];
         
-        if (groupedGames['blocked']) {
-            groupedGames['blocked'].forEach(gameInfo => {
-                const game = games.find(g => 
-                    g.dataset.package === gameInfo.packageName && 
-                    g.dataset.type === 'blocked'
-                );
-                if (game) sortedGames.push(game);
-            });
-        }
-        
-        if (groupedGames['cpu_only']) {
-            groupedGames['cpu_only'].forEach(gameInfo => {
-                const game = games.find(g => 
-                    g.dataset.package === gameInfo.packageName && 
-                    g.dataset.type === 'cpu_only'
-                );
-                if (game) sortedGames.push(game);
-            });
-        }
-        
         for (const key of configKeyOrder) {
             if (key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE') && groupedGames[key]) {
                 groupedGames[key].forEach(gameInfo => {
@@ -704,19 +540,8 @@ function applyGameFilter() {
         let shouldShow = false;
         
         switch(activeFilter) {
-            case 'blocklist':
-                shouldShow = game.querySelector('.blocked-globally-badge') || 
-                            game.querySelector('.blocked-badge');
-                break;
-            case 'cpu_only':
-                shouldShow = game.querySelector('.cpu-only-badge') || 
-                            game.querySelector('.cpu-badge');
-                break;
             case 'installed':
                 shouldShow = game.querySelector('.installed-badge');
-                break;
-            case 'no_tweaks':
-                shouldShow = game.querySelector('.no-tweaks-badge');
                 break;
             default:
                 shouldShow = true;
@@ -1643,64 +1468,10 @@ async function renderGameList() {
         appendToOutput("Failed to get installed packages: " + error, 'warning');
     }
 
-    const cpuSpoofData = currentConfig.cpu_spoof || {};
-    const blockedList = cpuSpoofData.blacklist || [];
-    const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
-
     const fragment = document.createDocumentFragment();
     let index = 0;
     const displayedPackages = new Set();
-    
-    blockedList.forEach(packageName => {
-        const cleanPackageName = getPackageNameWithoutTags(packageName);
-        if (displayedPackages.has(cleanPackageName)) return;
-        displayedPackages.add(cleanPackageName);
-        
-        const isInstalled = installedPackages.includes(cleanPackageName);
-        const gameName = gameNamesMap[cleanPackageName] || cleanPackageName;
-        const hasBlocked = hasBlockedTag(packageName);
-        
-        const gameCard = templates.cpuSpoofCard({
-            packageName: packageName,
-            type: 'blocked',
-            gameName: gameName,
-            cleanPackageName: cleanPackageName,
-            isInstalled: isInstalled,
-            hasBlocked: hasBlocked,
-            delay: Math.min(index * 0.05, 0.5),
-            typeLabel: 'Global Blocklist',
-            typeBadge: '<span class="blocked-globally-badge">Blocked Globally</span>'
-        });
-        
-        fragment.appendChild(gameCard);
-        index++;
-    });
-    
-    cpuOnlyList.forEach(packageName => {
-        const cleanPackageName = getPackageNameWithoutTags(packageName);
-        if (displayedPackages.has(cleanPackageName)) return;
-        displayedPackages.add(cleanPackageName);
-        
-        const isInstalled = installedPackages.includes(cleanPackageName);
-        const gameName = gameNamesMap[cleanPackageName] || cleanPackageName;
-        const hasBlocked = hasBlockedTag(packageName);
-        
-        const gameCard = templates.cpuSpoofCard({
-            packageName: packageName,
-            type: 'cpu_only',
-            gameName: gameName,
-            cleanPackageName: cleanPackageName,
-            isInstalled: isInstalled,
-            hasBlocked: hasBlocked,
-            delay: Math.min(index * 0.05, 0.5),
-            typeLabel: 'CPU Only',
-            typeBadge: '<span class="cpu-only-badge">CPU</span>'
-        });
-        
-        fragment.appendChild(gameCard);
-        index++;
-    });
-    
+
     for (const key of configKeyOrder) {
         if (Array.isArray(currentConfig[key]) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
             const deviceKey = `${key}_DEVICE`;
@@ -1711,21 +1482,10 @@ async function renderGameList() {
                 const cleanPackageName = getPackageNameWithoutTags(gamePackage);
                 if (displayedPackages.has(cleanPackageName)) return;
                 
-                const hasWithCpu = hasWithCpuTag(gamePackage);
-                const hasBlocked = hasBlockedTag(gamePackage);
                 const isInstalled = installedPackages.includes(cleanPackageName);
                 const gameName = gameNamesMap[cleanPackageName] || cleanPackageName;
-                
-                const isBlocked = blockedList.includes(cleanPackageName);
-                const isCpuOnly = cpuOnlyList.includes(cleanPackageName);
-                
+                               
                 let additionalBadges = '';
-                if (isBlocked) {
-                    additionalBadges += '<span class="blocked-globally-badge">Blocked Globally</span>';
-                }
-                if (isCpuOnly) {
-                    additionalBadges += '<span class="cpu-only-badge">CPU</span>';
-                }
                 
                 const gameCard = templates.gameCard({
                     gamePackage: gamePackage,
@@ -1734,8 +1494,6 @@ async function renderGameList() {
                     gameName: gameName,
                     cleanPackageName: cleanPackageName,
                     deviceName: deviceName,
-                    hasWithCpu: hasWithCpu,
-                    hasBlocked: hasBlocked,
                     isInstalled: isInstalled,
                     additionalBadges: additionalBadges
                 });
@@ -1983,12 +1741,7 @@ function setupLongPressHandlers() {
             const action = confirmBtn.dataset.action;
             const cleanPackageName = getPackageNameWithoutTags(packageName);
             
-            let success = false;
-            if (spoofType && spoofType !== 'regular') {
-                success = await handleCpuSpoofNoTweak(packageName, spoofType, action, cleanPackageName);
-            } else {
-                success = await handleRegularNoTweak(packageName, deviceKey, action, cleanPackageName);
-            }
+            let success = await handleRegularNoTweak(packageName, deviceKey, action, cleanPackageName);
             
             if (success) {
                 renderGameList();
@@ -2008,48 +1761,6 @@ function setupLongPressHandlers() {
     }
 }
 
-async function handleCpuSpoofNoTweak(packageName, spoofType, action, cleanPackageName) {
-    try {
-        const cpuSpoofData = currentConfig.cpu_spoof || {};
-        let targetList = null;
-        
-        if (spoofType === 'blocked') {
-            targetList = cpuSpoofData.blacklist || [];
-        } else if (spoofType === 'cpu_only') {
-            targetList = cpuSpoofData.cpu_only_packages || [];
-        }
-        
-        if (!targetList) {
-            appendToOutput(`Invalid spoof type: ${spoofType}`, 'error');
-            return false;
-        }
-        
-        const index = targetList.findIndex(pkg => getPackageNameWithoutTags(pkg) === cleanPackageName);
-        if (index === -1) {
-            appendToOutput(`Package ${cleanPackageName} not found in ${spoofType} list`, 'error');
-            return false;
-        }
-        
-        let newPackageName;
-        if (action === 'add') {
-            newPackageName = addTagToPackage(packageName, 'notweak');
-        } else {
-            newPackageName = removeTagFromPackage(packageName, 'notweak');
-        }
-        
-        targetList[index] = newPackageName;
-        await saveConfig();
-        appendToOutput(
-            `${action === 'add' ? 'Added' : 'Removed'} no-tweaks tag for ${cleanPackageName} (${spoofType})`,
-            'success'
-        );
-        return true;
-    } catch (error) {
-        appendToOutput(`Failed to update CPU Spoof package: ${error}`, 'error');
-        return false;
-    }
-}
-
 async function handleRegularNoTweak(packageName, deviceKey, action, cleanPackageName) {
     try {
         const packageIndex = currentConfig[deviceKey].indexOf(packageName);
@@ -2063,12 +1774,6 @@ async function handleRegularNoTweak(packageName, deviceKey, action, cleanPackage
             newPackageName = addTagToPackage(packageName, 'notweak');
         } else {
             newPackageName = removeTagFromPackage(packageName, 'notweak');
-        }
-        
-        const hasWithCpu = hasWithCpuTag(newPackageName);
-        const hasBlocked = hasBlockedTag(newPackageName);
-        if (hasWithCpu && hasBlocked) {
-            newPackageName = removeBlockedTag(newPackageName);
         }
         
         currentConfig[deviceKey][packageIndex] = newPackageName;
@@ -2105,15 +1810,6 @@ function attachGameListeners() {
         btn.removeEventListener('click', deleteGameHandler);
         btn.addEventListener('click', deleteGameHandler);
     });
-    
-    document.querySelectorAll('.game-card.cpu-spoof-card .edit-btn').forEach(btn => {
-        btn.removeEventListener('click', editCpuSpoofGameHandler);
-        btn.addEventListener('click', editCpuSpoofGameHandler);
-    });
-    document.querySelectorAll('.game-card.cpu-spoof-card .delete-btn').forEach(btn => {
-        btn.removeEventListener('click', deleteCpuSpoofGameHandler);
-        btn.addEventListener('click', deleteCpuSpoofGameHandler);
-    });
 }
 
 function editGameHandler(e) {
@@ -2126,13 +1822,6 @@ function deleteGameHandler(e) {
     const gameName = e.currentTarget.closest('.game-card').querySelector('.game-name').textContent;
     const deviceName = e.currentTarget.closest('.game-card').querySelector('.game-info').textContent;
     deleteGame(gamePackage, e.currentTarget.dataset.device, gameName, deviceName, cleanPackageName);
-}
-
-function editCpuSpoofGameHandler(e) {
-    e.stopPropagation();
-    const packageName = e.currentTarget.dataset.package;
-    const type = e.currentTarget.dataset.type;
-    editGame(packageName, null, type);
 }
 
 function editDevice(deviceKey) {
@@ -2301,55 +1990,6 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
         }
     });
     
-    let cpuSpoofContainer = document.getElementById('cpu-spoof-container');
-    if (!cpuSpoofContainer) {
-        cpuSpoofContainer = document.createElement('div');
-        cpuSpoofContainer.id = 'cpu-spoof-container';
-        cpuSpoofContainer.className = 'form-group disable-tweaks-group';
-        cpuSpoofContainer.innerHTML = `
-            <div class="toggle-wrapper">
-                <label class="toggle-label" for="cpu-spoof-toggle">
-                    <span>With CPU Spoofing</span>
-                    <span class="badge-container">
-                        <span class="with-cpu-badge modal-badge">With CPU</span>
-                    </span>
-                </label>
-                <label class="switch small-switch">
-                    <input type="checkbox" id="cpu-spoof-toggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        `;
-    }
-    
-    let blockCpuContainer = document.getElementById('block-cpu-container');
-    if (!blockCpuContainer) {
-        blockCpuContainer = document.createElement('div');
-        blockCpuContainer.id = 'block-cpu-container';
-        blockCpuContainer.className = 'form-group disable-tweaks-group';
-        blockCpuContainer.innerHTML = `
-            <div class="toggle-wrapper">
-                <label class="toggle-label" for="block-cpu-toggle">
-                    <span>Block CPU Spoofing</span>
-                    <span class="badge-container">
-                        <span class="blocked-cpu-badge modal-badge">Block CPU</span>
-                    </span>
-                </label>
-                <label class="switch small-switch">
-                    <input type="checkbox" id="block-cpu-toggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        `;
-        cpuSpoofContainer.after(blockCpuContainer);
-    }
-    
-    const cpuSpoofToggle = document.getElementById('cpu-spoof-toggle');
-    const blockCpuToggle = document.getElementById('block-cpu-toggle');
-    const disableTweaksGroup = document.querySelector('.disable-tweaks-group');
-    const cpuSpoofGroup = cpuSpoofContainer;
-    const blockCpuGroup = blockCpuContainer;
-    
     if (gamePackage) {
         title.textContent = 'Edit Game Configuration';
         
@@ -2357,22 +1997,7 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
         packageInput.value = cleanPackageName;
         
         let detectedType = 'device';
-        if (gameType) {
-            detectedType = gameType;
-        } else {
-            const cpuSpoofData = currentConfig.cpu_spoof || {};
-            const blockedList = cpuSpoofData.blacklist || [];
-            const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
-            
-            if (blockedList.includes(cleanPackageName)) {
-                detectedType = 'blocked';
-            } else if (cpuOnlyList.includes(cleanPackageName)) {
-                detectedType = 'cpu_only';
-            } else if (deviceKey) {
-                detectedType = 'device';
-            }
-        }
-        
+
         editingGame = { 
             package: gamePackage, 
             device: deviceKey,
@@ -2383,23 +2008,12 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
         typeInput.value = getTypeDisplayName(detectedType);
         typeInput.dataset.type = detectedType;
         typeInput.classList.add('highlighted');
-        
-        const hasWithCpu = hasWithCpuTag(gamePackage);
-        const hasBlocked = hasBlockedTag(gamePackage);
-        
-        cpuSpoofToggle.checked = hasWithCpu;
-        blockCpuToggle.checked = hasBlocked;
-        
+
         if (detectedType === 'device' && deviceKey) {
             deviceInput.value = currentConfig[`${deviceKey}_DEVICE`]?.DEVICE || '';
             deviceInput.dataset.key = `${deviceKey}_DEVICE`;
             deviceInput.classList.add('highlighted');
             deviceGroup.classList.remove('disabled');
-            disableTweaksGroup.classList.remove('disabled');
-            cpuSpoofGroup.classList.remove('disabled');
-            blockCpuGroup.classList.remove('disabled');
-            cpuSpoofToggle.disabled = false;
-            blockCpuToggle.disabled = false;
         }
         
         execCommand("cat /data/adb/modules/COPG/list.json")
@@ -2414,7 +2028,7 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
             });
             
     } else {
-        title.textContent = 'Add New Game';
+        title.textContent = 'Add New App';
         editingGame = null;
         form.reset();
         selectedGameType = 'device';
@@ -2423,14 +2037,7 @@ function openGameModal(gamePackage = null, deviceKey = null, gameType = null) {
         typeInput.classList.add('highlighted');
         
         deviceGroup.classList.remove('disabled');
-        disableTweaksGroup.classList.remove('disabled');
-        cpuSpoofGroup.classList.remove('disabled');
-        blockCpuGroup.classList.remove('disabled');
-        cpuSpoofToggle.checked = false;
-        blockCpuToggle.checked = false;
-        cpuSpoofToggle.disabled = false;
-        blockCpuToggle.disabled = false;
-        
+       
         deviceInput.value = '';
         deviceInput.dataset.key = '';
         deviceInput.classList.remove('highlighted');
@@ -2623,13 +2230,9 @@ async function saveGame(e) {
     const gameName = gameNameInput.value.trim() || gamePackageInput;
     const typeInput = document.getElementById('game-type');
     const deviceInput = document.getElementById('game-device');
-    const cpuSpoofToggle = document.getElementById('cpu-spoof-toggle');
-    const blockCpuToggle = document.getElementById('block-cpu-toggle');
     
     const selectedType = typeInput.dataset.type;
     const newDeviceKey = deviceInput.dataset.key;
-    const withCpuSpoof = cpuSpoofToggle ? cpuSpoofToggle.checked : false;
-    const blockCpuSpoof = blockCpuToggle ? blockCpuToggle.checked : false;
     
     form.querySelectorAll('input').forEach(field => {
         field.classList.remove('error');
@@ -2673,12 +2276,6 @@ async function saveGame(e) {
         missingFields.push('Device Profile');
     }
     
-    if (selectedType === 'device' && withCpuSpoof && blockCpuSpoof) {
-        document.getElementById('error-message').textContent = 'Cannot enable both "With CPU Spoofing" and "Block CPU Spoofing" at the same time';
-        showPopup('error-popup');
-        hasError = true;
-    }
-    
     const cleanPackageForCheck = getPackageNameWithoutTags(gamePackageInput);
     
     let duplicateLocation = '';
@@ -2686,26 +2283,7 @@ async function saveGame(e) {
     if (editingGame) {
         const oldCleanPackage = getPackageNameWithoutTags(editingGame.package);
         if (oldCleanPackage !== cleanPackageForCheck) {
-            const cpuSpoofData = currentConfig.cpu_spoof || {};
-            const blockedList = cpuSpoofData.blacklist || [];
-            const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
-            
-            for (const blockedPackage of blockedList) {
-                if (getPackageNameWithoutTags(blockedPackage) === cleanPackageForCheck) {
-                    duplicateLocation = 'blocklist';
-                    break;
-                }
-            }
-            
-            if (!duplicateLocation) {
-                for (const cpuPackage of cpuOnlyList) {
-                    if (getPackageNameWithoutTags(cpuPackage) === cleanPackageForCheck) {
-                        duplicateLocation = 'CPU only list';
-                        break;
-                    }
-                }
-            }
-            
+                        
             if (!duplicateLocation) {
                 for (const [key, value] of Object.entries(currentConfig)) {
                     if (Array.isArray(value) && key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE')) {
@@ -2741,25 +2319,6 @@ async function saveGame(e) {
             }
         }
     } else {
-        const cpuSpoofData = currentConfig.cpu_spoof || {};
-        const blockedList = cpuSpoofData.blacklist || [];
-        const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
-        
-        for (const blockedPackage of blockedList) {
-            if (getPackageNameWithoutTags(blockedPackage) === cleanPackageForCheck) {
-                duplicateLocation = 'blocklist';
-                break;
-            }
-        }
-        
-        if (!duplicateLocation) {
-            for (const cpuPackage of cpuOnlyList) {
-                if (getPackageNameWithoutTags(cpuPackage) === cleanPackageForCheck) {
-                    duplicateLocation = 'CPU only list';
-                    break;
-                }
-            }
-        }
         
         if (!duplicateLocation) {
             for (const [key, value] of Object.entries(currentConfig)) {
@@ -2786,12 +2345,12 @@ async function saveGame(e) {
             
             const errorMessage = document.createElement('span');
             errorMessage.className = 'error-message';
-            errorMessage.textContent = `Game package already exists in ${duplicateLocation}`;
+            errorMessage.textContent = `App package already exists in ${duplicateLocation}`;
             field.parentNode.insertAdjacentElement('afterend', errorMessage);
             
             hasError = true;
-            missingFields.push('Package Name (duplicate)');
-            document.getElementById('error-message').textContent = `Game package already exists in ${duplicateLocation}`;
+            missingFields.push('Package App (duplicate)');
+            document.getElementById('error-message').textContent = `App package already exists in ${duplicateLocation}`;
             showPopup('error-popup');
         }
     }
@@ -2807,16 +2366,7 @@ async function saveGame(e) {
     }
     
     try {
-        if (!currentConfig.cpu_spoof) {
-            currentConfig.cpu_spoof = {
-                blacklist: [],
-                cpu_only_packages: []
-            };
-            if (!configKeyOrder.includes('cpu_spoof')) {
-                configKeyOrder.push('cpu_spoof');
-            }
-        }
-        
+
         try {
             const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
             let listData = JSON.parse(listContent);
@@ -2833,37 +2383,16 @@ async function saveGame(e) {
         }
         
         let finalPackageName = gamePackageInput;
-        if (disableTweaks && selectedType !== 'blocked') {
-            finalPackageName = addTagToPackage(finalPackageName, 'notweak');
-        }
-        
-        if (withCpuSpoof && selectedType === 'device') {
-            finalPackageName = addCpuSpoofTag(finalPackageName);
-        }
-        
-        if (blockCpuSpoof && selectedType === 'device') {
-            finalPackageName = addBlockedTag(finalPackageName);
-        }
         
         const oldCleanPackage = editingGame ? getPackageNameWithoutTags(editingGame.package) : null;
         const oldDeviceKey = editingGame ? editingGame.device : null;
         const oldGameType = editingGame ? editingGame.type : null;
         
-        const cpuSpoofData = currentConfig.cpu_spoof;
-        const blockedList = cpuSpoofData.blacklist || [];
-        const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
-        
         let originalPosition = -1;
         let originalList = null;
         
         if (editingGame) {
-            if (oldGameType === 'blocked') {
-                originalPosition = blockedList.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
-                originalList = 'blocked';
-            } else if (oldGameType === 'cpu_only') {
-                originalPosition = cpuOnlyList.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
-                originalList = 'cpu_only';
-            } else if (oldGameType === 'device' && oldDeviceKey) {
+            if (oldGameType === 'device' && oldDeviceKey) {
                 const oldPackageList = currentConfig[oldDeviceKey];
                 if (Array.isArray(oldPackageList)) {
                     originalPosition = oldPackageList.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
@@ -2871,22 +2400,7 @@ async function saveGame(e) {
                 }
             }
         }
-        
-        if (oldCleanPackage) {
-            const blockedIndex = blockedList.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
-            const cpuOnlyIndex = cpuOnlyList.findIndex(pkg => getPackageNameWithoutTags(pkg) === oldCleanPackage);
-            
-            if (blockedIndex !== -1 && selectedType !== 'blocked') {
-                blockedList.splice(blockedIndex, 1);
-                appendToOutput(`Removed package from blocklist`, 'info');
-            }
-            
-            if (cpuOnlyIndex !== -1 && selectedType !== 'cpu_only') {
-                cpuOnlyList.splice(cpuOnlyIndex, 1);
-                appendToOutput(`Removed package from CPU only list`, 'info');
-            }
-        }
-        
+
         if (oldDeviceKey && selectedType !== 'device') {
             const oldPackageList = currentConfig[oldDeviceKey];
             if (Array.isArray(oldPackageList)) {
@@ -2930,58 +2444,13 @@ async function saveGame(e) {
             
             if (editingGame && originalList === packageKey && originalPosition !== -1) {
                 newPackageList.splice(originalPosition, 0, finalPackageName);
-                appendToOutput(`Updated game "${gameName}" at position ${originalPosition + 1} in "${currentConfig[newDeviceKey].DEVICE}"`, 'success');
+                appendToOutput(`Updated app "${gameName}" at position ${originalPosition + 1} in "${currentConfig[newDeviceKey].DEVICE}"`, 'success');
             } else {
                 newPackageList.push(finalPackageName);
                 
-                let tweaksMessage = '';
-                if (disableTweaks && withCpuSpoof) {
-                    tweaksMessage = 'with no tweaks and CPU spoofing';
-                } else if (disableTweaks && blockCpuSpoof) {
-                    tweaksMessage = 'with no tweaks and CPU spoofing blocked';
-                } else if (disableTweaks) {
-                    tweaksMessage = 'with no tweaks';
-                } else if (withCpuSpoof) {
-                    tweaksMessage = 'with CPU spoofing';
-                } else if (blockCpuSpoof) {
-                    tweaksMessage = 'with CPU spoofing blocked';
-                } else {
-                    tweaksMessage = 'with all tweaks';
-                }
-                
-                appendToOutput(`Game "${gameName}" ${editingGame ? 'updated' : 'added'} to "${currentConfig[newDeviceKey].DEVICE}" ${tweaksMessage}`, 'success');
+                appendToOutput(`App "${gameName}" ${editingGame ? 'updated' : 'added'} to "${currentConfig[newDeviceKey].DEVICE}"`, 'success');
             }
             
-        } else if (selectedType === 'cpu_only') {
-            const existingIndex = cpuOnlyList.findIndex(pkg => getPackageNameWithoutTags(pkg) === getPackageNameWithoutTags(finalPackageName));
-            if (existingIndex !== -1) {
-                cpuOnlyList.splice(existingIndex, 1);
-            }
-            
-            if (editingGame && originalList === 'cpu_only' && originalPosition !== -1) {
-                cpuOnlyList.splice(originalPosition, 0, finalPackageName);
-                appendToOutput(`Updated game "${gameName}" at position ${originalPosition + 1} in CPU only list`, 'success');
-            } else {
-                cpuOnlyList.push(finalPackageName);
-                
-                let tweaksMessage = disableTweaks ? 'with no tweaks' : 'with all tweaks';
-                appendToOutput(`Game "${gameName}" ${editingGame ? 'updated' : 'added'} to CPU only spoofing ${tweaksMessage}`, 'success');
-            }
-            
-        } else if (selectedType === 'blocked') {
-            const existingIndex = blockedList.findIndex(pkg => getPackageNameWithoutTags(pkg) === getPackageNameWithoutTags(cleanPackageForCheck));
-            if (existingIndex !== -1) {
-                blockedList.splice(existingIndex, 1);
-            }
-            
-            if (editingGame && originalList === 'blocked' && originalPosition !== -1) {
-                blockedList.splice(originalPosition, 0, cleanPackageForCheck);
-                appendToOutput(`Updated game "${gameName}" at position ${originalPosition + 1} in blocklist`, 'success');
-            } else {
-                blockedList.push(cleanPackageForCheck);
-                
-                appendToOutput(`Game "${gameName}" ${editingGame ? 'updated' : 'added'} to blocklist`, 'success');
-            }
         }
         
         await saveConfig();
@@ -2994,138 +2463,6 @@ async function saveGame(e) {
         document.getElementById('error-message').textContent = `Failed to save game: ${error}`;
         showPopup('error-popup');
     }
-}
-
-function deleteCpuSpoofGameHandler(e) {
-    e.stopPropagation();
-    const packageName = e.currentTarget.dataset.package;
-    const type = e.currentTarget.dataset.type;
-    const card = e.currentTarget.closest('.game-card');
-    const gameName = card.querySelector('.game-name').textContent;
-    deleteCpuSpoofGame(packageName, type, gameName);
-}
-
-async function deleteCpuSpoofGame(packageName, type, gameName) {
-    const card = document.querySelector(`.game-card.cpu-spoof-card[data-package="${packageName}"][data-type="${type}"]`);
-    if (!card) return;
-
-    card.classList.add('fade-out');
-    await new Promise(resolve => setTimeout(resolve, 400));
-
-    const cleanPackageName = getPackageNameWithoutTags(packageName);
-    const cpuSpoofData = currentConfig.cpu_spoof || {};
-    
-    let originalListData = {};
-    try {
-        const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
-        originalListData = JSON.parse(listContent);
-    } catch (error) {
-        appendToOutput("Failed to load game names list: " + error, 'warning');
-    }
-
-    let originalPosition = -1;
-    let originalPackage = null;
-    
-    if (type === 'blocked') {
-        const blockedList = cpuSpoofData.blacklist || [];
-        originalPosition = blockedList.findIndex(pkg => getPackageNameWithoutTags(pkg) === cleanPackageName);
-        if (originalPosition !== -1) {
-            originalPackage = blockedList[originalPosition];
-            blockedList.splice(originalPosition, 1);
-        }
-    } else if (type === 'cpu_only') {
-        const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
-        originalPosition = cpuOnlyList.findIndex(pkg => getPackageNameWithoutTags(pkg) === cleanPackageName);
-        if (originalPosition !== -1) {
-            originalPackage = cpuOnlyList[originalPosition];
-            cpuOnlyList.splice(originalPosition, 1);
-        }
-    }
-    
-    if (originalPosition === -1) {
-        const displayPackageName = cleanPackageName;
-        appendToOutput(`Package "${displayPackageName}" not found in ${type === 'blocked' ? 'blocklist' : 'CPU only list'}`, 'error');
-        card.classList.remove('fade-out');
-        return;
-    }
-    
-    try {
-        await saveConfig();
-        try {
-            const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
-            let listData = JSON.parse(listContent);
-            if (listData[cleanPackageName]) {
-                delete listData[cleanPackageName];
-                await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
-            }
-        } catch (error) {
-            appendToOutput("Failed to update game names list: " + error, 'warning');
-        }
-        appendToOutput(`Removed "${cleanPackageName}" from ${type === 'blocked' ? 'blocklist' : 'CPU only list'}`, 'red');
-    } catch (error) {
-        appendToOutput(`Failed to delete game: ${error}`, 'error');
-        if (type === 'blocked') {
-            cpuSpoofData.blacklist.splice(originalPosition, 0, originalPackage);
-        } else if (type === 'cpu_only') {
-            cpuSpoofData.cpu_only_packages.splice(originalPosition, 0, originalPackage);
-        }
-        card.classList.remove('fade-out');
-        renderGameList();
-        return;
-    }
-
-    renderGameList();
-    
-    const undoData = {
-        type: type,
-        package: originalPackage,
-        position: originalPosition,
-        cleanPackageName: cleanPackageName
-    };
-    
-    const typeName = type === 'blocked' ? 'blocklist' : 'CPU only list';
-    showSnackbar(`Removed "${gameName || cleanPackageName}" from ${typeName}`, async (undoData) => {
-        if (undoData.type === 'blocked') {
-            cpuSpoofData.blacklist.splice(undoData.position, 0, undoData.package);
-        } else if (undoData.type === 'cpu_only') {
-            cpuSpoofData.cpu_only_packages.splice(undoData.position, 0, undoData.package);
-        }
-        
-        try {
-            await saveConfig();
-            try {
-                await execCommand(`echo '${JSON.stringify(originalListData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
-            } catch (error) {
-                appendToOutput("Failed to restore game names list: " + error, 'warning');
-            }
-            appendToOutput(`Restored game "${undoData.cleanPackageName}" to ${typeName} at position ${undoData.position + 1}`, 'success');
-            renderGameList();
-            
-            setTimeout(() => {
-                const restoredCard = document.querySelector(`.game-card.cpu-spoof-card[data-package="${packageName}"][data-type="${type}"]`);
-                if (restoredCard) {
-                    restoredCard.style.opacity = '0';
-                    restoredCard.style.transform = 'translateY(20px)';
-                    setTimeout(() => {
-                        restoredCard.style.opacity = '1';
-                        restoredCard.style.transform = 'translateY(0)';
-                        restoredCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                    }, 10);
-                }
-            }, 100);
-        } catch (error) {
-            appendToOutput(`Failed to restore game: ${error}`, 'error');
-            if (undoData.type === 'blocked') {
-                const index = cpuSpoofData.blacklist.indexOf(undoData.package);
-                if (index !== -1) cpuSpoofData.blacklist.splice(index, 1);
-            } else if (undoData.type === 'cpu_only') {
-                const index = cpuSpoofData.cpu_only_packages.indexOf(undoData.package);
-                if (index !== -1) cpuSpoofData.cpu_only_packages.splice(index, 1);
-            }
-            await saveConfig();
-            renderGameList();
-        }
-    }, undoData);
 }
 
 function showSnackbar(message, onUndo, undoData = null) {
@@ -3947,9 +3284,7 @@ function applyEventListeners() {
         if (type) {
             searchableText = [
                 gameName, 
-                packageName,
-                type === 'blocked' ? 'global blocklist blocked globally' : '',
-                type === 'cpu_only' ? 'cpu only cpu' : ''
+                packageName
             ].join(' ');
         } else {
             searchableText = [
@@ -4184,16 +3519,8 @@ function shouldShowByCurrentFilter(card) {
     if (!currentFilter) return true;
     
     switch(currentFilter) {
-        case 'blocklist':
-            return card.querySelector('.blocked-globally-badge') || 
-                   card.querySelector('.blocked-badge');
-        case 'cpu_only':
-            return card.querySelector('.cpu-only-badge') || 
-                   card.querySelector('.cpu-badge');
         case 'installed':
             return card.querySelector('.installed-badge');
-        case 'no_tweaks':
-            return card.querySelector('.no-tweaks-badge');
         default:
             return true;
     }
@@ -4325,46 +3652,18 @@ async function showPackagePicker() {
                 });
             }
         }
-        
-        const blockedGames = [];
-        const cpuOnlyGames = [];
-        const cpuSpoofData = currentConfig.cpu_spoof || {};
-        const blockedList = cpuSpoofData.blacklist || [];
-        const cpuOnlyList = cpuSpoofData.cpu_only_packages || [];
-        
-        blockedList.forEach(pkg => {
-            const cleanPkg = getPackageNameWithoutTags(pkg);
-            if (!blockedGames.includes(cleanPkg)) {
-                blockedGames.push(cleanPkg);
-            }
-        });
-        
-        cpuOnlyList.forEach(pkg => {
-            const cleanPkg = getPackageNameWithoutTags(pkg);
-            if (!cpuOnlyGames.includes(cleanPkg)) {
-                cpuOnlyGames.push(cleanPkg);
-            }
-        });
 
         appList.innerHTML = '';
 
         const fragment = document.createDocumentFragment();
         appIndex.forEach(app => {
             const isAdded = addedGames.includes(app.package);
-            const isBlocked = blockedGames.includes(app.package);
-            const isCpuOnly = cpuOnlyGames.includes(app.package);
             
             const appCard = templates.packagePickerCard({
                 package: app.package,
                 appLabel: app.originalLabel,
                 isAdded: isAdded
             });
-            
-            if (isBlocked) {
-                appCard.classList.add('blocked-game');
-            } else if (isCpuOnly) {
-                appCard.classList.add('cpuonly-game');
-            }
             
             appCard.addEventListener('click', () => {
                 document.getElementById('game-package').value = app.package;
@@ -4805,114 +4104,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function showNoTweaksExplanation(e) {
-    e.stopPropagation();
-
-    const popup = document.createElement('div');
-    popup.className = 'popup no-tweaks-explanation-popup';
-    popup.id = 'no-tweaks-explanation-popup';
-    popup.innerHTML = `
-        <div class="popup-content">
-            <h3 class="explanation-title">About No Tweaks</h3>
-            <div class="explanation-text">
-                <span class="highlight">No Tweaks</span> means this app <span class="highlight">WON'T</span> receive these tweaks:
-                <ul>
-                    <li>Disable Logging</li>
-                </ul>
-                <div class="important-note">
-                    <span class="important-text">Important:</span> Spoofing <span class="highlight">WILL STILL WORK</span> normally.
-                </div>
-            </div>
-            <button class="action-btn">OK</button>
-        </div>
-    `;
-
-    document.body.appendChild(popup);
-
-    requestAnimationFrame(() => {
-        popup.style.display = 'flex';
-        popup.querySelector('.popup-content').classList.add('modal-enter');
-    });
-
-    popup.querySelector('.action-btn').addEventListener('click', () => {
-        const content = popup.querySelector('.popup-content');
-        content.classList.remove('modal-enter');
-        content.classList.add('popup-exit');
-        content.addEventListener('animationend', () => {
-            popup.remove();
-        }, { once: true });
-    });
-
-    popup.addEventListener('click', (e) => {
-        if (e.target === popup) {
-            const content = popup.querySelector('.popup-content');
-            content.classList.remove('modal-enter');
-            content.classList.add('popup-exit');
-            content.addEventListener('animationend', () => {
-                popup.remove();
-            }, { once: true });
-        }
-    });
-}
-
-function showWithCpuExplanation(e) {
-    e.stopPropagation();
-
-    const popup = document.createElement('div');
-    popup.className = 'popup cpu-explanation-popup';
-    popup.id = 'with-cpu-explanation-popup';
-    popup.innerHTML = `
-        <div class="popup-content">
-            <h3 class="explanation-title">With CPU Spoofing</h3>
-            <div class="explanation-text">
-                <span class="highlight">This application receives:</span>
-                <ul>
-                    <li>• Device Spoofing (Full device profile)</li>
-                    <li>• CPU Spoofing (CPU information modification)</li>
-                </ul>
-                
-                <div class="important-note">
-                    <span class="important-text">Use case:</span> 
-                    Games and applications that require both device and CPU spoofing for optimal performance and compatibility.
-                </div>
-                
-                <div class="important-note">
-                    <span class="important-text">Result:</span> 
-                    The application will see a different device with modified CPU specifications.
-                </div>
-            </div>
-            <button class="action-btn">OK</button>
-        </div>
-    `;
-
-    document.body.appendChild(popup);
-    requestAnimationFrame(() => {
-        popup.style.display = 'flex';
-        popup.querySelector('.popup-content').classList.add('modal-enter');
-    });
-
-    const okBtn = popup.querySelector('.action-btn');
-    okBtn.addEventListener('click', () => {
-        const content = popup.querySelector('.popup-content');
-        content.classList.remove('modal-enter');
-        content.classList.add('popup-exit');
-        content.addEventListener('animationend', () => {
-            popup.remove();
-        }, { once: true });
-    });
-
-    popup.addEventListener('click', (e) => {
-        if (e.target === popup) {
-            const content = popup.querySelector('.popup-content');
-            content.classList.remove('modal-enter');
-            content.classList.add('popup-exit');
-            content.addEventListener('animationend', () => {
-                popup.remove();
-            }, { once: true });
-        }
-    });
-}
-
 function showGameTypePicker() {
     const popup = document.getElementById('game-type-picker-popup');
     const typeCards = document.querySelectorAll('.type-picker-card');
@@ -4943,11 +4134,6 @@ function showGameTypePicker() {
             
             const deviceGroup = document.getElementById('device-select-group');
             const deviceInput = document.getElementById('game-device');
-            const disableTweaksGroup = document.querySelector('.disable-tweaks-group');
-            const cpuSpoofGroup = document.getElementById('cpu-spoof-container');
-            const cpuSpoofToggle = document.getElementById('cpu-spoof-toggle');
-            const blockCpuGroup = document.getElementById('block-cpu-container');
-            const blockCpuToggle = document.getElementById('block-cpu-toggle');
             
             if (type === 'device') {
                 deviceGroup.classList.remove('disabled');
@@ -4961,18 +4147,7 @@ function showGameTypePicker() {
                         deviceInput.value = deviceData.DEVICE || '';
                     }
                 }
-                
-                disableTweaksGroup.classList.remove('disabled');
-                cpuSpoofGroup.classList.remove('disabled');
-                cpuSpoofToggle.disabled = false;
-                blockCpuGroup.classList.remove('disabled');
-                blockCpuToggle.disabled = false;
-                
-                if (!cpuSpoofToggle.checked && !blockCpuToggle.checked) {
-                    cpuSpoofToggle.checked = false;
-                    blockCpuToggle.checked = false;
-                }
-                
+
             }
 
             closePopup('game-type-picker-popup');
