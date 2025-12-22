@@ -1,1 +1,2 @@
-Original file: https://github.com/AlirezaParsi/COPG/blob/master/README.md
+A fork of COPG, but Device Spoofer only.  
+Original: https://github.com/AlirezaParsi/COPG
