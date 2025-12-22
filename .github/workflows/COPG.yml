@@ -99,7 +99,6 @@ jobs:
           cp -rf system/* module/system/
           cp customize.sh module/customize.sh
           cp service.sh module/service.sh
-          cp uninstall.sh module/uninstall.sh
           cp update_config.sh module/update_config.sh
           cp system.prop module/system.prop
           cp META-INF/com/google/android/update-binary module/META-INF/com/google/android/update-binary
@@ -110,7 +109,7 @@ jobs:
           cp webroot/config.json module/webroot/config.json
           cp webroot/icon.png module/webroot/icon.png
           cp webroot/assets/RobotoMono-Regular.ttf module/webroot/assets/RobotoMono-Regular.ttf
-          chmod 755 module/customize.sh module/service.sh module/uninstall.sh module/update_config.sh module/META-INF/com/google/android/update-binary
+          chmod 755 module/customize.sh module/service.sh module/update_config.sh module/META-INF/com/google/android/update-binary
           VERSION='4.7.4-vd'
           VERSION_CODE=474
           cat > module/module.prop << EOF
