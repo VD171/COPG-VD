@@ -294,7 +294,6 @@ public:
         PKG_LOG("Processing: %s", package_name);
         reloadIfNeeded(false);
 
-        bool should_close = true;
         bool current_needs_device_spoof = false;
         
         {
@@ -320,16 +319,10 @@ public:
             if (current_needs_device_spoof) {
                 spoofDevice(current_info);
                 spoofSystemProps(current_info);
-                should_close = false;
             }
         }
 
-        if (should_close) {
-            LOGI("%s: Not in config, closing", package_name);
-            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-        } else {
-            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-        }
+        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
@@ -375,16 +368,6 @@ private:
         }
         
         return {package_name, tags};
-    }
-
-    std::string getZygiskSettingFromTags(const std::unordered_set<std::string>& tags) {
-        if (tags.find("blocked") != tags.end()) {
-            return "blocked";
-        } else if (tags.find("with_cpu") != tags.end()) {
-            return "with_cpu";
-        }
-        
-        return "";
     }
 
     bool executeCompanionCommand(const std::string& command) {
@@ -647,25 +630,6 @@ private:
         try {
             json config = json::parse(file);
             std::vector<std::pair<DeviceInfo, std::unordered_map<std::string, std::string>>> new_device_packages;
-            
-            cpu_blacklist.clear();
-            cpu_only_packages.clear();
-            
-            if (config.contains("cpu_spoof")) {
-                auto cpu_spoof_config = config["cpu_spoof"];
-                
-                if (cpu_spoof_config.contains("blacklist")) {
-                    for (const auto& pkg : cpu_spoof_config["blacklist"]) {
-                        cpu_blacklist.insert(pkg.get<std::string>());
-                    }
-                }
-                
-                if (cpu_spoof_config.contains("cpu_only_packages")) {
-                    for (const auto& pkg : cpu_spoof_config["cpu_only_packages"]) {
-                        cpu_only_packages.insert(pkg.get<std::string>());
-                    }
-                }
-            }
 
             int device_count = 0;
             for (auto& [key, value] : config.items()) {
@@ -728,18 +692,6 @@ private:
                     }
 
                     std::unordered_map<std::string, std::string> package_settings;
-                    
-                    if (value.is_array()) {
-                        for (const auto& pkg_entry : value) {
-                            std::string pkg_str = pkg_entry.get<std::string>();
-                            
-                            auto [pkg_name, tags] = parsePackageWithTags(pkg_str);
-                            std::string setting = getZygiskSettingFromTags(tags);
-                            
-                            package_settings[pkg_name] = setting;
-                        }
-                    }
-                    
                     new_device_packages.emplace_back(info, package_settings);
                     device_count++;
                 }
