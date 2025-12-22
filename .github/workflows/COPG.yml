@@ -101,7 +101,7 @@ jobs:
           version=$VERSION
           versionCode=$VERSION_CODE
           author=VD171 & AlirezaParsi
-          description=Spoof your device for games/apps to unlock new features. (Fork by VD171)
+          description=Spoof your device. (Fork by VD171)
           minMagisk=20.4
           EOF
 
