@@ -1,4 +1,4 @@
-name: test
+name: COPG
 
 on:
   workflow_dispatch:
