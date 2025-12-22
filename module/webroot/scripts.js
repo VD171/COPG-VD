@@ -1360,7 +1360,7 @@ async function loadVersion() {
     const versionElement = document.getElementById('version-text');
     try {
         const version = await execCommand("grep '^version=' /data/adb/modules/COPG/module.prop | cut -d'=' -f2");
-        versionElement.textContent = `v${version.trim()}`;
+        versionElement.textContent = `${version.trim()}`;
     } catch (error) {
         appendToOutput("Failed to load version: " + error, 'error');
     }
