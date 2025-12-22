@@ -291,27 +291,13 @@ public:
         PKG_LOG("Processing: %s", package_name);
         reloadIfNeeded(false);
 
-        bool current_needs_device_spoof = false;
-        
         {
             std::lock_guard<std::mutex> lock(info_mutex);
             
             DeviceInfo device_info;
-            bool found_in_device_list = false;
-
-            for (auto& device_entry : device_packages) {
-                auto it = device_entry.second.find(package_name);
-                if (it != device_entry.second.end()) {
-                    found_in_device_list = true;
-                    current_needs_device_spoof = true;
-                    device_info = device_entry.first;
-                    current_info = device_info;
-
-                    break;
-                }
-            }
-
-            if (current_needs_device_spoof) {
+           
+            if (!device_packages.empty()) {
+                current_info = device_info = device_packages.front().first;
                 spoofDevice(current_info);
                 spoofSystemProps(current_info);
             }
