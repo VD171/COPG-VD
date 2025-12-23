@@ -218,9 +218,8 @@ private:
 
             int device_count = 0;
 
-            std::string device_key = "DEVICE";
+            std::string device_key = "COPG";
             if (config.contains(device_key) && config[device_key].is_object()) {
-                
                 auto device = config[device_key];
                 DeviceInfo info;
                 info.brand = device.value("BRAND", "generic");
