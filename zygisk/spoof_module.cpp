@@ -167,9 +167,6 @@ private:
             manufacturerField = env->GetStaticFieldID(buildClass, "MANUFACTURER", "Ljava/lang/String;");
             fingerprintField = env->GetStaticFieldID(buildClass, "FINGERPRINT", "Ljava/lang/String;");
             productField = env->GetStaticFieldID(buildClass, "PRODUCT", "Ljava/lang/String;");
-            build_boardField = env->GetStaticFieldID(buildClass, "BOARD", "Ljava/lang/String;");
-            build_bootloaderField = env->GetStaticFieldID(buildClass, "BOOTLOADER", "Ljava/lang/String;");
-            build_hardwareField = env->GetStaticFieldID(buildClass, "HARDWARE", "Ljava/lang/String;");
             build_idField = env->GetStaticFieldID(buildClass, "ID", "Ljava/lang/String;");
             build_displayField = env->GetStaticFieldID(buildClass, "DISPLAY", "Ljava/lang/String;");
             build_hostField = env->GetStaticFieldID(buildClass, "HOST", "Ljava/lang/String;");
