@@ -100,12 +100,8 @@ public:
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
-            
-            DeviceInfo device_info;
-        
-            if (!device_packages.empty()) {
-                SPOOF_LOG("Applying global spoof");
-                current_info = device_info = device_packages.front().first;
+            if (spoof_device && current_info != *spoof_device) {
+                current_info = *spoof_device;
                 spoofDevice(current_info);
             }
         }
@@ -132,6 +128,17 @@ public:
     }
 
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
+        ensureBuildClass();
+        reloadIfNeeded(true);
+
+        {
+            std::lock_guard<std::mutex> lock(info_mutex);
+            if (spoof_device && current_info != *spoof_device) {
+                current_info = *spoof_device;
+                spoofDevice(current_info);
+            }
+        }
+
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
 
@@ -142,7 +149,7 @@ public:
 private:
     zygisk::Api* api;
     JNIEnv* env;
-    std::vector<std::pair<DeviceInfo, std::unordered_map<std::string, std::string>>> device_packages;
+    std::optional<DeviceInfo> spoof_device;
 
     void ensureBuildClass() {
         std::call_once(build_once, [&] {
@@ -214,9 +221,6 @@ private:
 
         try {
             json config = json::parse(file);
-            std::vector<std::pair<DeviceInfo, std::unordered_map<std::string, std::string>>> new_device_packages;
-
-            int device_count = 0;
 
             std::string device_key = "COPG";
             if (config.contains(device_key) && config[device_key].is_object()) {
@@ -271,20 +275,18 @@ private:
                 } else {
                     info.should_spoof_sdk_int = false;
                 }
-    
-                std::unordered_map<std::string, std::string> package_settings;
-                new_device_packages.emplace_back(info, package_settings);
-                device_count++;
-            }
-            
-            {
-                std::lock_guard<std::mutex> lock(info_mutex);
-                device_packages = std::move(new_device_packages);
-            }
 
-            last_config_mtime = current_mtime;
-            CONFIG_LOG("Loaded: %d devices", 
-                      device_count);
+                {
+                    std::lock_guard<std::mutex> lock(info_mutex);
+                    spoof_device = info;
+                }
+   
+                last_config_mtime = current_mtime;
+                CONFIG_LOG("Loaded device: %s", 
+                          info.device);
+            } else {
+                LOGE("Device error: nothing found");
+            }        
         } catch (const json::exception& e) {
             LOGE("JSON error: %s", e.what());
         } catch (const std::exception& e) {
