@@ -21,48 +21,10 @@
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
                     </button>
-                    <button class="delete-btn" data-device="[KEY]" title="Delete">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 6h18"></path>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        </svg>
-                    </button>
                 </div>
             </div>
             <div class="device-details">
-                Model: [MODEL]<br>
-                Apps associated: [GAME_COUNT]
-            </div>
-        </div>
-    </template>
-
-    <template id="game-card-template">
-        <div class="game-card" data-package="[GAME_PACKAGE]" data-device="[DEVICE_KEY]" style="animation-delay: [DELAY]s">
-            <div class="game-header">
-                <div class="game-name-container">
-                    <h4 class="game-name">[GAME_NAME]</h4>
-                    <span class="game-package">[CLEAN_PACKAGE_NAME]</span>
-                </div>
-                <div class="game-actions">
-                    <button class="edit-btn" data-game="[GAME_PACKAGE]" data-device="[DEVICE_KEY]" title="Edit">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                        </svg>
-                    </button>
-                    <button class="delete-btn" data-game="[GAME_PACKAGE]" data-device="[DEVICE_KEY]" title="Delete">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 6h18"></path>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            <div class="game-details">
-                <span class="game-info">[DEVICE_NAME]</span>
-                <div class="badge-group">
-                    [INSTALLED_BADGE]
-                </div>
+                Model: [MODEL]
             </div>
         </div>
     </template>
@@ -71,18 +33,6 @@
         <div class="picker-device-card" data-key="[KEY]">
             <h4>[DEVICE_NAME]</h4>
             <p>[BRAND] [MODEL]</p>
-        </div>
-    </template>
-
-    <template id="package-picker-card-template">
-        <div class="app-card" data-package="[PACKAGE]">
-            <div class="app-icon-container" data-pkg="[PACKAGE]">
-                <div class="app-icon-placeholder"></div>
-            </div>
-            <div class="app-info">
-                <div class="app-name">[APP_LABEL]</div>
-                <div class="app-package">[PACKAGE]</div>
-            </div>
         </div>
     </template>
 
@@ -356,8 +306,7 @@
 
         <div class="tab-nav">
             <button id="tab-settings" class="tab-btn active">Settings</button>
-            <button id="tab-devices" class="tab-btn">Devices</button>
-            <button id="tab-games" class="tab-btn">Apps</button>
+            <button id="tab-devices" class="tab-btn">Device</button>
         </div>
 
         <div class="tab-container" id="tab-container">
@@ -375,7 +324,6 @@
                         </div>
                     </div>
                     <div class="button-group">
-                        <button id="update-config" class="action-btn">Update Game List</button>
                         <button id="backup-manager" class="action-btn">Backup/Restore</button>
                     </div>
                 </div>
@@ -401,53 +349,9 @@
             </div>
 
             <div id="devices-tab" class="tab-content">
-    <div class="search-container">
-        <div class="search-input-wrapper">
-            <input type="text" id="device-search" placeholder="Search devices...">
-            <button id="device-sort-btn" class="sort-btn" title="Sort devices">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18"></path>
-                    <path d="M8 12h8"></path>
-                    <path d="M13 18h3"></path>
-                </svg>
-            </button>
-        </div>
-        <button id="add-device" class="add-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 5v14m-7-7h14"></path>
-            </svg>
-            Add Device
-        </button>
-    </div>
     <div class="scroll-container">
         <div class="list-wrapper">
             <div id="device-list" class="device-list"></div>
-        </div>
-    </div>
-</div>
-
-<div id="games-tab" class="tab-content">
-    <div class="search-container">
-        <div class="search-input-wrapper">
-            <input type="text" id="game-search" placeholder="Search apps...">
-            <button id="game-sort-btn" class="sort-btn" title="Sort apps">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18"></path>
-                    <path d="M8 12h8"></path>
-                    <path d="M13 18h3"></path>
-                </svg>
-            </button>
-        </div>
-        <button id="add-game" class="add-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 5v14m-7-7h14"></path>
-            </svg>
-            Add App
-        </button>
-    </div>
-    <div class="scroll-container">
-        <div class="list-wrapper">
-            <div id="game-list" class="game-list"></div>
         </div>
     </div>
 </div>
@@ -552,48 +456,6 @@
         </div>
     </div>
 
-    <div id="game-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="game-modal-title">Add New Game</h3>
-            </div>
-            <form id="game-form">
-                <div class="form-group">
-                    <label for="game-name">Game Name</label>
-                    <input type="text" id="game-name" placeholder="e.g., PUBG Mobile">
-                </div>
-                <div class="form-group">
-                    <label for="game-package">Package Name</label>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="game-package" placeholder="e.g., com.example.game" required>
-                        <button type="button" id="package-picker-btn" class="action-btn package-picker-btn">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M5 5h4v4H5V5zm10 0h4v4h-4V5zM5 15h4v4H5v-4zm10 0h4v4h-4v-4z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                
-                <input type="hidden" id="game-type" value="device">
-                
-                <div class="form-group device-select-group" id="device-select-group">
-                    <label for="game-device">Device Profile</label>
-                    <div class="device-select-wrapper">
-                        <input type="text" id="game-device" placeholder="Select a device..." readonly>
-                        <svg class="dropdown-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M6 9l6 6 6-6"></path>
-                        </svg>
-                    </div>
-                </div>
-
-                <div class="form-buttons">
-                    <button type="button" class="cancel-btn">Cancel</button>
-                    <button type="submit" class="action-btn">Save</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <div id="update-confirm-popup" class="popup">
         <div class="popup-content">
             <div class="popup-icon-container">
@@ -625,25 +487,6 @@
         </div>
     </div>
 
-    <div id="package-picker-popup" class="popup">
-        <div class="popup-content device-picker-content">
-            <div class="modal-header">
-                <h3>Select Application</h3>
-            </div>
-            <div class="search-container" onclick="document.getElementById('package-picker-search').removeAttribute('readonly')">
-                <input type="text" id="package-picker-search" placeholder="Search apps...">
-            </div>
-            <div class="scroll-container">
-                <div class="list-wrapper">
-                    <div id="package-picker-list" class="device-picker"></div>
-                </div>
-            </div>
-            <div class="popup-buttons">
-                <button class="cancel-btn">Cancel</button>
-            </div>
-        </div>
-    </div>
-
     <div id="error-popup" class="popup">
         <div class="popup-content">
             <h3>Error</h3>
@@ -658,24 +501,7 @@
         <span id="snackbar-message"></span>
         <button id="snackbar-undo" class="snackbar-btn">Undo</button>
     </div>
-    
-    <div id="no-tweaks-popup" class="popup">
-        <div class="popup-content">
-            <div class="popup-header">
-                <h3 id="no-tweaks-popup-title">Manage No Tweaks</h3>
-            </div>
-            <div class="popup-body">
-                <div class="popup-icon" id="no-tweaks-popup-icon"></div>
-                <p id="no-tweaks-popup-message" style="margin-bottom: 16px; font-size: 14px; line-height: 1.4;">This package will not receive tweaks</p>
-                <div class="popup-package" id="no-tweaks-popup-package"></div>
-            </div>
-            <div class="popup-footer">
-                <button id="no-tweaks-popup-cancel" class="popup-btn cancel-btn">Cancel</button>
-                <button id="no-tweaks-popup-confirm" class="popup-btn action-btn">Confirm</button>
-            </div>
-        </div>
-    </div>
-    
+
     <div id="backup-popup" class="popup">
         <div class="popup-content">
             <h3>Backup/Restore</h3>
@@ -700,30 +526,6 @@
                         </button>
                     </div>
                 </div>
-                <div class="backup-row">
-                    <div class="backup-info">
-                        <div class="backup-title">list.json</div>
-                        <div class="backup-desc">Game names mapping</div>
-                    </div>
-                    <div class="button-group">
-                        <button class="small-btn backup-btn" data-file="list.json">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                                <polyline points="7 3 7 8 15 8"></polyline>
-                            </svg>
-                        </button>
-                        <button class="small-btn restore-btn" data-file="list.json">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5-5-5 5M12 3.5V14"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="popup-footer">
-                <button id="backup-all-btn" class="action-btn">Backup All</button>
-                <button class="action-btn cancel-btn">Close</button>
             </div>
         </div>
     </div>
