@@ -170,6 +170,9 @@ private:
             build_boardField = env->GetStaticFieldID(buildClass, "BOARD", "Ljava/lang/String;");
             build_bootloaderField = env->GetStaticFieldID(buildClass, "BOOTLOADER", "Ljava/lang/String;");
             build_hardwareField = env->GetStaticFieldID(buildClass, "HARDWARE", "Ljava/lang/String;");
+            build_idField = env->GetStaticFieldID(buildClass, "ID", "Ljava/lang/String;");
+            build_displayField = env->GetStaticFieldID(buildClass, "DISPLAY", "Ljava/lang/String;");
+            build_hostField = env->GetStaticFieldID(buildClass, "HOST", "Ljava/lang/String;");
 
             jclass localVersion = env->FindClass("android/os/Build$VERSION");
             if (localVersion) {
@@ -321,9 +324,9 @@ private:
         setStr(manufacturerField, info.manufacturer);
         setStr(fingerprintField, info.fingerprint);
         setStr(productField, info.product);
-        setStr(build_boardField, info.build_board);
-        setStr(build_bootloaderField, info.build_bootloader);
-        setStr(build_hardwareField, info.build_hardware);
+        //setStr(build_boardField, info.build_board);
+        //setStr(build_bootloaderField, info.build_bootloader);
+        //setStr(build_hardwareField, info.build_hardware);
         setStr(build_idField, info.build_id);
         setStr(build_displayField, info.build_display);
         setStr(build_hostField, info.build_host);
