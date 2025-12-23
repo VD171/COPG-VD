@@ -2034,5 +2034,3 @@ function getTypeDisplayName(type) {
         default: return type;
     }
 }
-
-pre { background: transparent }pre.western { font-family: "Liberation Mono", monospace; font-size: 10pt }pre.cjk { font-family: "Noto Sans Mono CJK SC", monospace; font-size: 10pt }pre.ctl { font-family: "Liberation Mono", monospace; font-size: 10pt }p { margin-bottom: 0.25cm; line-height: 115%; background: transparent }a:link { color: #000080; text-decoration: underline }a:visited { color: #800000; text-decoration: underline }
