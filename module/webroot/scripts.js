@@ -2,19 +2,15 @@ let actionRunning = false;
 let configKeyOrder = [];
 let currentConfig = {};
 let editingDevice = null;
-let editingGame = null;
-let lastRender = { devices: 0, games: 0 };
+let lastRender = { devices: 0 };
 const RENDER_DEBOUNCE_MS = 150;
 let snackbarTimeout = null;
 let appIndex = [];
 let logcatProcess = null;
 let logcatRunning = false;
-let selectedGameType = 'device';
 let currentDeviceSort = 'default';
 let deviceSortDropdown = null;
-let currentGameSort = 'default';
 let sortDropdown = null;
-let gameListOriginalOrder = [];
 let currentFilter = null;
 let activeFilter = null;
 
@@ -56,34 +52,6 @@ const templates = {
         return card;
     },
     
-    gameCard: (data) => {
-        const template = document.getElementById('game-card-template');
-        const clone = template.content.cloneNode(true);
-        const card = clone.querySelector('.game-card');
-        
-        card.dataset.package = data.gamePackage;
-        card.dataset.device = data.deviceKey;
-        card.style.animationDelay = `${data.delay}s`;
-        card.querySelector('.game-name').textContent = data.gameName;
-        card.querySelector('.game-package').textContent = data.cleanPackageName;
-        card.querySelector('.edit-btn').dataset.game = data.gamePackage;
-        card.querySelector('.edit-btn').dataset.device = data.deviceKey;
-        card.querySelector('.game-info').textContent = data.deviceName;
-        
-        const badgeGroup = card.querySelector('.badge-group');
-        let badgesHTML = '';
-        
-        if (data.isInstalled) {
-            badgesHTML += '<span class="installed-badge">Installed</span>';
-        }
-        if (data.additionalBadges) {
-            badgesHTML += data.additionalBadges;
-        }
-        
-        badgeGroup.innerHTML = badgesHTML;
-        return card;
-    },
-    
     pickerDeviceCard: (data) => {
         const template = document.getElementById('picker-device-card-template');
         const clone = template.content.cloneNode(true);
@@ -92,23 +60,6 @@ const templates = {
         card.dataset.key = data.key;
         card.querySelector('h4').textContent = data.deviceName;
         card.querySelector('p').textContent = `${data.brand} ${data.model}`;
-        
-        return card;
-    },
-    
-    packagePickerCard: (data) => {
-        const template = document.getElementById('package-picker-card-template');
-        const clone = template.content.cloneNode(true);
-        const card = clone.querySelector('.app-card');
-        
-        card.dataset.package = data.package;
-        card.querySelector('.app-name').textContent = data.appLabel;
-        card.querySelector('.app-package').textContent = data.package;
-        card.querySelector('.app-icon-container').dataset.pkg = data.package;
-        
-        if (data.isAdded) {
-            card.classList.add('added-game');
-        }
         
         return card;
     },
@@ -157,39 +108,6 @@ async function execCommand(command) {
     });
 }
 
-function getPackageNameWithoutTags(packageName) {
-    const parts = packageName.split(':');
-    return parts[0];
-}
-
-function getAllTags(packageName) {
-    const parts = packageName.split(':');
-    return parts.slice(1);
-}
-
-function addTagToPackage(packageName, tag) {
-    const cleanName = getPackageNameWithoutTags(packageName);
-    const existingTags = getAllTags(packageName);
-    if (!existingTags.includes(tag)) {
-        existingTags.push(tag);
-    }
-    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
-}
-
-function removeTagFromPackage(packageName, tag) {
-    const cleanName = getPackageNameWithoutTags(packageName);
-    const existingTags = getAllTags(packageName).filter(t => t !== tag);
-    return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
-}
-
-
-function getFilterDisplayName(filterType) {
-    switch(filterType) {
-        case 'installed': return 'Installed';
-        default: return filterType;
-    }
-}
-
 function getSortTypeName(sortType) {
     switch(sortType) {
         case 'default': return 'Default';
@@ -201,51 +119,13 @@ function getSortTypeName(sortType) {
 }
 
 function updateFilterCounts() {
-    const gameList = document.getElementById('game-list');
-    if (!gameList) return;
-    
-    const games = gameList.querySelectorAll('.game-card');
-    
     const counts = {
         installed: 0
     };
     
-    games.forEach(game => {
-        if (game.querySelector('.installed-badge')) {
-            counts.installed++;
-        }
-    });
-    
     const installedCount = document.getElementById('installed-count');
 
     if (installedCount) installedCount.textContent = counts.installed;
-}
-
-function setGameSort(sortType) {
-    currentGameSort = sortType;
-    
-    sortDropdown.querySelectorAll('.sort-option').forEach(option => {
-        option.classList.remove('active');
-        if (option.dataset.sort === sortType) {
-            option.classList.add('active');
-        }
-        if (activeFilter && option.dataset.filter === activeFilter) {
-            option.classList.add('active');
-        }
-    });
-    
-    sortGameList();
-    
-    const sortBtn = document.getElementById('game-sort-btn');
-    let title = 'Sort games';
-    if (sortType === 'asc') title = 'Sorted A→Z';
-    else if (sortType === 'desc') title = 'Sorted Z→A';
-    else if (activeFilter) {
-        title = `Filter: ${getFilterDisplayName(activeFilter)}`;
-    }
-    sortBtn.title = title;
-    
-    appendToOutput(`Games sorted: ${getSortTypeName(sortType)}`, 'info');
 }
 
 function setDeviceSort(sortType) {
@@ -304,7 +184,6 @@ function createDeviceSortDropdown() {
 function getOriginalDeviceOrder() {
     const devices = [];
 
-    
     for (const key of configKeyOrder) {
         if (key === 'COPG' && currentConfig[key]) {
             const deviceName = currentConfig[key].DEVICE || 'COPG';
@@ -371,9 +250,6 @@ function sortDeviceList() {
     attachDeviceListeners();
 }
 
-
-
-
 function initializeDeviceSort() {
     createDeviceSortDropdown();
     
@@ -391,41 +267,6 @@ function initializeDeviceSort() {
     }
     
     setDeviceSort('default');
-}
-
-
-
-function populateDevicePicker() {
-    const picker = document.getElementById('device-picker-list');
-    picker.innerHTML = '';
-    
-    for (const [key, value] of Object.entries(currentConfig)) {
-        if (key === 'COPG') {
-            const deviceName = value.DEVICE || 'COPG';
-            const deviceCard = templates.pickerDeviceCard({
-                key: key,
-                deviceName: deviceName,
-                brand: value.BRAND || 'Unknown',
-                model: value.MODEL || 'Unknown'
-            });
-            
-            deviceCard.addEventListener('click', () => {
-                picker.querySelectorAll('.picker-device-card').forEach(card => {
-                    card.classList.remove('selected');
-                });
-                deviceCard.classList.add('selected');
-                const selectedDeviceInput = document.getElementById('game-device');
-                selectedDeviceInput.value = deviceName;
-                selectedDeviceInput.dataset.key = key;
-                selectedDeviceInput.classList.add('highlighted');
-                setTimeout(() => {
-                    closePopup('device-picker-popup');
-                }, 200);
-            });
-            
-            picker.appendChild(deviceCard);
-        }
-    }
 }
 
 function setupInfoPopup() {
@@ -896,7 +737,7 @@ async function startLogcat(e) {
     }
 
     try {
-        appendToOutput("Starting logcat for COPGModule... (open target app/game ...)", 'info');
+        appendToOutput("Starting logcat for COPGModule... (open target app ...)", 'info');
         logcatRunning = true;
         document.getElementById('start-logcat').style.display = 'none';
         document.getElementById('stop-logcat').style.display = 'inline-block';
@@ -1110,202 +951,6 @@ function attachDeviceListeners() {
 
 function editDeviceHandler(e) {
     editDevice(e.currentTarget.dataset.device);
-}
-
-
-function setupLongPressHandlers() {
-    let pressTimer;
-    const pressDuration = 500;
-    const scrollThreshold = 15;
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchStartTime = 0;
-    let isLongPressActive = false;
-
-    const handleTouchStart = (e, card, packageName, deviceKey, spoofType, cleanPackageName, gameName) => {
-        if (isLongPressActive) return;
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-        touchStartTime = Date.now();
-        pressTimer = setTimeout(() => {
-            showLongPressPopup(e, card, packageName, deviceKey, spoofType, cleanPackageName, gameName);
-        }, pressDuration);
-    };
-
-    const handleTouchMove = (e) => {
-        if (!pressTimer) return;
-        const touchX = e.touches[0].clientX;
-        const touchY = e.touches[0].clientY;
-        const deltaX = Math.abs(touchX - touchStartX);
-        const deltaY = Math.abs(touchY - touchStartY);
-        const elapsedTime = Date.now() - touchStartTime;
-
-        if (elapsedTime < 100 && (deltaX > 10 || deltaY > 10)) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-            return;
-        }
-
-        if (deltaX > scrollThreshold || deltaY > scrollThreshold) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-        }
-    };
-
-    const handleTouchEnd = (e) => {
-        if (pressTimer) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-        }
-        if (isLongPressActive) {
-            e.preventDefault();
-            e.stopPropagation();
-            isLongPressActive = false;
-        }
-    };
-
-    const handleTouchCancel = () => {
-        if (pressTimer) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-        }
-    };
-
-    const handleMouseDown = (e, card, packageName, deviceKey, spoofType, cleanPackageName, gameName) => {
-        if (e.button !== 0 || isLongPressActive) return;
-        pressTimer = setTimeout(() => {
-            showLongPressPopup(e, card, packageName, deviceKey, spoofType, cleanPackageName, gameName);
-        }, pressDuration);
-    };
-
-    const handleMouseUp = (e) => {
-        if (pressTimer) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-        }
-        if (isLongPressActive) {
-            e.preventDefault();
-            isLongPressActive = false;
-        }
-    };
-
-    const handleMouseLeave = () => {
-        if (pressTimer) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-        }
-    };
-
-    const handleClick = (e) => {
-        if (isLongPressActive) {
-            e.preventDefault();
-            e.stopPropagation();
-            isLongPressActive = false;
-        }
-    };
-
-    const handleContextMenu = (e) => {
-        if (isLongPressActive) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-    };
-
-    function showLongPressPopup(e, card, packageName, deviceKey, spoofType, cleanPackageName, gameName) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!packageName) return;
-        
-        isLongPressActive = true;
-
-        const popup = document.getElementById('no-tweaks-popup');
-        const title = document.getElementById('no-tweaks-popup-title');
-        const message = document.getElementById('no-tweaks-popup-message');
-        const packageEl = document.getElementById('no-tweaks-popup-package');
-        const icon = document.getElementById('no-tweaks-popup-icon');
-        const confirmBtn = document.getElementById('no-tweaks-popup-confirm');
-
-        packageEl.innerHTML = `
-            <span class="game-name-popup">${gameName}</span>
-            <span class="package-name-popup">${cleanPackageName}</span>
-        `;
-
-        icon.className = 'popup-icon';
-
-        confirmBtn.dataset.package = packageName;
-        confirmBtn.dataset.device = deviceKey;
-        confirmBtn.dataset.type = spoofType || 'regular';
-
-        popup.style.display = 'flex';
-        requestAnimationFrame(() => {
-            popup.querySelector('.popup-content').classList.add('modal-enter');
-        });
-    }
-
-    const popup = document.getElementById('no-tweaks-popup');
-    const cancelBtn = document.getElementById('no-tweaks-popup-cancel');
-    const confirmBtn = document.getElementById('no-tweaks-popup-confirm');
-
-    if (cancelBtn) {
-        cancelBtn.onclick = (e) => {
-            e.stopPropagation();
-            closePopup('no-tweaks-popup');
-            isLongPressActive = false;
-        };
-    }
-
-    if (confirmBtn) {
-        confirmBtn.onclick = async (e) => {
-            e.stopPropagation();
-            const packageName = confirmBtn.dataset.package;
-            const deviceKey = confirmBtn.dataset.device;
-            const spoofType = confirmBtn.dataset.type;
-            const action = confirmBtn.dataset.action;
-            const cleanPackageName = getPackageNameWithoutTags(packageName);
-            
-            let success = await handleRegularNoTweak(packageName, deviceKey, action, cleanPackageName);
-            
-            closePopup('no-tweaks-popup');
-            isLongPressActive = false;
-        };
-    }
-
-    if (popup) {
-        popup.onclick = (e) => {
-            if (e.target === popup) {
-                closePopup('no-tweaks-popup');
-                isLongPressActive = false;
-            }
-        };
-    }
-}
-
-async function handleRegularNoTweak(packageName, deviceKey, action, cleanPackageName) {
-    try {
-        const packageIndex = currentConfig[deviceKey].indexOf(packageName);
-        if (packageIndex === -1) {
-            appendToOutput(`Package ${cleanPackageName} not found in config`, 'error');
-            return false;
-        }
-        
-        let newPackageName;
-        if (action === 'add') {
-            newPackageName = addTagToPackage(packageName, 'notweak');
-        } else {
-            newPackageName = removeTagFromPackage(packageName, 'notweak');
-        }
-        
-        currentConfig[deviceKey][packageIndex] = newPackageName;
-        await saveConfig();
-        appendToOutput(
-            `${action === 'add' ? 'Added' : 'Removed'} no-tweaks tag for ${cleanPackageName}`,
-            'success'
-        );
-        return true;
-    } catch (error) {
-        appendToOutput(`Failed to update package: ${error}`, 'error');
-        return false;
-    }
 }
 
 function closePopup(popupId) {
@@ -1632,203 +1277,6 @@ async function saveDevice(e) {
     }
 }
 
-function showSnackbar(message, onUndo, undoData = null) {
-    const snackbar = document.getElementById('snackbar');
-    const messageElement = document.getElementById('snackbar-message');
-    const undoButton = document.getElementById('snackbar-undo');
-
-    resetSnackbar();
-
-    messageElement.textContent = message;
-    snackbar.classList.add('show');
-    snackbar.style.transform = 'translateY(0)';
-    snackbar.style.opacity = '1';
-
-    const newUndoButton = undoButton.cloneNode(true);
-    undoButton.parentNode.replaceChild(newUndoButton, undoButton);
-
-    newUndoButton.addEventListener('click', () => {
-        if (onUndo) {
-            if (undoData) {
-                onUndo(undoData);
-            } else {
-                onUndo();
-            }
-        }
-        resetSnackbar();
-    });
-
-    let touchStartX = 0;
-    let touchMoveX = 0;
-    const swipeThreshold = 100;
-
-    const handleTouchStart = (e) => {
-        touchStartX = e.touches[0].clientX;
-        snackbar.style.transition = 'none';
-        snackbar.classList.remove('show-timer');
-    };
-
-    const handleTouchMove = (e) => {
-        touchMoveX = e.touches[0].clientX;
-        const diffX = touchMoveX - touchStartX;
-        snackbar.style.transform = `translateX(${diffX}px) translateY(0)`;
-        snackbar.style.opacity = Math.max(0.2, 1 - Math.abs(diffX) / window.innerWidth);
-    };
-
-    const handleTouchEnd = () => {
-        const diffX = touchMoveX - touchStartX;
-        snackbar.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-
-        if (Math.abs(diffX) > swipeThreshold) {
-            const direction = diffX > 0 ? '100%' : '-100%';
-            snackbar.style.transform = `translateX(${direction}) translateY(0)`;
-            snackbar.style.opacity = '0';
-            snackbar.addEventListener('transitionend', resetSnackbar, { once: true });
-        } else {
-            snackbar.style.transform = 'translateY(0)';
-            snackbar.style.opacity = '1';
-            restartTimerAnimation();
-        }
-
-        snackbar.removeEventListener('touchstart', handleTouchStart);
-        snackbar.removeEventListener('touchmove', handleTouchMove);
-        snackbar.removeEventListener('touchend', handleTouchEnd);
-    };
-
-    snackbar.addEventListener('touchstart', handleTouchStart, { passive: true });
-    snackbar.addEventListener('touchmove', handleTouchMove, { passive: true });
-    snackbar.addEventListener('touchend', handleTouchEnd);
-
-    restartTimerAnimation();
-
-    function resetSnackbar() {
-        snackbar.classList.remove('show', 'show-timer');
-        snackbar.style.transform = 'translateY(100px)';
-        snackbar.style.opacity = '0';
-        snackbar.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-        if (snackbarTimeout) {
-            clearTimeout(snackbarTimeout);
-            snackbarTimeout = null;
-        }
-    }
-
-    function restartTimerAnimation() {
-        snackbar.classList.remove('show-timer');
-        void snackbar.offsetWidth;
-        snackbar.classList.add('show-timer');
-        snackbarTimeout = setTimeout(resetSnackbar, 5000);
-    }
-}
-
-function insertAtIndex(obj, key, value, index) {
-    const entries = Object.entries(obj);
-    const newEntries = [
-        ...entries.slice(0, index),
-        [key, value],
-        ...entries.slice(index)
-    ];
-    return Object.fromEntries(newEntries);
-}
-
-async function deleteGame(gamePackage, deviceKey, gameName, deviceName, cleanPackageName = null) {
-    const card = document.querySelector(`.game-card[data-package="${gamePackage}"][data-device="${deviceKey}"]`);
-    if (!card) return;
-
-    card.classList.add('fade-out');
-    await new Promise(resolve => setTimeout(resolve, 400));
-
-    const cleanPackage = cleanPackageName || getPackageNameWithoutTags(gamePackage);
-    const originalIndex = currentConfig[deviceKey].indexOf(gamePackage);
-    
-    if (originalIndex === -1) {
-        const displayPackageName = cleanPackage;
-        appendToOutput(`Game "${gameName || displayPackageName}" not found in "${deviceName}"`, 'error');
-        card.classList.remove('fade-out');
-        return;
-    }
-
-    const deletedGameData = {
-        package: gamePackage,
-        deviceKey: deviceKey,
-        position: originalIndex,
-        cleanPackage: cleanPackage
-    };
-
-    let originalListData = {};
-    try {
-        const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
-        originalListData = JSON.parse(listContent);
-    } catch (error) {
-        appendToOutput("Failed to load game names list: " + error, 'warning');
-    }
-
-    currentConfig[deviceKey].splice(originalIndex, 1);
-    
-    try {
-        await saveConfig();
-        try {
-            const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
-            let listData = JSON.parse(listContent);
-            if (listData[cleanPackage]) {
-                delete listData[cleanPackage];
-                await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
-            }
-        } catch (error) {
-            appendToOutput("Failed to update game names list: " + error, 'warning');
-        }
-        
-        const displayPackageName = cleanPackage;
-        appendToOutput(`Removed "${displayPackageName}" from "${deviceName}"`, 'red');
-    } catch (error) {
-        appendToOutput(`Failed to delete game: ${error}`, 'error');
-        currentConfig[deviceKey].splice(originalIndex, 0, gamePackage);
-        card.classList.remove('fade-out');
-        renderDeviceList();
-        return;
-    }
-
-    renderDeviceList();
-
-    const displayPackageName = cleanPackage;
-    showSnackbar(`Removed "${gameName || displayPackageName}" from "${deviceName}"`, async (undoData) => {
-        if (!Array.isArray(currentConfig[undoData.deviceKey])) {
-            currentConfig[undoData.deviceKey] = [];
-        }
-        
-        currentConfig[undoData.deviceKey].splice(undoData.position, 0, undoData.package);
-        
-        try {
-            await saveConfig();
-            try {
-                await execCommand(`echo '${JSON.stringify(originalListData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
-            } catch (error) {
-                appendToOutput("Failed to restore game names list: " + error, 'warning');
-            }
-            
-            appendToOutput(`Restored game "${undoData.cleanPackage}" to "${deviceName}" at position ${undoData.position + 1}`, 'success');
-            renderDeviceList();
-            
-            setTimeout(() => {
-                const restoredCard = document.querySelector(`.game-card[data-package="${gamePackage}"][data-device="${deviceKey}"]`);
-                if (restoredCard) {
-                    restoredCard.style.opacity = '0';
-                    restoredCard.style.transform = 'translateY(20px)';
-                    setTimeout(() => {
-                        restoredCard.style.opacity = '1';
-                        restoredCard.style.transform = 'translateY(0)';
-                        restoredCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                    }, 10);
-                }
-            }, 100);
-        } catch (error) {
-            appendToOutput(`Failed to restore game: ${error}`, 'error');
-            currentConfig[undoData.deviceKey].splice(undoData.position, 1);
-            await saveConfig();
-            renderDeviceList();
-        }
-    }, deletedGameData);
-}
-
 async function saveConfig() {
     try {
         const orderedConfig = {};
@@ -1871,7 +1319,6 @@ function closeModal(modalId) {
         modal.style.display = 'none';
         content.classList.remove('modal-exit');
         editingDevice = null;
-        editingGame = null;
     }, { once: true });
 }
 
@@ -1880,16 +1327,6 @@ function showPopup(popupId) {
     if (popup) {
         popup.style.display = 'flex';
         popup.querySelector('.popup-content').classList.remove('popup-exit');
-        if (popupId === 'device-picker-popup') {
-            populateDevicePicker();
-            const searchInput = document.getElementById('device-picker-search');
-            if (searchInput) {
-                searchInput.value = '';
-                document.querySelectorAll('.picker-device-card').forEach(card => {
-                    card.style.display = 'block';
-                });
-            }
-        }
     }
 }
 
@@ -1951,7 +1388,6 @@ function switchTab(tabId, direction = null) {
         newTabElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
         newTabElement.style.transform = 'translateX(0)';
         newTabElement.style.opacity = '1';
-
         if (tabId === 'devices') {
             setTimeout(() => renderDeviceList(), 100);
         }
@@ -2287,15 +1723,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeDeviceSort(); 
     switchTab('settings');
 });
-
-const loadPackagePickerDependencies = async () => {
-    if (typeof $packageManager !== 'undefined') {
-        if (typeof wrapInputStream === 'undefined') {
-            const { wrapInputStream } = await import("https://mui.kernelsu.org/internal/assets/ext/wrapInputStream.mjs");
-            window.wrapInputStream = wrapInputStream;
-        }
-    }
-};
 
 async function detectAvailableAPI() {
     const apis = {
