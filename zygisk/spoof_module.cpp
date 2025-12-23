@@ -318,8 +318,8 @@ private:
             }
         };
 
-        setStr(modelField, info.model);
-        //setStr(brandField, info.brand);
+        //setStr(modelField, info.model);
+        setStr(brandField, info.brand);
         //setStr(deviceField, info.device);
         //setStr(manufacturerField, info.manufacturer);
         //setStr(fingerprintField, info.fingerprint);
