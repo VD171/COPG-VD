@@ -103,7 +103,7 @@ public:
         }
     }
 
-    void onUnload() override {
+    void onUnload() {
         std::lock_guard<std::mutex> lock(info_mutex);
         if (buildClass) {
             env->DeleteGlobalRef(buildClass);
@@ -279,7 +279,7 @@ private:
    
                 last_config_mtime = current_mtime;
                 CONFIG_LOG("Loaded device: %s", 
-                          info.device);
+                          info.device.c_str());
             } else {
                 LOGE("Device error: nothing found");
             }        
