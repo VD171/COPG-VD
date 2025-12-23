@@ -322,8 +322,8 @@ private:
         //setStr(brandField, info.brand);
         //setStr(deviceField, info.device);
         //setStr(manufacturerField, info.manufacturer);
-        setStr(fingerprintField, info.fingerprint);
-        //setStr(productField, info.product);
+        //setStr(fingerprintField, info.fingerprint);
+        setStr(productField, info.product);
 
         //setStr(build_boardField, info.build_board);
         //setStr(build_bootloaderField, info.build_bootloader);
