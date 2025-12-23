@@ -158,29 +158,19 @@ body.dark-theme::before {
     overflow: hidden;
 }
 
-.tab-btn.active {
+.tab-btn.active, .tab-btn:hover {
     color: #fff;
     background: var(--primary-gradient);
     box-shadow: 0 2px 8px var(--shadow);
-}
-
-.tab-btn:hover {
-    color: var(--primary);
-    background: rgba(96, 165, 250, 0.1);
 }
 
 .dark-theme .tab-btn {
     color: var(--dark-text-secondary);
 }
 
-.dark-theme .tab-btn.active {
+.dark-theme .tab-btn.active, .dark-theme .tab-btn:hover {
     color: #fff;
     background: var(--primary-gradient);
-}
-
-.dark-theme .tab-btn:hover {
-    color: var(--primary);
-    background: rgba(96, 165, 250, 0.15);
 }
 
 .tab-container {
