@@ -174,7 +174,7 @@ if $INSTALL_SUCCESS; then
   chmod 0755 "$MODPATH/service.sh" 2>/dev/null
   chmod 0644 "$MODPATH/COPG.json" 2>/dev/null
   
-  for file in "$MODPATH/COPG.json""; do
+  for file in "$MODPATH/COPG.json"; do
     if [ -f "$file" ]; then
       chcon u:object_r:system_file:s0 "$file" 2>/dev/null
     fi
