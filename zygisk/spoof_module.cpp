@@ -324,9 +324,9 @@ private:
         setStr(manufacturerField, info.manufacturer);
         setStr(fingerprintField, info.fingerprint);
         setStr(productField, info.product);
-        setStr(build_boardField, info.build_board);
-        setStr(build_bootloaderField, info.build_bootloader);
-        setStr(build_hardwareField, info.build_hardware);
+        //setStr(build_boardField, info.build_board);
+        //setStr(build_bootloaderField, info.build_bootloader);
+        //setStr(build_hardwareField, info.build_hardware);
         //setStr(build_idField, info.build_id);
         //setStr(build_displayField, info.build_display);
         //setStr(build_hostField, info.build_host);
