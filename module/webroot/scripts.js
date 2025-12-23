@@ -182,44 +182,6 @@ function removeTagFromPackage(packageName, tag) {
     return existingTags.length > 0 ? `${cleanName}:${existingTags.join(':')}` : cleanName;
 }
 
-function createSortDropdown() {
-    const template = document.getElementById('sort-dropdown-template');
-    const clone = template.content.cloneNode(true);
-    sortDropdown = clone.querySelector('.sort-dropdown');
-    
-    sortDropdown.querySelectorAll('.sort-option[data-sort]').forEach(option => {
-        option.addEventListener('click', (e) => {
-            const sortType = option.dataset.sort;
-            setGameSort(sortType);
-            sortDropdown.classList.remove('show');
-            e.stopPropagation();
-        });
-    });
-    
-    sortDropdown.querySelectorAll('.sort-option[data-filter]').forEach(option => {
-        option.addEventListener('click', (e) => {
-            const filterType = option.dataset.filter;
-            
-            if (filterType === 'clear') {
-                clearGameFilter();
-            } else {
-                setGameFilter(filterType);
-            }
-            
-            sortDropdown.classList.remove('show');
-            e.stopPropagation();
-        });
-    });
-    
-    document.addEventListener('click', (e) => {
-        if (sortDropdown && sortDropdown.classList.contains('show') && 
-            !e.target.closest('.sort-btn') && !e.target.closest('.sort-dropdown')) {
-            sortDropdown.classList.remove('show');
-        }
-    });
-    
-    document.body.appendChild(sortDropdown);
-}
 
 function getFilterDisplayName(filterType) {
     switch(filterType) {
@@ -344,8 +306,8 @@ function getOriginalDeviceOrder() {
 
     
     for (const key of configKeyOrder) {
-        if (key === 'DEVICE' && currentConfig[key]) {
-            const deviceName = currentConfig[key].DEVICE || 'DEVICE';
+        if (key === 'COPG' && currentConfig[key]) {
+            const deviceName = currentConfig[key].DEVICE || 'COPG';
             const model = currentConfig[key].MODEL || 'Unknown';
             
             devices.push({
@@ -409,149 +371,8 @@ function sortDeviceList() {
     attachDeviceListeners();
 }
 
-function applyGameFilter() {
-    const gameList = document.getElementById('game-list');
-    if (!gameList || !activeFilter) return;
-    
-    const games = gameList.querySelectorAll('.game-card');
-    let visibleCount = 0;
-    
-    games.forEach(game => {
-        let shouldShow = false;
-        
-        switch(activeFilter) {
-            case 'installed':
-                shouldShow = game.querySelector('.installed-badge');
-                break;
-            default:
-                shouldShow = true;
-        }
-        
-        if (shouldShow) {
-            game.style.display = 'block';
-            visibleCount++;
-            game.style.order = '';
-        } else {
-            game.style.display = 'none';
-        }
-    });
-    
-    if (visibleCount > 0 && currentGameSort !== 'default') {
-        const visibleGames = Array.from(gameList.querySelectorAll('.game-card[style*="display: block"]'));
-        
-        if (currentGameSort === 'asc') {
-            visibleGames.sort((a, b) => {
-                const nameA = a.querySelector('.game-name').textContent.toLowerCase();
-                const nameB = b.querySelector('.game-name').textContent.toLowerCase();
-                return nameA.localeCompare(nameB);
-            });
-        } else if (currentGameSort === 'desc') {
-            visibleGames.sort((a, b) => {
-                const nameA = a.querySelector('.game-name').textContent.toLowerCase();
-                const nameB = b.querySelector('.game-name').textContent.toLowerCase();
-                return nameB.localeCompare(nameA);
-            });
-        }
-        
-        visibleGames.forEach((game, index) => {
-            game.style.order = index;
-        });
-    }
-    
-    setupLongPressHandlers();
-    
-    if (visibleCount === 0) {
-        appendToOutput(`No games found with ${getFilterDisplayName(activeFilter)} filter`, 'warning');
-    }
-    
-    appendToOutput(`Filter applied: ${getFilterDisplayName(activeFilter)} (${visibleCount} games)`, 'info');
-}
 
-function removeGameFilter() {
-    activeFilter = null;
-    
-    const gameList = document.getElementById('game-list');
-    if (!gameList) return;
-    
-    const games = gameList.querySelectorAll('.game-card');
-    games.forEach(game => {
-        game.style.display = 'block';
-        game.style.order = '';
-    });
-    
-    if (currentGameSort !== 'default') {
-        const sortedGames = Array.from(games);
-        
-        if (currentGameSort === 'asc') {
-            sortedGames.sort((a, b) => {
-                const nameA = a.querySelector('.game-name').textContent.toLowerCase();
-                const nameB = b.querySelector('.game-name').textContent.toLowerCase();
-                return nameA.localeCompare(nameB);
-            });
-        } else if (currentGameSort === 'desc') {
-            sortedGames.sort((a, b) => {
-                const nameA = a.querySelector('.game-name').textContent.toLowerCase();
-                const nameB = b.querySelector('.game-name').textContent.toLowerCase();
-                return nameB.localeCompare(nameA);
-            });
-        }
-        
-        gameList.innerHTML = '';
-        sortedGames.forEach(game => gameList.appendChild(game));
-    }
 
-    setupLongPressHandlers();
-}
-
-function setGameFilter(filterType) {
-    activeFilter = filterType;
-    
-    sortDropdown.querySelectorAll('.sort-option[data-filter]').forEach(option => {
-        option.classList.remove('active');
-        if (option.dataset.filter === filterType) {
-            option.classList.add('active');
-        }
-    });
-    
-    if (currentGameSort !== 'default') {
-        sortDropdown.querySelectorAll('.sort-option[data-sort]').forEach(option => {
-            option.classList.remove('active');
-            if (option.dataset.sort === currentGameSort) {
-                option.classList.add('active');
-            }
-        });
-    }
-    
-    const clearBtn = document.getElementById('clear-filter-btn');
-    if (clearBtn) {
-        clearBtn.style.display = 'flex';
-    }
-    
-    const sortBtn = document.getElementById('game-sort-btn');
-    sortBtn.title = `Filter: ${getFilterDisplayName(filterType)}`;
-    
-    applyGameFilter();
-}
-
-function clearGameFilter() {
-    activeFilter = null;
-    
-    sortDropdown.querySelectorAll('.sort-option[data-filter]').forEach(option => {
-        option.classList.remove('active');
-    });
-    
-    const clearBtn = document.getElementById('clear-filter-btn');
-    if (clearBtn) {
-        clearBtn.style.display = 'none';
-    }
-    
-    const sortBtn = document.getElementById('game-sort-btn');
-    sortBtn.title = 'Sort & Filter games';
-    
-    removeGameFilter();
-    
-    appendToOutput('Filter cleared', 'success');
-}
 
 function initializeDeviceSort() {
     createDeviceSortDropdown();
@@ -572,32 +393,15 @@ function initializeDeviceSort() {
     setDeviceSort('default');
 }
 
-function initializeGameSort() {
-    createSortDropdown();
-    
-    const sortBtn = document.getElementById('game-sort-btn');
-    if (sortBtn) {
-        sortBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            
-            const rect = sortBtn.getBoundingClientRect();
-            sortDropdown.style.top = `${rect.bottom + window.scrollY + 8}px`;
-            sortDropdown.style.right = `${window.innerWidth - rect.right}px`;
-            
-            sortDropdown.classList.toggle('show');
-        });
-    }
-    
-    setGameSort('default');
-}
+
 
 function populateDevicePicker() {
     const picker = document.getElementById('device-picker-list');
     picker.innerHTML = '';
     
     for (const [key, value] of Object.entries(currentConfig)) {
-        if (key === 'DEVICE') {
-            const deviceName = value.DEVICE || 'DEVICE';
+        if (key === 'COPG') {
+            const deviceName = value.DEVICE || 'COPG';
             const deviceCard = templates.pickerDeviceCard({
                 key: key,
                 deviceName: deviceName,
@@ -1270,8 +1074,8 @@ function renderDeviceList() {
     let index = 0;
     
     for (const key of configKeyOrder) {
-        if (key === 'DEVICE' && currentConfig[key]) {
-            const deviceName = currentConfig[key].DEVICE || 'DEVICE';
+        if (key === 'COPG' && currentConfig[key]) {
+            const deviceName = currentConfig[key].DEVICE || 'COPG';
             const model = currentConfig[key].MODEL || 'Unknown';
             
             const deviceCard = templates.deviceCard({
@@ -1308,101 +1112,6 @@ function editDeviceHandler(e) {
     editDevice(e.currentTarget.dataset.device);
 }
 
-function deleteDeviceHandler(e) {
-    deleteDevice(e.currentTarget.dataset.device);
-}
-
-async function renderGameList() {
-    const now = Date.now();
-    if (now - lastRender.games < RENDER_DEBOUNCE_MS) return;
-    lastRender.games = now;
-
-    const gameList = document.getElementById('game-list');
-    if (!gameList) return appendToOutput("Error: 'game-list' not found", 'error');
-    
-    const currentActiveFilter = activeFilter;
-    const currentGameSortState = currentGameSort;
-    
-    let gameNamesMap = {};
-    try {
-        const gameNamesContent = await execCommand("cat /data/adb/modules/COPG/list.json");
-        gameNamesMap = JSON.parse(gameNamesContent);
-    } catch (error) {
-        appendToOutput("Failed to load game names mapping: " + error, 'warning');
-    }
-    
-    let installedPackages = [];
-    try {
-        const pmOutput = await execCommand("pm list packages | cut -d: -f2");
-        installedPackages = pmOutput.trim().split('\n');
-    } catch (error) {
-        appendToOutput("Failed to get installed packages: " + error, 'warning');
-    }
-
-    const fragment = document.createDocumentFragment();
-    let index = 0;
-    const displayedPackages = new Set();
-
-    for (const key of configKeyOrder) {
-        if (Array.isArray(currentConfig[key]) && key === 'DEVICE') {
-            const deviceKey = `${key}`;
-            const deviceData = currentConfig[deviceKey] || {};
-            const deviceName = deviceData.DEVICE || 'DEVICE';
-            
-            currentConfig[key].forEach(gamePackage => {
-                const cleanPackageName = getPackageNameWithoutTags(gamePackage);
-                if (displayedPackages.has(cleanPackageName)) return;
-                
-                const isInstalled = installedPackages.includes(cleanPackageName);
-                const gameName = gameNamesMap[cleanPackageName] || cleanPackageName;
-                               
-                let additionalBadges = '';
-                
-                const gameCard = templates.gameCard({
-                    gamePackage: gamePackage,
-                    deviceKey: key,
-                    delay: Math.min(index * 0.05, 0.5),
-                    gameName: gameName,
-                    cleanPackageName: cleanPackageName,
-                    deviceName: deviceName,
-                    isInstalled: isInstalled,
-                    additionalBadges: additionalBadges
-                });
-                
-                fragment.appendChild(gameCard);
-                displayedPackages.add(cleanPackageName);
-                index++;
-            });
-        }
-    }
-    
-    gameList.innerHTML = '';
-    gameList.appendChild(fragment);
-    setupLongPressHandlers();
-    updateFilterCounts();
-
-    if (currentActiveFilter) {
-        setTimeout(() => {
-            activeFilter = currentActiveFilter;
-            
-            const sortBtn = document.getElementById('game-sort-btn');
-            if (sortBtn && activeFilter) {
-                sortBtn.title = `Filter: ${getFilterDisplayName(activeFilter)}`;
-            }
-            
-            applyGameFilter();
-            
-            const clearBtn = document.getElementById('clear-filter-btn');
-            if (clearBtn) {
-                clearBtn.style.display = 'flex';
-            }
-        }, 200);
-    } else if (currentFilter) {
-        setTimeout(() => {
-            applyGameFilter();
-        }, 200);
-    }
-}
 
 function setupLongPressHandlers() {
     let pressTimer;
@@ -1799,11 +1508,11 @@ async function saveDevice(e) {
     
     const deviceName = document.getElementById('device-name').value.trim();
     const deviceModel = document.getElementById('device-model').value.trim();
-    const deviceKey = `DEVICE`;
+    const deviceKey = `COPG`;
     
     if (!editingDevice) {
         for (const [key, value] of Object.entries(currentConfig)) {
-            if (key === 'DEVICE' && key !== deviceKey) {
+            if (key === 'COPG' && key !== deviceKey) {
                 if (value.DEVICE === deviceName) {
                     const field = document.getElementById('device-name');
                     field.classList.add('error');
@@ -1848,7 +1557,7 @@ async function saveDevice(e) {
         return;
     }
     
-    const packageKey = 'DEVICE';
+    const packageKey = 'COPG';
     const brand = document.getElementById('device-brand').value.trim() || 'Unknown';
     const model = document.getElementById('device-model').value.trim() || 'Unknown';
     const product = document.getElementById('device-product').value.trim() || 'Unknown';
@@ -1886,7 +1595,7 @@ async function saveDevice(e) {
     
     try {
         if (editingDevice && editingDevice !== deviceKey) {
-            const oldPackageKey = 'DEVICE';
+            const oldPackageKey = 'COPG';
             const oldIndex = configKeyOrder.indexOf(editingDevice);
             const oldPackageIndex = configKeyOrder.indexOf(oldPackageKey);
             
@@ -2120,121 +1829,6 @@ async function deleteGame(gamePackage, deviceKey, gameName, deviceName, cleanPac
     }, deletedGameData);
 }
 
-async function deleteDevice(deviceKey) {
-    const deviceName = currentConfig[deviceKey]?.DEVICE || 'DEVICE';
-    const packageKey = 'DEVICE';
-    const card = document.querySelector(`.device-card[data-key="${deviceKey}"]`);
-    
-    if (!card) return;
-
-    const deviceEntries = Object.entries(currentConfig).filter(([key]) => key === 'DEVICE');
-    const deviceIndex = deviceEntries.findIndex(([key]) => key === deviceKey);
-    if (deviceIndex === -1) {
-        appendToOutput(`Device "${deviceName}" not found in config`, 'error');
-        return;
-    }
-    
-    card.classList.add('fade-out');
-    await new Promise(resolve => setTimeout(resolve, 400));
-
-    const deletedDeviceData = { ...currentConfig[deviceKey] };
-    const deletedPackageData = currentConfig[packageKey] ? [...currentConfig[packageKey]] : [];
-    const deletedDeviceIndex = deviceIndex;
-
-    let originalListData = {};
-    try {
-        const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
-        originalListData = JSON.parse(listContent);
-    } catch (error) {
-        appendToOutput("Failed to load game names list during device deletion: " + error, 'warning');
-    }
-
-    try {
-        const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
-        let listData = JSON.parse(listContent);
-        if (deletedPackageData.length > 0) {
-            deletedPackageData.forEach(pkg => {
-                const cleanPkg = getPackageNameWithoutTags(pkg);
-                if (listData[cleanPkg]) {
-                    delete listData[cleanPkg];
-                }
-            });
-            await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
-        }
-    } catch (error) {
-        appendToOutput("Failed to update game names list during device deletion: " + error, 'warning');
-    }
-
-    delete currentConfig[packageKey];
-    delete currentConfig[deviceKey];
-    try {
-        await saveConfig();
-        appendToOutput(`Deleted device "${deviceName}"`, 'red');
-    } catch (error) {
-        appendToOutput(`Failed to delete device: ${error}`, 'error');
-        currentConfig = insertAtIndex(currentConfig, deviceKey, deletedDeviceData, deletedDeviceIndex * 2);
-        if (deletedPackageData.length > 0) {
-            currentConfig = insertAtIndex(currentConfig, packageKey, deletedPackageData, deletedDeviceIndex * 2);
-        }
-        
-        try {
-            await execCommand(`echo '${JSON.stringify(originalListData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
-        } catch (listError) {
-            appendToOutput("Failed to restore game names list after failed deletion: " + listError, 'warning');
-        }
-        card.classList.remove('fade-out');
-        renderDeviceList();
-        return;
-    }
-
-    renderDeviceList();
-
-    showSnackbar(`Deleted device "${deviceName}"`, async () => {
-        currentConfig = insertAtIndex(currentConfig, deviceKey, deletedDeviceData, deletedDeviceIndex * 2);
-        if (deletedPackageData.length > 0) {
-            currentConfig = insertAtIndex(currentConfig, packageKey, deletedPackageData, deletedDeviceIndex * 2);
-        }
-        try {
-            await saveConfig();
-            try {
-                await execCommand(`echo '${JSON.stringify(originalListData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
-            } catch (error) {
-                appendToOutput("Failed to restore game names list: " + error, 'warning');
-            }
-            appendToOutput(`Restored device "${deviceName}"`, 'success');
-            renderDeviceList();
-            const restoredCard = document.querySelector(`.device-card[data-key="${deviceKey}"]`);
-            if (restoredCard) {
-                restoredCard.style.opacity = '0';
-                restoredCard.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    restoredCard.style.opacity = '1';
-                    restoredCard.style.transform = 'translateY(0)';
-                    restoredCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                }, 10);
-            }
-        } catch (error) {
-            appendToOutput(`Failed to restore device: ${error}`, 'error');
-            delete currentConfig[packageKey];
-            delete currentConfig[deviceKey];
-            await saveConfig();
-            
-            try {
-                const listContent = await execCommand("cat /data/adb/modules/COPG/list.json");
-                let listData = JSON.parse(listContent);
-                deletedPackageData.forEach(pkg => {
-                    const cleanPkg = getPackageNameWithoutTags(pkg);
-                    delete listData[cleanPkg];
-                });
-                await execCommand(`echo '${JSON.stringify(listData, null, 2).replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/list.json`);
-            } catch (listError) {
-                appendToOutput("Failed to clean up game names list after failed restoration: " + listError, 'warning');
-            }
-            renderDeviceList();
-        }
-    });
-}
-
 async function saveConfig() {
     try {
         const orderedConfig = {};
@@ -2326,7 +1920,7 @@ function toggleLogSection(e) {
 }
 
 function switchTab(tabId, direction = null) {
-    const tabs = ['settings', 'devices', 'games'];
+    const tabs = ['settings', 'devices'];
     const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`)?.classList.contains('active'));
     if (currentTab === tabId) return;
 
@@ -2340,14 +1934,14 @@ function switchTab(tabId, direction = null) {
 
     if (currentTabElement) {
         currentTabElement.classList.remove('active');
-        currentTabElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-        currentTabElement.style.transform = inferredDirection === 'left' ? 'translateX(-100%)' : 'translateX(100%)';
+        currentTabElement.style.display = 'none';
+        currentTabElement.style.transform = 'translateX(0)';
         currentTabElement.style.opacity = '0';
     }
 
     newTabElement.style.display = 'block';
     newTabElement.style.transition = 'none';
-    newTabElement.style.transform = inferredDirection === 'left' ? 'translateX(100%)' : 'translateX(-100%)';
+    newTabElement.style.transform = 'translateX(100%)';
     newTabElement.style.opacity = '0';
 
     void newTabElement.offsetHeight;
@@ -2358,21 +1952,9 @@ function switchTab(tabId, direction = null) {
         newTabElement.style.transform = 'translateX(0)';
         newTabElement.style.opacity = '1';
 
-        if (currentTabElement) {
-            currentTabElement.addEventListener('transitionend', () => {
-                currentTabElement.style.display = 'none';
-                currentTabElement.style.transform = 'translateX(0)';
-                currentTabElement.style.opacity = '0';
-            }, { once: true });
+        if (tabId === 'devices') {
+            setTimeout(() => renderDeviceList(), 100);
         }
-
-        newTabElement.addEventListener('transitionend', () => {
-            setTimeout(() => {
-                if (tabId === 'devices') {
-                    renderDeviceList();
-                }
-            }, 100);
-        }, { once: true });
     });
 
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -2404,13 +1986,13 @@ function copyLogContent() {
 
 function setupSwipeNavigation() {
     const container = document.getElementById('tab-container');
+    const tabs = ['settings', 'devices'];
+    const swipeThreshold = 30;
+    const verticalThreshold = 50;
     let touchStartX = 0;
     let touchStartY = 0;
     let touchMoveX = 0;
     let touchMoveY = 0;
-    const tabs = ['settings', 'devices', 'games'];
-    const swipeThreshold = 30;
-    const verticalThreshold = 50;
     let isSwiping = false;
     let lastSwipeTime = 0;
     const debounceTime = 150;
@@ -2440,67 +2022,64 @@ function setupSwipeNavigation() {
         touchMoveY = e.touches[0].clientY;
         const diffX = touchMoveX - touchStartX;
         const diffY = touchMoveY - touchStartY;
-        const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`)?.classList.contains('active'));
-        const currentIndex = tabs.indexOf(currentTab);
-
-        if (Math.abs(diffY) > verticalThreshold || Math.abs(diffX) < 20) return;
-
+        if (Math.abs(diffY) > verticalThreshold || Math.abs(diffX) < 5) return;
         e.preventDefault();
         isSwiping = true;
 
-        if ((currentIndex === 0 && diffX > 0) || (currentIndex === tabs.length - 1 && diffX < 0)) return;
-
+        const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`)?.classList.contains('active'));
+        const otherTab = tabs.find(tab => tab !== currentTab);
         const currentTabElement = document.getElementById(`${currentTab}-tab`);
+        const otherTabElement = document.getElementById(`${otherTab}-tab`);
+
         if (currentTabElement) {
             currentTabElement.style.transition = 'none';
             currentTabElement.style.transform = `translateX(${diffX}px)`;
             currentTabElement.style.opacity = Math.max(0.2, 1 - Math.abs(diffX) / window.innerWidth);
         }
 
-        const nextTab = diffX < 0 ? tabs[currentIndex + 1] : tabs[currentIndex - 1];
-        const nextTabElement = document.getElementById(`${nextTab}-tab`);
-        if (nextTabElement) {
-            nextTabElement.style.display = 'block';
-            nextTabElement.style.transition = 'none';
-            nextTabElement.style.transform = `translateX(${diffX < 0 ? window.innerWidth + diffX : -window.innerWidth + diffX}px)`;
-            nextTabElement.style.opacity = Math.min(1, Math.abs(diffX) / window.innerWidth);
+        if (otherTabElement) {
+            otherTabElement.style.display = 'block';
+            otherTabElement.style.transition = 'none';
+            otherTabElement.style.transform = `translateX(${diffX < 0 ? window.innerWidth + diffX : -window.innerWidth + diffX}px)`;
+            otherTabElement.style.opacity = Math.min(1, Math.abs(diffX) / window.innerWidth);
         }
     }, { passive: false });
 
-    container.addEventListener('touchend', (e) => {
+    container.addEventListener('touchend', () => {
         if (!isSwiping) return;
-
         const now = Date.now();
         if (now - lastSwipeTime < debounceTime) return;
         lastSwipeTime = now;
 
         const diffX = touchMoveX - touchStartX;
         const diffY = touchMoveY - touchStartY;
+        if (Math.abs(diffY) > verticalThreshold) {
+            resetTabStates();
+            return;
+        }
+
         const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`)?.classList.contains('active'));
-        const currentIndex = tabs.indexOf(currentTab);
+        const otherTab = tabs.find(tab => tab !== currentTab);
         const currentTabElement = document.getElementById(`${currentTab}-tab`);
-        const nextTab = diffX < 0 ? tabs[currentIndex + 1] : tabs[currentIndex - 1];
-        const nextTabElement = document.getElementById(`${nextTab}-tab`);
+        const otherTabElement = document.getElementById(`${otherTab}-tab`);
 
         if (currentTabElement) currentTabElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-        if (nextTabElement) nextTabElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+        if (otherTabElement) otherTabElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
 
-        if (Math.abs(diffX) > swipeThreshold && Math.abs(diffY) <= verticalThreshold && nextTab) {
-            switchTab(nextTab, diffX < 0 ? 'left' : 'right');
+        if (Math.abs(diffX) > swipeThreshold) {
+            switchTab(otherTab, diffX < 0 ? 'left' : 'right');
         } else {
             if (currentTabElement) {
                 currentTabElement.style.transform = 'translateX(0)';
                 currentTabElement.style.opacity = '1';
             }
-            if (nextTabElement) {
-                nextTabElement.style.transform = diffX < 0 ? 'translateX(100%)' : 'translateX(-100%)';
-                nextTabElement.style.opacity = '0';
-                nextTabElement.addEventListener('transitionend', () => {
-                    nextTabElement.style.display = 'none';
+            if (otherTabElement) {
+                otherTabElement.style.transform = diffX < 0 ? 'translateX(100%)' : 'translateX(-100%)';
+                otherTabElement.style.opacity = '0';
+                otherTabElement.addEventListener('transitionend', () => {
+                    otherTabElement.style.display = 'none';
                     resetTabStates();
                 }, { once: true });
-            } else {
-                resetTabStates();
             }
         }
     });
@@ -2508,17 +2087,6 @@ function setupSwipeNavigation() {
     resetTabStates();
 }
 
-async function updateGameList() {
-    if (actionRunning) return;
-    actionRunning = true;
-    const btn = document.getElementById('update-config');
-    btn.classList.add('loading');
-    appendToOutput("Checking for game list updates...", 'info');
-    let isUpToDate = true;
-    appendToOutput("Your config is already up-to-date");
-    btn.classList.remove('loading');
-    actionRunning = false;
-}
 
 function applyEventListeners() {
     document.getElementById('toggle-logging').addEventListener('click', async (e) => {
@@ -2550,22 +2118,6 @@ function applyEventListeners() {
     document.getElementById('save-log-no').addEventListener('click', () => {
         closePopup('save-log-popup');
         appendToOutput("Log not saved", 'info');
-    });
-
-    document.getElementById('update-config').addEventListener('click', () => {
-        if (actionRunning) return;
-        showPopup('update-confirm-popup');
-    });
-
-    document.getElementById('update-yes').addEventListener('click', async () => {
-        hidePopup('update-confirm-popup', async () => {
-            await updateGameList();
-        });
-    });
-
-    document.getElementById('update-no').addEventListener('click', () => {
-        closePopup('update-confirm-popup');
-        appendToOutput("Update canceled", 'info');
     });
 
     const shortcutButton = document.getElementById('shortcut-container');
@@ -2647,10 +2199,6 @@ function applyEventListeners() {
         });
     });
 
-    document.getElementById('game-device').addEventListener('click', () => {
-        showPopup('device-picker-popup');
-    });
-
     document.getElementById('error-ok').addEventListener('click', () => {
         closePopup('error-popup');
     });
@@ -2679,8 +2227,6 @@ function applyEventListeners() {
         sortDeviceList();
     });
     
-});
-
     document.getElementById('device-picker-search').addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase().trim();
         document.querySelectorAll('.picker-device-card').forEach(card => {
@@ -2739,7 +2285,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadConfig();
     applyEventListeners();
     initializeDeviceSort(); 
-    initializeGameSort(); 
     switchTab('settings');
 });
 
