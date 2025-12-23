@@ -1,3 +1,12 @@
+
+
+
+	
+	
+	
+	
+
+
 let actionRunning = false;
 let configKeyOrder = [];
 let currentConfig = {};
@@ -1393,7 +1402,7 @@ function switchTab(tabId, direction = null) {
         }
     });
 
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-nav .tab-btn.active:not(#info-popup .tab-btn)').forEach(btn => btn.classList.remove('active'))
     document.getElementById(`tab-${tabId}`)?.classList.add('active');
 }
 
@@ -1419,110 +1428,6 @@ function copyLogContent() {
     
     document.body.removeChild(textarea);
 }
-
-function setupSwipeNavigation() {
-    const container = document.getElementById('tab-container');
-    const tabs = ['settings', 'devices'];
-    const swipeThreshold = 30;
-    const verticalThreshold = 50;
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchMoveX = 0;
-    let touchMoveY = 0;
-    let isSwiping = false;
-    let lastSwipeTime = 0;
-    const debounceTime = 150;
-
-    function resetTabStates() {
-        tabs.forEach(tab => {
-            const tabElement = document.getElementById(`${tab}-tab`);
-            if (tabElement) {
-                tabElement.style.transition = 'none';
-                tabElement.style.transform = 'translateX(0)';
-                tabElement.style.opacity = tabElement.classList.contains('active') ? '1' : '0';
-                tabElement.style.display = tabElement.classList.contains('active') ? 'block' : 'none';
-            }
-        });
-    }
-
-    container.addEventListener('touchstart', (e) => {
-        const now = Date.now();
-        if (now - lastSwipeTime < debounceTime) return;
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-        isSwiping = false;
-    }, { passive: true });
-
-    container.addEventListener('touchmove', (e) => {
-        touchMoveX = e.touches[0].clientX;
-        touchMoveY = e.touches[0].clientY;
-        const diffX = touchMoveX - touchStartX;
-        const diffY = touchMoveY - touchStartY;
-        if (Math.abs(diffY) > verticalThreshold || Math.abs(diffX) < 5) return;
-        e.preventDefault();
-        isSwiping = true;
-
-        const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`)?.classList.contains('active'));
-        const otherTab = tabs.find(tab => tab !== currentTab);
-        const currentTabElement = document.getElementById(`${currentTab}-tab`);
-        const otherTabElement = document.getElementById(`${otherTab}-tab`);
-
-        if (currentTabElement) {
-            currentTabElement.style.transition = 'none';
-            currentTabElement.style.transform = `translateX(${diffX}px)`;
-            currentTabElement.style.opacity = Math.max(0.2, 1 - Math.abs(diffX) / window.innerWidth);
-        }
-
-        if (otherTabElement) {
-            otherTabElement.style.display = 'block';
-            otherTabElement.style.transition = 'none';
-            otherTabElement.style.transform = `translateX(${diffX < 0 ? window.innerWidth + diffX : -window.innerWidth + diffX}px)`;
-            otherTabElement.style.opacity = Math.min(1, Math.abs(diffX) / window.innerWidth);
-        }
-    }, { passive: false });
-
-    container.addEventListener('touchend', () => {
-        if (!isSwiping) return;
-        const now = Date.now();
-        if (now - lastSwipeTime < debounceTime) return;
-        lastSwipeTime = now;
-
-        const diffX = touchMoveX - touchStartX;
-        const diffY = touchMoveY - touchStartY;
-        if (Math.abs(diffY) > verticalThreshold) {
-            resetTabStates();
-            return;
-        }
-
-        const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`)?.classList.contains('active'));
-        const otherTab = tabs.find(tab => tab !== currentTab);
-        const currentTabElement = document.getElementById(`${currentTab}-tab`);
-        const otherTabElement = document.getElementById(`${otherTab}-tab`);
-
-        if (currentTabElement) currentTabElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-        if (otherTabElement) otherTabElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-
-        if (Math.abs(diffX) > swipeThreshold) {
-            switchTab(otherTab, diffX < 0 ? 'left' : 'right');
-        } else {
-            if (currentTabElement) {
-                currentTabElement.style.transform = 'translateX(0)';
-                currentTabElement.style.opacity = '1';
-            }
-            if (otherTabElement) {
-                otherTabElement.style.transform = diffX < 0 ? 'translateX(100%)' : 'translateX(-100%)';
-                otherTabElement.style.opacity = '0';
-                otherTabElement.addEventListener('transitionend', () => {
-                    otherTabElement.style.display = 'none';
-                    resetTabStates();
-                }, { once: true });
-            }
-        }
-    });
-
-    resetTabStates();
-}
-
 
 function applyEventListeners() {
     document.getElementById('toggle-logging').addEventListener('click', async (e) => {
@@ -1683,8 +1588,6 @@ function applyEventListeners() {
             card.style.display = searchableText.includes(searchTerm) ? 'block' : 'none';
         });
     });
-
-    setupSwipeNavigation();
 }
 
 window.addEventListener('resize', () => {
@@ -2140,3 +2043,6 @@ function getTypeDisplayName(type) {
         default: return type;
     }
 }
+
+
+pre { background: transparent }pre.western { font-family: "Liberation Mono", monospace; font-size: 10pt }pre.cjk { font-family: "Noto Sans Mono CJK SC", monospace; font-size: 10pt }pre.ctl { font-family: "Liberation Mono", monospace; font-size: 10pt }p { margin-bottom: 0.25cm; line-height: 115%; background: transparent }a:link { color: #000080; text-decoration: underline }a:visited { color: #800000; text-decoration: underline }
