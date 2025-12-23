@@ -103,6 +103,7 @@ jobs:
           author=VD171 & AlirezaParsi
           description=Spoof your device. (Fork by VD171)
           minMagisk=20.4
+          updateJson=https://raw.githubusercontent.com/VD171/COPG/refs/heads/JSON/module/update.json
           EOF
 
       - name: Update version with grep
