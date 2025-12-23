@@ -3,27 +3,14 @@
 #include <zygisk.hpp>
 #include <nlohmann/json.hpp>
 #include <fstream>
-#include <unordered_map>
-#include <dlfcn.h>
-#include <sys/mman.h>
-#include <unistd.h>
 #include <android/log.h>
 #include <mutex>
-#include <functional>
 #include <sys/stat.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <vector>
-#include <unordered_set>
-#include <fcntl.h>
-#include <sstream>
 
 using json = nlohmann::json;
 
 #define LOG_TAG "COPGModule"
 
-#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__)
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
@@ -89,6 +76,15 @@ struct JniString {
     const char* get() const { return chars; }
 };
 
+bool operator!=(const DeviceInfo& a, const DeviceInfo& b) {
+    return a.brand != b.brand || a.device != b.device || a.model != b.model ||
+           a.manufacturer != b.manufacturer || a.fingerprint != b.fingerprint ||
+           a.product != b.product || a.build_board != b.build_board ||
+           a.build_bootloader != b.build_bootloader || a.build_id != b.build_id ||
+           a.build_hardware != b.build_hardware ||
+           a.build_display != b.build_display || a.build_host != b.build_host;
+}
+
 class COPGModule : public zygisk::ModuleBase {
 public:
     void onLoad(zygisk::Api* api, JNIEnv* env) override {
@@ -107,7 +103,7 @@ public:
         }
     }
 
-    void onUnload() {
+    void onUnload() override {
         std::lock_guard<std::mutex> lock(info_mutex);
         if (buildClass) {
             env->DeleteGlobalRef(buildClass);
@@ -232,12 +228,12 @@ private:
                 info.model = device.value("MODEL", "generic");
                 info.fingerprint = device.value("FINGERPRINT", "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys");
                 info.product = device.value("PRODUCT", info.brand);
-                info.build_board = device.value("BOARD", info.build_board);
+                info.build_board = device.value("BOARD", info.model);
                 info.build_bootloader = device.value("BOOTLOADER", "unknown");
-                info.build_hardware = device.value("HARDWARE", info.build_hardware);
-                info.build_id = device.value("ID", info.build_id);
-                info.build_display = device.value("DISPLAY", info.build_display);
-                info.build_host = device.value("HOST", info.build_host);
+                info.build_hardware = device.value("HARDWARE", info.model);
+                info.build_id = device.value("ID", "generic");
+                info.build_display = device.value("DISPLAY", "generic");
+                info.build_host = device.value("HOST", "generic");
     
                 if (device.contains("ANDROID_VERSION")) {
                     try {
