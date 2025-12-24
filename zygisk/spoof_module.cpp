@@ -60,6 +60,7 @@ static jfieldID build_displayField = nullptr;
 static jfieldID build_hostField = nullptr;
 
 static std::once_flag build_once;
+static std::once_flag original_once;
 
 static time_t last_config_mtime = 0;
 static const std::string config_path = "/data/adb/modules/COPG/COPG.json";
@@ -93,6 +94,11 @@ public:
         this->env = env;
 
         ensureBuildClass();
+        std::call_once(original_info_flag, [&] {
+            captureOriginalInfo();
+            SPOOF_LOG("Original device info captured: %s", original_info.model.c_str());
+	});
+        
         reloadIfNeeded(true);
 
         {
@@ -128,48 +134,29 @@ public:
         ensureBuildClass();
         reloadIfNeeded(true);
 
-        {
-            std::lock_guard<std::mutex> lock(info_mutex);
-            if (spoof_device && current_info != *spoof_device) {
-                current_info = *spoof_device;
-                spoofDevice(current_info);
-            }
-        }
-
-        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-    }
-    
-    void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
-        ensureBuildClass();
-        reloadIfNeeded(true);
-    
         if (!args || !args->nice_name) {
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
         }
-    
+
         const char* package_name = env->GetStringUTFChars(*args->nice_name, nullptr);
-        if ("com.google.android.GoogleCamera" == package_name) {
-            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-            return;
-        }
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
-            if (spoof_device && current_info != *spoof_device) {
-                current_info = *spoof_device;
-                spoofDevice(current_info);
+            if (strcmp(package_name, "com.google.android.GoogleCamera") == 0) {
+                SPOOF_LOG("Restoring original device for: %s", package_name);
+                spoofDevice(original_info);
+            } else {
+                if (spoof_device && current_info != *spoof_device) {
+                    current_info = *spoof_device;
+                    spoofDevice(current_info);
+                }
             }
         }
 
         env->ReleaseStringUTFChars(*args->nice_name, package_name);
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
-
-
-
-
-
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
         api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
@@ -226,6 +213,47 @@ private:
                 versionClass = nullptr;
             }
         });
+    }
+
+    void captureOriginalInfo() {
+        if (!buildClass) return;
+
+        auto getStr = [&](jfieldID field) -> std::string {
+            if (!field) return "";
+            jstring js = (jstring)env->GetStaticObjectField(buildClass, field);
+            if (!js) return "";
+            const char* str = env->GetStringUTFChars(js, nullptr);
+            std::string result(str);
+            env->ReleaseStringUTFChars(js, str);
+            env->DeleteLocalRef(js);
+            return result;
+        };
+
+        auto getInt = [&](jfieldID field) -> int {
+            if (!field || !versionClass) return 0;
+            return env->GetStaticIntField(versionClass, field);
+        };
+
+        original_info.model = getStr(modelField);
+        original_info.brand = getStr(brandField);
+        original_info.device = getStr(deviceField);
+        original_info.manufacturer = getStr(manufacturerField);
+        original_info.fingerprint = getStr(fingerprintField);
+        original_info.product = getStr(productField);
+        original_info.build_board = getStr(build_boardField);
+        original_info.build_bootloader = getStr(build_bootloaderField);
+        original_info.build_hardware = getStr(build_hardwareField);
+        original_info.build_id = getStr(build_idField);
+        original_info.build_display = getStr(build_displayField);
+        original_info.build_host = getStr(build_hostField);
+        
+        if (versionClass && releaseField) {
+            original_info.android_version = getStr(releaseField);
+        }
+        
+        if (versionClass && sdkIntField) {
+            original_info.sdk_int = getInt(sdkIntField);
+        }
     }
 
     void reloadIfNeeded(bool force = false) {
