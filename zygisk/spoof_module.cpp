@@ -6,6 +6,9 @@
 #include <android/log.h>
 #include <mutex>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <signal.h>
 
 using json = nlohmann::json;
 
@@ -17,6 +20,7 @@ using json = nlohmann::json;
 
 #define CONFIG_LOG(...) LOGI("[CONFIG] " __VA_ARGS__)
 #define SPOOF_LOG(...) LOGI("[SPOOF] " __VA_ARGS__)
+#define INFO_LOG(...) LOGI("[INFO] " __VA_ARGS__)
 
 static bool debug_mode = false;
 
@@ -58,6 +62,11 @@ static jfieldID build_hardwareField = nullptr;
 static jfieldID build_idField = nullptr;
 static jfieldID build_displayField = nullptr;
 static jfieldID build_hostField = nullptr;
+static const char* const gms_packages[] = {
+    "com.android.vending",
+    "com.google.android.gsf",
+    "com.google.android.gms"
+};
 
 static std::once_flag build_once;
 static std::once_flag original_once;
@@ -85,6 +94,37 @@ bool operator!=(const DeviceInfo& a, const DeviceInfo& b) {
            a.build_bootloader != b.build_bootloader || a.build_id != b.build_id ||
            a.build_hardware != b.build_hardware ||
            a.build_display != b.build_display || a.build_host != b.build_host;
+}
+
+void killGmsProcesses() {
+    for (const char* pkg : gms_packages) {
+        std::string proc_path = "/proc";
+        DIR* dir = opendir(proc_path.c_str());
+        if (!dir) continue;
+        
+        struct dirent* entry;
+        while ((entry = readdir(dir)) != nullptr) {
+            if (entry->d_type != DT_DIR) continue;
+            
+            int pid = atoi(entry->d_name);
+            if (pid <= 0) continue;
+            
+            std::string cmdline_path = proc_path + "/" + entry->d_name + "/cmdline";
+            std::ifstream cmdline_file(cmdline_path);
+            if (!cmdline_file.is_open()) continue;
+            
+            std::string process_name;
+            std::getline(cmdline_file, process_name, '\0');
+            cmdline_file.close();
+            
+            if (process_name == pkg) {
+                if (kill(pid, SIGKILL) == 0) {
+                    INFO_LOG("Killed process: %s (PID: %d)", pkg, pid);
+                }
+            }
+        }
+        closedir(dir);
+    }
 }
 
 class COPGModule : public zygisk::ModuleBase {
@@ -145,13 +185,26 @@ public:
         {
             std::lock_guard<std::mutex> lock(info_mutex);
             if (strcmp(package_name, "com.google.android.GoogleCamera") == 0) {
-                SPOOF_LOG("Restoring original device for: %s", package_name);
+                INFO_LOG("Restoring original device for: %s", package_name);
                 spoofDevice(original_info);
             } else {
                 if (spoof_device && current_info != *spoof_device) {
                     current_info = *spoof_device;
                     spoofDevice(current_info);
-                }
+               
+	                bool is_gms_package = false;
+	                for (const char* pkg : gms_packages) {
+	                    if (strcmp(package_name, pkg) == 0) {
+	                        is_gms_package = true;
+	                        break;
+	                    }
+	                }
+	                
+	                if (!is_gms_package) {
+	                    INFO_LOG("New device detected:  %s (%s). Killing GMS processes...", current_info.model.c_str(), current_info.brand.c_str());
+	                    killGmsProcesses();
+	                }
+				}
             }
         }
 
@@ -217,46 +270,46 @@ private:
 
     void ensureOriginalInfo() {
         if (!buildClass) return;
-		std::call_once(original_once, [&] {
-	        auto getStr = [&](jfieldID field) -> std::string {
-	            if (!field) return "";
-	            jstring js = (jstring)env->GetStaticObjectField(buildClass, field);
-	            if (!js) return "";
-	            const char* str = env->GetStringUTFChars(js, nullptr);
-	            std::string result(str);
-	            env->ReleaseStringUTFChars(js, str);
-	            env->DeleteLocalRef(js);
-	            return result;
-	        };
-	
-	        auto getInt = [&](jfieldID field) -> int {
-	            if (!field || !versionClass) return 0;
-	            return env->GetStaticIntField(versionClass, field);
-	        };
-	
-	        original_info.model = getStr(modelField);
-	        original_info.brand = getStr(brandField);
-	        original_info.device = getStr(deviceField);
-	        original_info.manufacturer = getStr(manufacturerField);
-	        original_info.fingerprint = getStr(fingerprintField);
-	        original_info.product = getStr(productField);
-	        original_info.build_board = getStr(build_boardField);
-	        original_info.build_bootloader = getStr(build_bootloaderField);
-	        original_info.build_hardware = getStr(build_hardwareField);
-	        original_info.build_id = getStr(build_idField);
-	        original_info.build_display = getStr(build_displayField);
-	        original_info.build_host = getStr(build_hostField);
-	        
-	        if (versionClass && releaseField) {
-	            original_info.android_version = getStr(releaseField);
-	        }
-	        
-	        if (versionClass && sdkIntField) {
-	            original_info.sdk_int = getInt(sdkIntField);
-	        }
-			SPOOF_LOG("Original device info captured: %s (%s)", original_info.model.c_str(), original_info.brand.c_str());
-		});
-	}
+        std::call_once(original_once, [&] {
+            auto getStr = [&](jfieldID field) -> std::string {
+                if (!field) return "";
+                jstring js = (jstring)env->GetStaticObjectField(buildClass, field);
+                if (!js) return "";
+                const char* str = env->GetStringUTFChars(js, nullptr);
+                std::string result(str);
+                env->ReleaseStringUTFChars(js, str);
+                env->DeleteLocalRef(js);
+                return result;
+            };
+
+            auto getInt = [&](jfieldID field) -> int {
+                if (!field || !versionClass) return 0;
+                return env->GetStaticIntField(versionClass, field);
+            };
+
+            original_info.model = getStr(modelField);
+            original_info.brand = getStr(brandField);
+            original_info.device = getStr(deviceField);
+            original_info.manufacturer = getStr(manufacturerField);
+            original_info.fingerprint = getStr(fingerprintField);
+            original_info.product = getStr(productField);
+            original_info.build_board = getStr(build_boardField);
+            original_info.build_bootloader = getStr(build_bootloaderField);
+            original_info.build_hardware = getStr(build_hardwareField);
+            original_info.build_id = getStr(build_idField);
+            original_info.build_display = getStr(build_displayField);
+            original_info.build_host = getStr(build_hostField);
+
+            if (versionClass && releaseField) {
+                original_info.android_version = getStr(releaseField);
+            }
+
+            if (versionClass && sdkIntField) {
+                original_info.sdk_int = getInt(sdkIntField);
+            }
+            SPOOF_LOG("Original device info captured: %s (%s)", original_info.model.c_str(), original_info.brand.c_str());
+        });
+    }
 
     void reloadIfNeeded(bool force = false) {
         struct stat file_stat;
