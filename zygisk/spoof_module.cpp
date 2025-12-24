@@ -67,6 +67,10 @@ static const char* const gms_packages[] = {
     "com.google.android.gsf",
     "com.google.android.gms"
 };
+static const char* const camera_packages[] = {
+    "com.google.android.GoogleCamera",
+    "com.android.MGC"
+};
 
 static std::once_flag build_once;
 static std::once_flag original_once;
@@ -181,12 +185,24 @@ public:
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
 		}
+		/*
+		bool is_camera_package = false;
+		for (const char* pkg : camera_packages) {
+			if (strcmp(package_name, pkg) == 0) {
+				is_camera_package = true;
+				break;
+			}
+		}
+		
+		if (is_camera_package) {
+			INFO_LOG("Restoring original device for: %s", package_name);
+			spoofDevice(original_info);
+		}
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
             if (strcmp(package_name, "com.google.android.GoogleCamera") == 0) {
-                INFO_LOG("Restoring original device for: %s", package_name);
-                spoofDevice(original_info);
+
             } else {
                 if (spoof_device && current_info != *spoof_device) {
                     current_info = *spoof_device;
@@ -207,7 +223,7 @@ public:
 				}
             }
         }
-
+*/
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
 
