@@ -10,6 +10,7 @@
 #include <dirent.h>
 #include <signal.h>
 #include <algorithm>
+#include <unordered_set>
 
 using json = nlohmann::json;
 
@@ -63,48 +64,50 @@ static jfieldID build_hardwareField = nullptr;
 static jfieldID build_idField = nullptr;
 static jfieldID build_displayField = nullptr;
 static jfieldID build_hostField = nullptr;
-static const char* const gms_packages[] = {
+
+static const std::unordered_set<std::string> gms_packages = {
     "com.android.vending",
     "com.google.android.gsf",
     "com.google.android.gms"
 };
-static const char* const camera_packages[] = {
+
+static const std::unordered_set<std::string> camera_packages = {
     "com.google.android.GoogleCamera",
     "com.android.MGC",
-	"com.sec.android.app.camera",
-	
-	"com.google.android.camera",
-	"com.android.camera",
-	"com.huawei.camera",
-	"zte.camera",
-	
-	"com.fotoable.fotobeauty",
-	"com.commsource.beautyplus",
-	"com.venticake.retrica",
-	"com.joeware.android.gpulumera",
-	"com.ywqc.picbeauty",
-	"vStudio.Android.Camera360",
-	"com.almalence.night",
-	
-	"com.google.android.GoogleCameraNext",
-	"com.google.android.GoogleCameraEng",
-	"com.android.camera2",
-	"com.asus.camera",
-	"com.blackberry.camera",
-	"com.bq.camerabq",
-	"com.vinsmart.camera",
-	"com.hmdglobal.camera2",
-	"com.lge.camera",
-	"com.mediatek.camera",
-	"com.motorola.camera",
-	"com.motorola.cameraone",
-	"com.motorola.camera2",
-	"com.motorola.ts.camera",
-	"com.oneplus.camera",
-	"com.oppo.camera",
-	"com.sonyericsson.android.camera",
-	"com.vivo.devcamera",
-	"com.mediatek.hz.camera"
+    "com.sec.android.app.camera",
+
+    "com.google.android.camera",
+    "com.android.camera",
+    "com.huawei.camera",
+    "zte.camera",
+
+    "com.fotoable.fotobeauty",
+    "com.commsource.beautyplus",
+    "com.venticake.retrica",
+    "com.joeware.android.gpulumera",
+    "com.ywqc.picbeauty",
+    "vStudio.Android.Camera360",
+    "com.almalence.night",
+
+    "com.google.android.GoogleCameraNext",
+    "com.google.android.GoogleCameraEng",
+    "com.android.camera2",
+    "com.asus.camera",
+    "com.blackberry.camera",
+    "com.bq.camerabq",
+    "com.vinsmart.camera",
+    "com.hmdglobal.camera2",
+    "com.lge.camera",
+    "com.mediatek.camera",
+    "com.motorola.camera",
+    "com.motorola.cameraone",
+    "com.motorola.camera2",
+    "com.motorola.ts.camera",
+    "com.oneplus.camera",
+    "com.oppo.camera",
+    "com.sonyericsson.android.camera",
+    "com.vivo.devcamera",
+    "com.mediatek.hz.camera"
 };
 
 static std::once_flag build_once;
@@ -136,33 +139,56 @@ bool operator!=(const DeviceInfo& a, const DeviceInfo& b) {
 }
 
 void killGmsProcesses() {
-    for (const char* pkg : gms_packages) {
-        std::string proc_path = "/proc";
-        DIR* dir = opendir(proc_path.c_str());
-        if (!dir) continue;
-        
-        struct dirent* entry;
-        while ((entry = readdir(dir)) != nullptr) {
-            if (entry->d_type != DT_DIR) continue;
-            
-            int pid = atoi(entry->d_name);
-            if (pid <= 0) continue;
-            
-            std::string cmdline_path = proc_path + "/" + entry->d_name + "/cmdline";
-            std::ifstream cmdline_file(cmdline_path);
-            if (!cmdline_file.is_open()) continue;
-            
-            std::string process_name;
-            std::getline(cmdline_file, process_name, '\0');
-            cmdline_file.close();
-            
-            if (process_name == pkg) {
-                if (kill(pid, SIGKILL) == 0) {
-                    INFO_LOG("Killed process: %s (PID: %d)", pkg, pid);
+    const int timeout_ms = 1000;
+    for (const auto& pkg : gms_packages) {
+        bool killed = false;
+        DIR* dir = opendir("/proc");
+        if (dir) {
+            struct dirent* entry;
+            while ((entry = readdir(dir)) != nullptr) {
+                if (entry->d_type != DT_DIR) continue;
+                pid_t pid = static_cast<pid_t>(atoi(entry->d_name));
+                if (pid <= 0) continue;
+                std::ifstream cmdline("/proc/" + std::string(entry->d_name) + "/cmdline");
+                if (!cmdline.is_open()) continue;
+                std::string process_name;
+                std::getline(cmdline, process_name, '\0');
+                if (process_name == pkg) {
+                    if (kill(pid, SIGTERM) == 0) {
+                        int elapsed = 0;
+                        const int step = 50;
+                        while (elapsed < timeout_ms) {
+                            if (kill(pid, 0) != 0) {
+                                INFO_LOG("Killed via SIGTERM: %s (PID %d)", pkg.c_str(), pid);
+                                killed = true;
+                                break;
+                            }
+                            usleep(step * 1000);
+                            elapsed += step;
+                        }
+                    }
+                    if (!killed && kill(pid, SIGKILL) == 0) {
+                        INFO_LOG("Killed via SIGKILL: %s (PID %d)", pkg.c_str(), pid);
+                        killed = true;
+                    }
                 }
             }
+            closedir(dir);
         }
-        closedir(dir);
+
+        if (!killed) {
+            if (system(("kill $(pidof " + pkg + ") 2>/dev/null").c_str()) == 0) {
+                INFO_LOG("Killed via shell SIGTERM: %s", pkg.c_str());
+                killed = true;
+            } else if (system(("kill -9 $(pidof " + pkg + ") 2>/dev/null").c_str()) == 0) {
+                INFO_LOG("Killed via shell SIGKILL: %s", pkg.c_str());
+                killed = true;
+            }
+        }
+
+        if (!killed) {
+            INFO_LOG("Failed to kill process: %s", pkg.c_str());
+        }
     }
 }
 
@@ -173,7 +199,7 @@ public:
         this->env = env;
 
         ensureBuildClass();
-		ensureOriginalInfo();       
+        ensureOriginalInfo();       
         reloadIfNeeded(true);
 
         {
@@ -221,11 +247,8 @@ public:
             return;
         }
 
-		bool info_changed = false;
-        bool is_camera_package = std::any_of(std::begin(camera_packages), std::end(camera_packages),
-                                             [package_name](const char* pkg) {
-                                                 return strcmp(package_name, pkg) == 0;
-                                             });
+        bool info_changed = false;
+        bool is_camera_package = camera_packages.find(package_name) != camera_packages.end();
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
@@ -244,10 +267,7 @@ public:
         }
 
         if (info_changed && !is_camera_package) {
-            bool is_gms_package = std::any_of(std::begin(gms_packages), std::end(gms_packages),
-                                      [package_name](const char* pkg) { 
-                                          return strcmp(package_name, pkg) == 0; 
-                                      });
+            bool is_gms_package = gms_packages.find(package_name) != gms_packages.end();
             
             if (!is_gms_package) {
                 INFO_LOG("Device changed to %s (%s), killing GMS processes...", 
@@ -257,7 +277,7 @@ public:
         }
 
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-	}
+    }
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
         api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
