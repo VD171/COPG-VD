@@ -135,7 +135,7 @@ public:
             return;
         }
 
-        const char* package_name = env->GetStringUTFChars(*args->nice_name, nullptr);
+        const char* package_name = env->GetStringUTFChars(args->nice_name, nullptr);
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
@@ -150,7 +150,7 @@ public:
             }
         }
 
-        env->ReleaseStringUTFChars(*args->nice_name, package_name);
+        env->ReleaseStringUTFChars(args->nice_name, package_name);
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
 
