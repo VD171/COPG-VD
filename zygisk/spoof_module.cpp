@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <signal.h>
+#include <algorithm>
 
 using json = nlohmann::json;
 
@@ -69,7 +70,41 @@ static const char* const gms_packages[] = {
 };
 static const char* const camera_packages[] = {
     "com.google.android.GoogleCamera",
-    "com.android.MGC"
+    "com.android.MGC",
+	"com.sec.android.app.camera",
+	
+	"com.google.android.camera",
+	"com.android.camera",
+	"com.huawei.camera",
+	"zte.camera",
+	
+	"com.fotoable.fotobeauty",
+	"com.commsource.beautyplus",
+	"com.venticake.retrica",
+	"com.joeware.android.gpulumera",
+	"com.ywqc.picbeauty",
+	"vStudio.Android.Camera360",
+	"com.almalence.night",
+	
+	"com.google.android.GoogleCameraNext",
+	"com.google.android.GoogleCameraEng",
+	"com.android.camera2",
+	"com.asus.camera",
+	"com.blackberry.camera",
+	"com.bq.camerabq",
+	"com.vinsmart.camera",
+	"com.hmdglobal.camera2",
+	"com.lge.camera",
+	"com.mediatek.camera",
+	"com.motorola.camera",
+	"com.motorola.cameraone",
+	"com.motorola.camera2",
+	"com.motorola.ts.camera",
+	"com.oneplus.camera",
+	"com.oppo.camera",
+	"com.sonyericsson.android.camera",
+	"com.vivo.devcamera",
+	"com.mediatek.hz.camera"
 };
 
 static std::once_flag build_once;
@@ -143,8 +178,8 @@ public:
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
-            if (spoof_device && current_info != *spoof_device) {
-                current_info = *spoof_device;
+            if (spoof_info && current_info != *spoof_info) {
+                current_info = *spoof_info;
                 spoofDevice(current_info);
             }
         }
@@ -184,48 +219,45 @@ public:
         if (!package_name) {
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
-		}
-		/*
-		bool is_camera_package = false;
-		for (const char* pkg : camera_packages) {
-			if (strcmp(package_name, pkg) == 0) {
-				is_camera_package = true;
-				break;
-			}
-		}
-		
-		if (is_camera_package) {
-			INFO_LOG("Restoring original device for: %s", package_name);
-			spoofDevice(original_info);
-		}
+        }
+
+		bool info_changed = false;
+        bool is_camera_package = std::any_of(std::begin(camera_packages), std::end(camera_packages),
+                                             [package_name](const char* pkg) {
+                                                 return strcmp(package_name, pkg) == 0;
+                                             });
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
-            if (strcmp(package_name, "com.google.android.GoogleCamera") == 0) {
 
-            } else {
-                if (spoof_device && current_info != *spoof_device) {
-                    current_info = *spoof_device;
-                    spoofDevice(current_info);
-               
-	                bool is_gms_package = false;
-	                for (const char* pkg : gms_packages) {
-	                    if (strcmp(package_name, pkg) == 0) {
-	                        is_gms_package = true;
-	                        break;
-	                    }
-	                }
-	                
-	                if (!is_gms_package) {
-	                    INFO_LOG("New device detected:  %s (%s). Killing GMS processes...", current_info.model.c_str(), current_info.brand.c_str());
-	                    killGmsProcesses();
-	                }
-				}
+            const DeviceInfo& target_info = is_camera_package ? original_info : 
+                                            (spoof_info ? *spoof_info : current_info);
+            
+            if (current_info != target_info) {
+                current_info = target_info;
+                INFO_LOG("Restoring %s device for: %s (%s)", 
+                         is_camera_package ? "original" : "spoofed",
+                         package_name, current_info.model.c_str());
+                spoofDevice(current_info);
+                info_changed = true;
             }
         }
-*/
+
+        if (info_changed && !is_camera_package) {
+            bool is_gms_package = std::any_of(std::begin(gms_packages), std::end(gms_packages),
+                                      [package_name](const char* pkg) { 
+                                          return strcmp(package_name, pkg) == 0; 
+                                      });
+            
+            if (!is_gms_package) {
+                INFO_LOG("Device changed to %s (%s), killing GMS processes...", 
+                         current_info.model.c_str(), current_info.brand.c_str());
+                killGmsProcesses();
+            }
+        }
+
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-    }
+	}
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
         api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
@@ -234,7 +266,7 @@ public:
 private:
     zygisk::Api* api;
     JNIEnv* env;
-    std::optional<DeviceInfo> spoof_device;
+    std::optional<DeviceInfo> spoof_info;
 
     void ensureBuildClass() {
         std::call_once(build_once, [&] {
@@ -406,7 +438,7 @@ private:
 
                 {
                     std::lock_guard<std::mutex> lock(info_mutex);
-                    spoof_device = info;
+                    spoof_info = info;
                 }
    
                 last_config_mtime = current_mtime;
