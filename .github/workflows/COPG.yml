@@ -93,7 +93,7 @@ jobs:
           chmod 755 module/zygisk/arm64-v8a.so
           
           chmod 755 module/customize.sh module/service.sh module/META-INF/com/google/android/update-binary
-          VERSION='v4.8.2-vd-camera'
+          VERSION='v4.8.2-vd'
           VERSION_CODE=482
           cat > module/module.prop << EOF
           id=COPG
