@@ -94,11 +94,7 @@ public:
         this->env = env;
 
         ensureBuildClass();
-        std::call_once(original_info_flag, [&] {
-            captureOriginalInfo();
-            SPOOF_LOG("Original device info captured: %s", original_info.model.c_str());
-	});
-        
+		ensureOriginalInfo();       
         reloadIfNeeded(true);
 
         {
@@ -215,46 +211,48 @@ private:
         });
     }
 
-    void captureOriginalInfo() {
+    void ensureOriginalInfo() {
         if (!buildClass) return;
-
-        auto getStr = [&](jfieldID field) -> std::string {
-            if (!field) return "";
-            jstring js = (jstring)env->GetStaticObjectField(buildClass, field);
-            if (!js) return "";
-            const char* str = env->GetStringUTFChars(js, nullptr);
-            std::string result(str);
-            env->ReleaseStringUTFChars(js, str);
-            env->DeleteLocalRef(js);
-            return result;
-        };
-
-        auto getInt = [&](jfieldID field) -> int {
-            if (!field || !versionClass) return 0;
-            return env->GetStaticIntField(versionClass, field);
-        };
-
-        original_info.model = getStr(modelField);
-        original_info.brand = getStr(brandField);
-        original_info.device = getStr(deviceField);
-        original_info.manufacturer = getStr(manufacturerField);
-        original_info.fingerprint = getStr(fingerprintField);
-        original_info.product = getStr(productField);
-        original_info.build_board = getStr(build_boardField);
-        original_info.build_bootloader = getStr(build_bootloaderField);
-        original_info.build_hardware = getStr(build_hardwareField);
-        original_info.build_id = getStr(build_idField);
-        original_info.build_display = getStr(build_displayField);
-        original_info.build_host = getStr(build_hostField);
-        
-        if (versionClass && releaseField) {
-            original_info.android_version = getStr(releaseField);
-        }
-        
-        if (versionClass && sdkIntField) {
-            original_info.sdk_int = getInt(sdkIntField);
-        }
-    }
+		std::call_once(original_once, [&] {
+	        auto getStr = [&](jfieldID field) -> std::string {
+	            if (!field) return "";
+	            jstring js = (jstring)env->GetStaticObjectField(buildClass, field);
+	            if (!js) return "";
+	            const char* str = env->GetStringUTFChars(js, nullptr);
+	            std::string result(str);
+	            env->ReleaseStringUTFChars(js, str);
+	            env->DeleteLocalRef(js);
+	            return result;
+	        };
+	
+	        auto getInt = [&](jfieldID field) -> int {
+	            if (!field || !versionClass) return 0;
+	            return env->GetStaticIntField(versionClass, field);
+	        };
+	
+	        original_info.model = getStr(modelField);
+	        original_info.brand = getStr(brandField);
+	        original_info.device = getStr(deviceField);
+	        original_info.manufacturer = getStr(manufacturerField);
+	        original_info.fingerprint = getStr(fingerprintField);
+	        original_info.product = getStr(productField);
+	        original_info.build_board = getStr(build_boardField);
+	        original_info.build_bootloader = getStr(build_bootloaderField);
+	        original_info.build_hardware = getStr(build_hardwareField);
+	        original_info.build_id = getStr(build_idField);
+	        original_info.build_display = getStr(build_displayField);
+	        original_info.build_host = getStr(build_hostField);
+	        
+	        if (versionClass && releaseField) {
+	            original_info.android_version = getStr(releaseField);
+	        }
+	        
+	        if (versionClass && sdkIntField) {
+	            original_info.sdk_int = getInt(sdkIntField);
+	        }
+			SPOOF_LOG("Original device info captured: %s (%s)", original_info.model.c_str(), original_info.brand.c_str());
+		});
+	}
 
     void reloadIfNeeded(bool force = false) {
         struct stat file_stat;
