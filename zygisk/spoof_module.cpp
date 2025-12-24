@@ -40,6 +40,7 @@ struct DeviceInfo {
 };
 
 static DeviceInfo current_info;
+static DeviceInfo original_info;
 static std::mutex info_mutex;
 static jclass buildClass = nullptr;
 static jclass versionClass = nullptr;
@@ -137,6 +138,38 @@ public:
 
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
+    
+    void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
+        ensureBuildClass();
+        reloadIfNeeded(true);
+    
+        if (!args || !args->nice_name) {
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            return;
+        }
+    
+        const char* package_name = env->GetStringUTFChars(*args->nice_name, nullptr);
+        if ("com.google.android.GoogleCamera" == package_name) {
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            return;
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(info_mutex);
+            if (spoof_device && current_info != *spoof_device) {
+                current_info = *spoof_device;
+                spoofDevice(current_info);
+            }
+        }
+
+        env->ReleaseStringUTFChars(*args->nice_name, package_name);
+        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+    }
+
+
+
+
+
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
         api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
@@ -318,19 +351,18 @@ private:
             }
         };
 
-        //setStr(modelField, info.model);
-        //setStr(brandField, info.brand);
-        //setStr(deviceField, info.device);
-        //setStr(manufacturerField, info.manufacturer);
-        //setStr(fingerprintField, info.fingerprint);
+        setStr(modelField, info.model);
+        setStr(brandField, info.brand);
+        setStr(deviceField, info.device);
+        setStr(manufacturerField, info.manufacturer);
+        setStr(fingerprintField, info.fingerprint);
         setStr(productField, info.product);
-
-        //setStr(build_boardField, info.build_board);
-        //setStr(build_bootloaderField, info.build_bootloader);
-        //setStr(build_hardwareField, info.build_hardware);
-        //setStr(build_idField, info.build_id);
-        //setStr(build_displayField, info.build_display);
-        //setStr(build_hostField, info.build_host);
+        setStr(build_boardField, info.build_board);
+        setStr(build_bootloaderField, info.build_bootloader);
+        setStr(build_hardwareField, info.build_hardware);
+        setStr(build_idField, info.build_id);
+        setStr(build_displayField, info.build_display);
+        setStr(build_hostField, info.build_host);
         
         if (info.should_spoof_android_version && versionClass && releaseField) {
             setStr(releaseField, info.android_version);
