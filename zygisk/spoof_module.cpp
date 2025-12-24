@@ -135,7 +135,12 @@ public:
             return;
         }
 
-        const char* package_name = env->GetStringUTFChars(args->nice_name, nullptr);
+        JniString pkg(env, args->nice_name);
+        const char* package_name = pkg.get();
+        if (!package_name) {
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            return;
+		}
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
@@ -150,7 +155,6 @@ public:
             }
         }
 
-        env->ReleaseStringUTFChars(args->nice_name, package_name);
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
 
