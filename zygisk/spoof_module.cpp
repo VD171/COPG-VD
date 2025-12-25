@@ -118,7 +118,7 @@ static std::once_flag build_once;
 static std::once_flag original_once;
 
 static time_t last_config_mtime = 0;
-static const std::string config_path = "/data/adb/modules/COPG/COPG.json";
+static const std::string config_path = "/data/adb/COPG.json";
 
 struct JniString {
     JNIEnv* env;
