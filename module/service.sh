@@ -1,6 +1,6 @@
 #!/system/bin/sh
 
-COPG_JSON="/data/adb/modules/COPG/COPG.json"
+COPG_JSON="/data/adb/COPG.json"
 
 find_resetprop() {
     for path in "/data/adb/ksu/bin/resetprop" "/data/adb/magisk/resetprop" "/debug_ramdisk/resetprop" "/data/adb/ap/bin/resetprop" "/system/bin/resetprop" "/vendor/bin/resetprop"; do
