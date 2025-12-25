@@ -239,7 +239,7 @@ public:
 
         ensureBuildClass();
         ensureOriginalInfo();       
-        reloadIfNeeded(true);
+        reloadIfNeeded();
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
@@ -272,7 +272,7 @@ public:
 
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
         ensureBuildClass();
-        reloadIfNeeded(true);
+        reloadIfNeeded();
 
         if (!args || !args->nice_name) {
             api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
@@ -455,7 +455,7 @@ private:
         });
     }
 
-    void reloadIfNeeded(bool force = false) {
+    void reloadIfNeeded() {
         struct stat file_stat;
         if (stat(config_path.c_str(), &file_stat) != 0) {
             ERROR_LOG("Config missing: %s", config_path.c_str());
@@ -463,7 +463,7 @@ private:
         }
 
         time_t current_mtime = file_stat.st_mtime;
-        if (!force && current_mtime == last_config_mtime) {
+        if (current_mtime == last_config_mtime) {
             return;
         }
 
