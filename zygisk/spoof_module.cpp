@@ -38,25 +38,25 @@ struct DeviceInfo {
     int sdk_int;
     bool should_spoof_android_version = false;
     bool should_spoof_sdk_int = false;
-    std::string build_board;
-    std::string build_bootloader;
-    std::string build_hardware;
-    std::string build_id;
-    std::string build_display;
-    std::string build_host;
-    std::string build_odm_sku;
-    std::string build_sku;
-    std::string build_soc_manufacturer;
-    std::string build_soc_model;
-    std::string build_tags;
-    int64_t build_time;
-    std::string build_type;
-    std::string build_user;
-    std::string build_version_codename;
-    std::string build_version_incremental;
-    std::string build_version_sdk;
-    int build_version_sdk_int_full;
-    std::string build_version_security_patch;
+    std::string board;
+    std::string bootloader;
+    std::string hardware;
+    std::string id;
+    std::string display;
+    std::string host;
+    std::string odm_sku;
+    std::string sku;
+    std::string soc_manufacturer;
+    std::string soc_model;
+    std::string tags;
+    int64_t time;
+    std::string type;
+    std::string user;
+    std::string version_codename;
+    std::string version_incremental;
+    std::string version_sdk;
+    int version_sdk_int_full;
+    std::string version_security_patch;
 };
 
 static DeviceInfo current_info;
@@ -65,14 +65,14 @@ static std::mutex info_mutex;
 static std::mutex kill_mutex;
 static jclass buildClass = nullptr;
 static jclass versionClass = nullptr;
-static jfieldID modelField = nullptr;
-static jfieldID brandField = nullptr;
-static jfieldID deviceField = nullptr;
-static jfieldID manufacturerField = nullptr;
-static jfieldID fingerprintField = nullptr;
-static jfieldID productField = nullptr;
-static jfieldID releaseField = nullptr;
-static jfieldID sdkIntField = nullptr;
+static jfieldID build_modelField = nullptr;
+static jfieldID build_brandField = nullptr;
+static jfieldID build_deviceField = nullptr;
+static jfieldID build_manufacturerField = nullptr;
+static jfieldID build_fingerprintField = nullptr;
+static jfieldID build_productField = nullptr;
+static jfieldID build_version_releaseField = nullptr;
+static jfieldID build_version_sdk_intField = nullptr;
 static jfieldID build_boardField = nullptr;
 static jfieldID build_bootloaderField = nullptr;
 static jfieldID build_hardwareField = nullptr;
@@ -338,12 +338,12 @@ private:
                 return;
             }
 
-            modelField = env->GetStaticFieldID(buildClass, "MODEL", "Ljava/lang/String;");
-            brandField = env->GetStaticFieldID(buildClass, "BRAND", "Ljava/lang/String;");
-            deviceField = env->GetStaticFieldID(buildClass, "DEVICE", "Ljava/lang/String;");
-            manufacturerField = env->GetStaticFieldID(buildClass, "MANUFACTURER", "Ljava/lang/String;");
-            fingerprintField = env->GetStaticFieldID(buildClass, "FINGERPRINT", "Ljava/lang/String;");
-            productField = env->GetStaticFieldID(buildClass, "PRODUCT", "Ljava/lang/String;");
+            build_modelField = env->GetStaticFieldID(buildClass, "MODEL", "Ljava/lang/String;");
+            build_brandField = env->GetStaticFieldID(buildClass, "BRAND", "Ljava/lang/String;");
+            build_deviceField = env->GetStaticFieldID(buildClass, "DEVICE", "Ljava/lang/String;");
+            build_manufacturerField = env->GetStaticFieldID(buildClass, "MANUFACTURER", "Ljava/lang/String;");
+            build_fingerprintField = env->GetStaticFieldID(buildClass, "FINGERPRINT", "Ljava/lang/String;");
+            build_productField = env->GetStaticFieldID(buildClass, "PRODUCT", "Ljava/lang/String;");
             build_boardField = env->GetStaticFieldID(buildClass, "BOARD", "Ljava/lang/String;");
             build_bootloaderField = env->GetStaticFieldID(buildClass, "BOOTLOADER", "Ljava/lang/String;");
             build_hardwareField = env->GetStaticFieldID(buildClass, "HARDWARE", "Ljava/lang/String;");
@@ -365,13 +365,13 @@ private:
                 env->DeleteLocalRef(localVersion);
                 
                 if (versionClass) {
-                    releaseField = env->GetStaticFieldID(versionClass, "RELEASE", "Ljava/lang/String;");
-                    sdkIntField = env->GetStaticFieldID(versionClass, "SDK_INT", "I");
-                    build_version_codenameField = env->GetStaticFieldID(buildClass, "CODENAME", "Ljava/lang/String;");
-                    build_version_incrementalField = env->GetStaticFieldID(buildClass, "INCREMENTAL", "Ljava/lang/String;");
-                    build_version_sdkField = env->GetStaticFieldID(buildClass, "SDK", "Ljava/lang/String;");
-                    build_version_sdk_int_fullField = env->GetStaticFieldID(buildClass, "SDK_INT_FULL", "I");
-                    build_version_security_patchField = env->GetStaticFieldID(buildClass, "SECURITY_PATCH", "Ljava/lang/String;");
+                    build_version_releaseField = env->GetStaticFieldID(versionClass, "RELEASE", "Ljava/lang/String;");
+                    build_version_sdk_intField = env->GetStaticFieldID(versionClass, "SDK_INT", "I");
+                    build_version_codenameField = env->GetStaticFieldID(versionClass, "CODENAME", "Ljava/lang/String;");
+                    build_version_incrementalField = env->GetStaticFieldID(versionClass, "INCREMENTAL", "Ljava/lang/String;");
+                    build_version_sdkField = env->GetStaticFieldID(versionClass, "SDK", "Ljava/lang/String;");
+                    build_version_sdk_int_fullField = env->GetStaticFieldID(versionClass, "SDK_INT_FULL", "I");
+                    build_version_security_patchField = env->GetStaticFieldID(versionClass, "SECURITY_PATCH", "Ljava/lang/String;");
                 }
             }
 
@@ -412,38 +412,43 @@ private:
                 return env->GetStaticIntField(versionClass, field);
             };
 
-            original_info.model = getStr(modelField);
-            original_info.brand = getStr(brandField);
-            original_info.device = getStr(deviceField);
-            original_info.manufacturer = getStr(manufacturerField);
-            original_info.fingerprint = getStr(fingerprintField);
-            original_info.product = getStr(productField);
-            original_info.build_board = getStr(build_boardField);
-            original_info.build_bootloader = getStr(build_bootloaderField);
-            original_info.build_hardware = getStr(build_hardwareField);
-            original_info.build_id = getStr(build_idField);
-            original_info.build_display = getStr(build_displayField);
-            original_info.build_host = getStr(build_hostField);
-            original_info.build_odm_sku = getStr(build_odm_skuField);
-            original_info.build_sku = getStr(build_skuField);
-            original_info.build_soc_manufacturer = getStr(build_soc_manufacturerField);
-            original_info.build_soc_model = getStr(build_soc_modelField);
-            original_info.build_tags = getStr(build_tagsField);
-            original_info.build_time = getStr(build_timeField);
-            original_info.build_type = getStr(build_typeField);
-            original_info.build_user = getStr(build_userField);
-            original_info.build_version_codename = getStr(build_version_codenameField);
-            original_info.build_version_incremental = getStr(build_version_incrementalField);
-            original_info.build_version_sdk = getStr(build_version_sdkField);
-            original_info.build_version_sdk_int_full = getStr(build_version_sdk_int_fullField);
-            original_info.build_version_security_patch = getStr(build_version_security_patchField);
+            auto getLong = [&](jfieldID field) -> int64_t {
+                if (!field || !buildClass) return 0;
+                return env->GetStaticLongField(buildClass, field);
+            };
 
-            if (versionClass && releaseField) {
-                original_info.android_version = getStr(releaseField);
+            original_info.model = getStr(build_modelField);
+            original_info.brand = getStr(build_brandField);
+            original_info.device = getStr(build_deviceField);
+            original_info.manufacturer = getStr(build_manufacturerField);
+            original_info.fingerprint = getStr(build_fingerprintField);
+            original_info.product = getStr(build_productField);
+            original_info.board = getStr(build_boardField);
+            original_info.bootloader = getStr(build_bootloaderField);
+            original_info.hardware = getStr(build_hardwareField);
+            original_info.id = getStr(build_idField);
+            original_info.display = getStr(build_displayField);
+            original_info.host = getStr(build_hostField);
+            original_info.odm_sku = getStr(build_odm_skuField);
+            original_info.sku = getStr(build_skuField);
+            original_info.soc_manufacturer = getStr(build_soc_manufacturerField);
+            original_info.soc_model = getStr(build_soc_modelField);
+            original_info.tags = getStr(build_tagsField);
+            original_info.time = getLong(build_timeField);
+            original_info.type = getStr(build_typeField);
+            original_info.user = getStr(build_userField);
+            original_info.version_codename = getStr(build_version_codenameField);
+            original_info.version_incremental = getStr(build_version_incrementalField);
+            original_info.version_sdk = getStr(build_version_sdkField);
+            original_info.version_sdk_int_full = getInt(build_version_sdk_int_fullField);
+            original_info.version_security_patch = getStr(build_version_security_patchField);
+
+            if (versionClass && build_version_releaseField) {
+                original_info.android_version = getStr(build_version_releaseField);
             }
 
-            if (versionClass && sdkIntField) {
-                original_info.sdk_int = getInt(sdkIntField);
+            if (versionClass && build_version_sdk_intField) {
+                original_info.sdk_int = getInt(build_version_sdk_intField);
             }
             SPOOF_LOG("Original device info captured: %s (%s)", original_info.model.c_str(), original_info.brand.c_str());
         });
@@ -482,13 +487,24 @@ private:
                 info.model = device.value("MODEL", "generic");
                 info.fingerprint = device.value("FINGERPRINT", "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys");
                 info.product = device.value("PRODUCT", info.brand);
-                info.build_board = device.value("BOARD", info.model);
-                info.build_bootloader = device.value("BOOTLOADER", "unknown");
-                info.build_hardware = device.value("HARDWARE", info.model);
-                info.build_id = device.value("ID", "generic");
-                info.build_display = device.value("DISPLAY", "generic");
-                info.build_host = device.value("HOST", "generic");
-    
+                info.board = device.value("BOARD", info.model);
+                info.bootloader = device.value("BOOTLOADER", "unknown");
+                info.hardware = device.value("HARDWARE", info.model);
+                info.id = device.value("ID", "generic");
+                info.display = device.value("DISPLAY", "generic");
+                info.host = device.value("HOST", "");
+                info.odm_sku = device.value("ODM_SKU", info.model);
+                info.sku = device.value("SKU", "unknown");
+                info.soc_manufacturer = device.value("SOC_MANUFACTURER", "unknown");
+                info.soc_model = device.value("SOC_MODEL", "unknown");
+                info.tags = device.value("TAGS", "release-keys");
+                info.time = device.value("TIME", "");
+                info.type = device.value("TYPE", "user");
+                info.user = device.value("USER", "");
+                info.version_codename = device.value("CODENAME", "REL");
+                info.version_incremental = device.value("INCREMENTAL", "");
+                info.version_security_patch = device.value("SECURITY_PATCH", "");
+                
                 if (device.contains("ANDROID_VERSION")) {
                     try {
                         if (device["ANDROID_VERSION"].is_string()) {
@@ -572,38 +588,46 @@ private:
             }
         };
 
-        setStr(modelField, info.model);
-        setStr(brandField, info.brand);
-        setStr(deviceField, info.device);
-        setStr(manufacturerField, info.manufacturer);
-        setStr(fingerprintField, info.fingerprint);
-        setStr(productField, info.product);
-        setStr(build_boardField, info.build_board);
-        setStr(build_bootloaderField, info.build_bootloader);
-        setStr(build_hardwareField, info.build_hardware);
-        setStr(build_idField, info.build_id);
-        setStr(build_displayField, info.build_display);
-        setStr(build_hostField, info.build_host);
-        setStr(build_odm_skuField, info.build_odm_sku);
-        setStr(build_skuField, info.build_sku);
-        setStr(build_soc_manufacturerField, info.build_soc_manufacturer);
-        setStr(build_soc_modelField, info.build_soc_model);
-        setStr(build_tagsField, info.build_tags);
-        setStr(build_timeField, info.build_time);
-        setStr(build_typeField, info.build_type);
-        setStr(build_userField, info.build_user);
-        setStr(build_version_codenameField, info.build_version_codename);
-        setStr(build_version_incrementalField, info.build_version_incremental);
-        setStr(build_version_sdkField, info.build_version_sdk);
-        setStr(build_version_sdk_int_fullField, info.build_version_sdk_int_full);
-        setStr(build_version_security_patchField, info.build_version_security_patch);
+        auto setLong = [&](jfieldID field, int64_t value) {
+            if (!field) return;
+            env->SetStaticLongField(buildClass, field, value);
+            if (env->ExceptionCheck()) {
+                env->ExceptionClear();
+            }
+        };
 
-        if (info.should_spoof_android_version && versionClass && releaseField) {
-            setStr(releaseField, info.android_version);
+        setStr(build_modelField, info.model);
+        setStr(build_brandField, info.brand);
+        setStr(build_deviceField, info.device);
+        setStr(build_manufacturerField, info.manufacturer);
+        setStr(build_fingerprintField, info.fingerprint);
+        setStr(build_productField, info.product);
+        setStr(build_boardField, info.board);
+        setStr(build_bootloaderField, info.bootloader);
+        setStr(build_hardwareField, info.hardware);
+        setStr(build_idField, info.id);
+        setStr(build_displayField, info.display);
+        setStr(build_hostField, info.host);
+        setStr(build_odm_skuField, info.odm_sku);
+        setStr(build_skuField, info.sku);
+        setStr(build_soc_manufacturerField, info.soc_manufacturer);
+        setStr(build_soc_modelField, info.soc_model);
+        setStr(build_tagsField, info.tags);
+        setLong(build_timeField, info.time);
+        setStr(build_typeField, info.type);
+        setStr(build_userField, info.user);
+        setStr(build_version_codenameField, info.version_codename);
+        setStr(build_version_incrementalField, info.version_incremental);
+        setStr(build_version_sdkField, info.version_sdk);
+        setInt(build_version_sdk_int_fullField, info.version_sdk_int_full);
+        setStr(build_version_security_patchField, info.version_security_patch);
+
+        if (info.should_spoof_android_version && versionClass && build_version_releaseField) {
+            setStr(build_version_releaseField, info.android_version);
         }
         
-        if (info.should_spoof_sdk_int && versionClass && sdkIntField) {
-            setInt(sdkIntField, info.sdk_int);
+        if (info.should_spoof_sdk_int && versionClass && build_version_sdk_intField) {
+            setInt(build_version_sdk_intField, info.sdk_int);
         }
         
         SPOOF_LOG("Device spoofed: %s (%s)", info.model.c_str(), info.brand.c_str());
