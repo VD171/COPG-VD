@@ -1,7 +1,7 @@
 #!/system/bin/sh
 
 COPG_JSON="/data/adb/COPG.json"
-json_content=$(cat "$COPG_JSON") || return 0
+json_content=$(cat "$COPG_JSON")
 getprop_output=$(getprop)
 
 find_resetprop() {
@@ -46,7 +46,7 @@ MANUFACTURER|ro.product.manufacturer
 MAPPING
 }
 
-while IFS='|' read -r json_key props; do
+get_prop_mapping | while IFS='|' read -r json_key props; do
     [ -z "$json_key" ] && continue
     json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
     if [ -n "$json_value" ]; then
@@ -65,19 +65,19 @@ while IFS='|' read -r json_key props; do
         done
         IFS="$old_ifs"
     fi
-done < <(get_prop_mapping)
+done
 
 propreset ro.build.description "$DESCRIPTION"
 propreset ro.build.flavor "$FLAVOR"
 
 if [ -n "$BUILD_DATE" ]; then
-    for prop in ro.build.date|ro.odm.build.date|ro.product.build.date|ro.system.build.date|ro.system_ext.build.date|ro.vendor.build.date|ro.vendor_dlkm.build.date|ro.bootimage.build.date; then
+    for prop in ro.build.date ro.odm.build.date ro.product.build.date; do
         propreset "$prop" "$BUILD_DATE"
     done
 fi
 
 if [ -n "$SDK_FULL" ]; then
-    for prop in ro.build.version.sdk_full ro.odm.build.version.sdk_full ro.product.build.version.sdk_full ro.system.build.version.sdk_full ro.system_ext.build.version.sdk_full ro.vendor_dlkm.build.version.sdk_full ro.vendor.build.version.sdk_full; then
+    for prop in ro.build.version.sdk_full ro.odm.build.version.sdk_full ro.product.build.version.sdk_full ro.system.build.version.sdk_full ro.system_ext.build.version.sdk_full ro.vendor_dlkm.build.version.sdk_full ro.vendor.build.version.sdk_full; do
         propreset "$prop" "$SDK_FULL"
     done
 fi
