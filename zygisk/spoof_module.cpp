@@ -398,9 +398,10 @@ private:
     void ensureOriginalInfo() {
         if (!buildClass) return;
         std::call_once(original_once, [&] {
+            jclass thisClass = nullptr;
             auto getStr = [&](jfieldID field) -> std::string {
                 if (!field) return "";
-                jstring js = (jstring)env->GetStaticObjectField(buildClass, field);
+                jstring js = (jstring)env->GetStaticObjectField(thisClass, field);
                 if (!js) {
                     if (env->ExceptionCheck()) env->ExceptionClear();
                     return "";
@@ -418,15 +419,16 @@ private:
             };
 
             auto getInt = [&](jfieldID field) -> int {
-                if (!field || !versionClass) return 0;
-                return env->GetStaticIntField(versionClass, field);
+                if (!field) return 0;
+                return env->GetStaticIntField(thisClass, field);
             };
 
             auto getLong = [&](jfieldID field) -> int64_t {
-                if (!field || !buildClass) return 0;
-                return env->GetStaticLongField(buildClass, field);
+                if (!field) return 0L;
+                return env->GetStaticLongField(thisClass, field);
             };
 
+            thisClass = buildClass;
             original_info.model = getStr(build_modelField);
             original_info.brand = getStr(build_brandField);
             original_info.device = getStr(build_deviceField);
@@ -447,23 +449,20 @@ private:
             original_info.time = getLong(build_timeField);
             original_info.type = getStr(build_typeField);
             original_info.user = getStr(build_userField);
-            original_info.version_codename = getStr(build_version_codenameField);
-            original_info.version_incremental = getStr(build_version_incrementalField);
-            original_info.version_sdk = getStr(build_version_sdkField);
-            original_info.version_sdk_int_full = getInt(build_version_sdk_int_fullField);
-            original_info.version_security_patch = getStr(build_version_security_patchField);
-            original_info.version_release_or_codename = getStr(build_version_release_or_codenameField);
-            original_info.version_release_or_preview_display = getStr(build_version_release_or_preview_displayField);
 
             if (versionClass) {
-                if (build_version_releaseField) {
-                    original_info.android_version = getStr(build_version_releaseField);
-                }
-
-                if (build_version_sdk_intField) {
-                    original_info.version_sdk_int = getInt(build_version_sdk_intField);
-                }
+                thisClass = versionClass;
+                original_info.android_version = getStr(build_version_releaseField);
+                original_info.version_sdk_int = getInt(build_version_sdk_intField);
+                original_info.version_codename = getStr(build_version_codenameField);
+                original_info.version_incremental = getStr(build_version_incrementalField);
+                original_info.version_sdk = getStr(build_version_sdkField);
+                original_info.version_sdk_int_full = getInt(build_version_sdk_int_fullField);
+                original_info.version_security_patch = getStr(build_version_security_patchField);
+                original_info.version_release_or_codename = getStr(build_version_release_or_codenameField);
+                original_info.version_release_or_preview_display = getStr(build_version_release_or_preview_displayField);
             }
+
             SPOOF_LOG("Original device info captured: %s (%s)", original_info.model.c_str(), original_info.brand.c_str());
         });
     }
@@ -537,6 +536,10 @@ private:
                         } else if (device_android_version.is_number()) {
                             info.android_version = std::to_string(device_android_version.get<int>());
                         }
+                        
+                        info.version_release_or_codename = info.android_version;
+                        info.version_release_or_preview_display = info.android_version;
+                        
                     } catch (const std::exception& e) {
                         WARN_LOG("Failed to parse ANDROID_VERSION: %s", e.what());
                     }
@@ -555,8 +558,6 @@ private:
                         }
                         
                         info.version_sdk = std::to_string(info.version_sdk_int);
-                        info.version_release_or_codename = std::to_string(info.version_sdk_int);
-                        info.version_release_or_preview_display = std::to_string(info.version_sdk_int);
                         info.version_sdk_int_full = info.version_sdk_int * 100000;
 
                     } catch (const std::exception& e) {
@@ -588,14 +589,15 @@ private:
             return;
         }
 
+        jclass thisClass = nullptr;
         auto setStr = [&](jfieldID field, const std::string& value) {
-            if (!field) return;
+            if (!field || value.empty() || value == " ") return;
             jstring js = env->NewStringUTF(value.c_str());
             if (!js || env->ExceptionCheck()) {
                 env->ExceptionClear();
                 return;
             }
-            env->SetStaticObjectField(buildClass, field, js);
+            env->SetStaticObjectField(thisClass, field, js);
             env->DeleteLocalRef(js);
             if (env->ExceptionCheck()) {
                 env->ExceptionClear();
@@ -603,21 +605,22 @@ private:
         };
 
         auto setInt = [&](jfieldID field, int value) {
-            if (!field) return;
-            env->SetStaticIntField(versionClass, field, value);
+            if (!field || value.empty() || value == 0) return;
+            env->SetStaticIntField(thisClass, field, value);
             if (env->ExceptionCheck()) {
                 env->ExceptionClear();
             }
         };
 
         auto setLong = [&](jfieldID field, int64_t value) {
-            if (!field) return;
-            env->SetStaticLongField(buildClass, field, value);
+            if (!field || value.empty() || value == 0L) return;
+            env->SetStaticLongField(thisClass, field, value);
             if (env->ExceptionCheck()) {
                 env->ExceptionClear();
             }
         };
 
+        thisClass = buildClass;
         setStr(build_modelField, info.model);
         setStr(build_brandField, info.brand);
         setStr(build_deviceField, info.device);
@@ -638,6 +641,7 @@ private:
         setLong(build_timeField, info.time);
         setStr(build_typeField, info.type);
         setStr(build_userField, info.user);
+        thisClass = versionClass;
         setStr(build_version_codenameField, info.version_codename);
         setStr(build_version_incrementalField, info.version_incremental);
         setStr(build_version_sdkField, info.version_sdk);
