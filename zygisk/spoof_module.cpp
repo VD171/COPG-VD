@@ -48,6 +48,7 @@ struct DeviceInfo {
 static DeviceInfo current_info;
 static DeviceInfo original_info;
 static std::mutex info_mutex;
+static std::mutex kill_mutex;
 static jclass buildClass = nullptr;
 static jclass versionClass = nullptr;
 static jfieldID modelField = nullptr;
@@ -130,17 +131,24 @@ struct JniString {
 };
 
 bool operator!=(const DeviceInfo& a, const DeviceInfo& b) {
-    return a.brand != b.brand || a.device != b.device || a.model != b.model ||
-           a.manufacturer != b.manufacturer || a.fingerprint != b.fingerprint ||
-           a.product != b.product || a.build_board != b.build_board ||
-           a.build_bootloader != b.build_bootloader || a.build_id != b.build_id ||
-           a.build_hardware != b.build_hardware ||
-           a.build_display != b.build_display || a.build_host != b.build_host;
+    return a.brand != b.brand || a.device != b.device || 
+           a.model != b.model || a.manufacturer != b.manufacturer || 
+           a.fingerprint != b.fingerprint || a.product != b.product || 
+           a.build_board != b.build_board || 
+           a.build_bootloader != b.build_bootloader || 
+           a.build_id != b.build_id || a.build_hardware != b.build_hardware ||
+           a.build_display != b.build_display || a.build_host != b.build_host ||
+           (a.should_spoof_android_version && b.should_spoof_android_version && 
+            a.android_version != b.android_version) ||
+           (a.should_spoof_sdk_int && b.should_spoof_sdk_int && 
+            a.sdk_int != b.sdk_int);
 }
 
-void killGmsProcesses() {
+void killGmsProcesses(const char* package_name) {
+    std::lock_guard<std::mutex> lock(kill_mutex);
     const int timeout_ms = 1000;
     for (const auto& pkg : gms_packages) {
+    	if (pkg == package_name) continue;
         bool killed = false;
         DIR* dir = opendir("/proc");
         if (dir) {
@@ -267,13 +275,11 @@ public:
         }
 
         if (info_changed && !is_camera_package) {
-            bool is_gms_package = gms_packages.find(package_name) != gms_packages.end();
-            
-            if (!is_gms_package) {
-                INFO_LOG("Device changed to %s (%s), killing GMS processes...", 
-                         current_info.model.c_str(), current_info.brand.c_str());
-                killGmsProcesses();
-            }
+            INFO_LOG("Device changed to %s (%s). Killing GMS processes...", 
+                     current_info.model.c_str(), current_info.brand.c_str());
+            std::thread([package_name = std::string(package_name)]() {
+                killGmsProcesses(package_name.c_str());
+            }).detach();
         }
 
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
@@ -342,8 +348,16 @@ private:
             auto getStr = [&](jfieldID field) -> std::string {
                 if (!field) return "";
                 jstring js = (jstring)env->GetStaticObjectField(buildClass, field);
-                if (!js) return "";
+                if (!js) {
+                    if (env->ExceptionCheck()) env->ExceptionClear();
+                    return "";
+                }
                 const char* str = env->GetStringUTFChars(js, nullptr);
+                if (!str) {
+                    env->DeleteLocalRef(js);
+                    if (env->ExceptionCheck()) env->ExceptionClear();
+                    return "";
+                }
                 std::string result(str);
                 env->ReleaseStringUTFChars(js, str);
                 env->DeleteLocalRef(js);
