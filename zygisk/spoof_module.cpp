@@ -519,17 +519,18 @@ private:
                 if (device.contains("TIMESTAMP")) {
                     const auto& device_timestamp = device["TIMESTAMP"];
                     try {
-                    if (device_timestamp.is_number_integer()) {
-                        info.time = static_cast<int64_t>(device_timestamp.get<int64_t>()) * 1000;
-                    } else if (device_timestamp.is_string()) {
-                        info.time = std::stoll(device_timestamp.get<std::string>()) * 1000;
+                        if (device_timestamp.is_number_integer()) {
+                            info.time = static_cast<int64_t>(device_timestamp.get<int64_t>()) * 1000;
+                        } else if (device_timestamp.is_string()) {
+                            info.time = std::stoll(device_timestamp.get<std::string>()) * 1000;
+                        }
                     } catch (const std::exception& e) {
                         WARN_LOG("Failed to parse TIMESTAMP: %s", e.what());
                     }
                 }
 
                 if (device.contains("ANDROID_VERSION")) {
-                    const auto& device_android_version = device["TIMESTAMP"];
+                    const auto& device_android_version = device["ANDROID_VERSION"];
                     try {
                         if (device_android_version.is_string()) {
                             info.android_version = device_android_version.get<std::string>();
@@ -542,7 +543,7 @@ private:
                 }
     
                 if (device.contains("SDK_INT")) {
-                    const auto& device_sdk_int = device["TIMESTAMP"];
+                    const auto& device_sdk_int = device["SDK_INT"];
                     try {
                         if (device_sdk_int.is_number()) {
                             info.version_sdk_int = device_sdk_int.get<int>();
@@ -644,8 +645,8 @@ private:
         setStr(build_version_security_patchField, info.version_security_patch);
         setStr(build_version_releaseField, info.android_version);
         setInt(build_version_sdk_intField, info.version_sdk_int);
-        setInt(build_version_release_or_codenameField, info.version_release_or_codename);
-        setInt(build_version_release_or_preview_displayField, info.version_release_or_preview_display);
+        setStr(build_version_release_or_codenameField, info.version_release_or_codename);
+        setStr(build_version_release_or_preview_displayField, info.version_release_or_preview_display);
 
         SPOOF_LOG("Device spoofed: %s (%s)", info.model.c_str(), info.brand.c_str());
     }
