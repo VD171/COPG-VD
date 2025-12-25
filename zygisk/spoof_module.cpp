@@ -600,7 +600,7 @@ private:
         };
 
         auto setLong = [&](jfieldID field, int64_t value) {
-            if (!field || value.empty() || value == 0L) return;
+            if (!field || value == 0) return;
             env->SetStaticLongField(thisClass, field, value);
             if (env->ExceptionCheck()) {
                 env->ExceptionClear();
