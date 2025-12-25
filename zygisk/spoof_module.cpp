@@ -164,10 +164,10 @@ bool operator!=(const DeviceInfo& a, const DeviceInfo& b) {
     return a.brand != b.brand || a.device != b.device || 
            a.model != b.model || a.manufacturer != b.manufacturer || 
            a.fingerprint != b.fingerprint || a.product != b.product || 
-           a.build_board != b.build_board || 
-           a.build_bootloader != b.build_bootloader || 
-           a.build_id != b.build_id || a.build_hardware != b.build_hardware ||
-           a.build_display != b.build_display || a.build_host != b.build_host ||
+           a.board != b.board || 
+           a.bootloader != b.bootloader || 
+           a.id != b.id || a.hardware != b.hardware ||
+           a.display != b.display || a.host != b.host ||
            (a.should_spoof_android_version && b.should_spoof_android_version && 
             a.android_version != b.android_version) ||
            (a.should_spoof_sdk_int && b.should_spoof_sdk_int && 
@@ -498,7 +498,7 @@ private:
                 info.soc_manufacturer = device.value("SOC_MANUFACTURER", "unknown");
                 info.soc_model = device.value("SOC_MODEL", "unknown");
                 info.tags = device.value("TAGS", "release-keys");
-                info.time = device.value("TIME", "");
+                info.time = device.value("TIME", 0LL);
                 info.type = device.value("TYPE", "user");
                 info.user = device.value("USER", "");
                 info.version_codename = device.value("CODENAME", "REL");
