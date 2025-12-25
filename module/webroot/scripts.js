@@ -5,14 +5,10 @@ let editingDevice = null;
 let lastRender = { devices: 0 };
 const RENDER_DEBOUNCE_MS = 150;
 let snackbarTimeout = null;
-let appIndex = [];
 let logcatProcess = null;
 let logcatRunning = false;
 let currentDeviceSort = 'default';
 let deviceSortDropdown = null;
-let sortDropdown = null;
-let currentFilter = null;
-let activeFilter = null;
 
 const CONFIG_FILE = "/data/adb/COPG.json";
 const MODULE_ID = 'COPG';
@@ -107,47 +103,6 @@ async function execCommand(command) {
             reject("KSU API not available");
         }
     });
-}
-
-function getSortTypeName(sortType) {
-    switch(sortType) {
-        case 'default': return 'Default';
-        case 'asc': return 'A → Z';
-        case 'desc': return 'Z → A';
-        case 'installed': return 'Installed';
-        default: return sortType;
-    }
-}
-
-function updateFilterCounts() {
-    const counts = {
-        installed: 0
-    };
-    
-    const installedCount = document.getElementById('installed-count');
-
-    if (installedCount) installedCount.textContent = counts.installed;
-}
-
-function setDeviceSort(sortType) {
-    currentDeviceSort = sortType;
-    
-    deviceSortDropdown.querySelectorAll('.sort-option').forEach(option => {
-        option.classList.remove('active');
-        if (option.dataset.sort === sortType) {
-            option.classList.add('active');
-        }
-    });
-    
-    sortDeviceList();
-    
-    const sortBtn = document.getElementById('device-sort-btn');
-    let title = 'Sort devices';
-    if (sortType === 'asc') title = 'Sorted A→Z';
-    else if (sortType === 'desc') title = 'Sorted Z→A';
-    sortBtn.title = title;
-    
-    appendToOutput(`Devices sorted: ${getSortTypeName(sortType)}`, 'info');
 }
 
 function createDeviceSortDropdown() {
@@ -1619,26 +1574,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     switchTab('settings');
 });
 
-async function detectAvailableAPI() {
-    const apis = {
-        'KernelSU New': typeof ksu !== 'undefined' && 
-                      (typeof ksu.listPackages === 'function' || 
-                       typeof ksu.getPackageInfo === 'function' ||
-                       typeof ksu.getPackagesInfo === 'function'),
-        'WebUI-X': typeof $packageManager !== 'undefined'
-    };
-    
-    let availableAPI = null;
-    for (const [apiName, isAvailable] of Object.entries(apis)) {
-        if (isAvailable) {
-            availableAPI = apiName;
-            break;
-        }
-    }
-    
-    return availableAPI;
-}
-
 document.querySelector('#package-picker-popup .cancel-btn')?.addEventListener('click', () => {
     document.getElementById('package-picker-search').value = '';
     closePopup('package-picker-popup');
@@ -2019,19 +1954,5 @@ function setupBackupListeners() {
                 showFilePicker(targetFile, parentPath);
             }
         });
-    }
-}
-
-function arrayBufferToBase64(buffer) {
-    const uint8Array = new Uint8Array(buffer);
-    let binary = '';
-    uint8Array.forEach(byte => binary += String.fromCharCode(byte));
-    return btoa(binary);
-}
-
-function getTypeDisplayName(type) {
-    switch(type) {
-        case 'device': return 'Device Spoof';
-        default: return type;
     }
 }
