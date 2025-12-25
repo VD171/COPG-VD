@@ -21,9 +21,10 @@ using json = nlohmann::json;
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-#define CONFIG_LOG(...) LOGI("[CONFIG] " __VA_ARGS__)
 #define SPOOF_LOG(...) LOGI("[SPOOF] " __VA_ARGS__)
 #define INFO_LOG(...) LOGI("[INFO] " __VA_ARGS__)
+#define ERROR_LOG(...) LOGE("[ERROR] " __VA_ARGS__)
+#define WARN_LOG(...) LOGW("[WARN] " __VA_ARGS__)
 
 static bool debug_mode = false;
 
@@ -225,7 +226,7 @@ void killGmsProcesses(const char* package_name) {
         }
 
         if (!killed) {
-            INFO_LOG("Failed to kill process: %s", pkg.c_str());
+            ERROR_LOG("Failed to kill process: %s", pkg.c_str());
         }
     }
 }
@@ -457,7 +458,7 @@ private:
     void reloadIfNeeded(bool force = false) {
         struct stat file_stat;
         if (stat(config_path.c_str(), &file_stat) != 0) {
-            CONFIG_LOG("Config missing: %s", config_path.c_str());
+            ERROR_LOG("Config missing: %s", config_path.c_str());
             return;
         }
 
@@ -466,11 +467,9 @@ private:
             return;
         }
 
-        CONFIG_LOG("Loading config...");
-
         std::ifstream file(config_path);
         if (!file.is_open()) {
-            CONFIG_LOG("Failed to open config");
+            ERROR_LOG("Failed to open config");
             return;
         }
 
@@ -515,7 +514,7 @@ private:
                             info.should_spoof_android_version = true;
                         }
                     } catch (const std::exception& e) {
-                        LOGW("Failed to parse ANDROID_VERSION: %s", e.what());
+                        WARN_LOG("Failed to parse ANDROID_VERSION: %s", e.what());
                         info.should_spoof_android_version = false;
                     }
                 } else {
@@ -535,7 +534,7 @@ private:
                             }
                         }
                     } catch (const std::exception& e) {
-                        LOGW("Failed to parse SDK_INT: %s", e.what());
+                        WARN_LOG("Failed to parse SDK_INT: %s", e.what());
                         info.should_spoof_sdk_int = false;
                     }
                 } else {
@@ -548,15 +547,15 @@ private:
                 }
    
                 last_config_mtime = current_mtime;
-                CONFIG_LOG("Loaded device: %s", 
-                          info.device.c_str());
+                INFO_LOG("Loaded device: %s", 
+                        info.device.c_str());
             } else {
-                LOGE("Device error: nothing found");
+                ERROR_LOG("Device error: nothing found");
             }        
         } catch (const json::exception& e) {
-            LOGE("JSON error: %s", e.what());
+            ERROR_LOG("JSON error: %s", e.what());
         } catch (const std::exception& e) {
-            LOGE("Config error: %s", e.what());
+            ERROR_LOG("Config error: %s", e.what());
         }
         file.close();
     }
