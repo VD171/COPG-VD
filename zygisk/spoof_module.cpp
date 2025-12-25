@@ -44,6 +44,19 @@ struct DeviceInfo {
     std::string build_id;
     std::string build_display;
     std::string build_host;
+    std::string build_odm_sku;
+    std::string build_sku;
+    std::string build_soc_manufacturer;
+    std::string build_soc_model;
+    std::string build_tags;
+    int64_t build_time;
+    std::string build_type;
+    std::string build_user;
+    std::string build_version_codename;
+    std::string build_version_incremental;
+    std::string build_version_sdk;
+    int build_version_sdk_int_full;
+    std::string build_version_security_patch;
 };
 
 static DeviceInfo current_info;
@@ -66,6 +79,19 @@ static jfieldID build_hardwareField = nullptr;
 static jfieldID build_idField = nullptr;
 static jfieldID build_displayField = nullptr;
 static jfieldID build_hostField = nullptr;
+static jfieldID build_odm_skuField = nullptr;
+static jfieldID build_skuField = nullptr;
+static jfieldID build_soc_manufacturerField = nullptr;
+static jfieldID build_soc_modelField = nullptr;
+static jfieldID build_tagsField = nullptr;
+static jfieldID build_timeField = nullptr;
+static jfieldID build_typeField = nullptr;
+static jfieldID build_userField = nullptr;
+static jfieldID build_version_codenameField = nullptr;
+static jfieldID build_version_incrementalField = nullptr;
+static jfieldID build_version_sdkField = nullptr;
+static jfieldID build_version_sdk_int_fullField = nullptr;
+static jfieldID build_version_security_patchField = nullptr;
 
 static const std::unordered_set<std::string> gms_packages = {
     "com.android.vending",
@@ -324,6 +350,14 @@ private:
             build_idField = env->GetStaticFieldID(buildClass, "ID", "Ljava/lang/String;");
             build_displayField = env->GetStaticFieldID(buildClass, "DISPLAY", "Ljava/lang/String;");
             build_hostField = env->GetStaticFieldID(buildClass, "HOST", "Ljava/lang/String;");
+            build_odm_skuField = env->GetStaticFieldID(buildClass, "ODM_SKU", "Ljava/lang/String;");
+            build_skuField = env->GetStaticFieldID(buildClass, "SKU", "Ljava/lang/String;");
+            build_soc_manufacturerField = env->GetStaticFieldID(buildClass, "SOC_MANUFACTURER", "Ljava/lang/String;");
+            build_soc_modelField = env->GetStaticFieldID(buildClass, "SOC_MODEL", "Ljava/lang/String;");
+            build_tagsField = env->GetStaticFieldID(buildClass, "TAGS", "Ljava/lang/String;");
+            build_timeField = env->GetStaticFieldID(buildClass, "TIME", "J");
+            build_typeField = env->GetStaticFieldID(buildClass, "TYPE", "Ljava/lang/String;");
+            build_userField = env->GetStaticFieldID(buildClass, "USER", "Ljava/lang/String;");
 
             jclass localVersion = env->FindClass("android/os/Build$VERSION");
             if (localVersion) {
@@ -333,6 +367,11 @@ private:
                 if (versionClass) {
                     releaseField = env->GetStaticFieldID(versionClass, "RELEASE", "Ljava/lang/String;");
                     sdkIntField = env->GetStaticFieldID(versionClass, "SDK_INT", "I");
+                    build_version_codenameField = env->GetStaticFieldID(buildClass, "CODENAME", "Ljava/lang/String;");
+                    build_version_incrementalField = env->GetStaticFieldID(buildClass, "INCREMENTAL", "Ljava/lang/String;");
+                    build_version_sdkField = env->GetStaticFieldID(buildClass, "SDK", "Ljava/lang/String;");
+                    build_version_sdk_int_fullField = env->GetStaticFieldID(buildClass, "SDK_INT_FULL", "I");
+                    build_version_security_patchField = env->GetStaticFieldID(buildClass, "SECURITY_PATCH", "Ljava/lang/String;");
                 }
             }
 
@@ -385,6 +424,19 @@ private:
             original_info.build_id = getStr(build_idField);
             original_info.build_display = getStr(build_displayField);
             original_info.build_host = getStr(build_hostField);
+            original_info.build_odm_sku = getStr(build_odm_skuField);
+            original_info.build_sku = getStr(build_skuField);
+            original_info.build_soc_manufacturer = getStr(build_soc_manufacturerField);
+            original_info.build_soc_model = getStr(build_soc_modelField);
+            original_info.build_tags = getStr(build_tagsField);
+            original_info.build_time = getStr(build_timeField);
+            original_info.build_type = getStr(build_typeField);
+            original_info.build_user = getStr(build_userField);
+            original_info.build_version_codename = getStr(build_version_codenameField);
+            original_info.build_version_incremental = getStr(build_version_incrementalField);
+            original_info.build_version_sdk = getStr(build_version_sdkField);
+            original_info.build_version_sdk_int_full = getStr(build_version_sdk_int_fullField);
+            original_info.build_version_security_patch = getStr(build_version_security_patchField);
 
             if (versionClass && releaseField) {
                 original_info.android_version = getStr(releaseField);
@@ -532,7 +584,20 @@ private:
         setStr(build_idField, info.build_id);
         setStr(build_displayField, info.build_display);
         setStr(build_hostField, info.build_host);
-        
+        setStr(build_odm_skuField, info.build_odm_sku);
+        setStr(build_skuField, info.build_sku);
+        setStr(build_soc_manufacturerField, info.build_soc_manufacturer);
+        setStr(build_soc_modelField, info.build_soc_model);
+        setStr(build_tagsField, info.build_tags);
+        setStr(build_timeField, info.build_time);
+        setStr(build_typeField, info.build_type);
+        setStr(build_userField, info.build_user);
+        setStr(build_version_codenameField, info.build_version_codename);
+        setStr(build_version_incrementalField, info.build_version_incremental);
+        setStr(build_version_sdkField, info.build_version_sdk);
+        setStr(build_version_sdk_int_fullField, info.build_version_sdk_int_full);
+        setStr(build_version_security_patchField, info.build_version_security_patch);
+
         if (info.should_spoof_android_version && versionClass && releaseField) {
             setStr(releaseField, info.android_version);
         }
