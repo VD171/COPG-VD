@@ -1295,11 +1295,11 @@ async function saveConfig() {
         }
         const configStr = JSON.stringify(orderedConfig, null, 2);
         
-        await execCommand(`echo '${configStr.replace(/'/g, "'\\''")}' > ${CONFIG_PATH}`);
-        await execCommand(`su -c 'chmod 644 ${CONFIG_PATH}'`);
+        await execCommand(`echo '${configStr.replace(/'/g, "'\\''")}' > ${CONFIG_FILE}`);
+        await execCommand(`su -c 'chmod 644 ${CONFIG_FILE}'`);
         
         try {
-            await execCommand(`su -c 'chcon u:object_r:system_file:s0 ${CONFIG_PATH}'`);
+            await execCommand(`su -c 'chcon u:object_r:system_file:s0 ${CONFIG_FILE}'`);
         } catch (selinuxError) {
             console.warn('Could not set SELinux context:', selinuxError);
         }
