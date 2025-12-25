@@ -1288,57 +1288,6 @@ h2 {
     100% { background-position: 200% 0; }
 }
 
-.installed-badge {
-    display: inline-block;
-    background: var(--success);
-    color: white;
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    margin-left: 8px;
-    font-weight: 500;
-}
-
-.dark-theme .installed-badge {
-    background: var(--success);
-}
-
-.badge-group {
-    display: flex;
-    gap: 6px;
-    margin-left: 8px;
-}
-
-.popup-icon-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.popup-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.update-icon {
-    background: var(--primary);
-}
-
-.update-icon::before {
-    content: '';
-    width: 20px;
-    height: 20px;
-    background: white;
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M4 12a8 8 0 0 1 8-8V2.5M20 12a8 8 0 0 1-8 8v1.5M14 12h6m-6 0H4m0 0l3-3m-3 3l3 3'/%3E%3C/svg%3E") no-repeat center;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M4 12a8 8 0 0 1 8-8V2.5M20 12a8 8 0 0 1-8 8v1.5M14 12h6m-6 0H4m0 0l3-3m-3 3l3 3'/%3E%3C/svg%3E") no-repeat center;
-}
-
 .popup-content h3 {
     margin: 0;
     font-size: 17px;
@@ -1393,37 +1342,6 @@ h2 {
 
 .app-icon-container.load-failed .app-icon-placeholder::after {
     background: var(--error);
-}
-
-.device-select-wrapper, .type-select-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.device-select-wrapper input, .type-select-wrapper input {
-    padding-right: 32px;
-    width: 100%;
-}
-
-.dropdown-icon {
-    position: absolute;
-    right: 12px;
-    pointer-events: none;
-    transition: transform 0.2s ease;
-    color: var(--text-secondary);
-}
-
-.type-select-wrapper input.highlighted ~ .dropdown-icon {
-    color: var(--primary);
-}
-
-.dark-theme .dropdown-icon {
-    color: var(--dark-text-secondary);
-}
-
-.dark-theme .type-select-wrapper input.highlighted ~ .dropdown-icon {
-    color: var(--primary);
 }
 
 .log-actions {
@@ -2690,70 +2608,6 @@ h2 {
     transition: all 0.2s ease;
 }
 
-.installed-badge {
-    display: inline-block;
-    background: var(--success);
-    color: white;
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.installed-badge:hover {
-    background: #10B981;
-}
-
-.device-icon {
-    background: linear-gradient(135deg, #60A5FA, #3B82F6);
-    color: white;
-}
-
-.device-select-group {
-    transition: all 0.3s ease;
-}
-
-.device-select-group.disabled {
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-.device-select-group.disabled input {
-    background: var(--border);
-    color: var(--text-secondary);
-}
-
-.dark-theme .device-select-group.disabled input {
-    background: var(--dark-border);
-    color: var(--dark-text-secondary);
-}
-
-.switch.small-switch {
-    width: 42px;
-    height: 22px;
-}
-
-.switch.small-switch .slider {
-    border-radius: 22px;
-}
-
-.switch.small-switch .slider:before {
-    height: 18px;
-    width: 18px;
-    left: 2px;
-    bottom: 2px;
-}
-
-.switch.small-switch input:checked + .slider:before {
-    transform: translateX(20px);
-}
-
-.switch.small-switch input:disabled + .slider {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .modal-badge {
     display: inline-block;
     font-size: 11px;
@@ -2852,30 +2706,6 @@ input:checked ~ .slider ~ .toggle-label .modal-badge {
 
 .dark-theme .modal-badge {
     color: white !important;
-}
-
-.dark-theme .type-select-wrapper .dropdown-icon,
-.dark-theme .device-select-wrapper .dropdown-icon {
-    color: var(--dark-text-secondary) !important;
-}
-
-.dark-theme .type-select-wrapper input.highlighted ~ .dropdown-icon,
-.dark-theme .device-select-wrapper input.highlighted ~ .dropdown-icon {
-    color: var(--primary) !important;
-}
-
-.sort-btn {
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    justify-content: center;
-    border-radius: 50%;
-}
-
-.sort-btn svg {
-    width: 20px;
-    height: 20px;
-    stroke: #fff;
 }
 
 .sort-dropdown {
@@ -3169,22 +2999,4 @@ input:checked ~ .slider ~ .toggle-label .modal-badge {
     border: 1px solid var(--border);
     display: none;
     animation: dropdownFade 0.2s ease;
-}
-
-@media (max-width: 480px) {
-    .search-input-wrapper input {
-        padding: 10px 40px 10px 12px;
-        font-size: 14px;
-    }
-    
-    .search-input-wrapper .sort-btn {
-        width: 30px;
-        height: 30px;
-        right: 4px;
-    }
-    
-    .search-input-wrapper .sort-btn svg {
-        width: 16px;
-        height: 16px;
-    }
 }
