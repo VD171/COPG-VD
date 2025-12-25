@@ -47,11 +47,7 @@ struct DeviceInfo {
     std::string sku;
     std::string soc_manufacturer;
     std::string soc_model;
-    std::string tags;
     int64_t time;
-    std::string type;
-    std::string user;
-    std::string version_codename;
     std::string version_incremental;
     std::string version_sdk;
     int version_sdk_int_full;
@@ -170,9 +166,8 @@ bool operator!=(const DeviceInfo& a, const DeviceInfo& b) {
            a.board != b.board || a.hardware != b.hardware || a.sku != b.sku ||
            a.bootloader != b.bootloader || a.display != b.display ||
            a.host != b.host || a.odm_sku != b.odm_sku || a.tags != b.tags ||
-           a.soc_manufacturer != b.soc_manufacturer || a.user != b.user ||
-           a.soc_model != b.soc_model || a.time != b.time || a.type != b.type ||
-           a.version_codename != b.version_codename ||
+           a.soc_manufacturer != b.soc_manufacturer ||
+           a.soc_model != b.soc_model || a.time != b.time ||
            a.version_incremental != b.version_incremental ||
            a.version_sdk != b.version_sdk || a.version_sdk_int != b.version_sdk_int ||
            a.version_sdk_int_full != b.version_sdk_int_full ||
@@ -445,16 +440,12 @@ private:
             original_info.sku = getStr(build_skuField);
             original_info.soc_manufacturer = getStr(build_soc_manufacturerField);
             original_info.soc_model = getStr(build_soc_modelField);
-            original_info.tags = getStr(build_tagsField);
             original_info.time = getLong(build_timeField);
-            original_info.type = getStr(build_typeField);
-            original_info.user = getStr(build_userField);
 
             if (versionClass) {
                 thisClass = versionClass;
                 original_info.android_version = getStr(build_version_releaseField);
                 original_info.version_sdk_int = getInt(build_version_sdk_intField);
-                original_info.version_codename = getStr(build_version_codenameField);
                 original_info.version_incremental = getStr(build_version_incrementalField);
                 original_info.version_sdk = getStr(build_version_sdkField);
                 original_info.version_sdk_int_full = getInt(build_version_sdk_int_fullField);
@@ -497,21 +488,17 @@ private:
                 info.manufacturer = device.value("MANUFACTURER", "");
                 info.model = device.value("MODEL", "");
                 info.fingerprint = device.value("FINGERPRINT", "");
-                info.product = device.value("PRODUCT", info.brand);
-                info.board = device.value("BOARD", info.model);
-                info.bootloader = device.value("BOOTLOADER", "unknown");
-                info.hardware = device.value("HARDWARE", info.model);
+                info.product = device.value("PRODUCT", "");
+                info.board = device.value("BOARD", "");
+                info.bootloader = device.value("BOOTLOADER", "");
+                info.hardware = device.value("HARDWARE", "");
                 info.id = device.value("ID", "");
                 info.display = device.value("DISPLAY", "");
                 info.host = device.value("HOST", "");
-                info.odm_sku = device.value("ODM_SKU", info.model);
-                info.sku = device.value("SKU", "unknown");
-                info.soc_manufacturer = device.value("SOC_MANUFACTURER", "unknown");
-                info.soc_model = device.value("SOC_MODEL", "unknown");
-                info.tags = device.value("TAGS", "release-keys");
-                info.type = device.value("TYPE", "user");
-                info.user = device.value("USER", "");
-                info.version_codename = device.value("CODENAME", "REL");
+                info.odm_sku = device.value("ODM_SKU", "");
+                info.sku = device.value("SKU", "");
+                info.soc_manufacturer = device.value("SOC_MANUFACTURER", "");
+                info.soc_model = device.value("SOC_MODEL", "");
                 info.version_incremental = device.value("INCREMENTAL", "");
                 info.version_security_patch = device.value("SECURITY_PATCH", "");
 
@@ -605,7 +592,7 @@ private:
         };
 
         auto setInt = [&](jfieldID field, int value) {
-            if (!field || value.empty() || value == 0) return;
+            if (!field || value == 0) return;
             env->SetStaticIntField(thisClass, field, value);
             if (env->ExceptionCheck()) {
                 env->ExceptionClear();
@@ -637,12 +624,11 @@ private:
         setStr(build_skuField, info.sku);
         setStr(build_soc_manufacturerField, info.soc_manufacturer);
         setStr(build_soc_modelField, info.soc_model);
-        setStr(build_tagsField, info.tags);
         setLong(build_timeField, info.time);
-        setStr(build_typeField, info.type);
-        setStr(build_userField, info.user);
+        setStr(build_tagsField, "release-keys");
+        setStr(build_typeField, "user");
         thisClass = versionClass;
-        setStr(build_version_codenameField, info.version_codename);
+        setStr(build_version_codenameField, "REL");
         setStr(build_version_incrementalField, info.version_incremental);
         setStr(build_version_sdkField, info.version_sdk);
         setInt(build_version_sdk_int_fullField, info.version_sdk_int_full);
