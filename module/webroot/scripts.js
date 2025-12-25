@@ -891,7 +891,7 @@ async function loadVersion() {
 
 async function loadConfig() {
     try {
-        const configContent = await execCommand("cat /data/adb/modules/COPG/COPG.json");
+        const configContent = await execCommand("cat /data/adb/COPG.json");
         const parsedConfig = JSON.parse(configContent);
         currentConfig = parsedConfig;
         configKeyOrder = Object.keys(parsedConfig);
@@ -1294,11 +1294,11 @@ async function saveConfig() {
         }
         const configStr = JSON.stringify(orderedConfig, null, 2);
         
-        await execCommand(`echo '${configStr.replace(/'/g, "'\\''")}' > /data/adb/modules/COPG/COPG.json`);
-        await execCommand(`su -c 'chmod 644 /data/adb/modules/COPG/COPG.json'`);
+        await execCommand(`echo '${configStr.replace(/'/g, "'\\''")}' > /data/adb/COPG.json`);
+        await execCommand(`su -c 'chmod 644 /data/adb/COPG.json'`);
         
         try {
-            await execCommand(`su -c 'chcon u:object_r:system_file:s0 /data/adb/modules/COPG/COPG.json'`);
+            await execCommand(`su -c 'chcon u:object_r:system_file:s0 /data/adb/COPG.json'`);
         } catch (selinuxError) {
             console.warn('Could not set SELinux context:', selinuxError);
         }
@@ -1966,7 +1966,7 @@ function setupBackupListeners() {
         const newBackupAllBtn = document.getElementById('backup-all-btn');
         newBackupAllBtn.addEventListener('click', async () => {
             newBackupAllBtn.classList.add('loading');
-            const files = ['COPG.json', 'list.json'];
+            const files = ['COPG.json'];
             let successCount = 0;
 
             for (const file of files) {

@@ -5,7 +5,13 @@
 #include <fstream>
 #include <android/log.h>
 #include <mutex>
+#include <thread>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <signal.h>
+#include <algorithm>
+#include <unordered_set>
 
 using json = nlohmann::json;
 
@@ -17,6 +23,7 @@ using json = nlohmann::json;
 
 #define CONFIG_LOG(...) LOGI("[CONFIG] " __VA_ARGS__)
 #define SPOOF_LOG(...) LOGI("[SPOOF] " __VA_ARGS__)
+#define INFO_LOG(...) LOGI("[INFO] " __VA_ARGS__)
 
 static bool debug_mode = false;
 
@@ -40,7 +47,9 @@ struct DeviceInfo {
 };
 
 static DeviceInfo current_info;
+static DeviceInfo original_info;
 static std::mutex info_mutex;
+static std::mutex kill_mutex;
 static jclass buildClass = nullptr;
 static jclass versionClass = nullptr;
 static jfieldID modelField = nullptr;
@@ -58,10 +67,59 @@ static jfieldID build_idField = nullptr;
 static jfieldID build_displayField = nullptr;
 static jfieldID build_hostField = nullptr;
 
+static const std::unordered_set<std::string> gms_packages = {
+    "com.android.vending",
+    "com.google.android.gsf",
+    "com.google.android.gms"
+};
+
+static const std::unordered_set<std::string> camera_packages = {
+    "com.google.android.GoogleCamera",
+    "com.android.MGC",
+    "com.sec.android.app.camera",
+    "com.sgmediapp.gcam",
+    "org.lineageos.aperture",
+    "org.lineageos.aperture.dev",
+
+    "com.google.android.camera",
+    "com.android.camera",
+    "com.huawei.camera",
+    "zte.camera",
+
+    "com.fotoable.fotobeauty",
+    "com.commsource.beautyplus",
+    "com.venticake.retrica",
+    "com.joeware.android.gpulumera",
+    "com.ywqc.picbeauty",
+    "vStudio.Android.Camera360",
+    "com.almalence.night",
+
+    "com.google.android.GoogleCameraNext",
+    "com.google.android.GoogleCameraEng",
+    "com.android.camera2",
+    "com.asus.camera",
+    "com.blackberry.camera",
+    "com.bq.camerabq",
+    "com.vinsmart.camera",
+    "com.hmdglobal.camera2",
+    "com.lge.camera",
+    "com.mediatek.camera",
+    "com.motorola.camera",
+    "com.motorola.cameraone",
+    "com.motorola.camera2",
+    "com.motorola.ts.camera",
+    "com.oneplus.camera",
+    "com.oppo.camera",
+    "com.sonyericsson.android.camera",
+    "com.vivo.devcamera",
+    "com.mediatek.hz.camera"
+};
+
 static std::once_flag build_once;
+static std::once_flag original_once;
 
 static time_t last_config_mtime = 0;
-static const std::string config_path = "/data/adb/modules/COPG/COPG.json";
+static const std::string config_path = "/data/adb/COPG.json";
 
 struct JniString {
     JNIEnv* env;
@@ -77,12 +135,73 @@ struct JniString {
 };
 
 bool operator!=(const DeviceInfo& a, const DeviceInfo& b) {
-    return a.brand != b.brand || a.device != b.device || a.model != b.model ||
-           a.manufacturer != b.manufacturer || a.fingerprint != b.fingerprint ||
-           a.product != b.product || a.build_board != b.build_board ||
-           a.build_bootloader != b.build_bootloader || a.build_id != b.build_id ||
-           a.build_hardware != b.build_hardware ||
-           a.build_display != b.build_display || a.build_host != b.build_host;
+    return a.brand != b.brand || a.device != b.device || 
+           a.model != b.model || a.manufacturer != b.manufacturer || 
+           a.fingerprint != b.fingerprint || a.product != b.product || 
+           a.build_board != b.build_board || 
+           a.build_bootloader != b.build_bootloader || 
+           a.build_id != b.build_id || a.build_hardware != b.build_hardware ||
+           a.build_display != b.build_display || a.build_host != b.build_host ||
+           (a.should_spoof_android_version && b.should_spoof_android_version && 
+            a.android_version != b.android_version) ||
+           (a.should_spoof_sdk_int && b.should_spoof_sdk_int && 
+            a.sdk_int != b.sdk_int);
+}
+
+void killGmsProcesses(const char* package_name) {
+    std::lock_guard<std::mutex> lock(kill_mutex);
+    const int timeout_ms = 1000;
+    for (const auto& pkg : gms_packages) {
+    	if (pkg == package_name) continue;
+        bool killed = false;
+        DIR* dir = opendir("/proc");
+        if (dir) {
+            struct dirent* entry;
+            while ((entry = readdir(dir)) != nullptr) {
+                if (entry->d_type != DT_DIR) continue;
+                pid_t pid = static_cast<pid_t>(atoi(entry->d_name));
+                if (pid <= 0) continue;
+                std::ifstream cmdline("/proc/" + std::string(entry->d_name) + "/cmdline");
+                if (!cmdline.is_open()) continue;
+                std::string process_name;
+                std::getline(cmdline, process_name, '\0');
+                if (process_name == pkg) {
+                    if (kill(pid, SIGTERM) == 0) {
+                        int elapsed = 0;
+                        const int step = 50;
+                        while (elapsed < timeout_ms) {
+                            if (kill(pid, 0) != 0) {
+                                INFO_LOG("Killed via SIGTERM: %s (PID %d)", pkg.c_str(), pid);
+                                killed = true;
+                                break;
+                            }
+                            usleep(step * 1000);
+                            elapsed += step;
+                        }
+                    }
+                    if (!killed && kill(pid, SIGKILL) == 0) {
+                        INFO_LOG("Killed via SIGKILL: %s (PID %d)", pkg.c_str(), pid);
+                        killed = true;
+                    }
+                }
+            }
+            closedir(dir);
+        }
+
+        if (!killed) {
+            if (system(("kill $(pidof " + pkg + ") 2>/dev/null").c_str()) == 0) {
+                INFO_LOG("Killed via shell SIGTERM: %s", pkg.c_str());
+                killed = true;
+            } else if (system(("kill -9 $(pidof " + pkg + ") 2>/dev/null").c_str()) == 0) {
+                INFO_LOG("Killed via shell SIGKILL: %s", pkg.c_str());
+                killed = true;
+            }
+        }
+
+        if (!killed) {
+            INFO_LOG("Failed to kill process: %s", pkg.c_str());
+        }
+    }
 }
 
 class COPGModule : public zygisk::ModuleBase {
@@ -92,18 +211,19 @@ public:
         this->env = env;
 
         ensureBuildClass();
+        ensureOriginalInfo();       
         reloadIfNeeded(true);
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
-            if (spoof_device && current_info != *spoof_device) {
-                current_info = *spoof_device;
+            if (spoof_info && current_info != *spoof_info) {
+                current_info = *spoof_info;
                 spoofDevice(current_info);
             }
         }
     }
 
-    void onUnload() override {
+    void onUnload() {
         std::lock_guard<std::mutex> lock(info_mutex);
         if (buildClass) {
             env->DeleteGlobalRef(buildClass);
@@ -127,12 +247,43 @@ public:
         ensureBuildClass();
         reloadIfNeeded(true);
 
+        if (!args || !args->nice_name) {
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            return;
+        }
+
+        JniString pkg(env, args->nice_name);
+        const char* package_name = pkg.get();
+        if (!package_name) {
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            return;
+        }
+
+        bool info_changed = false;
+        bool is_camera_package = camera_packages.find(package_name) != camera_packages.end();
+
         {
             std::lock_guard<std::mutex> lock(info_mutex);
-            if (spoof_device && current_info != *spoof_device) {
-                current_info = *spoof_device;
+
+            const DeviceInfo& target_info = is_camera_package ? original_info : 
+                                            (spoof_info ? *spoof_info : current_info);
+            
+            if (current_info != target_info) {
+                current_info = target_info;
+                INFO_LOG("Restoring %s device for: %s (%s)", 
+                         is_camera_package ? "original" : "spoofed",
+                         package_name, current_info.model.c_str());
                 spoofDevice(current_info);
+                info_changed = true;
             }
+        }
+
+        if (info_changed && !is_camera_package) {
+            INFO_LOG("Device changed to %s (%s). Killing GMS processes...", 
+                     current_info.model.c_str(), current_info.brand.c_str());
+            std::thread([package_name = std::string(package_name)]() {
+                killGmsProcesses(package_name.c_str());
+            }).detach();
         }
 
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
@@ -145,7 +296,7 @@ public:
 private:
     zygisk::Api* api;
     JNIEnv* env;
-    std::optional<DeviceInfo> spoof_device;
+    std::optional<DeviceInfo> spoof_info;
 
     void ensureBuildClass() {
         std::call_once(build_once, [&] {
@@ -192,6 +343,57 @@ private:
                 buildClass = nullptr;
                 versionClass = nullptr;
             }
+        });
+    }
+
+    void ensureOriginalInfo() {
+        if (!buildClass) return;
+        std::call_once(original_once, [&] {
+            auto getStr = [&](jfieldID field) -> std::string {
+                if (!field) return "";
+                jstring js = (jstring)env->GetStaticObjectField(buildClass, field);
+                if (!js) {
+                    if (env->ExceptionCheck()) env->ExceptionClear();
+                    return "";
+                }
+                const char* str = env->GetStringUTFChars(js, nullptr);
+                if (!str) {
+                    env->DeleteLocalRef(js);
+                    if (env->ExceptionCheck()) env->ExceptionClear();
+                    return "";
+                }
+                std::string result(str);
+                env->ReleaseStringUTFChars(js, str);
+                env->DeleteLocalRef(js);
+                return result;
+            };
+
+            auto getInt = [&](jfieldID field) -> int {
+                if (!field || !versionClass) return 0;
+                return env->GetStaticIntField(versionClass, field);
+            };
+
+            original_info.model = getStr(modelField);
+            original_info.brand = getStr(brandField);
+            original_info.device = getStr(deviceField);
+            original_info.manufacturer = getStr(manufacturerField);
+            original_info.fingerprint = getStr(fingerprintField);
+            original_info.product = getStr(productField);
+            original_info.build_board = getStr(build_boardField);
+            original_info.build_bootloader = getStr(build_bootloaderField);
+            original_info.build_hardware = getStr(build_hardwareField);
+            original_info.build_id = getStr(build_idField);
+            original_info.build_display = getStr(build_displayField);
+            original_info.build_host = getStr(build_hostField);
+
+            if (versionClass && releaseField) {
+                original_info.android_version = getStr(releaseField);
+            }
+
+            if (versionClass && sdkIntField) {
+                original_info.sdk_int = getInt(sdkIntField);
+            }
+            SPOOF_LOG("Original device info captured: %s (%s)", original_info.model.c_str(), original_info.brand.c_str());
         });
     }
 
@@ -274,12 +476,12 @@ private:
 
                 {
                     std::lock_guard<std::mutex> lock(info_mutex);
-                    spoof_device = info;
+                    spoof_info = info;
                 }
    
                 last_config_mtime = current_mtime;
                 CONFIG_LOG("Loaded device: %s", 
-                          info.device);
+                          info.device.c_str());
             } else {
                 LOGE("Device error: nothing found");
             }        
