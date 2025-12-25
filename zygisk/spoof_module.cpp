@@ -36,9 +36,7 @@ struct DeviceInfo {
     std::string fingerprint;
     std::string product;
     std::string android_version;
-    int sdk_int;
-    bool should_spoof_android_version = false;
-    bool should_spoof_sdk_int = false;
+    int version_sdk_int;
     std::string board;
     std::string bootloader;
     std::string hardware;
@@ -146,7 +144,7 @@ static std::once_flag build_once;
 static std::once_flag original_once;
 
 static time_t last_config_mtime = 0;
-static const std::string config_path = "/data/adb/COPG.json";
+static const std::string config_file = "/data/adb/COPG.json";
 
 struct JniString {
     JNIEnv* env;
@@ -162,17 +160,20 @@ struct JniString {
 };
 
 bool operator!=(const DeviceInfo& a, const DeviceInfo& b) {
-    return a.brand != b.brand || a.device != b.device || 
-           a.model != b.model || a.manufacturer != b.manufacturer || 
-           a.fingerprint != b.fingerprint || a.product != b.product || 
-           a.board != b.board || 
-           a.bootloader != b.bootloader || 
-           a.id != b.id || a.hardware != b.hardware ||
-           a.display != b.display || a.host != b.host ||
-           (a.should_spoof_android_version && b.should_spoof_android_version && 
-            a.android_version != b.android_version) ||
-           (a.should_spoof_sdk_int && b.should_spoof_sdk_int && 
-            a.sdk_int != b.sdk_int);
+    return a.brand != b.brand || a.device != b.device || a.id != b.id ||
+           a.manufacturer != b.manufacturer || a.model != b.model ||
+           a.fingerprint != b.fingerprint || a.product != b.product ||
+           a.board != b.board || a.hardware != b.hardware || a.sku != b.sku ||
+           a.bootloader != b.bootloader || a.display != b.display ||
+           a.host != b.host || a.odm_sku != b.odm_sku || a.tags != b.tags ||
+           a.soc_manufacturer != b.soc_manufacturer || a.user != b.user ||
+           a.soc_model != b.soc_model || a.time != b.time || a.type != b.type ||
+           a.version_codename != b.version_codename ||
+           a.version_incremental != b.version_incremental ||
+           a.version_sdk != b.version_sdk || a.version_sdk_int != b.version_sdk_int
+           a.version_sdk_int_full != b.version_sdk_int_full ||
+           a.version_security_patch != b.version_security_patch ||
+           a.android_version != b.android_version;
 }
 
 void killGmsProcesses(const char* package_name) {
@@ -444,12 +445,14 @@ private:
             original_info.version_sdk_int_full = getInt(build_version_sdk_int_fullField);
             original_info.version_security_patch = getStr(build_version_security_patchField);
 
-            if (versionClass && build_version_releaseField) {
-                original_info.android_version = getStr(build_version_releaseField);
-            }
+            if (versionClass) {
+                if (build_version_releaseField) {
+                    original_info.android_version = getStr(build_version_releaseField);
+                }
 
-            if (versionClass && build_version_sdk_intField) {
-                original_info.sdk_int = getInt(build_version_sdk_intField);
+                if (build_version_sdk_intField) {
+                    original_info.version_sdk_int = getInt(build_version_sdk_intField);
+                }
             }
             SPOOF_LOG("Original device info captured: %s (%s)", original_info.model.c_str(), original_info.brand.c_str());
         });
@@ -457,8 +460,8 @@ private:
 
     void reloadIfNeeded() {
         struct stat file_stat;
-        if (stat(config_path.c_str(), &file_stat) != 0) {
-            ERROR_LOG("Config missing: %s", config_path.c_str());
+        if (stat(config_file.c_str(), &file_stat) != 0) {
+            ERROR_LOG("Config missing: %s", config_file.c_str());
             return;
         }
 
@@ -467,7 +470,7 @@ private:
             return;
         }
 
-        std::ifstream file(config_path);
+        std::ifstream file(config_file);
         if (!file.is_open()) {
             ERROR_LOG("Failed to open config");
             return;
@@ -480,17 +483,17 @@ private:
             if (config.contains(device_key) && config[device_key].is_object()) {
                 auto device = config[device_key];
                 DeviceInfo info;
-                info.brand = device.value("BRAND", "generic");
-                info.device = device.value("DEVICE", "generic");
-                info.manufacturer = device.value("MANUFACTURER", "generic");
-                info.model = device.value("MODEL", "generic");
-                info.fingerprint = device.value("FINGERPRINT", "generic/brand/device:13/TQ3A.230805.001/123456:user/release-keys");
+                info.brand = device.value("BRAND", "");
+                info.device = device.value("DEVICE", "");
+                info.manufacturer = device.value("MANUFACTURER", "");
+                info.model = device.value("MODEL", "");
+                info.fingerprint = device.value("FINGERPRINT", "");
                 info.product = device.value("PRODUCT", info.brand);
                 info.board = device.value("BOARD", info.model);
                 info.bootloader = device.value("BOOTLOADER", "unknown");
                 info.hardware = device.value("HARDWARE", info.model);
-                info.id = device.value("ID", "generic");
-                info.display = device.value("DISPLAY", "generic");
+                info.id = device.value("ID", "");
+                info.display = device.value("DISPLAY", "");
                 info.host = device.value("HOST", "");
                 info.odm_sku = device.value("ODM_SKU", info.model);
                 info.sku = device.value("SKU", "unknown");
@@ -508,37 +511,27 @@ private:
                     try {
                         if (device["ANDROID_VERSION"].is_string()) {
                             info.android_version = device["ANDROID_VERSION"].get<std::string>();
-                            info.should_spoof_android_version = !info.android_version.empty();
                         } else if (device["ANDROID_VERSION"].is_number()) {
                             info.android_version = std::to_string(device["ANDROID_VERSION"].get<int>());
-                            info.should_spoof_android_version = true;
                         }
                     } catch (const std::exception& e) {
                         WARN_LOG("Failed to parse ANDROID_VERSION: %s", e.what());
-                        info.should_spoof_android_version = false;
                     }
-                } else {
-                    info.should_spoof_android_version = false;
                 }
     
                 if (device.contains("SDK_INT")) {
                     try {
                         if (device["SDK_INT"].is_number()) {
-                            info.sdk_int = device["SDK_INT"].get<int>();
-                            info.should_spoof_sdk_int = true;
+                            info.version_sdk_int = device["SDK_INT"].get<int>();
                         } else if (device["SDK_INT"].is_string()) {
                             std::string sdk_str = device["SDK_INT"].get<std::string>();
                             if (!sdk_str.empty()) {
-                                info.sdk_int = std::stoi(sdk_str);
-                                info.should_spoof_sdk_int = true;
+                                info.version_sdk_int = std::stoi(sdk_str);
                             }
                         }
                     } catch (const std::exception& e) {
                         WARN_LOG("Failed to parse SDK_INT: %s", e.what());
-                        info.should_spoof_sdk_int = false;
                     }
-                } else {
-                    info.should_spoof_sdk_int = false;
                 }
 
                 {
@@ -620,14 +613,8 @@ private:
         setStr(build_version_sdkField, info.version_sdk);
         setInt(build_version_sdk_int_fullField, info.version_sdk_int_full);
         setStr(build_version_security_patchField, info.version_security_patch);
-
-        if (info.should_spoof_android_version && versionClass && build_version_releaseField) {
-            setStr(build_version_releaseField, info.android_version);
-        }
-        
-        if (info.should_spoof_sdk_int && versionClass && build_version_sdk_intField) {
-            setInt(build_version_sdk_intField, info.sdk_int);
-        }
+        setStr(build_version_releaseField, info.android_version);
+        setInt(build_version_sdk_intField, info.version_sdk_int);
         
         SPOOF_LOG("Device spoofed: %s (%s)", info.model.c_str(), info.brand.c_str());
     }
