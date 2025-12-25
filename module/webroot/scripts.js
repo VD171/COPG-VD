@@ -14,6 +14,7 @@ let sortDropdown = null;
 let currentFilter = null;
 let activeFilter = null;
 
+const CONFIG_FILE = "/data/adb/COPG.json";
 const MODULE_ID = 'COPG';
 const SANITIZED_MODULE_ID = MODULE_ID.replace(/[^a-zA-Z0-9_.]/g, '_');
 const JS_INTERFACE = `$${SANITIZED_MODULE_ID}`;
@@ -891,7 +892,7 @@ async function loadVersion() {
 
 async function loadConfig() {
     try {
-        const configContent = await execCommand("cat /data/adb/COPG.json");
+        const configContent = await execCommand(`cat ${CONFIG_FILE}`);
         const parsedConfig = JSON.parse(configContent);
         currentConfig = parsedConfig;
         configKeyOrder = Object.keys(parsedConfig);
@@ -1294,11 +1295,11 @@ async function saveConfig() {
         }
         const configStr = JSON.stringify(orderedConfig, null, 2);
         
-        await execCommand(`echo '${configStr.replace(/'/g, "'\\''")}' > /data/adb/COPG.json`);
-        await execCommand(`su -c 'chmod 644 /data/adb/COPG.json'`);
+        await execCommand(`echo '${configStr.replace(/'/g, "'\\''")}' > ${CONFIG_PATH}`);
+        await execCommand(`su -c 'chmod 644 ${CONFIG_PATH}'`);
         
         try {
-            await execCommand(`su -c 'chcon u:object_r:system_file:s0 /data/adb/COPG.json'`);
+            await execCommand(`su -c 'chcon u:object_r:system_file:s0 ${CONFIG_PATH}'`);
         } catch (selinuxError) {
             console.warn('Could not set SELinux context:', selinuxError);
         }
