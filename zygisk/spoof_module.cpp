@@ -76,6 +76,8 @@ static const std::unordered_set<std::string> camera_packages = {
     "com.google.android.GoogleCamera",
     "com.android.MGC",
     "com.sec.android.app.camera",
+    "com.sgmediapp.gcam",
+    "org.lineageos.aperture",
 
     "com.google.android.camera",
     "com.android.camera",
