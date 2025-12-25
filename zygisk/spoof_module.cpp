@@ -56,6 +56,8 @@ struct DeviceInfo {
     std::string version_sdk;
     int version_sdk_int_full;
     std::string version_security_patch;
+    std::string version_release_or_codename;
+    std::string version_release_or_preview_display;
 };
 
 static DeviceInfo current_info;
@@ -91,6 +93,8 @@ static jfieldID build_version_incrementalField = nullptr;
 static jfieldID build_version_sdkField = nullptr;
 static jfieldID build_version_sdk_int_fullField = nullptr;
 static jfieldID build_version_security_patchField = nullptr;
+static jfieldID build_version_release_or_codenameField = nullptr;
+static jfieldID build_version_release_or_preview_displayField = nullptr;
 
 static const std::unordered_set<std::string> gms_packages = {
     "com.android.vending",
@@ -170,10 +174,12 @@ bool operator!=(const DeviceInfo& a, const DeviceInfo& b) {
            a.soc_model != b.soc_model || a.time != b.time || a.type != b.type ||
            a.version_codename != b.version_codename ||
            a.version_incremental != b.version_incremental ||
-           a.version_sdk != b.version_sdk || a.version_sdk_int != b.version_sdk_int
+           a.version_sdk != b.version_sdk || a.version_sdk_int != b.version_sdk_int ||
            a.version_sdk_int_full != b.version_sdk_int_full ||
            a.version_security_patch != b.version_security_patch ||
-           a.android_version != b.android_version;
+           a.android_version != b.android_version ||
+           a.version_release_or_codename != b.version_release_or_codename ||
+           a.version_release_or_preview_display != b.version_release_or_preview_display;
 }
 
 void killGmsProcesses(const char* package_name) {
@@ -374,6 +380,8 @@ private:
                     build_version_sdkField = env->GetStaticFieldID(versionClass, "SDK", "Ljava/lang/String;");
                     build_version_sdk_int_fullField = env->GetStaticFieldID(versionClass, "SDK_INT_FULL", "I");
                     build_version_security_patchField = env->GetStaticFieldID(versionClass, "SECURITY_PATCH", "Ljava/lang/String;");
+                    build_version_release_or_codenameField = env->GetStaticFieldID(versionClass, "RELEASE_OR_CODENAME", "Ljava/lang/String;");
+                    build_version_release_or_preview_displayField = env->GetStaticFieldID(versionClass, "RELEASE_OR_PREVIEW_DISPLAY", "Ljava/lang/String;");
                 }
             }
 
@@ -444,6 +452,8 @@ private:
             original_info.version_sdk = getStr(build_version_sdkField);
             original_info.version_sdk_int_full = getInt(build_version_sdk_int_fullField);
             original_info.version_security_patch = getStr(build_version_security_patchField);
+            original_info.version_release_or_codename = getStr(build_version_release_or_codenameField);
+            original_info.version_release_or_preview_display = getStr(build_version_release_or_preview_displayField);
 
             if (versionClass) {
                 if (build_version_releaseField) {
@@ -506,7 +516,7 @@ private:
                 info.version_codename = device.value("CODENAME", "REL");
                 info.version_incremental = device.value("INCREMENTAL", "");
                 info.version_security_patch = device.value("SECURITY_PATCH", "");
-                
+
                 if (device.contains("ANDROID_VERSION")) {
                     try {
                         if (device["ANDROID_VERSION"].is_string()) {
@@ -529,6 +539,12 @@ private:
                                 info.version_sdk_int = std::stoi(sdk_str);
                             }
                         }
+                        
+                        info.version_sdk = std::to_string(info.version_sdk_int);
+                        info.version_release_or_codename = std::to_string(info.version_sdk_int);
+                        info.version_release_or_preview_display = std::to_string(info.version_sdk_int);
+                        info.version_sdk_int_full = info.version_sdk_int * 100000;
+
                     } catch (const std::exception& e) {
                         WARN_LOG("Failed to parse SDK_INT: %s", e.what());
                     }
@@ -615,7 +631,9 @@ private:
         setStr(build_version_security_patchField, info.version_security_patch);
         setStr(build_version_releaseField, info.android_version);
         setInt(build_version_sdk_intField, info.version_sdk_int);
-        
+        setInt(build_version_release_or_codenameField, info.version_release_or_codename);
+        setInt(build_version_release_or_preview_displayField, info.version_release_or_preview_display);
+
         SPOOF_LOG("Device spoofed: %s (%s)", info.model.c_str(), info.brand.c_str());
     }
 };
