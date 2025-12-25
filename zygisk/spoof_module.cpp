@@ -5,6 +5,7 @@
 #include <fstream>
 #include <android/log.h>
 #include <mutex>
+#include <thread>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
