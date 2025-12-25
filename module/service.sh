@@ -1,6 +1,8 @@
 #!/system/bin/sh
 
 COPG_JSON="/data/adb/COPG.json"
+json_content=$(cat "$COPG_JSON") || return 0
+getprop_output=$(getprop)
 
 find_resetprop() {
     for path in "/data/adb/ksu/bin/resetprop" "/data/adb/magisk/resetprop" "/debug_ramdisk/resetprop" "/data/adb/ap/bin/resetprop" "/system/bin/resetprop" "/vendor/bin/resetprop"; do
@@ -8,6 +10,17 @@ find_resetprop() {
     done
     which_path=$(which resetprop 2>/dev/null)
     [ -n "$which_path" ] && [ -x "$which_path" ] && echo "$which_path" && return 0
+    return 1
+}
+bin_resetprop=$(find_resetprop)
+
+propreset() {
+    name="$1"
+    value="$2"
+    [[ -z "$name" || -z "$value" ]] && return 0
+    current=$(echo "$getprop_output" | grep "^\[$name\]:" | sed 's/.*: \[\(.*\)\]/\1/')
+    [[ -z "$current" || "$current" == "$value" ]] && return 0
+    "$bin_resetprop" "$name" "$value" && return 0
     return 1
 }
 
@@ -33,9 +46,6 @@ MANUFACTURER|ro.product.manufacturer
 MAPPING
 }
 
-resetprop=$(find_resetprop)
-json_content=$(cat "$COPG_JSON")
-getprop_output=$(getprop)
 while IFS='|' read -r json_key props; do
     [ -z "$json_key" ] && continue
     json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
@@ -51,28 +61,24 @@ while IFS='|' read -r json_key props; do
         old_ifs="$IFS"
         IFS='|'
         for prop in $props; do
-            [ -z "$prop" ] && continue
-            current=$(echo "$getprop_output" | grep "^\[$prop\]:" | sed 's/.*: \[\(.*\)\]/\1/')
-            if [ -n "$current" ] && [ "$current" != "$json_value" ]; then
-                "$resetprop" "$prop" "$json_value"
-            fi
+            propreset "$prop" "$json_value"
         done
         IFS="$old_ifs"
     fi
 done < <(get_prop_mapping)
 
-"$resetprop" ro.build.description "$DESCRIPTION"
-"$resetprop" ro.build.flavor "$FLAVOR"
+propreset ro.build.description "$DESCRIPTION"
+propreset ro.build.flavor "$FLAVOR"
 
 if [ -n "$BUILD_DATE" ]; then
     for prop in ro.build.date|ro.odm.build.date|ro.product.build.date|ro.system.build.date|ro.system_ext.build.date|ro.vendor.build.date|ro.vendor_dlkm.build.date|ro.bootimage.build.date; then
-        "$resetprop" "$prop" "$BUILD_DATE"
+        propreset "$prop" "$BUILD_DATE"
     done
 fi
 
 if [ -n "$SDK_FULL" ]; then
     for prop in ro.build.version.sdk_full ro.odm.build.version.sdk_full ro.product.build.version.sdk_full ro.system.build.version.sdk_full ro.system_ext.build.version.sdk_full ro.vendor_dlkm.build.version.sdk_full ro.vendor.build.version.sdk_full; then
-        "$resetprop" "$prop" "$SDK_FULL"
+        propreset "$prop" "$SDK_FULL"
     done
 fi
 
