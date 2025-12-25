@@ -160,7 +160,7 @@ bool operator!=(const DeviceInfo& a, const DeviceInfo& b) {
            a.fingerprint != b.fingerprint || a.product != b.product ||
            a.board != b.board || a.hardware != b.hardware || a.sku != b.sku ||
            a.bootloader != b.bootloader || a.display != b.display ||
-           a.host != b.host || a.odm_sku != b.odm_sku || a.tags != b.tags ||
+           a.host != b.host || a.odm_sku != b.odm_sku ||
            a.version_incremental != b.version_incremental ||
            a.version_sdk != b.version_sdk || a.version_sdk_int != b.version_sdk_int ||
            a.version_sdk_int_full != b.version_sdk_int_full ||
