@@ -166,7 +166,9 @@ check_config_file() {
     "HARDWARE": "comet",
     "DISPLAY": "CP11.251114.006",
     "ID": "CP11.251114.006",
-    "HOST": "r-a06a74e0f133947d-zsc4"
+    "HOST": "r-a06a74e0f133947d-zsc4",
+    "INCREMENTAL": "14621658",
+    "TIMESTAMP": "1766184311"
   }
 }' > "$CONFIG_FILE"
   fi
