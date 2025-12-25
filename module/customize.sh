@@ -4,6 +4,7 @@
 
 INSTALL_SUCCESS=true
 ENABLE_GPHOTO_SPOOF=false
+CONFIG_FILE="/data/adb/COPG.json"
 
 print_box_start() {
   ui_print "╔═════════════════════════════════╗"
@@ -150,6 +151,27 @@ cleanup_gphoto_directories() {
   find "$MODPATH" -type d -empty -delete 2>/dev/null
 }
 
+check_config_file() {
+  if [ ! -f "$CONFIG_FILE" ]; then
+      echo '{
+  "COPG": {
+    "BRAND": "google",
+    "DEVICE": "Pixel 9 Pro Fold",
+    "MANUFACTURER": "Google",
+    "MODEL": "comet",
+    "FINGERPRINT": "google/comet_beta/comet:16/CP11.251114.006/14560987:user/release-keys",
+    "PRODUCT": "comet",
+    "BOOTLOADER": "unknown",
+    "BOARD": "comet",
+    "HARDWARE": "comet",
+    "DISPLAY": "CP11.251114.006",
+    "ID": "CP11.251114.006",
+    "HOST": "r-a06a74e0f133947d-zsc4"
+  }
+}' > "$CONFIG_FILE"
+  fi
+}
+
 print_module_version
 
 if ! $BOOTMODE; then
@@ -171,14 +193,13 @@ if [ "$API" -lt 26 ]; then
 fi
 
 if $INSTALL_SUCCESS; then
+  check_config_file
+fi
+
+if $INSTALL_SUCCESS; then
   chmod 0755 "$MODPATH/service.sh" 2>/dev/null
-  chmod 0644 "$MODPATH/COPG.json" 2>/dev/null
-  
-  for file in "$MODPATH/COPG.json"; do
-    if [ -f "$file" ]; then
-      chcon u:object_r:system_file:s0 "$file" 2>/dev/null
-    fi
-  done
+  chmod 0644 "$CONFIG_FILE" 2>/dev/null
+  chcon u:object_r:system_file:s0 "$CONFIG_FILE" 2>/dev/null
 fi
 
 if $INSTALL_SUCCESS; then
