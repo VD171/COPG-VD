@@ -510,19 +510,31 @@ private:
                 info.soc_manufacturer = device.value("SOC_MANUFACTURER", "unknown");
                 info.soc_model = device.value("SOC_MODEL", "unknown");
                 info.tags = device.value("TAGS", "release-keys");
-                info.time = device.value("TIME", 0LL);
                 info.type = device.value("TYPE", "user");
                 info.user = device.value("USER", "");
                 info.version_codename = device.value("CODENAME", "REL");
                 info.version_incremental = device.value("INCREMENTAL", "");
                 info.version_security_patch = device.value("SECURITY_PATCH", "");
 
-                if (device.contains("ANDROID_VERSION")) {
+                if (device.contains("TIMESTAMP")) {
+                    const auto& device_timestamp = device["TIMESTAMP"];
                     try {
-                        if (device["ANDROID_VERSION"].is_string()) {
-                            info.android_version = device["ANDROID_VERSION"].get<std::string>();
-                        } else if (device["ANDROID_VERSION"].is_number()) {
-                            info.android_version = std::to_string(device["ANDROID_VERSION"].get<int>());
+                    if (device_timestamp.is_number_integer()) {
+                        info.time = static_cast<int64_t>(device_timestamp.get<int64_t>()) * 1000;
+                    } else if (device_timestamp.is_string()) {
+                        info.time = std::stoll(device_timestamp.get<std::string>()) * 1000;
+                    } catch (const std::exception& e) {
+                        WARN_LOG("Failed to parse TIMESTAMP: %s", e.what());
+                    }
+                }
+
+                if (device.contains("ANDROID_VERSION")) {
+                    const auto& device_android_version = device["TIMESTAMP"];
+                    try {
+                        if (device_android_version.is_string()) {
+                            info.android_version = device_android_version.get<std::string>();
+                        } else if (device_android_version.is_number()) {
+                            info.android_version = std::to_string(device_android_version.get<int>());
                         }
                     } catch (const std::exception& e) {
                         WARN_LOG("Failed to parse ANDROID_VERSION: %s", e.what());
@@ -530,11 +542,12 @@ private:
                 }
     
                 if (device.contains("SDK_INT")) {
+                    const auto& device_sdk_int = device["TIMESTAMP"];
                     try {
-                        if (device["SDK_INT"].is_number()) {
-                            info.version_sdk_int = device["SDK_INT"].get<int>();
-                        } else if (device["SDK_INT"].is_string()) {
-                            std::string sdk_str = device["SDK_INT"].get<std::string>();
+                        if (device_sdk_int.is_number()) {
+                            info.version_sdk_int = device_sdk_int.get<int>();
+                        } else if (device_sdk_int.is_string()) {
+                            std::string sdk_str = device_sdk_int.get<std::string>();
                             if (!sdk_str.empty()) {
                                 info.version_sdk_int = std::stoi(sdk_str);
                             }
