@@ -168,7 +168,10 @@ check_config_file() {
     "ID": "CP11.251114.007",
     "HOST": "r-a06a74e0f133947d-zsc4",
     "INCREMENTAL": "14621658",
-    "TIMESTAMP": "1766184311"
+    "TIMESTAMP": "1766184311",
+    "ANDROID_VERSION": "16",
+    "SDK_INT": "36",
+    "SECURITY_PATCH": "2025-12-05"
   }
 }' > "$CONFIG_FILE"
   fi
