@@ -1447,12 +1447,10 @@ window.addEventListener('resize', () => {
     }
 });
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     setupDonatePopup();
     setupInfoPopup();
-});
 
-document.addEventListener('DOMContentLoaded', async () => {
     const savedTheme = localStorage.getItem('theme');
     if (!savedTheme || savedTheme === 'light') {
         document.body.classList.remove('dark-theme');
