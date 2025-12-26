@@ -419,14 +419,6 @@ input:checked + .slider:before {
     transform: scale(1);
 }
 
-.shortcut-icon {
-    width: 20px;
-    height: 20px;
-    fill: #fff;
-    margin-right: 4px;
-    transition: transform 0.3s ease;
-}
-
 .action-btn:hover {
     box-shadow: 0 6px 16px var(--shadow);
 }
@@ -2514,34 +2506,7 @@ h2 {
     margin: 16px auto;
 }
 
-.modal-badge.blocked-badge {
-    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
-    color: white;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-size: 9px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.2px;
-    margin-left: 4px;
-    opacity: 0.6;
-    transition: all 0.2s ease;
-}
-
-.modal-badge {
-    display: inline-block;
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-weight: 500;
-    margin-left: 8px;
-    opacity: 0.6;
-    transition: all 0.3s ease;
-    cursor: default;
-    pointer-events: none;
-}
-
-input:checked ~ .slider ~ .toggle-label .modal-badge {
+input:checked ~ .slider {
     opacity: 1;
     transform: scale(1.05);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
@@ -2622,10 +2587,6 @@ input:checked ~ .slider ~ .toggle-label .modal-badge {
         min-height: 460px;
         max-height: 88vh;
     }
-}
-
-.dark-theme .modal-badge {
-    color: white !important;
 }
 
 .sort-dropdown {
@@ -2871,27 +2832,6 @@ input:checked ~ .slider ~ .toggle-label .modal-badge {
 
 .dark-theme #clear-filter-btn:hover {
     background: rgba(248, 113, 113, 0.25);
-}
-
-.modal-badge {
-    display: inline-block;
-    padding: 2px 6px !important;
-    border-radius: 10px !important;
-    font-size: 9px !important;
-    font-weight: 600 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.2px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    transition: all 0.3s ease !important;
-    margin-left: 6px !important;
-    height: 16px !important;
-    line-height: 12px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-}
-
-.dark-theme .modal-badge {
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
 .search-container {
