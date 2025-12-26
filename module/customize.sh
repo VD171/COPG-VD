@@ -153,27 +153,9 @@ cleanup_gphoto_directories() {
 
 check_config_file() {
   if [ ! -f "$CONFIG_FILE" ]; then
-      echo '{
-  "COPG": {
-    "BRAND": "google",
-    "DEVICE": "Pixel 9 Pro Fold",
-    "MANUFACTURER": "Google",
-    "MODEL": "comet",
-    "FINGERPRINT": "google/comet_beta/comet:16/CP11.251114.007/14621658:user/release-keys",
-    "PRODUCT": "comet",
-    "BOOTLOADER": "unknown",
-    "BOARD": "comet",
-    "HARDWARE": "comet",
-    "DISPLAY": "CP11.251114.007",
-    "ID": "CP11.251114.007",
-    "HOST": "r-a06a74e0f133947d-zsc4",
-    "INCREMENTAL": "14621658",
-    "TIMESTAMP": "1766184311",
-    "ANDROID_VERSION": "16",
-    "SDK_INT": "36",
-    "SECURITY_PATCH": "2025-12-05"
-  }
-}' > "$CONFIG_FILE"
+      cp "$MODPATH/COPG.json.example" "$CONFIG_FILE"
+      chmod 0644 $CONFIG_FILE
+      chcon u:object_r:system_file:s0 $CONFIG_FILE
   fi
 }
 
