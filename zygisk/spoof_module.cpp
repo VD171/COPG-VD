@@ -26,8 +26,6 @@ using json = nlohmann::json;
 #define ERROR_LOG(...) LOGE("[ERROR] " __VA_ARGS__)
 #define WARN_LOG(...) LOGW("[WARN] " __VA_ARGS__)
 
-static bool debug_mode = false;
-
 struct DeviceInfo {
     std::string brand;
     std::string device;
