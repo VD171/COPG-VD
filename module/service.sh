@@ -1,13 +1,18 @@
 #!/system/bin/sh
 
 COPG_JSON="/data/adb/COPG.json"
+COPG_ORIGINAL="/data/adb/modules/COPG/original_device.txt"
+COPG_UTILS="/data/adb/modules/COPG/utils.sh"
 
-. /data/adb/modules/COPG/utils.sh spoofed
+sh $COPG_UTILS
+sh $COPG_UTILS spoof
 
 until [ "$(getprop sys.boot_completed)" = "1" ]; do
     sleep 2
 done
 
-sleep 5
-chmod 0644 $COPG_JSON
-chcon u:object_r:system_file:s0 $COPG_JSON
+sleep 2
+for FILE in $COPG_JSON $COPG_ORIGINAL; do
+    chmod 0644 $FILE
+    chcon u:object_r:system_file:s0 $FILE
+done
