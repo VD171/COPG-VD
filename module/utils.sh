@@ -21,7 +21,7 @@ propreset() {
     value="$2"
     [ -z "$name" ] || [ -z "$value" ] && return 0
     current=$(echo "$getprop_output" | grep "^\[$name\]:" | sed 's/.*: \[\(.*\)\]/\1/')
-    [ -z "$current" ] || [ "$current" == "$value" ] && return 0
+    [ -z "$current" ] || [ "$current" = "$value" ] && return 0
     "$bin_resetprop" -n "$name" "$value" && return 0
     return 1
 }
@@ -83,9 +83,12 @@ if [ "$DEVICE" = "spoofed" ]; then
       done
   fi
 elif [ "$DEVICE" = "original" ]; then
-  while read -r prop value rest; do
-    propreset "$prop" "$value"
-  done < "$COPG_ORIGINAL"
+  if [ -f "$COPG_ORIGINAL" ]; then
+    while read -r prop value rest; do
+      [ -z "$prop" ] && continue
+      propreset "$prop" "$value"
+    done < "$COPG_ORIGINAL"
+  fi
 else
   echo > "$COPG_ORIGINAL"
   get_prop_mapping | while IFS='|' read -r json_key props; do
