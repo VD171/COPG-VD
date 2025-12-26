@@ -135,8 +135,8 @@ setup_gphoto_spoof() {
     done
   fi
   find "$MODPATH/system/product/etc/sysconfig" "$MODPATH/system/etc/sysconfig" -type f 2>/dev/null | while read -r file; do
-    chmod 0644 "$file" 2>/dev/null
-    chcon u:object_r:system_file:s0 "$file" 2>/dev/null
+    chmod 0644 "$file"
+    chcon u:object_r:system_file:s0 "$file"
   done
 
   ui_print " ✔ Unlimited Photos Configured   "
@@ -184,9 +184,9 @@ if $INSTALL_SUCCESS; then
 fi
 
 if $INSTALL_SUCCESS; then
-  chmod 0755 "$MODPATH/service.sh" "$MODPATH/utils.sh" 2>/dev/null
-  chmod 0644 "$CONFIG_FILE" 2>/dev/null
-  chcon u:object_r:system_file:s0 "$CONFIG_FILE" 2>/dev/null
+  chmod 0755 "$MODPATH/service.sh" "$MODPATH/utils.sh"
+  chmod 0644 "$CONFIG_FILE"
+  chcon u:object_r:system_file:s0 "$CONFIG_FILE"
 fi
 
 if $INSTALL_SUCCESS; then
