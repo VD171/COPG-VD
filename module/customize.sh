@@ -2,7 +2,6 @@
 # COPG Module Installation Script
 # ================================================
 
-INSTALL_SUCCESS=true
 ENABLE_GPHOTO_SPOOF=false
 CONFIG_FILE="/data/adb/COPG.json"
 
@@ -154,8 +153,8 @@ cleanup_gphoto_directories() {
 check_config_file() {
   if [ ! -f "$CONFIG_FILE" ]; then
       cp "$MODPATH/COPG.json.example" "$CONFIG_FILE"
-      chmod 0644 $CONFIG_FILE
-      chcon u:object_r:system_file:s0 $CONFIG_FILE
+      chmod 0644 "$CONFIG_FILE"
+      chcon u:object_r:system_file:s0 "$CONFIG_FILE"
   fi
 }
 
@@ -179,42 +178,28 @@ if [ "$API" -lt 26 ]; then
   print_failure_and_exit "initial"
 fi
 
-if $INSTALL_SUCCESS; then
-  check_config_file
-fi
+check_config_file
 
-if $INSTALL_SUCCESS; then
-  chmod 0755 "$MODPATH/service.sh" "$MODPATH/utils.sh"
-  chmod 0644 "$CONFIG_FILE"
-  chcon u:object_r:system_file:s0 "$CONFIG_FILE"
-fi
+chmod 0755 "$MODPATH/service.sh" "$MODPATH/utils.sh"
+chmod 0644 "$CONFIG_FILE"
+chcon u:object_r:system_file:s0 "$CONFIG_FILE"
 
-if $INSTALL_SUCCESS; then
-  prompt_gphoto_spoof
-  if $ENABLE_GPHOTO_SPOOF; then
-    setup_gphoto_spoof || {
-      INSTALL_SUCCESS=false
-    }
-  else
-    print_box_start
-    ui_print "      ✦ Google Photos Spoof ✦    "
-    print_empty_line
-    ui_print " ⚙ Removing Google Photos Config "
-    
-    cleanup_gphoto_directories
-    
-    ui_print " ✔ Unlimited Photos Disabled    "
-    print_box_end
-  fi
-fi
-
-if $INSTALL_SUCCESS; then
-  print_empty_line
+prompt_gphoto_spoof
+if $ENABLE_GPHOTO_SPOOF; then
+  setup_gphoto_spoof
+else
   print_box_start
-  ui_print " ✅ Module Successfully Installed "
+  ui_print "      ✦ Google Photos Spoof ✦    "
+  print_empty_line
+  ui_print " ⚙ Removing Google Photos Config "
+  
+  cleanup_gphoto_directories
+  
+  ui_print " ✔ Unlimited Photos Disabled    "
   print_box_end
 fi
 
-if ! $INSTALL_SUCCESS; then
-  exit 1
-fi
+print_empty_line
+print_box_start
+ui_print " ✅ Module Successfully Installed "
+print_box_end
