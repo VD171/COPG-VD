@@ -920,6 +920,9 @@ function openDeviceModal(deviceKey = null) {
         document.getElementById('device-host').value = deviceData.HOST || '';
         document.getElementById('device-android-version').value = deviceData.ANDROID_VERSION || '';
         document.getElementById('device-sdk-int').value = deviceData.SDK_INT || '';
+        document.getElementById('device-incremental').value = deviceData.INCREMENTAL || '';
+        document.getElementById('device-timestamp').value = deviceData.TIMESTAMP || '';
+        document.getElementById('device-security_patch').value = deviceData.SECURITY_PATCH || '';
         setupAndroidSdkLink();
     } else {
         title.textContent = 'Add New Device Profile';
@@ -1044,7 +1047,10 @@ async function saveDevice(e) {
         'device-hardware',
         'device-id',
         'device-display',
-        'device-host'
+        'device-host',
+        'device-incremental',
+        'device-timestamp',
+        'device-security_patch'
     ];
     let hasError = false;
     const missingFields = [];
@@ -1132,6 +1138,9 @@ async function saveDevice(e) {
     const id = document.getElementById('device-id').value.trim() || 'Unknown';
     const display = document.getElementById('device-display').value.trim() || 'Unknown';
     const host = document.getElementById('device-host').value.trim() || 'Unknown';
+    const incremental = document.getElementById('device-incremental').value.trim() || 'Unknown';
+    const timestamp = document.getElementById('device-timestamp').value.trim() || 'Unknown';
+    const security_patch = document.getElementById('device-security_patch').value.trim() || 'Unknown';
     const androidVersion = document.getElementById('device-android-version').value.trim();
     const sdkInt = document.getElementById('device-sdk-int').value.trim();
     
@@ -1147,7 +1156,10 @@ async function saveDevice(e) {
         HARDWARE: hardware,
         ID: id,
         DISPLAY: display,
-        HOST: host
+        HOST: host,
+        INCREMENTAL: incremental,
+        TIMESTAMP: timestamp,
+        SECURITY_PATCH: security_patch
     };
     
     if (androidVersion) {
@@ -1432,7 +1444,10 @@ function applyEventListeners() {
                 deviceData.HARDWARE || '',
                 deviceData.ID || '',
                 deviceData.DISPLAY || '',
-                deviceData.HOST || ''
+                deviceData.HOST || '',
+                deviceData.INCREMENTAL || '',
+                deviceData.TIMESTAMP || '',
+                deviceData.SECURITY_PATCH || ''
             ].join(' ').toLowerCase();
             card.style.display = searchableText.includes(searchTerm) ? 'block' : 'none';
         });
