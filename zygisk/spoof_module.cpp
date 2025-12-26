@@ -295,7 +295,7 @@ public:
                 INFO_LOG("Restoring %s device for: %s (%s)", 
                          current_device, package_name, current_info.model.c_str());
                 spoofDevice(current_info);
-                system((("sh /data/adb/modules/COPG/utils.sh ") + current_device).c_str());
+                system((std::string("sh /data/adb/modules/COPG/utils.sh ") + current_device).c_str());
             }
         }
 
