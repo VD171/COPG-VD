@@ -184,7 +184,7 @@ if $INSTALL_SUCCESS; then
 fi
 
 if $INSTALL_SUCCESS; then
-  chmod 0755 "$MODPATH/service.sh" 2>/dev/null
+  chmod 0755 "$MODPATH/service.sh" "$MODPATH/utils.sh" 2>/dev/null
   chmod 0644 "$CONFIG_FILE" 2>/dev/null
   chcon u:object_r:system_file:s0 "$CONFIG_FILE" 2>/dev/null
 fi
