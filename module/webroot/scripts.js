@@ -1,18 +1,12 @@
-let actionRunning = false;
 let configKeyOrder = [];
 let currentConfig = {};
 let editingDevice = null;
-let lastRender = { devices: 0 };
-const RENDER_DEBOUNCE_MS = 150;
 let logcatRunning = false;
 let currentDeviceSort = 'default';
 let deviceSortDropdown = null;
 
 const CONFIG_FILE = "/data/adb/COPG.json";
 const MODULE_ID = 'COPG';
-const SANITIZED_MODULE_ID = MODULE_ID.replace(/[^a-zA-Z0-9_.]/g, '_');
-const JS_INTERFACE = `$${SANITIZED_MODULE_ID}`;
-const DEBUG_LOGS = false;
 const androidToSdkMapping = {
     '10': 29, '10.0': 29,
     '11': 30, '11.0': 30,
@@ -43,18 +37,6 @@ const templates = {
         card.querySelector('.device-name').textContent = data.deviceName;
         card.querySelector('.edit-btn').dataset.device = data.key;
         card.querySelector('.device-details').innerHTML = `Model: ${data.model}`;
-        
-        return card;
-    },
-    
-    pickerDeviceCard: (data) => {
-        const template = document.getElementById('picker-device-card-template');
-        const clone = template.content.cloneNode(true);
-        const card = clone.querySelector('.picker-device-card');
-        
-        card.dataset.key = data.key;
-        card.querySelector('h4').textContent = data.deviceName;
-        card.querySelector('p').textContent = `${data.brand} ${data.model}`;
         
         return card;
     },
@@ -762,20 +744,6 @@ async function showSaveLogPopup() {
     }
 }
 
-async function checkWebUIConfig() {
-    try {
-        const configContent = await execCommand("cat /data/adb/modules/COPG/webroot/config.json");
-        const webuiConfig = JSON.parse(configContent);
-        if (!webuiConfig.title || !webuiConfig.icon) {
-            appendToOutput("Warning: Shortcut configuration is incomplete. Creation may fail.", 'warning');
-        }
-        return webuiConfig;
-    } catch (error) {
-        appendToOutput("Failed to load shortcut configuration: " + error, 'error');
-        return null;
-    }
-}
-
 function toggleTheme() {
     document.body.classList.toggle('dark-theme');
     const themeIcon = document.getElementById('theme-icon');
@@ -859,8 +827,6 @@ async function loadConfig() {
 
 function renderDeviceList() {
     const now = Date.now();
-    if (now - lastRender.devices < RENDER_DEBOUNCE_MS) return;
-    lastRender.devices = now;
 
     const deviceList = document.getElementById('device-list');
     if (!deviceList) return appendToOutput("Error: 'device-list' not found", 'error');
@@ -1405,46 +1371,6 @@ function applyEventListeners() {
         closePopup('save-log-popup');
         appendToOutput("Log not saved", 'info');
     });
-
-    const shortcutButton = document.getElementById('shortcut-container');
-    if (shortcutButton) {
-        const moduleInterface = window[JS_INTERFACE] || window.$copg;
-        const isInterfaceAvailable = moduleInterface && Object.keys(moduleInterface).length > 0 && typeof moduleInterface.createShortcut === 'function';
-        
-        if (DEBUG_LOGS) {
-            appendToOutput(`Module interface check: ${JS_INTERFACE} = ${typeof moduleInterface}, createShortcut = ${typeof moduleInterface?.createShortcut}`, 'info');
-        }
-        
-        if (isInterfaceAvailable) {
-            shortcutButton.style.display = 'flex';
-            appendToOutput("Shortcut feature is ready", 'success');
-            shortcutButton.addEventListener('click', async () => {
-                if (actionRunning) return;
-                actionRunning = true;
-                shortcutButton.classList.add('loading');
-                appendToOutput("Creating shortcut, please wait...", 'info');
-                try {
-                    if (window[JS_INTERFACE] && typeof window[JS_INTERFACE].createShortcut === 'function') {
-                        await window[JS_INTERFACE].createShortcut();
-                        appendToOutput("Home screen shortcut created successfully", 'success');
-                    } else {
-                        throw new Error(`${JS_INTERFACE}.createShortcut is not available`);
-                    }
-                } catch (error) {
-                    appendToOutput("Unable to create shortcut. Please try again or add it manually via your home screen.", 'error');
-                    if (DEBUG_LOGS) {
-                        appendToOutput(`Error: ${error.message || error}`, 'error');
-                    }
-                } finally {
-                    shortcutButton.classList.remove('loading');
-                    actionRunning = false;
-                }
-            });
-        } else {
-            appendToOutput("Shortcut feature not available", 'warning');
-            shortcutButton.style.display = 'none';
-        }
-    }
     
     document.getElementById('start-logcat').addEventListener('click', startLogcat);
     document.getElementById('stop-logcat').addEventListener('click', stopLogcat);
@@ -1512,27 +1438,6 @@ function applyEventListeners() {
         });
         sortDeviceList();
     });
-    
-    document.getElementById('device-picker-search').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase().trim();
-        document.querySelectorAll('.picker-device-card').forEach(card => {
-            const key = card.dataset.key;
-            const deviceData = currentConfig[key] || {};
-            const searchableText = [
-                deviceData.DEVICE || '',
-                deviceData.BRAND || '',
-                deviceData.MANUFACTURER || '',
-                deviceData.FINGERPRINT || '',
-                deviceData.BOARD || '',
-                deviceData.BOOTLOADER || '',
-                deviceData.HARDWARE || '',
-                deviceData.ID || '',
-                deviceData.DISPLAY || '',
-                deviceData.HOST || ''
-            ].join(' ').toLowerCase();
-            card.style.display = searchableText.includes(searchTerm) ? 'block' : 'none';
-        });
-    });
 }
 
 window.addEventListener('resize', () => {
@@ -1557,13 +1462,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.body.classList.add('dark-theme');
         document.getElementById('theme-icon').textContent = '🌙';
     }
-    
-    const moduleInterface = window[JS_INTERFACE] || window.$copg;
-    if (DEBUG_LOGS) {
-        appendToOutput(`Initial module interface check: ${JS_INTERFACE} = ${typeof moduleInterface}, createShortcut = ${typeof moduleInterface?.createShortcut}`, 'info');
-    }
-    
-    await checkWebUIConfig();
+        
     appendToOutput("UI initialized", 'success');
     await loadVersion();
     await loadConfig();
