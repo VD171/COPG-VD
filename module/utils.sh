@@ -19,9 +19,9 @@ bin_resetprop=$(find_resetprop)
 propreset() {
     name="$1"
     value="$2"
-    [[ -z "$name" || -z "$value" ]] && return 0
+    [ -z "$name" ] || [ -z "$value" ] && return 0
     current=$(echo "$getprop_output" | grep "^\[$name\]:" | sed 's/.*: \[\(.*\)\]/\1/')
-    [[ -z "$current" || "$current" == "$value" ]] && return 0
+    [ -z "$current" ] || [ "$current" == "$value" ] && return 0
     "$bin_resetprop" -n "$name" "$value" && return 0
     return 1
 }
@@ -52,7 +52,7 @@ MAPPING
 if [ "$DEVICE" = "spoofed" ]; then
   get_prop_mapping | while IFS='|' read -r json_key props; do
       [ -z "$json_key" ] && continue
-      json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
+      json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\(\"[^\"]*\"\|[0-9][0-9]*\)" | sed 's/.*:[[:space:]]*"\?\(.*\)"\?/\1/' | sed 's/"$//')
       if [ -n "$json_value" ]; then
           if [ "$json_key" = "TIMESTAMP" ]; then
               BUILD_DATE="$(LC_ALL=C TZ=UTC date -u -d "@$json_value")"
@@ -83,11 +83,11 @@ if [ "$DEVICE" = "spoofed" ]; then
       done
   fi
 elif [ "$DEVICE" = "original" ]; then
-  for LINE in $(cat "$COPG_ORIGINAL"); do
-    propreset $LINE
-  done
+  while read -r prop value rest; do
+    propreset "$prop" "$value"
+  done < "$COPG_ORIGINAL"
 else
-  echo > $COPG_ORIGINAL
+  echo > "$COPG_ORIGINAL"
   get_prop_mapping | while IFS='|' read -r json_key props; do
       [ -z "$json_key" ] && continue
       old_ifs="$IFS"
@@ -95,7 +95,7 @@ else
       for prop in $props; do
           current=$(echo "$getprop_output" | grep "^\[$prop\]:" | sed 's/.*: \[\(.*\)\]/\1/')
           [ -z "$current" ] && continue
-          echo $prop $current >> $COPG_ORIGINAL
+          echo "$prop $current" >> "$COPG_ORIGINAL"
       done
       IFS="$old_ifs"
   done
