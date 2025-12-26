@@ -169,7 +169,7 @@ if ! $BOOTMODE; then
   print_failure_and_exit "initial"
 fi
 
-if [ "$API" -lt 26 ]; then
+if [ "$API" -lt 28 ]; then
   print_box_start
   ui_print "      ✦ Installation Error ✦     "
   print_empty_line
