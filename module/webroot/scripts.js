@@ -1352,31 +1352,6 @@ function applyEventListeners() {
         closePopup('error-popup');
     });
 
-    document.getElementById('device-search').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase().trim();
-        document.querySelectorAll('.device-card').forEach(card => {
-            const key = card.dataset.key;
-            const deviceData = currentConfig[key] || {};
-            const searchableText = [
-                deviceData.DEVICE || '',
-                deviceData.BRAND || '',
-                deviceData.MODEL || '',
-                deviceData.PRODUCT || '',
-                deviceData.MANUFACTURER || '',
-                deviceData.FINGERPRINT || '',
-                deviceData.BOARD || '',
-                deviceData.BOOTLOADER || '',
-                deviceData.HARDWARE || '',
-                deviceData.ID || '',
-                deviceData.DISPLAY || '',
-                deviceData.HOST || '',
-                deviceData.INCREMENTAL || '',
-                deviceData.TIMESTAMP || '',
-                deviceData.SECURITY_PATCH || ''
-            ].join(' ').toLowerCase();
-            card.style.display = searchableText.includes(searchTerm) ? 'block' : 'none';
-        });
-    });
 }
 
 window.addEventListener('resize', () => {
@@ -1650,7 +1625,7 @@ async function showFilePicker(targetFile, startPath = null) {
                         </div>
                         <div class="app-info">
                             <div class="app-name">${file.name}</div>
-                            <div class="app-package">${file.path}</div>
+                            <div>${file.path}</div>
                         </div>
                     `;
                     fileCard.addEventListener('click', async () => {
