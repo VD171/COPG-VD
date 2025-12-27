@@ -24,6 +24,20 @@ const sdkToAndroidMapping = (function() {
     return map;
 })();
 
+window.onerror = function (message, source, lineno, colno, error) {
+    const div = document.createElement('pre');
+    div.style.position = 'fixed';
+    div.style.bottom = '0';
+    div.style.left = '0';
+    div.style.right = '0';
+    div.style.background = '#300';
+    div.style.color = '#fff';
+    div.style.zIndex = '9999';
+    div.textContent = message + "\n" + source + ":" + lineno;
+    document.body.appendChild(div);
+};
+
+
 const templates = {
     deviceCard: (data) => {
         const template = document.getElementById('device-card-template');
@@ -34,11 +48,24 @@ const templates = {
         card.style.animationDelay = `${data.delay}s`;
         card.querySelector('.device-name').textContent = data.deviceName;
         card.querySelector('.edit-btn').dataset.device = data.key;
-        card.querySelector('.device-details').innerHTML = `Model: ${data.model}`;
+        card.querySelector('.device-details').innerHTML = `Model: ${data.model}<br>
+                                                           Brand: ${data.brand}<br>
+                                                           Product: ${data.product}<br>
+                                                           Manufacturer: ${data.manufacturer}<br>
+                                                           Fingerprint: ${data.fingerprint}<br>
+                                                           Board: ${data.board}<br>
+                                                           Bootloader: ${data.bootloader}<br>
+                                                           Hardware: ${data.hardware}<br>
+                                                           ID: ${data.id}<br>
+                                                           Display: ${data.display}<br>
+                                                           HOST: ${data.host}<br>
+                                                           Incremental: ${data.incremental}<br>
+                                                           Timestamp: ${data.timestamp}<br>
+                                                           Security Patch: ${data.security_patch}`;
         
         return card;
     },
-    
+
     directoryCard: (data) => {
         const template = document.getElementById('directory-card-template');
         const clone = template.content.cloneNode(true);
@@ -715,13 +742,39 @@ function renderDeviceList() {
     for (const key of configKeyOrder) {
         if (key === 'COPG' && currentConfig[key]) {
             const deviceName = currentConfig[key].DEVICE || 'COPG';
-            const model = currentConfig[key].MODEL || 'Unknown';
-            
+            const model = currentConfig[key].MODEL || 'Undefined';
+            const board = currentConfig[key].BOARD || 'Undefined';
+            const bootloader = currentConfig[key].BOOTLOADER || 'Undefined';
+            const brand = currentConfig[key].BRAND || 'Undefined';
+            const display = currentConfig[key].DISPLAY || 'Undefined';
+            const fingerprint = currentConfig[key].FINGERPRINT || 'Undefined';
+            const hardware = currentConfig[key].HARDWARE || 'Undefined';
+            const host = currentConfig[key].HOST || 'Undefined';
+            const id = currentConfig[key].ID || 'Undefined';
+            const incremental = currentConfig[key].INCREMENTAL || 'Undefined';
+            const manufacturer = currentConfig[key].MANUFACTURER || 'Undefined';
+            const product = currentConfig[key].PRODUCT || 'Undefined';
+            const security_patch = currentConfig[key].SECURITY_PATCH || 'Undefined';
+            const timestamp = currentConfig[key].TIMESTAMP || 'Undefined';
+
             const deviceCard = templates.deviceCard({
                 key: key,
                 delay: Math.min(index * 0.05, 0.5),
                 deviceName: deviceName,
-                model: model
+                model: model,
+                board: board,
+                bootloader: bootloader,
+                brand: brand,
+                display: display,
+                fingerprint: fingerprint,
+                hardware: hardware,
+                host: host,
+                id: id,
+                incremental: incremental,
+                manufacturer: manufacturer,
+                product: product,
+                security_patch: security_patch,
+                timestamp: timestamp
             });
             
             fragment.appendChild(deviceCard);
@@ -1001,25 +1054,25 @@ async function saveDevice(e) {
     }
     
     const packageKey = 'COPG';
-    const brand = document.getElementById('device-brand').value.trim() || 'Unknown';
-    const model = document.getElementById('device-model').value.trim() || 'Unknown';
-    const product = document.getElementById('device-product').value.trim() || 'Unknown';
-    const board = document.getElementById('device-board').value.trim() || 'Unknown';
-    const bootloader = document.getElementById('device-bootloader').value.trim() || 'Unknown';
-    const hardware = document.getElementById('device-hardware').value.trim() || 'Unknown';
-    const id = document.getElementById('device-id').value.trim() || 'Unknown';
-    const display = document.getElementById('device-display').value.trim() || 'Unknown';
-    const host = document.getElementById('device-host').value.trim() || 'Unknown';
-    const incremental = document.getElementById('device-incremental').value.trim() || 'Unknown';
-    const timestamp = document.getElementById('device-timestamp').value.trim() || 'Unknown';
-    const security_patch = document.getElementById('device-security_patch').value.trim() || 'Unknown';
+    const brand = document.getElementById('device-brand').value.trim() || 'Undefined';
+    const model = document.getElementById('device-model').value.trim() || 'Undefined';
+    const product = document.getElementById('device-product').value.trim() || 'Undefined';
+    const board = document.getElementById('device-board').value.trim() || 'Undefined';
+    const bootloader = document.getElementById('device-bootloader').value.trim() || 'Undefined';
+    const hardware = document.getElementById('device-hardware').value.trim() || 'Undefined';
+    const id = document.getElementById('device-id').value.trim() || 'Undefined';
+    const display = document.getElementById('device-display').value.trim() || 'Undefined';
+    const host = document.getElementById('device-host').value.trim() || 'Undefined';
+    const incremental = document.getElementById('device-incremental').value.trim() || 'Undefined';
+    const timestamp = document.getElementById('device-timestamp').value.trim() || 'Undefined';
+    const security_patch = document.getElementById('device-security_patch').value.trim() || 'Undefined';
     const androidVersion = document.getElementById('device-android-version').value.trim();
     const sdkInt = document.getElementById('device-sdk-int').value.trim();
     
     const deviceData = {
         BRAND: brand,
         DEVICE: deviceName,
-        MANUFACTURER: document.getElementById('device-manufacturer').value.trim() || 'Unknown',
+        MANUFACTURER: document.getElementById('device-manufacturer').value.trim() || 'Undefined',
         MODEL: model,
         FINGERPRINT: document.getElementById('device-fingerprint').value.trim() || `${brand}/${model}/${model}:14/UP1A.231005.007/20230101:user/release-keys`,
         PRODUCT: product,
