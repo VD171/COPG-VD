@@ -436,7 +436,7 @@ private:
                 original_info.version_incremental = getStr(build_version_incrementalField);
                 original_info.version_sdk = getStr(build_version_sdkField);
                 original_info.version_sdk_int_full = getInt(build_version_sdk_int_fullField);
-                original_info.version_security_patch = getStr(build_version_security_patchField);
+                original_info.version_security_patch = "";
                 original_info.version_release_or_codename = getStr(build_version_release_or_codenameField);
                 original_info.version_release_or_preview_display = getStr(build_version_release_or_preview_displayField);
             }
