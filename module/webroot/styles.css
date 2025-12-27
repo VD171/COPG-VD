@@ -2514,12 +2514,6 @@ input:checked ~ .slider {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.badge-container {
-    display: inline-flex;
-    align-items: center;
-    margin-left: 8px;
-}
-
 @media (max-width: 480px) {
     .info-popup-content {
         padding: 16px 16px 0 16px;
