@@ -2,8 +2,6 @@ let configKeyOrder = [];
 let currentConfig = {};
 let editingDevice = null;
 let logcatRunning = false;
-let currentDeviceSort = 'default';
-let deviceSortDropdown = null;
 
 const CONFIG_FILE = "/data/adb/COPG.json";
 const MODULE_ID = 'COPG';
@@ -83,126 +81,6 @@ async function execCommand(command) {
             reject("KSU API not available");
         }
     });
-}
-
-function createDeviceSortDropdown() {
-    const template = document.getElementById('sort-dropdown-template');
-    const clone = template.content.cloneNode(true);
-    deviceSortDropdown = clone.querySelector('.sort-dropdown');
-    
-    deviceSortDropdown.id = 'device-sort-dropdown';
-    
-    const sortOptionsToRemove = deviceSortDropdown.querySelectorAll(
-        '.sort-option[data-filter], .sort-separator, #clear-filter-btn'
-    );
-    
-    sortOptionsToRemove.forEach(option => option.remove());
-    
-    deviceSortDropdown.querySelectorAll('.sort-option').forEach(option => {
-        option.addEventListener('click', (e) => {
-            const sortType = option.dataset.sort;
-            setDeviceSort(sortType);
-            deviceSortDropdown.classList.remove('show');
-            e.stopPropagation();
-        });
-    });
-    
-    document.addEventListener('click', (e) => {
-        if (deviceSortDropdown && deviceSortDropdown.classList.contains('show') && 
-            !e.target.closest('#device-sort-btn') && !e.target.closest('#device-sort-dropdown')) {
-            deviceSortDropdown.classList.remove('show');
-        }
-    });
-    
-    document.body.appendChild(deviceSortDropdown);
-}
-
-function getOriginalDeviceOrder() {
-    const devices = [];
-
-    for (const key of configKeyOrder) {
-        if (key === 'COPG' && currentConfig[key]) {
-            const deviceName = currentConfig[key].DEVICE || 'COPG';
-            const model = currentConfig[key].MODEL || 'Unknown';
-            
-            devices.push({
-                key: key,
-                deviceName: deviceName,
-                model: model
-            });
-        }
-    }
-    
-    return devices;
-}
-
-function sortDeviceList() {
-    const deviceList = document.getElementById('device-list');
-    if (!deviceList) return;
-    
-    const devices = Array.from(deviceList.querySelectorAll('.device-card'));
-    
-    if (currentDeviceSort === 'default') {
-        const originalOrder = getOriginalDeviceOrder();
-        const deviceMap = new Map();
-        
-        devices.forEach(device => {
-            const deviceKey = device.dataset.key;
-            deviceMap.set(deviceKey, device);
-        });
-        
-        deviceList.innerHTML = '';
-        originalOrder.forEach(deviceInfo => {
-            const device = deviceMap.get(deviceInfo.key);
-            if (device) {
-                deviceList.appendChild(device);
-            }
-        });
-        
-        devices.forEach(device => {
-            const deviceKey = device.dataset.key;
-            if (!deviceMap.has(deviceKey)) {
-                deviceList.appendChild(device);
-            }
-        });
-    } else {
-        devices.sort((a, b) => {
-            const nameA = a.querySelector('.device-name').textContent.toLowerCase();
-            const nameB = b.querySelector('.device-name').textContent.toLowerCase();
-            
-            if (currentDeviceSort === 'asc') {
-                return nameA.localeCompare(nameB);
-            } else if (currentDeviceSort === 'desc') {
-                return nameB.localeCompare(nameA);
-            }
-            return 0;
-        });
-        
-        devices.forEach(device => {
-            deviceList.appendChild(device);
-        });
-    }
-    
-    attachDeviceListeners();
-}
-
-function initializeDeviceSort() {
-    createDeviceSortDropdown();
-    
-    const sortBtn = document.getElementById('device-sort-btn');
-    if (sortBtn) {
-        sortBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            
-            const rect = sortBtn.getBoundingClientRect();
-            deviceSortDropdown.style.top = `${rect.bottom + window.scrollY + 8}px`;
-            deviceSortDropdown.style.right = `${window.innerWidth - rect.right}px`;
-            
-            deviceSortDropdown.classList.toggle('show');
-        });
-    }
-    
-    setDeviceSort('default');
 }
 
 function setupInfoPopup() {
@@ -643,7 +521,7 @@ async function backupFile(filename) {
             }
         }
         
-        await execCommand(`cp /data/adb/modules/COPG/${filename} "/sdcard/Download/COPG/${finalFilename}"`);
+        await execCommand(`cp /data/adb/${filename} "/sdcard/Download/COPG/${finalFilename}"`);
         appendToOutput(`Backup created: ${finalFilename}`, 'success');
         return true;
     } catch (error) {
@@ -854,12 +732,6 @@ function renderDeviceList() {
     deviceList.innerHTML = '';
     deviceList.appendChild(fragment);
     attachDeviceListeners();
-    
-    if (currentDeviceSort !== 'default') {
-        setTimeout(() => {
-            sortDeviceList();
-        }, 100);
-    }
 }
 
 function attachDeviceListeners() {
@@ -1451,7 +1323,6 @@ function applyEventListeners() {
             ].join(' ').toLowerCase();
             card.style.display = searchableText.includes(searchTerm) ? 'block' : 'none';
         });
-        sortDeviceList();
     });
 }
 
@@ -1480,13 +1351,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadVersion();
     await loadConfig();
     applyEventListeners();
-    initializeDeviceSort(); 
     switchTab('settings');
-});
-
-document.querySelector('#package-picker-popup .cancel-btn')?.addEventListener('click', () => {
-    document.getElementById('package-picker-search').value = '';
-    closePopup('package-picker-popup');
 });
 
 async function getPreferredStartPath() {
@@ -1534,16 +1399,15 @@ async function restoreFile(sourcePath, targetFile) {
             throw new Error(`Invalid source or target path: source=${sourcePath}, target=${targetFile}`);
         }
 
-        await execCommand(`su -c 'mkdir -p /data/adb/modules/COPG'`);
-        const cpOutput = await execCommand(`su -c 'cp "${sourcePath}" "/data/adb/modules/COPG/${targetFile}"' || echo "ERROR: cp_failed"`);
+        const cpOutput = await execCommand(`su -c 'cp "${sourcePath}" "/data/adb/${targetFile}"' || echo "ERROR: cp_failed"`);
         if (cpOutput.includes('ERROR: cp_failed')) {
             throw new Error(`Copy command failed: ${cpOutput}`);
         }
 
-        await execCommand(`su -c 'chmod 644 /data/adb/modules/COPG/${targetFile}'`);
+        await execCommand(`su -c 'chmod 644 /data/adb/${targetFile}'`);
         
         try {
-            await execCommand(`su -c 'chcon u:object_r:system_file:s0 /data/adb/modules/COPG/${targetFile}'`);
+            await execCommand(`su -c 'chcon u:object_r:system_file:s0 /data/adb/${targetFile}'`);
         } catch (selinuxError) {
             console.warn('Could not set SELinux context:', selinuxError);
         }
