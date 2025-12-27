@@ -28,6 +28,9 @@ propreset() {
 
 get_prop_mapping() {
     cat << 'MAPPING'
+CODENAME|ro.build.version.all_codenames|ro.build.version.codename|ro.build.version.preview_sdk_fingerprint
+TAGS|ro.bootimage.build.tags|ro.bootimage.keys|ro.build.keys|ro.build.tags|ro.odm.build.tags|ro.odm.keys|ro.odm_dlkm.build.tags|ro.odm_dlkm.keys|ro.oem.build.tags|ro.oem.keys|ro.product.build.tags|ro.product.keys|ro.system.build.tags|ro.system.keys|ro.system_ext.build.tags|ro.system_ext.keys|ro.vendor.build.tags|ro.vendor.keys|ro.vendor_dlkm.build.tags|ro.vendor_dlkm.keys
+TYPE|ro.bootimage.build.type|ro.build.type|ro.odm.build.type|ro.odm_dlkm.build.type|ro.oem.build.type|ro.product.build.type|ro.system.build.type|ro.system_dlkm.build.type|ro.system_ext.build.type|ro.vendor.build.type|ro.vendor.md_apps.load_type|ro.vendor_dlkm.build.type
 SECURITY_PATCH|ro.build.version.security_patch|ro.system.build.security_patch|ro.vendor.build.security_patch
 TIMESTAMP|ro.build.date.utc|ro.system.build.date.utc|ro.vendor.build.date.utc|ro.system_ext.build.date.utc|ro.vendor_dlkm.build.date.utc|ro.product.build.date.utc|ro.odm.build.date.utc|ro.bootimage.build.date.utc
 INCREMENTAL|ro.build.version.incremental|ro.odm.build.version.incremental|ro.product.build.version.incremental|ro.system.build.version.incremental|ro.system_ext.build.version.incremental|ro.vendor.build.version.incremental|ro.vendor_dlkm.build.version.incremental
@@ -52,15 +55,31 @@ MAPPING
 if [ "$DEVICE" = "spoofed" ]; then
   get_prop_mapping | while IFS='|' read -r json_key props; do
       [ -z "$json_key" ] && continue
-      json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\(\"[^\"]*\"\|[0-9][0-9]*\)" | sed 's/.*:[[:space:]]*"\?\(.*\)"\?/\1/' | sed 's/"$//')
+      if [ $json_key = "CODENAME" ]; then
+          json_value = "REL"
+      elif [ $json_key = "TAGS" ]; then
+          json_value = "release-keys"
+      elif [ $json_key = "TYPE" ]; then
+          json_value = "user"
+      else
+          json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
+      fi
       if [ -n "$json_value" ]; then
           if [ "$json_key" = "TIMESTAMP" ]; then
               BUILD_DATE="$(LC_ALL=C TZ=UTC date -u -d "@$json_value")"
+              for prop in ro.build.date ro.odm.build.date ro.product.build.date; do
+                  propreset "$prop" "$BUILD_DATE"
+              done
           elif [ "$json_key" = "SDK_INT" ]; then
               SDK_FULL="$json_value.0"
+              for prop in ro.build.version.sdk_full ro.odm.build.version.sdk_full ro.product.build.version.sdk_full ro.system.build.version.sdk_full ro.system_ext.build.version.sdk_full ro.vendor_dlkm.build.version.sdk_full ro.vendor.build.version.sdk_full; do
+                  propreset "$prop" "$SDK_FULL"
+              done
           elif [ "$json_key" = "FINGERPRINT" ]; then
               DESCRIPTION="$(echo "$json_value" | awk -F'[:/]' '{print $3"-"$7" "$4" "$5" "$6" "$8}')"
               FLAVOR="$(echo "$json_value" | awk -F'[:/]' '{print $3"-"$7}')"
+              propreset ro.build.description "$DESCRIPTION"
+              propreset ro.build.flavor "$FLAVOR"
           fi
           old_ifs="$IFS"
           IFS='|'
@@ -70,21 +89,9 @@ if [ "$DEVICE" = "spoofed" ]; then
           IFS="$old_ifs"
       fi
   done
-  propreset ro.build.description "$DESCRIPTION"
-  propreset ro.build.flavor "$FLAVOR"
-  if [ -n "$BUILD_DATE" ]; then
-      for prop in ro.build.date ro.odm.build.date ro.product.build.date; do
-          propreset "$prop" "$BUILD_DATE"
-      done
-  fi
-  if [ -n "$SDK_FULL" ]; then
-      for prop in ro.build.version.sdk_full ro.odm.build.version.sdk_full ro.product.build.version.sdk_full ro.system.build.version.sdk_full ro.system_ext.build.version.sdk_full ro.vendor_dlkm.build.version.sdk_full ro.vendor.build.version.sdk_full; do
-          propreset "$prop" "$SDK_FULL"
-      done
-  fi
 elif [ "$DEVICE" = "original" ]; then
   if [ -f "$COPG_ORIGINAL" ]; then
-    while read -r prop value rest; do
+    while IFS='=' read -r prop value; do
       [ -z "$prop" ] && continue
       propreset "$prop" "$value"
     done < "$COPG_ORIGINAL"
@@ -92,13 +99,13 @@ elif [ "$DEVICE" = "original" ]; then
 else
   echo > "$COPG_ORIGINAL"
   get_prop_mapping | while IFS='|' read -r json_key props; do
-      [ -z "$json_key" ] && continue
+      [ -z "$json_key" ] || [ $json_key = "CODENAME" ] || [ $json_key = "TAGS" ] || [ $json_key = "TYPE" ] || [ $json_key = "SECURITY_PATCH" ] && continue
       old_ifs="$IFS"
       IFS='|'
       for prop in $props; do
           current=$(echo "$getprop_output" | grep "^\[$prop\]:" | sed 's/.*: \[\(.*\)\]/\1/')
           [ -z "$current" ] && continue
-          echo "$prop $current" >> "$COPG_ORIGINAL"
+          echo "$prop=$current" >> "$COPG_ORIGINAL"
       done
       IFS="$old_ifs"
   done
