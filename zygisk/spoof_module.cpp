@@ -280,7 +280,7 @@ public:
         }
 
         bool info_changed = false;
-        bool is_camera_package = camera_packages.find(package_name) != camera_packages.end();
+        bool is_camera_package = camera_packages.find(std::string(package_name)) != camera_packages.end();
 
         {
             std::lock_guard<std::mutex> lock(info_mutex);
