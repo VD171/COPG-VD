@@ -55,12 +55,12 @@ MAPPING
 if [ "$DEVICE" = "spoofed" ]; then
   get_prop_mapping | while IFS='|' read -r json_key props; do
       [ -z "$json_key" ] && continue
-      if [ $json_key = "CODENAME" ]; then
-          json_value = "REL"
-      elif [ $json_key = "TAGS" ]; then
-          json_value = "release-keys"
-      elif [ $json_key = "TYPE" ]; then
-          json_value = "user"
+      if [ "$json_key" = "CODENAME" ]; then
+          json_value="REL"
+      elif [ "$json_key" = "TAGS" ]; then
+          json_value="release-keys"
+      elif [ "$json_key" = "TYPE" ]; then
+          json_value="user"
       else
           json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
       fi
@@ -99,7 +99,11 @@ elif [ "$DEVICE" = "original" ]; then
 else
   echo > "$COPG_ORIGINAL"
   get_prop_mapping | while IFS='|' read -r json_key props; do
-      [ -z "$json_key" ] || [ $json_key = "CODENAME" ] || [ $json_key = "TAGS" ] || [ $json_key = "TYPE" ] || [ $json_key = "SECURITY_PATCH" ] && continue
+      [ -z "$json_key" ] && continue
+      [ "$json_key" = "CODENAME" ] && continue
+      [ "$json_key" = "TAGS" ] && continue
+      [ "$json_key" = "TYPE" ] && continue
+      [ "$json_key" = "SECURITY_PATCH" ] && continue
       old_ifs="$IFS"
       IFS='|'
       for prop in $props; do
