@@ -51,53 +51,6 @@
         </div>
     </template>
 
-    <template id="sort-dropdown-template">
-        <div class="sort-dropdown">
-            <div class="sort-option" data-sort="default">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M8 6h13"></path>
-                    <path d="M8 12h13"></path>
-                    <path d="M8 18h13"></path>
-                    <path d="M3 6h.01"></path>
-                    <path d="M3 12h.01"></path>
-                    <path d="M3 18h.01"></path>
-                </svg>
-                <span>Default</span>
-            </div>
-            <div class="sort-option" data-sort="asc">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18"></path>
-                    <path d="M6 12h15"></path>
-                    <path d="M9 18h12"></path>
-                </svg>
-                <span>A → Z</span>
-            </div>
-            <div class="sort-option" data-sort="desc">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 18h18"></path>
-                    <path d="M6 12h15"></path>
-                    <path d="M9 6h12"></path>
-                </svg>
-                <span>Z → A</span>
-            </div>
-            <div class="sort-separator"></div>
-            <div class="sort-option" data-filter="installed">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-                <span>Installed Only</span>
-                <span class="filter-badge" id="installed-count">0</span>
-            </div>
-            <div class="sort-option" data-filter="clear" id="clear-filter-btn" style="display: none;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2"></path>
-                </svg>
-                <span>Clear Filter</span>
-            </div>
-        </div>
-    </template>
-
     <div class="container">
         <div class="header">
             <h1 class="header-title">COPG <span class="version" id="version-text">0.0</span></h1>
@@ -427,6 +380,24 @@
                             Host<span class="required-badge">required</span>
                         </label>
                         <input type="text" id="device-host" placeholder="e.g., r-a06a74e0f133947d-zsc4">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-incremental">
+                            Incremental<span class="required-badge">required</span>
+                        </label>
+                        <input type="text" id="device-incremental" placeholder="e.g., r-a06a74e0f133947d-zsc4">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-timestamp">
+                            Timestamp<span class="required-badge">required</span>
+                        </label>
+                        <input type="text" id="device-timestamp" placeholder="e.g., r-a06a74e0f133947d-zsc4">
+                    </div>
+                    <div class="form-group">
+                        <label for="security_patch">
+                            Security Patch<span class="required-badge">required</span>
+                        </label>
+                        <input type="text" id="security_patch" placeholder="e.g., r-a06a74e0f133947d-zsc4">
                     </div>
                     <div class="form-group">
                         <label for="device-android-version">
