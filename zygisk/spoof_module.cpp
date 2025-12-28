@@ -23,7 +23,6 @@ using json = nlohmann::json;
 #define LOG_TAG "COPGModule"
 
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 #define SPOOF_LOG(...) LOGI("[SPOOF] " __VA_ARGS__)
@@ -159,12 +158,14 @@ static int hooked_system_property_get(const char* name, char* value) {
         }
         return 0;
     }
+    ERROR_LOG("Analisando: %s = %s", name, value);
 
     {
         std::lock_guard<std::mutex> lock(prop_mutex);
         auto it = original_props.find(name);
         if (it != original_props.end()) {
 
+            ERROR_LOG("Aplicando: %s = %s", name, it->second.c_str());
             size_t len = it->second.length();
             if (len >= PROP_VALUE_MAX) {
                 len = PROP_VALUE_MAX - 1;
@@ -215,13 +216,17 @@ void loadOriginalPropsFromFile() {
 }
 
 void installPropertyHookForCamera() {
-    void* sym = DobbySymbolResolver("libc.so", "__system_property_read_callback");
-    if (!sym) return;
-
-    if (DobbyHook(sym, (void*)hooked_system_property_read_callback,
-                  (void**)&orig_system_property_read_callback) != 0) return;
-
-    if (!orig_system_property_read_callback) return;
+    void* sym = DobbySymbolResolver(nullptr, "__system_property_get");
+    if (!sym) {
+        ERROR_LOG("Failed to resolve __system_property_get");
+        return;
+    }
+    int result = DobbyHook(sym, (void*)hooked_system_property_get, (void**)&orig_system_property_get);
+    if (result == 0) {
+        INFO_LOG("Property hook installed for camera app");
+    } else {
+        ERROR_LOG("Failed to install property hook, error code: %d", result);
+    }
 }
 
 DeviceInfo loadDeviceFromConfig() {
