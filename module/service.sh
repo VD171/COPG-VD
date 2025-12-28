@@ -4,8 +4,7 @@ COPG_JSON="/data/adb/COPG.json"
 COPG_ORIGINAL="/data/adb/modules/COPG/original_device.txt"
 COPG_UTILS="/data/adb/modules/COPG/utils.sh"
 
-sh "$COPG_UTILS"
-sh "$COPG_UTILS" spoofed
+. "$COPG_UTILS"
 
 until [ "$(getprop sys.boot_completed)" = "1" ]; do
     sleep 2
