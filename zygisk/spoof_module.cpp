@@ -36,7 +36,7 @@ static std::mutex prop_mutex;
 static std::string current_package;
 
 static const std::string config_file = "/data/adb/COPG.json";
-static const std::string original_device = "/data/adb/modules/COPG/original_device.txt"
+static const std::string original_device = "/data/adb/modules/COPG/original_device.txt";
 
 #ifndef PROP_VALUE_MAX
 #define PROP_VALUE_MAX 92
