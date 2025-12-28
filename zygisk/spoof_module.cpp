@@ -276,7 +276,7 @@ DeviceInfo loadDeviceFromConfig() {
                 info.version_sdk = std::to_string(info.version_sdk_int);
                 info.version_sdk_int_full = info.version_sdk_int * 100000;
             }
-            INFO_LOG("Loaded device config: %s (%s)", info.model.c_str(), info.brand.c_str());
+            INFO_LOG("[%s] Loaded device config: %s (%s)", current_package.c_str(), info.model.c_str(), info.brand.c_str());
         }
     } catch (const std::exception& e) {
         ERROR_LOG("Config error: %s", e.what());
@@ -400,7 +400,7 @@ void spoofBuild(JNIEnv* env, const DeviceInfo& info) {
         setStr(versionClass, build_version_release_or_preview_displayField, info.version_release_or_preview_display);
     }
 
-    SPOOF_LOG("Build spoofed: %s (%s)", info.model.c_str(), info.brand.c_str());
+    SPOOF_LOG("[%s] Build spoofed: %s (%s)", current_package.c_str(), info.model.c_str(), info.brand.c_str());
 }
 
 class COPGModule : public zygisk::ModuleBase {
@@ -443,7 +443,8 @@ public:
             return;
         }
 
-        bool is_camera_package = camera_packages.find(std::string(package_name)) != camera_packages.end();
+        current_package = package_name;
+        bool is_camera_package = camera_packages.find(std::string(current_package)) != camera_packages.end();
 
         if (is_camera_package) {
             loadOriginalPropsFromFile();
@@ -464,6 +465,7 @@ public:
 private:
     zygisk::Api* api;
     JNIEnv* env;
+    std::string current_package;
 };
 
 REGISTER_ZYGISK_MODULE(COPGModule)
