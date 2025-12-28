@@ -289,13 +289,12 @@ public:
                                             (spoof_info ? *spoof_info : current_info);
 
             if (current_info != target_info) {
-                current_info = target_info;
-                info_changed = true;
-                const char* current_device = is_camera_package ? "original" : "spoofed";
-                INFO_LOG("Restoring %s device for: %s (%s)", 
-                         current_device, package_name, current_info.model.c_str());
-                spoofDevice(current_info);
-                system((std::string("sh /data/adb/modules/COPG/utils.sh ") + current_device).c_str());
+                //current_info = target_info;
+                //info_changed = true;
+                //const char* current_device = is_camera_package ? "original" : "spoofed";
+                //INFO_LOG("Restoring %s device for: %s (%s)", 
+                //         current_device, package_name, current_info.model.c_str());
+                //spoofDevice(current_info);
             }
         }
 
