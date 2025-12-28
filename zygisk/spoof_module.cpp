@@ -34,6 +34,11 @@ using json = nlohmann::json;
 static std::unordered_map<std::string, std::string> original_props;
 static int (*orig_system_property_get)(const char*, char*) = nullptr;
 static std::mutex prop_mutex;
+static std::string current_package;
+
+#ifndef PROP_VALUE_MAX
+#define PROP_VALUE_MAX 92
+#endif
 
 static int hooked_system_property_get(const char* name, char* value) {
     if (!name || !value) {
