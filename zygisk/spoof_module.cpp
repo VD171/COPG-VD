@@ -408,24 +408,6 @@ public:
     void onLoad(zygisk::Api* api, JNIEnv* env) override {
         this->api = api;
         this->env = env;
-
-        JniString pkg(env, args->nice_name);
-        const char* package_name = pkg.get();
-
-        if (!package_name) {
-            return;
-        }
-
-        bool is_camera_package = camera_packages.find(std::string(package_name)) != camera_packages.end();
-
-        if (is_camera_package) {
-            loadOriginalPropsFromFile();
-            installPropertyHookForCamera();
-        } else {
-            initBuildClass(env);
-            DeviceInfo spoof_info = loadDeviceFromConfig();
-            spoofBuild(env, spoof_info);
-        }
     }
 
     void onUnload() {
@@ -447,7 +429,31 @@ public:
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
 
-    void preAppSpecialize(zygisk::AppSpecializeArgs*) override {
+    void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
+        if (!args || !args->nice_name) {
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            return;
+        }
+
+        JniString pkg(env, args->nice_name);
+        const char* package_name = pkg.get();
+
+        if (!package_name) {
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+            return;
+        }
+
+        bool is_camera_package = camera_packages.find(std::string(package_name)) != camera_packages.end();
+
+        if (is_camera_package) {
+            loadOriginalPropsFromFile();
+            installPropertyHookForCamera();
+        } else {
+            initBuildClass(env);
+            DeviceInfo spoof_info = loadDeviceFromConfig();
+            spoofBuild(env, spoof_info);
+        }
+
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
 
