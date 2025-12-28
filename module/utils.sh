@@ -2,7 +2,6 @@
 
 COPG_JSON="/data/adb/COPG.json"
 COPG_ORIGINAL="/data/adb/modules/COPG/original_device.txt"
-COPG_SPOOF="/data/adb/modules/COPG/spoof_device.txt"
 json_content=$(cat "$COPG_JSON")
 getprop_output=$(getprop)
 
@@ -52,29 +51,22 @@ MANUFACTURER|ro.product.manufacturer
 MAPPING
 }
 
-save_device() {
-  FILE="$1"
-  echo > "$FILE"
-  get_prop_mapping | while IFS='|' read -r json_key props; do
-      [ -z "$json_key" ] && continue
-      if [ "$FILE" = "$COPG_ORIGINAL" ]; then
-          [ "$json_key" = "CODENAME" ] && continue
-          [ "$json_key" = "TAGS" ] && continue
-          [ "$json_key" = "TYPE" ] && continue
-          [ "$json_key" = "SECURITY_PATCH" ] && continue
-      fi
-      old_ifs="$IFS"
-      IFS='|'
-      for prop in $props; do
-          current=$(echo "$getprop_output" | grep "^\[$prop\]:" | sed 's/.*: \[\(.*\)\]/\1/')
-          [ -z "$current" ] && continue
-          echo "$prop=$current" >> "$FILE"
-      done
-      IFS="$old_ifs"
-  done
-}
-
-save_device "$COPG_ORIGINAL"
+echo > "$COPG_ORIGINAL"
+get_prop_mapping | while IFS='|' read -r json_key props; do
+    [ -z "$json_key" ] && continue
+    [ "$json_key" = "CODENAME" ] && continue
+    [ "$json_key" = "TAGS" ] && continue
+    [ "$json_key" = "TYPE" ] && continue
+    [ "$json_key" = "SECURITY_PATCH" ] && continue
+    old_ifs="$IFS"
+    IFS='|'
+    for prop in $props; do
+        current=$(echo "$getprop_output" | grep "^\[$prop\]:" | sed 's/.*: \[\(.*\)\]/\1/')
+        [ -z "$current" ] && continue
+        echo "$prop=$current" >> "$COPG_ORIGINAL"
+    done
+    IFS="$old_ifs"
+done
 
 get_prop_mapping | while IFS='|' read -r json_key props; do
   [ -z "$json_key" ] && continue
@@ -112,5 +104,3 @@ get_prop_mapping | while IFS='|' read -r json_key props; do
       IFS="$old_ifs"
   fi
 done
-
-save_device "$COPG_SPOOF"
