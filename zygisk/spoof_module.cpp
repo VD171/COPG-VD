@@ -99,8 +99,6 @@ void loadOriginalPropsFromFile() {
         }
     }
     file.close();
-    
-    INFO_LOG("Loaded %zu original properties", original_props.size());
 }
 
 void installPropertyHookForCamera() {
@@ -463,9 +461,7 @@ public:
         bool is_camera_package = camera_packages.find(current_package) != camera_packages.end();
 
         if (is_camera_package) {
-            INFO_LOG("[%s] Camera package detected, loading original props", package_name);
             loadOriginalPropsFromFile();
-            installPropertyHookForCamera();
         } else {
             initBuildClass(env);
             DeviceInfo spoof_info = loadDeviceFromConfig();
@@ -476,13 +472,18 @@ public:
     }
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs*) override {
+        bool is_camera_package = camera_packages.find(current_package) != camera_packages.end();
+        
+        if (is_camera_package) {
+            installPropertyHookForCamera();
+        }
+
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
 
 private:
     zygisk::Api* api;
     JNIEnv* env;
-    std::string current_package;
 };
 
 REGISTER_ZYGISK_MODULE(COPGModule)
