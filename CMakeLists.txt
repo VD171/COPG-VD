@@ -12,10 +12,6 @@ if(NOT DEBUG)
     add_link_options(-s)
 endif()
 
-set(DOBBY_GENERATE_SHARED OFF CACHE BOOL "" FORCE)
-set(NearBranch OFF CACHE BOOL "" FORCE)
-set(Plugin.SymbolResolver ON CACHE BOOL "" FORCE)
-
 add_subdirectory(dobby)
 
 set(ZYGISK_SOURCES
