@@ -102,12 +102,18 @@ void loadOriginalPropsFromFile() {
 }
 
 void installPropertyHookForCamera() {
-    void* sym = DobbySymbolResolver(nullptr, "__system_property_get");
-    if (!sym) {
-        ERROR_LOG("Failed to resolve __system_property_get");
+    void* libc_handle = dlopen("libc.so", RTLD_NOW);
+    if (!libc_handle) {
+        ERROR_LOG("Failed to open libc.so: %s", dlerror());
         return;
     }
-
+    void* sym = dlsym(libc_handle, "__system_property_get");
+    if (!sym) {
+        ERROR_LOG("Failed to resolve __system_property_get: %s", dlerror());
+        dlclose(libc_handle);
+        return;
+    }
+    INFO_LOG("Found __system_property_get at: %p", sym);
     int result = DobbyHook(sym, (void*)hooked_system_property_get, (void**)&orig_system_property_get);
     if (result == 0) {
         INFO_LOG("Property hook installed for camera app");
