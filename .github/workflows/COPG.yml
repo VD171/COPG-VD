@@ -59,11 +59,9 @@ jobs:
           wget https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hpp
           wget https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O include/nlohmann/json.hpp
 
-      - name: Fetch Dobby
+      - name: Fetch Dobby Fork
         run: |
-          git clone --depth=1 https://github.com/jmpews/Dobby.git dobby
-          sed -i 's/@PAGE//g' dobby/source/TrampolineBridge/ClosureTrampolineBridge/arm64/closure_bridge_arm64.asm
-          sed -i 's/@PAGEOFF//g' dobby/source/TrampolineBridge/ClosureTrampolineBridge/arm64/closure_bridge_arm64.asm
+          git clone --depth=1 https://github.com/JingMatrix/Dobby.git dobby
 
       - name: Build Project (arm64-v8a) - Start
         id: arm64_start
