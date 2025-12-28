@@ -16,6 +16,7 @@
 #include <dobby.h>
 #include <sys/system_properties.h>
 #include <cstring>
+#include <dlfcn.h>
 
 using json = nlohmann::json;
 
@@ -36,7 +37,10 @@ static std::mutex prop_mutex;
 
 static int hooked_system_property_get(const char* name, char* value) {
     if (!name || !value) {
-        return orig_system_property_get ? orig_system_property_get(name, value) : 0;
+        if (orig_system_property_get) {
+            return orig_system_property_get(name, value);
+        }
+        return 0;
     }
 
     {
@@ -53,7 +57,11 @@ static int hooked_system_property_get(const char* name, char* value) {
         }
     }
 
-    return orig_system_property_get ? orig_system_property_get(name, value) : 0;
+    if (orig_system_property_get) {
+        return orig_system_property_get(name, value);
+    }
+    
+    return 0;
 }
 
 void loadOriginalPropsFromFile() {
@@ -86,6 +94,8 @@ void loadOriginalPropsFromFile() {
         }
     }
     file.close();
+    
+    INFO_LOG("Loaded %zu original properties", original_props.size());
 }
 
 void installPropertyHookForCamera() {
@@ -95,10 +105,11 @@ void installPropertyHookForCamera() {
         return;
     }
 
-    if (DobbyHook(sym, (void*)hooked_system_property_get, (void**)&orig_system_property_get) == 0) {
+    int result = DobbyHook(sym, (void*)hooked_system_property_get, (void**)&orig_system_property_get);
+    if (result == 0) {
         INFO_LOG("Property hook installed for camera app");
     } else {
-        ERROR_LOG("Failed to install property hook");
+        ERROR_LOG("Failed to install property hook, error code: %d", result);
     }
 }
 
@@ -443,10 +454,11 @@ public:
             return;
         }
 
-        current_package = package_name;
-        bool is_camera_package = camera_packages.find(std::string(current_package)) != camera_packages.end();
+        current_package = std::string(package_name);
+        bool is_camera_package = camera_packages.find(current_package) != camera_packages.end();
 
         if (is_camera_package) {
+            INFO_LOG("[%s] Camera package detected, loading original props", package_name);
             loadOriginalPropsFromFile();
             installPropertyHookForCamera();
         } else {
