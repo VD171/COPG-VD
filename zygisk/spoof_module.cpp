@@ -152,35 +152,8 @@ struct JniString {
 };
 
 static int hooked_system_property_get(const char* name, char* value) {
-    if (!name || !value) {
-        if (orig_system_property_get) {
-            return orig_system_property_get(name, value);
-        }
-        return 0;
-    }
-    ERROR_LOG("Analisando: %s = %s", name, value);
-
-    {
-        std::lock_guard<std::mutex> lock(prop_mutex);
-        auto it = original_props.find(name);
-        if (it != original_props.end()) {
-
-            ERROR_LOG("Aplicando: %s = %s", name, it->second.c_str());
-            size_t len = it->second.length();
-            if (len >= PROP_VALUE_MAX) {
-                len = PROP_VALUE_MAX - 1;
-            }
-            strncpy(value, it->second.c_str(), len);
-            value[len] = '\0';
-            return len;
-        }
-    }
-
-    if (orig_system_property_get) {
-        return orig_system_property_get(name, value);
-    }
-    
-    return 0;
+    if (!orig_system_property_get) return 0;
+    return orig_system_property_get(name, value);
 }
 
 void loadOriginalPropsFromFile() {
@@ -216,14 +189,17 @@ void loadOriginalPropsFromFile() {
 }
 
 void installPropertyHookForCamera() {
-    void* sym = DobbySymbolResolver(nullptr, "__system_property_get");
+    void* sym = DobbySymbolResolver("libc.so", "__system_property_get");
+    if (!sym) {
+        sym = DobbySymbolResolver(nullptr, "__system_property_get");
+    }
     if (!sym) {
         ERROR_LOG("Failed to resolve __system_property_get");
         return;
     }
     int result = DobbyHook(sym, (void*)hooked_system_property_get, (void**)&orig_system_property_get);
     if (result == 0) {
-        INFO_LOG("Property hook installed for camera app");
+        INFO_LOG("Minimal property hook installed");
     } else {
         ERROR_LOG("Failed to install property hook, error code: %d", result);
     }
