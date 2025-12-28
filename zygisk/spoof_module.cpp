@@ -29,98 +29,18 @@ using json = nlohmann::json;
 #define SPOOF_LOG(...) LOGI("[SPOOF] " __VA_ARGS__)
 #define INFO_LOG(...) LOGI("[INFO] " __VA_ARGS__)
 #define ERROR_LOG(...) LOGE("[ERROR] " __VA_ARGS__)
-#define WARN_LOG(...) LOGW("[WARN] " __VA_ARGS__)
 
 static std::unordered_map<std::string, std::string> original_props;
 static int (*orig_system_property_get)(const char*, char*) = nullptr;
 static std::mutex prop_mutex;
 static std::string current_package;
 
+static const std::string config_file = "/data/adb/COPG.json";
+static const std::string original_device = "/data/adb/modules/COPG/original_device.txt"
+
 #ifndef PROP_VALUE_MAX
 #define PROP_VALUE_MAX 92
 #endif
-
-static int hooked_system_property_get(const char* name, char* value) {
-    if (!name || !value) {
-        if (orig_system_property_get) {
-            return orig_system_property_get(name, value);
-        }
-        return 0;
-    }
-
-    {
-        std::lock_guard<std::mutex> lock(prop_mutex);
-        auto it = original_props.find(name);
-        if (it != original_props.end()) {
-            size_t len = it->second.length();
-            if (len >= PROP_VALUE_MAX) {
-                len = PROP_VALUE_MAX - 1;
-            }
-            strncpy(value, it->second.c_str(), len);
-            value[len] = '\0';
-            return len;
-        }
-    }
-
-    if (orig_system_property_get) {
-        return orig_system_property_get(name, value);
-    }
-    
-    return 0;
-}
-
-void loadOriginalPropsFromFile() {
-    std::lock_guard<std::mutex> lock(prop_mutex);
-    
-    std::ifstream file("/data/adb/modules/COPG/original_device.txt");
-    if (!file.is_open()) {
-        ERROR_LOG("Failed to open original_device.txt");
-        return;
-    }
-
-    original_props.clear();
-    std::string line;
-    while (std::getline(file, line)) {
-        if (line.empty() || line[0] == '#') continue;
-        
-        size_t pos = line.find('=');
-        if (pos != std::string::npos) {
-            std::string key = line.substr(0, pos);
-            std::string value = line.substr(pos + 1);
-            
-            key.erase(0, key.find_first_not_of(" \t"));
-            key.erase(key.find_last_not_of(" \t") + 1);
-            value.erase(0, value.find_first_not_of(" \t"));
-            value.erase(value.find_last_not_of(" \t") + 1);
-            
-            if (!key.empty()) {
-                original_props[key] = value;
-            }
-        }
-    }
-    file.close();
-}
-
-void installPropertyHookForCamera() {
-    void* libc_handle = dlopen("libc.so", RTLD_NOW);
-    if (!libc_handle) {
-        ERROR_LOG("Failed to open libc.so: %s", dlerror());
-        return;
-    }
-    void* sym = dlsym(libc_handle, "__system_property_get");
-    if (!sym) {
-        ERROR_LOG("Failed to resolve __system_property_get: %s", dlerror());
-        dlclose(libc_handle);
-        return;
-    }
-    INFO_LOG("Found __system_property_get at: %p", sym);
-    int result = DobbyHook(sym, (void*)hooked_system_property_get, (void**)&orig_system_property_get);
-    if (result == 0) {
-        INFO_LOG("Property hook installed for camera app");
-    } else {
-        ERROR_LOG("Failed to install property hook, error code: %d", result);
-    }
-}
 
 struct DeviceInfo {
     std::string brand;
@@ -219,8 +139,6 @@ static const std::unordered_set<std::string> camera_packages = {
     "com.mediatek.hz.camera"
 };
 
-static const std::string config_file = "/data/adb/COPG.json";
-
 struct JniString {
     JNIEnv* env;
     jstring jstr;
@@ -234,12 +152,95 @@ struct JniString {
     const char* get() const { return chars; }
 };
 
+static int hooked_system_property_get(const char* name, char* value) {
+    if (!name || !value) {
+        if (orig_system_property_get) {
+            return orig_system_property_get(name, value);
+        }
+        return 0;
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(prop_mutex);
+        auto it = original_props.find(name);
+        if (it != original_props.end()) {
+
+            size_t len = it->second.length();
+            if (len >= PROP_VALUE_MAX) {
+                len = PROP_VALUE_MAX - 1;
+            }
+            strncpy(value, it->second.c_str(), len);
+            value[len] = '\0';
+            return len;
+        }
+    }
+
+    if (orig_system_property_get) {
+        return orig_system_property_get(name, value);
+    }
+    
+    return 0;
+}
+
+void loadOriginalPropsFromFile() {
+    std::lock_guard<std::mutex> lock(prop_mutex);
+    
+    std::ifstream file(original_device);
+    if (!file.is_open()) {
+        ERROR_LOG("Failed to open: %s", original_device.c_str());
+        return;
+    }
+
+    original_props.clear();
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.empty() || line[0] == '#') continue;
+        
+        size_t pos = line.find('=');
+        if (pos != std::string::npos) {
+            std::string key = line.substr(0, pos);
+            std::string value = line.substr(pos + 1);
+            
+            key.erase(0, key.find_first_not_of(" \t"));
+            key.erase(key.find_last_not_of(" \t") + 1);
+            value.erase(0, value.find_first_not_of(" \t"));
+            value.erase(value.find_last_not_of(" \t") + 1);
+            
+            if (!key.empty()) {
+                original_props[key] = value;
+            }
+        }
+    }
+    file.close();
+}
+
+void installPropertyHookForCamera() {
+    void* libc_handle = dlopen("libc.so", RTLD_NOW);
+    if (!libc_handle) {
+        ERROR_LOG("Failed to open libc.so: %s", dlerror());
+        return;
+    }
+    void* sym = dlsym(libc_handle, "__system_property_get");
+    if (!sym) {
+        ERROR_LOG("Failed to resolve __system_property_get: %s", dlerror());
+        dlclose(libc_handle);
+        return;
+    }
+    INFO_LOG("Found __system_property_get at: %p", sym);
+    int result = DobbyHook(sym, (void*)hooked_system_property_get, (void**)&orig_system_property_get);
+    if (result == 0) {
+        INFO_LOG("Property hook installed for camera app");
+    } else {
+        ERROR_LOG("Failed to install property hook, error code: %d", result);
+    }
+}
+
 DeviceInfo loadDeviceFromConfig() {
     DeviceInfo info;
     
     std::ifstream file(config_file);
     if (!file.is_open()) {
-        ERROR_LOG("Failed to open config: %s", config_file.c_str());
+        ERROR_LOG("Failed to open: %s", config_file.c_str());
         return info;
     }
 
@@ -296,7 +297,6 @@ DeviceInfo loadDeviceFromConfig() {
                 info.version_sdk = std::to_string(info.version_sdk_int);
                 info.version_sdk_int_full = info.version_sdk_int * 100000;
             }
-            INFO_LOG("[%s] Loaded device config: %s (%s)", current_package.c_str(), info.model.c_str(), info.brand.c_str());
         }
     } catch (const std::exception& e) {
         ERROR_LOG("Config error: %s", e.what());
