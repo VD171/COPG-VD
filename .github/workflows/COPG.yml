@@ -97,8 +97,8 @@ jobs:
           chmod 755 module/zygisk/arm64-v8a.so
           
           chmod 755 module/customize.sh module/service.sh module/META-INF/com/google/android/update-binary
-          VERSION='v4.8.2-vd'
-          VERSION_CODE=482
+          VERSION='v4.9.0-vd'
+          VERSION_CODE=490
           cat > module/module.prop << EOF
           id=COPG
           name=COPG by VD171
