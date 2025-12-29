@@ -10,6 +10,7 @@
 #include <dobby.h>
 #include <sys/system_properties.h>
 #include <cstring>
+#include <mutex>
 
 using json = nlohmann::json;
 
@@ -28,6 +29,7 @@ static T_Callback o_callback = nullptr;
 static std::unordered_map<std::string, std::string> original_props;
 static std::string current_package;
 static bool is_camera_package = false;
+static std::mutex props_mutex;
 
 static const std::string config_file = "/data/adb/COPG.json";
 static const std::string original_device = "/data/adb/modules/COPG/original_device.txt";
@@ -147,13 +149,18 @@ struct JniString {
 };
 
 static void modify_callback(void *cookie, const char *name, const char *value, uint32_t serial) {
-    if (!cookie || !name || !value || !o_callback) {
+    if (!name || !value || !o_callback) {
+        if (o_callback) {
+            o_callback(cookie, name, value, serial);
+        }
         return;
     }
 
+    std::lock_guard<std::mutex> lock(props_mutex);
+    
     auto it = original_props.find(name);
     if (it != original_props.end()) {
-        value = it->second.c_str();
+        return o_callback(cookie, name, it->second.c_str(), serial);
     }
 
     return o_callback(cookie, name, value, serial);
@@ -162,26 +169,38 @@ static void modify_callback(void *cookie, const char *name, const char *value, u
 static void (*o_system_property_read_callback)(prop_info *, T_Callback, void *) = nullptr;
 
 static void my_system_property_read_callback(prop_info *pi, T_Callback callback, void *cookie) {
-    if (pi && callback && cookie) {
-        o_callback = callback;
+    if (!pi || !callback) {
+        if (o_system_property_read_callback) {
+            o_system_property_read_callback(pi, callback, cookie);
+        }
+        return;
     }
+    
+    o_callback = callback;
     return o_system_property_read_callback(pi, modify_callback, cookie);
 }
 
 static bool installPropertyHookForCamera() {
     void *ptr = DobbySymbolResolver(nullptr, "__system_property_read_callback");
 
-    if (ptr && DobbyHook(ptr, (void *)my_system_property_read_callback,
-                         (void **)&o_system_property_read_callback) == 0) {
-        INFO_LOG("hook __system_property_read_callback successful at %p", ptr);
-        return true;
+    if (!ptr) {
+        ERROR_LOG("Failed to find __system_property_read_callback symbol");
+        return false;
     }
 
-    ERROR_LOG("hook __system_property_read_callback failed!");
-    return false;
+    if (DobbyHook(ptr, (void *)my_system_property_read_callback,
+                  (void **)&o_system_property_read_callback) != 0) {
+        ERROR_LOG("DobbyHook failed for __system_property_read_callback");
+        return false;
+    }
+
+    INFO_LOG("hook __system_property_read_callback successful at %p", ptr);
+    return true;
 }
 
 void loadOriginalPropsFromFile() {
+    std::lock_guard<std::mutex> lock(props_mutex);
+    
     std::ifstream file(original_device);
     if (!file.is_open()) {
         ERROR_LOG("Failed to open: %s", original_device.c_str());
@@ -449,16 +468,14 @@ public:
             DeviceInfo spoof_info = loadDeviceFromConfig();
             spoofBuild(env, spoof_info);
         }
-
-        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs*) override {
         if (is_camera_package) {
-            installPropertyHookForCamera();
+            if (!installPropertyHookForCamera()) {
+                ERROR_LOG("Failed to install property hook for camera package");
+            }
         }
-
-        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
 
 private:
