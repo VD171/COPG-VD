@@ -180,7 +180,7 @@ fi
 
 check_config_file
 
-chmod 0755 "$MODPATH/service.sh" "$MODPATH/utils.sh"
+chmod 0755 "$MODPATH/service.sh"
 chmod 0644 "$CONFIG_FILE"
 chcon u:object_r:system_file:s0 "$CONFIG_FILE"
 
