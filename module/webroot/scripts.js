@@ -1275,8 +1275,8 @@ function applyEventListeners() {
     document.getElementById('toggle-resetprop').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
-            await execCommand(`touch /data/adb/modules/COPG/.skip.resetprop`);
-            appendToOutput(isChecked ? "Resetprop Disabled" : "Resetprop Enabled", isChecked ? 'success' : 'error');
+            await execCommand(`${isChecked ? "rm -f" : "touch"} /data/adb/modules/COPG/.skip.resetprop`);
+            appendToOutput(isChecked ? "Resetprop Enabled" : "Resetprop Disabled", isChecked ? 'success' : 'error');
         } catch (error) {
             appendToOutput(`Failed to update Resetprop Config: ${error}`, 'error');
             e.target.checked = !isChecked;
@@ -1285,8 +1285,8 @@ function applyEventListeners() {
     document.getElementById('toggle-ro-product-manufacturer').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
-            await execCommand(`sed -i 's/^#\\?MANUFACTURER\\|ro.product.manufacturer/${isChecked ? "#" : ""}MANUFACTURER\\|ro.product.manufacturer/' /data/adb/COPG.json`);
-            appendToOutput(isChecked ? "Ro.Product.Manufacturer Disabled" : "Ro.Product.Manufacturer Enabled", isChecked ? 'success' : 'error');
+            await execCommand(`sed -i 's/^#\\?MANUFACTURER\\|ro.product.manufacturer/${isChecked ? "" : "#"}MANUFACTURER\\|ro.product.manufacturer/' /data/adb/modules/COPG/service.sh`);
+            appendToOutput(isChecked ? "Ro.Product.Manufacturer Enabled" : "Ro.Product.Manufacturer Disabled", isChecked ? 'success' : 'error');
         } catch (error) {
             appendToOutput(`Failed to update Ro.Product.Manufacturer Config: ${error}`, 'error');
             e.target.checked = !isChecked;
