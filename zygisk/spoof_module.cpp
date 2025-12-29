@@ -156,6 +156,7 @@ static void modify_callback(void *cookie, const char *name, const char *value, u
     std::lock_guard<std::mutex> lock(props_mutex);
     auto it = original_props.find(name);
     if (it != original_props.end()) {
+        SPOOF_LOG("[%s] Props set: [%s]: OLD=%s new=%s", current_package.c_str(), name, value, it->second.c_str());
         return o_callback(cookie, name, it->second.c_str(), serial);
     }
     return o_callback(cookie, name, value, serial);
