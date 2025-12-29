@@ -4,7 +4,7 @@
 
 ENABLE_GPHOTO_SPOOF=false
 CONFIG_FILE="/data/adb/COPG-VD.json"
-CONFLICT_MODULES="copg playintegrity playintegrityfix integrity-*box"
+CONFLICT_MODULES="COPG playintegrity playintegrityfix integrity-*box"
 
 print_box_start() {
   ui_print "╔═════════════════════════════════╗"
@@ -156,9 +156,9 @@ check_config_file() {
 check_conflict_modules() {
   local FOUND=""
   for module in $CONFLICT_MODULES; do
-    if find /data/adb/modules -mindepth 1 -maxdepth 1 -type d -iname "$module" 2>/dev/null | grep -q .; then
-      FOUND="$FOUND $module"
-    fi
+      for dir in $(find /data/adb/modules -mindepth 1 -maxdepth 1 -type d -iname "$module" 2>/dev/null); do
+          FOUND+=("$dir")
+      done
   done
   [ -z "$FOUND" ] && return
   
@@ -182,6 +182,7 @@ check_conflict_modules() {
     ELAPSED=$((CURRENT_TIME - START_TIME))
     if [ $ELAPSED -ge $TIMEOUT ]; then
       print_empty_line
+      print_box_start
       ui_print " ⏰ Timeout (10s) - Do it after."
       print_failure_and_exit
       return
@@ -196,11 +197,13 @@ check_conflict_modules() {
     if [ -n "$EVENT" ]; then
       if echo "$EVENT" | grep -q "KEY_VOLUMEUP.*DOWN"; then
         print_empty_line
+        print_box_start
         ui_print " ✅ Uninstall all them."
         ENABLE_GPHOTO_SPOOF=true
         return
       elif echo "$EVENT" | grep -q "KEY_VOLUMEDOWN.*DOWN"; then
         print_empty_line
+        print_box_start
         ui_print " ❌ Do it after."
         print_failure_and_exit
         return
@@ -209,9 +212,8 @@ check_conflict_modules() {
 
     sleep 0.1
   done
-  for module in $CONFLICT_MODULES; do
-      DIR="/data/adb/modules/$module"
-      [ -d "$DIR" ] && touch "$DIR/remove"
+  for DIR in "${FOUND[@]}"; do
+      touch "$DIR/remove"
   done
 }
 
