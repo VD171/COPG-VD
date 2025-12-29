@@ -3,8 +3,8 @@ let currentConfig = {};
 let editingDevice = null;
 let logcatRunning = false;
 
-const CONFIG_FILE = "/data/adb/COPG.json";
-const MODULE_ID = 'COPG';
+const CONFIG_FILE = "/data/adb/COPG-VD.json";
+const MODULE_ID = 'COPG-VD';
 const androidToSdkMapping = {
     '10': 29, '10.0': 29,
     '11': 30, '11.0': 30,
@@ -211,9 +211,8 @@ function activateInfoTab(tabId) {
 
 async function loadMarkdownContent() {
     const contents = {
-        'license-content': 'https://raw.githubusercontent.com/AlirezaParsi/COPG/JSON/LICENSE',
-        'readme-content': 'https://raw.githubusercontent.com/AlirezaParsi/COPG/JSON/README.md',
-        'changelog-content': 'https://raw.githubusercontent.com/AlirezaParsi/COPG/JSON/changelog.md'
+        'license-content': 'https://raw.githubusercontent.com/VD171/COPG-VD/main/LICENSE',
+        'readme-content': 'https://raw.githubusercontent.com/VD171/COPG-VD/main/README.md'
     };
     
     setTimeout(() => {
@@ -444,10 +443,10 @@ async function saveLogToFile() {
     }
 
     try {
-        await execCommand(`mkdir -p /storage/emulated/0/Download/COPG/LOGS`);
+        await execCommand(`mkdir -p /storage/emulated/0/Download/COPG-VD/LOGS`);
         let finalFilename = document.getElementById('save-log-popup').dataset.filename || await generateLogFilename();
         const escapedContent = logContent.replace(/'/g, "'\\''");
-        await execCommand(`echo '${escapedContent}' > "/storage/emulated/0/Download/COPG/LOGS/${finalFilename}"`);
+        await execCommand(`echo '${escapedContent}' > "/storage/emulated/0/Download/COPG-VD/LOGS/${finalFilename}"`);
         appendToOutput(`Log saved to: ${finalFilename}`, 'success');
         return true;
     } catch (error) {
@@ -458,37 +457,37 @@ async function saveLogToFile() {
 
 async function generateLogFilename() {
     try {
-        await execCommand(`mkdir -p /storage/emulated/0/Download/COPG/LOGS`);
+        await execCommand(`mkdir -p /storage/emulated/0/Download/COPG-VD/LOGS`);
         const now = new Date();
         const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
         const hours = now.getHours().toString().padStart(2, '0');
         const minutes = now.getMinutes().toString().padStart(2, '0');
         const seconds = now.getSeconds().toString().padStart(2, '0');
         
-        let filename = "COPG-LOG.txt";
-        const checkOriginal = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
+        let filename = "COPG-VD-LOG.txt";
+        const checkOriginal = await execCommand(`ls "/storage/emulated/0/Download/COPG-VD/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
         
         if (checkOriginal.trim() !== 'not_found') {
-            filename = `COPG-LOG-${dateStr}.txt`;
-            const checkDated = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
+            filename = `COPG-VD-LOG-${dateStr}.txt`;
+            const checkDated = await execCommand(`ls "/storage/emulated/0/Download/COPG-VD/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
             
             if (checkDated.trim() !== 'not_found') {
-                filename = `COPG-LOG-${dateStr}-${hours}${minutes}.txt`;
-                const checkTime = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
+                filename = `COPG-VD-LOG-${dateStr}-${hours}${minutes}.txt`;
+                const checkTime = await execCommand(`ls "/storage/emulated/0/Download/COPG-VD/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
                 
                 if (checkTime.trim() !== 'not_found') {
-                    filename = `COPG-LOG-${dateStr}-${hours}${minutes}${seconds}.txt`;
-                    const checkSeconds = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
+                    filename = `COPG-VD-LOG-${dateStr}-${hours}${minutes}${seconds}.txt`;
+                    const checkSeconds = await execCommand(`ls "/storage/emulated/0/Download/COPG-VD/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
                     
                     if (checkSeconds.trim() !== 'not_found') {
                         let counter = 1;
-                        let newFilename = `COPG-LOG-${dateStr}-${hours}${minutes}${seconds}(${counter}).txt`;
-                        let checkNumbered = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${newFilename}" 2>/dev/null || echo "not_found"`);
+                        let newFilename = `COPG-VD-LOG-${dateStr}-${hours}${minutes}${seconds}(${counter}).txt`;
+                        let checkNumbered = await execCommand(`ls "/storage/emulated/0/Download/COPG-VD/LOGS/${newFilename}" 2>/dev/null || echo "not_found"`);
                         
                         while (checkNumbered.trim() !== 'not_found') {
                             counter++;
-                            newFilename = `COPG-LOG-${dateStr}-${hours}${minutes}${seconds}(${counter}).txt`;
-                            checkNumbered = await execCommand(`ls "/storage/emulated/0/Download/COPG/LOGS/${newFilename}" 2>/dev/null || echo "not_found"`);
+                            newFilename = `COPG-VD-LOG-${dateStr}-${hours}${minutes}${seconds}(${counter}).txt`;
+                            checkNumbered = await execCommand(`ls "/storage/emulated/0/Download/COPG-VD/LOGS/${newFilename}" 2>/dev/null || echo "not_found"`);
                         }
                         filename = newFilename;
                     }
@@ -498,14 +497,14 @@ async function generateLogFilename() {
         return filename;
     } catch (error) {
         appendToOutput(`Error generating filename: ${error}`, 'error');
-        return "COPG-LOG.txt";
+        return "COPG-VD-LOG.txt";
     }
 }
 
 async function backupFile(filename) {
     try {
-        await execCommand(`mkdir -p /sdcard/Download/COPG`);
-        const checkOriginal = await execCommand(`ls "/sdcard/Download/COPG/${filename}" 2>/dev/null || echo "not_found"`);
+        await execCommand(`mkdir -p /sdcard/Download/COPG-VD`);
+        const checkOriginal = await execCommand(`ls "/sdcard/Download/COPG-VD/${filename}" 2>/dev/null || echo "not_found"`);
         
         let finalFilename = filename;
         if (checkOriginal.trim() !== 'not_found') {
@@ -515,31 +514,31 @@ async function backupFile(filename) {
             const extension = filename.split('.')[1];
             
             let newFilename = `${baseName}-${dateStr}.${extension}`;
-            const checkDated = await execCommand(`ls "/sdcard/Download/COPG/${newFilename}" 2>/dev/null || echo "not_found"`);
+            const checkDated = await execCommand(`ls "/sdcard/Download/COPG-VD/${newFilename}" 2>/dev/null || echo "not_found"`);
             
             if (checkDated.trim() === 'not_found') {
                 finalFilename = newFilename;
             } else {
                 const timeStr = now.toTimeString().slice(0, 5).replace(/:/g, '');
                 newFilename = `${baseName}-${dateStr}-${timeStr}.${extension}`;
-                let checkTime = await execCommand(`ls "/sdcard/Download/COPG/${newFilename}" 2>/dev/null || echo "not_found"`);
+                let checkTime = await execCommand(`ls "/sdcard/Download/COPG-VD/${newFilename}" 2>/dev/null || echo "not_found"`);
                 
                 if (checkTime.trim() === 'not_found') {
                     finalFilename = newFilename;
                 } else {
                     const fullTimeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
                     newFilename = `${baseName}-${dateStr}-${fullTimeStr}.${extension}`;
-                    let checkFullTime = await execCommand(`ls "/sdcard/Download/COPG/${newFilename}" 2>/dev/null || echo "not_found"`);
+                    let checkFullTime = await execCommand(`ls "/sdcard/Download/COPG-VD/${newFilename}" 2>/dev/null || echo "not_found"`);
                     
                     if (checkFullTime.trim() === 'not_found') {
                         finalFilename = newFilename;
                     } else {
                         let counter = 1;
-                        let checkNumbered = await execCommand(`ls "/sdcard/Download/COPG/${newFilename}" 2>/dev/null || echo "not_found"`);
+                        let checkNumbered = await execCommand(`ls "/sdcard/Download/COPG-VD/${newFilename}" 2>/dev/null || echo "not_found"`);
                         
                         while (checkNumbered.trim() !== 'not_found') {
                             newFilename = `${baseName}-${dateStr}-${fullTimeStr}(${counter}).${extension}`;
-                            checkNumbered = await execCommand(`ls "/sdcard/Download/COPG/${newFilename}" 2>/dev/null || echo "not_found"`);
+                            checkNumbered = await execCommand(`ls "/sdcard/Download/COPG-VD/${newFilename}" 2>/dev/null || echo "not_found"`);
                             counter++;
                         }
                         finalFilename = newFilename;
@@ -548,7 +547,7 @@ async function backupFile(filename) {
             }
         }
         
-        await execCommand(`cp /data/adb/${filename} "/sdcard/Download/COPG/${finalFilename}"`);
+        await execCommand(`cp /data/adb/${filename} "/sdcard/Download/COPG-VD/${finalFilename}"`);
         appendToOutput(`Backup created: ${finalFilename}`, 'success');
         return true;
     } catch (error) {
@@ -570,7 +569,7 @@ async function startLogcat(e) {
     if (logcatRunning) return;
 
     try {
-        appendToOutput("Starting logcat for COPGModule... (open target app ...)", 'info');
+        appendToOutput("Starting logcat for COPG-VD... (open target app ...)", 'info');
         logcatRunning = true;
         document.getElementById('start-logcat').style.display = 'none';
         document.getElementById('stop-logcat').style.display = 'inline-block';
@@ -589,7 +588,7 @@ async function readLogcat() {
     if (!logcatRunning) return;
 
     try {
-        const logs = await execCommand("su -c 'logcat -d -s COPGModule'");
+        const logs = await execCommand("su -c 'logcat -d -s COPG-VD'");
         if (logs && logs.trim()) {
             const lines = logs.split('\n');
             lines.forEach(line => {
@@ -701,7 +700,7 @@ function appendToOutput(content, type = 'info') {
 async function loadVersion() {
     const versionElement = document.getElementById('version-text');
     try {
-        const version = await execCommand("grep '^version=' /data/adb/modules/COPG/module.prop | cut -d'=' -f2");
+        const version = await execCommand("grep '^version=' /data/adb/modules/COPG-VD/module.prop | cut -d'=' -f2");
         versionElement.textContent = `${version.trim()}`;
     } catch (error) {
         appendToOutput("Failed to load version: " + error, 'error');
@@ -712,8 +711,8 @@ async function loadToggleStates() {
     try {
         const resetpropToggle = document.getElementById('toggle-resetprop');
         const roproductmanufacturerToggle = document.getElementById('toggle-ro-product-manufacturer');
-        resetpropToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG/.skip.resetprop ] && echo 0 || echo 1")).trim() === "1";
-        roproductmanufacturerToggle.checked = (await execCommand("grep -q -i '#MANUFACTURER\\|ro\\.product\\.manufacturer' /data/adb/modules/COPG/service.sh && echo 0 || echo 1")).trim() === "1";
+        resetpropToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG-VD/.skip.resetprop ] && echo 0 || echo 1")).trim() === "1";
+        roproductmanufacturerToggle.checked = (await execCommand("grep -q -i '#MANUFACTURER\\|ro\\.product\\.manufacturer' /data/adb/modules/COPG-VD/service.sh && echo 0 || echo 1")).trim() === "1";
     } catch (error) {
         appendToOutput("Failed to load toggle states: " + error, 'error');
     }
@@ -743,8 +742,8 @@ function renderDeviceList() {
     let index = 0;
     
     for (const key of configKeyOrder) {
-        if (key === 'COPG' && currentConfig[key]) {
-            const deviceName = currentConfig[key].DEVICE || 'COPG';
+        if (key === 'COPG-VD' && currentConfig[key]) {
+            const deviceName = currentConfig[key].DEVICE || 'Undefined';
             const model = currentConfig[key].MODEL || 'Undefined';
             const board = currentConfig[key].BOARD || 'Undefined';
             const bootloader = currentConfig[key].BOOTLOADER || 'Undefined';
@@ -1007,11 +1006,11 @@ async function saveDevice(e) {
     
     const deviceName = document.getElementById('device-name').value.trim();
     const deviceModel = document.getElementById('device-model').value.trim();
-    const deviceKey = `COPG`;
+    const deviceKey = `COPG-VD`;
     
     if (!editingDevice) {
         for (const [key, value] of Object.entries(currentConfig)) {
-            if (key === 'COPG' && key !== deviceKey) {
+            if (key === 'COPG-VD' && key !== deviceKey) {
                 if (value.DEVICE === deviceName) {
                     const field = document.getElementById('device-name');
                     field.classList.add('error');
@@ -1056,7 +1055,7 @@ async function saveDevice(e) {
         return;
     }
     
-    const packageKey = 'COPG';
+    const packageKey = 'COPG-VD';
     const brand = document.getElementById('device-brand').value.trim() || 'Undefined';
     const model = document.getElementById('device-model').value.trim() || 'Undefined';
     const product = document.getElementById('device-product').value.trim() || 'Undefined';
@@ -1100,7 +1099,7 @@ async function saveDevice(e) {
     
     try {
         if (editingDevice && editingDevice !== deviceKey) {
-            const oldPackageKey = 'COPG';
+            const oldPackageKey = 'COPG-VD';
             const oldIndex = configKeyOrder.indexOf(editingDevice);
             const oldPackageIndex = configKeyOrder.indexOf(oldPackageKey);
             
@@ -1286,7 +1285,7 @@ function applyEventListeners() {
     document.getElementById('toggle-resetprop').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
-            await execCommand(`${isChecked ? "rm -f" : "touch"} /data/adb/modules/COPG/.skip.resetprop`);
+            await execCommand(`${isChecked ? "rm -f" : "touch"} /data/adb/modules/COPG-VD/.skip.resetprop`);
             appendToOutput(isChecked ? "Resetprop Enabled. Reboot to see changes" : "Resetprop Disabled. Reboot to see changes", isChecked ? 'success' : 'error');
         } catch (error) {
             appendToOutput(`Failed to update Resetprop Config: ${error}`, 'error');
@@ -1296,7 +1295,7 @@ function applyEventListeners() {
     document.getElementById('toggle-ro-product-manufacturer').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
-            await execCommand(`sed -i 's/^${isChecked ? "#" : ""}MANUFACTURER|ro.product.manufacturer/${isChecked ? "" : "#"}MANUFACTURER|ro.product.manufacturer/' /data/adb/modules/COPG/service.sh`);
+            await execCommand(`sed -i 's/^${isChecked ? "#" : ""}MANUFACTURER|ro.product.manufacturer/${isChecked ? "" : "#"}MANUFACTURER|ro.product.manufacturer/' /data/adb/modules/COPG-VD/service.sh`);
             appendToOutput(isChecked ? "Ro.Product.Manufacturer Enabled. Reboot to see changes" : "Ro.Product.Manufacturer Disabled. Reboot to see changes", isChecked ? 'success' : 'error');
         } catch (error) {
             appendToOutput(`Failed to update Ro.Product.Manufacturer Config: ${error}`, 'error');
@@ -1458,7 +1457,7 @@ async function restoreFile(sourcePath, targetFile) {
 
         appendToOutput(`Successfully restored ${sourcePath.split('/').pop()} as ${targetFile}`, 'success');
 
-        if (targetFile === 'COPG.json') {
+        if (targetFile === 'COPG-VD.json') {
             await loadConfig();
             renderDeviceList();
         }
@@ -1471,8 +1470,8 @@ async function restoreFile(sourcePath, targetFile) {
 
 async function showFilePicker(targetFile, startPath = null) {
     if (!targetFile) {
-        targetFile = 'COPG.json';
-        appendToOutput('Warning: targetFile undefined, defaulting to COPG.json', 'warning');
+        targetFile = 'COPG-VD.json';
+        appendToOutput('Warning: targetFile undefined, defaulting to COPG-VD.json', 'warning');
     }
 
     appendToOutput(`Loading file picker for ${targetFile}...`, 'info');
@@ -1720,7 +1719,7 @@ function setupBackupListeners() {
         const newBackupAllBtn = document.getElementById('backup-all-btn');
         newBackupAllBtn.addEventListener('click', async () => {
             newBackupAllBtn.classList.add('loading');
-            const files = ['COPG.json'];
+            const files = ['COPG-VD.json'];
             let successCount = 0;
 
             for (const file of files) {
@@ -1762,7 +1761,7 @@ function setupBackupListeners() {
         newBackBtn.addEventListener('click', () => {
             const currentPath = document.getElementById('file-picker-path').textContent;
             const searchInput = document.getElementById('file-picker-search');
-            const targetFile = document.querySelector('.restore-btn[data-file]:not([disabled])')?.dataset.file || 'COPG.json';
+            const targetFile = document.querySelector('.restore-btn[data-file]:not([disabled])')?.dataset.file || 'COPG-VD.json';
             
             if (searchInput.value.trim()) {
                 searchInput.value = '';

@@ -1,10 +1,10 @@
 # ================================================
-# COPG Module Installation Script
+# COPG-VD Module Installation Script
 # ================================================
 
 ENABLE_GPHOTO_SPOOF=false
-CONFIG_FILE="/data/adb/COPG.json"
-CONFLICT_MODULES="playintegrity playintegrityfix integrity-*box"
+CONFIG_FILE="/data/adb/COPG-VD.json"
+CONFLICT_MODULES="copg playintegrity playintegrityfix integrity-*box"
 
 print_box_start() {
   ui_print "╔═════════════════════════════════╗"
@@ -39,7 +39,7 @@ grep_prop() {
 
 print_module_version() {
   print_box_start
-  ui_print "      ✦ COPG Module Version ✦    "
+  ui_print "      ✦ COPG-VD Module Version ✦    "
   print_empty_line
   MODULE_PROP="$MODPATH/module.prop"
   if [ -f "$MODULE_PROP" ]; then
@@ -147,7 +147,7 @@ cleanup_gphoto_directories() {
 
 check_config_file() {
   if [ ! -f "$CONFIG_FILE" ]; then
-      cp "$MODPATH/COPG.json.example" "$CONFIG_FILE"
+      cp "$MODPATH/COPG-VD.json.example" "$CONFIG_FILE"
       chmod 0644 "$CONFIG_FILE"
       chcon u:object_r:system_file:s0 "$CONFIG_FILE"
   fi

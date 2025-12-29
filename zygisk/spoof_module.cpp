@@ -9,11 +9,11 @@
 
 using json = nlohmann::json;
 
-#define LOG_TAG "COPGModule"
+#define LOG_TAG "COPG-VD"
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 #define ERROR_LOG(...) LOGE("[ERROR] " __VA_ARGS__)
 
-static const std::string config_file = "/data/adb/COPG.json";
+static const std::string config_file = "/data/adb/COPG-VD.json";
 
 struct DeviceInfo {
     std::string brand;
@@ -51,7 +51,7 @@ static inline std::string trim(const std::string& str) {
     return (start < end) ? std::string(start, end) : std::string();
 }
 
-class COPGModule : public zygisk::ModuleBase {
+class COPGVDModule : public zygisk::ModuleBase {
 private:
     zygisk::Api* api = nullptr;
     JNIEnv* env = nullptr;
@@ -123,9 +123,9 @@ private:
         try {
             json config = json::parse(file);
 
-            if (config.contains("COPG") && config["COPG"].is_object()) {
-                auto device = config["COPG"];
-                
+            if (config.contains(std::string(LOG_TAG)) && config[LOG_TAG].is_object()) {
+                auto device = config[LOG_TAG];
+
                 spoof_info.brand = device.value("BRAND", "");
                 spoof_info.device = device.value("DEVICE", "");
                 spoof_info.manufacturer = device.value("MANUFACTURER", "");
@@ -238,4 +238,4 @@ public:
     }
 };
 
-REGISTER_ZYGISK_MODULE(COPGModule)
+REGISTER_ZYGISK_MODULE(COPGVDModule)

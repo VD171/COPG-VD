@@ -1,4 +1,4 @@
-## COPG
+## COPG-VD
 COPG-VD is a fork of COPG by @AlirezaParsi, renamed to COPG-VD to prevent confusion.  
 This module is redesigned for global device spoofing.  
 This means even system apps and the whole device will be hooked.  
@@ -6,10 +6,10 @@ This means even system apps and the whole device will be hooked.
 ## How to use?
 If using this module and spoofing a working FingerPrint, using PlayIntegrityFix or GooglePhotosUnlimited are unnecessary.  
 ### Example JSON config file  
-`/data/adb/COPG.json`
+`/data/adb/COPG-VD.json`
 ```json
 {
-  "COPG": {
+  "COPG-VD": {
     "BRAND": "google",
     "DEVICE": "Pixel 9 Pro Fold",
     "MANUFACTURER": "Google",

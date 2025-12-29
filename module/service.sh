@@ -1,7 +1,7 @@
 #!/system/bin/sh
 
-COPG_JSON="/data/adb/COPG.json"
-json_content=$(cat "$COPG_JSON")
+COPG_VD_JSON="/data/adb/COPG-VD.json"
+json_content=$(cat "$COPG_VD_JSON")
 getprop_output=$(getprop)
 
 find_resetprop() {
@@ -50,7 +50,7 @@ MANUFACTURER|ro.product.manufacturer
 MAPPING
 }
 
-if [ ! -e "/data/adb/modules/COPG/.skip.resetprop" ]; then
+if [ ! -e "/data/adb/modules/COPG-VD/.skip.resetprop" ]; then
     get_prop_mapping | while IFS='|' read -r json_key props; do
       [ -z "$json_key" ] && continue
       if [ "$json_key" = "CODENAME" ]; then
@@ -100,5 +100,5 @@ done
 
 sleep 2
 
-chmod 0644 "$COPG_JSON"
-chcon u:object_r:system_file:s0 "$COPG_JSON"
+chmod 0644 "$COPG_VD_JSON"
+chcon u:object_r:system_file:s0 "$COPG_VD_JSON"
