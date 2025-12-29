@@ -5,18 +5,12 @@
 #include <fstream>
 #include <android/log.h>
 #include <mutex>
-#include <thread>
 #include <sys/stat.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <signal.h>
-#include <algorithm>
 #include <unordered_set>
 #include <unordered_map>
 #include <dobby.h>
 #include <sys/system_properties.h>
 #include <cstring>
-#include <dlfcn.h>
 
 using json = nlohmann::json;
 
@@ -29,6 +23,9 @@ using json = nlohmann::json;
 #define INFO_LOG(...) LOGI("[INFO] " __VA_ARGS__)
 #define ERROR_LOG(...) LOGE("[ERROR] " __VA_ARGS__)
 
+typedef void (*T_Callback)(void *, const char *, const char *, uint32_t);
+
+static T_Callback o_callback = nullptr;
 static std::unordered_map<std::string, std::string> original_props;
 static std::mutex prop_mutex;
 static std::string current_package;
@@ -150,6 +147,31 @@ struct JniString {
     const char* get() const { return chars; }
 };
 
+
+static void modify_callback(void *cookie, const char *name, const char *value, uint32_t serial) {
+    if (cookie == nullptr || name == nullptr || value == nullptr || o_callback == nullptr) {
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(prop_mutex);
+    auto it = original_props.find(name);
+    if (it != original_props.end()) {
+        value = it->second.c_str();
+    }
+
+    return o_callback(cookie, name, value, serial);
+}
+
+static void (*o_system_property_read_callback)(const prop_info *, T_Callback, void *) = nullptr;
+
+static void my_system_property_read_callback(const prop_info *pi, T_Callback callback, void *cookie) {
+    if (pi == nullptr || callback == nullptr || cookie == nullptr) {
+        return o_system_property_read_callback(pi, callback, cookie);
+    }
+    o_callback = callback;
+    return o_system_property_read_callback(pi, modify_callback, cookie);
+}
+
 void loadOriginalPropsFromFile() {
     std::lock_guard<std::mutex> lock(prop_mutex);
     
@@ -182,22 +204,15 @@ void loadOriginalPropsFromFile() {
     file.close();
 }
 
-struct prop_info;
-typedef int (*system_property_read_callback_t)(
-    const prop_info*,
-    void (*)(void*, const char*, const char*, uint32_t),
-    void*
-);
-static system_property_read_callback_t orig_cb = nullptr;
-static int hooked_cb(const prop_info* pi, void (*callback)(void*, const char*, const char*, uint32_t), void* cookie) {
-    return orig_cb ? orig_cb(pi, callback, cookie) : 0;
-}
 void installPropertyHookForCamera() {
-    void* sym = DobbySymbolResolver("libc.so", "__system_property_read_callback");
-    if (!sym) return;
-    DobbyHook(sym, (void*)hooked_cb, (void**)&orig_cb);
+    void *handle = DobbySymbolResolver(nullptr, "__system_property_read_callback");
+    if (handle == nullptr) {
+        ERROR_LOG("Failed to resolve __system_property_read_callback");
+        return;
+    }
+    DobbyHook(handle, (void *)my_system_property_read_callback, (void **)&o_system_property_read_callback);
+    INFO_LOG("Property hook installed for camera at %p", handle);
 }
-
 
 DeviceInfo loadDeviceFromConfig() {
     DeviceInfo info;
