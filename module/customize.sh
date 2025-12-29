@@ -154,15 +154,13 @@ check_config_file() {
 }
 
 check_conflict_modules() {
-  local FOUND=""
+  FOUND=""
   for module in $CONFLICT_MODULES; do
-    if find /data/adb/modules -mindepth 1 -maxdepth 1 -type d -iname "$module" -quit 2>/dev/null; then
-      FOUND=true
-      break
-    fi
+    for dir in $(find /data/adb/modules -mindepth 1 -maxdepth 1 -type d -iname "$module" 2>/dev/null); do
+      FOUND="$FOUND $dir"
+    done
   done
-
-  [ "$FOUND" = true ] || return
+  [ -z "$FOUND" ] && return
 
   print_box_start
   ui_print " ✦ Found Conflicting Modules: ✦ "
@@ -201,7 +199,11 @@ check_conflict_modules() {
         print_empty_line
         print_box_start
         ui_print " ✅ Uninstall all them."
-        ENABLE_GPHOTO_SPOOF=true
+        for found in $FOUND; do
+          touch "$found/disable"
+          touch "$found/remove"
+        done
+        print_box_end
         return
       elif echo "$EVENT" | grep -q "KEY_VOLUMEDOWN.*DOWN"; then
         print_empty_line
@@ -214,11 +216,7 @@ check_conflict_modules() {
 
     sleep 0.1
   done
-  for module in $CONFLICT_MODULES; do
-    for DIR in $(find /data/adb/modules -mindepth 1 -maxdepth 1 -type d -iname "$module" 2>/dev/null); do
-      touch "$DIR/remove"
-    done
-  done
+
 }
 
 print_module_version
