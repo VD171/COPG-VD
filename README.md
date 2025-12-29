@@ -1,7 +1,10 @@
 ## COPG
-A fork of COPG, but a Global Device Spoofer only.  
+COPG-VD is a fork of COPG by @AlirezaParsi, renamed to COPG-VD to prevent confusion.  
+This module is redesigned for global device spoofing.  
+This means even system apps and the whole device will be hooked.  
   
 ## How to use?
+If using this module and spoofing a working FingerPrint, using PlayIntegrityFix or GooglePhotosUnlimited are unnecessary.  
 ### Example JSON config file  
 `/data/adb/COPG.json`
 ```json
@@ -28,6 +31,13 @@ A fork of COPG, but a Global Device Spoofer only.
 }
 ```
 Be sure to use strings on double-quotes only.  
+### WebUI  
+Using the WebUI is unnecessary if you edit the JSON config file directly.  
+If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
+#### Use resetprop  
+Disable to spoof Build info only.  
+#### Use ro.product.manufacturer  
+Disable if you care for "Found device spoofing" detection in Disclosure root detector app.  
 ___
 For multi-profiles and multiple targets,  
 use the original COPG by AlirezaParsi:  
