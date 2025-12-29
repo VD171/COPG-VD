@@ -154,15 +154,16 @@ check_config_file() {
 }
 
 check_conflict_modules() {
-  FOUND=""
+  local FOUND=""
   for module in $CONFLICT_MODULES; do
-    while IFS= read -r dir; do
-      FOUND="$FOUND
-  $dir"
-    done < <(find /data/adb/modules -mindepth 1 -maxdepth 1 -type d -iname "$module" 2>/dev/null)
+    if find /data/adb/modules -mindepth 1 -maxdepth 1 -type d -iname "$module" -quit 2>/dev/null; then
+      FOUND=true
+      break
+    fi
   done
-  [ -z "$FOUND" ] && return
-  
+
+  [ "$FOUND" = true ] || return
+
   print_box_start
   ui_print " ✦ Found Conflicting Modules: ✦ "
   print_empty_line
@@ -213,8 +214,10 @@ check_conflict_modules() {
 
     sleep 0.1
   done
-  echo "$FOUND" | while IFS= read -r DIR; do
+  for module in $CONFLICT_MODULES; do
+    for DIR in $(find /data/adb/modules -mindepth 1 -maxdepth 1 -type d -iname "$module" 2>/dev/null); do
       touch "$DIR/remove"
+    done
   done
 }
 
