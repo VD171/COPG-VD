@@ -436,7 +436,6 @@ public:
     }
 
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
-        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
         
         if (!args || !args->nice_name) {
             return;
