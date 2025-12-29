@@ -7,6 +7,7 @@ This means even system apps and the whole device will be hooked.
 If using this module and spoofing a working FingerPrint, using PlayIntegrityFix or GooglePhotosUnlimited are unnecessary.  
 ### Example JSON config file  
 `/data/adb/COPG-VD.json`
+* All fields are OPTIONAL. If some field is not provided, it will be skipped.  
 ```json
 {
   "COPG-VD": {
@@ -34,9 +35,9 @@ Be sure to use strings on double-quotes only.
 ### WebUI  
 Using the WebUI is unnecessary if you edit the JSON config file directly.  
 If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
-#### Use resetprop  
-Disable to spoof Build info only.  
-#### Use ro.product.manufacturer  
+#### Use resetprop:  
+Disable resetprop usage and enable spoof Build info only.  
+#### Use ro.product.manufacturer:  
 Disable if you care for "Found device spoofing" detection in Disclosure root detector app.  
 ___
 For multi-profiles and multiple targets,  
