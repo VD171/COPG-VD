@@ -4,7 +4,6 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <android/log.h>
-#include <mutex>
 #include <sys/stat.h>
 #include <unordered_set>
 #include <unordered_map>
@@ -27,8 +26,8 @@ typedef void (*T_Callback)(void *, const char *, const char *, uint32_t);
 
 static T_Callback o_callback = nullptr;
 static std::unordered_map<std::string, std::string> original_props;
-static std::mutex prop_mutex;
 static std::string current_package;
+static bool is_camera_package = false;
 
 static const std::string config_file = "/data/adb/COPG.json";
 static const std::string original_device = "/data/adb/modules/COPG/original_device.txt";
@@ -147,13 +146,11 @@ struct JniString {
     const char* get() const { return chars; }
 };
 
-
 static void modify_callback(void *cookie, const char *name, const char *value, uint32_t serial) {
-    if (cookie == nullptr || name == nullptr || value == nullptr || o_callback == nullptr) {
+    if (!cookie || !name || !value || !o_callback) {
         return;
     }
 
-    std::lock_guard<std::mutex> lock(prop_mutex);
     auto it = original_props.find(name);
     if (it != original_props.end()) {
         value = it->second.c_str();
@@ -165,16 +162,19 @@ static void modify_callback(void *cookie, const char *name, const char *value, u
 static void (*o_system_property_read_callback)(const prop_info *, T_Callback, void *) = nullptr;
 
 static void my_system_property_read_callback(const prop_info *pi, T_Callback callback, void *cookie) {
-    if (pi == nullptr || callback == nullptr || cookie == nullptr) {
-        return o_system_property_read_callback(pi, callback, cookie);
+    if (!pi || !callback || !cookie) {
+        if (o_system_property_read_callback) {
+            return o_system_property_read_callback(pi, callback, cookie);
+        }
+        return;
     }
     o_callback = callback;
-    return o_system_property_read_callback(pi, modify_callback, cookie);
+    if (o_system_property_read_callback) {
+        return o_system_property_read_callback(pi, modify_callback, cookie);
+    }
 }
 
 void loadOriginalPropsFromFile() {
-    std::lock_guard<std::mutex> lock(prop_mutex);
-    
     std::ifstream file(original_device);
     if (!file.is_open()) {
         ERROR_LOG("Failed to open: %s", original_device.c_str());
@@ -206,11 +206,14 @@ void loadOriginalPropsFromFile() {
 
 void installPropertyHookForCamera() {
     void *handle = DobbySymbolResolver(nullptr, "__system_property_read_callback");
-    if (handle == nullptr) {
+    if (!handle) {
         ERROR_LOG("Failed to resolve __system_property_read_callback");
         return;
     }
-    DobbyHook(handle, (void *)my_system_property_read_callback, (void **)&o_system_property_read_callback);
+    if (DobbyHook(handle, (void *)my_system_property_read_callback, (void **)&o_system_property_read_callback) != 0) {
+        ERROR_LOG("Failed to hook __system_property_read_callback");
+        return;
+    }
     INFO_LOG("Property hook installed for camera at %p", handle);
 }
 
@@ -443,7 +446,7 @@ public:
         }
 
         current_package = std::string(package_name);
-        bool is_camera_package = camera_packages.find(current_package) != camera_packages.end();
+        is_camera_package = camera_packages.find(current_package) != camera_packages.end();
 
         if (is_camera_package) {
             loadOriginalPropsFromFile();
@@ -457,8 +460,6 @@ public:
     }
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs*) override {
-        bool is_camera_package = camera_packages.find(current_package) != camera_packages.end();
-        
         if (is_camera_package) {
             installPropertyHookForCamera();
         }
