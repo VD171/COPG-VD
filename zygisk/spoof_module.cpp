@@ -159,19 +159,26 @@ static void modify_callback(void *cookie, const char *name, const char *value, u
     return o_callback(cookie, name, value, serial);
 }
 
-static void (*o_system_property_read_callback)(const prop_info *, T_Callback, void *) = nullptr;
+static void (*o_system_property_read_callback)(prop_info *, T_Callback, void *) = nullptr;
 
-static void my_system_property_read_callback(const prop_info *pi, T_Callback callback, void *cookie) {
-    if (!pi || !callback || !cookie) {
-        if (o_system_property_read_callback) {
-            return o_system_property_read_callback(pi, callback, cookie);
-        }
-        return;
+static void my_system_property_read_callback(prop_info *pi, T_Callback callback, void *cookie) {
+    if (pi && callback && cookie) {
+        o_callback = callback;
     }
-    o_callback = callback;
-    if (o_system_property_read_callback) {
-        return o_system_property_read_callback(pi, modify_callback, cookie);
+    return o_system_property_read_callback(pi, modify_callback, cookie);
+}
+
+static bool installPropertyHookForCamera() {
+    void *ptr = DobbySymbolResolver(nullptr, "__system_property_read_callback");
+
+    if (ptr && DobbyHook(ptr, (void *)my_system_property_read_callback,
+                         (void **)&o_system_property_read_callback) == 0) {
+        INFO_LOG("hook __system_property_read_callback successful at %p", ptr);
+        return true;
     }
+
+    ERROR_LOG("hook __system_property_read_callback failed!");
+    return false;
 }
 
 void loadOriginalPropsFromFile() {
@@ -202,19 +209,6 @@ void loadOriginalPropsFromFile() {
         }
     }
     file.close();
-}
-
-void installPropertyHookForCamera() {
-    void *handle = DobbySymbolResolver(nullptr, "__system_property_read_callback");
-    if (!handle) {
-        ERROR_LOG("Failed to resolve __system_property_read_callback");
-        return;
-    }
-    if (DobbyHook(handle, (void *)my_system_property_read_callback, (void **)&o_system_property_read_callback) != 0) {
-        ERROR_LOG("Failed to hook __system_property_read_callback");
-        return;
-    }
-    INFO_LOG("Property hook installed for camera at %p", handle);
 }
 
 DeviceInfo loadDeviceFromConfig() {
