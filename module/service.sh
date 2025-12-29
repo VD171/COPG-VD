@@ -62,7 +62,12 @@ get_prop_mapping | while IFS='|' read -r json_key props; do
       json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
   fi
   if [ -n "$json_value" ]; then
-      if [ "$json_key" = "TIMESTAMP" ]; then
+      if [ "$json_key" = "SECURITY_PATCH" ]; then
+          SECURITY_PATCH="/data/adb/tricky_store/security_patch.txt"
+          if [ -e "$SECURITY_PATCH" ]; then
+              echo "$json_value" > "$SECURITY_PATCH"
+          fi
+      elif [ "$json_key" = "TIMESTAMP" ]; then
           BUILD_DATE="$(LC_ALL=C TZ=UTC date -u -d "@$json_value")"
           for prop in ro.build.date ro.odm.build.date ro.product.build.date; do
               propreset "$prop" "$BUILD_DATE"
