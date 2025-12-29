@@ -436,8 +436,9 @@ public:
     }
 
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
+        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+        
         if (!args || !args->nice_name) {
-            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
         }
 
@@ -445,7 +446,6 @@ public:
         const char* package_name = pkg.get();
 
         if (!package_name) {
-            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
         }
 
@@ -458,13 +458,11 @@ public:
             initBuildClass(env);
             DeviceInfo spoof_info = loadDeviceFromConfig();
             spoofBuild(env, spoof_info);
-            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
         }
     }
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs*) override {
         if (is_camera_package) installPropertyHookForCamera();
-        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
 
 private:
