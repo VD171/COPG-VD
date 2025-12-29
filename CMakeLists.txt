@@ -14,15 +14,15 @@ if(NOT DEBUG)
 endif()
 
 set(ZYGISK_SOURCES
-    zygisk/spoof_module.cpp
-    zygisk/atexit.cpp
+    spoof_module.cpp
+    atexit.cpp
 )
 
 add_library(spoof SHARED ${ZYGISK_SOURCES})
 
 find_library(log-lib log)
 
-include_directories(${CMAKE_SOURCE_DIR}/zygisk)
+include_directories(${CMAKE_SOURCE_DIR})
 
 target_link_libraries(spoof ${log-lib})
 
