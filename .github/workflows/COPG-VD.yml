@@ -1,4 +1,4 @@
-name: COPG
+name: COPG-VD
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    environment: COPG
+    environment: COPG-VD
 
     steps:
       - name: Checkout code
@@ -86,17 +86,17 @@ jobs:
           chmod 755 module/zygisk/arm64-v8a.so
           
           chmod 755 module/customize.sh module/service.sh module/META-INF/com/google/android/update-binary
-          VERSION='v4.8.2-vd'
-          VERSION_CODE=482
+          VERSION='v4.9.0-vd'
+          VERSION_CODE=490
           cat > module/module.prop << EOF
-          id=COPG
+          id=COPG-VD
           name=COPG by VD171
           version=$VERSION
           versionCode=$VERSION_CODE
           author=VD171 & AlirezaParsi
           description=Spoof your device. (Fork by VD171)
           minMagisk=20.4
-          updateJson=https://raw.githubusercontent.com/VD171/COPG/refs/heads/JSON/module/update.json
+          updateJson=https://raw.githubusercontent.com/VD171/COPG-VD/refs/heads/JSON/module/update.json
           EOF
 
       - name: Update version with grep
@@ -107,6 +107,6 @@ jobs:
       - name: Upload module artifact
         uses: actions/upload-artifact@v4
         with:
-          name: COPG-${{ env.VERSION }}
+          name: COPG-VD-${{ env.VERSION }}
           path: |
             module/**
