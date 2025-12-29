@@ -43,7 +43,6 @@ jobs:
           unzip -q ndk.zip -d $ANDROID_HOME/ndk
           NDK_DIR=$(find $ANDROID_HOME/ndk -maxdepth 1 -type d -name "android-ndk-r29*" | head -n 1)
           echo "NDK_PATH=$NDK_DIR" >> $GITHUB_ENV
-          echo "Installed NDK at $NDK_DIR"
 
       - name: Install build tools
         run: |
@@ -52,16 +51,6 @@ jobs:
           echo 'DPkg::Post-Invoke { ":"; };' | sudo tee /etc/apt/apt.conf.d/99noman >/dev/null
           sudo apt-get update
           sudo apt-get install -y build-essential cmake zip curl
-
-      - name: Fetch Zygisk Headers and JSON Library
-        run: |
-          mkdir -p zygisk include/nlohmann
-          wget https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp -O zygisk/zygisk.hpp
-          wget https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp -O include/nlohmann/json.hpp
-
-      - name: Fetch Dobby Fork
-        run: |
-          git clone --depth=1 https://github.com/JingMatrix/Dobby.git dobby
 
       - name: Build Project (arm64-v8a) - Start
         id: arm64_start
@@ -97,8 +86,8 @@ jobs:
           chmod 755 module/zygisk/arm64-v8a.so
           
           chmod 755 module/customize.sh module/service.sh module/META-INF/com/google/android/update-binary
-          VERSION='v4.9.0-vd'
-          VERSION_CODE=490
+          VERSION='v4.8.2-vd'
+          VERSION_CODE=482
           cat > module/module.prop << EOF
           id=COPG
           name=COPG by VD171
