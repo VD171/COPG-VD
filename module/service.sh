@@ -50,47 +50,49 @@ MANUFACTURER|ro.product.manufacturer
 MAPPING
 }
 
-get_prop_mapping | while IFS='|' read -r json_key props; do
-  [ -z "$json_key" ] && continue
-  if [ "$json_key" = "CODENAME" ]; then
-      json_value="REL"
-  elif [ "$json_key" = "TAGS" ]; then
-      json_value="release-keys"
-  elif [ "$json_key" = "TYPE" ]; then
-      json_value="user"
-  else
-      json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
-  fi
-  if [ -n "$json_value" ]; then
-      if [ "$json_key" = "SECURITY_PATCH" ]; then
-          SECURITY_PATCH="/data/adb/tricky_store/security_patch.txt"
-          if [ -e "$SECURITY_PATCH" ]; then
-              echo "$json_value" > "$SECURITY_PATCH"
-          fi
-      elif [ "$json_key" = "TIMESTAMP" ]; then
-          BUILD_DATE="$(LC_ALL=C TZ=UTC date -u -d "@$json_value")"
-          for prop in ro.build.date ro.odm.build.date ro.product.build.date; do
-              propreset "$prop" "$BUILD_DATE"
-          done
-      elif [ "$json_key" = "SDK_INT" ]; then
-          SDK_FULL="$json_value.0"
-          for prop in ro.build.version.sdk_full ro.odm.build.version.sdk_full ro.product.build.version.sdk_full ro.system.build.version.sdk_full ro.system_ext.build.version.sdk_full ro.vendor_dlkm.build.version.sdk_full ro.vendor.build.version.sdk_full; do
-              propreset "$prop" "$SDK_FULL"
-          done
-      elif [ "$json_key" = "FINGERPRINT" ]; then
-          DESCRIPTION="$(echo "$json_value" | awk -F'[:/]' '{print $3"-"$7" "$4" "$5" "$6" "$8}')"
-          FLAVOR="$(echo "$json_value" | awk -F'[:/]' '{print $3"-"$7}')"
-          propreset ro.build.description "$DESCRIPTION"
-          propreset ro.build.flavor "$FLAVOR"
+if [ ! -e "/data/adb/modules/COPG/.skip.resetprop" ]; then
+    get_prop_mapping | while IFS='|' read -r json_key props; do
+      [ -z "$json_key" ] && continue
+      if [ "$json_key" = "CODENAME" ]; then
+          json_value="REL"
+      elif [ "$json_key" = "TAGS" ]; then
+          json_value="release-keys"
+      elif [ "$json_key" = "TYPE" ]; then
+          json_value="user"
+      else
+          json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
       fi
-      old_ifs="$IFS"
-      IFS='|'
-      for prop in $props; do
-          propreset "$prop" "$json_value"
-      done
-      IFS="$old_ifs"
-  fi
-done
+      if [ -n "$json_value" ]; then
+          if [ "$json_key" = "SECURITY_PATCH" ]; then
+              SECURITY_PATCH="/data/adb/tricky_store/security_patch.txt"
+              if [ -e "$SECURITY_PATCH" ]; then
+                  echo "$json_value" > "$SECURITY_PATCH"
+              fi
+          elif [ "$json_key" = "TIMESTAMP" ]; then
+              BUILD_DATE="$(LC_ALL=C TZ=UTC date -u -d "@$json_value")"
+              for prop in ro.build.date ro.odm.build.date ro.product.build.date; do
+                  propreset "$prop" "$BUILD_DATE"
+              done
+          elif [ "$json_key" = "SDK_INT" ]; then
+              SDK_FULL="$json_value.0"
+              for prop in ro.build.version.sdk_full ro.odm.build.version.sdk_full ro.product.build.version.sdk_full ro.system.build.version.sdk_full ro.system_ext.build.version.sdk_full ro.vendor_dlkm.build.version.sdk_full ro.vendor.build.version.sdk_full; do
+                  propreset "$prop" "$SDK_FULL"
+              done
+          elif [ "$json_key" = "FINGERPRINT" ]; then
+              DESCRIPTION="$(echo "$json_value" | awk -F'[:/]' '{print $3"-"$7" "$4" "$5" "$6" "$8}')"
+              FLAVOR="$(echo "$json_value" | awk -F'[:/]' '{print $3"-"$7}')"
+              propreset ro.build.description "$DESCRIPTION"
+              propreset ro.build.flavor "$FLAVOR"
+          fi
+          old_ifs="$IFS"
+          IFS='|'
+          for prop in $props; do
+              propreset "$prop" "$json_value"
+          done
+          IFS="$old_ifs"
+      fi
+    done
+fi
 
 until [ "$(getprop sys.boot_completed)" = "1" ]; do
     sleep 2
