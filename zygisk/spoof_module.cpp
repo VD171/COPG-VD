@@ -145,16 +145,12 @@ private:
 
                 if (device.contains("TIMESTAMP")) {
                     const auto& device_timestamp = device["TIMESTAMP"];
-                    if (device_timestamp.is_number_integer()) {
-                        spoof_info.time = static_cast<int64_t>(device_timestamp.get<int64_t>()) * 1000;
-                    } else if (device_timestamp.is_string()) {
-                        spoof_info.time = std::stoll(device_timestamp.get<std::string>()) * 1000;
-                    }
+                    spoof_info.time = std::stoll(device_timestamp.get<std::string>()) * 1000;
                 }
 
                 if (device.contains("ANDROID_VERSION")) {
                     const auto& device_android_version = device["ANDROID_VERSION"];
-                    spoof_info.android_version = std::to_string(device_android_version.get<int>());
+                    spoof_info.android_version = device_android_version.get<std::string>();
                     spoof_info.version_release_or_codename = spoof_info.android_version;
                     spoof_info.version_release_or_preview_display = spoof_info.android_version;
                 }
