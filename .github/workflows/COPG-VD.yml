@@ -60,7 +60,8 @@ jobs:
       - name: Build Project (arm64-v8a)
         uses: threeal/cmake-action@v2.1.0
         with:
-          build-dir: build/arm64-v8a
+          source-dir: zygisk
+          build-dir: zygisk/build/arm64-v8a
           args: |
             -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake
             -DANDROID_ABI=arm64-v8a
@@ -73,16 +74,16 @@ jobs:
           ARM64_END_TIME=$(date -u +%s)
           ARM64_DURATION=$((ARM64_END_TIME - ARM64_START_TIME))
           echo "ARM64_BUILD_TIME=$ARM64_DURATION" >> $GITHUB_ENV
-          if [ ! -f "build/arm64-v8a/libspoof.so" ]; then
+          if [ ! -f "zygisk/build/arm64-v8a/libspoof.so" ]; then
             echo "Error: arm64-v8a library not built!"
-            ls -la build/arm64-v8a
+            ls -la zygisk/build/arm64-v8a
             exit 1
           fi
 
       - name: Prepare module structure
         run: |
           mkdir -p module/zygisk
-          cp build/arm64-v8a/libspoof.so module/zygisk/arm64-v8a.so
+          cp zygisk/build/arm64-v8a/libspoof.so module/zygisk/arm64-v8a.so
           chmod 755 module/zygisk/arm64-v8a.so
           
           chmod 755 module/customize.sh module/service.sh module/META-INF/com/google/android/update-binary
