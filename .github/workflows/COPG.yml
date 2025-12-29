@@ -61,7 +61,11 @@ jobs:
 
       - name: Fetch Dobby Fork
         run: |
-          git clone --depth=1 https://github.com/JingMatrix/Dobby.git dobby
+          mkdir -p dobby
+          wget https://github.com/jyotidwi/PlayIntegrityFix/raw/15.9.9/app/src/main/cpp/Dobby/dobby.h -O dobby/include/dobby.h
+          git clone --depth=1 https://github.com/jyotidwi/PlayIntegrityFix.git pif_temp
+          cp -r pif_temp/app/src/main/cpp/Dobby/* dobby/
+          rm -rf pif_temp
 
       - name: Build Project (arm64-v8a) - Start
         id: arm64_start
