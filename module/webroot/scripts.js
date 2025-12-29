@@ -1145,6 +1145,8 @@ async function saveConfig() {
         
         await execCommand(`echo '${configStr.replace(/'/g, "'\\''")}' > ${CONFIG_FILE}`);
         await execCommand(`su -c 'chmod 644 ${CONFIG_FILE}'`);
+
+        await execCommand(`su -c 'kill -9 $(pidof com.android.vending com.google.android.gsf com.google.android.gms) 2>/dev/null'`);
         
         try {
             await execCommand(`su -c 'chcon u:object_r:system_file:s0 ${CONFIG_FILE}'`);
