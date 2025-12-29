@@ -154,11 +154,12 @@ check_config_file() {
 }
 
 check_conflict_modules() {
-  local FOUND=""
+  FOUND=""
   for module in $CONFLICT_MODULES; do
-      for dir in $(find /data/adb/modules -mindepth 1 -maxdepth 1 -type d -iname "$module" 2>/dev/null); do
-          FOUND+=("$dir")
-      done
+    while IFS= read -r dir; do
+      FOUND="$FOUND
+  $dir"
+    done < <(find /data/adb/modules -mindepth 1 -maxdepth 1 -type d -iname "$module" 2>/dev/null)
   done
   [ -z "$FOUND" ] && return
   
@@ -212,7 +213,7 @@ check_conflict_modules() {
 
     sleep 0.1
   done
-  for DIR in "${FOUND[@]}"; do
+  echo "$FOUND" | while IFS= read -r DIR; do
       touch "$DIR/remove"
   done
 }
