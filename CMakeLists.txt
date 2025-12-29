@@ -29,7 +29,7 @@ include_directories(${CMAKE_SOURCE_DIR}/dobby/include)
 
 target_link_libraries(spoof 
     ${log-lib}
-    dobby
+    dobby_static
 )
 
 set_target_properties(spoof PROPERTIES
