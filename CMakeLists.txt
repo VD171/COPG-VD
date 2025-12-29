@@ -7,12 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_options(-Os -flto -ffunction-sections -fdata-sections)
 add_link_options(-flto -Wl,--gc-sections)
 
+
 if(NOT DEBUG)
     add_compile_options(-g0 -DNDEBUG)
     add_link_options(-s)
 endif()
-
-add_subdirectory(dobby)
 
 set(ZYGISK_SOURCES
     zygisk/spoof_module.cpp
@@ -24,13 +23,8 @@ add_library(spoof SHARED ${ZYGISK_SOURCES})
 find_library(log-lib log)
 
 include_directories(${CMAKE_SOURCE_DIR}/zygisk)
-include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/dobby/include)
 
-target_link_libraries(spoof 
-    ${log-lib}
-    dobby_static
-)
+target_link_libraries(spoof ${log-lib})
 
 set_target_properties(spoof PROPERTIES
     LINK_FLAGS "-Wl,--exclude-libs,ALL"
