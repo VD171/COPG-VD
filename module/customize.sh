@@ -4,6 +4,7 @@
 
 ENABLE_GPHOTO_SPOOF=false
 CONFIG_FILE="/data/adb/COPG.json"
+CONFLICT_MODULES="playintegrity playintegrityfix integrity-*box"
 
 print_box_start() {
   ui_print "╔═════════════════════════════════╗"
@@ -20,14 +21,8 @@ print_empty_line() {
 }
 
 print_failure_and_exit() {
-  local section="$1"
   print_empty_line
   ui_print " ✗ Installation Failed!          "
-  if [ "$section" = "binary" ] || [ "$section" = "gphoto" ]; then
-    print_empty_line
-    print_empty_line
-    print_empty_line
-  fi
   print_box_end
   exit 1
 }
@@ -158,6 +153,64 @@ check_config_file() {
   fi
 }
 
+check_conflict_modules() {
+  for module in $CONFLICT_MODULES; do
+      if find /data/adb/modules -mindepth 1 -maxdepth 1 -type d -iname "$module" -quit 2>/dev/null; then
+          FOUND=true
+          break
+      fi
+  done
+  [ "$FOUND" = true ] || return
+
+  print_box_start
+  ui_print " ✦ Found Conflicting Modules ✦ "
+  print_empty_line
+  ui_print " ❓ What to do now? "
+  ui_print " ➤ Volume Up: Uninstall all them.  "
+  ui_print " ➤ Volume Down: Do it after. "
+  print_box_end
+
+  TIMEOUT=10
+  START_TIME=$(date +%s)
+
+  while true; do
+    CURRENT_TIME=$(date +%s)
+    ELAPSED=$((CURRENT_TIME - START_TIME))
+    if [ $ELAPSED -ge $TIMEOUT ]; then
+      print_empty_line
+      ui_print " ⏰ Timeout (10s) - Do it after."
+      print_failure_and_exit
+      return
+    fi
+
+    if command -v timeout >/dev/null 2>&1; then
+      EVENT=$(timeout 0.1 getevent -lc1 2>/dev/null | tr -d '\r')
+    else
+      EVENT=$(getevent -lc1 2>/dev/null | tr -d '\r')
+    fi
+
+    if [ -n "$EVENT" ]; then
+      if echo "$EVENT" | grep -q "KEY_VOLUMEUP.*DOWN"; then
+        print_empty_line
+        ui_print " ✅ Uninstall all them."
+        ENABLE_GPHOTO_SPOOF=true
+        return
+      elif echo "$EVENT" | grep -q "KEY_VOLUMEDOWN.*DOWN"; then
+        print_empty_line
+        ui_print " ❌ Do it after."
+        print_failure_and_exit
+        return
+      fi
+    fi
+
+    sleep 0.1
+  done
+  for module in $CONFLICT_MODULES; do
+      DIR="/data/adb/modules/$module"
+      [ -d "$DIR" ] && touch "$DIR/remove"
+  done
+}
+
 print_module_version
 
 if ! $BOOTMODE; then
@@ -166,7 +219,7 @@ if ! $BOOTMODE; then
   print_empty_line
   ui_print " ✗ Recovery Mode Not Supported!  "
   ui_print " ➤ Install via Magisk/KSU/APatch "
-  print_failure_and_exit "initial"
+  print_failure_and_exit
 fi
 
 if [ "$API" -lt 28 ]; then
@@ -175,9 +228,10 @@ if [ "$API" -lt 28 ]; then
   print_empty_line
   ui_print " ✗ Android Version Too Old!      "
   ui_print " ➤ Requires Android 9.0+         "
-  print_failure_and_exit "initial"
+  print_failure_and_exit
 fi
 
+check_conflict_modules
 check_config_file
 
 chmod 0755 "$MODPATH/service.sh"
