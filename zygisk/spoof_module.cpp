@@ -429,11 +429,11 @@ public:
     }
 
     void preServerSpecialize(zygisk::ServerSpecializeArgs*) override {
-        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+        api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
     }
 
     void postServerSpecialize(const zygisk::ServerSpecializeArgs*) override {
-        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+        api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
     }
 
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
@@ -449,7 +449,7 @@ public:
             return;
         }
 
-        api->setOption(FORCE_DENYLIST_UNMOUNT);
+        api->setOption(zygisk::FORCE_DENYLIST_UNMOUNT);
 
         current_package = std::string(package_name);
         is_camera_package = camera_packages.find(current_package) != camera_packages.end();
