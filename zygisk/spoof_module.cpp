@@ -26,6 +26,7 @@ using json = nlohmann::json;
 typedef void (*T_Callback)(void *, const char *, const char *, uint32_t);
 
 static T_Callback o_callback = nullptr;
+static void (*o_system_property_read_callback)(prop_info *, T_Callback, void *) = nullptr;
 static std::unordered_map<std::string, std::string> original_props;
 static std::string current_package;
 static bool is_camera_package = false;
@@ -33,10 +34,6 @@ static std::mutex props_mutex;
 
 static const std::string config_file = "/data/adb/COPG.json";
 static const std::string original_device = "/data/adb/modules/COPG/original_device.txt";
-
-#ifndef PROP_VALUE_MAX
-#define PROP_VALUE_MAX 92
-#endif
 
 struct DeviceInfo {
     std::string brand;
@@ -155,18 +152,13 @@ static void modify_callback(void *cookie, const char *name, const char *value, u
         }
         return;
     }
-
     std::lock_guard<std::mutex> lock(props_mutex);
-    
     auto it = original_props.find(name);
     if (it != original_props.end()) {
         return o_callback(cookie, name, it->second.c_str(), serial);
     }
-
     return o_callback(cookie, name, value, serial);
 }
-
-static void (*o_system_property_read_callback)(prop_info *, T_Callback, void *) = nullptr;
 
 static void my_system_property_read_callback(prop_info *pi, T_Callback callback, void *cookie) {
     if (!pi || !callback) {
@@ -175,26 +167,18 @@ static void my_system_property_read_callback(prop_info *pi, T_Callback callback,
         }
         return;
     }
-    
     o_callback = callback;
     return o_system_property_read_callback(pi, modify_callback, cookie);
 }
 
 static bool installPropertyHookForCamera() {
     void *ptr = DobbySymbolResolver(nullptr, "__system_property_read_callback");
-
-    if (!ptr) {
-        ERROR_LOG("Failed to find __system_property_read_callback symbol");
-        return false;
-    }
-
+    if (!ptr) return false;
     if (DobbyHook(ptr, (void *)my_system_property_read_callback,
                   (void **)&o_system_property_read_callback) != 0) {
-        ERROR_LOG("DobbyHook failed for __system_property_read_callback");
         return false;
     }
-
-    INFO_LOG("hook __system_property_read_callback successful at %p", ptr);
+    SPOOF_LOG("[%s] Props restored: %s (%s)", current_package.c_str(), original_props.find("ro.product.brand").c_str(), original_props.find("ro.product.brand").c_str());
     return true;
 }
 
@@ -471,11 +455,7 @@ public:
     }
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs*) override {
-        if (is_camera_package) {
-            if (!installPropertyHookForCamera()) {
-                ERROR_LOG("Failed to install property hook for camera package");
-            }
-        }
+        if (is_camera_package) installPropertyHookForCamera();
     }
 
 private:
