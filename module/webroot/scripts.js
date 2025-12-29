@@ -708,6 +708,17 @@ async function loadVersion() {
     }
 }
 
+async function loadToggleStates() {
+    try {
+        const resetpropToggle = document.getElementById('toggle-resetprop');
+        const roproductmanufacturerToggle = document.getElementById('toggle-ro-product-manufacturer');
+        resetpropToggle.checked = (await execCommand("test -e /data/adb/modules/COPG/.skip.resetprop && echo 1 || echo 0")) === "1";
+        roproductmanufacturerToggle.checked = (await execCommand("grep -q '#MANUFACTURER|ro.product.manufacturer' /data/adb/modules/COPG/service.sh && echo 1 || echo 0")) === "1";
+    } catch (error) {
+        appendToOutput("Failed to load toggle states: " + error, 'error');
+    }
+}
+
 async function loadConfig() {
     try {
         const configContent = await execCommand(`cat ${CONFIG_FILE}`);
@@ -1285,7 +1296,7 @@ function applyEventListeners() {
     document.getElementById('toggle-ro-product-manufacturer').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
-            await execCommand(`sed -i 's/^#\\?MANUFACTURER\\|ro.product.manufacturer/${isChecked ? "" : "#"}MANUFACTURER\\|ro.product.manufacturer/' /data/adb/modules/COPG/service.sh`);
+            await execCommand(`sed -i 's/^#\\?MANUFACTURER|ro.product.manufacturer/${isChecked ? "" : "#"}MANUFACTURER\\|ro.product.manufacturer/' /data/adb/modules/COPG/service.sh`);
             appendToOutput(isChecked ? "Ro.Product.Manufacturer Enabled" : "Ro.Product.Manufacturer Disabled", isChecked ? 'success' : 'error');
         } catch (error) {
             appendToOutput(`Failed to update Ro.Product.Manufacturer Config: ${error}`, 'error');
@@ -1381,6 +1392,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
     appendToOutput("UI initialized", 'success');
     await loadVersion();
+    await loadToggleStates();
     await loadConfig();
     applyEventListeners();
     switchTab('settings');
