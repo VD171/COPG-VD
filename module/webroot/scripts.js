@@ -712,8 +712,8 @@ async function loadToggleStates() {
     try {
         const resetpropToggle = document.getElementById('toggle-resetprop');
         const roproductmanufacturerToggle = document.getElementById('toggle-ro-product-manufacturer');
-        resetpropToggle.checked = (await execCommand("test -e /data/adb/modules/COPG/.skip.resetprop && echo 1 || echo 0")) === "1";
-        roproductmanufacturerToggle.checked = (await execCommand("grep -q '#MANUFACTURER|ro.product.manufacturer' /data/adb/modules/COPG/service.sh && echo 1 || echo 0")) === "1";
+        resetpropToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG/.skip.resetprop ] && echo 0 || echo 1")).trim() === "1";
+        roproductmanufacturerToggle.checked = (await execCommand("grep -q -i '#MANUFACTURER\\|ro\\.product\\.manufacturer' /data/adb/modules/COPG/service.sh && echo 0 || echo 1")).trim() === "1";
     } catch (error) {
         appendToOutput("Failed to load toggle states: " + error, 'error');
     }
