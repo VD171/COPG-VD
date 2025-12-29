@@ -569,14 +569,6 @@ async function startLogcat(e) {
     if (e) e.stopPropagation();
     if (logcatRunning) return;
 
-    const loggingToggle = document.getElementById('toggle-logging');
-    if (loggingToggle && loggingToggle.checked) {
-        document.getElementById('error-message').textContent = "Please disable 'Disable Logging' option first to use logcat.";
-        showPopup('error-popup');
-        appendToOutput("Cannot start logcat - 'Disable Logging' is enabled", 'error');
-        return;
-    }
-
     try {
         appendToOutput("Starting logcat for COPGModule... (open target app ...)", 'info');
         logcatRunning = true;
@@ -1278,13 +1270,23 @@ function copyLogContent() {
 }
 
 function applyEventListeners() {
-    document.getElementById('toggle-logging').addEventListener('click', async (e) => {
+    document.getElementById('toggle-resetprop').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
-            await execCommand(`sed -i '/DISABLE_LOGGING=/d' /data/adb/copg_state; echo "DISABLE_LOGGING=${isChecked ? 1 : 0}" >> /data/adb/copg_state`);
-            appendToOutput(isChecked ? "Logging Disabled" : "Logging Enabled", isChecked ? 'success' : 'error');
+            await execCommand(`touch /data/adb/modules/COPG/.skip.resetprop`);
+            appendToOutput(isChecked ? "Resetprop Disabled" : "Resetprop Enabled", isChecked ? 'success' : 'error');
         } catch (error) {
-            appendToOutput(`Failed to update logging: ${error}`, 'error');
+            appendToOutput(`Failed to update Resetprop Config: ${error}`, 'error');
+            e.target.checked = !isChecked;
+        }
+    });
+    document.getElementById('toggle-ro-product-manufacturer').addEventListener('click', async (e) => {
+        const isChecked = e.target.checked;
+        try {
+            await execCommand(`sed -i 's/^#\\?MANUFACTURER\\|ro.product.manufacturer/${isChecked ? "#" : ""}MANUFACTURER\\|ro.product.manufacturer/' /data/adb/COPG.json`);
+            appendToOutput(isChecked ? "Ro.Product.Manufacturer Disabled" : "Ro.Product.Manufacturer Enabled", isChecked ? 'success' : 'error');
+        } catch (error) {
+            appendToOutput(`Failed to update Ro.Product.Manufacturer Config: ${error}`, 'error');
             e.target.checked = !isChecked;
         }
     });
