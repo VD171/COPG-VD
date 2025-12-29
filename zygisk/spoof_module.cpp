@@ -178,7 +178,14 @@ static bool installPropertyHookForCamera() {
                   (void **)&o_system_property_read_callback) != 0) {
         return false;
     }
-    SPOOF_LOG("[%s] Props restored: %s (%s)", current_package.c_str(), original_props.find("ro.product.brand").c_str(), original_props.find("ro.product.brand").c_str());
+
+    auto brand_it = original_props.find("ro.product.brand");
+    auto model_it = original_props.find("ro.product.model");
+    
+    std::string brand = (brand_it != original_props.end()) ? brand_it->second : "unknown";
+    std::string model = (model_it != original_props.end()) ? model_it->second : "unknown";
+    
+    SPOOF_LOG("[%s] Props restored: %s (%s)", current_package.c_str(), model.c_str(), brand.c_str());
     return true;
 }
 
@@ -451,11 +458,13 @@ public:
             initBuildClass(env);
             DeviceInfo spoof_info = loadDeviceFromConfig();
             spoofBuild(env, spoof_info);
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
         }
     }
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs*) override {
         if (is_camera_package) installPropertyHookForCamera();
+        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
     }
 
 private:
