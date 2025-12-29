@@ -154,19 +154,23 @@ check_config_file() {
 }
 
 check_conflict_modules() {
+  local FOUND=""
   for module in $CONFLICT_MODULES; do
-      if find /data/adb/modules -mindepth 1 -maxdepth 1 -type d -iname "$module" -quit 2>/dev/null; then
-          FOUND=true
-          break
-      fi
+    if find /data/adb/modules -mindepth 1 -maxdepth 1 -type d -iname "$module" 2>/dev/null | grep -q .; then
+      FOUND="$FOUND $module"
+    fi
   done
-  [ "$FOUND" = true ] || return
-
+  [ -z "$FOUND" ] && return
+  
   print_box_start
-  ui_print " ✦ Found Conflicting Modules ✦ "
+  ui_print " ✦ Found Conflicting Modules: ✦ "
+  print_empty_line
+  for found in $FOUND; do
+    ui_print " . $found "
+  done
   print_empty_line
   ui_print " ❓ What to do now? "
-  ui_print " ➤ Volume Up: Uninstall all them.  "
+  ui_print " ➤ Volume Up: Uninstall all them. "
   ui_print " ➤ Volume Down: Do it after. "
   print_box_end
 
