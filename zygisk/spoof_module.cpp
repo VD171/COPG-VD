@@ -30,7 +30,6 @@ using json = nlohmann::json;
 #define ERROR_LOG(...) LOGE("[ERROR] " __VA_ARGS__)
 
 static std::unordered_map<std::string, std::string> original_props;
-static int (*orig_system_property_get)(const char*, char*) = nullptr;
 static std::mutex prop_mutex;
 static std::string current_package;
 
@@ -151,11 +150,6 @@ struct JniString {
     const char* get() const { return chars; }
 };
 
-static int hooked_system_property_get(const char* name, char* value) {
-    if (!orig_system_property_get) return 0;
-    return orig_system_property_get(name, value);
-}
-
 void loadOriginalPropsFromFile() {
     std::lock_guard<std::mutex> lock(prop_mutex);
     
@@ -188,22 +182,22 @@ void loadOriginalPropsFromFile() {
     file.close();
 }
 
-void installPropertyHookForCamera() {
-    void* sym = DobbySymbolResolver("libc.so", "__system_property_get");
-    if (!sym) {
-        sym = DobbySymbolResolver(nullptr, "__system_property_get");
-    }
-    if (!sym) {
-        ERROR_LOG("Failed to resolve __system_property_get");
-        return;
-    }
-    int result = DobbyHook(sym, (void*)hooked_system_property_get, (void**)&orig_system_property_get);
-    if (result == 0) {
-        INFO_LOG("Minimal property hook installed");
-    } else {
-        ERROR_LOG("Failed to install property hook, error code: %d", result);
-    }
+struct prop_info;
+typedef int (*system_property_read_callback_t)(
+    const prop_info*,
+    void (*)(void*, const char*, const char*, uint32_t),
+    void*
+);
+static system_property_read_callback_t orig_cb = nullptr;
+static int hooked_cb(const prop_info* pi, void (*callback)(void*, const char*, const char*, uint32_t), void* cookie) {
+    return orig_cb ? orig_cb(pi, callback, cookie) : 0;
 }
+void installPropertyHookForCamera() {
+    void* sym = DobbySymbolResolver("libc.so", "__system_property_read_callback");
+    if (!sym) return;
+    DobbyHook(sym, (void*)hooked_cb, (void**)&orig_cb);
+}
+
 
 DeviceInfo loadDeviceFromConfig() {
     DeviceInfo info;
