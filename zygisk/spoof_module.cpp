@@ -129,7 +129,8 @@ static const std::unordered_set<std::string> camera_packages = {
     "com.oppo.camera",
     "com.sonyericsson.android.camera",
     "com.vivo.devcamera",
-    "com.mediatek.hz.camera"
+    "com.mediatek.hz.camera",
+    "vd171.ru"
 };
 
 struct JniString {
@@ -447,6 +448,8 @@ public:
         if (!package_name) {
             return;
         }
+
+        api->setOption(FORCE_DENYLIST_UNMOUNT);
 
         current_package = std::string(package_name);
         is_camera_package = camera_packages.find(current_package) != camera_packages.end();
