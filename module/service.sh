@@ -37,7 +37,7 @@ TIMESTAMP|ro.build.date.utc|ro.system.build.date.utc|ro.vendor.build.date.utc|ro
 INCREMENTAL|ro.build.version.incremental|ro.odm.build.version.incremental|ro.product.build.version.incremental|ro.system.build.version.incremental|ro.system_ext.build.version.incremental|ro.vendor.build.version.incremental|ro.vendor_dlkm.build.version.incremental|ro.odm_dlkm.build.version.incremental|ro.system_dlkm.build.version.incremental
 ANDROID_VERSION|ro.build.version.release|ro.odm.build.version.release|ro.product.build.version.release|ro.system.build.version.release|ro.system_ext.build.version.release|ro.vendor.build.version.release|ro.vendor_dlkm.build.version.release|ro.odm_dlkm.build.version.release|ro.system_dlkm.build.version.release
 SDK_INT|ro.build.version.sdk|ro.vendor_dlkm.build.version.sdk|ro.vendor.build.version.sdk|ro.system_ext.build.version.sdk|ro.product.build.version.sdk|ro.system.build.version.sdk|ro.odm.build.version.sdk|ro.odm_dlkm.build.version.sdk|ro.system_dlkm.build.version.sdk
-SDK_FULL|SDK_FULL
+SDK_FULL|ro.build.version.sdk_full|ro.odm.build.version.sdk_full|ro.product.build.version.sdk_full|ro.system.build.version.sdk_full|ro.system_ext.build.version.sdk_full|ro.vendor_dlkm.build.version.sdk_full|ro.vendor.build.version.sdk_full|ro.odm_dlkm.build.version.sdk_full|ro.system_dlkm.build.version.sdk_full
 BOARD|ro.board.platform|ro.product.board
 BOOTLOADER|ro.bootloader|boot.bootloader|ro.boot.bootloader
 DISPLAY|ro.build.display.id
@@ -55,7 +55,6 @@ MAPPING
 }
 
 if [ ! -e "/data/adb/modules/COPG-VD/.skip.resetprop" ]; then
-    SDK_FULL=""
     get_prop_mapping | while IFS='|' read -r json_key props; do
       [ -z "$json_key" ] && continue
       json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
@@ -79,9 +78,10 @@ if [ ! -e "/data/adb/modules/COPG-VD/.skip.resetprop" ]; then
                   propreset "$prop" "$BUILD_DATE"
               done
           elif [ "$json_key" = "SDK_INT" ]; then
-              [ -z "$SDK_FULL" ] && SDK_FULL="$json_value.0"
-          elif [ "$json_key" = "SDK_FULL" ]; then
-              SDK_FULL="$json_value"
+              SDK_FULL="$json_value.0"
+              for prop in ro.build.version.sdk_full ro.odm.build.version.sdk_full ro.product.build.version.sdk_full ro.system.build.version.sdk_full ro.system_ext.build.version.sdk_full ro.vendor_dlkm.build.version.sdk_full ro.vendor.build.version.sdk_full ro.odm_dlkm.build.version.sdk_full ro.system_dlkm.build.version.sdk_full; do
+                  propreset "$prop" "$SDK_FULL"
+              done
           elif [ "$json_key" = "FINGERPRINT" ]; then
               DESCRIPTION="$(echo "$json_value" | awk -F'[:/]' '{print $2"-"$7" "$4" "$5" "$6" "$8}')"
               FLAVOR="$(echo "$json_value" | awk -F'[:/]' '{print $2"-"$7}')"
@@ -96,11 +96,6 @@ if [ ! -e "/data/adb/modules/COPG-VD/.skip.resetprop" ]; then
           IFS="$old_ifs"
       fi
     done
-    if [ -n "$SDK_FULL" ]; then
-      for prop in ro.build.version.sdk_full ro.odm.build.version.sdk_full ro.product.build.version.sdk_full ro.system.build.version.sdk_full ro.system_ext.build.version.sdk_full ro.vendor_dlkm.build.version.sdk_full ro.vendor.build.version.sdk_full ro.odm_dlkm.build.version.sdk_full ro.system_dlkm.build.version.sdk_full; do
-          propreset "$prop" "$SDK_FULL"
-      done
-    fi
 fi
 
 until [ "$(getprop sys.boot_completed)" = "1" ]; do
