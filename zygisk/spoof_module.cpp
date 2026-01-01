@@ -32,6 +32,7 @@ struct DeviceInfo {
     std::string host;
     std::string odm_sku;
     std::string sku;
+    std::string user;
     int64_t time;
     std::string version_incremental;
     std::string version_sdk;
@@ -39,6 +40,7 @@ struct DeviceInfo {
     std::string version_security_patch;
     std::string version_release_or_codename;
     std::string version_release_or_preview_display;
+    std::string version_codename;
 };
 
 static inline std::string trim(const std::string& str) {
@@ -88,6 +90,7 @@ private:
         jfieldID build_tagsField = getField(buildClass, "TAGS", "Ljava/lang/String;");
         jfieldID build_timeField = getField(buildClass, "TIME", "J");
         jfieldID build_typeField = getField(buildClass, "TYPE", "Ljava/lang/String;");
+        jfieldID build_userField = getField(buildClass, "USER", "Ljava/lang/String;");
 
         jclass versionClass = env->FindClass("android/os/Build$VERSION");
         jfieldID build_version_releaseField = nullptr;
@@ -140,8 +143,27 @@ private:
                 spoof_info.host = device.value("HOST", "");
                 spoof_info.odm_sku = device.value("ODM_SKU", spoof_info.product);
                 spoof_info.sku = device.value("SKU", spoof_info.hardware);
+                spoof_info.user = device.value("USER", "");
                 spoof_info.version_incremental = device.value("INCREMENTAL", "");
                 spoof_info.version_security_patch = device.value("SECURITY_PATCH", "");
+                spoof_info.version_codename = device.value("CODENAME", "");
+
+                if (spoof_info.version_codename && !trim(spoof_info.version_codename).empty()) {
+                    spoof_info.version_release_or_preview_display = spoof_info.version_codename;
+                }
+
+                if (device.contains("SDK_FULL")) {
+                    std::string device_sdk_full_string = device["SDK_FULL"].get<std::string>();
+                    auto dot_position = device_sdk_full_string.find('.');
+                    int device_sdk_full_int = std::stoi(dot_position == std::string::npos ? device_sdk_full_string : device_sdk_full_string.substr(0, dot_position)) * 1000000;
+                    if (dot_position != std::string::npos) {
+                        std::string decimal_part = device_sdk_full_string.substr(dot_position + 1);
+                        if (decimal_part.size() > 2) decimal_part.resize(2);
+                        while (decimal_part.size() < 2) decimal_part += '0';
+                        device_sdk_full_int += std::stoi(decimal_part) * 10000;
+                    }
+                    spoof_info.version_sdk_int_full = device_sdk_full_int;
+                }
 
                 if (device.contains("TIMESTAMP")) {
                     const auto& device_timestamp = device["TIMESTAMP"];
@@ -152,14 +174,18 @@ private:
                     const auto& device_android_version = device["ANDROID_VERSION"];
                     spoof_info.android_version = device_android_version.get<std::string>();
                     spoof_info.version_release_or_codename = spoof_info.android_version;
-                    spoof_info.version_release_or_preview_display = spoof_info.android_version;
+                    if (!spoof_info.version_release_or_preview_display  || trim(spoof_info.version_release_or_preview_display).empty()) {
+                        spoof_info.version_release_or_preview_display = spoof_info.android_version;
+                    }
                 }
 
                 if (device.contains("SDK_INT")) {
                     const auto& device_sdk_int = device["SDK_INT"];
                     spoof_info.version_sdk_int = std::stoi(device_sdk_int.get<std::string>());
                     spoof_info.version_sdk = std::to_string(spoof_info.version_sdk_int);
-                    spoof_info.version_sdk_int_full = spoof_info.version_sdk_int * 100000;
+                    if (!spoof_info.version_sdk_int_full) {
+                        spoof_info.version_sdk_int_full = spoof_info.version_sdk_int * 100000;
+                    }
                 }
             }
         } catch (const std::exception& e) {
@@ -207,12 +233,13 @@ private:
         setStr(buildClass, build_hostField, spoof_info.host);
         setStr(buildClass, build_odm_skuField, spoof_info.odm_sku);
         setStr(buildClass, build_skuField, spoof_info.sku);
+        setStr(buildClass, build_userField, spoof_info.user);
         setLong(buildClass, build_timeField, spoof_info.time);
         setStr(buildClass, build_tagsField, "release-keys");
         setStr(buildClass, build_typeField, "user");
 
         if (versionClass) {
-            setStr(versionClass, build_version_codenameField, "REL");
+            setStr(versionClass, build_version_codenameField, spoof_info.version_codename);
             setStr(versionClass, build_version_incrementalField, spoof_info.version_incremental);
             setStr(versionClass, build_version_sdkField, spoof_info.version_sdk);
             setInt(versionClass, build_version_sdk_int_fullField, spoof_info.version_sdk_int_full);
