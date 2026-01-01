@@ -37,6 +37,7 @@ TIMESTAMP|ro.build.date.utc|ro.system.build.date.utc|ro.vendor.build.date.utc|ro
 INCREMENTAL|ro.build.version.incremental|ro.odm.build.version.incremental|ro.product.build.version.incremental|ro.system.build.version.incremental|ro.system_ext.build.version.incremental|ro.vendor.build.version.incremental|ro.vendor_dlkm.build.version.incremental|ro.odm_dlkm.build.version.incremental|ro.system_dlkm.build.version.incremental
 ANDROID_VERSION|ro.build.version.release|ro.odm.build.version.release|ro.product.build.version.release|ro.system.build.version.release|ro.system_ext.build.version.release|ro.vendor.build.version.release|ro.vendor_dlkm.build.version.release|ro.odm_dlkm.build.version.release|ro.system_dlkm.build.version.release
 SDK_INT|ro.build.version.sdk|ro.vendor_dlkm.build.version.sdk|ro.vendor.build.version.sdk|ro.system_ext.build.version.sdk|ro.product.build.version.sdk|ro.system.build.version.sdk|ro.odm.build.version.sdk|ro.odm_dlkm.build.version.sdk|ro.system_dlkm.build.version.sdk
+SDK_FULL|SDK_FULL
 BOARD|ro.board.platform|ro.product.board
 BOOTLOADER|ro.bootloader|boot.bootloader|ro.boot.bootloader
 DISPLAY|ro.build.display.id
@@ -54,6 +55,7 @@ MAPPING
 }
 
 if [ ! -e "/data/adb/modules/COPG-VD/.skip.resetprop" ]; then
+    SDK_FULL=""
     get_prop_mapping | while IFS='|' read -r json_key props; do
       [ -z "$json_key" ] && continue
       json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
@@ -64,6 +66,7 @@ if [ ! -e "/data/adb/modules/COPG-VD/.skip.resetprop" ]; then
         json_value="release-keys"
       elif [ "$json_key" = "TYPE" ]; then
         json_value="user"
+      fi
       if [ -n "$json_value" ]; then
           if [ "$json_key" = "SECURITY_PATCH" ]; then
               SECURITY_PATCH="/data/adb/tricky_store/security_patch.txt"
@@ -77,6 +80,8 @@ if [ ! -e "/data/adb/modules/COPG-VD/.skip.resetprop" ]; then
               done
           elif [ "$json_key" = "SDK_INT" ]; then
               [ -z "$SDK_FULL" ] && SDK_FULL="$json_value.0"
+          elif [ "$json_key" = "SDK_FULL" ]; then
+              SDK_FULL="$json_value"
           elif [ "$json_key" = "FINGERPRINT" ]; then
               DESCRIPTION="$(echo "$json_value" | awk -F'[:/]' '{print $2"-"$7" "$4" "$5" "$6" "$8}')"
               FLAVOR="$(echo "$json_value" | awk -F'[:/]' '{print $2"-"$7}')"
