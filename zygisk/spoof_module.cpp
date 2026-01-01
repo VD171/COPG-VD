@@ -148,7 +148,7 @@ private:
                 spoof_info.version_security_patch = device.value("SECURITY_PATCH", "");
                 spoof_info.version_codename = device.value("CODENAME", "");
 
-                if (spoof_info.version_codename && !trim(spoof_info.version_codename).empty()) {
+                if (!trim(spoof_info.version_codename).empty()) {
                     spoof_info.version_release_or_preview_display = spoof_info.version_codename;
                 }
 
@@ -174,7 +174,7 @@ private:
                     const auto& device_android_version = device["ANDROID_VERSION"];
                     spoof_info.android_version = device_android_version.get<std::string>();
                     spoof_info.version_release_or_codename = spoof_info.android_version;
-                    if (!spoof_info.version_release_or_preview_display  || trim(spoof_info.version_release_or_preview_display).empty()) {
+                    if (trim(spoof_info.version_release_or_preview_display).empty()) {
                         spoof_info.version_release_or_preview_display = spoof_info.android_version;
                     }
                 }
