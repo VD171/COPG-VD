@@ -40,6 +40,11 @@
                 SDK: [SDK-INT]
                 Incremental: [INCREMENTAL]
                 Timestamp: [TIMESTAMP]
+                Preview SDK: [PREVIEW_SDK]
+                SDK Full: [SDK_FULL]
+                Codename: [CODENAME]
+                User: [USER]
+                SDK Fingerprint: [SDK_FINGERPRINT]
                 Security Patch: [SECURITY_PATCH]
             </div>
         </div>
@@ -330,105 +335,135 @@
                 <div class="scroll-container">
                     <div class="form-group">
                         <label for="device-name">
-                            Device Name<span class="required-badge">required</span>
+                            Device<span class="optional-badge">optional</span>
                         </label>
-                        <input type="text" id="device-name" placeholder="e.g., Galaxy S23" required>
+                        <input type="text" id="device-name" placeholder="e.g., comet">
                     </div>
                     <div class="form-group">
                         <label for="device-brand">
-                            Brand<span class="required-badge">required</span>
+                            Brand<span class="optional-badge">optional</span>
                         </label>
-                        <input type="text" id="device-brand" placeholder="e.g., Samsung">
+                        <input type="text" id="device-brand" placeholder="e.g., google">
                     </div>
                     <div class="form-group">
                         <label for="device-model">
-                            Model<span class="required-badge">required</span>
+                            Model<span class="optional-badge">optional</span>
                         </label>
-                        <input type="text" id="device-model" placeholder="e.g., SM-S918B">
+                        <input type="text" id="device-model" placeholder="e.g., Pixel 9 Pro Fold">
                     </div>
                     <div class="form-group">
                         <label for="device-product">
-                            Product<span class="required-badge">required</span>
+                            Product<span class="optional-badge">optional</span>
                         </label>
-                        <input type="text" id="device-product" placeholder="e.g., SM-S918B">
+                        <input type="text" id="device-product" placeholder="e.g., comet_beta">
                     </div>
                     <div class="form-group">
                         <label for="device-manufacturer">
-                            Manufacturer<span class="required-badge">required</span>
+                            Manufacturer<span class="optional-badge">optional</span>
                         </label>
-                        <input type="text" id="device-manufacturer" placeholder="e.g., Samsung">
+                        <input type="text" id="device-manufacturer" placeholder="e.g., Google">
                     </div>
                     <div class="form-group">
                         <label for="device-fingerprint">
-                            Fingerprint<span class="required-badge">required</span>
+                            Fingerprint<span class="optional-badge">optional</span>
                         </label>
                         <input type="text" id="device-fingerprint" placeholder="e.g., samsung/m23xqns/samsung:14/UP1A.231005.007/G990BXXU7EWD5:user/release-keys">
                     </div>
                     <div class="form-group">
                         <label for="device-board">
-                            Board<span class="required-badge">required</span>
+                            Board<span class="optional-badge">optional</span>
                         </label>
                         <input type="text" id="device-board" placeholder="e.g., mt6768">
                     </div>
                     <div class="form-group">
                         <label for="device-bootloader">
-                            Bootloader<span class="required-badge">required</span>
+                            Bootloader<span class="optional-badge">optional</span>
                         </label>
                         <input type="text" id="device-bootloader" placeholder="e.g., unknown">
                     </div>
                     <div class="form-group">
                         <label for="device-hardware">
-                            Hardware<span class="required-badge">required</span>
+                            Hardware<span class="optional-badge">optional</span>
                         </label>
                         <input type="text" id="device-hardware" placeholder="e.g., mt6768">
                     </div>
                     <div class="form-group">
                         <label for="device-id">
-                            ID<span class="required-badge">required</span>
+                            ID<span class="optional-badge">optional</span>
                         </label>
-                        <input type="text" id="device-id" placeholder="e.g., BP41.250916.015.A1">
+                        <input type="text" id="device-id" placeholder="e.g., ZP11.251121.010">
                     </div>
                     <div class="form-group">
                         <label for="device-display">
-                            Display<span class="required-badge">required</span>
+                            Display<span class="optional-badge">optional</span>
                         </label>
-                        <input type="text" id="device-display" placeholder="e.g., BP41.250916.015.A1">
+                        <input type="text" id="device-display" placeholder="e.g., ZP11.251121.010">
                     </div>
                     <div class="form-group">
                         <label for="device-host">
-                            Host<span class="required-badge">required</span>
+                            Host<span class="optional-badge">optional</span>
                         </label>
-                        <input type="text" id="device-host" placeholder="e.g., r-a06a74e0f133947d-zsc4">
+                        <input type="text" id="device-host" placeholder="e.g., 58f21d9a5042">
                     </div>
                     <div class="form-group">
                         <label for="device-incremental">
-                            Incremental<span class="required-badge">required</span>
+                            Incremental<span class="optional-badge">optional</span>
                         </label>
-                        <input type="text" id="device-incremental" placeholder="e.g., r-a06a74e0f133947d-zsc4">
+                        <input type="text" id="device-incremental" placeholder="e.g., 14518957">
                     </div>
                     <div class="form-group">
                         <label for="device-timestamp">
-                            Timestamp<span class="required-badge">required</span>
+                            Timestamp<span class="optional-badge">optional</span>
                         </label>
-                        <input type="text" id="device-timestamp" placeholder="e.g., r-a06a74e0f133947d-zsc4">
+                        <input type="text" id="device-timestamp" placeholder="e.g., 1764628806">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-preview_sdk">
+                            Preview SDK<span class="optional-badge">optional</span>
+                        </label>
+                        <input type="text" id="device-preview_sdk" placeholder="e.g., 20251117">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-sdk_full">
+                            SDK Full<span class="optional-badge">optional</span>
+                        </label>
+                        <input type="text" id="device-sdk_full" placeholder="e.g., 36.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-codename">
+                            Codename<span class="optional-badge">optional</span>
+                        </label>
+                        <input type="text" id="device-codename" placeholder="e.g., CANARY">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-user">
+                            User<span class="optional-badge">optional</span>
+                        </label>
+                        <input type="text" id="device-user" placeholder="e.g., android-build">
+                    </div>
+                    <div class="form-group">
+                        <label for="device-sdk_fingerprint">
+                            SDK Fingerprint<span class="optional-badge">optional</span>
+                        </label>
+                        <input type="text" id="device-sdk_fingerprint" placeholder="e.g., 5884f561dec5f7cd98d06e1dc7ca80b1">
                     </div>
                     <div class="form-group">
                         <label for="device-security_patch">
-                            Security Patch<span class="required-badge">required</span>
+                            Security Patch<span class="optional-badge">optional</span>
                         </label>
-                        <input type="text" id="device-security_patch" placeholder="e.g., r-a06a74e0f133947d-zsc4">
+                        <input type="text" id="device-security_patch" placeholder="e.g., 2025-12-05">
                     </div>
                     <div class="form-group">
                         <label for="device-android-version">
                             Android Version<span class="optional-badge">optional</span>
                         </label>
-                        <input type="text" id="device-android-version" placeholder="e.g., 14">
+                        <input type="text" id="device-android-version" placeholder="e.g., 16">
                     </div>
                     <div class="form-group">
                         <label for="device-sdk-int">
                             SDK Version<span class="optional-badge">optional</span>
                         </label>
-                        <input type="text" id="device-sdk-int" placeholder="e.g., 34">
+                        <input type="text" id="device-sdk-int" placeholder="e.g., 36">
                     </div>
                 </div>
                 <div class="form-buttons">
