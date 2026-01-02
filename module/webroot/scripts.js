@@ -61,6 +61,11 @@ const templates = {
                                                            HOST: ${data.host}<br>
                                                            Incremental: ${data.incremental}<br>
                                                            Timestamp: ${data.timestamp}<br>
+                                                           Preview SDK: ${data.preview_sdk}<br>
+                                                           SDK Full: ${data.sdk_full}<br>
+                                                           Codename: ${data.codename}<br>
+                                                           User: ${data.user}<br>
+                                                           SDK Fingerprint: ${data.sdk_fingerprint}<br>
                                                            Security Patch: ${data.security_patch}`;
         
         return card;
@@ -758,6 +763,11 @@ function renderDeviceList() {
             const product = currentConfig[key].PRODUCT || 'Undefined';
             const security_patch = currentConfig[key].SECURITY_PATCH || 'Undefined';
             const timestamp = currentConfig[key].TIMESTAMP || 'Undefined';
+            const preview_sdk = currentConfig[key].PREVIEW_SDK || 'Undefined';
+            const sdk_full = currentConfig[key].SDK_FULL || 'Undefined';
+            const codename = currentConfig[key].CODENAME || 'Undefined';
+            const user = currentConfig[key].USER || 'Undefined';
+            const sdk_fingerprint = currentConfig[key].SDK_FINGERPRINT || 'Undefined';
 
             const deviceCard = templates.deviceCard({
                 key: key,
@@ -776,7 +786,12 @@ function renderDeviceList() {
                 manufacturer: manufacturer,
                 product: product,
                 security_patch: security_patch,
-                timestamp: timestamp
+                timestamp: timestamp,
+                preview_sdk: preview_sdk,
+                sdk_full: sdk_full,
+                codename: codename,
+                user: user,
+                sdk_fingerprint: sdk_fingerprint
             });
             
             fragment.appendChild(deviceCard);
@@ -850,6 +865,11 @@ function openDeviceModal(deviceKey = null) {
         document.getElementById('device-incremental').value = deviceData.INCREMENTAL || '';
         document.getElementById('device-timestamp').value = deviceData.TIMESTAMP || '';
         document.getElementById('device-security_patch').value = deviceData.SECURITY_PATCH || '';
+        document.getElementById('device-preview_sdk').value = deviceData.PREVIEW_SDK || '';
+        document.getElementById('device-sdk_full').value = deviceData.SDK_FULL || '';
+        document.getElementById('device-codename').value = deviceData.CODENAME || '';
+        document.getElementById('device-user').value = deviceData.USER || '';
+        document.getElementById('device-sdk_fingerprint').value = deviceData.SDK_FINGERPRINT || '';
         setupAndroidSdkLink();
     } else {
         title.textContent = 'Add New Device Profile';
@@ -977,7 +997,12 @@ async function saveDevice(e) {
         'device-host',
         'device-incremental',
         'device-timestamp',
-        'device-security_patch'
+        'device-security_patch',
+        'device-PREVIEW_SDK',
+        'device-SDK_FULL',
+        'device-CODENAME',
+        'device-USER',
+        'device-SDK_FINGERPRINT'
     ];
     let hasError = false;
     const missingFields = [];
@@ -1070,6 +1095,11 @@ async function saveDevice(e) {
     const security_patch = document.getElementById('device-security_patch').value.trim() || 'Undefined';
     const androidVersion = document.getElementById('device-android-version').value.trim();
     const sdkInt = document.getElementById('device-sdk-int').value.trim();
+    const preview_sdk = document.getElementById('device-preview_sdk').value.trim() || 'Undefined';
+    const sdk_full = document.getElementById('device-sdk_full').value.trim() || 'Undefined';
+    const codename = document.getElementById('device-codename').value.trim() || 'Undefined';
+    const user = document.getElementById('device-user').value.trim() || 'Undefined';
+    const sdk_fingerprint = document.getElementById('device-sdk_fingerprint').value.trim() || 'Undefined';
     
     const deviceData = {
         BRAND: brand,
@@ -1086,7 +1116,12 @@ async function saveDevice(e) {
         HOST: host,
         INCREMENTAL: incremental,
         TIMESTAMP: timestamp,
-        SECURITY_PATCH: security_patch
+        SECURITY_PATCH: security_patch,
+        PREVIEW_SDK: preview_sdk,
+        SDK_FULL: sdk_full,
+        CODENAME: codename,
+        USER: user,
+        SDK_FINGERPRINT: sdk_fingerprint
     };
     
     if (androidVersion) {
