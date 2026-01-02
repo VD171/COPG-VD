@@ -37,7 +37,6 @@ window.onerror = function (message, source, lineno, colno, error) {
     document.body.appendChild(div);
 };
 
-
 const templates = {
     deviceCard: (data) => {
         const template = document.getElementById('device-card-template');
@@ -998,27 +997,29 @@ async function saveDevice(e) {
         'device-incremental',
         'device-timestamp',
         'device-security_patch',
-        'device-PREVIEW_SDK',
-        'device-SDK_FULL',
-        'device-CODENAME',
-        'device-USER',
-        'device-SDK_FINGERPRINT'
+        'device-preview_sdk',
+        'device-sdk_full',
+        'device-codename',
+        'device-user',
+        'device-sdk_fingerprint'
     ];
     let hasError = false;
     const missingFields = [];
     
     requiredFieldIds.forEach(id => {
         const field = document.getElementById(id);
-        field.classList.remove('error');
-        const existingError = field.nextElementSibling;
-        if (existingError && existingError.classList.contains('error-message')) {
-            existingError.remove();
+        if (field) {
+            field.classList.remove('error');
+            const existingError = field.nextElementSibling;
+            if (existingError && existingError.classList.contains('error-message')) {
+                existingError.remove();
+            }
         }
     });
     
     requiredFieldIds.forEach(id => {
         const field = document.getElementById(id);
-        if (!field.value.trim()) {
+        if (field && !field.value.trim()) {
             field.classList.add('error');
             const errorMessage = document.createElement('span');
             errorMessage.className = 'error-message';
@@ -1029,58 +1030,17 @@ async function saveDevice(e) {
         }
     });
     
-    const deviceName = document.getElementById('device-name').value.trim();
-    const deviceModel = document.getElementById('device-model').value.trim();
-    const deviceKey = `COPG-VD`;
-    
-    if (!editingDevice) {
-        for (const [key, value] of Object.entries(currentConfig)) {
-            if (key === 'COPG-VD' && key !== deviceKey) {
-                if (value.DEVICE === deviceName) {
-                    const field = document.getElementById('device-name');
-                    field.classList.add('error');
-                    const existingError = field.nextElementSibling;
-                    if (existingError && existingError.classList.contains('error-message')) {
-                        existingError.remove();
-                    }
-                    const errorMessage = document.createElement('span');
-                    errorMessage.className = 'error-message';
-                    errorMessage.textContent = 'Device collections already exists';
-                    field.insertAdjacentElement('afterend', errorMessage);
-                    appendToOutput(`Device profile "${deviceName}" already exists`, 'error');
-                    hasError = true;
-                    if (!missingFields.includes('Device Name')) missingFields.push('Device Name (duplicate)');
-                }
-                if (value.MODEL === deviceModel) {
-                    const field = document.getElementById('device-model');
-                    field.classList.add('error');
-                    const existingError = field.nextElementSibling;
-                    if (existingError && existingError.classList.contains('error-message')) {
-                        existingError.remove();
-                    }
-                    const errorMessage = document.createElement('span');
-                    errorMessage.className = 'error-message';
-                    errorMessage.textContent = 'Device model already exists';
-                    field.insertAdjacentElement('afterend', errorMessage);
-                    appendToOutput(`Device model "${deviceModel}" already exists`, 'error');
-                    hasError = true;
-                    if (!missingFields.includes('Model')) missingFields.push('Model (duplicate)');
-                }
-            }
-        }
-    }
-    
     if (hasError) {
-        const poppyMessage = missingFields.length > 0 
+        const popupMessage = missingFields.length > 0 
             ? `Please fill in the following fields: ${missingFields.join(', ')}`
             : 'Please correct the errors in the form';
-        appendToOutput(poppyMessage, 'error');
-        document.getElementById('error-message').textContent = poppyMessage;
+        appendToOutput(popupMessage, 'error');
+        document.getElementById('error-message').textContent = popupMessage;
         showPopup('error-popup');
         return;
     }
     
-    const packageKey = 'COPG-VD';
+    const deviceName = document.getElementById('device-name').value.trim();
     const brand = document.getElementById('device-brand').value.trim() || 'Undefined';
     const model = document.getElementById('device-model').value.trim() || 'Undefined';
     const product = document.getElementById('device-product').value.trim() || 'Undefined';
@@ -1090,6 +1050,8 @@ async function saveDevice(e) {
     const id = document.getElementById('device-id').value.trim() || 'Undefined';
     const display = document.getElementById('device-display').value.trim() || 'Undefined';
     const host = document.getElementById('device-host').value.trim() || 'Undefined';
+    const manufacturer = document.getElementById('device-manufacturer').value.trim() || 'Undefined';
+    const fingerprint = document.getElementById('device-fingerprint').value.trim() || 'Undefined';
     const incremental = document.getElementById('device-incremental').value.trim() || 'Undefined';
     const timestamp = document.getElementById('device-timestamp').value.trim() || 'Undefined';
     const security_patch = document.getElementById('device-security_patch').value.trim() || 'Undefined';
@@ -1104,9 +1066,9 @@ async function saveDevice(e) {
     const deviceData = {
         BRAND: brand,
         DEVICE: deviceName,
-        MANUFACTURER: document.getElementById('device-manufacturer').value.trim() || 'Undefined',
+        MANUFACTURER: manufacturer,
         MODEL: model,
-        FINGERPRINT: document.getElementById('device-fingerprint').value.trim() || `${brand}/${model}/${model}:14/UP1A.231005.007/20230101:user/release-keys`,
+        FINGERPRINT: fingerprint,
         PRODUCT: product,
         BOARD: board,
         BOOTLOADER: bootloader,
@@ -1133,37 +1095,18 @@ async function saveDevice(e) {
     }
     
     try {
-        if (editingDevice && editingDevice !== deviceKey) {
-            const oldPackageKey = 'COPG-VD';
-            const oldIndex = configKeyOrder.indexOf(editingDevice);
-            const oldPackageIndex = configKeyOrder.indexOf(oldPackageKey);
-            
-            if (oldIndex !== -1) {
-                configKeyOrder[oldIndex] = deviceKey;
-            }
-            if (oldPackageIndex !== -1) {
-                configKeyOrder[oldPackageIndex] = packageKey;
-            }
-            
-            if (currentConfig[oldPackageKey]) {
-                currentConfig[packageKey] = currentConfig[oldPackageKey];
-                delete currentConfig[oldPackageKey];
-            }
-            delete currentConfig[editingDevice];
-        } else if (!editingDevice) {
-            configKeyOrder.push(packageKey, deviceKey);
-        }
-        
-        if (!Array.isArray(currentConfig[packageKey])) {
-            currentConfig[packageKey] = [];
-        }
+        const deviceKey = 'COPG-VD';
         currentConfig[deviceKey] = deviceData;
+        
+        if (!configKeyOrder.includes(deviceKey)) {
+            configKeyOrder.push(deviceKey);
+        }
         
         await saveConfig();
         closeModal('device-modal');
         renderDeviceList();
         appendToOutput(
-            `Device profile "${deviceName}" saved`, 
+            `Device profile "${deviceName}" updated`, 
             'success'
         );
     } catch (error) {
