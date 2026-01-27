@@ -155,14 +155,13 @@ private:
                 if (device.contains("SDK_FULL")) {
                     std::string device_sdk_full_string = device["SDK_FULL"].get<std::string>();
                     auto dot_position = device_sdk_full_string.find('.');
-                    int device_sdk_full_int = std::stoi(dot_position == std::string::npos ? device_sdk_full_string : device_sdk_full_string.substr(0, dot_position)) * 1000000;
+                    int major = std::stoi(dot_position == std::string::npos ? device_sdk_full_string : device_sdk_full_string.substr(0, dot_position));
+                    int minor = 0;
                     if (dot_position != std::string::npos) {
-                        std::string decimal_part = device_sdk_full_string.substr(dot_position + 1);
-                        if (decimal_part.size() > 2) decimal_part.resize(2);
-                        while (decimal_part.size() < 2) decimal_part += '0';
-                        device_sdk_full_int += std::stoi(decimal_part) * 10000;
+                        std::string minor_str = device_sdk_full_string.substr(dot_position + 1);
+                        minor = std::stoi(minor_str);
                     }
-                    spoof_info.version_sdk_int_full = device_sdk_full_int;
+                    spoof_info.version_sdk_int_full = major * 100000 + minor;
                 }
 
                 if (device.contains("TIMESTAMP")) {
