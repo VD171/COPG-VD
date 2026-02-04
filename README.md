@@ -1,6 +1,5 @@
 ## COPG-VD
-COPG-VD is a fork of COPG by @AlirezaParsi, renamed to COPG-VD to prevent confusion.  
-This module is redesigned for global device spoofing.  
+COPG-VD is a module designed for global device spoofing.  
 This means even system apps and the whole device will be hooked.  
   
 ## How to use?
@@ -47,7 +46,3 @@ If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWeb
 Disable resetprop usage and enable spoof Build info only.  
 #### Use ro.product.manufacturer:  
 Disable if you care for "Found device spoofing" detection in Disclosure root detector app.  
-___
-For multi-profiles and multiple targets,  
-use the original COPG by AlirezaParsi:  
-https://github.com/AlirezaParsi/COPG  
