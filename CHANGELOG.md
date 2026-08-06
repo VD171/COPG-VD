@@ -18,6 +18,6 @@
 - Fixed Build.TIME and Build.VERSION.SDK_INT_FULL getting garbage when the config has no TIMESTAMP, SDK_FULL or SDK_INT.
 - The WebUI no longer loads anything from the internet: marked, the fonts, the readme and the license are inside the module.
 - The WebUI no longer builds shell commands out of file names. A crafted file name on shared storage could run commands as root through the file picker.
-- The WebUI content security policy went from default-src * to default-src 'none'.
+- The WebUI content security policy went from default-src * to default-src 'none', declared both in config.json and in the page itself, so it also applies under KsuWebUIStandalone (Magisk), which does not read config.json.
 
 _The new build only reaches android.os.Build after a reboot: resetprop is re-applied right away, but zygisk reads the config when zygote starts._
