@@ -385,6 +385,18 @@ def main():
         gh_output(changed="false", build=build["name"], incremental=build["build_id"])
         return
 
+    # Never walk the committed build backwards. The API returns the highest canary buildId it
+    # currently lists, and a withdrawn build makes that number drop - which would commit a
+    # downgrade that every device then refuses anyway (the updater has the same guard).
+    try:
+        if int(build["build_id"]) < int(current.get("INCREMENTAL") or 0):
+            log(f"::warning::upstream build {build['name']} ({build['build_id']}) is older than "
+                f"the committed {current.get('ID')} ({current.get('INCREMENTAL')}) - not touching it")
+            gh_output(changed="false", build=build["name"], incremental=build["build_id"])
+            return
+    except ValueError:
+        fail(f"non-numeric incremental: API {build['build_id']!r}, file {current.get('INCREMENTAL')!r}")
+
     props = collect_props(build["url"])
     body, values = apply_props(body, props, static)
     missing = [f for f in PROP_MAP if f not in values]
