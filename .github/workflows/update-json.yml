@@ -66,6 +66,30 @@ jobs:
           git commit -m "COPG-VD.json: $BUILD (security patch $PATCH)"
           git push
 
+      # GitHub disables scheduled workflows after 60 days without a commit, and only commits
+      # count - not tags, not runs, not the schedule firing. The canary cadence alone does not
+      # cover it: 2026-04-17 -> 2026-06-18 was 62 days. So when nothing changed and the repo is
+      # about to go quiet, leave a line saying what was verified and when. It is a real record
+      # of the automation being alive, which an empty commit would not be.
+      - name: Keep the schedule alive
+        if: github.event_name == 'schedule' && steps.gen.outputs.changed != 'true'
+        env:
+          BUILD: ${{ steps.gen.outputs.build }}
+          INCREMENTAL: ${{ steps.gen.outputs.incremental }}
+        run: |
+          age=$(( ( $(date -u +%s) - $(git log -1 --format=%ct) ) / 86400 ))
+          echo "last commit was ${age} day(s) ago"
+          [ "$age" -lt 40 ] && { echo "still fresh, nothing to do"; exit 0; }
+          printf '%s  newest canary: %s (%s)\n' "$(date -u +%F)" "$BUILD" "$INCREMENTAL" \
+            >> .github/last-check
+          tail -n 12 .github/last-check > .github/last-check.tmp
+          mv .github/last-check.tmp .github/last-check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/last-check
+          git commit -m "chore: keepalive, newest canary is still $BUILD"
+          git push
+
       - name: Upload JSON artifact
         if: steps.gen.outputs.changed == 'true'
         uses: actions/upload-artifact@v4
