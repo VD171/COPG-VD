@@ -58,16 +58,27 @@ namespace {
 
         if (func != nullptr) {
             atexit_lock();
-            count++;
             if (!g_array) {
                 g_array = reinterpret_cast<AtexitEntry*>(malloc(capacity * sizeof(AtexitEntry)));
+                if (!g_array) {
+                    atexit_unlock();
+                    return -1;
+                }
             }
-            if (count > capacity) [[unlikely]] {
-                capacity *= 2;
-                g_array = reinterpret_cast<AtexitEntry*>(realloc(g_array, capacity * sizeof(AtexitEntry)));
+            if (count >= capacity) [[unlikely]] {
+                const size_t new_capacity = capacity * 2;
+                auto *grown = reinterpret_cast<AtexitEntry*>(
+                        realloc(g_array, new_capacity * sizeof(AtexitEntry)));
+                if (!grown) {           // realloc keeps the old block: do not leak it
+                    atexit_unlock();
+                    return -1;
+                }
+                g_array = grown;
+                capacity = new_capacity;
             }
-            g_array[count - 1].fn = func;
-            g_array[count - 1].arg = arg;
+            g_array[count].fn = func;
+            g_array[count].arg = arg;
+            count++;
             result = 0;
             atexit_unlock();
         }
@@ -79,29 +90,25 @@ namespace {
     // https://cs.android.com/android/platform/superproject/main/+/main:bionic/libc/arch-common/bionic/crtbegin_so.c;l=34;drc=5501003be73b73de59044b44b12f6e20ba6e0021
     extern "C" [[gnu::used]] void __cxa_finalize(void * /* dso */) { // NOLINT(bugprone-reserved-identifier)
         atexit_lock();
-        restart:
-        if (count > 0) {
-            size_t total = count;
-            for (size_t i = count - 1;; --i) {
-                if (g_array[i].fn == nullptr) continue;
+        // Pop from the end and shrink `count` as we go. Consuming the entry (instead of only
+        // blanking it) is what keeps this safe: an entry registered by a callback is picked up
+        // by the next iteration, a recursive __cxa_finalize drains what is left and finds an
+        // empty array on return, and there is no index left to run backwards past zero.
+        while (count > 0) {
+            const AtexitEntry entry = g_array[count - 1];
+            g_array[count - 1] = {};
+            count--;
 
-                // Clear the entry in the array to avoid calling an entry again
-                // if __cxa_finalize is called recursively.
-                const AtexitEntry entry = g_array[i];
-                g_array[i] = {};
+            if (entry.fn == nullptr) continue;
 
-                atexit_unlock();
-                entry.fn(entry.arg);
-                atexit_lock();
-
-                if (count != total) {
-                    goto restart;
-                }
-                if (i == 0) break;
-            }
-
-            free(g_array);
+            atexit_unlock();
+            entry.fn(entry.arg);
+            atexit_lock();
         }
+
+        free(g_array);
+        g_array = nullptr;      // a later __cxa_atexit must allocate again, not write freed memory
+        capacity = 8;
         atexit_unlock();
     }
 }
