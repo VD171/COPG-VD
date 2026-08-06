@@ -1,5 +1,11 @@
 # Changelog
 
+## v5.0.1-vd
+- The WebUI content security policy is now declared in the page itself, not only in config.json. KsuWebUIStandalone, which is what Magisk users run, does not read config.json - so on Magisk there was no policy at all.
+- The daily job that refreshes COPG-VD.json.example will never replace a build with an older one, the same rule the on-device updater already followed.
+
+_No change to the spoofing itself. Coming from v5.0.0-vd is optional; coming from anything older is not._
+
 ## v5.0.0-vd
 - Added COPG-VD.json auto-update, from the WebUI (Check Update / Update Now) or once per boot.
  . Only the build fields are rewritten, everything else you customized is kept: extra keys, custom BOOTLOADER/BOARD/HARDWARE, other objects, key order and formatting.
