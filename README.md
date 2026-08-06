@@ -45,6 +45,10 @@ The block above and `module/COPG-VD.json.example` are refreshed daily by the [Up
 `fingerprint-update.sh` pulls that file and updates your config, from the WebUI (**Check Update** / **Update Now**) or by itself **once per boot** (**Auto-update JSON on boot**, on by default).  
 * Both `/data/adb/COPG-VD.json` and `/data/adb/modules/COPG-VD/COPG-VD.json` are updated when both exist, and the previous content is kept as `.bak`.  
 * Only the build fields are rewritten (fingerprint, ID, incremental, timestamp, security patch, SDK, UUID, host, user). Everything else you customized is preserved: extra keys, `BOOTLOADER`/`BOARD`/`HARDWARE`, other objects, key order and formatting.  
+* It never goes backwards: an upstream build older than the one installed is refused. This is
+  routine (the repo can sit behind a config you updated by hand) and it is also the guard that
+  matters most on Android, where the only downloader available is busybox `wget`, which cannot
+  validate TLS certificates - every value is validated before use for the same reason.  
 * If your profile spoofs **another device** (different `BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT`), nothing is applied - a Pixel fingerprint on another profile is worse than an old fingerprint.  
 * At boot it runs in the background and keeps retrying for ~10 minutes, because wifi is usually not up yet when the boot finishes. It never delays the boot.  
 * `resetprop` is re-applied right after an update, but `android.os.Build` is written by the zygisk module when zygote starts: **reboot** for the new values to reach apps.  

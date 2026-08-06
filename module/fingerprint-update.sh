@@ -79,7 +79,10 @@ find_downloader() {
 }
 
 download() {
-    # TLS verification is never disabled: this file feeds props into every app.
+    # TLS is as good as the downloader available, and on a plain Android that is busybox
+    # wget, which prints "TLS certificate validation not implemented" and means it. Nothing
+    # here disables verification, but nothing can promise it either - which is why every value
+    # is validated before use and why an older build is refused instead of applied.
     case "$DOWNLOADER" in
         curl) curl -fsSL --max-time 60 -o "$TMP_FILE" "$REMOTE_URL" 2>/dev/null ;;
         wget) wget -q -T 60 -O "$TMP_FILE" "$REMOTE_URL" 2>/dev/null ;;
@@ -207,7 +210,8 @@ fetch_remote() {
     return 0
 }
 
-# 0 = something to do, 1 = already current, 2 = other device, 3 = no config file
+# 0 = something to do, 1 = already current, 2 = other device, 3 = no config,
+# 4 = upstream is older than what is installed file
 compare() {
     TARGETS=$(existing_targets)
     [ -n "$TARGETS" ] || { log "no config file found in: $CONFIG_PATHS"; return 3; }
@@ -229,6 +233,16 @@ compare() {
     log "local:  $LOCAL_ID ($(json_get "$REFERENCE" SECURITY_PATCH))"
     log "remote: $REMOTE_ID ($(json_get "$TMP_FILE" SECURITY_PATCH))"
     [ "$LOCAL_ID" = "$REMOTE_ID" ] && [ "$LOCAL_INCREMENTAL" = "$REMOTE_INCREMENTAL" ] && return 1
+
+    # Only ever move forward. "different" is not "newer": the repo can legitimately sit behind
+    # the device (a config updated by hand, a branch not merged yet), and on Android the only
+    # downloader available is busybox wget, which cannot validate certificates - so an older
+    # build arriving over the wire is exactly what a downgrade would look like.
+    case "$LOCAL_INCREMENTAL$REMOTE_INCREMENTAL" in
+        *[!0-9]*|"") log "non-numeric incremental, refusing to guess which build is newer"
+                     return 4 ;;
+    esac
+    [ "$REMOTE_INCREMENTAL" -le "$LOCAL_INCREMENTAL" ] && return 4
     return 0
 }
 
@@ -309,6 +323,8 @@ case "$MODE" in
             2) log "this is not the upstream device profile, nothing applied"
                echo "status: skipped-custom-device"; exit 0 ;;
             3) echo "status: no-config"; exit 1 ;;
+            4) log "upstream ($REMOTE_ID) is not newer than what is installed ($LOCAL_ID)"
+               echo "status: local-newer"; exit 0 ;;
         esac
         if [ "$MODE" = "check" ]; then
             log "update available: $LOCAL_ID -> $REMOTE_ID"
@@ -335,6 +351,7 @@ case "$MODE" in
                     1) log "already on the newest build" ;;
                     2) log "this is not the upstream device profile, nothing applied" ;;
                     3) log "no config file to update" ;;
+                    4) log "upstream is not newer than what is installed, nothing applied" ;;
                 esac
                 exit 0
             fi

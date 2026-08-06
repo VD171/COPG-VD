@@ -18,7 +18,10 @@ All notable changes to COPG-VD. Versions follow `v<major>.<minor>.<patch>-vd`; t
   - At boot it runs in the background and retries for ~10 minutes, because wifi is usually
     not up yet when boot completes. It never delays boot, and a boot with no network does
     not consume that boot's turn.
-  - Every value coming off the network is validated before it is written.
+  - Every value coming off the network is validated before it is written, and an upstream
+    build older than the installed one is refused. Both matter more than they look: on a plain
+    Android the only downloader present is busybox `wget`, which prints "TLS certificate
+    validation not implemented" and means it, so the transport cannot be trusted on its own.
 - **Auto-update JSON on boot** toggle in the WebUI (`.skip.autoupdate`), on by default.
 - `service.sh --props-only`, so the props are re-applied right after an update and
   `resetprop` never disagrees with what the zygisk module reads.

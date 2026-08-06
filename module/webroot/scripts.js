@@ -1236,6 +1236,9 @@ async function runUpdater(mode) {
             await loadConfig();
             renderDeviceList();
             break;
+        case 'local-newer':
+            appendToOutput('Your config is newer than upstream, nothing was changed', 'warning');
+            break;
         case 'skipped-custom-device':
             appendToOutput('Your profile spoofs another device, so nothing was changed', 'warning');
             break;
