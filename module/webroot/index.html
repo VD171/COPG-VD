@@ -6,7 +6,11 @@
     <meta name="theme-color" content="#60A5FA" id="theme-color">
     <title>COPG-VD</title>
     <!-- Everything is served from inside the module. This page can run root commands
-         through ksu.exec, so it must never load code or content off the network. -->
+         through ksu.exec, so it must never load code or content off the network.
+         The same policy lives in webroot/config.json, which only KernelSU's own WebUI
+         reads - KsuWebUIStandalone (what Magisk users run) ignores it and just serves
+         this directory, so without the meta tag those users would get no policy at all. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'none'; base-uri 'none'">
     <link rel="stylesheet" href="fonts.css">
     <link rel="stylesheet" href="styles.css">
     <script src="marked.min.js"></script>
