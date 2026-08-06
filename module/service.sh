@@ -1,8 +1,7 @@
 #!/system/bin/sh
 
+MODDIR=${0%/*}
 COPG_VD_JSON="/data/adb/COPG-VD.json"
-json_content=$(cat "$COPG_VD_JSON")
-getprop_output=$(getprop)
 
 find_resetprop() {
     for path in "/data/adb/ksu/bin/resetprop" "/data/adb/magisk/resetprop" "/debug_ramdisk/resetprop" "/data/adb/ap/bin/resetprop" "/system/bin/resetprop" "/vendor/bin/resetprop"; do
@@ -55,7 +54,13 @@ MANUFACTURER|ro.product.manufacturer
 MAPPING
 }
 
-if [ ! -e "/data/adb/modules/COPG-VD/.skip.resetprop" ]; then
+# Re-runnable: fingerprint-update.sh calls "service.sh --props-only" right after refreshing the
+# JSON, so resetprop never disagrees with what the zygisk module will read.
+apply_props() {
+  json_content=$(cat "$COPG_VD_JSON")
+  getprop_output=$(getprop)
+
+  if [ ! -e "$MODDIR/.skip.resetprop" ]; then
     get_prop_mapping | while IFS='|' read -r json_key props; do
       [ -z "$json_key" ] && continue
       json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
@@ -97,7 +102,16 @@ if [ ! -e "/data/adb/modules/COPG-VD/.skip.resetprop" ]; then
           IFS="$old_ifs"
       fi
     done
+  fi
+}
+
+# Called back by fingerprint-update.sh after it rewrites the JSON.
+if [ "$1" = "--props-only" ]; then
+    apply_props
+    exit 0
 fi
+
+apply_props
 
 until [ "$(getprop sys.boot_completed)" = "1" ]; do
     sleep 2
@@ -107,3 +121,9 @@ sleep 2
 
 chmod 0644 "$COPG_VD_JSON"
 chcon u:object_r:system_file:s0 "$COPG_VD_JSON"
+
+# Once per boot, in the background: the download must never hold the boot up, and wifi
+# usually is not up yet at boot_completed (fingerprint-update.sh keeps retrying on its own).
+if [ ! -e "$MODDIR/.skip.autoupdate" ] && [ -f "$MODDIR/fingerprint-update.sh" ]; then
+    sh "$MODDIR/fingerprint-update.sh" boot >/dev/null 2>&1 &
+fi

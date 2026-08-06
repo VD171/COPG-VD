@@ -23,7 +23,7 @@ struct DeviceInfo {
     std::string fingerprint;
     std::string product;
     std::string android_version;
-    int version_sdk_int;
+    int version_sdk_int = 0;
     std::string board;
     std::string bootloader;
     std::string hardware;
@@ -33,10 +33,10 @@ struct DeviceInfo {
     std::string odm_sku;
     std::string sku;
     std::string user;
-    int64_t time;
+    int64_t time = 0;
     std::string version_incremental;
     std::string version_sdk;
-    int version_sdk_int_full;
+    int version_sdk_int_full = 0;
     std::string version_security_patch;
     std::string version_release_or_codename;
     std::string version_release_or_preview_display;
@@ -58,7 +58,9 @@ private:
     zygisk::Api* api = nullptr;
     JNIEnv* env = nullptr;
 
-    DeviceInfo spoof_info;
+    // Value-initialized: setInt/setLong only skip a field when it is 0, so an
+    // indeterminate int here would be written straight into Build.TIME.
+    DeviceInfo spoof_info{};
 
     void spoofDevice() {
         jclass buildClass = env->FindClass("android/os/Build");

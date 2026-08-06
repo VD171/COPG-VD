@@ -47,25 +47,25 @@ const templates = {
         card.style.animationDelay = `${data.delay}s`;
         card.querySelector('.device-name').textContent = data.deviceName;
         card.querySelector('.edit-btn').dataset.device = data.key;
-        card.querySelector('.device-details').innerHTML = `Model: ${data.model}<br>
-                                                           Brand: ${data.brand}<br>
-                                                           Product: ${data.product}<br>
-                                                           Manufacturer: ${data.manufacturer}<br>
-                                                           Fingerprint: ${data.fingerprint}<br>
-                                                           Board: ${data.board}<br>
-                                                           Bootloader: ${data.bootloader}<br>
-                                                           Hardware: ${data.hardware}<br>
-                                                           ID: ${data.id}<br>
-                                                           Display: ${data.display}<br>
-                                                           HOST: ${data.host}<br>
-                                                           Incremental: ${data.incremental}<br>
-                                                           Timestamp: ${data.timestamp}<br>
-                                                           Preview SDK: ${data.preview_sdk}<br>
-                                                           SDK Full: ${data.sdk_full}<br>
-                                                           Codename: ${data.codename}<br>
-                                                           User: ${data.user}<br>
-                                                           SDK Fingerprint: ${data.sdk_fingerprint}<br>
-                                                           Security Patch: ${data.security_patch}`;
+        card.querySelector('.device-details').innerHTML = `Model: ${escapeHtml(data.model)}<br>
+                                                           Brand: ${escapeHtml(data.brand)}<br>
+                                                           Product: ${escapeHtml(data.product)}<br>
+                                                           Manufacturer: ${escapeHtml(data.manufacturer)}<br>
+                                                           Fingerprint: ${escapeHtml(data.fingerprint)}<br>
+                                                           Board: ${escapeHtml(data.board)}<br>
+                                                           Bootloader: ${escapeHtml(data.bootloader)}<br>
+                                                           Hardware: ${escapeHtml(data.hardware)}<br>
+                                                           ID: ${escapeHtml(data.id)}<br>
+                                                           Display: ${escapeHtml(data.display)}<br>
+                                                           HOST: ${escapeHtml(data.host)}<br>
+                                                           Incremental: ${escapeHtml(data.incremental)}<br>
+                                                           Timestamp: ${escapeHtml(data.timestamp)}<br>
+                                                           Preview SDK: ${escapeHtml(data.preview_sdk)}<br>
+                                                           SDK Full: ${escapeHtml(data.sdk_full)}<br>
+                                                           Codename: ${escapeHtml(data.codename)}<br>
+                                                           User: ${escapeHtml(data.user)}<br>
+                                                           SDK Fingerprint: ${escapeHtml(data.sdk_fingerprint)}<br>
+                                                           Security Patch: ${escapeHtml(data.security_patch)}`;
         
         return card;
     },
@@ -93,6 +93,20 @@ const templates = {
         return card;
     }
 };
+
+// Everything this page runs goes through ksu.exec, which is ALREADY root: there is no need
+// to wrap anything in `su -c`, and doing so adds a quoting layer that turns any file name
+// into a root command. Every value interpolated into a command must go through shq().
+function shq(value) {
+    return `'${String(value).replace(/'/g, "'\\''")}'`;
+}
+
+// For the few places that build HTML strings out of names coming from the filesystem.
+function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, ch => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]
+    ));
+}
 
 async function execCommand(command) {
     return new Promise((resolve, reject) => {
@@ -213,10 +227,31 @@ function activateInfoTab(tabId) {
     }
 }
 
+// marked does not sanitize HTML, and this page can run root commands: a single
+// <img src=x onerror=...> in the rendered markdown would be a root shell. The files are
+// shipped inside the module now, so this is defense in depth rather than the only guard.
+function sanitizeHtml(html) {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('script, iframe, object, embed, link, meta, base, form, style')
+       .forEach(node => node.remove());
+    doc.querySelectorAll('*').forEach(node => {
+        for (const attr of Array.from(node.attributes)) {
+            const name = attr.name.toLowerCase();
+            const value = attr.value.replace(/\s+/g, '').toLowerCase();
+            if (name.startsWith('on') || (['href', 'src', 'xlink:href'].includes(name) &&
+                (value.startsWith('javascript:') || value.startsWith('data:text/html')))) {
+                node.removeAttribute(attr.name);
+            }
+        }
+    });
+    return doc.body.innerHTML;
+}
+
 async function loadMarkdownContent() {
+    // Local files, packed into the module: the WebUI makes no network request.
     const contents = {
-        'license-content': 'https://raw.githubusercontent.com/VD171/COPG-VD/main/LICENSE',
-        'readme-content': 'https://raw.githubusercontent.com/VD171/COPG-VD/main/README.md'
+        'license-content': 'LICENSE',
+        'readme-content': 'README.md'
     };
     
     setTimeout(() => {
@@ -253,7 +288,7 @@ async function loadMarkdownContent() {
             
             let html = marked.parse(text);
             html = processCallouts(html);
-            container.innerHTML = html;
+            container.innerHTML = sanitizeHtml(html);
             container.dataset.loaded = 'true';
             
             const centeredElements = container.querySelectorAll('.centered-text, center, [align="center"], [style*="text-align: center"], [style*="text-align:center"]');
@@ -327,7 +362,7 @@ async function loadMarkdownContent() {
                 };
             });
         } catch (err) {
-            container.innerHTML = `<div style="color:var(--error); padding:16px;">Failed to load: ${err.message}</div>`;
+            container.innerHTML = `<div style="color:var(--error); padding:16px;">Failed to load: ${escapeHtml(err.message)}</div>`;
         }
     }
     
@@ -381,9 +416,22 @@ function processCallouts(html) {
     return html;
 }
 
+// The WebView has no handler for external links, so `am start` stays - but the URL is a
+// string from a document, and inside double quotes a $(...) in it would run as root.
 function openLink(url) {
-    execCommand(`am start -a android.intent.action.VIEW -d "${url}"`).catch(() => {
-        window.open(url, '_blank');
+    let parsed;
+    try {
+        parsed = new URL(url);
+    } catch (error) {
+        appendToOutput(`Refused to open a malformed link: ${url}`, 'warning');
+        return;
+    }
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+        appendToOutput(`Refused to open a ${parsed.protocol} link`, 'warning');
+        return;
+    }
+    execCommand(`am start -a android.intent.action.VIEW -d ${shq(parsed.href)}`).catch(() => {
+        window.open(parsed.href, '_blank');
     });
 }
 
@@ -449,8 +497,7 @@ async function saveLogToFile() {
     try {
         await execCommand(`mkdir -p /storage/emulated/0/Download/COPG-VD/LOGS`);
         let finalFilename = document.getElementById('save-log-popup').dataset.filename || await generateLogFilename();
-        const escapedContent = logContent.replace(/'/g, "'\\''");
-        await execCommand(`echo '${escapedContent}' > "/storage/emulated/0/Download/COPG-VD/LOGS/${finalFilename}"`);
+        await execCommand(`echo ${shq(logContent)} > ${shq(`/storage/emulated/0/Download/COPG-VD/LOGS/${finalFilename}`)}`);
         appendToOutput(`Log saved to: ${finalFilename}`, 'success');
         return true;
     } catch (error) {
@@ -469,29 +516,29 @@ async function generateLogFilename() {
         const seconds = now.getSeconds().toString().padStart(2, '0');
         
         let filename = "COPG-VD-LOG.txt";
-        const checkOriginal = await execCommand(`ls "/storage/emulated/0/Download/COPG-VD/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
+        const checkOriginal = await execCommand(`ls ${shq(`/storage/emulated/0/Download/COPG-VD/LOGS/${filename}`)} 2>/dev/null || echo "not_found"`);
         
         if (checkOriginal.trim() !== 'not_found') {
             filename = `COPG-VD-LOG-${dateStr}.txt`;
-            const checkDated = await execCommand(`ls "/storage/emulated/0/Download/COPG-VD/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
+            const checkDated = await execCommand(`ls ${shq(`/storage/emulated/0/Download/COPG-VD/LOGS/${filename}`)} 2>/dev/null || echo "not_found"`);
             
             if (checkDated.trim() !== 'not_found') {
                 filename = `COPG-VD-LOG-${dateStr}-${hours}${minutes}.txt`;
-                const checkTime = await execCommand(`ls "/storage/emulated/0/Download/COPG-VD/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
+                const checkTime = await execCommand(`ls ${shq(`/storage/emulated/0/Download/COPG-VD/LOGS/${filename}`)} 2>/dev/null || echo "not_found"`);
                 
                 if (checkTime.trim() !== 'not_found') {
                     filename = `COPG-VD-LOG-${dateStr}-${hours}${minutes}${seconds}.txt`;
-                    const checkSeconds = await execCommand(`ls "/storage/emulated/0/Download/COPG-VD/LOGS/${filename}" 2>/dev/null || echo "not_found"`);
+                    const checkSeconds = await execCommand(`ls ${shq(`/storage/emulated/0/Download/COPG-VD/LOGS/${filename}`)} 2>/dev/null || echo "not_found"`);
                     
                     if (checkSeconds.trim() !== 'not_found') {
                         let counter = 1;
                         let newFilename = `COPG-VD-LOG-${dateStr}-${hours}${minutes}${seconds}(${counter}).txt`;
-                        let checkNumbered = await execCommand(`ls "/storage/emulated/0/Download/COPG-VD/LOGS/${newFilename}" 2>/dev/null || echo "not_found"`);
+                        let checkNumbered = await execCommand(`ls ${shq(`/storage/emulated/0/Download/COPG-VD/LOGS/${newFilename}`)} 2>/dev/null || echo "not_found"`);
                         
                         while (checkNumbered.trim() !== 'not_found') {
                             counter++;
                             newFilename = `COPG-VD-LOG-${dateStr}-${hours}${minutes}${seconds}(${counter}).txt`;
-                            checkNumbered = await execCommand(`ls "/storage/emulated/0/Download/COPG-VD/LOGS/${newFilename}" 2>/dev/null || echo "not_found"`);
+                            checkNumbered = await execCommand(`ls ${shq(`/storage/emulated/0/Download/COPG-VD/LOGS/${newFilename}`)} 2>/dev/null || echo "not_found"`);
                         }
                         filename = newFilename;
                     }
@@ -508,7 +555,7 @@ async function generateLogFilename() {
 async function backupFile(filename) {
     try {
         await execCommand(`mkdir -p /sdcard/Download/COPG-VD`);
-        const checkOriginal = await execCommand(`ls "/sdcard/Download/COPG-VD/${filename}" 2>/dev/null || echo "not_found"`);
+        const checkOriginal = await execCommand(`ls ${shq(`/sdcard/Download/COPG-VD/${filename}`)} 2>/dev/null || echo "not_found"`);
         
         let finalFilename = filename;
         if (checkOriginal.trim() !== 'not_found') {
@@ -518,31 +565,31 @@ async function backupFile(filename) {
             const extension = filename.split('.')[1];
             
             let newFilename = `${baseName}-${dateStr}.${extension}`;
-            const checkDated = await execCommand(`ls "/sdcard/Download/COPG-VD/${newFilename}" 2>/dev/null || echo "not_found"`);
+            const checkDated = await execCommand(`ls ${shq(`/sdcard/Download/COPG-VD/${newFilename}`)} 2>/dev/null || echo "not_found"`);
             
             if (checkDated.trim() === 'not_found') {
                 finalFilename = newFilename;
             } else {
                 const timeStr = now.toTimeString().slice(0, 5).replace(/:/g, '');
                 newFilename = `${baseName}-${dateStr}-${timeStr}.${extension}`;
-                let checkTime = await execCommand(`ls "/sdcard/Download/COPG-VD/${newFilename}" 2>/dev/null || echo "not_found"`);
+                let checkTime = await execCommand(`ls ${shq(`/sdcard/Download/COPG-VD/${newFilename}`)} 2>/dev/null || echo "not_found"`);
                 
                 if (checkTime.trim() === 'not_found') {
                     finalFilename = newFilename;
                 } else {
                     const fullTimeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
                     newFilename = `${baseName}-${dateStr}-${fullTimeStr}.${extension}`;
-                    let checkFullTime = await execCommand(`ls "/sdcard/Download/COPG-VD/${newFilename}" 2>/dev/null || echo "not_found"`);
+                    let checkFullTime = await execCommand(`ls ${shq(`/sdcard/Download/COPG-VD/${newFilename}`)} 2>/dev/null || echo "not_found"`);
                     
                     if (checkFullTime.trim() === 'not_found') {
                         finalFilename = newFilename;
                     } else {
                         let counter = 1;
-                        let checkNumbered = await execCommand(`ls "/sdcard/Download/COPG-VD/${newFilename}" 2>/dev/null || echo "not_found"`);
+                        let checkNumbered = await execCommand(`ls ${shq(`/sdcard/Download/COPG-VD/${newFilename}`)} 2>/dev/null || echo "not_found"`);
                         
                         while (checkNumbered.trim() !== 'not_found') {
                             newFilename = `${baseName}-${dateStr}-${fullTimeStr}(${counter}).${extension}`;
-                            checkNumbered = await execCommand(`ls "/sdcard/Download/COPG-VD/${newFilename}" 2>/dev/null || echo "not_found"`);
+                            checkNumbered = await execCommand(`ls ${shq(`/sdcard/Download/COPG-VD/${newFilename}`)} 2>/dev/null || echo "not_found"`);
                             counter++;
                         }
                         finalFilename = newFilename;
@@ -551,7 +598,7 @@ async function backupFile(filename) {
             }
         }
         
-        await execCommand(`cp /data/adb/${filename} "/sdcard/Download/COPG-VD/${finalFilename}"`);
+        await execCommand(`cp ${shq(`/data/adb/${filename}`)} ${shq(`/sdcard/Download/COPG-VD/${finalFilename}`)}`);
         appendToOutput(`Backup created: ${finalFilename}`, 'success');
         return true;
     } catch (error) {
@@ -694,7 +741,12 @@ function appendToOutput(content, type = 'info') {
     }
     
     logEntry.className = colorClass;
-    logEntry.innerHTML = `<span class="log-icon ${iconClass}"></span> ${new Date().toLocaleTimeString()} - ${content.replace(/^\[.\]\s*/i, '')}`;
+    // Log lines carry command output and file names: build them as text, never as HTML.
+    const icon = document.createElement('span');
+    icon.className = `log-icon ${iconClass}`;
+    logEntry.appendChild(icon);
+    logEntry.appendChild(document.createTextNode(
+        ` ${new Date().toLocaleTimeString()} - ${content.replace(/^\[.\]\s*/i, '')}`));
     output.appendChild(logEntry);
     if (!logContent.classList.contains('collapsed')) {
         logEntry.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -715,8 +767,10 @@ async function loadToggleStates() {
     try {
         const resetpropToggle = document.getElementById('toggle-resetprop');
         const roproductmanufacturerToggle = document.getElementById('toggle-ro-product-manufacturer');
+        const autoupdateToggle = document.getElementById('toggle-autoupdate');
         resetpropToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG-VD/.skip.resetprop ] && echo 0 || echo 1")).trim() === "1";
         roproductmanufacturerToggle.checked = (await execCommand("grep -q -i '#MANUFACTURER\\|ro\\.product\\.manufacturer' /data/adb/modules/COPG-VD/service.sh && echo 0 || echo 1")).trim() === "1";
+        autoupdateToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG-VD/.skip.autoupdate ] && echo 0 || echo 1")).trim() === "1";
     } catch (error) {
         appendToOutput("Failed to load toggle states: " + error, 'error');
     }
@@ -724,7 +778,7 @@ async function loadToggleStates() {
 
 async function loadConfig() {
     try {
-        const configContent = await execCommand(`cat ${CONFIG_FILE}`);
+        const configContent = await execCommand(`cat ${shq(CONFIG_FILE)}`);
         const parsedConfig = JSON.parse(configContent);
         currentConfig = parsedConfig;
         configKeyOrder = Object.keys(parsedConfig);
@@ -1131,13 +1185,13 @@ async function saveConfig() {
         }
         const configStr = JSON.stringify(orderedConfig, null, 2);
         
-        await execCommand(`echo '${configStr.replace(/'/g, "'\\''")}' > ${CONFIG_FILE}`);
-        await execCommand(`su -c 'chmod 644 ${CONFIG_FILE}'`);
+        await execCommand(`echo ${shq(configStr)} > ${shq(CONFIG_FILE)}`);
+        await execCommand(`chmod 644 ${shq(CONFIG_FILE)}`);
 
-        await execCommand(`su -c 'kill -9 $(pidof com.android.vending com.google.android.gsf com.google.android.gms) 2>/dev/null'`);
+        await execCommand(`kill -9 $(pidof com.android.vending com.google.android.gsf com.google.android.gms) 2>/dev/null`);
         
         try {
-            await execCommand(`su -c 'chcon u:object_r:system_file:s0 ${CONFIG_FILE}'`);
+            await execCommand(`chcon u:object_r:system_file:s0 ${shq(CONFIG_FILE)}`);
         } catch (selinuxError) {
             console.warn('Could not set SELinux context:', selinuxError);
         }
@@ -1146,6 +1200,53 @@ async function saveConfig() {
     } catch (error) {
         appendToOutput(`Failed to save config: ${error}`, 'error');
         throw error;
+    }
+}
+
+// Front-end for fingerprint-update.sh: it prints "[COPG-VD] ..." lines plus a final "status:" line.
+async function runUpdater(mode) {
+    const script = '/data/adb/modules/COPG-VD/fingerprint-update.sh';
+    appendToOutput(mode === 'apply'
+        ? 'Updating COPG-VD.json from GitHub...'
+        : 'Checking GitHub for a newer build...', 'info');
+
+    let output;
+    try {
+        // "|| true": the script reports through its status line, execCommand rejects on exit != 0.
+        output = await execCommand(`sh ${script} ${mode} 2>&1 || true`);
+    } catch (error) {
+        appendToOutput(`Updater could not run: ${error}`, 'error');
+        return;
+    }
+
+    const lines = output.split('\n').map(line => line.trim()).filter(Boolean);
+    lines.filter(line => line.startsWith('[COPG-VD]'))
+         .forEach(line => appendToOutput(line.replace('[COPG-VD] ', ''), 'info'));
+    const status = (lines.find(line => line.startsWith('status:')) || '').replace('status:', '').trim();
+
+    switch (status) {
+        case 'up-to-date':
+            appendToOutput('Already on the newest build', 'success');
+            break;
+        case 'update-available':
+            appendToOutput('A newer build is available - press "Update Now"', 'warning');
+            break;
+        case 'applied':
+            appendToOutput('COPG-VD.json updated. Reboot to apply it to android.os.Build', 'success');
+            await loadConfig();
+            renderDeviceList();
+            break;
+        case 'local-newer':
+            appendToOutput('Your config is newer than upstream, nothing was changed', 'warning');
+            break;
+        case 'skipped-custom-device':
+            appendToOutput('Your profile spoofs another device, so nothing was changed', 'warning');
+            break;
+        case 'no-config':
+            appendToOutput('No COPG-VD.json found to update', 'error');
+            break;
+        default:
+            appendToOutput('Update failed, see the lines above', 'error');
     }
 }
 
@@ -1281,8 +1382,31 @@ function applyEventListeners() {
         }
     });
     
+    document.getElementById('toggle-autoupdate').addEventListener('click', async (e) => {
+        const isChecked = e.target.checked;
+        try {
+            await execCommand(`${isChecked ? "rm -f" : "touch"} /data/adb/modules/COPG-VD/.skip.autoupdate`);
+            appendToOutput(isChecked ? "JSON auto-update enabled (once per boot)" : "JSON auto-update disabled", isChecked ? 'success' : 'info');
+        } catch (error) {
+            appendToOutput(`Failed to update auto-update config: ${error}`, 'error');
+            e.target.checked = !isChecked;
+        }
+    });
+
+    document.getElementById('check-update').addEventListener('click', async (e) => {
+        e.target.classList.add('loading');
+        await runUpdater('check');
+        e.target.classList.remove('loading');
+    });
+
+    document.getElementById('apply-update').addEventListener('click', async (e) => {
+        e.target.classList.add('loading');
+        await runUpdater('apply');
+        e.target.classList.remove('loading');
+    });
+
     setupBackupListeners();
-    
+
     document.getElementById('save-log-yes').addEventListener('click', async () => {
         hidePopup('save-log-popup', async () => {
             await saveLogToFile();
@@ -1379,7 +1503,7 @@ async function getPreferredStartPath() {
     const paths = ['/storage/emulated/0/Download', '/storage/emulated/0'];
     for (const path of paths) {
         try {
-            const lsOutput = await execCommand(`su -c 'ls -l "${path}"' || echo "ERROR: dir_not_found"`);
+            const lsOutput = await execCommand(`ls -l ${shq(path)} || echo "ERROR: dir_not_found"`);
             if (!lsOutput.includes('ERROR: dir_not_found') && !lsOutput.includes('No such file or directory')) {
                 appendToOutput(`Selected start path: ${path}`, 'info');
                 return path;
@@ -1395,7 +1519,7 @@ async function getPreferredStartPath() {
 async function recursiveFileSearch(basePath, searchTerm = '') {
     const results = [];
     try {
-        const findOutput = await execCommand(`su -c 'find "${basePath}" -type f \\( -name "*.json" -o -name "*.txt" \\)' || echo ""`);
+        const findOutput = await execCommand(`find ${shq(basePath)} -type f \\( -name "*.json" -o -name "*.txt" \\) || echo ""`);
         const files = findOutput.trim().split('\n').filter(f => f && (f.endsWith('.json') || f.endsWith('.txt')));
         
         for (const file of files) {
@@ -1420,15 +1544,15 @@ async function restoreFile(sourcePath, targetFile) {
             throw new Error(`Invalid source or target path: source=${sourcePath}, target=${targetFile}`);
         }
 
-        const cpOutput = await execCommand(`su -c 'cp "${sourcePath}" "/data/adb/${targetFile}"' || echo "ERROR: cp_failed"`);
+        const cpOutput = await execCommand(`cp ${shq(sourcePath)} ${shq(`/data/adb/${targetFile}`)} || echo "ERROR: cp_failed"`);
         if (cpOutput.includes('ERROR: cp_failed')) {
             throw new Error(`Copy command failed: ${cpOutput}`);
         }
 
-        await execCommand(`su -c 'chmod 644 /data/adb/${targetFile}'`);
+        await execCommand(`chmod 644 ${shq(`/data/adb/${targetFile}`)}`);
         
         try {
-            await execCommand(`su -c 'chcon u:object_r:system_file:s0 /data/adb/${targetFile}'`);
+            await execCommand(`chcon u:object_r:system_file:s0 ${shq(`/data/adb/${targetFile}`)}`);
         } catch (selinuxError) {
             console.warn('Could not set SELinux context:', selinuxError);
         }
@@ -1477,7 +1601,7 @@ async function showFilePicker(targetFile, startPath = null) {
     searchContainer.addEventListener('click', enableSearch);
 
     try {
-        const lsOutput = await execCommand(`su -c 'ls -l "${currentPath}"' || echo "ERROR: dir_not_found"`);
+        const lsOutput = await execCommand(`ls -l ${shq(currentPath)} || echo "ERROR: dir_not_found"`);
         if (lsOutput.includes('ERROR: dir_not_found') || lsOutput.includes('No such file or directory')) {
             if (currentPath !== '/storage/emulated/0') {
                 appendToOutput(`Directory ${currentPath} not found, falling back to /storage/emulated/0`, 'warning');
@@ -1537,7 +1661,7 @@ async function showFilePicker(targetFile, startPath = null) {
         if (dirArray.length === 0 && fileArray.length === 0) {
             fileList.innerHTML = `
                 <div class="error-message" style="color: var(--text-secondary); text-align: center; padding: 16px;">
-                    No files or folders found in ${currentPath}
+                    No files or folders found in ${escapeHtml(currentPath)}
                 </div>
             `;
         } else {
@@ -1582,7 +1706,7 @@ async function showFilePicker(targetFile, startPath = null) {
                 if (dirArray.length === 0 && fileArray.length === 0) {
                     fileList.innerHTML = `
                         <div class="error-message" style="color: var(--text-secondary); text-align: center; padding: 16px;">
-                            No files or folders found in ${currentPath}
+                            No files or folders found in ${escapeHtml(currentPath)}
                         </div>
                     `;
                 } else {
@@ -1617,8 +1741,8 @@ async function showFilePicker(targetFile, startPath = null) {
                             <div class="app-icon-placeholder file-icon"></div>
                         </div>
                         <div class="app-info">
-                            <div class="app-name">${file.name}</div>
-                            <div>${file.path}</div>
+                            <div class="app-name">${escapeHtml(file.name)}</div>
+                            <div>${escapeHtml(file.path)}</div>
                         </div>
                     `;
                     fileCard.addEventListener('click', async () => {
@@ -1635,14 +1759,18 @@ async function showFilePicker(targetFile, startPath = null) {
         showPopup('file-picker-popup');
         appendToOutput(`File list loaded for ${currentPath}`, 'success');
     } catch (error) {
-        fileList.innerHTML = `
-            <div class="error-message" style="color: var(--error); text-align: center; padding: 16px;">
-                Failed to load files in ${currentPath}: ${error.message}
-                <button onclick="showFilePicker('${targetFile}', '${currentPath}')" style="margin-top: 8px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px;">
-                    Try Again
-                </button>
-            </div>
-        `;
+        // Built as DOM: the path is attacker-controlled and inline handlers are blocked by the CSP.
+        fileList.innerHTML = '';
+        const errorBox = document.createElement('div');
+        errorBox.className = 'error-message';
+        errorBox.style.cssText = 'color: var(--error); text-align: center; padding: 16px;';
+        errorBox.textContent = `Failed to load files in ${currentPath}: ${error.message} `;
+        const retry = document.createElement('button');
+        retry.textContent = 'Try Again';
+        retry.style.cssText = 'margin-top: 8px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px;';
+        retry.addEventListener('click', () => showFilePicker(targetFile, currentPath));
+        errorBox.appendChild(retry);
+        fileList.appendChild(errorBox);
         appendToOutput(`Failed to load file list in ${currentPath}: ${error}`, 'error');
     }
 }

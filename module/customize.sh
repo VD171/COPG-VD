@@ -243,6 +243,7 @@ check_conflict_modules
 check_config_file
 
 chmod 0755 "$MODPATH/service.sh"
+chmod 0755 "$MODPATH/fingerprint-update.sh"
 chmod 0644 "$CONFIG_FILE"
 chcon u:object_r:system_file:s0 "$CONFIG_FILE"
 

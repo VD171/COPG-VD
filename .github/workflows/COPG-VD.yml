@@ -1,10 +1,28 @@
 name: COPG-VD
 
+# The version lives in module/module.prop and nowhere else. .github/scripts/version.sh
+# bumps it, derives versionCode and rewrites module/update.json, so no string is ever
+# typed into this file.
+
 on:
   workflow_dispatch:
+    inputs:
+      bump:
+        description: 'version bump'
+        type: choice
+        options: [none, patch, minor, major]
+        default: none
+      release:
+        description: 'publish a GitHub release with the zip'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
+
+concurrency:
+  group: copg-vd-build
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -52,62 +70,103 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential cmake zip curl
 
-      - name: Build Project (arm64-v8a) - Start
-        id: arm64_start
+      # One .so per ABI, named the way Zygisk loads them: zygisk/<abi>.so.
+      # Plain cmake instead of a third-party action: one less thing to trust in a build that
+      # produces a library loaded into zygote.
+      - name: Build zygisk libraries
+        env:
+          ABIS: arm64-v8a armeabi-v7a x86_64
         run: |
-          echo "ARM64_START_TIME=$(date -u +%s)" >> $GITHUB_ENV
+          for abi in $ABIS; do
+            echo "::group::$abi"
+            start=$(date -u +%s)
+            cmake -S zygisk -B "zygisk/build/$abi" \
+              -DCMAKE_TOOLCHAIN_FILE="$NDK_PATH/build/cmake/android.toolchain.cmake" \
+              -DANDROID_ABI="$abi" \
+              -DANDROID_PLATFORM=android-28 \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_MAKE_PROGRAM=/usr/bin/make
+            cmake --build "zygisk/build/$abi" --parallel "$(nproc)"
+            if [ ! -f "zygisk/build/$abi/libspoof.so" ]; then
+              echo "::error::$abi library not built"
+              ls -la "zygisk/build/$abi"
+              exit 1
+            fi
+            echo "$abi built in $(( $(date -u +%s) - start ))s: $(stat -c %s "zygisk/build/$abi/libspoof.so") bytes"
+            echo "::endgroup::"
+          done
 
-      - name: Build Project (arm64-v8a)
-        uses: threeal/cmake-action@v2.1.0
-        with:
-          source-dir: zygisk
-          build-dir: zygisk/build/arm64-v8a
-          args: |
-            -DCMAKE_TOOLCHAIN_FILE=${{ env.NDK_PATH }}/build/cmake/android.toolchain.cmake
-            -DANDROID_ABI=arm64-v8a
-            -DANDROID_PLATFORM=android-35
-            -DCMAKE_MAKE_PROGRAM=/usr/bin/make
-
-      - name: Build Project (arm64-v8a) - End
-        id: arm64_end
-        run: |
-          ARM64_END_TIME=$(date -u +%s)
-          ARM64_DURATION=$((ARM64_END_TIME - ARM64_START_TIME))
-          echo "ARM64_BUILD_TIME=$ARM64_DURATION" >> $GITHUB_ENV
-          if [ ! -f "zygisk/build/arm64-v8a/libspoof.so" ]; then
-            echo "Error: arm64-v8a library not built!"
-            ls -la zygisk/build/arm64-v8a
-            exit 1
-          fi
+      - name: Resolve version
+        id: version
+        run: .github/scripts/version.sh "${{ inputs.bump == 'none' && 'read' || inputs.bump }}"
 
       - name: Prepare module structure
         run: |
           mkdir -p module/zygisk
-          cp zygisk/build/arm64-v8a/libspoof.so module/zygisk/arm64-v8a.so
-          chmod 755 module/zygisk/arm64-v8a.so
-          
-          chmod 755 module/customize.sh module/service.sh module/META-INF/com/google/android/update-binary
-          VERSION='v4.9.3-vd'
-          VERSION_CODE=493
-          cat > module/module.prop << EOF
-          id=COPG-VD
-          name=COPG by VD171
-          version=$VERSION
-          versionCode=$VERSION_CODE
-          author=VD171 & AlirezaParsi
-          description=Spoof your device. (Fork by VD171)
-          minMagisk=20.4
-          updateJson=https://raw.githubusercontent.com/VD171/COPG-VD/refs/heads/JSON/module/update.json
-          EOF
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            cp "zygisk/build/$abi/libspoof.so" "module/zygisk/$abi.so"
+          done
+          chmod 755 module/zygisk/*.so
 
-      - name: Update version with grep
+          # The WebUI reads these locally instead of fetching them from GitHub at runtime.
+          cp README.md LICENSE module/webroot/
+
+          chmod 755 module/customize.sh module/service.sh module/fingerprint-update.sh module/META-INF/com/google/android/update-binary
+
+      - name: Package module
         run: |
-          VERSION=$(grep "version=" module/module.prop | cut -d'=' -f2)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          cd module && zip -r9 "../${{ steps.version.outputs.zip_name }}" . -x '.git*'
+          cd .. && unzip -l "${{ steps.version.outputs.zip_name }}" | tail -n 1
+
+      - name: Commit the bump
+        if: steps.version.outputs.bumped == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add module/module.prop module/update.json
+          git commit -m "Release ${{ steps.version.outputs.version }} (versionCode ${{ steps.version.outputs.version_code }})"
+          git push
 
       - name: Upload module artifact
         uses: actions/upload-artifact@v4
         with:
-          name: COPG-VD-${{ env.VERSION }}
-          path: |
-            module/**
+          name: COPG-VD-${{ steps.version.outputs.version }}
+          path: ${{ steps.version.outputs.zip_name }}
+
+      - name: Publish release
+        if: inputs.release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # Release notes come from this version's section of the CHANGELOG when it has one.
+          notes=$(awk -v v="## $VERSION" '
+              $0 ~ "^"v { found = 1; next }
+              found && /^## / { exit }
+              found { print }
+          ' CHANGELOG.md)
+          if [ -n "$(printf '%s' "$notes" | tr -d '[:space:]')" ]; then
+              printf '%s\n' "$notes" > release-notes.md
+              gh release create "$VERSION" "${{ steps.version.outputs.zip_name }}" \
+                --title "$VERSION" --notes-file release-notes.md
+          else
+              echo "::warning::no CHANGELOG section for $VERSION, generating notes from commits"
+              gh release create "$VERSION" "${{ steps.version.outputs.zip_name }}" \
+                --title "$VERSION" --generate-notes
+          fi
+          # module/update.json already points at this asset, so the in-app updater works
+          # the moment the release exists.
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### COPG-VD ${{ steps.version.outputs.version }}"
+            echo ''
+            echo "| field | value |"
+            echo "| --- | --- |"
+            echo "| version | ${{ steps.version.outputs.version }} |"
+            echo "| versionCode | ${{ steps.version.outputs.version_code }} |"
+            echo "| bumped | ${{ steps.version.outputs.bumped }} |"
+            echo "| released | ${{ inputs.release }} |"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,89 @@
+name: Update COPG-VD.json
+
+# Keeps module/COPG-VD.json.example (and the README block) on the newest Google build.
+# The daily run is cheap: it only reads the flashstation API and stops when the build is
+# the same one already committed. When a new build shows up, the props are pulled straight
+# out of the factory image with HTTP range requests (~300 MB, nothing written to disk).
+
+on:
+  schedule:
+    - cron: '40 7 * * *'
+  workflow_dispatch:
+    inputs:
+      product:
+        description: 'flashstation product (device)'
+        default: 'comet_beta'
+      track:
+        description: 'release track'
+        type: choice
+        options: [canary, beta, any]
+        default: canary
+      force:
+        description: 'rewrite even if the build did not change'
+        type: boolean
+        default: false
+      dry_run:
+        description: 'generate and show the JSON, commit nothing'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-copg-json
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: github.repository == 'VD171/COPG-VD'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Generate COPG-VD.json
+        id: gen
+        env:
+          PRODUCT: ${{ inputs.product || 'comet_beta' }}
+          TRACK: ${{ inputs.track || 'canary' }}
+        run: |
+          python3 .github/scripts/update_copg_json.py \
+            --product "$PRODUCT" --track "$TRACK" \
+            --json module/COPG-VD.json.example --readme README.md \
+            ${{ inputs.force == true && '--force' || '' }} \
+            ${{ inputs.dry_run == true && '--check-only' || '' }}
+
+      - name: Commit and push
+        if: steps.gen.outputs.changed == 'true' && inputs.dry_run != true
+        env:
+          BUILD: ${{ steps.gen.outputs.build }}
+          PATCH: ${{ steps.gen.outputs.security_patch }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add module/COPG-VD.json.example README.md
+          git commit -m "COPG-VD.json: $BUILD (security patch $PATCH)"
+          git push
+
+      - name: Upload JSON artifact
+        if: steps.gen.outputs.changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: COPG-VD.json-${{ steps.gen.outputs.build }}
+          path: module/COPG-VD.json.example
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo '### COPG-VD.json'
+            echo ''
+            echo "| field | value |"
+            echo "| --- | --- |"
+            echo "| build | ${{ steps.gen.outputs.build || 'n/a' }} |"
+            echo "| incremental | ${{ steps.gen.outputs.incremental || 'n/a' }} |"
+            echo "| security patch | ${{ steps.gen.outputs.security_patch || 'n/a' }} |"
+            echo "| fingerprint | \`${{ steps.gen.outputs.fingerprint || 'n/a' }}\` |"
+            echo "| updated | ${{ steps.gen.outputs.changed || 'false' }} |"
+          } >> "$GITHUB_STEP_SUMMARY"

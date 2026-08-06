@@ -11,35 +11,48 @@ If using this module and spoofing a working FingerPrint, using PlayIntegrityFix 
 {
   "Instructions": "Use strings on double-quotes only.",
   "Instructions": "All fields are OPTIONAL. If some field is not provided, it will be skipped.",
-  "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/comet_beta-zp11.260123.011-factory-9f28f269.zip",
+  "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/comet_beta-zp11.260618.005-factory-9a7b415a.zip",
   "COPG-VD": {
     "BRAND": "google",
     "DEVICE": "comet",
     "MANUFACTURER": "Google",
     "MODEL": "Pixel 9 Pro Fold",
-    "FINGERPRINT": "google/comet_beta/comet:CANARY/ZP11.260123.011/14822050:user/release-keys",
+    "FINGERPRINT": "google/comet_beta/comet:CANARY/ZP11.260618.005/15760424:user/release-keys",
     "PRODUCT": "comet_beta",
     "BOOTLOADER": "unknown",
     "BOARD": "comet",
     "HARDWARE": "comet",
-    "DISPLAY": "ZP11.260123.011",
-    "ID": "ZP11.260123.011",
-    "HOST": "9e07efa7dda9",
-    "INCREMENTAL": "14822050",
-    "TIMESTAMP": "1770081304",
-    "ANDROID_VERSION": "16",
-    "SDK_INT": "36",
-    "PREVIEW_SDK": "20260119",
-    "SDK_FULL": "36.1",
+    "DISPLAY": "ZP11.260618.005",
+    "ID": "ZP11.260618.005",
+    "HOST": "d9ebe7185dbe",
+    "INCREMENTAL": "15760424",
+    "TIMESTAMP": "1782846114",
+    "ANDROID_VERSION": "17",
+    "SDK_INT": "37",
+    "PREVIEW_SDK": "20260708",
+    "SDK_FULL": "37.1",
     "CODENAME": "CANARY",
     "USER": "android-build",
-    "SDK_FINGERPRINT": "778045b9782faa743903c5e636f4745d",
-    "UUID": "2nn-rheGNyLgsb6UeLWcvacQ67Pvqwp3rvo8JD5Edf8",
-    "SECURITY_PATCH": "2026-02-05"
+    "SDK_FINGERPRINT": "801acefe11f16d44b7e306f2e8aca0bc",
+    "UUID": "LcNWKgpR2UNIusvjRj5WC4RJpSgaiu7kfv8jxIPLw8w",
+    "SECURITY_PATCH": "2026-07-05"
   }
 }
 ```
 Be sure to use strings on double-quotes only.  
+The block above and `module/COPG-VD.json.example` are refreshed daily by the [Update COPG-VD.json](.github/workflows/update-json.yml) workflow, straight from the newest Google factory image.  
+### Keeping the fingerprint fresh  
+`fingerprint-update.sh` pulls that file and updates your config, from the WebUI (**Check Update** / **Update Now**) or by itself **once per boot** (**Auto-update JSON on boot**, on by default).  
+* Both `/data/adb/COPG-VD.json` and `/data/adb/modules/COPG-VD/COPG-VD.json` are updated when both exist, and the previous content is kept as `.bak`.  
+* Only the build fields are rewritten (fingerprint, ID, incremental, timestamp, security patch, SDK, UUID, host, user). Everything else you customized is preserved: extra keys, `BOOTLOADER`/`BOARD`/`HARDWARE`, other objects, key order and formatting.  
+* It never goes backwards: an upstream build older than the one installed is refused. This is
+  routine (the repo can sit behind a config you updated by hand) and it is also the guard that
+  matters most on Android, where the only downloader available is busybox `wget`, which cannot
+  validate TLS certificates - every value is validated before use for the same reason.  
+* If your profile spoofs **another device** (different `BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT`), nothing is applied - a Pixel fingerprint on another profile is worse than an old fingerprint.  
+* At boot it runs in the background and keeps retrying for ~10 minutes, because wifi is usually not up yet when the boot finishes. It never delays the boot.  
+* `resetprop` is re-applied right after an update, but `android.os.Build` is written by the zygisk module when zygote starts: **reboot** for the new values to reach apps.  
+* Log at `/data/adb/COPG-VD.update.log`.  
 ### WebUI  
 Using the WebUI is unnecessary if you edit the JSON config file directly.  
 If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
