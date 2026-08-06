@@ -1,0 +1,8 @@
+id=COPG-VD
+name=COPG by VD171
+version=v5.0.0-vd
+versionCode=50000
+author=VD171 & AlirezaParsi
+description=Spoof your device. (Fork by VD171)
+minMagisk=20.4
+updateJson=https://raw.githubusercontent.com/VD171/COPG-VD/main/module/update.json
