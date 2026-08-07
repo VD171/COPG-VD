@@ -11,31 +11,31 @@ If using this module and spoofing a working FingerPrint, using PlayIntegrityFix 
 {
   "Instructions": "Use strings on double-quotes only.",
   "Instructions": "All fields are OPTIONAL. If some field is not provided, it will be skipped.",
-  "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/comet_beta-zp11.260618.005-factory-9a7b415a.zip",
+  "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/comet_beta-zp11.260717.006-factory-1458a2a5.zip",
   "COPG-VD": {
     "BRAND": "google",
     "DEVICE": "comet",
     "MANUFACTURER": "Google",
     "MODEL": "Pixel 9 Pro Fold",
-    "FINGERPRINT": "google/comet_beta/comet:CANARY/ZP11.260618.005/15760424:user/release-keys",
+    "FINGERPRINT": "google/comet_beta/comet:CANARY/ZP11.260717.006/16004061:user/release-keys",
     "PRODUCT": "comet_beta",
     "BOOTLOADER": "unknown",
     "BOARD": "comet",
     "HARDWARE": "comet",
-    "DISPLAY": "ZP11.260618.005",
-    "ID": "ZP11.260618.005",
-    "HOST": "d9ebe7185dbe",
-    "INCREMENTAL": "15760424",
-    "TIMESTAMP": "1782846114",
+    "DISPLAY": "ZP11.260717.006",
+    "ID": "ZP11.260717.006",
+    "HOST": "e6a08b72aae6",
+    "INCREMENTAL": "16004061",
+    "TIMESTAMP": "1785780531",
     "ANDROID_VERSION": "17",
     "SDK_INT": "37",
-    "PREVIEW_SDK": "20260708",
+    "PREVIEW_SDK": "20260805",
     "SDK_FULL": "37.1",
     "CODENAME": "CANARY",
     "USER": "android-build",
-    "SDK_FINGERPRINT": "801acefe11f16d44b7e306f2e8aca0bc",
-    "UUID": "LcNWKgpR2UNIusvjRj5WC4RJpSgaiu7kfv8jxIPLw8w",
-    "SECURITY_PATCH": "2026-07-05"
+    "SDK_FINGERPRINT": "88d3b71bccd150fc3f60ac4d1026e1db",
+    "UUID": "62diQFW6nD4Hahmxok7HCfvYo9s1e42GqP9SatyVrVQ",
+    "SECURITY_PATCH": "2026-08-05"
   }
 }
 ```
