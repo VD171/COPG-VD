@@ -1,5 +1,20 @@
 # Changelog
 
+## v5.1.0-vd
+- The Android version is no longer spoofed. ANDROID_VERSION, SDK_INT, SDK_FULL and CODENAME describe the ROM, not the build being spoofed. A device told its SDK is newer than it really is has apps calling APIs its framework does not have: Google's apps crash, the phone reboots, and it starts over. That is a softloop - the boot itself completes, so nothing shows up in the boot logs and nobody finds the cause.
+ . They are gone from the config the module ships, and the daily job never writes them again.
+ . A config that already carries them is cleaned when you update, keeping a .bak.
+ . A three-state selector in the WebUI decides whether they are applied at all: Never (default), Up to this ROM (only what does not exceed it), Force (as written - this is what causes the softloop).
+ . The real version is read from /system/build.prop. Never from getprop, which is the very thing this module falsifies.
+- Fixed ro.build.version.release_or_codename being given the literal string "REL". By AOSP it holds the release number when the codename is REL, so the module was publishing a combination no real device reports.
+- Added Analyze to the WebUI: checks the config against the ROM and against itself - version vs ROM, whether the file still parses (a broken one makes the module spoof nothing, and only logcat says so), whether the fingerprint agrees with the fields around it, keys the module does not read, dates, and whether the props already carry what the config asks for.
+- Settings can now be declared in COPG-VD.json, in a COPG-VD-Settings object: resetprop, autoupdate, spoof_manufacturer and spoof_version. The WebUI writes both the config and the flag files.
+ . "spoof_version": "force" is refused from the config and downgraded to "rom" - restoring an old backup must not re-arm the dangerous mode behind your back. Arm it in the WebUI.
+- "Spoof ro.product.manufacturer" no longer edits service.sh, so it survives module updates. If you had it off, set it again after updating.
+- Fixed the prop reader taking several lines at once when the config holds more than one object.
+
+_The version group only reaches apps after a reboot. If you came from v5.0.x and the phone kept rebooting on its own, this is the update that stops it._
+
 ## v5.0.1-vd
 - The WebUI content security policy is now declared in the page itself, not only in config.json. KsuWebUIStandalone, which is what Magisk users run, does not read config.json - so on Magisk there was no policy at all.
 - The daily job that refreshes COPG-VD.json.example will never replace a build with an older one, the same rule the on-device updater already followed.

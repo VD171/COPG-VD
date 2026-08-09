@@ -2642,3 +2642,25 @@ input:checked ~ .slider {
 .dark-theme .optional-badge:hover {
     background-color: rgba(147, 197, 253, 0.25);
 }
+
+/* Three states, not a switch: the Android version is the one setting where "on" has degrees.
+   never = the ROM's own version, up to this ROM = only what does not exceed it, force = the
+   config as written, which is what makes Google apps crash in a loop. */
+.version-select {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    max-width: 55%;
+}
+.version-select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+.version-select.danger { border-color: var(--error); color: var(--error); }
+.toggle-hint {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    margin-top: 2px;
+}

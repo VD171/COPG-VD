@@ -3,6 +3,61 @@
 MODDIR=${0%/*}
 COPG_VD_JSON="/data/adb/COPG-VD.json"
 
+# What the ROM really is. NEVER getprop here: this script is what falsifies those props, so
+# asking the system would be asking our own lie. /build.prop does not exist on these devices.
+ROM_PROP="/system/build.prop"
+# The Android version belongs to the ROM. Telling apps the SDK is newer than the framework
+# really is makes them call APIs that do not exist: Google's apps crash, the device reboots,
+# and it repeats. Softloop, not bootloop - nothing shows up in the boot logs.
+VERSION_KEYS="ANDROID_VERSION SDK_INT SDK_FULL CODENAME"
+# These are derived, never copied from CODENAME (see aplicar_derivados).
+DERIVED_RELCOD="ro.build.version.release_or_codename ro.build.version.release_or_preview_display ro.odm.build.version.release_or_codename ro.odm_dlkm.build.version.release_or_codename ro.product.build.version.release_or_codename ro.system.build.version.release_or_codename ro.system_dlkm.build.version.release_or_codename ro.system_ext.build.version.release_or_codename ro.vendor.build.version.release_or_codename ro.vendor_dlkm.build.version.release_or_codename ro.bootimage.build.version.release_or_codename"
+
+rom_prop() {
+    grep -m 1 "^$1=" "$ROM_PROP" 2>/dev/null | cut -d= -f2-
+}
+
+spoof_version_policy() {
+    case "$(cat "$MODDIR/.spoof.version" 2>/dev/null)" in
+        rom) echo rom ;; force) echo force ;; *) echo never ;;
+    esac
+}
+
+# 0 = apply this version field, 1 = refuse. "rom" only lets through what does not exceed the
+# ROM, which in practice means lowering the SDK - raising it is what breaks the device.
+version_allowed() {
+    case "$POLICY_VERSION" in
+        force) return 0 ;;
+        never) return 1 ;;
+    esac
+    case "$1" in
+        SDK_INT)
+            rom=$(rom_prop ro.build.version.sdk)
+            case "$2$rom" in *[!0-9]*) return 1 ;; esac
+            [ "$2" -le "$rom" ] ;;
+        ANDROID_VERSION) [ "$2" = "$(rom_prop ro.build.version.release)" ] ;;
+        CODENAME)        [ "$2" = "$(rom_prop ro.build.version.codename)" ] ;;
+        SDK_FULL)
+            rom=$(rom_prop ro.build.version.sdk)
+            case "$2" in "$rom"|"$rom".*) return 0 ;; *) return 1 ;; esac ;;
+        *) return 1 ;;
+    esac
+}
+
+# AOSP: RELEASE_OR_CODENAME = "REL".equals(CODENAME) ? RELEASE : CODENAME. The old mapping
+# copied CODENAME straight in, which published the literal "REL" where the version number
+# belongs - a combination no real device reports.
+aplicar_derivados() {
+    codename="$1"; release="$2"
+    [ -n "$codename" ] || codename=$(rom_prop ro.build.version.codename)
+    [ -n "$release" ] || release=$(rom_prop ro.build.version.release)
+    if [ "$codename" = "REL" ] || [ -z "$codename" ]; then valor="$release"; else valor="$codename"; fi
+    [ -n "$valor" ] || return 0
+    for prop in $DERIVED_RELCOD; do
+        propreset "$prop" "$valor"
+    done
+}
+
 find_resetprop() {
     for path in "/data/adb/ksu/bin/resetprop" "/data/adb/magisk/resetprop" "/debug_ramdisk/resetprop" "/data/adb/ap/bin/resetprop" "/system/bin/resetprop" "/vendor/bin/resetprop"; do
         [ -x "$path" ] && echo "$path" && return 0
@@ -28,7 +83,7 @@ get_prop_mapping() {
 USER|ro.build.user
 SDK_FINGERPRINT|ro.build.version.preview_sdk_fingerprint
 PREVIEW_SDK|ro.build.version.preview_sdk
-CODENAME|ro.build.version.all_codenames|ro.build.version.codename|ro.build.version.codename|ro.build.version.release_or_codename|ro.build.version.release_or_preview_display|ro.odm.build.version.release_or_codename|ro.odm_dlkm.build.version.release_or_codename|ro.product.build.version.release_or_codename|ro.system.build.version.release_or_codename|ro.system_dlkm.build.version.release_or_codename|ro.system_ext.build.version.release_or_codename|ro.vendor.build.version.release_or_codename|ro.vendor_dlkm.build.version.release_or_codename|ro.bootimage.build.version.release_or_codename
+CODENAME|ro.build.version.all_codenames|ro.build.version.codename
 TAGS|ro.bootimage.build.tags|ro.bootimage.keys|ro.build.keys|ro.build.tags|ro.odm.build.tags|ro.odm.keys|ro.odm_dlkm.build.tags|ro.odm_dlkm.keys|ro.oem.build.tags|ro.oem.keys|ro.product.build.tags|ro.product.keys|ro.system.build.tags|ro.system.keys|ro.system_ext.build.tags|ro.system_ext.keys|ro.vendor.build.tags|ro.vendor.keys|ro.vendor_dlkm.build.tags|ro.vendor_dlkm.keys|ro.system_dlkm.build.tags
 TYPE|ro.bootimage.build.type|ro.build.type|ro.odm.build.type|ro.odm_dlkm.build.type|ro.oem.build.type|ro.product.build.type|ro.system.build.type|ro.system_dlkm.build.type|ro.system_ext.build.type|ro.vendor.build.type|ro.vendor.md_apps.load_type|ro.vendor_dlkm.build.type
 SECURITY_PATCH|ro.build.version.security_patch|ro.system.build.security_patch|ro.vendor.build.security_patch
@@ -59,13 +114,23 @@ MAPPING
 apply_props() {
   json_content=$(cat "$COPG_VD_JSON")
   getprop_output=$(getprop)
+  POLICY_VERSION=$(spoof_version_policy)
 
   if [ ! -e "$MODDIR/.skip.resetprop" ]; then
     get_prop_mapping | while IFS='|' read -r json_key props; do
       [ -z "$json_key" ] && continue
-      json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
-      if [ "$json_key" = "CODENAME" ] && [ -z "$json_value" ]; then
-        json_value="REL"
+      # head -n1: with more than one object in the file this used to return several lines and
+      # feed a multi-line value straight into resetprop.
+      json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | head -n 1 | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
+      case " $VERSION_KEYS " in
+        *" $json_key "*)
+            if [ -n "$json_value" ] && ! version_allowed "$json_key" "$json_value"; then
+                json_value=""      # the semaphore said no
+            fi ;;
+      esac
+      if [ "$json_key" = "MANUFACTURER" ] && [ "$props" = "ro.product.manufacturer" ] &&
+         [ -e "$MODDIR/.skip.manufacturer" ]; then
+        continue                   # "Spoof ro.product.manufacturer" is off
       fi
       if [ "$json_key" = "TAGS" ]; then
         json_value="release-keys"
@@ -102,6 +167,13 @@ apply_props() {
           IFS="$old_ifs"
       fi
     done
+
+    # Computed once, from whatever ended up effective - not copied from CODENAME.
+    cod=$(echo "$json_content" | grep -o "\"CODENAME\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | head -n 1 | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
+    rel=$(echo "$json_content" | grep -o "\"ANDROID_VERSION\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | head -n 1 | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
+    version_allowed CODENAME "$cod" || cod=""
+    version_allowed ANDROID_VERSION "$rel" || rel=""
+    aplicar_derivados "$cod" "$rel"
   fi
 }
 
@@ -110,6 +182,10 @@ if [ "$1" = "--props-only" ]; then
     apply_props
     exit 0
 fi
+
+# The JSON declares the settings; the flag files are the cache this script and the zygisk
+# module read. Sync before applying, so a config edited by hand takes effect this boot.
+[ -f "$MODDIR/fingerprint-update.sh" ] && sh "$MODDIR/fingerprint-update.sh" sync-settings >/dev/null 2>&1
 
 apply_props
 

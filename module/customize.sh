@@ -145,6 +145,30 @@ cleanup_gphoto_directories() {
   find "$MODPATH" -type d -empty -delete 2>/dev/null
 }
 
+# Coming from v5.0.x the config may carry ANDROID_VERSION/SDK_INT/SDK_FULL/CODENAME, which
+# describe the ROM and not the build being spoofed. A device told its SDK is newer than it is
+# has apps calling APIs that do not exist: Google's crash, it reboots, and it repeats. The
+# runtime refuses to apply them anyway, but a file that says one thing while the module does
+# another is a trap for whoever reads it next - so they come out, with a backup.
+migrate_version_keys() {
+  UPDATER="$MODPATH/fingerprint-update.sh"
+  [ -f "$UPDATER" ] || return
+  saida=$(sh "$UPDATER" migrate 2>&1)
+  case "$saida" in
+    *status:\ migrated*)
+      print_box_start
+      ui_print "    ✦ Android version removed ✦   "
+      print_empty_line
+      ui_print " ✔ The config asked to spoof the  "
+      ui_print "   Android version. That is what  "
+      ui_print "   makes Google apps crash and    "
+      ui_print "   the phone reboot in circles.   "
+      ui_print " ➤ Removed; backup kept as .bak   "
+      print_box_end
+      ;;
+  esac
+}
+
 check_config_file() {
   if [ ! -f "$CONFIG_FILE" ]; then
       cp "$MODPATH/COPG-VD.json.example" "$CONFIG_FILE"
@@ -241,6 +265,10 @@ fi
 
 check_conflict_modules
 check_config_file
+migrate_version_keys
+
+# Safe by default: the version group is only applied if you arm it in the WebUI.
+[ -f "$MODPATH/.spoof.version" ] || echo never > "$MODPATH/.spoof.version"
 
 chmod 0755 "$MODPATH/service.sh"
 chmod 0755 "$MODPATH/fingerprint-update.sh"
