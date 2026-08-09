@@ -49,6 +49,18 @@ The block above and `module/COPG-VD.json.example` are refreshed daily by the [Up
 * At boot it runs in the background and keeps retrying for ~10 minutes, because wifi is usually not up yet when the boot finishes. It never delays the boot.  
 * `resetprop` is re-applied right after an update, but `android.os.Build` is written by the zygisk module when zygote starts: **reboot** for the new values to reach apps.  
 * Log at `/data/adb/COPG-VD.update.log`.  
+### Android version - and why it is not spoofed  
+`ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` and `CODENAME` describe **your ROM**, not the device being spoofed. Telling apps the SDK is newer than the framework really is makes them call APIs that do not exist: Google's apps crash, the phone reboots, and it starts over. The boot itself completes, so it is a **softloop** and nothing shows up in the boot logs.  
+* They are not in the shipped config and the updater never writes them.  
+* **Spoof Android version** in the WebUI decides whether they are applied at all:  
+  * **Never** (default) - the ROM's own version is used.  
+  * **Up to this ROM** - only what does not exceed it, which in practice means lowering the SDK.  
+  * **Force** - exactly what the config says. This is what causes the softloop.  
+* The real version is read from `/system/build.prop`, never from `getprop` - that is the very thing this module falsifies.  
+### Analyze  
+**Analyze** in the WebUI (or `fingerprint-update.sh analyze`) audits the config as it stands: version against the ROM, whether the file still parses at all (a broken one makes the module spoof **nothing**, and only logcat says so), whether the fingerprint agrees with the fields around it, keys the module does not read, dates, and whether the props already carry what the config asks for.  
+### Settings in the config  
+`COPG-VD.json` can carry a `COPG-VD-Settings` object - `resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version` - so your choices travel with a backup and can be edited by hand. The WebUI writes both that and the flag files the boot scripts read. `"spoof_version": "force"` is refused from the file and downgraded: restoring an old backup must not re-arm it behind your back.  
 ### WebUI  
 Using the WebUI is unnecessary if you edit the JSON config file directly.  
 If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
