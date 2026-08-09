@@ -12,6 +12,7 @@
  . "spoof_version": "force" is refused from the config and downgraded to "rom" - restoring an old backup must not re-arm the dangerous mode behind your back. Arm it in the WebUI.
 - "Spoof ro.product.manufacturer" no longer edits service.sh, so it survives module updates. If you had it off, set it again after updating.
 - Fixed the prop reader taking several lines at once when the config holds more than one object.
+- Fixed updates failing on the device while passing on a PC: the field list was written across two lines, and Android's awk refuses a newline inside a -v assignment. Half the fields were never refreshed, silently.
 
 _The version group only reaches apps after a reboot. If you came from v5.0.x and the phone kept rebooting on its own, this is the update that stops it._
 
