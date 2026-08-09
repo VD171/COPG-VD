@@ -34,6 +34,13 @@ FLASH_API = "https://content-flashstation-pa.googleapis.com/v1/builds"
 UA = "COPG-VD-updater/1.0"
 
 # build.prop -> JSON field. First prop found wins; missing ones keep the current value.
+#
+# ANDROID_VERSION, SDK_INT, SDK_FULL and CODENAME are DELIBERATELY ABSENT. They describe the
+# Android version, and a device told it runs a newer SDK than it does will have apps call APIs
+# its framework does not have - Google's crash, the device reboots, and it repeats. That is a
+# softloop, not a bootloop, so nobody looking at boot logs finds anything. The version belongs
+# to the ROM and is never taken from the build being spoofed.
+# See Historicos/2026-08-07_versao-do-android-nunca-se-spoofa.md (Fedora repo).
 PROP_MAP = {
     "BRAND": ("ro.product.system_dlkm.brand", "ro.product.brand_for_attestation"),
     "DEVICE": ("ro.product.system_dlkm.device", "ro.product.device_for_attestation"),
@@ -46,11 +53,7 @@ PROP_MAP = {
     "HOST": ("ro.build.host",),
     "INCREMENTAL": ("ro.system_dlkm.build.version.incremental", "ro.build.version.incremental"),
     "TIMESTAMP": ("ro.system_dlkm.build.date.utc", "ro.build.date.utc"),
-    "ANDROID_VERSION": ("ro.system_dlkm.build.version.release", "ro.build.version.release"),
-    "SDK_INT": ("ro.system_dlkm.build.version.sdk", "ro.build.version.sdk"),
     "PREVIEW_SDK": ("ro.build.version.preview_sdk",),
-    "SDK_FULL": ("ro.system_dlkm.build.version.sdk_full", "ro.build.version.sdk_full"),
-    "CODENAME": ("ro.system_dlkm.build.version.release_or_codename", "ro.build.version.codename"),
     "USER": ("ro.build.user",),
     "SDK_FINGERPRINT": ("ro.build.version.preview_sdk_fingerprint",),
     "UUID": ("ro.system_dlkm.build.uuid", "ro.build.uuid"),
@@ -60,8 +63,7 @@ PROP_MAP = {
 # Used only when the JSON file does not exist yet: key order of the generated object.
 DEFAULT_ORDER = ["BRAND", "DEVICE", "MANUFACTURER", "MODEL", "FINGERPRINT", "PRODUCT",
                  "BOOTLOADER", "BOARD", "HARDWARE", "DISPLAY", "ID", "HOST", "INCREMENTAL",
-                 "TIMESTAMP", "ANDROID_VERSION", "SDK_INT", "PREVIEW_SDK", "SDK_FULL",
-                 "CODENAME", "USER", "SDK_FINGERPRINT", "UUID", "SECURITY_PATCH"]
+                 "TIMESTAMP", "PREVIEW_SDK", "USER", "SDK_FINGERPRINT", "UUID", "SECURITY_PATCH"]
 DEFAULT_HEADER = [("Instructions", "Use strings on double-quotes only."),
                   ("Instructions", "All fields are OPTIONAL. If some field is not provided, "
                                    "it will be skipped."),

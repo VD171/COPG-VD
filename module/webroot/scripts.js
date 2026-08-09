@@ -769,8 +769,10 @@ async function loadToggleStates() {
         const roproductmanufacturerToggle = document.getElementById('toggle-ro-product-manufacturer');
         const autoupdateToggle = document.getElementById('toggle-autoupdate');
         resetpropToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG-VD/.skip.resetprop ] && echo 0 || echo 1")).trim() === "1";
-        roproductmanufacturerToggle.checked = (await execCommand("grep -q -i '#MANUFACTURER\\|ro\\.product\\.manufacturer' /data/adb/modules/COPG-VD/service.sh && echo 0 || echo 1")).trim() === "1";
+        // Used to be a sed on the shipped service.sh, so it was lost on every module update.
+        roproductmanufacturerToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG-VD/.skip.manufacturer ] && echo 0 || echo 1")).trim() === "1";
         autoupdateToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG-VD/.skip.autoupdate ] && echo 0 || echo 1")).trim() === "1";
+        await loadVersionPolicy();
     } catch (error) {
         appendToOutput("Failed to load toggle states: " + error, 'error');
     }
@@ -1203,12 +1205,45 @@ async function saveConfig() {
     }
 }
 
+// The settings live in two places on purpose: the JSON declares them (so they travel with a
+// backup and can be edited by hand) and the flag files cache them (so the boot scripts and the
+// zygisk module read one cheap file instead of parsing JSON). The WebUI writes both.
+async function writeSetting(key, value) {
+    try {
+        if (!currentConfig['COPG-VD-Settings']) currentConfig['COPG-VD-Settings'] = {};
+        currentConfig['COPG-VD-Settings'][key] = value;
+        await saveConfig();
+    } catch (error) {
+        appendToOutput(`Setting saved to the flag file only: ${error}`, 'warning');
+    }
+}
+
+// The one setting where "on" has degrees. Reads the real ROM from /system/build.prop - never
+// from getprop, which is what this module falsifies.
+async function loadVersionPolicy() {
+    const select = document.getElementById('select-spoof-version');
+    const hint = document.getElementById('version-rom-hint');
+    try {
+        const state = (await execCommand("cat /data/adb/modules/COPG-VD/.spoof.version 2>/dev/null || echo never")).trim();
+        select.value = ['never', 'rom', 'force'].includes(state) ? state : 'never';
+        select.classList.toggle('danger', select.value === 'force');
+        const rom = (await execCommand(
+            "grep -m1 '^ro.build.version.release=' /system/build.prop | cut -d= -f2; " +
+            "grep -m1 '^ro.build.version.sdk=' /system/build.prop | cut -d= -f2")).trim().split('\n');
+        hint.textContent = rom.length >= 2 ? `this ROM: Android ${rom[0].trim()}, SDK ${rom[1].trim()}` : '';
+    } catch (error) {
+        appendToOutput(`Failed to read the version policy: ${error}`, 'error');
+    }
+}
+
 // Front-end for fingerprint-update.sh: it prints "[COPG-VD] ..." lines plus a final "status:" line.
 async function runUpdater(mode) {
     const script = '/data/adb/modules/COPG-VD/fingerprint-update.sh';
-    appendToOutput(mode === 'apply'
-        ? 'Updating COPG-VD.json from GitHub...'
-        : 'Checking GitHub for a newer build...', 'info');
+    appendToOutput({
+        apply: 'Updating COPG-VD.json from GitHub...',
+        check: 'Checking GitHub for a newer build...',
+        analyze: 'Analyzing the config as it stands...'
+    }[mode] || 'Running the updater...', 'info');
 
     let output;
     try {
@@ -1235,6 +1270,15 @@ async function runUpdater(mode) {
             appendToOutput('COPG-VD.json updated. Reboot to apply it to android.os.Build', 'success');
             await loadConfig();
             renderDeviceList();
+            break;
+        case 'analyze-ok':
+            appendToOutput('Config analyzed: nothing to fix', 'success');
+            break;
+        case 'analyze-warn':
+            appendToOutput('Config analyzed: see the [warn] lines above', 'warning');
+            break;
+        case 'analyze-red':
+            appendToOutput('Config analyzed: the [RED] lines break the module or the device', 'error');
             break;
         case 'local-newer':
             appendToOutput('Your config is newer than upstream, nothing was changed', 'warning');
@@ -1365,6 +1409,7 @@ function applyEventListeners() {
         const isChecked = e.target.checked;
         try {
             await execCommand(`${isChecked ? "rm -f" : "touch"} /data/adb/modules/COPG-VD/.skip.resetprop`);
+            await writeSetting('resetprop', isChecked);
             appendToOutput(isChecked ? "Resetprop Enabled. Reboot to see changes" : "Resetprop Disabled. Reboot to see changes", isChecked ? 'success' : 'error');
         } catch (error) {
             appendToOutput(`Failed to update Resetprop Config: ${error}`, 'error');
@@ -1374,18 +1419,47 @@ function applyEventListeners() {
     document.getElementById('toggle-ro-product-manufacturer').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
-            await execCommand(`sed -i 's/^${isChecked ? "#" : ""}MANUFACTURER|ro.product.manufacturer/${isChecked ? "" : "#"}MANUFACTURER|ro.product.manufacturer/' /data/adb/modules/COPG-VD/service.sh`);
+            await execCommand(`${isChecked ? "rm -f" : "touch"} /data/adb/modules/COPG-VD/.skip.manufacturer`);
+            await writeSetting('spoof_manufacturer', isChecked);
             appendToOutput(isChecked ? "Ro.Product.Manufacturer Enabled. Reboot to see changes" : "Ro.Product.Manufacturer Disabled. Reboot to see changes", isChecked ? 'success' : 'error');
         } catch (error) {
             appendToOutput(`Failed to update Ro.Product.Manufacturer Config: ${error}`, 'error');
             e.target.checked = !isChecked;
         }
     });
+
+    document.getElementById('select-spoof-version').addEventListener('change', async (e) => {
+        const value = e.target.value;
+        e.target.classList.toggle('danger', value === 'force');
+        try {
+            await execCommand(`echo ${shq(value)} > /data/adb/modules/COPG-VD/.spoof.version`);
+            // "force" is never written to the JSON: that file travels through backups, and
+            // restoring an old one must not re-arm the mode that softloops the device.
+            await writeSetting('spoof_version', value === 'force' ? 'rom' : value);
+            if (value === 'force') {
+                appendToOutput('FORCE: the config version is applied as written. This is what makes Google apps crash until the phone reboots, over and over. Reboot to apply.', 'error');
+            } else if (value === 'rom') {
+                appendToOutput('Version spoofing limited to what this ROM already is. Reboot to apply.', 'warning');
+            } else {
+                appendToOutput('Android version is no longer spoofed. Reboot to apply.', 'success');
+            }
+        } catch (error) {
+            appendToOutput(`Failed to change the version policy: ${error}`, 'error');
+            await loadVersionPolicy();
+        }
+    });
+
+    document.getElementById('analyze-config').addEventListener('click', async (e) => {
+        e.target.classList.add('loading');
+        await runUpdater('analyze');
+        e.target.classList.remove('loading');
+    });
     
     document.getElementById('toggle-autoupdate').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
             await execCommand(`${isChecked ? "rm -f" : "touch"} /data/adb/modules/COPG-VD/.skip.autoupdate`);
+            await writeSetting('autoupdate', isChecked);
             appendToOutput(isChecked ? "JSON auto-update enabled (once per boot)" : "JSON auto-update disabled", isChecked ? 'success' : 'info');
         } catch (error) {
             appendToOutput(`Failed to update auto-update config: ${error}`, 'error');

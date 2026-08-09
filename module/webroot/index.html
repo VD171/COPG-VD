@@ -304,9 +304,21 @@
                                     <span class="slider"></span>
                                 </label>
                             </div>
+                            <div class="toggle-group version-group">
+                                <span class="toggle-label">
+                                    Spoof Android version
+                                    <small id="version-rom-hint" class="toggle-hint"></small>
+                                </span>
+                                <select id="select-spoof-version" class="version-select">
+                                    <option value="never">Never</option>
+                                    <option value="rom">Up to this ROM</option>
+                                    <option value="force">Force</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="button-group">
+                        <button id="analyze-config" class="action-btn">Analyze</button>
                         <button id="check-update" class="action-btn">Check Update</button>
                         <button id="apply-update" class="action-btn">Update Now</button>
                         <button id="backup-manager" class="action-btn">Backup/Restore</button>
