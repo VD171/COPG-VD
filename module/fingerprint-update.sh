@@ -45,9 +45,10 @@ ROM_PROP="/system/build.prop"
 VERSION_FIELDS="ANDROID_VERSION SDK_INT SDK_FULL CODENAME"
 SETTINGS_OBJECT="COPG-VD-Settings"
 # Keys the module actually understands - anything else in the object does nothing.
-KNOWN_KEYS="BRAND DEVICE MANUFACTURER MODEL FINGERPRINT PRODUCT BOOTLOADER BOARD HARDWARE
-            DISPLAY ID HOST INCREMENTAL TIMESTAMP PREVIEW_SDK USER SDK_FINGERPRINT UUID
-            SECURITY_PATCH ANDROID_VERSION SDK_INT SDK_FULL CODENAME TAGS TYPE ODM_SKU SKU"
+# One line, deliberately: Android's awk refuses a newline inside a -v assignment ("newline in
+# string ... at source line 1") and the whole program dies. Fedora's gawk accepts it, so this
+# only ever breaks on the device - which is exactly where it matters.
+KNOWN_KEYS="BRAND DEVICE MANUFACTURER MODEL FINGERPRINT PRODUCT BOOTLOADER BOARD HARDWARE DISPLAY ID HOST INCREMENTAL TIMESTAMP PREVIEW_SDK USER SDK_FINGERPRINT UUID SECURITY_PATCH ANDROID_VERSION SDK_INT SDK_FULL CODENAME TAGS TYPE ODM_SKU SKU"
 STATE_FILE="/data/adb/$MODULE_ID.update.state"
 LOG_FILE="/data/adb/$MODULE_ID.update.log"
 LOG_MAX=32768
@@ -63,8 +64,9 @@ if [ -z "$AWK" ]; then
 fi
 
 # Refreshed from upstream. Everything else in the file is left alone.
-FIELDS="FINGERPRINT ID DISPLAY INCREMENTAL TIMESTAMP SECURITY_PATCH
-        PREVIEW_SDK SDK_FINGERPRINT UUID HOST USER"
+# Single line for the same reason as KNOWN_KEYS: this one is passed to awk by write_fields,
+# so a newline here meant every update failed on a real device while passing on a PC.
+FIELDS="FINGERPRINT ID DISPLAY INCREMENTAL TIMESTAMP SECURITY_PATCH PREVIEW_SDK SDK_FINGERPRINT UUID HOST USER"
 # Must match upstream, otherwise the user is spoofing something else.
 IDENTITY="BRAND DEVICE MANUFACTURER MODEL PRODUCT"
 # Re-evaluate attestation with the new props. com.android.vending is deliberately left
