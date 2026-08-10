@@ -361,6 +361,9 @@ migrate_version() {
 # [RED] this is what breaks the device or silently disables the whole module.
 A_RED=0; A_WARN=0
 say_ok()   { log "  [ok]   $*"; }
+# Deliberate and permanent: reported, never counted. A warning that can never be acted on
+# teaches you to skip the warnings that can.
+say_info() { log "  [info] $*"; }
 say_warn() { log "  [warn] $*"; A_WARN=$((A_WARN + 1)); }
 say_red()  { log "  [RED]  $*"; A_RED=$((A_RED + 1)); }
 
@@ -479,14 +482,14 @@ check_fingerprint() {
     [ -n "$rel" ] || rel=$(rom_prop ro.build.version.release)
     efetivo=$(release_or_codename "$cod" "$rel")
     if [ -n "$efetivo" ] && [ "$fp_relcod" != "$efetivo" ]; then
-        say_warn "FINGERPRINT carries ':$fp_relcod/' but this device reports '$efetivo' - deliberate: matching it would need a target build of the same Android version, and rewriting the fingerprint would break attestation"
+        say_info "FINGERPRINT carries ':$fp_relcod/' and this device reports '$efetivo'. Deliberate: that segment is release_or_codename, so a preview build always says a word where a release says a number. Matching it would mean a target build of the same Android version; rewriting it would break attestation"
     else
         say_ok "FINGERPRINT agrees with the version this device reports"
     fi
 
     preview=$(json_get "$conf" PREVIEW_SDK)
     if [ -n "$preview" ] && [ "$preview" != "0" ] && [ "$efetivo" = "$rel" ]; then
-        say_warn "PREVIEW_SDK=$preview marks a preview build while the device reports a release one ($rel)"
+        say_info "PREVIEW_SDK=$preview comes from the spoofed preview build while the device reports a release one ($rel). Kept on purpose"
     fi
 }
 
