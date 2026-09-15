@@ -1,13 +1,20 @@
 #include <jni.h>
 #include <string>
 #include <zygisk.hpp>
-#include <json.hpp>
+#include <map>
+#include <vector>
+#include <iterator>
 #include <fstream>
 #include <android/log.h>
 #include <algorithm>
 #include <cctype>
 
-using json = nlohmann::json;
+// jsmn in strict mode: a real JSON validator in ~470 lines, instead of nlohmann's 25k-line
+// header being instantiated inside zygote to read a flat object. Any parse error yields an
+// empty config, and an empty config spoofs nothing - the same fail-closed behaviour as before.
+#define JSMN_STATIC
+#define JSMN_STRICT
+#include "jsmn.h"
 
 #define LOG_TAG "COPG-VD"
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
@@ -111,6 +118,111 @@ static std::string releaseOrCodename(const std::string& codename, const std::str
     return (codename.empty() || codename == "REL") ? release : codename;
 }
 
+using Config = std::map<std::string, std::string>;
+
+// Index right after token i and its whole subtree (jsmn has no parent links).
+static int skipToken(const std::vector<jsmntok_t>& t, int i) {
+    int j = i + 1;
+    for (int k = 0; k < t[i].size; k++) j = skipToken(t, j);
+    return j;
+}
+
+static std::string tokenText(const std::string& text, const jsmntok_t& tok) {
+    return text.substr(tok.start, tok.end - tok.start);
+}
+
+// jsmn, even in strict mode, does not check the comma between object members: with one
+// missing it silently gives the previous key two children and drops a pair. The structure
+// betrays it, though - a well-formed tree has every object key with exactly one child and
+// every scalar with none. Anything else is rejected whole, which is what a JSON parser would
+// do, and what "spoof nothing rather than half" requires.
+// The one thing the structure cannot show: a comma before the closing brace or bracket.
+// jsmn swallows it; a JSON parser rejects it, and so does the module's own analyze - the
+// two must agree, or the diagnostic lies about whether the module will spoof.
+static bool trailingComma(const std::string& text, const jsmntok_t& tok) {
+    int p = tok.end - 2;
+    while (p > tok.start && std::isspace(static_cast<unsigned char>(text[p]))) p--;
+    return p > tok.start && text[p] == ',';
+}
+
+static bool validTree(const std::string& text, const std::vector<jsmntok_t>& t, int i, int& next) {
+    const jsmntok_t& tok = t[i];
+    if ((tok.type == JSMN_OBJECT || tok.type == JSMN_ARRAY) && tok.size > 0 && trailingComma(text, tok))
+        return false;
+    if (tok.type == JSMN_OBJECT) {
+        int j = i + 1;
+        for (int k = 0; k < tok.size; k++) {
+            if (j >= static_cast<int>(t.size()) || t[j].type != JSMN_STRING || t[j].size != 1) return false;
+            if (j + 1 >= static_cast<int>(t.size())) return false;
+            int after;
+            if (!validTree(text, t, j + 1, after)) return false;
+            j = after;
+        }
+        next = j;
+        return true;
+    }
+    if (tok.type == JSMN_ARRAY) {
+        int j = i + 1;
+        for (int k = 0; k < tok.size; k++) {
+            int after;
+            if (j >= static_cast<int>(t.size()) || !validTree(text, t, j, after)) return false;
+            j = after;
+        }
+        next = j;
+        return true;
+    }
+    if (tok.size != 0) return false;        // a scalar that "owns" children = missing comma
+    next = i + 1;
+    return true;
+}
+
+// The "COPG-VD" object of the config as key -> value. Only string/primitive values are taken;
+// nested objects (the settings object, anything else) are skipped whole. Last duplicate wins,
+// as the previous parser did. Returns false when the file is missing or not valid JSON.
+static bool readConfig(const std::string& path, Config& out) {
+    std::ifstream file(path);
+    if (!file.is_open()) return false;
+    const std::string text((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+    jsmn_parser parser;
+    jsmn_init(&parser);
+    const int count = jsmn_parse(&parser, text.data(), text.size(), nullptr, 0);
+    if (count <= 0) return false;
+    std::vector<jsmntok_t> tokens(static_cast<size_t>(count));
+    jsmn_init(&parser);
+    if (jsmn_parse(&parser, text.data(), text.size(), tokens.data(), static_cast<unsigned>(count)) < 0)
+        return false;
+    if (tokens[0].type != JSMN_OBJECT) return false;
+    int end = 0;
+    if (!validTree(text, tokens, 0, end) || end != count) return false;
+
+    int i = 1;
+    for (int k = 0; k < tokens[0].size; k++) {
+        const jsmntok_t& key = tokens[i];
+        const int valueIndex = i + 1;
+        if (key.type == JSMN_STRING && tokenText(text, key) == LOG_TAG
+                && tokens[valueIndex].type == JSMN_OBJECT) {
+            int p = valueIndex + 1;
+            for (int n = 0; n < tokens[valueIndex].size; n++) {
+                const jsmntok_t& k2 = tokens[p];
+                const jsmntok_t& v2 = tokens[p + 1];
+                if (k2.type == JSMN_STRING && (v2.type == JSMN_STRING || v2.type == JSMN_PRIMITIVE)) {
+                    out[tokenText(text, k2)] = tokenText(text, v2);
+                }
+                p = skipToken(tokens, p);
+            }
+            return true;
+        }
+        i = skipToken(tokens, i);
+    }
+    return true;   // valid JSON, just no "COPG-VD" object: nothing to spoof
+}
+
+static std::string get(const Config& c, const char* key, const std::string& fallback = "") {
+    auto it = c.find(key);
+    return it == c.end() ? fallback : it->second;
+}
+
 class COPGVDModule : public zygisk::ModuleBase {
 private:
     zygisk::Api* api = nullptr;
@@ -175,40 +287,36 @@ private:
             build_version_release_or_preview_displayField = getField(versionClass, "RELEASE_OR_PREVIEW_DISPLAY", "Ljava/lang/String;");
         }
 
-        std::ifstream file(config_file);
-        if (!file.is_open()) {
-            ERROR_LOG("Failed to open: %s", config_file.c_str());
+        Config device;
+        if (!readConfig(config_file, device)) {
+            ERROR_LOG("Failed to read or parse: %s", config_file.c_str());
             env->DeleteLocalRef(buildClass);
             if (versionClass) env->DeleteLocalRef(versionClass);
             return;
         }
 
         try {
-            json config = json::parse(file);
+            if (!device.empty()) {
 
-            if (config.contains(std::string(LOG_TAG)) && config[LOG_TAG].is_object()) {
-                auto device = config[LOG_TAG];
-
-                spoof_info.brand = device.value("BRAND", "");
-                spoof_info.device = device.value("DEVICE", "");
-                spoof_info.manufacturer = device.value("MANUFACTURER", "");
-                spoof_info.model = device.value("MODEL", "");
-                spoof_info.fingerprint = device.value("FINGERPRINT", "");
-                spoof_info.product = device.value("PRODUCT", "");
-                spoof_info.board = device.value("BOARD", "");
-                spoof_info.bootloader = device.value("BOOTLOADER", "");
-                spoof_info.hardware = device.value("HARDWARE", "");
-                spoof_info.id = device.value("ID", "");
-                spoof_info.display = device.value("DISPLAY", "");
-                spoof_info.host = device.value("HOST", "");
-                spoof_info.odm_sku = device.value("ODM_SKU", spoof_info.product);
-                spoof_info.sku = device.value("SKU", spoof_info.hardware);
-                spoof_info.user = device.value("USER", "");
-                spoof_info.version_incremental = device.value("INCREMENTAL", "");
-                spoof_info.version_security_patch = device.value("SECURITY_PATCH", "");
-                if (device.contains("TIMESTAMP")) {
-                    const auto& device_timestamp = device["TIMESTAMP"];
-                    spoof_info.time = std::stoll(device_timestamp.get<std::string>()) * 1000;
+                spoof_info.brand = get(device, "BRAND");
+                spoof_info.device = get(device, "DEVICE");
+                spoof_info.manufacturer = get(device, "MANUFACTURER");
+                spoof_info.model = get(device, "MODEL");
+                spoof_info.fingerprint = get(device, "FINGERPRINT");
+                spoof_info.product = get(device, "PRODUCT");
+                spoof_info.board = get(device, "BOARD");
+                spoof_info.bootloader = get(device, "BOOTLOADER");
+                spoof_info.hardware = get(device, "HARDWARE");
+                spoof_info.id = get(device, "ID");
+                spoof_info.display = get(device, "DISPLAY");
+                spoof_info.host = get(device, "HOST");
+                spoof_info.odm_sku = get(device, "ODM_SKU", spoof_info.product);
+                spoof_info.sku = get(device, "SKU", spoof_info.hardware);
+                spoof_info.user = get(device, "USER");
+                spoof_info.version_incremental = get(device, "INCREMENTAL");
+                spoof_info.version_security_patch = get(device, "SECURITY_PATCH");
+                if (device.count("TIMESTAMP")) {
+                    spoof_info.time = std::stoll(device.at("TIMESTAMP")) * 1000;
                 }
 
                 // --- the version group, and only what the semaphore lets through ---
@@ -230,26 +338,26 @@ private:
                     return false;
                 };
 
-                const std::string cfg_codename = device.value("CODENAME", "");
+                const std::string cfg_codename = get(device, "CODENAME");
                 if (!trim(cfg_codename).empty() && allowed("CODENAME", cfg_codename)) {
                     spoof_info.version_codename = cfg_codename;
                 }
 
-                if (device.contains("ANDROID_VERSION")) {
-                    const std::string value = device["ANDROID_VERSION"].get<std::string>();
+                if (device.count("ANDROID_VERSION")) {
+                    const std::string value = device.at("ANDROID_VERSION");
                     if (allowed("ANDROID_VERSION", value)) spoof_info.android_version = value;
                 }
 
-                if (device.contains("SDK_INT")) {
-                    const std::string value = device["SDK_INT"].get<std::string>();
+                if (device.count("SDK_INT")) {
+                    const std::string value = device.at("SDK_INT");
                     if (allowed("SDK_INT", value)) {
                         spoof_info.version_sdk_int = std::stoi(value);
                         spoof_info.version_sdk = std::to_string(spoof_info.version_sdk_int);
                     }
                 }
 
-                if (device.contains("SDK_FULL")) {
-                    const std::string value = device["SDK_FULL"].get<std::string>();
+                if (device.count("SDK_FULL")) {
+                    const std::string value = device.at("SDK_FULL");
                     if (allowed("SDK_FULL", value)) {
                         auto dot_position = value.find('.');
                         int major = std::stoi(dot_position == std::string::npos ? value : value.substr(0, dot_position));
