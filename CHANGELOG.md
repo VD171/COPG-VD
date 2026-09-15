@@ -1,8 +1,7 @@
 # Changelog
 
 ## v5.1.1-vd
-- The zygisk library is about ten times smaller. The 25,000-line JSON header it carried was replaced by a 470-line strict parser plus a structural check, so much less code runs inside zygote. Behaviour is unchanged: a config that is not valid JSON still makes the module spoof nothing - and now the module and Analyze agree on what "not valid" means.
-- Fewer symbols exported from the library, and identical code folded at link time.
+- The zygisk library is less than half the size: 465 KB to 205 KB on arm64. The 25,000-line JSON header was replaced by a 470-line strict parser with a structural check, iostreams and exceptions are gone, and the library now exports a single symbol. Less code runs inside zygote; behaviour is unchanged. A config that is not valid JSON still makes the module spoof nothing - and the module and Analyze now agree on what "not valid" means.
 
 _No change to the spoofing itself or to the config file._
 
