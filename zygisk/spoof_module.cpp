@@ -3,8 +3,10 @@
 #include <zygisk.hpp>
 #include <map>
 #include <vector>
-#include <iterator>
-#include <fstream>
+#include <fcntl.h>
+#include <unistd.h>
+#include <cstdlib>
+#include <cerrno>
 #include <android/log.h>
 #include <algorithm>
 #include <cctype>
@@ -79,33 +81,71 @@ static inline std::string trim(const std::string& str) {
     return (start < end) ? std::string(start, end) : std::string();
 }
 
+// POSIX instead of <fstream>: iostreams drag std::locale and friends into a statically
+// linked libc++, and that - not the JSON parser - was most of the library's size.
+static bool readFile(const std::string& path, std::string& out) {
+    const int fd = open(path.c_str(), O_RDONLY | O_CLOEXEC);
+    if (fd < 0) return false;
+    out.clear();
+    char buf[4096];
+    for (;;) {
+        const ssize_t n = read(fd, buf, sizeof(buf));
+        if (n < 0) { close(fd); return false; }
+        if (n == 0) break;
+        out.append(buf, static_cast<size_t>(n));
+        if (out.size() > (1u << 20)) break;             // a config or build.prop is never this big
+    }
+    close(fd);
+    return true;
+}
+
+// strtol/strtoll with a full-consumption check, so the module needs no exceptions at all
+// (and can be built with -fno-exceptions, which is where the unwind tables go).
+static bool parseInt(const std::string& s, long long& out) {
+    if (s.empty()) return false;
+    char* end = nullptr;
+    errno = 0;
+    const long long v = strtoll(s.c_str(), &end, 10);
+    if (errno != 0 || end == s.c_str() || *end != '\0') return false;
+    out = v;
+    return true;
+}
+
+static void forEachLine(const std::string& text, void (*fn)(const std::string&, void*), void* ctx) {
+    size_t start = 0;
+    while (start < text.size()) {
+        size_t nl = text.find('\n', start);
+        if (nl == std::string::npos) nl = text.size();
+        fn(text.substr(start, nl - start), ctx);
+        start = nl + 1;
+    }
+}
+
 static RomVersion readRomVersion() {
     RomVersion rom;
-    std::ifstream file(rom_prop_file);
-    if (!file.is_open()) return rom;                 // unknown ROM -> nothing is allowed through
-    std::string line;
-    while (std::getline(file, line)) {
+    std::string text;
+    if (!readFile(rom_prop_file, text)) return rom;    // unknown ROM -> nothing is allowed through
+    forEachLine(text, [](const std::string& line, void* ctx) {
+        RomVersion& r = *static_cast<RomVersion*>(ctx);
         auto take = [&line](const char* key, std::string& out) {
             const std::string needle = std::string(key) + "=";
             if (line.rfind(needle, 0) == 0) out = trim(line.substr(needle.size()));
         };
-        take("ro.build.version.release", rom.release);
-        take("ro.build.version.codename", rom.codename);
+        take("ro.build.version.release", r.release);
+        take("ro.build.version.codename", r.codename);
         std::string sdk;
         take("ro.build.version.sdk", sdk);
-        if (!sdk.empty()) {
-            try { rom.sdk = std::stoi(sdk); } catch (const std::exception&) { rom.sdk = 0; }
-        }
-    }
+        long long v;
+        if (!sdk.empty() && parseInt(sdk, v)) r.sdk = static_cast<int>(v);
+    }, &rom);
     return rom;
 }
 
 static VersionPolicy readVersionPolicy() {
-    std::ifstream file(version_policy_file);
-    if (!file.is_open()) return VersionPolicy::Never;
-    std::string value;
-    std::getline(file, value);
-    value = trim(value);
+    std::string text;
+    if (!readFile(version_policy_file, text)) return VersionPolicy::Never;
+    const size_t nl = text.find('\n');
+    const std::string value = trim(nl == std::string::npos ? text : text.substr(0, nl));
     if (value == "force") return VersionPolicy::Force;
     if (value == "rom") return VersionPolicy::Rom;
     return VersionPolicy::Never;
@@ -180,9 +220,8 @@ static bool validTree(const std::string& text, const std::vector<jsmntok_t>& t, 
 // nested objects (the settings object, anything else) are skipped whole. Last duplicate wins,
 // as the previous parser did. Returns false when the file is missing or not valid JSON.
 static bool readConfig(const std::string& path, Config& out) {
-    std::ifstream file(path);
-    if (!file.is_open()) return false;
-    const std::string text((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    std::string text;
+    if (!readFile(path, text)) return false;
 
     jsmn_parser parser;
     jsmn_init(&parser);
@@ -295,7 +334,7 @@ private:
             return;
         }
 
-        try {
+        {
             if (!device.empty()) {
 
                 spoof_info.brand = get(device, "BRAND");
@@ -316,7 +355,8 @@ private:
                 spoof_info.version_incremental = get(device, "INCREMENTAL");
                 spoof_info.version_security_patch = get(device, "SECURITY_PATCH");
                 if (device.count("TIMESTAMP")) {
-                    spoof_info.time = std::stoll(device.at("TIMESTAMP")) * 1000;
+                    long long ts;
+                    if (parseInt(get(device, "TIMESTAMP"), ts)) spoof_info.time = ts * 1000;
                 }
 
                 // --- the version group, and only what the semaphore lets through ---
@@ -330,8 +370,10 @@ private:
                     const std::string f(field);
                     if (f == "SDK_INT" || f == "SDK_FULL") {
                         if (rom.sdk == 0) return false;
-                        try { return std::stoi(value) <= rom.sdk; }
-                        catch (const std::exception&) { return false; }
+                        long long v;
+                        const size_t dot = value.find('.');
+                        return parseInt(dot == std::string::npos ? value : value.substr(0, dot), v)
+                               && v <= rom.sdk;
                     }
                     if (f == "ANDROID_VERSION") return !rom.release.empty() && value == rom.release;
                     if (f == "CODENAME") return !rom.codename.empty() && value == rom.codename;
@@ -344,28 +386,27 @@ private:
                 }
 
                 if (device.count("ANDROID_VERSION")) {
-                    const std::string value = device.at("ANDROID_VERSION");
+                    const std::string value = get(device, "ANDROID_VERSION");
                     if (allowed("ANDROID_VERSION", value)) spoof_info.android_version = value;
                 }
 
                 if (device.count("SDK_INT")) {
-                    const std::string value = device.at("SDK_INT");
-                    if (allowed("SDK_INT", value)) {
-                        spoof_info.version_sdk_int = std::stoi(value);
+                    const std::string value = get(device, "SDK_INT");
+                    long long v;
+                    if (allowed("SDK_INT", value) && parseInt(value, v)) {
+                        spoof_info.version_sdk_int = static_cast<int>(v);
                         spoof_info.version_sdk = std::to_string(spoof_info.version_sdk_int);
                     }
                 }
 
                 if (device.count("SDK_FULL")) {
-                    const std::string value = device.at("SDK_FULL");
+                    const std::string value = get(device, "SDK_FULL");
                     if (allowed("SDK_FULL", value)) {
-                        auto dot_position = value.find('.');
-                        int major = std::stoi(dot_position == std::string::npos ? value : value.substr(0, dot_position));
-                        int minor = 0;
-                        if (dot_position != std::string::npos) {
-                            minor = std::stoi(value.substr(dot_position + 1));
-                        }
-                        spoof_info.version_sdk_int_full = major * 100000 + minor;
+                        const auto dot_position = value.find('.');
+                        long long major = 0, minor = 0;
+                        const bool okMajor = parseInt(dot_position == std::string::npos ? value : value.substr(0, dot_position), major);
+                        const bool okMinor = dot_position == std::string::npos || parseInt(value.substr(dot_position + 1), minor);
+                        if (okMajor && okMinor) spoof_info.version_sdk_int_full = static_cast<int>(major * 100000 + minor);
                     }
                 }
                 if (!spoof_info.version_sdk_int_full && spoof_info.version_sdk_int) {
@@ -383,11 +424,6 @@ private:
                     spoof_info.version_release_or_preview_display = spoof_info.version_release_or_codename;
                 }
             }
-        } catch (const std::exception& e) {
-            ERROR_LOG("Config error: %s", e.what());
-            env->DeleteLocalRef(buildClass);
-            if (versionClass) env->DeleteLocalRef(versionClass);
-            return;
         }
 
         auto setStr = [this](jclass thisClass, jfieldID field, const std::string& value) {

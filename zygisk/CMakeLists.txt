@@ -7,9 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_options(-Os -flto -ffunction-sections -fdata-sections)
 # Nothing is exported except what zygisk.hpp marks visibility("default") - the two entry
 # points. Fewer symbols in .dynsym is less to read for whoever opens the library, and
-# --icf=all folds identical code. Deliberately NOT here: -fno-unwind-tables (the std::sto*
-# calls are caught by a try, and unwinding needs the tables) and -z norelro (hardening).
+# --icf=all folds identical code. Deliberately NOT here: -z norelro (hardening).
 add_compile_options(-fvisibility=hidden -fvisibility-inlines-hidden)
+# No exceptions and no RTTI: nothing in the module throws any more (std::sto* went away with
+# the JSON header), and this is where .eh_frame/.gcc_except_table - ~60 KB - come from.
+add_compile_options(-fno-exceptions -fno-rtti -fno-unwind-tables -fno-asynchronous-unwind-tables)
 add_link_options(-flto -Wl,--gc-sections -Wl,--icf=all)
 
 
