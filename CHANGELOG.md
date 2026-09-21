@@ -1,5 +1,8 @@
 # Changelog
 
+## v5.1.1-vd
+- Updated FINGERPRINT and Build info to: ZP11.260821.010 (security patch 2026-09-05).
+
 ## v5.1.0-vd
 - The Android version is no longer spoofed. ANDROID_VERSION, SDK_INT, SDK_FULL and CODENAME describe the ROM, not the build being spoofed. A device told its SDK is newer than it really is has apps calling APIs its framework does not have: Google's apps crash, the phone reboots, and it starts over. That is a softloop - the boot itself completes, so nothing shows up in the boot logs and nobody finds the cause.
  . They are gone from the config the module ships, and the daily job never writes them again.
