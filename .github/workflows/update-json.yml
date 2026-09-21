@@ -29,6 +29,7 @@ on:
 
 permissions:
   contents: write
+  actions: write      # to dispatch the module build below
 
 concurrency:
   group: update-copg-json
@@ -65,6 +66,21 @@ jobs:
           git add module/COPG-VD.json.example README.md
           git commit -m "COPG-VD.json: $BUILD (security patch $PATCH)"
           git push
+
+      # A new fingerprint is data, not code: it ships as a new module version on its own, so a
+      # fresh install gets it inside the zip instead of waiting for the updater's first boot.
+      # workflow_dispatch is one of the two events a GITHUB_TOKEN is allowed to trigger.
+      - name: Release the new fingerprint
+        if: steps.gen.outputs.changed == 'true' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD: ${{ steps.gen.outputs.build }}
+          PATCH: ${{ steps.gen.outputs.security_patch }}
+        run: |
+          gh workflow run COPG-VD.yml --ref main \
+            -f bump=patch -f release=true \
+            -f notes="- Updated FINGERPRINT and Build info to: $BUILD (security patch $PATCH)."
+          echo "module build dispatched for $BUILD"
 
       # GitHub disables scheduled workflows after 60 days without a commit, and only commits
       # count - not tags, not runs, not the schedule firing. The canary cadence alone does not

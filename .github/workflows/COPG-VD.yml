@@ -16,6 +16,10 @@ on:
         description: 'publish a GitHub release with the zip'
         type: boolean
         default: false
+      notes:
+        description: 'changelog lines for this version (used by the automatic fingerprint release)'
+        type: string
+        default: ''
 
 permissions:
   contents: write
@@ -100,6 +104,23 @@ jobs:
         id: version
         run: .github/scripts/version.sh "${{ inputs.bump == 'none' && 'read' || inputs.bump }}"
 
+      # The automatic fingerprint release has no hand-written CHANGELOG section, so it brings
+      # its own lines: they become the section for this version (kept in the file, committed
+      # with the bump) and therefore also the release notes.
+      - name: Changelog section from notes
+        if: steps.version.outputs.bumped == 'true' && inputs.notes != ''
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          NOTES: ${{ inputs.notes }}
+        run: |
+          grep -q "^## $VERSION\$" CHANGELOG.md && { echo "section already there"; exit 0; }
+          {
+            sed -n '1,2p' CHANGELOG.md
+            printf '## %s\n%s\n\n' "$VERSION" "$NOTES"
+            sed -n '3,$p' CHANGELOG.md
+          } > CHANGELOG.new && mv CHANGELOG.new CHANGELOG.md
+          sed -n '1,8p' CHANGELOG.md
+
       - name: Prepare module structure
         run: |
           mkdir -p module/zygisk
@@ -123,7 +144,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add module/module.prop module/update.json
+          git add module/module.prop module/update.json CHANGELOG.md
           git commit -m "Release ${{ steps.version.outputs.version }} (versionCode ${{ steps.version.outputs.version_code }})"
           git push
 
