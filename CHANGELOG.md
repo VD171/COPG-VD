@@ -1,10 +1,5 @@
 # Changelog
 
-## v5.1.1-vd
-- The zygisk library is less than half the size: 465 KB to 205 KB on arm64. The 25,000-line JSON header was replaced by a 470-line strict parser with a structural check, iostreams and exceptions are gone, and the library now exports a single symbol. Less code runs inside zygote; behaviour is unchanged. A config that is not valid JSON still makes the module spoof nothing - and the module and Analyze now agree on what "not valid" means.
-
-_No change to the spoofing itself or to the config file._
-
 ## v5.1.0-vd
 - The Android version is no longer spoofed. ANDROID_VERSION, SDK_INT, SDK_FULL and CODENAME describe the ROM, not the build being spoofed. A device told its SDK is newer than it really is has apps calling APIs its framework does not have: Google's apps crash, the phone reboots, and it starts over. That is a softloop - the boot itself completes, so nothing shows up in the boot logs and nobody finds the cause.
  . They are gone from the config the module ships, and the daily job never writes them again.
