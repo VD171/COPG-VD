@@ -97,9 +97,9 @@
                     <h3>COPG-VD Module Info</h3>
                 </div>
                 <div class="tab-nav info-tab-nav">
-                    <button class="tab-btn active" data-tab="info-about">About</button>
-                    <button class="tab-btn" data-tab="info-readme">Readme</button>
-                    <button class="tab-btn" data-tab="info-license">License</button>
+                    <button class="tab-btn active" data-tab="info-about" data-i18n="ui_001">About</button>
+                    <button class="tab-btn" data-tab="info-readme" data-i18n="ui_028">Readme</button>
+                    <button class="tab-btn" data-tab="info-license" data-i18n="ui_018">License</button>
                 </div>
                 <div class="info-tab-container">
                     <div id="info-about" class="info-tab-content active">
@@ -112,7 +112,7 @@
                                     </svg>
                                 </div>
                                 <div class="about-card-content">
-                                    <h4>Developer</h4>
+                                    <h4 data-i18n="ui_012">Developer</h4>
                                     <p class="info-link" data-link="https://github.com/VD171">
                                         <span class="link-icon">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -135,7 +135,7 @@
                                     </svg>
                                 </div>
                                 <div class="about-card-content">
-                                    <h4>Project</h4>
+                                    <h4 data-i18n="ui_027">Project</h4>
                                     <p class="info-link" data-link="https://github.com/VD171/COPG-VD">
                                         <span class="link-icon">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -156,7 +156,7 @@
                                     </svg>
                                 </div>
                                 <div class="about-card-content">
-                                    <h4>Community</h4>
+                                    <h4 data-i18n="ui_010">Community</h4>
                                     <div class="community-links">
                                         <p class="info-link" data-link="https://t.me/VD_Priv8">
                                             <span class="link-icon">
@@ -181,14 +181,14 @@
                         </div>
                     </div>
                     <div id="info-license" class="info-tab-content">
-                        <div class="markdown-container" id="license-content">Loading...</div>
+                        <div class="markdown-container" id="license-content" data-i18n="ui_019">Loading...</div>
                     </div>
                     <div id="info-readme" class="info-tab-content">
                         <div class="markdown-container" id="readme-content">Loading...</div>
                     </div>
                 </div>
                 <div class="popup-footer">
-                    <button class="cancel-btn close-info-btn">Close</button>
+                    <button class="cancel-btn close-info-btn" data-i18n="ui_009">Close</button>
                 </div>
             </div>
         </div>
@@ -196,11 +196,11 @@
         <div id="donate-popup" class="popup">
             <div class="popup-content">
                 <div class="modal-header">
-                    <h3>Support Developer</h3>
+                    <h3 data-i18n="ui_036">Support Developer</h3>
                 </div>
                 <div class="popup-body">
                     <div class="donate-message">
-                        <p>If you find this app helpful, consider supporting the developer:</p>
+                        <p data-i18n="ui_017">If you find this app helpful, consider supporting the developer:</p>
                     </div>
                     <div class="donate-options">
                         <div class="donate-option">
@@ -255,7 +255,7 @@
                                 </svg>
                             </div>
                             <div class="donate-info">
-                                <h4>Telegram Gifts</h4>
+                                <h4 data-i18n="ui_037">Telegram Gifts</h4>
                                 <p class="donate-address">@AlirezaParsi</p>
                             </div>
                             <button class="copy-btn" data-address="@AlirezaParsi">
@@ -274,8 +274,8 @@
         </div>
 
         <div class="tab-nav">
-            <button id="tab-settings" class="tab-btn active">Settings</button>
-            <button id="tab-devices" class="tab-btn">Device</button>
+            <button id="tab-settings" class="tab-btn active" data-i18n="ui_032">Settings</button>
+            <button id="tab-devices" class="tab-btn" data-i18n="ui_013">Device</button>
         </div>
 
         <div class="tab-container" id="tab-container">
@@ -284,21 +284,21 @@
                     <div class="scroll-container">
                         <div class="list-wrapper">
                             <div class="toggle-group">
-                                <span class="toggle-label">Use Resetprop</span>
+                                <span class="toggle-label" data-i18n="ui_041">Use Resetprop</span>
                                 <label class="switch">
                                     <input type="checkbox" id="toggle-resetprop">
                                     <span class="slider"></span>
                                 </label>
                             </div>
                             <div class="toggle-group">
-                                <span class="toggle-label">Spoof ro.product.manufacturer</span>
+                                <span class="toggle-label" data-i18n="ui_033">Spoof ro.product.manufacturer</span>
                                 <label class="switch">
                                     <input type="checkbox" id="toggle-ro-product-manufacturer">
                                     <span class="slider"></span>
                                 </label>
                             </div>
                             <div class="toggle-group">
-                                <span class="toggle-label">Auto-update JSON on boot</span>
+                                <span class="toggle-label" data-i18n="ui_004">Auto-update JSON on boot</span>
                                 <label class="switch">
                                     <input type="checkbox" id="toggle-autoupdate">
                                     <span class="slider"></span>
@@ -310,33 +310,37 @@
                                     <small id="version-rom-hint" class="toggle-hint"></small>
                                 </span>
                                 <select id="select-spoof-version" class="version-select">
-                                    <option value="never">Never</option>
-                                    <option value="rom">Up to this ROM</option>
-                                    <option value="force">Force</option>
+                                    <option value="never" data-i18n="ui_022">Never</option>
+                                    <option value="rom" data-i18n="ui_039">Up to this ROM</option>
+                                    <option value="force" data-i18n="ui_016">Force</option>
                                 </select>
+                            </div>
+                            <div class="toggle-group">
+                                <span class="toggle-label" data-i18n="ui_lang">Language</span>
+                                <select id="select-language" class="version-select"></select>
                             </div>
                         </div>
                     </div>
                     <div class="button-group">
-                        <button id="analyze-config" class="action-btn">Analyze</button>
-                        <button id="check-update" class="action-btn">Check Update</button>
-                        <button id="apply-update" class="action-btn">Update Now</button>
-                        <button id="backup-manager" class="action-btn">Backup/Restore</button>
+                        <button id="analyze-config" class="action-btn" data-i18n="ui_003">Analyze</button>
+                        <button id="check-update" class="action-btn" data-i18n="ui_007">Check Update</button>
+                        <button id="apply-update" class="action-btn" data-i18n="ui_040">Update Now</button>
+                        <button id="backup-manager" class="action-btn" data-i18n="ui_005">Backup/Restore</button>
                     </div>
                 </div>
                 <div class="log-section" id="settings-log-section">
                     <div class="log-header" id="log-header">
                         <div class="log-title">
-                            <h2>Logs</h2>
+                            <h2 data-i18n="ui_020">Logs</h2>
                             <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </div>
                         <div class="log-actions">
-                            <span class="copy-text" id="copy-log">Copy</span>
-                            <span class="clear-text" id="clear-log">Clear</span>
-                            <span class="logcat-text" id="start-logcat">Start Logcat</span>
-                            <span class="logcat-text" id="stop-logcat" style="display: none;">Stop Logcat</span>
+                            <span class="copy-text" id="copy-log" data-i18n="ui_011">Copy</span>
+                            <span class="clear-text" id="clear-log" data-i18n="ui_008">Clear</span>
+                            <span class="logcat-text" id="start-logcat" data-i18n="ui_034">Start Logcat</span>
+                            <span class="logcat-text" id="stop-logcat" style="display: none;" data-i18n="ui_035">Stop Logcat</span>
                         </div>
                     </div>
                     <div class="log-content" id="log-content">
@@ -356,13 +360,13 @@
     <div id="device-modal" class="modal">
         <div class="modal-content device-form-content">
             <div class="modal-header">
-                <h3 id="device-modal-title">Add New Device Profile</h3>
+                <h3 id="device-modal-title" data-i18n="ui_002">Add New Device Profile</h3>
             </div>
             <form id="device-form">
                 <div class="scroll-container">
                     <div class="form-group">
                         <label for="device-name">
-                            Device<span class="optional-badge">optional</span>
+                            Device<span class="optional-badge" data-i18n="ui_043">optional</span>
                         </label>
                         <input type="text" id="device-name" placeholder="e.g., comet">
                     </div>
@@ -494,8 +498,8 @@
                     </div>
                 </div>
                 <div class="form-buttons">
-                    <button type="button" class="cancel-btn">Cancel</button>
-                    <button type="submit" class="action-btn">Save</button>
+                    <button type="button" class="cancel-btn" data-i18n="ui_006">Cancel</button>
+                    <button type="submit" class="action-btn" data-i18n="ui_029">Save</button>
                 </div>
             </form>
         </div>
@@ -503,17 +507,17 @@
 
     <div id="error-popup" class="popup">
         <div class="popup-content">
-            <h3>Error</h3>
-            <p id="error-message">Please fill out the required fields.</p>
+            <h3 data-i18n="ui_015">Error</h3>
+            <p id="error-message" data-i18n="ui_026">Please fill out the required fields.</p>
             <div class="popup-buttons">
-                <button id="error-ok" class="action-btn">OK</button>
+                <button id="error-ok" class="action-btn" data-i18n="ui_024">OK</button>
             </div>
         </div>
     </div>
 
     <div id="snackbar" class="snackbar">
         <span id="snackbar-message"></span>
-        <button id="snackbar-undo" class="snackbar-btn">Undo</button>
+        <button id="snackbar-undo" class="snackbar-btn" data-i18n="ui_038">Undo</button>
     </div>
 
     <div id="backup-popup" class="popup">
@@ -523,7 +527,7 @@
                 <div class="backup-row">
                     <div class="backup-info">
                         <div class="backup-title">COPG-VD.json</div>
-                        <div class="backup-desc">Package names and devices</div>
+                        <div class="backup-desc" data-i18n="ui_025">Package names and devices</div>
                     </div>
                     <div class="button-group">
                         <button class="small-btn backup-btn" data-file="COPG-VD.json">
@@ -546,7 +550,7 @@
 
     <div class="popup" id="file-picker-popup">
         <div class="popup-content">
-            <h3>Select File</h3>
+            <h3 data-i18n="ui_031">Select File</h3>
             <div class="breadcrumb-container">
                 <button class="small-btn back-btn" id="file-picker-back">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -569,16 +573,17 @@
 
     <div id="save-log-popup" class="popup">
         <div class="popup-content">
-            <h3>Save Log</h3>
-            <p>Do you want to save this log to /storage/emulated/0/Download/COPG-VD/LOGS?</p>
+            <h3 data-i18n="ui_030">Save Log</h3>
+            <p data-i18n="ui_014">Do you want to save this log to /storage/emulated/0/Download/COPG-VD/LOGS?</p>
             <p>File name: <span id="save-log-filename" style="font-family: monospace; font-weight: bold;">COPG-VD-LOG.txt</span></p>
             <div class="popup-buttons">
-                <button id="save-log-no" class="cancel-btn">No</button>
-                <button id="save-log-yes" class="action-btn">Yes</button>
+                <button id="save-log-no" class="cancel-btn" data-i18n="ui_023">No</button>
+                <button id="save-log-yes" class="action-btn" data-i18n="ui_042">Yes</button>
             </div>
         </div>
     </div>
     
+    <script src="i18n.js"></script>
     <script src="scripts.js"></script>
 </body>
 </html>

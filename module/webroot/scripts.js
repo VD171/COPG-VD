@@ -423,11 +423,11 @@ function openLink(url) {
     try {
         parsed = new URL(url);
     } catch (error) {
-        appendToOutput(`Refused to open a malformed link: ${url}`, 'warning');
+        appendToOutput(t('msg_097', {"url": url}), 'warning');
         return;
     }
     if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-        appendToOutput(`Refused to open a ${parsed.protocol} link`, 'warning');
+        appendToOutput(t('msg_096', {"parsed.protocol": parsed.protocol}), 'warning');
         return;
     }
     execCommand(`am start -a android.intent.action.VIEW -d ${shq(parsed.href)}`).catch(() => {
@@ -466,12 +466,12 @@ function copyToClipboard(text) {
     try {
         const successful = document.execCommand('copy');
         if (successful) {
-            appendToOutput("Address copied to clipboard", 'success');
+            appendToOutput(t('msg_045'), 'success');
         } else {
-            appendToOutput("Failed to copy address", 'error');
+            appendToOutput(t('msg_068'), 'error');
         }
     } catch (err) {
-        appendToOutput("Error copying address: " + err, 'error');
+        appendToOutput(t('msg_058') + err, 'error');
     }
     
     document.body.removeChild(textarea);
@@ -490,7 +490,7 @@ async function saveLogToFile() {
     const logContent = output.innerText || output.textContent;
     
     if (!logContent.trim()) {
-        appendToOutput("No log content to save", 'warning');
+        appendToOutput(t('msg_094'), 'warning');
         return false;
     }
 
@@ -498,10 +498,10 @@ async function saveLogToFile() {
         await execCommand(`mkdir -p /storage/emulated/0/Download/COPG-VD/LOGS`);
         let finalFilename = document.getElementById('save-log-popup').dataset.filename || await generateLogFilename();
         await execCommand(`echo ${shq(logContent)} > ${shq(`/storage/emulated/0/Download/COPG-VD/LOGS/${finalFilename}`)}`);
-        appendToOutput(`Log saved to: ${finalFilename}`, 'success');
+        appendToOutput(t('msg_088', {"finalFilename": finalFilename}), 'success');
         return true;
     } catch (error) {
-        appendToOutput(`Failed to save log: ${error}`, 'error');
+        appendToOutput(t('msg_078', {"error": error}), 'error');
         return false;
     }
 }
@@ -547,7 +547,7 @@ async function generateLogFilename() {
         }
         return filename;
     } catch (error) {
-        appendToOutput(`Error generating filename: ${error}`, 'error');
+        appendToOutput(t('msg_061', {"error": error}), 'error');
         return "COPG-VD-LOG.txt";
     }
 }
@@ -599,10 +599,10 @@ async function backupFile(filename) {
         }
         
         await execCommand(`cp ${shq(`/data/adb/${filename}`)} ${shq(`/sdcard/Download/COPG-VD/${finalFilename}`)}`);
-        appendToOutput(`Backup created: ${finalFilename}`, 'success');
+        appendToOutput(t('msg_049', {"finalFilename": finalFilename}), 'success');
         return true;
     } catch (error) {
-        appendToOutput(`Failed to backup ${filename}: ${error}`, 'error');
+        appendToOutput(t('msg_066', {"filename": filename, "error": error}), 'error');
         return false;
     }
 }
@@ -620,7 +620,7 @@ async function startLogcat(e) {
     if (logcatRunning) return;
 
     try {
-        appendToOutput("Starting logcat for COPG-VD... (open target app ...)", 'info');
+        appendToOutput(t('msg_100'), 'info');
         logcatRunning = true;
         document.getElementById('start-logcat').style.display = 'none';
         document.getElementById('stop-logcat').style.display = 'inline-block';
@@ -630,7 +630,7 @@ async function startLogcat(e) {
         await execCommand("su -c 'logcat -c'");
         readLogcat();
     } catch (error) {
-        appendToOutput(`Failed to start logcat: ${error}`, 'error');
+        appendToOutput(t('msg_080', {"error": error}), 'error');
         stopLogcat();
     }
 }
@@ -657,7 +657,7 @@ async function readLogcat() {
             setTimeout(readLogcat, 10);
         }
     } catch (error) {
-        appendToOutput(`Logcat error: ${error}`, 'error');
+        appendToOutput(t('msg_089', {"error": error}), 'error');
         stopLogcat();
     }
 }
@@ -669,9 +669,9 @@ function stopLogcat(e) {
     logcatRunning = false;
     try {
         execCommand("su -c 'logcat -c'").catch(() => {});
-        appendToOutput("Logcat stopped", 'info');
+        appendToOutput(t('msg_090'), 'info');
     } catch (error) {
-        appendToOutput(`Error stopping logcat: ${error}`, 'error');
+        appendToOutput(t('msg_062', {"error": error}), 'error');
     } finally {
         document.getElementById('start-logcat').style.display = 'inline-block';
         document.getElementById('stop-logcat').style.display = 'none';
@@ -686,7 +686,7 @@ async function showSaveLogPopup() {
         document.getElementById('save-log-popup').dataset.filename = filename;
         showPopup('save-log-popup');
     } catch (error) {
-        appendToOutput(`Error determining filename: ${error}`, 'error');
+        appendToOutput(t('msg_060', {"error": error}), 'error');
         showPopup('save-log-popup');
     }
 }
@@ -759,7 +759,7 @@ async function loadVersion() {
         const version = await execCommand("grep '^version=' /data/adb/modules/COPG-VD/module.prop | cut -d'=' -f2");
         versionElement.textContent = `${version.trim()}`;
     } catch (error) {
-        appendToOutput("Failed to load version: " + error, 'error');
+        appendToOutput(t('msg_073') + error, 'error');
     }
 }
 
@@ -774,7 +774,7 @@ async function loadToggleStates() {
         autoupdateToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG-VD/.skip.autoupdate ] && echo 0 || echo 1")).trim() === "1";
         await loadVersionPolicy();
     } catch (error) {
-        appendToOutput("Failed to load toggle states: " + error, 'error');
+        appendToOutput(t('msg_072') + error, 'error');
     }
 }
 
@@ -784,9 +784,9 @@ async function loadConfig() {
         const parsedConfig = JSON.parse(configContent);
         currentConfig = parsedConfig;
         configKeyOrder = Object.keys(parsedConfig);
-        appendToOutput("Config loaded successfully", 'success');
+        appendToOutput(t('msg_054'), 'success');
     } catch (error) {
-        appendToOutput("Failed to load config: " + error, 'error');
+        appendToOutput(t('msg_070') + error, 'error');
         currentConfig = {};
         configKeyOrder = [];
     }
@@ -796,7 +796,7 @@ function renderDeviceList() {
     const now = Date.now();
 
     const deviceList = document.getElementById('device-list');
-    if (!deviceList) return appendToOutput("Error: 'device-list' not found", 'error');
+    if (!deviceList) return appendToOutput(t('msg_063'), 'error');
 
     const fragment = document.createDocumentFragment();
     let index = 0;
@@ -1162,11 +1162,11 @@ async function saveDevice(e) {
         closeModal('device-modal');
         renderDeviceList();
         appendToOutput(
-            `Device profile "${deviceName}" updated`, 
+            t('msg_056', {"deviceName": deviceName}),
             'success'
         );
     } catch (error) {
-        appendToOutput(`Failed to save device: ${error}`, 'error');
+        appendToOutput(t('msg_077', {"error": error}), 'error');
     }
 }
 
@@ -1198,9 +1198,9 @@ async function saveConfig() {
             console.warn('Could not set SELinux context:', selinuxError);
         }
         
-        appendToOutput("Config saved", 'info');
+        appendToOutput(t('msg_055'), 'info');
     } catch (error) {
-        appendToOutput(`Failed to save config: ${error}`, 'error');
+        appendToOutput(t('msg_076', {"error": error}), 'error');
         throw error;
     }
 }
@@ -1214,7 +1214,7 @@ async function writeSetting(key, value) {
         currentConfig['COPG-VD-Settings'][key] = value;
         await saveConfig();
     } catch (error) {
-        appendToOutput(`Setting saved to the flag file only: ${error}`, 'warning');
+        appendToOutput(t('msg_099', {"error": error}), 'warning');
     }
 }
 
@@ -1232,7 +1232,7 @@ async function loadVersionPolicy() {
             "grep -m1 '^ro.build.version.sdk=' /system/build.prop | cut -d= -f2")).trim().split('\n');
         hint.textContent = rom.length >= 2 ? `this ROM: Android ${rom[0].trim()}, SDK ${rom[1].trim()}` : '';
     } catch (error) {
-        appendToOutput(`Failed to read the version policy: ${error}`, 'error');
+        appendToOutput(t('msg_074', {"error": error}), 'error');
     }
 }
 
@@ -1250,7 +1250,7 @@ async function runUpdater(mode) {
         // "|| true": the script reports through its status line, execCommand rejects on exit != 0.
         output = await execCommand(`sh ${script} ${mode} 2>&1 || true`);
     } catch (error) {
-        appendToOutput(`Updater could not run: ${error}`, 'error');
+        appendToOutput(t('msg_104', {"error": error}), 'error');
         return;
     }
 
@@ -1261,36 +1261,36 @@ async function runUpdater(mode) {
 
     switch (status) {
         case 'up-to-date':
-            appendToOutput('Already on the newest build', 'success');
+            appendToOutput(t('msg_046'), 'success');
             break;
         case 'update-available':
-            appendToOutput('A newer build is available - press "Update Now"', 'warning');
+            appendToOutput(t('msg_044'), 'warning');
             break;
         case 'applied':
-            appendToOutput('COPG-VD.json updated. Reboot to apply it to android.os.Build', 'success');
+            appendToOutput(t('msg_050'), 'success');
             await loadConfig();
             renderDeviceList();
             break;
         case 'analyze-ok':
-            appendToOutput('Config analyzed: nothing to fix', 'success');
+            appendToOutput(t('msg_051'), 'success');
             break;
         case 'analyze-warn':
-            appendToOutput('Config analyzed: see the [warn] lines above', 'warning');
+            appendToOutput(t('msg_052'), 'warning');
             break;
         case 'analyze-red':
-            appendToOutput('Config analyzed: the [RED] lines break the module or the device', 'error');
+            appendToOutput(t('msg_053'), 'error');
             break;
         case 'local-newer':
-            appendToOutput('Your config is newer than upstream, nothing was changed', 'warning');
+            appendToOutput(t('msg_107'), 'warning');
             break;
         case 'skipped-custom-device':
-            appendToOutput('Your profile spoofs another device, so nothing was changed', 'warning');
+            appendToOutput(t('msg_108'), 'warning');
             break;
         case 'no-config':
-            appendToOutput('No COPG-VD.json found to update', 'error');
+            appendToOutput(t('msg_092'), 'error');
             break;
         default:
-            appendToOutput('Update failed, see the lines above', 'error');
+            appendToOutput(t('msg_103'), 'error');
     }
 }
 
@@ -1393,12 +1393,12 @@ function copyLogContent() {
     try {
         const successful = document.execCommand('copy');
         if (successful) {
-            appendToOutput("Logs copied to clipboard", 'success');
+            appendToOutput(t('msg_091'), 'success');
         } else {
-            appendToOutput("Failed to copy logs", 'error');
+            appendToOutput(t('msg_069'), 'error');
         }
     } catch (err) {
-        appendToOutput("Error copying logs: " + err, 'error');
+        appendToOutput(t('msg_059') + err, 'error');
     }
     
     document.body.removeChild(textarea);
@@ -1412,7 +1412,7 @@ function applyEventListeners() {
             await writeSetting('resetprop', isChecked);
             appendToOutput(isChecked ? "Resetprop Enabled. Reboot to see changes" : "Resetprop Disabled. Reboot to see changes", isChecked ? 'success' : 'error');
         } catch (error) {
-            appendToOutput(`Failed to update Resetprop Config: ${error}`, 'error');
+            appendToOutput(t('msg_081', {"error": error}), 'error');
             e.target.checked = !isChecked;
         }
     });
@@ -1423,7 +1423,7 @@ function applyEventListeners() {
             await writeSetting('spoof_manufacturer', isChecked);
             appendToOutput(isChecked ? "Ro.Product.Manufacturer Enabled. Reboot to see changes" : "Ro.Product.Manufacturer Disabled. Reboot to see changes", isChecked ? 'success' : 'error');
         } catch (error) {
-            appendToOutput(`Failed to update Ro.Product.Manufacturer Config: ${error}`, 'error');
+            appendToOutput(t('msg_082', {"error": error}), 'error');
             e.target.checked = !isChecked;
         }
     });
@@ -1437,14 +1437,14 @@ function applyEventListeners() {
             // restoring an old one must not re-arm the mode that softloops the device.
             await writeSetting('spoof_version', value === 'force' ? 'rom' : value);
             if (value === 'force') {
-                appendToOutput('FORCE: the config version is applied as written. This is what makes Google apps crash until the phone reboots, over and over. Reboot to apply.', 'error');
+                appendToOutput(t('msg_064'), 'error');
             } else if (value === 'rom') {
-                appendToOutput('Version spoofing limited to what this ROM already is. Reboot to apply.', 'warning');
+                appendToOutput(t('msg_105'), 'warning');
             } else {
-                appendToOutput('Android version is no longer spoofed. Reboot to apply.', 'success');
+                appendToOutput(t('msg_047'), 'success');
             }
         } catch (error) {
-            appendToOutput(`Failed to change the version policy: ${error}`, 'error');
+            appendToOutput(t('msg_067', {"error": error}), 'error');
             await loadVersionPolicy();
         }
     });
@@ -1462,7 +1462,7 @@ function applyEventListeners() {
             await writeSetting('autoupdate', isChecked);
             appendToOutput(isChecked ? "JSON auto-update enabled (once per boot)" : "JSON auto-update disabled", isChecked ? 'success' : 'info');
         } catch (error) {
-            appendToOutput(`Failed to update auto-update config: ${error}`, 'error');
+            appendToOutput(t('msg_083', {"error": error}), 'error');
             e.target.checked = !isChecked;
         }
     });
@@ -1496,7 +1496,7 @@ function applyEventListeners() {
 
     document.getElementById('save-log-no').addEventListener('click', () => {
         closePopup('save-log-popup');
-        appendToOutput("Log not saved", 'info');
+        appendToOutput(t('msg_087'), 'info');
     });
     
     document.getElementById('start-logcat').addEventListener('click', startLogcat);
@@ -1506,7 +1506,7 @@ function applyEventListeners() {
         e.stopPropagation();
         const output = document.getElementById('output');
         output.innerHTML = '';
-        appendToOutput("Log cleared", 'success');
+        appendToOutput(t('msg_086'), 'success');
     });
     document.getElementById('copy-log').addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1551,7 +1551,41 @@ window.addEventListener('resize', () => {
     }
 });
 
+const LANG_NAMES = {
+    en: "English", ar: "\u0627\u0644\u0639\u0631\u0628\u064a\u0629", cs: "\u010ce\u0161tina",
+    de: "Deutsch", es: "Espa\u00f1ol", fa: "\u0641\u0627\u0631\u0633\u06cc", fr: "Fran\u00e7ais",
+    hi: "\u0939\u093f\u0928\u094d\u0926\u0940", in: "Bahasa Indonesia", it: "Italiano",
+    ja: "\u65e5\u672c\u8a9e", ko: "\ud55c\uad6d\uc5b4", nl: "Nederlands", pl: "Polski",
+    pt: "Portugu\u00eas", ru: "\u0420\u0443\u0441\u0441\u043a\u0438\u0439", sv: "Svenska",
+    th: "\u0e44\u0e17\u0e22", tr: "T\u00fcrk\u00e7e", vi: "Ti\u1ebfng Vi\u1ec7t", zh: "\u4e2d\u6587"
+};
+
+function setupLanguageSelector() {
+    const sel = document.getElementById('select-language');
+    if (!sel || !window.I18N) return;
+    sel.innerHTML = '';
+    window.I18N.AVAILABLE.forEach(code => {
+        const o = document.createElement('option');
+        o.value = code;
+        o.textContent = LANG_NAMES[code] || code;
+        sel.appendChild(o);
+    });
+    sel.value = window.I18N.current;
+    sel.addEventListener('change', async (e) => {
+        const lang = e.target.value;
+        try {
+            await window.I18N.set(lang);
+            if (typeof writeSetting === 'function') { try { await writeSetting('lang', lang); } catch (_) {} }
+            appendToOutput(t('msg_lang_changed'), 'success');
+        } catch (err) {
+            appendToOutput('Failed to change language: ' + err, 'error');
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+    if (window.I18N) { try { await window.I18N.init(); } catch (e) {} }
+    setupLanguageSelector();
     setupDonatePopup();
     setupInfoPopup();
 
@@ -1565,7 +1599,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('theme-icon').textContent = '🌙';
     }
         
-    appendToOutput("UI initialized", 'success');
+    appendToOutput(t('msg_102'), 'success');
     await loadVersion();
     await loadToggleStates();
     await loadConfig();
@@ -1579,14 +1613,14 @@ async function getPreferredStartPath() {
         try {
             const lsOutput = await execCommand(`ls -l ${shq(path)} || echo "ERROR: dir_not_found"`);
             if (!lsOutput.includes('ERROR: dir_not_found') && !lsOutput.includes('No such file or directory')) {
-                appendToOutput(`Selected start path: ${path}`, 'info');
+                appendToOutput(t('msg_098', {"path": path}), 'info');
                 return path;
             }
         } catch (error) {
-            appendToOutput(`Failed to access ${path}: ${error.message}`, 'warning');
+            appendToOutput(t('msg_065', {"path": path, "error.message": error.message}), 'warning');
         }
     }
-    appendToOutput('No accessible storage path found, defaulting to /storage/emulated/0', 'warning');
+    appendToOutput(t('msg_093'), 'warning');
     return '/storage/emulated/0';
 }
 
@@ -1607,7 +1641,7 @@ async function recursiveFileSearch(basePath, searchTerm = '') {
         }
         return results;
     } catch (error) {
-        appendToOutput(`Failed to search files in ${basePath}: ${error}`, 'error');
+        appendToOutput(t('msg_079', {"basePath": basePath, "error": error}), 'error');
         return [];
     }
 }
@@ -1631,7 +1665,7 @@ async function restoreFile(sourcePath, targetFile) {
             console.warn('Could not set SELinux context:', selinuxError);
         }
 
-        appendToOutput(`Successfully restored ${sourcePath.split('/').pop()} as ${targetFile}`, 'success');
+        appendToOutput(t('msg_101', {"sourcePath.split('/').pop()": sourcePath.split('/').pop(), "targetFile": targetFile}), 'success');
 
         if (targetFile === 'COPG-VD.json') {
             await loadConfig();
@@ -1639,7 +1673,7 @@ async function restoreFile(sourcePath, targetFile) {
         }
         return true;
     } catch (error) {
-        appendToOutput(`Failed to restore ${sourcePath ? sourcePath.split('/').pop() : 'unknown file'}: ${error.message}`, 'error');
+        appendToOutput(t('msg_075', {"sourcePath ? sourcePath.split('/').pop() : 'unknown file'": sourcePath ? sourcePath.split('/').pop() : 'unknown file', "error.message": error.message}), 'error');
         return false;
     }
 }
@@ -1647,10 +1681,10 @@ async function restoreFile(sourcePath, targetFile) {
 async function showFilePicker(targetFile, startPath = null) {
     if (!targetFile) {
         targetFile = 'COPG-VD.json';
-        appendToOutput('Warning: targetFile undefined, defaulting to COPG-VD.json', 'warning');
+        appendToOutput(t('msg_106'), 'warning');
     }
 
-    appendToOutput(`Loading file picker for ${targetFile}...`, 'info');
+    appendToOutput(t('msg_085', {"targetFile": targetFile}), 'info');
     const popup = document.getElementById('file-picker-popup');
     const searchInput = document.getElementById('file-picker-search');
     const fileList = document.getElementById('file-picker-list');
@@ -1678,7 +1712,7 @@ async function showFilePicker(targetFile, startPath = null) {
         const lsOutput = await execCommand(`ls -l ${shq(currentPath)} || echo "ERROR: dir_not_found"`);
         if (lsOutput.includes('ERROR: dir_not_found') || lsOutput.includes('No such file or directory')) {
             if (currentPath !== '/storage/emulated/0') {
-                appendToOutput(`Directory ${currentPath} not found, falling back to /storage/emulated/0`, 'warning');
+                appendToOutput(t('msg_057', {"currentPath": currentPath}), 'warning');
                 return showFilePicker(targetFile, '/storage/emulated/0');
             } else {
                 throw new Error(`Cannot access ${currentPath}: Directory not found or no permission`);
@@ -1831,7 +1865,7 @@ async function showFilePicker(targetFile, startPath = null) {
         });
 
         showPopup('file-picker-popup');
-        appendToOutput(`File list loaded for ${currentPath}`, 'success');
+        appendToOutput(t('msg_084', {"currentPath": currentPath}), 'success');
     } catch (error) {
         // Built as DOM: the path is attacker-controlled and inline handlers are blocked by the CSP.
         fileList.innerHTML = '';
@@ -1845,7 +1879,7 @@ async function showFilePicker(targetFile, startPath = null) {
         retry.addEventListener('click', () => showFilePicker(targetFile, currentPath));
         errorBox.appendChild(retry);
         fileList.appendChild(errorBox);
-        appendToOutput(`Failed to load file list in ${currentPath}: ${error}`, 'error');
+        appendToOutput(t('msg_071', {"currentPath": currentPath, "error": error}), 'error');
     }
 }
 
@@ -1887,7 +1921,7 @@ function setupBackupListeners() {
         const filename = btn.dataset.file;
         if (!filename) return;
         btn.addEventListener('click', async (e) => {
-            appendToOutput(`Opening file picker for ${filename}`, 'info');
+            appendToOutput(t('msg_095', {"filename": filename}), 'info');
             const startPath = await getPreferredStartPath();
             await showFilePicker(filename, startPath);
         });
@@ -1910,7 +1944,7 @@ function setupBackupListeners() {
             }
 
             newBackupAllBtn.classList.remove('loading');
-            appendToOutput(`Backup completed: ${successCount}/${files.length} files`, 
+            appendToOutput(t('msg_048', {"successCount": successCount, "files.length": files.length}), 
                           successCount === files.length ? 'success' : 'warning');
         });
     }
