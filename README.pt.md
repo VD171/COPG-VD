@@ -80,3 +80,7 @@ Desative se você se importa com a detecção "Found device spoofing" no app det
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **GitHub:** @VD171 https://github.com/VD171
+
+---
+
+**Tags:** `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG` `COPG-VD`
