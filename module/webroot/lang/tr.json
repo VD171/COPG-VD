@@ -108,5 +108,6 @@
   "msg_107": "Yapılandırmanız üst kaynaktan daha yeni, hiçbir şey değiştirilmedi",
   "msg_108": "Profiliniz başka bir cihazı sahteliyor, bu yüzden hiçbir şey değiştirilmedi",
   "ui_lang": "Dil",
-  "msg_lang_changed": "Dil değiştirildi. Her yerde uygulamak için yeniden başlatın."
+  "msg_lang_changed": "Dil değiştirildi. Her yerde uygulamak için yeniden başlatın.",
+  "msg_lang_error": "Dil değiştirilemedi: ${error}"
 }

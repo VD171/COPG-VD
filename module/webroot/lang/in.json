@@ -108,5 +108,6 @@
   "msg_107": "Konfigurasi Anda lebih baru daripada hulu, tidak ada yang diubah",
   "msg_108": "Profil Anda melakukan spoofing perangkat lain, jadi tidak ada yang diubah",
   "ui_lang": "Bahasa",
-  "msg_lang_changed": "Bahasa diubah. Mulai ulang agar berlaku di mana saja."
+  "msg_lang_changed": "Bahasa diubah. Mulai ulang agar berlaku di mana saja.",
+  "msg_lang_error": "Gagal mengubah bahasa: ${error}"
 }

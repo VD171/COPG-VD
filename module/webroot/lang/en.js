@@ -1,4 +1,4 @@
-{
+window.__I18N_EN = {
   "ui_001": "About",
   "ui_002": "Add New Device Profile",
   "ui_003": "Analyze",
@@ -110,4 +110,4 @@
   "ui_lang": "Language",
   "msg_lang_changed": "Language changed. Reboot to apply it everywhere.",
   "msg_lang_error": "Failed to change language: ${error}"
-}
+};

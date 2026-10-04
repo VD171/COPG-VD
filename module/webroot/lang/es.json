@@ -108,5 +108,6 @@
   "msg_107": "Tu configuracion es mas nueva que upstream, no se cambio nada",
   "msg_108": "Tu perfil spoofea otro dispositivo, asi que no se cambio nada",
   "ui_lang": "Idioma",
-  "msg_lang_changed": "Idioma cambiado. Reinicia para aplicarlo en todas partes."
+  "msg_lang_changed": "Idioma cambiado. Reinicia para aplicarlo en todas partes.",
+  "msg_lang_error": "No se pudo cambiar el idioma: ${error}"
 }

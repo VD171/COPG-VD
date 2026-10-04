@@ -108,5 +108,6 @@
   "msg_107": "Din konfiguration är nyare än uppströms, ingenting ändrades",
   "msg_108": "Din profil spoofar en annan enhet, så ingenting ändrades",
   "ui_lang": "Språk",
-  "msg_lang_changed": "Språk ändrat. Starta om för att tillämpa överallt."
+  "msg_lang_changed": "Språk ändrat. Starta om för att tillämpa överallt.",
+  "msg_lang_error": "Kunde inte byta språk: ${error}"
 }

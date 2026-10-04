@@ -108,5 +108,6 @@
   "msg_107": "Votre config est plus récente que l'amont, rien n'a été changé",
   "msg_108": "Votre profil usurpe un autre appareil, donc rien n'a été changé",
   "ui_lang": "Langue",
-  "msg_lang_changed": "Langue changée. Redémarrez pour l'appliquer partout."
+  "msg_lang_changed": "Langue changée. Redémarrez pour l'appliquer partout.",
+  "msg_lang_error": "Échec du changement de langue : ${error}"
 }

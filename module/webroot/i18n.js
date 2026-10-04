@@ -4,7 +4,7 @@
   "use strict";
   var AVAILABLE = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "in", "it", "ja",
                    "ko", "nl", "pl", "pt", "ru", "sv", "th", "tr", "vi", "zh"];
-  var dict = {}, fallback = {};
+  var dict = {}, fallback = (window.__I18N_EN || {});
 
   function pick() {
     try { var s = localStorage.getItem("copgvd_lang"); if (s && AVAILABLE.indexOf(s) >= 0) return s; } catch (e) {}
@@ -23,8 +23,10 @@
   }
 
   async function load(lang) {
-    fallback = await fetchJson("lang/en.json");
-    dict = (lang === "en") ? fallback : await fetchJson("lang/" + lang + ".json");
+    // English is embedded (lang/en.js) so a blocked fetch degrades to English, never to raw keys.
+    if (lang === "en") { dict = fallback; return; }
+    var d = await fetchJson("lang/" + lang + ".json");
+    dict = Object.keys(d).length ? d : fallback;
   }
 
   // t(key, vars): vars keys are the EXACT ${...} expression text kept in the strings,

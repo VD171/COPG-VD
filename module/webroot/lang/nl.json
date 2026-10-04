@@ -108,5 +108,6 @@
   "msg_107": "Je configuratie is nieuwer dan upstream, er is niets gewijzigd",
   "msg_108": "Je profiel spooft een ander apparaat, dus er is niets gewijzigd",
   "ui_lang": "Taal",
-  "msg_lang_changed": "Taal gewijzigd. Start opnieuw op om het overal toe te passen."
+  "msg_lang_changed": "Taal gewijzigd. Start opnieuw op om het overal toe te passen.",
+  "msg_lang_error": "Taal wijzigen mislukt: ${error}"
 }

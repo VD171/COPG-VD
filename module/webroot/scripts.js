@@ -1578,7 +1578,7 @@ function setupLanguageSelector() {
             if (typeof writeSetting === 'function') { try { await writeSetting('lang', lang); } catch (_) {} }
             appendToOutput(t('msg_lang_changed'), 'success');
         } catch (err) {
-            appendToOutput('Failed to change language: ' + err, 'error');
+            appendToOutput(t('msg_lang_error', {"error": err}), 'error');
         }
     });
 }
