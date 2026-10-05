@@ -1,5 +1,8 @@
 # Changelog
 
+## v5.2.0-vd
+- The WebUI and README are now available in 21 languages (English plus ar cs de es fa fr hi in it ja ko nl pl pt ru sv th tr vi zh). A language selector sits in Settings; English is embedded, so a blocked fetch falls back to English instead of showing raw keys.
+
 ## v5.1.1-vd
 - Updated FINGERPRINT and Build info to: ZP11.260821.010 (security patch 2026-09-05).
 
