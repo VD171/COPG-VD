@@ -1,26 +1,26 @@
 {
   "Instructions": "Use strings on double-quotes only.",
   "Instructions": "All fields are OPTIONAL. If some field is not provided, it will be skipped.",
-  "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/comet_beta-zp11.260821.010-factory-08a98446.zip",
+  "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/comet_beta-zp11.260918.007-factory-8586f319.zip",
   "COPG-VD": {
     "BRAND": "google",
     "DEVICE": "comet",
     "MANUFACTURER": "Google",
     "MODEL": "Pixel 9 Pro Fold",
-    "FINGERPRINT": "google/comet_beta/comet:CANARY/ZP11.260821.010/16290768:user/release-keys",
+    "FINGERPRINT": "google/comet_beta/comet:CANARY/ZP11.260918.007/16484274:user/release-keys",
     "PRODUCT": "comet_beta",
     "BOOTLOADER": "unknown",
     "BOARD": "comet",
     "HARDWARE": "comet",
-    "DISPLAY": "ZP11.260821.010",
-    "ID": "ZP11.260821.010",
-    "HOST": "901e56a65b6b",
-    "INCREMENTAL": "16290768",
-    "TIMESTAMP": "1788897757",
-    "PREVIEW_SDK": "20260909",
+    "DISPLAY": "ZP11.260918.007",
+    "ID": "ZP11.260918.007",
+    "HOST": "7ce6fcf9b606",
+    "INCREMENTAL": "16484274",
+    "TIMESTAMP": "1790806787",
+    "PREVIEW_SDK": "20261007",
     "USER": "android-build",
-    "SDK_FINGERPRINT": "dcead6233b738ebc908d5d77cd445f8b",
-    "UUID": "f7zpdMvb23VEDwaAnZZSj_0jpgXfIAILKODaGMBrmOA",
-    "SECURITY_PATCH": "2026-09-05"
+    "SDK_FINGERPRINT": "d9ad4b00fa641d6e43c42cc969f49492",
+    "UUID": "Ml4RO6pzAfB67qdL0aEQv4ozLvf9NNFMW8KTcHXKnU8",
+    "SECURITY_PATCH": "2026-10-05"
   }
 }
