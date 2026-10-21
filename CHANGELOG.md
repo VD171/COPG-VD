@@ -1,5 +1,27 @@
 # Changelog
 
+## v6.0.0-vd .. v6.6.5-vd
+
+Spoofing:
+- Scope modes: the spoof can target processes instead of the whole system - global, whitelist, blacklist or Google Play (the default). In a scoped mode the device identity is delivered per process instead of through the global properties.
+- Three engines, each on/off: the Build fields (JNI), a property hook for the targeted processes, and resetprop. Resetprop is managed by group - identity, version, boot state, SELinux, adb/usb, anti-emulator and cleanup - each switchable.
+- Fields can be set, set empty or deleted, not only set: `"KEY": "value"` sets it, `"KEY": ""` sets it empty, a `COPG-VD-Delete` list removes it, and a missing key keeps the ROM's value. The Android version group is never deletable.
+- A DRM / Widevine engine, off by default: it reports a chosen Widevine security level, L1 or L3.
+- A `global_fields` list applies the named Build fields device-wide even in a scoped mode, so a value stays consistent everywhere. For coherence-safe fields only - never identity, never the Android version group.
+- `first_api_level` is set, aligned to the spoofed build.
+- The shipped profile is the Pixel 9a, refreshed by a daily job.
+- The zygisk library is less than half the size (~205 KB), built without the bundled JSON library, iostreams or exceptions, with a stricter config parser.
+
+WebUI (rebuilt):
+- A new "device identity console" design, light and dark, machine data in a monospace font, with an active-profile plate showing model, fingerprint and scope.
+- An About tab is the landing page: project, license, contacts and support, all on-device.
+- Five tabs - About, Device, Spoofing, System, Tools. The Device tab groups fields into categories (Identity, Hardware, Build, Version); each field is set per state - Spoof, Skip, Empty, Null or Global - with the top bar pinned while you scroll. The version and launch-API fields offer only Spoof or Skip.
+- Scope, engines and resetprop groups each have their own control, every item has an info button, and the language picker (21 languages) sits in the header.
+- Tools gathers Analyze, Check Update, Update Now, Backup/Restore and the boot auto-update toggle.
+- No network: the fonts and assets stay inside the module.
+
+_The Build fields and the version group only reach `android.os.Build` after a reboot: resetprop is re-applied right away, but zygisk reads the config when zygote starts._
+
 ## v5.2.1-vd
 - Updated FINGERPRINT and Build info to: ZP11.260918.007 (security patch 2026-10-05).
 

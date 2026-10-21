@@ -1,5 +1,24 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# ======================================================================
+#  COPG-VD  ::  global device spoofer
+#  Spoof your device fingerprint and build - Zygisk, KernelSU/APatch/Magisk.
+#
+#  Copyright (C) 2026  VD171
+#  SPDX-License-Identifier: Apache-2.0
+#  Fork by VD171.
+#
+#  Licensed under the Apache License, Version 2.0; you may obtain a copy at
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Site           : https://vd171.ru
+#  Site           : https://vd.priv8.ru
+#  Source         : https://github.com/VD171/COPG-VD
+#  GitHub         : @VD171 https://github.com/VD171
+#  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+#  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+#  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+#  E-mail         : vd.priv8@pm.me
+# ======================================================================
 """Refresh COPG-VD.json with the props of the latest Google factory image.
 
 No full download: the factory zip (~4 GB) is read with HTTP Range requests only.
@@ -20,6 +39,7 @@ Usage:
 Exit codes: 0 = done (changed or already up to date), 1 = failure.
 """
 import argparse
+import glob
 import json
 import os
 import re
@@ -33,14 +53,6 @@ FLASH_HOME = "https://flash.android.com"
 FLASH_API = "https://content-flashstation-pa.googleapis.com/v1/builds"
 UA = "COPG-VD-updater/1.0"
 
-# build.prop -> JSON field. First prop found wins; missing ones keep the current value.
-#
-# ANDROID_VERSION, SDK_INT, SDK_FULL and CODENAME are DELIBERATELY ABSENT. They describe the
-# Android version, and a device told it runs a newer SDK than it does will have apps call APIs
-# its framework does not have - Google's crash, the device reboots, and it repeats. That is a
-# softloop, not a bootloop, so nobody looking at boot logs finds anything. The version belongs
-# to the ROM and is never taken from the build being spoofed.
-# See Historicos/2026-08-07_versao-do-android-nunca-se-spoofa.md (Fedora repo).
 PROP_MAP = {
     "BRAND": ("ro.product.system_dlkm.brand", "ro.product.brand_for_attestation"),
     "DEVICE": ("ro.product.system_dlkm.device", "ro.product.device_for_attestation"),
@@ -60,7 +72,6 @@ PROP_MAP = {
     "SECURITY_PATCH": ("ro.build.version.security_patch",),
 }
 
-# Used only when the JSON file does not exist yet: key order of the generated object.
 DEFAULT_ORDER = ["BRAND", "DEVICE", "MANUFACTURER", "MODEL", "FINGERPRINT", "PRODUCT",
                  "BOOTLOADER", "BOARD", "HARDWARE", "DISPLAY", "ID", "HOST", "INCREMENTAL",
                  "TIMESTAMP", "PREVIEW_SDK", "USER", "SDK_FINGERPRINT", "UUID", "SECURITY_PATCH"]
@@ -68,20 +79,15 @@ DEFAULT_HEADER = [("Instructions", "Use strings on double-quotes only."),
                   ("Instructions", "All fields are OPTIONAL. If some field is not provided, "
                                    "it will be skipped."),
                   ("Strings extracted from", "")]
-# Fields no build.prop carries; kept from the current file (or these defaults).
-DEFAULT_STATIC = {"BOOTLOADER": "unknown", "BOARD": "comet", "HARDWARE": "comet"}
-
+DEFAULT_STATIC = {"BOOTLOADER": "unknown", "BOARD": "tegu", "HARDWARE": "tegu"}
 
 def log(msg):
     print(msg, file=sys.stderr, flush=True)
-
 
 def fail(msg):
     log(f"::error::{msg}")
     sys.exit(1)
 
-
-# --------------------------------------------------------------------------- HTTP
 def http(url, headers=None, retries=4):
     """GET with retries. Returns the open response (caller reads/closes it)."""
     last = None
@@ -89,11 +95,10 @@ def http(url, headers=None, retries=4):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA, **(headers or {})})
             return urllib.request.urlopen(req, timeout=60)
-        except Exception as exc:  # noqa: BLE001 - network flakiness, retry
+        except Exception as exc:
             last = exc
             time.sleep(2 * (attempt + 1))
     raise RuntimeError(f"GET {url}: {last}")
-
 
 def get_bytes(url, start=None, end=None, headers=None):
     headers = dict(headers or {})
@@ -102,7 +107,6 @@ def get_bytes(url, start=None, end=None, headers=None):
     with http(url, headers) as resp:
         return resp.read()
 
-
 def content_length(url):
     req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=60) as resp:
@@ -110,8 +114,6 @@ def content_length(url):
             fail(f"server does not accept range requests: {url}")
         return int(resp.headers["Content-Length"])
 
-
-# --------------------------------------------------------------------------- flashstation API
 def latest_build(product, track):
     """Newest build published for `product`: dict with buildId, name and factory URL."""
     page = http(FLASH_HOME).read().decode("utf-8", "replace")
@@ -119,7 +121,7 @@ def latest_build(product, track):
     if not m:
         fail("could not read the flash.android.com API key")
     data = json.loads(get_bytes(f"{FLASH_API}?product={product}&key={m.group(1)}",
-                                headers={"Referer": FLASH_HOME}))   # the API demands it
+                                headers={"Referer": FLASH_HOME}))
     builds = data.get("flashstationBuild") or []
     if not builds:
         fail(f"the API returned no build for product={product}")
@@ -140,8 +142,6 @@ def latest_build(product, track):
             "url": best["factoryImageDownloadUrl"],
             "track": ((best.get("previewMetadata") or {}).get("releaseTrackVersionName") or track)}
 
-
-# --------------------------------------------------------------------------- zip over HTTP
 def _zip64_extra(extra, csz, usz, lho):
     """Replace the 0xFFFFFFFF placeholders with the values of the zip64 extra field."""
     pos = 0
@@ -167,7 +167,6 @@ def _zip64_extra(extra, csz, usz, lho):
         pos += 4 + hsz
     return csz, usz, lho
 
-
 class RemoteZip:
     """Central directory of a zip served over HTTP, addressed from `base` (absolute offset)."""
 
@@ -183,7 +182,7 @@ class RemoteZip:
         if pos < 0:
             fail(f"end of central directory not found in {self.url}")
         cd_size, cd_off = struct.unpack("<II", tail[pos + 12:pos + 20])
-        loc = tail.rfind(b"PK\x06\x07")           # zip64, only when the zip needs it
+        loc = tail.rfind(b"PK\x06\x07")
         if loc >= 0:
             eocd64_off = struct.unpack("<Q", tail[loc + 8:loc + 16])[0]
             head = get_bytes(self.url, self.base + eocd64_off, self.base + eocd64_off + 55)
@@ -231,21 +230,19 @@ class RemoteZip:
                 buf += dec.decompress(block) if dec else block
                 hit = buf.find(needle)
                 if hit < 0:
-                    buf = buf[-(window + len(needle)):]        # keep a straddling hit alive
+                    buf = buf[-(window + len(needle)):]
                 elif len(buf) - hit >= window:
                     log(f"    {name}: props found after {read / 1e6:.0f} MB")
                     return buf[max(0, hit - window):hit + window]
                 else:
-                    buf = buf[max(0, hit - window):]           # hold context, read the tail
+                    buf = buf[max(0, hit - window):]
         hit = buf.find(needle)
         if hit >= 0:
             log(f"    {name}: props found after {read / 1e6:.0f} MB")
             return buf[max(0, hit - window):hit + window]
         fail(f"{name}: '{needle.decode()}' not found after {read / 1e6:.0f} MB")
 
-
 PROP_LINE = re.compile(r"^[A-Za-z0-9_.\-]+=[^\x00-\x08\x0b-\x1f\x7f]*$")
-
 
 def parse_props(blob, needle):
     """Props of the single build.prop that holds `needle` (the window may touch other files)."""
@@ -271,7 +268,6 @@ def parse_props(blob, needle):
             props.setdefault(key.strip(), val.strip())
     return props
 
-
 def collect_props(factory_url):
     """All build.prop keys needed, read from the two cheapest images of the factory zip."""
     log(f"  factory: {factory_url}")
@@ -285,16 +281,12 @@ def collect_props(factory_url):
                       size=outer.entries[inner_name]["csize"])
 
     props = {}
-    # cheap: device identity, real FINGERPRINT and UUID (~1 MB)
     dlkm = b"ro.product.system_dlkm.brand="
     props.update(parse_props(inner.scan_props("system_dlkm.img", dlkm, window=8192), dlkm))
-    # the rest lives in /system/build.prop (~300 MB, the stream stops at the hit)
     patch = b"ro.build.version.security_patch="
     props.update(parse_props(inner.scan_props("system.img", patch), patch))
     return props
 
-
-# --------------------------------------------------------------------------- JSON file
 def read_json(path):
     """(header pairs, COPG-VD pairs) preserving order and duplicate keys."""
     if not os.path.exists(path):
@@ -306,7 +298,6 @@ def read_json(path):
     header = [(k, v) for k, v in top if k != "COPG-VD"]
     return header, list(body)
 
-
 def render_json(header, body):
     lines = ["{"]
     lines += [f"  {json.dumps(k)}: {json.dumps(v, ensure_ascii=False)}," for k, v in header]
@@ -316,7 +307,6 @@ def render_json(header, body):
     lines[-1] = lines[-1].rstrip(",")
     lines += ["  }", "}", ""]
     return "\n".join(lines)
-
 
 def apply_props(body, props, static):
     """New COPG-VD pairs: every mapped field refreshed, everything else preserved."""
@@ -330,11 +320,10 @@ def apply_props(body, props, static):
     for key, old in body:
         seen.add(key)
         out.append((key, values.get(key, old)))
-    for key in DEFAULT_ORDER:                      # fields the current file does not have yet
+    for key in DEFAULT_ORDER:
         if key not in seen:
             out.append((key, values.get(key, static.get(key, ""))))
     return out, values
-
 
 def update_readme(path, json_text):
     """Keep the ```json block of the README in sync with the generated file."""
@@ -351,7 +340,6 @@ def update_readme(path, json_text):
     open(path, "w", encoding="utf-8").write(new)
     return True
 
-
 def gh_output(**kwargs):
     path = os.environ.get("GITHUB_OUTPUT")
     if not path:
@@ -360,8 +348,6 @@ def gh_output(**kwargs):
         for key, val in kwargs.items():
             fh.write(f"{key}={val}\n")
 
-
-# --------------------------------------------------------------------------- main
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -387,9 +373,6 @@ def main():
         gh_output(changed="false", build=build["name"], incremental=build["build_id"])
         return
 
-    # Never walk the committed build backwards. The API returns the highest canary buildId it
-    # currently lists, and a withdrawn build makes that number drop - which would commit a
-    # downgrade that every device then refuses anyway (the updater has the same guard).
     try:
         if int(build["build_id"]) < int(current.get("INCREMENTAL") or 0):
             log(f"::warning::upstream build {build['name']} ({build['build_id']}) is older than "
@@ -424,14 +407,17 @@ def main():
         os.makedirs(os.path.dirname(args.json) or ".", exist_ok=True)
         open(args.json, "w", encoding="utf-8").write(text)
         log(f"  written: {args.json}")
-    readme_changed = update_readme(args.readme, text) if args.readme else False
-    if readme_changed:
-        log(f"  written: {args.readme}")
+    readme_changed = False
+    if args.readme:
+        base = os.path.dirname(args.readme) or "."
+        for rp in sorted(set([args.readme] + glob.glob(os.path.join(base, "README*.md")))):
+            if update_readme(rp, text):
+                readme_changed = True
+                log(f"  written: {rp}")
 
     gh_output(changed=str(changed or readme_changed).lower(), build=build["name"],
               incremental=build["build_id"], fingerprint=values["FINGERPRINT"],
               security_patch=values["SECURITY_PATCH"], factory_url=build["url"])
-
 
 if __name__ == "__main__":
     main()

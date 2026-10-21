@@ -1,75 +1,112 @@
 ## COPG-VD
 
 [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
-COPG-VD هو موديول مصمم لانتحال هوية الجهاز بشكل شامل.  
-هذا يعني انه حتى تطبيقات النظام والجهاز بالكامل سيتم عمل hook لها.  
-  
+
+COPG-VD هو spoofer للجهاز: يعيد كتابة بصمة الجهاز (fingerprint) والـ build بحيث ترى التطبيقات الجهاز الذي تختاره بدلاً من الجهاز الحقيقي.  
+يعمل على Zygisk (KernelSU أو APatch أو Magisk) وبشكل افتراضي يقصر الانتحال على حزمة Google Play - لذا فهو بديل أخف وأكثر متانة لـ PlayIntegrityFix.  
+
+## لقطات الشاشة
+
+<p align="center">
+  <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
+</p>
+
 ## كيفية الاستخدام؟
-اذا كنت تستخدم هذا الموديول وتنتحل FingerPrint يعمل بشكل صحيح، فلا داعي لاستخدام PlayIntegrityFix او GooglePhotosUnlimited.  
-### مثال على ملف اعدادات JSON  
+ثبّت الموديول، أعد التشغيل، ويتم انتحال الملف الشخصي المرفق (جهاز Pixel) للتطبيقات المستهدفة. مع بصمة تعمل بشكل صحيح لا تحتاج إلى PlayIntegrityFix أو GooglePhotosUnlimited.  
+يتم ضبط كل شيء في `/data/adb/COPG-VD.json`، أو من WebUI. جميع الحقول اختيارية - أي حقل لا يتم توفيره يتم تخطيه.  
+
+### Scope - من يرى الانتحال
+`scope_mode` يحدد العمليات التي تحصل على الهوية المنتحلة. في الوضع المحدود، يسلّم Zygisk الهوية لكل عملية على حدة ولا تتسرب إلى بقية النظام عبر الـ properties العامة.  
+* **Google Play** (`playstore`، الافتراضي) - حزمة Play فقط (Google Play services، وعمليتها unstable، ومتجر Play).  
+* **Global** - الجهاز بالكامل؛ كل عملية تراها.  
+* **Whitelist** - فقط التطبيقات الموجودة في `scope_whitelist`.  
+* **Blacklist** - كل التطبيقات ما عدا الموجودة في `scope_blacklist`.  
+
+### Engines - كيف يتم تسليم الانتحال
+كل واحد مستقل ويمكن إيقافه:  
+* **Build fields (JNI)** - يعيد كتابة `android.os.Build.*` في العمليات المستهدفة.  
+* **Property hook** - يعرض properties النظام المنتحلة للعمليات المستهدفة (إعادة تعيين نظيفة لمنطقة الـ properties لكل عملية على حدة، دون hook للدالة).  
+* **resetprop** - يعيد كتابة properties النظام، مُدارة حسب المجموعة: الهوية، والإصدار، وحالة الإقلاع، وSELinux، وadb/usb، ومضاد المحاكي، ومرحلة تنظيف. في الوضع المحدود تبقى مجموعتا الهوية والإصدار خارج resetprop على مستوى الجهاز (يسلّمها Zygisk لكل عملية)؛ وتبقى مجموعات boot/lock/SELinux عامة.  
+* **DRM / Widevine** (معطّل افتراضياً) - يبلّغ عن مستوى أمان Widevine المختار، L1 أو L3، للتطبيقات التي تقرأه.  
+
+### Fields - التعيين، أو التفريغ، أو الحذف، أو التخطي
+داخل كائن `COPG-VD` لكل حقل Build أربع حالات:  
+* **Set** - `"KEY": "value"` يكتب القيمة.  
+* **Empty** - `"KEY": ""` يكتب قيمة فارغة.  
+* **Delete** - أدرج المفتاح في `"COPG-VD-Delete": [ ... ]` على المستوى الأعلى لإزالته (يصبح حقل Build قيمته null، وتُزال الـ property عبر `resetprop --delete`).  
+* **Skip** - اترك المفتاح خارجاً تماماً؛ يتم الإبقاء على قيمة الـ ROM نفسها.  
+
+تطبّق قائمة `"global_fields": [ ... ]` حقول Build المذكورة على مستوى الجهاز حتى في الوضع المحدود، للحفاظ على قيمة متسقة في كل مكان - فقط للحقول الآمنة من ناحية الاتساق (الـ security patch مثلاً)، وليس الهوية أبداً وليس مجموعة إصدار Android أبداً.  
+
+### مثال على ملف إعدادات JSON
 `/data/adb/COPG-VD.json`
-* جميع الحقول اختيارية. اذا لم يتم توفير حقل ما، فسيتم تخطيه.  
 ```json
 {
   "Instructions": "Use strings on double-quotes only.",
   "Instructions": "All fields are OPTIONAL. If some field is not provided, it will be skipped.",
-  "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/comet_beta-zp11.260821.010-factory-08a98446.zip",
+  "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.260918.007-factory-f5955275.zip",
+  "scope_mode": "playstore",
   "COPG-VD": {
     "BRAND": "google",
-    "DEVICE": "comet",
+    "DEVICE": "tegu",
     "MANUFACTURER": "Google",
-    "MODEL": "Pixel 9 Pro Fold",
-    "FINGERPRINT": "google/comet_beta/comet:CANARY/ZP11.260821.010/16290768:user/release-keys",
-    "PRODUCT": "comet_beta",
+    "MODEL": "Pixel 9a",
+    "FINGERPRINT": "google/tegu_beta/tegu:CANARY/ZP11.260918.007/16484274:user/release-keys",
+    "PRODUCT": "tegu_beta",
     "BOOTLOADER": "unknown",
-    "BOARD": "comet",
-    "HARDWARE": "comet",
-    "DISPLAY": "ZP11.260821.010",
-    "ID": "ZP11.260821.010",
-    "HOST": "901e56a65b6b",
-    "INCREMENTAL": "16290768",
-    "TIMESTAMP": "1788897757",
-    "PREVIEW_SDK": "20260909",
+    "BOARD": "tegu",
+    "HARDWARE": "tegu",
+    "DISPLAY": "ZP11.260918.007",
+    "ID": "ZP11.260918.007",
+    "HOST": "51b22e6d8afb",
+    "INCREMENTAL": "16484274",
+    "TIMESTAMP": "1790806751",
+    "PREVIEW_SDK": "20261007",
     "USER": "android-build",
-    "SDK_FINGERPRINT": "dcead6233b738ebc908d5d77cd445f8b",
-    "UUID": "f7zpdMvb23VEDwaAnZZSj_0jpgXfIAILKODaGMBrmOA",
-    "SECURITY_PATCH": "2026-09-05"
-  }
+    "SDK_FINGERPRINT": "d9ad4b00fa641d6e43c42cc969f49492",
+    "UUID": "_mQOcxvuFzRVZAjNEr2UUUpk2fv0mqDc8RpFyaeJjuk",
+    "SECURITY_PATCH": "2026-10-05",
+    "FIRST_API_LEVEL": "35",
+    "DRM_SECURITY_LEVEL": "L1"
+  },
+  "motor_drm": false,
+  "global_fields": ["SECURITY_PATCH"]
 }
 ```
-احرص على استخدام النصوص بين علامات اقتباس مزدوجة فقط.  
-يتم تحديث الكتلة اعلاه و `module/COPG-VD.json.example` يوميا عبر workflow الموسوم [Update COPG-VD.json](.github/workflows/update-json.yml)، مباشرة من احدث صورة مصنع من Google.  
-### الحفاظ على تحديث الـ fingerprint  
-يقوم `fingerprint-update.sh` بسحب ذلك الملف وتحديث اعداداتك، من الـ WebUI (**Check Update** / **Update Now**) او من تلقاء نفسه **مرة واحدة في كل اقلاع** (**Auto-update JSON on boot**، مفعل افتراضيا).  
-* يتم تحديث كل من `/data/adb/COPG-VD.json` و `/data/adb/modules/COPG-VD/COPG-VD.json` عند وجود كليهما، ويتم الاحتفاظ بالمحتوى السابق باسم `.bak`.  
-* يعاد كتابة حقول الـ build فقط (fingerprint، ID، incremental، timestamp، security patch، SDK، UUID، host، user). ويتم الحفاظ على كل ما خصصته انت: المفاتيح الاضافية، و `BOOTLOADER`/`BOARD`/`HARDWARE`، والكائنات الاخرى، وترتيب المفاتيح والتنسيق.  
-* لا يتراجع ابدا للوراء: اي build من upstream اقدم من المثبت يتم رفضه. هذا
-  امر روتيني (قد يتخلف المستودع عن اعدادات حدثتها يدويا) وهو ايضا الحماية التي
-  تهم اكثر على Android، حيث ان اداة التنزيل الوحيدة المتاحة هي busybox `wget`، والتي لا يمكنها
-  التحقق من شهادات TLS - لنفس السبب يتم التحقق من كل قيمة قبل استخدامها.  
-* اذا كان ملفك التعريفي ينتحل **جهازا اخر** (قيم `BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT` مختلفة)، فلا يتم تطبيق اي شيء - فينتحال fingerprint خاص بـ Pixel على ملف تعريفي اخر اسوا من fingerprint قديم.  
-* عند الاقلاع يعمل في الخلفية ويستمر في اعادة المحاولة لمدة ~10 دقائق، لان الـ wifi عادة لا يكون متاحا بعد عند انتهاء الاقلاع. وهو لا يؤخر الاقلاع ابدا.  
-* يعاد تطبيق `resetprop` مباشرة بعد التحديث، لكن `android.os.Build` يكتبه موديول zygisk عند بدء zygote: **اعد التشغيل** لكي تصل القيم الجديدة الى التطبيقات.  
+تأكد من استخدام الـ strings بين علامات اقتباس مزدوجة فقط.  
+يتم تحديث الكتلة أعلاه و`module/COPG-VD.json.example` يومياً عبر الـ workflow [Update COPG-VD.json](.github/workflows/update-json.yml)، مباشرة من أحدث صورة مصنع (factory image) من Google.  
+
+### إبقاء البصمة محدّثة
+`fingerprint-update.sh` يسحب ذلك الملف ويحدّث إعداداتك، من WebUI (**Check Update** / **Update Now**) أو من تلقاء نفسه **مرة واحدة لكل إقلاع** (**Auto-update JSON on boot**، مفعّل افتراضياً).  
+* يتم تحديث كل من `/data/adb/COPG-VD.json` و`/data/adb/modules/COPG-VD/COPG-VD.json` عند وجود كليهما، ويُحتفظ بالمحتوى السابق كـ `.bak`.  
+* تُعاد كتابة حقول build فقط (fingerprint، ID، incremental، timestamp، security patch، SDK، UUID، host، user). كل ما خصّصته غير ذلك يُحتفظ به: المفاتيح الإضافية، و`scope_mode`، و`BOOTLOADER`/`BOARD`/`HARDWARE`، والكائنات الأخرى، وترتيب المفاتيح والتنسيق.  
+* لا يرجع إلى الوراء أبداً: يُرفض أي build upstream أقدم من المثبّت. هذا
+  أمر روتيني (قد يتأخر الـ repo خلف إعداد حدّثته يدوياً) وهو أيضاً الحماية
+  الأهم على Android، حيث أداة التنزيل الوحيدة المتاحة هي busybox `wget`، التي لا تستطيع
+  التحقق من شهادات TLS - للسبب نفسه يتم التحقق من كل قيمة قبل استخدامها.  
+* إذا كان ملفك الشخصي ينتحل **جهازاً آخر** (`BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT` مختلفة)، فلا يُطبَّق شيء - بصمة Pixel على ملف شخصي آخر أسوأ من بصمة قديمة.  
+* عند الإقلاع يعمل في الخلفية ويستمر في إعادة المحاولة لمدة ~10 دقائق، لأن الواي فاي عادة لا يكون جاهزاً بعد عند انتهاء الإقلاع. وهو لا يؤخر الإقلاع أبداً.  
+* يُعاد تطبيق `resetprop` مباشرة بعد التحديث، لكن `android.os.Build` يكتبه موديول zygisk عند بدء zygote: **أعد التشغيل** لكي تصل القيم الجديدة إلى التطبيقات.  
 * السجل في `/data/adb/COPG-VD.update.log`.  
-### اصدار Android - ولماذا لا يتم انتحاله  
-`ANDROID_VERSION` و `SDK_INT` و `SDK_FULL` و `CODENAME` تصف **الـ ROM الخاص بك**، وليس الجهاز الذي يتم انتحاله. اخبار التطبيقات بان الـ SDK احدث مما هو عليه الـ framework فعليا يجعلها تستدعي APIs غير موجودة: تطبيقات Google تنهار، والهاتف يعيد التشغيل، ثم يبدا من جديد. الاقلاع نفسه يكتمل، لذا فهو **softloop** ولا يظهر اي شيء في سجلات الاقلاع.  
-* هي ليست في الاعدادات المرفقة ولا يكتبها المحدث ابدا.  
-* **Spoof Android version** في الـ WebUI يقرر ما اذا كانت ستطبق من الاساس:  
-  * **Never** (افتراضي) - يتم استخدام اصدار الـ ROM نفسه.  
-  * **Up to this ROM** - فقط ما لا يتجاوزه، وهو ما يعني عمليا خفض الـ SDK.  
-  * **Force** - تماما كما تقول الاعدادات. هذا ما يسبب الـ softloop.  
-* يقرا الاصدار الحقيقي من `/system/build.prop`، وليس ابدا من `getprop` - فذلك بالذات هو ما يزوره هذا الموديول.  
-### Analyze  
-يقوم **Analyze** في الـ WebUI (او `fingerprint-update.sh analyze`) بتدقيق الاعدادات كما هي: الاصدار مقابل الـ ROM، وما اذا كان الملف لا يزال قابلا للتحليل اصلا (الملف المعطوب يجعل الموديول لا ينتحل **اي شيء**، ولا يخبرك بذلك سوى logcat)، وما اذا كان الـ fingerprint متوافقا مع الحقول المحيطة به، والمفاتيح التي لا يقرؤها الموديول، والتواريخ، وما اذا كانت الـ props تحمل بالفعل ما تطلبه الاعدادات.  
-### الاعدادات داخل ملف الاعدادات  
-يمكن ان يحمل `COPG-VD.json` كائن `COPG-VD-Settings` - `resetprop`، `autoupdate`، `spoof_manufacturer`، `spoof_version` - بحيث تنتقل خياراتك مع النسخة الاحتياطية ويمكن تحريرها يدويا. يكتب الـ WebUI كلا من ذلك وملفات الـ flag التي تقراها سكربتات الاقلاع. يتم رفض `"spoof_version": "force"` من الملف وتخفيضه: استعادة نسخة احتياطية قديمة يجب الا تعيد تفعيله من وراء ظهرك.  
-### WebUI  
-استخدام الـ WebUI غير ضروري اذا كنت تحرر ملف اعدادات JSON مباشرة.  
-اذا كنت مستخدم Magisk، فاستخدم KsuWebUI من KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
-#### Use resetprop:  
-عطل استخدام resetprop وفعل انتحال معلومات Build فقط.  
-#### Use ro.product.manufacturer:  
-عطله اذا كنت تهتم بكشف "Found device spoofing" في تطبيق كاشف الروت Disclosure.  
+
+### إصدار Android - ولماذا لا يتم انتحاله
+`ANDROID_VERSION` و`SDK_INT` و`SDK_FULL` و`CODENAME` تصف **الـ ROM الخاصة بك**، لا الجهاز الذي يُنتحل. إخبار التطبيقات بأن الـ SDK أحدث مما هو عليه الـ framework فعلاً يجعلها تستدعي APIs غير موجودة: تنهار تطبيقات Google، ويعيد الهاتف التشغيل، ثم يبدأ من جديد. الإقلاع نفسه يكتمل، لذا فهي **softloop** ولا يظهر أي شيء في سجلات الإقلاع.  
+* ليست موجودة في الإعداد المرفق والمحدّث لا يكتبها أبداً.  
+* **Spoof Android version** في WebUI يقرر ما إذا كانت ستُطبَّق أصلاً:  
+  * **Never** (الافتراضي) - يُستخدم إصدار الـ ROM نفسه.  
+  * **Up to this ROM** - فقط ما لا يتجاوزه، وهو ما يعني عملياً خفض الـ SDK.  
+  * **Force** - بالضبط ما تقوله الإعدادات. هذا هو ما يسبب الـ softloop.  
+* يُقرأ الإصدار الحقيقي من `/system/build.prop`، وليس أبداً من `getprop` - فهو بالضبط ما يزوّره هذا الموديول.  
+
+### Analyze
+**Analyze** في WebUI (أو `fingerprint-update.sh analyze`) يدقّق الإعداد كما هو: الإصدار مقابل الـ ROM، وما إذا كان الملف لا يزال قابلاً للتحليل أصلاً (الملف التالف يجعل الموديول ينتحل **لا شيء**، ولا يخبر بذلك سوى logcat)، وما إذا كانت البصمة متوافقة مع الحقول المحيطة بها، والمفاتيح التي لا يقرؤها الموديول، والتواريخ، وما إذا كانت الـ props تحمل بالفعل ما يطلبه الإعداد.  
+
+### WebUI
+WebUI اختياري - يمكن تعديل كل شيء في إعداد JSON مباشرة - لكنه الطريقة السهلة لإدارة الموديول. له خمس علامات تبويب: **About**، و**Device** (كل حقل، مضبوط حسب الحالة، مجمّع حسب الفئة)، و**Spoofing** (الـ scope والـ engines)، و**System** (مجموعات resetprop)، و**Tools** (Analyze، وCheck Update، وUpdate Now، وBackup/Restore، والتحديث التلقائي عند الإقلاع). لا يرسل أي طلب شبكي؛ كل ما يحتاجه مُضمَّن داخل الموديول.  
+إذا كنت مستخدم Magisk، فاستخدم KsuWebUI من KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
+
+### الإعدادات في ملف الإعداد
+يحمل `COPG-VD.json` إعداداته بجوار الملف الشخصي، بحيث تسافر اختياراتك مع النسخة الاحتياطية ويمكن تعديلها يدوياً: `scope_mode`، ومفاتيح الـ engines، ومجموعات resetprop، و`global_fields`، وكائن `COPG-VD-Settings` (`resetprop`، و`autoupdate`، و`spoof_manufacturer`، و`spoof_version`). يكتب WebUI كلاً من الإعداد وملفات الـ flag التي تقرؤها سكربتات الإقلاع. `"spoof_version": "force"` يُرفض من الملف ويُخفَّض: استعادة نسخة احتياطية قديمة يجب ألا تعيد تفعيله من وراء ظهرك.  
 
 ## جهات الاتصال
 

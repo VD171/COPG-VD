@@ -1,3 +1,25 @@
+/*
+ * ======================================================================
+ *  COPG-VD  ::  global device spoofer
+ *  Spoof your device fingerprint and build - Zygisk, KernelSU/APatch/Magisk.
+ *
+ *  Copyright (C) 2026  AlirezaParsi & VD171
+ *  SPDX-License-Identifier: Apache-2.0
+ *  Fork by VD171.
+ *
+ *  Licensed under the Apache License, Version 2.0; you may obtain a copy at
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Site           : https://vd171.ru
+ *  Site           : https://vd.priv8.ru
+ *  Source         : https://github.com/VD171/COPG-VD
+ *  GitHub         : @VD171 https://github.com/VD171
+ *  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+ *  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+ *  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+ *  E-mail         : vd.priv8@pm.me
+ * ======================================================================
+ */
 let configKeyOrder = [];
 let currentConfig = {};
 let editingDevice = null;
@@ -94,14 +116,10 @@ const templates = {
     }
 };
 
-// Everything this page runs goes through ksu.exec, which is ALREADY root: there is no need
-// to wrap anything in `su -c`, and doing so adds a quoting layer that turns any file name
-// into a root command. Every value interpolated into a command must go through shq().
 function shq(value) {
     return `'${String(value).replace(/'/g, "'\\''")}'`;
 }
 
-// For the few places that build HTML strings out of names coming from the filesystem.
 function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, ch => (
         { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]
@@ -227,9 +245,6 @@ function activateInfoTab(tabId) {
     }
 }
 
-// marked does not sanitize HTML, and this page can run root commands: a single
-// <img src=x onerror=...> in the rendered markdown would be a root shell. The files are
-// shipped inside the module now, so this is defense in depth rather than the only guard.
 function sanitizeHtml(html) {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     doc.querySelectorAll('script, iframe, object, embed, link, meta, base, form, style')
@@ -248,7 +263,6 @@ function sanitizeHtml(html) {
 }
 
 async function loadMarkdownContent() {
-    // Local files, packed into the module: the WebUI makes no network request.
     const contents = {
         'license-content': 'LICENSE',
         'readme-content': 'README.md'
@@ -416,8 +430,6 @@ function processCallouts(html) {
     return html;
 }
 
-// The WebView has no handler for external links, so `am start` stays - but the URL is a
-// string from a document, and inside double quotes a $(...) in it would run as root.
 function openLink(url) {
     let parsed;
     try {
@@ -426,34 +438,12 @@ function openLink(url) {
         appendToOutput(t('msg_097', {"url": url}), 'warning');
         return;
     }
-    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:' && parsed.protocol !== 'mailto:') {
         appendToOutput(t('msg_096', {"parsed.protocol": parsed.protocol}), 'warning');
         return;
     }
     execCommand(`am start -a android.intent.action.VIEW -d ${shq(parsed.href)}`).catch(() => {
         window.open(parsed.href, '_blank');
-    });
-}
-
-function setupDonatePopup() {
-    const donateToggle = document.getElementById('donate-toggle');
-    const closeDonateBtn = document.querySelector('.close-donate-btn');
-    
-    donateToggle.addEventListener('click', () => {
-        showPopup('donate-popup');
-    });
-    
-    closeDonateBtn.addEventListener('click', () => {
-        closePopup('donate-popup');
-    });
-    
-    document.querySelectorAll('.copy-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const address = btn.dataset.address;
-            copyToClipboard(address);
-            showCopyFeedback(btn);
-        });
     });
 }
 
@@ -741,7 +731,6 @@ function appendToOutput(content, type = 'info') {
     }
     
     logEntry.className = colorClass;
-    // Log lines carry command output and file names: build them as text, never as HTML.
     const icon = document.createElement('span');
     icon.className = `log-icon ${iconClass}`;
     logEntry.appendChild(icon);
@@ -769,7 +758,6 @@ async function loadToggleStates() {
         const roproductmanufacturerToggle = document.getElementById('toggle-ro-product-manufacturer');
         const autoupdateToggle = document.getElementById('toggle-autoupdate');
         resetpropToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG-VD/.skip.resetprop ] && echo 0 || echo 1")).trim() === "1";
-        // Used to be a sed on the shipped service.sh, so it was lost on every module update.
         roproductmanufacturerToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG-VD/.skip.manufacturer ] && echo 0 || echo 1")).trim() === "1";
         autoupdateToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG-VD/.skip.autoupdate ] && echo 0 || echo 1")).trim() === "1";
         await loadVersionPolicy();
@@ -792,78 +780,199 @@ async function loadConfig() {
     }
 }
 
-function renderDeviceList() {
-    const now = Date.now();
+const DEVICE_FIELDS = [
+    ['DEVICE', 'ui_fld_device'], ['BRAND', 'ui_fld_brand'], ['MODEL', 'ui_fld_model'],
+    ['PRODUCT', 'ui_fld_product'], ['MANUFACTURER', 'ui_fld_manufacturer'],
+    ['FINGERPRINT', 'ui_fld_fingerprint'], ['BOARD', 'ui_fld_board'],
+    ['BOOTLOADER', 'ui_fld_bootloader'], ['HARDWARE', 'ui_fld_hardware'], ['ID', 'ui_fld_id'],
+    ['DISPLAY', 'ui_fld_display'], ['HOST', 'ui_fld_host'], ['INCREMENTAL', 'ui_fld_incremental'],
+    ['TIMESTAMP', 'ui_fld_timestamp'], ['SECURITY_PATCH', 'ui_fld_security_patch'],
+    ['PREVIEW_SDK', 'ui_fld_preview_sdk'], ['SDK_FULL', 'ui_fld_sdk_full'],
+    ['CODENAME', 'ui_fld_codename'], ['USER', 'ui_fld_user'],
+    ['SDK_FINGERPRINT', 'ui_fld_sdk_fingerprint'], ['ANDROID_VERSION', 'ui_fld_android_version'],
+    ['SDK_INT', 'ui_fld_sdk_int'], ['FIRST_API_LEVEL', 'ui_fld_first_api_level']
+];
 
+const DEVICE_CATEGORIES = [
+    ['ui_cat_identity', ['DEVICE', 'BRAND', 'MODEL', 'PRODUCT', 'MANUFACTURER', 'FINGERPRINT']],
+    ['ui_cat_hardware', ['BOARD', 'BOOTLOADER', 'HARDWARE']],
+    ['ui_cat_build',    ['ID', 'DISPLAY', 'HOST', 'INCREMENTAL', 'TIMESTAMP', 'USER', 'SDK_FINGERPRINT']],
+    ['ui_cat_version',  ['SECURITY_PATCH', 'PREVIEW_SDK', 'SDK_FULL', 'CODENAME', 'ANDROID_VERSION', 'SDK_INT', 'FIRST_API_LEVEL']],
+];
+const DEVICE_LOCKED = ['ANDROID_VERSION', 'SDK_INT', 'SDK_FULL', 'CODENAME', 'FIRST_API_LEVEL'];
+const DEVICE_LABELS = Object.fromEntries(DEVICE_FIELDS);
+const DEVICE_STATE_LABELS = { spoof: 'ui_st_spoof', skip: 'ui_st_skip', empty: 'ui_st_empty', 'null': 'ui_st_null', global: 'ui_st_global' };
+const devStateNeedsValue = (s) => s === 'spoof' || s === 'global';
+
+function renderDeviceList() {
     const deviceList = document.getElementById('device-list');
     if (!deviceList) return appendToOutput(t('msg_063'), 'error');
-
-    const fragment = document.createDocumentFragment();
-    let index = 0;
-    
-    for (const key of configKeyOrder) {
-        if (key === 'COPG-VD' && currentConfig[key]) {
-            const deviceName = currentConfig[key].DEVICE || 'Undefined';
-            const model = currentConfig[key].MODEL || 'Undefined';
-            const board = currentConfig[key].BOARD || 'Undefined';
-            const bootloader = currentConfig[key].BOOTLOADER || 'Undefined';
-            const brand = currentConfig[key].BRAND || 'Undefined';
-            const display = currentConfig[key].DISPLAY || 'Undefined';
-            const fingerprint = currentConfig[key].FINGERPRINT || 'Undefined';
-            const hardware = currentConfig[key].HARDWARE || 'Undefined';
-            const host = currentConfig[key].HOST || 'Undefined';
-            const id = currentConfig[key].ID || 'Undefined';
-            const incremental = currentConfig[key].INCREMENTAL || 'Undefined';
-            const manufacturer = currentConfig[key].MANUFACTURER || 'Undefined';
-            const product = currentConfig[key].PRODUCT || 'Undefined';
-            const security_patch = currentConfig[key].SECURITY_PATCH || 'Undefined';
-            const timestamp = currentConfig[key].TIMESTAMP || 'Undefined';
-            const preview_sdk = currentConfig[key].PREVIEW_SDK || 'Undefined';
-            const sdk_full = currentConfig[key].SDK_FULL || 'Undefined';
-            const codename = currentConfig[key].CODENAME || 'Undefined';
-            const user = currentConfig[key].USER || 'Undefined';
-            const sdk_fingerprint = currentConfig[key].SDK_FINGERPRINT || 'Undefined';
-
-            const deviceCard = templates.deviceCard({
-                key: key,
-                delay: Math.min(index * 0.05, 0.5),
-                deviceName: deviceName,
-                model: model,
-                board: board,
-                bootloader: bootloader,
-                brand: brand,
-                display: display,
-                fingerprint: fingerprint,
-                hardware: hardware,
-                host: host,
-                id: id,
-                incremental: incremental,
-                manufacturer: manufacturer,
-                product: product,
-                security_patch: security_patch,
-                timestamp: timestamp,
-                preview_sdk: preview_sdk,
-                sdk_full: sdk_full,
-                codename: codename,
-                user: user,
-                sdk_fingerprint: sdk_fingerprint
-            });
-            
-            fragment.appendChild(deviceCard);
-            index++;
-        }
-    }
-    
+    const profile = currentConfig['COPG-VD'] || {};
+    const delList = Array.isArray(currentConfig['COPG-VD-Delete']) ? currentConfig['COPG-VD-Delete'] : [];
+    const globList = Array.isArray(currentConfig['global_fields']) ? currentConfig['global_fields'] : [];
     deviceList.innerHTML = '';
-    deviceList.appendChild(fragment);
-    attachDeviceListeners();
+
+    const stateOf = (key) => {
+        if (globList.includes(key) && !DEVICE_LOCKED.includes(key)) return 'global';
+        if (delList.includes(key) && !DEVICE_LOCKED.includes(key)) return 'null';
+        if (profile[key] === '' && !DEVICE_LOCKED.includes(key)) return 'empty';
+        if (profile[key] != null && profile[key] !== '') return 'spoof';
+        return 'skip';
+    };
+
+    DEVICE_CATEGORIES.forEach(([catKey, keys]) => {
+        const sec = document.createElement('div');
+        sec.className = 'dev-category';
+        const head = document.createElement('div');
+        head.className = 'dev-cat-head';
+        head.textContent = t(catKey);
+        sec.appendChild(head);
+
+        if (catKey === 'ui_cat_version') {
+            const prow = document.createElement('div');
+            prow.className = 'dev-field dev-policy';
+            const phead = document.createElement('div');
+            phead.className = 'dev-field-head';
+            const plab = document.createElement('label');
+            plab.className = 'dev-field-label';
+            plab.textContent = t('ui_version_policy');
+            const pinfo = document.createElement('button');
+            pinfo.type = 'button';
+            pinfo.className = 'info-btn-item';
+            pinfo.dataset.info = 'version_spoof';
+            pinfo.setAttribute('aria-label', 'Info');
+            pinfo.textContent = '?';
+            phead.appendChild(plab);
+            phead.appendChild(pinfo);
+            const psel = document.createElement('select');
+            psel.id = 'select-spoof-version';
+            psel.className = 'version-select';
+            [['never', 'ui_022'], ['rom', 'ui_039'], ['force', 'ui_016']].forEach(([v, k]) => {
+                const o = document.createElement('option');
+                o.value = v; o.textContent = t(k);
+                psel.appendChild(o);
+            });
+            psel.addEventListener('change', (e) => setVersionPolicy(e.target.value, e.target));
+            const phint = document.createElement('small');
+            phint.id = 'version-rom-hint';
+            phint.className = 'toggle-hint';
+            prow.appendChild(phead);
+            prow.appendChild(psel);
+            prow.appendChild(phint);
+            sec.appendChild(prow);
+            if (typeof loadVersionPolicy === 'function') loadVersionPolicy();
+        }
+
+        keys.forEach((key) => {
+            const st = stateOf(key);
+            const allowed = DEVICE_LOCKED.includes(key) ? ['spoof', 'skip'] : ['spoof', 'skip', 'empty', 'null', 'global'];
+            const row = document.createElement('div');
+            row.className = 'dev-field';
+            row.dataset.key = key;
+            row.dataset.state = st;
+
+            const head = document.createElement('div');
+            head.className = 'dev-field-head';
+            const lab = document.createElement('label');
+            lab.className = 'dev-field-label';
+            lab.textContent = t(DEVICE_LABELS[key]);
+            const info = document.createElement('button');
+            info.type = 'button';
+            info.className = 'info-btn-item';
+            info.dataset.info = 'states';
+            info.setAttribute('aria-label', 'Info');
+            info.textContent = '?';
+            head.appendChild(lab);
+            head.appendChild(info);
+
+            const inp = document.createElement('input');
+            inp.type = 'text';
+            inp.className = 'dev-value';
+            inp.dataset.key = key;
+            inp.value = (profile[key] != null && profile[key] !== '') ? profile[key] : '';
+            inp.style.display = devStateNeedsValue(st) ? '' : 'none';
+
+            const states = document.createElement('div');
+            states.className = 'dev-states';
+            states.setAttribute('role', 'radiogroup');
+            allowed.forEach((s) => {
+                const opt = document.createElement('label');
+                opt.className = 'dev-st';
+                opt.dataset.value = s;
+                const r = document.createElement('input');
+                r.type = 'radio';
+                r.name = 'st_' + key;
+                r.value = s;
+                if (s === st) { r.checked = true; opt.classList.add('on'); }
+                const span = document.createElement('span');
+                span.textContent = t(DEVICE_STATE_LABELS[s]);
+                opt.appendChild(r);
+                opt.appendChild(span);
+                r.addEventListener('change', () => {
+                    states.querySelectorAll('.dev-st').forEach((e) => e.classList.remove('on'));
+                    opt.classList.add('on');
+                    row.dataset.state = s;
+                    inp.style.display = devStateNeedsValue(s) ? '' : 'none';
+                    row.classList.toggle('is-active', s !== 'skip');
+                });
+                states.appendChild(opt);
+            });
+            row.classList.toggle('is-active', st !== 'skip');
+
+            row.appendChild(head);
+            if (DEVICE_LOCKED.includes(key)) {
+                const sub = document.createElement('div');
+                sub.className = 'dev-field-sub';
+                sub.textContent = t('ui_fldsub_' + key.toLowerCase());
+                row.appendChild(sub);
+            }
+            row.appendChild(states);
+            row.appendChild(inp);
+            sec.appendChild(row);
+        });
+        deviceList.appendChild(sec);
+    });
 }
 
-function attachDeviceListeners() {
-    document.querySelectorAll('.device-card .edit-btn').forEach(btn => {
-        btn.removeEventListener('click', editDeviceHandler);
-        btn.addEventListener('click', editDeviceHandler);
+async function saveDeviceInline() {
+    const deviceList = document.getElementById('device-list');
+    const profile = Object.assign({}, currentConfig['COPG-VD'] || {});
+    const fieldKeys = DEVICE_FIELDS.map(([k]) => k);
+    let delList = (Array.isArray(currentConfig['COPG-VD-Delete']) ? currentConfig['COPG-VD-Delete'] : []).filter((k) => !fieldKeys.includes(k));
+    let globList = (Array.isArray(currentConfig['global_fields']) ? currentConfig['global_fields'] : []).filter((k) => !fieldKeys.includes(k));
+
+    deviceList.querySelectorAll('.dev-field').forEach((row) => {
+        const key = row.dataset.key;
+        const checked = row.querySelector('input[type="radio"]:checked');
+        const inp = row.querySelector('.dev-value');
+        const st = checked ? checked.value : 'skip';
+        const val = inp ? inp.value.trim() : '';
+        delete profile[key];
+        if (st === 'spoof' || st === 'global') {
+            if (val === '') return;
+            profile[key] = val;
+            if (st === 'global') globList.push(key);
+        } else if (st === 'empty') {
+            profile[key] = '';
+        } else if (st === 'null') {
+            delList.push(key);
+        }
     });
+
+    currentConfig['COPG-VD'] = profile;
+    if (!configKeyOrder.includes('COPG-VD')) configKeyOrder.push('COPG-VD');
+    if (delList.length) { currentConfig['COPG-VD-Delete'] = delList; if (!configKeyOrder.includes('COPG-VD-Delete')) configKeyOrder.push('COPG-VD-Delete'); }
+    else delete currentConfig['COPG-VD-Delete'];
+    if (globList.length) { currentConfig['global_fields'] = globList; if (!configKeyOrder.includes('global_fields')) configKeyOrder.push('global_fields'); }
+    else delete currentConfig['global_fields'];
+
+    fillIdentityPlate();
+    try {
+        await saveConfig();
+        appendToOutput(t('msg_056', {"deviceName": profile.DEVICE || 'COPG-VD'}), 'success');
+    } catch (error) {
+        appendToOutput(t('msg_077', {"error": error}), 'error');
+    }
 }
 
 function editDeviceHandler(e) {
@@ -1205,9 +1314,6 @@ async function saveConfig() {
     }
 }
 
-// The settings live in two places on purpose: the JSON declares them (so they travel with a
-// backup and can be edited by hand) and the flag files cache them (so the boot scripts and the
-// zygisk module read one cheap file instead of parsing JSON). The WebUI writes both.
 async function writeSetting(key, value) {
     try {
         if (!currentConfig['COPG-VD-Settings']) currentConfig['COPG-VD-Settings'] = {};
@@ -1218,11 +1324,166 @@ async function writeSetting(key, value) {
     }
 }
 
-// The one setting where "on" has degrees. Reads the real ROM from /system/build.prop - never
-// from getprop, which is what this module falsifies.
+const RP_GROUPS = ['identity', 'version', 'boot_state', 'selinux_bootmode', 'adb_usb', 'anti_emulator', 'cleanup'];
+const scopeNeedsApps = (m) => m === 'whitelist' || m === 'blacklist';
+
+function loadScopeSettings() {
+    try {
+        const mode = currentConfig['scope_mode'] || 'playstore';
+        const sel = document.getElementById('select-scope-mode');
+        if (sel) sel.value = ['global', 'whitelist', 'blacklist', 'playstore'].includes(mode) ? mode : 'global';
+        const appsGrp = document.getElementById('scope-apps-group');
+        if (appsGrp) appsGrp.style.display = scopeNeedsApps(mode) ? '' : 'none';
+        const jni = document.getElementById('toggle-motor-jni');
+        if (jni) jni.checked = currentConfig['motor_jni'] !== false;
+        const pm = document.getElementById('select-prop-method');
+        if (pm) pm.value = (currentConfig['motor_prop_hook'] !== false && currentConfig['prop_method'] === 'mmap') ? 'mmap' : 'off';
+        const dlvl = document.getElementById('select-drm-level');
+        if (dlvl) dlvl.value = (currentConfig['motor_drm'] === true)
+            ? (((currentConfig['COPG-VD'] || {})['DRM_SECURITY_LEVEL'] === 'L3') ? 'L3' : 'L1')
+            : 'off';
+        const grupos = (currentConfig['resetprop'] && currentConfig['resetprop'].grupos) || {};
+        RP_GROUPS.forEach((g) => {
+            const el = document.getElementById('grp-' + g);
+            if (el) el.checked = grupos[g] !== false;
+        });
+        fillIdentityPlate();
+    } catch (e) {}
+}
+
+function fillIdentityPlate() {
+    const p = currentConfig['COPG-VD'] || {};
+    const modelEl = document.getElementById('identity-model');
+    const fpEl = document.getElementById('identity-fp');
+    const scopeEl = document.getElementById('identity-scope');
+    const name = p.MODEL || p.DEVICE || p.PRODUCT || '';
+    if (modelEl) {
+        if (name) {
+            modelEl.textContent = name;
+            modelEl.classList.remove('empty');
+            modelEl.removeAttribute('data-i18n');
+        } else {
+            modelEl.textContent = t('ui_profile_none');
+            modelEl.classList.add('empty');
+            modelEl.setAttribute('data-i18n', 'ui_profile_none');
+        }
+    }
+    if (fpEl) fpEl.textContent = p.FINGERPRINT || '';
+    if (scopeEl) {
+        const mode = currentConfig['scope_mode'] || 'playstore';
+        scopeEl.textContent = t('ui_scope_' + mode);
+        scopeEl.classList.toggle('neutral', mode === 'global');
+    }
+}
+
+async function setScopeMode(mode) {
+    currentConfig['scope_mode'] = mode;
+    const appsGrp = document.getElementById('scope-apps-group');
+    if (appsGrp) appsGrp.style.display = scopeNeedsApps(mode) ? '' : 'none';
+    fillIdentityPlate();
+    await saveConfig();
+}
+async function setMotor(key, value) { currentConfig[key] = value; await saveConfig(); }
+async function setPropHook(value) {
+    currentConfig['motor_prop_hook'] = (value !== 'off');
+    currentConfig['prop_method'] = (value === 'off') ? 'off' : value;
+    await saveConfig();
+}
+async function setDrm(value) {
+    currentConfig['motor_drm'] = (value !== 'off');
+    if (value !== 'off') {
+        const profile = Object.assign({}, currentConfig['COPG-VD'] || {});
+        profile['DRM_SECURITY_LEVEL'] = value;
+        currentConfig['COPG-VD'] = profile;
+    }
+    await saveConfig();
+}
+async function setVersionPolicy(value, selectEl) {
+    if (selectEl) selectEl.classList.toggle('danger', value === 'force');
+    try {
+        await execCommand(`echo ${shq(value)} > /data/adb/modules/COPG-VD/.spoof.version`);
+        await writeSetting('spoof_version', value === 'force' ? 'rom' : value);
+        if (value === 'force') appendToOutput(t('msg_064'), 'error');
+        else if (value === 'rom') appendToOutput(t('msg_105'), 'warning');
+        else appendToOutput(t('msg_047'), 'success');
+    } catch (error) {
+        appendToOutput(t('msg_067', {"error": error}), 'error');
+        await loadVersionPolicy();
+    }
+}
+async function setGlobalField(field, on) {
+    let gf = Array.isArray(currentConfig['global_fields']) ? currentConfig['global_fields'].slice() : [];
+    gf = gf.filter((f) => f !== field);
+    if (on) gf.push(field);
+    currentConfig['global_fields'] = gf;
+    await saveConfig();
+}
+async function setGroup(name, value) {
+    if (!currentConfig['resetprop']) currentConfig['resetprop'] = { enabled: true, grupos: {} };
+    if (!currentConfig['resetprop'].grupos) currentConfig['resetprop'].grupos = {};
+    currentConfig['resetprop'].grupos[name] = value;
+    await saveConfig();
+}
+
+async function openScopeApps() {
+    const mode = currentConfig['scope_mode'] || 'playstore';
+    const key = mode === 'blacklist' ? 'scope_blacklist' : 'scope_whitelist';
+    const current = Array.isArray(currentConfig[key]) ? currentConfig[key] : [];
+    let pkgs = [];
+    try {
+        const out = await execCommand("pm list packages 2>/dev/null | sed 's/^package://' | sort");
+        pkgs = out.split('\n').map((s) => s.trim()).filter(Boolean);
+    } catch (e) {}
+    current.forEach((p) => { if (!pkgs.includes(p)) pkgs.unshift(p); });
+    const sel = new Set(current);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'popup scope-apps-popup';
+    overlay.style.display = 'flex';
+    overlay.innerHTML =
+        '<div class="popup-content">' +
+          '<div class="modal-header"><h3></h3></div>' +
+          '<input type="text" class="scope-app-filter" placeholder="filter">' +
+          '<div class="popup-body scope-app-list"></div>' +
+          '<div class="popup-footer">' +
+            '<button class="action-btn scope-apps-save"></button>' +
+            '<button class="cancel-btn scope-apps-cancel"></button>' +
+          '</div>' +
+        '</div>';
+    overlay.querySelector('h3').textContent = t('ui_scope_apps');
+    overlay.querySelector('.scope-apps-save').textContent = t('ui_029');
+    overlay.querySelector('.scope-apps-cancel').textContent = t('ui_006');
+    const list = overlay.querySelector('.scope-app-list');
+    pkgs.forEach((p) => {
+        const row = document.createElement('label');
+        row.className = 'scope-app-row';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.dataset.pkg = p;
+        cb.checked = sel.has(p);
+        row.appendChild(cb);
+        row.appendChild(document.createTextNode(' ' + p));
+        list.appendChild(row);
+    });
+    overlay.querySelector('.scope-app-filter').addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase();
+        list.querySelectorAll('.scope-app-row').forEach((r) => {
+            r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    });
+    overlay.querySelector('.scope-apps-cancel').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('.scope-apps-save').addEventListener('click', async () => {
+        currentConfig[key] = [...list.querySelectorAll('input[data-pkg]:checked')].map((c) => c.dataset.pkg);
+        await saveConfig();
+        overlay.remove();
+    });
+    document.body.appendChild(overlay);
+}
+
 async function loadVersionPolicy() {
     const select = document.getElementById('select-spoof-version');
     const hint = document.getElementById('version-rom-hint');
+    if (!select || !hint) return;
     try {
         const state = (await execCommand("cat /data/adb/modules/COPG-VD/.spoof.version 2>/dev/null || echo never")).trim();
         select.value = ['never', 'rom', 'force'].includes(state) ? state : 'never';
@@ -1236,7 +1497,6 @@ async function loadVersionPolicy() {
     }
 }
 
-// Front-end for fingerprint-update.sh: it prints "[COPG-VD] ..." lines plus a final "status:" line.
 async function runUpdater(mode) {
     const script = '/data/adb/modules/COPG-VD/fingerprint-update.sh';
     appendToOutput({
@@ -1247,7 +1507,6 @@ async function runUpdater(mode) {
 
     let output;
     try {
-        // "|| true": the script reports through its status line, execCommand rejects on exit != 0.
         output = await execCommand(`sh ${script} ${mode} 2>&1 || true`);
     } catch (error) {
         appendToOutput(t('msg_104', {"error": error}), 'error');
@@ -1341,7 +1600,7 @@ function toggleLogSection(e) {
 }
 
 function switchTab(tabId, direction = null) {
-    const tabs = ['settings', 'devices'];
+    const tabs = ['about', 'devices', 'spoofing', 'system', 'tools'];
     const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`)?.classList.contains('active'));
     if (currentTab === tabId) return;
 
@@ -1379,6 +1638,8 @@ function switchTab(tabId, direction = null) {
 
     document.querySelectorAll('.tab-nav .tab-btn.active:not(#info-popup .tab-btn)').forEach(btn => btn.classList.remove('active'))
     document.getElementById(`tab-${tabId}`)?.classList.add('active');
+    const sb = document.getElementById('device-savebar');
+    if (sb) sb.style.display = (tabId === 'devices') ? '' : 'none';
 }
 
 function copyLogContent() {
@@ -1405,6 +1666,22 @@ function copyLogContent() {
 }
 
 function applyEventListeners() {
+    const scopeSel = document.getElementById('select-scope-mode');
+    if (scopeSel) scopeSel.addEventListener('change', (e) => setScopeMode(e.target.value));
+    const mjni = document.getElementById('toggle-motor-jni');
+    if (mjni) mjni.addEventListener('change', (e) => setMotor('motor_jni', e.target.checked));
+    const pmSel = document.getElementById('select-prop-method');
+    if (pmSel) pmSel.addEventListener('change', (e) => setPropHook(e.target.value));
+    const dlvlSel = document.getElementById('select-drm-level');
+    if (dlvlSel) dlvlSel.addEventListener('change', (e) => setDrm(e.target.value));
+    RP_GROUPS.forEach((g) => {
+        const el = document.getElementById('grp-' + g);
+        if (el) el.addEventListener('change', (e) => setGroup(g, e.target.checked));
+    });
+    const scopeAppsBtn = document.getElementById('scope-apps-edit');
+    if (scopeAppsBtn) scopeAppsBtn.addEventListener('click', openScopeApps);
+    const deviceSaveBtn = document.getElementById('device-save-btn');
+    if (deviceSaveBtn) deviceSaveBtn.addEventListener('click', saveDeviceInline);
     document.getElementById('toggle-resetprop').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
@@ -1425,27 +1702,6 @@ function applyEventListeners() {
         } catch (error) {
             appendToOutput(t('msg_082', {"error": error}), 'error');
             e.target.checked = !isChecked;
-        }
-    });
-
-    document.getElementById('select-spoof-version').addEventListener('change', async (e) => {
-        const value = e.target.value;
-        e.target.classList.toggle('danger', value === 'force');
-        try {
-            await execCommand(`echo ${shq(value)} > /data/adb/modules/COPG-VD/.spoof.version`);
-            // "force" is never written to the JSON: that file travels through backups, and
-            // restoring an old one must not re-arm the mode that softloops the device.
-            await writeSetting('spoof_version', value === 'force' ? 'rom' : value);
-            if (value === 'force') {
-                appendToOutput(t('msg_064'), 'error');
-            } else if (value === 'rom') {
-                appendToOutput(t('msg_105'), 'warning');
-            } else {
-                appendToOutput(t('msg_047'), 'success');
-            }
-        } catch (error) {
-            appendToOutput(t('msg_067', {"error": error}), 'error');
-            await loadVersionPolicy();
         }
     });
 
@@ -1514,8 +1770,14 @@ function applyEventListeners() {
     });
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 
-    document.getElementById('tab-settings').addEventListener('click', () => switchTab('settings'));
+    document.getElementById('tab-about').addEventListener('click', () => switchTab('about'));
     document.getElementById('tab-devices').addEventListener('click', () => switchTab('devices'));
+    document.getElementById('tab-spoofing').addEventListener('click', () => switchTab('spoofing'));
+    document.querySelectorAll('#about-tab .about-row[data-link]').forEach((row) => {
+        row.addEventListener('click', () => openLink(row.getAttribute('data-link')));
+    });
+    document.getElementById('tab-system').addEventListener('click', () => switchTab('system'));
+    document.getElementById('tab-tools').addEventListener('click', () => switchTab('tools'));
 
     document.querySelectorAll('.close-btn, .cancel-btn').forEach(btn => btn.addEventListener('click', () => {
         const modal = btn.closest('.modal');
@@ -1561,33 +1823,59 @@ const LANG_NAMES = {
 };
 
 function setupLanguageSelector() {
-    const sel = document.getElementById('select-language');
-    if (!sel || !window.I18N) return;
-    sel.innerHTML = '';
-    window.I18N.AVAILABLE.forEach(code => {
-        const o = document.createElement('option');
-        o.value = code;
-        o.textContent = LANG_NAMES[code] || code;
-        sel.appendChild(o);
-    });
-    sel.value = window.I18N.current;
-    sel.addEventListener('change', async (e) => {
-        const lang = e.target.value;
-        try {
-            await window.I18N.set(lang);
-            if (typeof writeSetting === 'function') { try { await writeSetting('lang', lang); } catch (_) {} }
-            appendToOutput(t('msg_lang_changed'), 'success');
-        } catch (err) {
-            appendToOutput(t('msg_lang_error', {"error": err}), 'error');
-        }
+    const list = document.getElementById('lang-list');
+    const btn = document.getElementById('lang-toggle');
+    if (!list || !window.I18N) return;
+    const render = () => {
+        list.innerHTML = '';
+        const cur = window.I18N.current;
+        const ordered = [cur, ...window.I18N.AVAILABLE.filter((c) => c !== cur)];
+        ordered.forEach((code) => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'lang-item' + (code === cur ? ' active' : '');
+            item.textContent = LANG_NAMES[code] || code;
+            item.addEventListener('click', async () => {
+                closePopup('lang-popup');
+                try {
+                    await window.I18N.set(code);
+                    if (typeof writeSetting === 'function') { try { await writeSetting('lang', code); } catch (_) {} }
+                    if (typeof renderDeviceList === 'function') renderDeviceList();
+                    appendToOutput(t('msg_lang_changed'), 'success');
+                } catch (err) {
+                    appendToOutput(t('msg_lang_error', {"error": err}), 'error');
+                }
+            });
+            list.appendChild(item);
+        });
+    };
+    render();
+    if (btn) btn.addEventListener('click', () => { render(); showPopup('lang-popup'); });
+}
+
+function setupItemInfo() {
+    const titleEl = document.getElementById('iteminfo-title');
+    const bodyEl = document.getElementById('iteminfo-body');
+    if (!titleEl || !bodyEl) return;
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest ? e.target.closest('.info-btn-item') : null;
+        if (!btn) return;
+        const key = btn.dataset.info;
+        const wrap = btn.closest('.tg-label');
+        const lbl = wrap ? wrap.querySelector('.toggle-label') : null;
+        titleEl.textContent = lbl
+            ? (lbl.childNodes[0] ? lbl.childNodes[0].textContent.trim() : lbl.textContent.trim())
+            : t('ui_infoT_' + key);
+        bodyEl.textContent = t('ui_info_' + key);
+        showPopup('iteminfo-popup');
     });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
     if (window.I18N) { try { await window.I18N.init(); } catch (e) {} }
     setupLanguageSelector();
-    setupDonatePopup();
     setupInfoPopup();
+    setupItemInfo();
 
     const savedTheme = localStorage.getItem('theme');
     if (!savedTheme || savedTheme === 'light') {
@@ -1603,8 +1891,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadVersion();
     await loadToggleStates();
     await loadConfig();
+    loadScopeSettings();
     applyEventListeners();
-    switchTab('settings');
+    renderDeviceList();
 });
 
 async function getPreferredStartPath() {
@@ -1867,7 +2156,6 @@ async function showFilePicker(targetFile, startPath = null) {
         showPopup('file-picker-popup');
         appendToOutput(t('msg_084', {"currentPath": currentPath}), 'success');
     } catch (error) {
-        // Built as DOM: the path is attacker-controlled and inline handlers are blocked by the CSP.
         fileList.innerHTML = '';
         const errorBox = document.createElement('div');
         errorBox.className = 'error-message';

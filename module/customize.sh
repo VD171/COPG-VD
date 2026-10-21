@@ -1,6 +1,23 @@
-# ================================================
-# COPG-VD Module Installation Script
-# ================================================
+# ======================================================================
+#  COPG-VD  ::  global device spoofer
+#  Spoof your device fingerprint and build - Zygisk, KernelSU/APatch/Magisk.
+#
+#  Copyright (C) 2026  AlirezaParsi & VD171
+#  SPDX-License-Identifier: Apache-2.0
+#  Fork by VD171.
+#
+#  Licensed under the Apache License, Version 2.0; you may obtain a copy at
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Site           : https://vd171.ru
+#  Site           : https://vd.priv8.ru
+#  Source         : https://github.com/VD171/COPG-VD
+#  GitHub         : @VD171 https://github.com/VD171
+#  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+#  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+#  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+#  E-mail         : vd.priv8@pm.me
+# ======================================================================
 
 ENABLE_GPHOTO_SPOOF=false
 CONFIG_FILE="/data/adb/COPG-VD.json"
@@ -145,11 +162,6 @@ cleanup_gphoto_directories() {
   find "$MODPATH" -type d -empty -delete 2>/dev/null
 }
 
-# Coming from v5.0.x the config may carry ANDROID_VERSION/SDK_INT/SDK_FULL/CODENAME, which
-# describe the ROM and not the build being spoofed. A device told its SDK is newer than it is
-# has apps calling APIs that do not exist: Google's crash, it reboots, and it repeats. The
-# runtime refuses to apply them anyway, but a file that says one thing while the module does
-# another is a trap for whoever reads it next - so they come out, with a backup.
 migrate_version_keys() {
   UPDATER="$MODPATH/fingerprint-update.sh"
   [ -f "$UPDATER" ] || return
@@ -267,7 +279,6 @@ check_conflict_modules
 check_config_file
 migrate_version_keys
 
-# Safe by default: the version group is only applied if you arm it in the WebUI.
 [ -f "$MODPATH/.spoof.version" ] || echo never > "$MODPATH/.spoof.version"
 
 chmod 0755 "$MODPATH/service.sh"

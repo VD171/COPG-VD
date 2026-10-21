@@ -1,15 +1,33 @@
 <!DOCTYPE html>
+<!--
+  ======================================================================
+   COPG-VD  ::  global device spoofer
+   Spoof your device fingerprint and build - Zygisk, KernelSU/APatch/Magisk.
+  
+   Copyright (C) 2026  AlirezaParsi & VD171
+   SPDX-License-Identifier: Apache-2.0
+   Fork by VD171.
+  
+   Licensed under the Apache License, Version 2.0; you may obtain a copy at
+   http://www.apache.org/licenses/LICENSE-2.0
+  
+   Site           : https://vd171.ru
+   Site           : https://vd.priv8.ru
+   Source         : https://github.com/VD171/COPG-VD
+   GitHub         : @VD171 https://github.com/VD171
+   XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+   Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+   Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+   E-mail         : vd.priv8@pm.me
+  ======================================================================
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#60A5FA" id="theme-color">
     <title>COPG-VD</title>
-    <!-- Everything is served from inside the module. This page can run root commands
-         through ksu.exec, so it must never load code or content off the network.
-         The same policy lives in webroot/config.json, which only KernelSU's own WebUI
-         reads - KsuWebUIStandalone (what Magisk users run) ignores it and just serves
-         this directory, so without the meta tag those users would get no policy at all. -->
+    
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'none'; base-uri 'none'">
     <link rel="stylesheet" href="fonts.css">
     <link rel="stylesheet" href="styles.css">
@@ -79,11 +97,16 @@
     </template>
 
     <div class="container">
+        <div class="app-top">
         <div class="header">
             <h1 class="header-title">COPG-VD <span class="version" id="version-text">0.0</span></h1>
             <div class="header-actions">
-                <button id="donate-toggle" class="theme-btn" title="Support Developer">
-                    <span class="donate-icon">🎁</span>
+                <button id="lang-toggle" class="theme-btn" title="Language" aria-label="Language">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M2 12h20"></path>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
                 </button>
                 <button id="theme-toggle" class="theme-btn" title="Toggle Theme">
                     <span id="theme-icon">☀️</span>
@@ -193,139 +216,196 @@
             </div>
         </div>
 
-        <div id="donate-popup" class="popup">
-            <div class="popup-content">
-                <div class="modal-header">
-                    <h3 data-i18n="ui_036">Support Developer</h3>
-                </div>
-                <div class="popup-body">
-                    <div class="donate-message">
-                        <p data-i18n="ui_017">If you find this app helpful, consider supporting the developer:</p>
-                    </div>
-                    <div class="donate-options">
-                        <div class="donate-option">
-                            <div class="crypto-icon usdt-icon">
-                                <svg width="20" height="20" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                                    <g fill="none" fill-rule="evenodd">
-                                        <circle cx="16" cy="16" r="16" fill="#26A17B"/>
-                                        <path fill="#FFF" d="M17.922 17.383v-.002c-.11.008-.677.042-1.942.042-1.01 0-1.721-.03-1.971-.042v.003c-3.888-.171-6.79-.848-6.79-1.658 0-.809 2.902-1.486 6.79-1.66v2.644c.254.018.982.061 1.988.061 1.207 0 1.812-.05 1.925-.06v-2.643c3.88.173 6.775.85 6.775 1.658 0 .81-2.895 1.485-6.775 1.657m0-3.59v-2.366h5.414V7.819H8.595v3.608h5.414v2.365c-4.4.202-7.709 1.074-7.709 2.118 0 1.044 3.309 1.915 7.709 2.118v7.582h3.913v-7.584c4.393-.202 7.694-1.073 7.694-2.116 0-1.043-3.301-1.914-7.694-2.117"/>
-                                    </g>
-                                </svg>
-                            </div>
-                            <div class="donate-info">
-                                <h4>USDT (TRC-20)/TRON (TRX)</h4>
-                                <p class="donate-address">TMMDAyJ9Fs3yQpidd2Q4eYLTMkM1hsrauV</p>
-                            </div>
-                            <button class="copy-btn" data-address="TMMDAyJ9Fs3yQpidd2Q4eYLTMkM1hsrauV">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        
-                        <div class="donate-option">
-                            <div class="crypto-icon ton-icon">
-                                <svg width="20" height="20" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M28,56c15.5,0,28-12.5,28-28S43.5,0,28,0S0,12.5,0,28S12.5,56,28,56z" fill="#0098EA"/>
-                                    <path d="M37.6,15.6H18.4c-3.5,0-5.7,3.8-4,6.9l11.8,20.5c0.8,1.3,2.7,1.3,3.5,0l11.8-20.5 C43.3,19.4,41.1,15.6,37.6,15.6L37.6,15.6z M26.3,36.8l-2.6-5l-6.2-11.1c-0.4-0.7,0.1-1.6,1-1.6h7.8L26.3,36.8L26.3,36.8z M38.5,20.7l-6.2,11.1l-2.6,5V19.1h7.8C38.4,19.1,38.9,20,38.5,20.7z" fill="#FFFFFF"/>
-                                </svg>
-                            </div>
-                            <div class="donate-info">
-                                <h4>TON (TON)</h4>
-                                <p class="donate-address">UQDpCIV5E8O2uHg8TPr6PUf36BEDOAu42lr9YzJw2j7HONat</p>
-                            </div>
-                            <button class="copy-btn" data-address="UQDpCIV5E8O2uHg8TPr6PUf36BEDOAu42lr9YzJw2j7HONat">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        
-                        <div class="donate-option">
-                            <div class="crypto-icon telegram-icon">
-                                <svg width="20" height="20" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <g>
-                                        <path d="M128,0 C57.307,0 0,57.307 0,128 L0,128 C0,198.693 57.307,256 128,256 L128,256 C198.693,256 256,198.693 256,128 L256,128 C256,57.307 198.693,0 128,0 L128,0 Z" fill="#40B3E0"></path>
-                                        <path d="M190.2826,73.6308 L167.4206,188.8978 C167.4206,188.8978 164.2236,196.8918 155.4306,193.0548 L102.6726,152.6068 L83.4886,143.3348 L51.1946,132.4628 C51.1946,132.4628 46.2386,130.7048 45.7586,126.8678 C45.2796,123.0308 51.3546,120.9528 51.3546,120.9528 L179.7306,70.5928 C179.7306,70.5928 190.2826,65.9568 190.2826,73.6308" fill="#FFFFFF"></path>
-                                        <path d="M98.6178,187.6035 C98.6178,187.6035 97.0778,187.4595 95.1588,181.3835 C93.2408,175.3085 83.4888,143.3345 83.4888,143.3345 L161.0258,94.0945 C161.0258,94.0945 165.5028,91.3765 165.3428,94.0945 C165.3428,94.0945 166.1418,94.5735 163.7438,96.8115 C161.3458,99.0505 102.8328,151.6475 102.8328,151.6475" fill="#D2E5F1"></path>
-                                        <path d="M122.9015,168.1154 L102.0335,187.1414 C102.0335,187.1414 100.4025,188.3794 98.6175,187.6034 L102.6135,152.2624" fill="#B5CFE4"></path>
-                                    </g>
-                                </svg>
-                            </div>
-                            <div class="donate-info">
-                                <h4 data-i18n="ui_037">Telegram Gifts</h4>
-                                <p class="donate-address">@AlirezaParsi</p>
-                            </div>
-                            <button class="copy-btn" data-address="@AlirezaParsi">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="popup-footer">
-                    <button class="action-btn close-donate-btn">Close</button>
-                </div>
+        <section class="identity-plate" id="identity-plate">
+            <div class="identity-eyebrow" data-i18n="ui_sec_profile">Active profile</div>
+            <div class="identity-model empty" id="identity-model" data-i18n="ui_profile_none">No profile set</div>
+            <div class="identity-fp mono" id="identity-fp"></div>
+            <div class="identity-meta">
+                <span class="identity-badge neutral" id="identity-scope"></span>
             </div>
-        </div>
+        </section>
 
         <div class="tab-nav">
-            <button id="tab-settings" class="tab-btn active" data-i18n="ui_032">Settings</button>
+            <button id="tab-about" class="tab-btn active" data-i18n="ui_tab_about">About</button>
             <button id="tab-devices" class="tab-btn" data-i18n="ui_013">Device</button>
+            <button id="tab-spoofing" class="tab-btn" data-i18n="ui_tab_spoofing">Spoofing</button>
+            <button id="tab-system" class="tab-btn" data-i18n="ui_tab_system">System</button>
+            <button id="tab-tools" class="tab-btn" data-i18n="ui_tab_tools">Tools</button>
+        </div>
+
+        <div class="device-savebar" id="device-savebar" style="display:none">
+            <button id="device-save-btn" class="action-btn" data-i18n="ui_029">Save</button>
+        </div>
         </div>
 
         <div class="tab-container" id="tab-container">
-            <div id="settings-tab" class="tab-content active">
+            <div id="about-tab" class="tab-content active">
+                <div class="about-callout">
+                    <span class="about-callout-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
+                    <span data-i18n="ui_about_callout">This WebUI runs entirely on your device and makes no network request.</span>
+                </div>
+
+                <div class="about-sec" data-i18n="ui_about_sec_project">Project</div>
+                <div class="card about-card2">
+                    <div class="about-row link" data-link="https://github.com/VD171">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
+                        <div class="about-txt"><div class="about-lbl" data-i18n="ui_about_developer">Developer</div><div class="about-val">fork by VD171</div></div>
+                    </div>
+                    <div class="about-row link" data-link="https://github.com/VD171/COPG-VD">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"></path></svg></span>
+                        <div class="about-txt"><div class="about-lbl" data-i18n="ui_about_source">Source</div><div class="about-val">github.com/VD171/COPG-VD</div></div>
+                    </div>
+                    <div class="about-row">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 13l-7.5 7.5a2.12 2.12 0 0 1-3-3L11 10M12.8 7.2l4 4M19 11l-4-4M15 3l6 6"></path></svg></span>
+                        <div class="about-txt"><div class="about-lbl" data-i18n="ui_about_license">License</div><div class="about-val">Apache License 2.0</div></div>
+                    </div>
+                </div>
+
+                <div class="about-sec" data-i18n="ui_about_sec_contacts">Contacts</div>
+                <div class="card about-card2">
+                    <div class="about-row link" data-link="https://vd171.ru">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"></path></svg></span>
+                        <div class="about-txt"><div class="about-val">https://vd171.ru</div></div>
+                    </div>
+                    <div class="about-row link" data-link="https://vd.priv8.ru">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"></path></svg></span>
+                        <div class="about-txt"><div class="about-val">https://vd.priv8.ru</div></div>
+                    </div>
+                    <div class="about-row link" data-link="https://t.me/VD_Priv8">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg></span>
+                        <div class="about-txt"><div class="about-lbl">Telegram</div><div class="about-val">@VD_Priv8</div></div>
+                    </div>
+                    <div class="about-row link" data-link="https://discord.com/users/1296831918989639721">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></span>
+                        <div class="about-txt"><div class="about-lbl">Discord</div><div class="about-val">@VD.Priv8</div></div>
+                    </div>
+                    <div class="about-row link" data-link="mailto:vd.priv8@pm.me">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M22 6l-10 7L2 6"></path></svg></span>
+                        <div class="about-txt"><div class="about-lbl">E-mail</div><div class="about-val">vd.priv8@pm.me</div></div>
+                    </div>
+                    <div class="about-row link" data-link="https://xdaforums.com/m/vd171.4699873/">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.5 8.5 0 0 1 12 3a8.38 8.38 0 0 1 9 8.5z"></path></svg></span>
+                        <div class="about-txt"><div class="about-lbl">XDA</div><div class="about-val">@VD171</div></div>
+                    </div>
+                    <div class="about-row link" data-link="https://github.com/VD171">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"></path><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"></path></svg></span>
+                        <div class="about-txt"><div class="about-lbl">GitHub</div><div class="about-val">@VD171</div></div>
+                    </div>
+                </div>
+
+                <div class="about-sec" data-i18n="ui_about_sec_support">Support</div>
+                <div class="card about-card2">
+                    <div class="about-row link" data-link="https://github.com/VD171/COPG-VD/releases">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><path d="M15 3h6v6M10 14L21 3"></path></svg></span>
+                        <div class="about-txt"><div class="about-val">github.com/VD171/COPG-VD/releases</div></div>
+                    </div>
+                    <div class="about-row link" data-link="https://t.me/RootDetected">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><path d="M15 3h6v6M10 14L21 3"></path></svg></span>
+                        <div class="about-txt"><div class="about-val">@RootDetected on Telegram</div></div>
+                    </div>
+                    <div class="about-row link" data-link="https://t.me/BlankAssistance">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><path d="M15 3h6v6M10 14L21 3"></path></svg></span>
+                        <div class="about-txt"><div class="about-val">@BlankAssistance on Telegram</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="devices-tab" class="tab-content">
+                <div id="device-list" class="device-list"></div>
+            </div>
+
+            <div id="spoofing-tab" class="tab-content">
                 <div class="card">
                     <div class="scroll-container">
                         <div class="list-wrapper">
-                            <div class="toggle-group">
-                                <span class="toggle-label" data-i18n="ui_041">Use Resetprop</span>
-                                <label class="switch">
-                                    <input type="checkbox" id="toggle-resetprop">
-                                    <span class="slider"></span>
-                                </label>
+                            <div class="settings-section">
+                                <div class="section-head" data-i18n="ui_scope">Scope</div>
+                                <div class="toggle-group">
+                                    <span class="tg-label"><span class="toggle-label" data-i18n="ui_scope">Scope</span><button type="button" class="info-btn-item" data-info="scope" aria-label="Info" data-i18n-title="ui_info_btn">?</button></span>
+                                    <select id="select-scope-mode" class="version-select">
+                                        <option value="global" data-i18n="ui_scope_global">Global</option>
+                                        <option value="whitelist" data-i18n="ui_scope_whitelist">Whitelist</option>
+                                        <option value="blacklist" data-i18n="ui_scope_blacklist">Blacklist</option>
+                                        <option value="playstore" data-i18n="ui_scope_playstore">Google Play</option>
+                                    </select>
+                                </div>
+                                <div id="scope-apps-group" class="toggle-group scope-apps-group" style="display:none">
+                                    <span class="tg-label"><span class="toggle-label" data-i18n="ui_scope_apps">Apps in the list</span><button type="button" class="info-btn-item" data-info="scope_apps" aria-label="Info" data-i18n-title="ui_info_btn">?</button></span>
+                                    <button id="scope-apps-edit" class="small-btn" data-i18n="ui_scope_apps_edit">Choose apps</button>
+                                </div>
                             </div>
-                            <div class="toggle-group">
-                                <span class="toggle-label" data-i18n="ui_033">Spoof ro.product.manufacturer</span>
-                                <label class="switch">
-                                    <input type="checkbox" id="toggle-ro-product-manufacturer">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="toggle-group">
-                                <span class="toggle-label" data-i18n="ui_004">Auto-update JSON on boot</span>
-                                <label class="switch">
-                                    <input type="checkbox" id="toggle-autoupdate">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="toggle-group version-group">
-                                <span class="toggle-label">
-                                    Spoof Android version
-                                    <small id="version-rom-hint" class="toggle-hint"></small>
-                                </span>
-                                <select id="select-spoof-version" class="version-select">
-                                    <option value="never" data-i18n="ui_022">Never</option>
-                                    <option value="rom" data-i18n="ui_039">Up to this ROM</option>
-                                    <option value="force" data-i18n="ui_016">Force</option>
-                                </select>
-                            </div>
-                            <div class="toggle-group">
-                                <span class="toggle-label" data-i18n="ui_lang">Language</span>
-                                <select id="select-language" class="version-select"></select>
+
+                            <div class="settings-section">
+                                <div class="section-head" data-i18n="ui_sec_engines">Engines</div>
+                                <div class="toggle-group">
+                                    <span class="tg-label"><span class="toggle-label" data-i18n="ui_motor_jni">Build fields (JNI)</span><button type="button" class="info-btn-item" data-info="motor_jni" aria-label="Info" data-i18n-title="ui_info_btn">?</button></span>
+                                    <label class="switch"><input type="checkbox" id="toggle-motor-jni"><span class="slider"></span></label>
+                                </div>
+                                <div class="toggle-group">
+                                    <span class="tg-label"><span class="toggle-label" data-i18n="ui_motor_prop_hook">Property hook</span><button type="button" class="info-btn-item" data-info="motor_prop_hook" aria-label="Info">?</button></span>
+                                    <select id="select-prop-method" class="version-select">
+                                        <option value="off" data-i18n="ui_prop_method_off">Off</option>
+                                        <option value="mmap" data-i18n="ui_prop_method_mmap">Per-process (mmap)</option>
+                                    </select>
+                                </div>
+                                <div class="toggle-group">
+                                    <span class="tg-label"><span class="toggle-label" data-i18n="ui_motor_drm">DRM / Widevine</span><button type="button" class="info-btn-item" data-info="motor_drm" aria-label="Info">?</button></span>
+                                    <select id="select-drm-level" class="version-select">
+                                        <option value="off" data-i18n="ui_prop_method_off">Off</option>
+                                        <option value="L1">L1</option>
+                                        <option value="L3">L3</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="button-group">
-                        <button id="analyze-config" class="action-btn" data-i18n="ui_003">Analyze</button>
-                        <button id="check-update" class="action-btn" data-i18n="ui_007">Check Update</button>
-                        <button id="apply-update" class="action-btn" data-i18n="ui_040">Update Now</button>
-                        <button id="backup-manager" class="action-btn" data-i18n="ui_005">Backup/Restore</button>
+                </div>
+            </div>
+
+            <div id="system-tab" class="tab-content">
+                <div class="card">
+                    <div class="scroll-container">
+                        <div class="list-wrapper">
+                            <div class="settings-section">
+                                <div class="section-head" data-i18n="ui_rp_groups">Resetprop groups</div>
+                                <div class="toggle-group">
+                                    <div class="tg-col"><span class="tg-label"><span class="toggle-label" data-i18n="ui_041">Use Resetprop</span><button type="button" class="info-btn-item" data-info="resetprop" aria-label="Info" data-i18n-title="ui_info_btn">?</button></span><small class="toggle-sub" data-i18n="ui_sub_resetprop">Rewrite system properties for the whole device at boot</small></div>
+                                    <label class="switch"><input type="checkbox" id="toggle-resetprop"><span class="slider"></span></label>
+                                </div>
+                                <div class="toggle-group">
+                                    <div class="tg-col"><span class="tg-label"><span class="toggle-label" data-i18n="ui_grp_identity">Identity</span><button type="button" class="info-btn-item" data-info="grp_identity" aria-label="Info">?</button></span><small class="toggle-sub" data-i18n="ui_sub_grp_identity">Brand, model, device, fingerprint</small></div>
+                                    <label class="switch"><input type="checkbox" id="grp-identity"><span class="slider"></span></label>
+                                </div>
+                                <div class="toggle-group">
+                                    <div class="tg-col"><span class="tg-label"><span class="toggle-label" data-i18n="ui_033">Spoof ro.product.manufacturer</span><button type="button" class="info-btn-item" data-info="manufacturer" aria-label="Info">?</button></span><small class="toggle-sub" data-i18n="ui_sub_manufacturer">The ro.product.manufacturer property (can be a tell)</small></div>
+                                    <label class="switch"><input type="checkbox" id="toggle-ro-product-manufacturer"><span class="slider"></span></label>
+                                </div>
+                                <div class="toggle-group">
+                                    <div class="tg-col"><span class="tg-label"><span class="toggle-label" data-i18n="ui_grp_version">Version</span><button type="button" class="info-btn-item" data-info="grp_version" aria-label="Info" data-i18n-title="ui_info_btn">?</button></span><small class="toggle-sub" data-i18n="ui_sub_grp_version">Android version props - off avoids boot loops</small></div>
+                                    <label class="switch"><input type="checkbox" id="grp-version"><span class="slider"></span></label>
+                                </div>
+                                <div class="toggle-group">
+                                    <div class="tg-col"><span class="tg-label"><span class="toggle-label" data-i18n="ui_grp_boot_state">Boot state</span><button type="button" class="info-btn-item" data-info="grp_boot_state" aria-label="Info" data-i18n-title="ui_info_btn">?</button></span><small class="toggle-sub" data-i18n="ui_sub_grp_boot_state">Verified-boot and bootloader lock state</small></div>
+                                    <label class="switch"><input type="checkbox" id="grp-boot_state"><span class="slider"></span></label>
+                                </div>
+                                <div class="toggle-group">
+                                    <div class="tg-col"><span class="tg-label"><span class="toggle-label" data-i18n="ui_grp_selinux_bootmode">SELinux / boot mode</span><button type="button" class="info-btn-item" data-info="grp_selinux_bootmode" aria-label="Info" data-i18n-title="ui_info_btn">?</button></span><small class="toggle-sub" data-i18n="ui_sub_grp_selinux_bootmode">SELinux enforcing and normal boot mode</small></div>
+                                    <label class="switch"><input type="checkbox" id="grp-selinux_bootmode"><span class="slider"></span></label>
+                                </div>
+                                <div class="toggle-group">
+                                    <div class="tg-col"><span class="tg-label"><span class="toggle-label" data-i18n="ui_grp_adb_usb">ADB / USB</span><button type="button" class="info-btn-item" data-info="grp_adb_usb" aria-label="Info" data-i18n-title="ui_info_btn">?</button></span><small class="toggle-sub" data-i18n="ui_sub_grp_adb_usb">ADB and USB-debugging properties</small></div>
+                                    <label class="switch"><input type="checkbox" id="grp-adb_usb"><span class="slider"></span></label>
+                                </div>
+                                <div class="toggle-group">
+                                    <div class="tg-col"><span class="tg-label"><span class="toggle-label" data-i18n="ui_grp_anti_emulator">Anti-emulator</span><button type="button" class="info-btn-item" data-info="grp_anti_emulator" aria-label="Info" data-i18n-title="ui_info_btn">?</button></span><small class="toggle-sub" data-i18n="ui_sub_grp_anti_emulator">Hide emulator / QEMU traces</small></div>
+                                    <label class="switch"><input type="checkbox" id="grp-anti_emulator"><span class="slider"></span></label>
+                                </div>
+                                <div class="toggle-group">
+                                    <div class="tg-col"><span class="tg-label"><span class="toggle-label" data-i18n="ui_grp_cleanup">Cleanup</span><button type="button" class="info-btn-item" data-info="grp_cleanup" aria-label="Info" data-i18n-title="ui_info_btn">?</button></span><small class="toggle-sub" data-i18n="ui_sub_grp_cleanup">Remove leftover / diagnostic properties</small></div>
+                                    <label class="switch"><input type="checkbox" id="grp-cleanup"><span class="slider"></span></label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="log-section" id="settings-log-section">
@@ -349,13 +429,36 @@
                 </div>
             </div>
 
-            <div id="devices-tab" class="tab-content">
-    <div class="scroll-container">
-        <div class="list-wrapper">
-            <div id="device-list" class="device-list"></div>
+            <div id="tools-tab" class="tab-content">
+                <div class="card">
+                    <div class="tool-item toggle-tool">
+                        <div class="tool-text">
+                            <div class="tool-title" data-i18n="ui_004">Auto-update JSON on boot</div>
+                            <div class="tool-desc" data-i18n="ui_toolsd_autoupdate">Refresh the profile to the newest matching image on every boot.</div>
+                        </div>
+                        <label class="switch"><input type="checkbox" id="toggle-autoupdate"><span class="slider"></span></label>
+                    </div>
+                    <div class="tool-item">
+                        <div class="tool-desc" data-i18n="ui_toolsd_analyze">Check the current profile for inconsistencies and tells.</div>
+                        <button id="analyze-config" class="action-btn tool-btn" data-i18n="ui_003">Analyze</button>
+                    </div>
+                    <div class="tool-item">
+                        <div class="tool-desc" data-i18n="ui_toolsd_checkupdate">See whether a newer matching factory image is available.</div>
+                        <button id="check-update" class="action-btn tool-btn" data-i18n="ui_007">Check Update</button>
+                    </div>
+                    <div class="tool-item">
+                        <div class="tool-desc" data-i18n="ui_toolsd_updatenow">Fetch and apply the newest matching profile values now.</div>
+                        <button id="apply-update" class="action-btn tool-btn" data-i18n="ui_040">Update Now</button>
+                    </div>
+                    <div class="tool-item">
+                        <div class="tool-desc" data-i18n="ui_toolsd_backup">Save the configuration to a file, or restore it from one.</div>
+                        <button id="backup-manager" class="action-btn tool-btn" data-i18n="ui_005">Backup/Restore</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-</div>
 
     <div id="device-modal" class="modal">
         <div class="modal-content device-form-content">
@@ -583,6 +686,28 @@
         </div>
     </div>
     
+    <div id="lang-popup" class="popup">
+        <div class="popup-content">
+            <h3 data-i18n="ui_lang">Language</h3>
+            <div class="popup-body">
+                <div id="lang-list" class="lang-list"></div>
+            </div>
+            <div class="popup-footer">
+                <button class="cancel-btn" data-i18n="ui_009">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="iteminfo-popup" class="popup">
+        <div class="popup-content">
+            <h3 id="iteminfo-title"></h3>
+            <p id="iteminfo-body"></p>
+            <div class="popup-buttons">
+                <button class="cancel-btn" data-i18n="ui_024">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script src="lang/en.js"></script>
     <script src="i18n.js"></script>
     <script src="scripts.js"></script>

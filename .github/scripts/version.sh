@@ -4,12 +4,8 @@
 #   version.sh read            print the current version, nothing is written
 #   version.sh patch|minor|major   bump it, rewrite module.prop and update.json
 #
-# The version string is v<major>.<minor>.<patch>-vd and versionCode is derived from it as
-# major*10000 + minor*100 + patch (v5.0.0 = 50000, v5.12.3 = 51203), so no number is ever
-# typed by hand. Two decimal places per component: every part can go up to 99 before any of
-# them could collide with its neighbour, and the code only ever grows - which is the one
-# thing Magisk/KernelSU actually require, since versionCode is what decides "there is an
-# update", not the version string.
+# Version is v<major>.<minor>.<patch>-vd; versionCode = major*10000 + minor*100 + patch (two digits
+# each, so parts up to 99 never collide and the code only grows - what Magisk/KernelSU require).
 # Writes version/versionCode/zip/tag to $GITHUB_OUTPUT when running in Actions.
 set -euo pipefail
 

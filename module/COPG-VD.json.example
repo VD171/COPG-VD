@@ -1,26 +1,31 @@
 {
   "Instructions": "Use strings on double-quotes only.",
   "Instructions": "All fields are OPTIONAL. If some field is not provided, it will be skipped.",
-  "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/comet_beta-zp11.260918.007-factory-8586f319.zip",
+  "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.260918.007-factory-f5955275.zip",
+  "scope_mode": "playstore",
   "COPG-VD": {
     "BRAND": "google",
-    "DEVICE": "comet",
+    "DEVICE": "tegu",
     "MANUFACTURER": "Google",
-    "MODEL": "Pixel 9 Pro Fold",
-    "FINGERPRINT": "google/comet_beta/comet:CANARY/ZP11.260918.007/16484274:user/release-keys",
-    "PRODUCT": "comet_beta",
+    "MODEL": "Pixel 9a",
+    "FINGERPRINT": "google/tegu_beta/tegu:CANARY/ZP11.260918.007/16484274:user/release-keys",
+    "PRODUCT": "tegu_beta",
     "BOOTLOADER": "unknown",
-    "BOARD": "comet",
-    "HARDWARE": "comet",
+    "BOARD": "tegu",
+    "HARDWARE": "tegu",
     "DISPLAY": "ZP11.260918.007",
     "ID": "ZP11.260918.007",
-    "HOST": "7ce6fcf9b606",
+    "HOST": "51b22e6d8afb",
     "INCREMENTAL": "16484274",
-    "TIMESTAMP": "1790806787",
+    "TIMESTAMP": "1790806751",
     "PREVIEW_SDK": "20261007",
     "USER": "android-build",
     "SDK_FINGERPRINT": "d9ad4b00fa641d6e43c42cc969f49492",
-    "UUID": "Ml4RO6pzAfB67qdL0aEQv4ozLvf9NNFMW8KTcHXKnU8",
-    "SECURITY_PATCH": "2026-10-05"
-  }
+    "UUID": "_mQOcxvuFzRVZAjNEr2UUUpk2fv0mqDc8RpFyaeJjuk",
+    "SECURITY_PATCH": "2026-10-05",
+    "FIRST_API_LEVEL": "35",
+    "DRM_SECURITY_LEVEL": "L1"
+  },
+  "motor_drm": false,
+  "global_fields": ["SECURITY_PATCH"]
 }

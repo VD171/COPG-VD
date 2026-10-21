@@ -1,5 +1,25 @@
-// COPG-VD WebUI i18n. Loads lang/<code>.json over same-origin fetch (CSP connect-src 'self'),
-// falls back to English, and fills ${expr} placeholders left verbatim from the source strings.
+/*
+ * ======================================================================
+ *  COPG-VD  ::  global device spoofer
+ *  Spoof your device fingerprint and build - Zygisk, KernelSU/APatch/Magisk.
+ *
+ *  Copyright (C) 2026  VD171
+ *  SPDX-License-Identifier: Apache-2.0
+ *  Fork by VD171.
+ *
+ *  Licensed under the Apache License, Version 2.0; you may obtain a copy at
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Site           : https://vd171.ru
+ *  Site           : https://vd.priv8.ru
+ *  Source         : https://github.com/VD171/COPG-VD
+ *  GitHub         : @VD171 https://github.com/VD171
+ *  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+ *  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+ *  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+ *  E-mail         : vd.priv8@pm.me
+ * ======================================================================
+ */
 (function () {
   "use strict";
   var AVAILABLE = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "in", "it", "ja",
@@ -11,8 +31,8 @@
     var n = (navigator.language || "en").toLowerCase();
     if (AVAILABLE.indexOf(n) >= 0) return n;
     var base = n.split("-")[0];
-    if (base === "id") return "in";            // Android legacy code for Indonesian
-    if (base === "iw") return "he";            // (not shipped, but normalize)
+    if (base === "id") return "in";
+    if (base === "iw") return "he";
     if (AVAILABLE.indexOf(base) >= 0) return base;
     return "en";
   }
@@ -23,14 +43,11 @@
   }
 
   async function load(lang) {
-    // English is embedded (lang/en.js) so a blocked fetch degrades to English, never to raw keys.
     if (lang === "en") { dict = fallback; return; }
     var d = await fetchJson("lang/" + lang + ".json");
     dict = Object.keys(d).length ? d : fallback;
   }
 
-  // t(key, vars): vars keys are the EXACT ${...} expression text kept in the strings,
-  // e.g. t("msg_070", {"error": e}) or t("msg_061", {"successCount": n, "files.length": m}).
   function t(key, vars) {
     var s = dict[key]; if (s == null) s = fallback[key]; if (s == null) s = key;
     if (vars) for (var k in vars) if (Object.prototype.hasOwnProperty.call(vars, k)) s = s.split("${" + k + "}").join(vars[k]);
@@ -52,5 +69,5 @@
     async init() { this.current = pick(); await load(this.current); apply(document); },
     async set(lang) { this.current = lang; try { localStorage.setItem("copgvd_lang", lang); } catch (e) {} await load(lang); apply(document); }
   };
-  window.t = t;   // scripts.js calls t(...) directly
+  window.t = t;
 })();

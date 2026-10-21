@@ -1,61 +1,42 @@
 #!/system/bin/sh
-# ================================================
-# COPG-VD.json updater
-# ================================================
-# Pulls the build props of the newest Google image from the COPG-VD repo, where the
-# "Update COPG-VD.json" workflow keeps module/COPG-VD.json.example refreshed.
+# ======================================================================
+#  COPG-VD  ::  global device spoofer
+#  Spoof your device fingerprint and build - Zygisk, KernelSU/APatch/Magisk.
 #
-#   fingerprint-update.sh check           what would change (writes nothing)
-#   fingerprint-update.sh apply           update the config file(s) now
-#   fingerprint-update.sh boot            once per boot, waits for the network, then applies
-#   fingerprint-update.sh analyze         audit the config as it stands (writes nothing)
-#   fingerprint-update.sh sync-settings   COPG-VD-Settings from the JSON -> the flag files
+#  Copyright (C) 2026  VD171
+#  SPDX-License-Identifier: Apache-2.0
+#  Fork by VD171.
 #
-# What it will NOT touch:
-#   * the device identity (BRAND/DEVICE/MANUFACTURER/MODEL/PRODUCT). If yours differs
-#     from upstream you are spoofing another device, so nothing is applied at all - a
-#     Pixel fingerprint on a non-Pixel profile is worse than an old fingerprint.
-#   * any other key of the file: extra fields, BOOTLOADER/BOARD/HARDWARE, other objects,
-#     key order, indentation and the duplicated "Instructions" lines all survive, because
-#     only the value of each known build field is rewritten in place.
-#   * the Android version. ANDROID_VERSION, SDK_INT, SDK_FULL and CODENAME describe the ROM,
-#     not the build being spoofed. Telling apps the SDK is newer than the framework really is
-#     makes them call APIs that do not exist: Google's apps crash, the device reboots, and it
-#     repeats - a softloop, which leaves no trace in the boot logs. They are never written
-#     here, and applying them at all is gated by the semaphore below.
+#  Licensed under the Apache License, Version 2.0; you may obtain a copy at
+#  http://www.apache.org/licenses/LICENSE-2.0
 #
-# Exit status: 0 when the check ran (see "status:" in the output), 1 on failure.
+#  Site           : https://vd171.ru
+#  Site           : https://vd.priv8.ru
+#  Source         : https://github.com/VD171/COPG-VD
+#  GitHub         : @VD171 https://github.com/VD171
+#  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+#  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+#  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+#  E-mail         : vd.priv8@pm.me
+# ======================================================================
 
 MODDIR=${0%/*}
 MODULE_ID="COPG-VD"
 BRANCH="main"
 REMOTE_URL="https://raw.githubusercontent.com/VD171/COPG-VD/$BRANCH/module/COPG-VD.json.example"
 
-# Both are updated when both exist: /data/adb is what the module reads, the copy inside
-# the module directory is a convention of some setups and must not drift from it.
 MODULE_DIR="/data/adb/modules/$MODULE_ID"
 CONFIG_PATHS="/data/adb/COPG-VD.json $MODULE_DIR/COPG-VD.json"
 
-# The only honest source for what the ROM really is. Never getprop: the module rewrites those
-# very props, so asking the system would be asking our own lie. /build.prop does not exist on
-# these devices; only /system/build.prop, and on a custom ROM the fingerprint line in it is
-# stale garbage inherited from the base image - the ro.build.version.* lines are the good part.
 ROM_PROP="/system/build.prop"
-# Never refreshed from upstream, and only applied when the semaphore allows.
 VERSION_FIELDS="ANDROID_VERSION SDK_INT SDK_FULL CODENAME"
 SETTINGS_OBJECT="COPG-VD-Settings"
-# Keys the module actually understands - anything else in the object does nothing.
-# One line, deliberately: Android's awk refuses a newline inside a -v assignment ("newline in
-# string ... at source line 1") and the whole program dies. Fedora's gawk accepts it, so this
-# only ever breaks on the device - which is exactly where it matters.
-KNOWN_KEYS="BRAND DEVICE MANUFACTURER MODEL FINGERPRINT PRODUCT BOOTLOADER BOARD HARDWARE DISPLAY ID HOST INCREMENTAL TIMESTAMP PREVIEW_SDK USER SDK_FINGERPRINT UUID SECURITY_PATCH ANDROID_VERSION SDK_INT SDK_FULL CODENAME TAGS TYPE ODM_SKU SKU"
+KNOWN_KEYS="BRAND DEVICE MANUFACTURER MODEL FINGERPRINT PRODUCT BOOTLOADER BOARD HARDWARE DISPLAY ID HOST INCREMENTAL TIMESTAMP PREVIEW_SDK USER SDK_FINGERPRINT UUID SECURITY_PATCH ANDROID_VERSION SDK_INT SDK_FULL CODENAME TAGS TYPE ODM_SKU SKU FIRST_API_LEVEL"
 STATE_FILE="/data/adb/$MODULE_ID.update.state"
 LOG_FILE="/data/adb/$MODULE_ID.update.log"
 LOG_MAX=32768
-# /data/adb is root-only; /data/local/tmp is shared with the shell user and could be raced.
 TMP_FILE="/data/adb/.$MODULE_ID.update.$$"
 
-# The WebUI calls this through ksu.exec, whose PATH has none of the root manager's busybox.
 AWK=$(command -v awk 2>/dev/null)
 if [ -z "$AWK" ]; then
     for bb in /data/adb/ksu/bin/busybox /data/adb/ap/bin/busybox /data/adb/magisk/busybox; do
@@ -63,18 +44,12 @@ if [ -z "$AWK" ]; then
     done
 fi
 
-# Refreshed from upstream. Everything else in the file is left alone.
-# Single line for the same reason as KNOWN_KEYS: this one is passed to awk by write_fields,
-# so a newline here meant every update failed on a real device while passing on a PC.
 FIELDS="FINGERPRINT ID DISPLAY INCREMENTAL TIMESTAMP SECURITY_PATCH PREVIEW_SDK SDK_FINGERPRINT UUID HOST USER"
-# Must match upstream, otherwise the user is spoofing something else.
 IDENTITY="BRAND DEVICE MANUFACTURER MODEL PRODUCT"
-# Re-evaluate attestation with the new props. com.android.vending is deliberately left
-# alone: killing it interrupts downloads, and it picks the change up on its own.
 KILL_PACKAGES="com.google.android.gms com.google.android.gsf com.google.android.gms.unstable"
 
-BOOT_RETRY_MAX=40          # network attempts at boot ...
-BOOT_RETRY_SLEEP=15        # ... every 15s, so ~10 min of waiting for wifi
+BOOT_RETRY_MAX=40
+BOOT_RETRY_SLEEP=15
 
 log() {
     echo "[$MODULE_ID] $*"
@@ -88,7 +63,6 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# --------------------------------------------------------------------- download
 find_downloader() {
     for cmd in curl wget; do
         command -v "$cmd" >/dev/null 2>&1 && echo "$cmd" && return 0
@@ -102,10 +76,6 @@ find_downloader() {
 }
 
 download() {
-    # TLS is as good as the downloader available, and on a plain Android that is busybox
-    # wget, which prints "TLS certificate validation not implemented" and means it. Nothing
-    # here disables verification, but nothing can promise it either - which is why every value
-    # is validated before use and why an older build is refused instead of applied.
     case "$DOWNLOADER" in
         curl) curl -fsSL --max-time 60 -o "$TMP_FILE" "$REMOTE_URL" 2>/dev/null ;;
         wget) wget -q -T 60 -O "$TMP_FILE" "$REMOTE_URL" 2>/dev/null ;;
@@ -113,14 +83,11 @@ download() {
     esac
 }
 
-# --------------------------------------------------------------------- json helpers
-# Same grep/sed style the module already uses in service.sh: one key per line, strings only.
 json_get() {
     grep -o "\"$2\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" "$1" 2>/dev/null | head -n 1 |
         sed "s/^\"[^\"]*\"[[:space:]]*:[[:space:]]*\"//; s/\"$//"
 }
 
-# Values land in props and in sed/awk, so anything outside this alphabet is refused.
 sane_value() {
     case "$1" in
         FINGERPRINT) printf '%s' "$2" | grep -qE '^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+:[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+:[a-z]+/[a-z-]+$' ;;
@@ -143,21 +110,15 @@ validate_remote() {
     return 0
 }
 
-# Bare values too (true/false/numbers), which the settings object uses.
 json_get_raw() {
     grep -o "\"$2\"[[:space:]]*:[[:space:]]*[^,}[:space:]]*" "$1" 2>/dev/null | head -n 1 |
         sed "s/^\"[^\"]*\"[[:space:]]*:[[:space:]]*//; s/\"//g"
 }
 
-# --------------------------------------------------------------------- the ROM, for real
 rom_prop() {
     grep -m 1 "^$1=" "$ROM_PROP" 2>/dev/null | cut -d= -f2-
 }
 
-# never = the version group is never applied (default) | rom = only what does not exceed the
-# ROM | force = whatever the config says, which is what caused the softloop.
-# force lives ONLY in the flag file: a config file travels through backups and restores, and
-# restoring an old one must never re-arm the dangerous mode behind your back.
 spoof_version_policy() {
     case "$(cat "$MODULE_DIR/.spoof.version" 2>/dev/null)" in
         rom) echo rom ;;
@@ -166,15 +127,10 @@ spoof_version_policy() {
     esac
 }
 
-# AOSP: RELEASE_OR_CODENAME = "REL".equals(CODENAME) ? RELEASE : CODENAME.
-# Copying CODENAME into it - which is what the mapping used to do - publishes the literal
-# string "REL" in a field that must hold the version number. No real device reports that.
 release_or_codename() {
     if [ "$1" = "REL" ] || [ -z "$1" ]; then echo "$2"; else echo "$1"; fi
 }
 
-# What the version group would actually become, given the config and the semaphore.
-# Echoes "<field> <value>" for each field that WILL be applied; silence means "none".
 effective_version_fields() {
     conf="$1"
     policy=$(spoof_version_policy)
@@ -200,8 +156,6 @@ effective_version_fields() {
     done
 }
 
-# --------------------------------------------------------------------- settings <- json
-# The JSON declares, the flag files are the cache the shell and the zygisk module read.
 sync_settings() {
     conf=""
     for path in $CONFIG_PATHS; do [ -f "$path" ] && conf="$path" && break; done
@@ -226,8 +180,6 @@ sync_settings() {
     return 0
 }
 
-# Rewrites the values of $FIELDS inside the "COPG-VD" object of $1 and nothing else.
-# Values arrive through the environment (COPG_V_<FIELD>) so no quoting can bite.
 write_fields() {
     target="$1"
     [ -n "$AWK" ] || { log "no awk available"; return 1; }
@@ -245,7 +197,6 @@ write_fields() {
             n = split(keys, K, /[ \t\n]+/)
             for (i = 1; i <= n; i++) if (K[i] != "") want[K[i]] = 1
         }
-        # pass 1: which keys already live inside the object
         NR == FNR {
             if (!inblock && $0 ~ "\"" id "\"[ \t]*:[ \t]*\\{") { inblock = 1; depth = depth_of($0); next }
             if (inblock) {
@@ -255,7 +206,6 @@ write_fields() {
             }
             next
         }
-        # pass 2: rewrite in place, inserting whatever was missing right after the header
         {
             if (!inblock2 && $0 ~ "\"" id "\"[ \t]*:[ \t]*\\{") {
                 print
@@ -282,7 +232,6 @@ write_fields() {
                 print
                 next
             }
-            # outside the object: only the provenance line is refreshed
             if (src != "" && $0 ~ /"Strings extracted from"[ \t]*:[ \t]*"/)
                 sub(/:[ \t]*"[^"]*"/, ": \"" src "\"", $0)
             print
@@ -300,9 +249,6 @@ write_fields() {
     return 0
 }
 
-# Drops the version keys from the "COPG-VD" object of $1 - scoped to that object, so another
-# profile in the same file is untouched. Used by the installer when coming from a version that
-# still wrote them.
 drop_version_fields() {
     target="$1"
     [ -n "$AWK" ] || return 1
@@ -333,7 +279,6 @@ drop_version_fields() {
     return 0
 }
 
-# The installer calls this when upgrading from a version that still wrote the version group.
 migrate_version() {
     rom_sdk=$(rom_prop ro.build.version.sdk)
     rom_cod=$(rom_prop ro.build.version.codename)
@@ -356,21 +301,12 @@ migrate_version() {
     return $mexeu
 }
 
-# --------------------------------------------------------------------- analyze
-# Verdicts: [ok] nothing to say | [warn] incoherent but deliberate or harmless |
-# [RED] this is what breaks the device or silently disables the whole module.
 A_RED=0; A_WARN=0
 say_ok()   { log "  [ok]   $*"; }
-# Deliberate and permanent: reported, never counted. A warning that can never be acted on
-# teaches you to skip the warnings that can.
 say_info() { log "  [info] $*"; }
 say_warn() { log "  [warn] $*"; A_WARN=$((A_WARN + 1)); }
 say_red()  { log "  [RED]  $*"; A_RED=$((A_RED + 1)); }
 
-# The C++ parses this file with a real JSON parser: if it is malformed the module logs one
-# line to logcat and spoofs NOTHING. That failure is invisible from the outside, so it is
-# checked first. This validates the shape the module writes and expects - one "KEY": "value"
-# per line - not arbitrary JSON.
 check_shape() {
     conf="$1"
     opens=$(tr -cd '{' < "$conf" | wc -c); closes=$(tr -cd '}' < "$conf" | wc -c)
@@ -383,16 +319,23 @@ check_shape() {
         say_red "odd number of quotes ($quotes) - the module will not spoof at all"
         return
     fi
-    # Read whole, checked at the end: the comma rule needs to know what comes next, and a
-    # missing comma is the most common way a hand-edited config stops parsing.
     bad=$($AWK '
         { line[NR] = $0 }
         END {
+            inarr = 0
             for (i = 1; i <= NR; i++) {
                 l = line[i]
                 if (l ~ /^[ \t]*$/) continue
+                if (inarr) {
+                    if (l ~ /^[ \t]*"[^"]*"[ \t]*,?[ \t]*$/) continue
+                    if (l ~ /^[ \t]*][ \t]*,?[ \t]*$/) { inarr = 0; continue }
+                    print i ": " l
+                    continue
+                }
                 if (l ~ /^[ \t]*[{}][ \t]*,?[ \t]*$/) continue
                 if (l ~ /^[ \t]*"[^"]*"[ \t]*:[ \t]*\{[ \t]*$/) continue
+                if (l ~ /^[ \t]*"[^"]*"[ \t]*:[ \t]*\[.*][ \t]*,?[ \t]*$/) continue
+                if (l ~ /^[ \t]*"[^"]*"[ \t]*:[ \t]*\[[ \t]*$/) { inarr = 1; continue }
                 if (l !~ /^[ \t]*"[^"]*"[ \t]*:[ \t]*("[^"]*"|true|false|[0-9]+)[ \t]*,?[ \t]*$/) {
                     print i ": " l
                     continue
@@ -453,7 +396,6 @@ check_version() {
     return 0
 }
 
-# The fingerprint is not free text: it carries six of the other fields inside it.
 check_fingerprint() {
     conf="$1"
     fp=$(json_get "$conf" FINGERPRINT)
@@ -473,8 +415,6 @@ check_fingerprint() {
             say_red "FINGERPRINT says $key='$dentro' but the config says '$fora' - one of them was edited alone"
     done
 
-    # Segment 4 is release_or_codename, so it has to match what the device will actually
-    # report - which is what the semaphore lets through, not what the config asks for.
     aplicados=$(effective_version_fields "$conf")
     cod=$(echo "$aplicados" | grep "^CODENAME " | cut -d" " -f2-)
     [ -n "$cod" ] || cod=$(rom_prop ro.build.version.codename)
@@ -528,6 +468,25 @@ check_unknown_keys() {
         say_ok "every key in the object is one the module understands"
 }
 
+check_delete() {
+    conf="$1"
+    dlist=$(tr -d '\n' < "$conf" |
+            grep -o "\"COPG-VD-Delete\"[[:space:]]*:[[:space:]]*\[[^]]*\]" |
+            grep -o '"[^"]*"' | sed 's/"//g' | grep -v '^COPG-VD-Delete$')
+    [ -n "$dlist" ] || { say_ok "no COPG-VD-Delete list"; return; }
+    log "  COPG-VD-Delete removes:$(echo "$dlist" | tr '\n' ' ')"
+    for d in $dlist; do
+        case " $VERSION_FIELDS " in
+            *" $d "*) say_warn "'$d' is a version field - delete never touches the version group (that is the semaphore's job), so this entry does nothing" ; continue ;;
+        esac
+        case " FINGERPRINT $IDENTITY " in
+            *" $d "*) say_red "deletes '$d', an identity field - the device would report no $d at all, which no real device does" ; continue ;;
+        esac
+        grep -q "\"$d\"[[:space:]]*:[[:space:]]*\"" "$conf" &&
+            say_warn "'$d' is both set and deleted - delete wins, the set value is dead weight"
+    done
+}
+
 check_applied() {
     conf="$1"
     fp_conf=$(json_get "$conf" FINGERPRINT)
@@ -555,6 +514,7 @@ analyze() {
     check_fingerprint "$conf"
     check_dates "$conf"
     check_unknown_keys "$conf"
+    check_delete "$conf"
     check_applied "$conf"
     log "$A_RED red, $A_WARN warn"
     if [ "$A_RED" -gt 0 ]; then echo "status: analyze-red"; return 1; fi
@@ -562,7 +522,6 @@ analyze() {
     return 0
 }
 
-# --------------------------------------------------------------------- steps
 existing_targets() {
     found=""
     for path in $CONFIG_PATHS; do
@@ -578,8 +537,6 @@ fetch_remote() {
     return 0
 }
 
-# 0 = something to do, 1 = already current, 2 = other device, 3 = no config,
-# 4 = upstream is older than what is installed file
 compare() {
     TARGETS=$(existing_targets)
     [ -n "$TARGETS" ] || { log "no config file found in: $CONFIG_PATHS"; return 3; }
@@ -602,10 +559,6 @@ compare() {
     log "remote: $REMOTE_ID ($(json_get "$TMP_FILE" SECURITY_PATCH))"
     [ "$LOCAL_ID" = "$REMOTE_ID" ] && [ "$LOCAL_INCREMENTAL" = "$REMOTE_INCREMENTAL" ] && return 1
 
-    # Only ever move forward. "different" is not "newer": the repo can legitimately sit behind
-    # the device (a config updated by hand, a branch not merged yet), and on Android the only
-    # downloader available is busybox wget, which cannot validate certificates - so an older
-    # build arriving over the wire is exactly what a downgrade would look like.
     case "$LOCAL_INCREMENTAL$REMOTE_INCREMENTAL" in
         *[!0-9]*|"") log "non-numeric incremental, refusing to guess which build is newer"
                      return 4 ;;
@@ -641,7 +594,6 @@ apply() {
     done
     [ -n "$written" ] || return 1
 
-    # resetprop and the zygisk spoof must not disagree: re-apply the props right away.
     if [ -e "$MODDIR/.skip.resetprop" ]; then
         log "resetprop is disabled, props not re-applied"
     elif [ -f "$MODDIR/service.sh" ]; then
@@ -654,8 +606,6 @@ apply() {
         [ -n "$pid" ] && kill -9 $pid 2>/dev/null
     done
     log "attestation processes killed: $KILL_PACKAGES"
-    # android.os.Build is written by zygisk when zygote starts, so the Java side of the
-    # spoof only picks the new values up on the next boot.
     log "reboot to apply the new build to android.os.Build"
     return 0
 }
@@ -668,18 +618,16 @@ wait_for_boot() {
 
 already_ran_this_boot() {
     boot_id=$(cat /proc/sys/kernel/random/boot_id 2>/dev/null)
-    [ -n "$boot_id" ] || return 1                       # cannot tell: let it run
+    [ -n "$boot_id" ] || return 1
     [ -f "$STATE_FILE" ] && grep -q "^boot_id=$boot_id$" "$STATE_FILE" 2>/dev/null
 }
 
 mark_ran_this_boot() {
-    # Only after the network answered: a boot that never got wifi must not burn its turn.
     [ -n "$boot_id" ] || return 0
     echo "boot_id=$boot_id" > "$STATE_FILE"
     chmod 0600 "$STATE_FILE" 2>/dev/null
 }
 
-# --------------------------------------------------------------------- main
 MODE="${1:-check}"
 
 case "$MODE" in
@@ -699,10 +647,6 @@ case "$MODE" in
             echo "status: update-available"
             exit 0
         fi
-        # Refuse to write into a file the module cannot read - that would carry the damage
-        # forward and get the blame for it. A red on the version group does NOT block here:
-        # that is a risk the owner armed on purpose, and it has nothing to do with the
-        # fingerprint being refreshed.
         A_RED=0; A_WARN=0
         check_shape "$REFERENCE"
         if [ "$A_RED" -gt 0 ]; then
@@ -719,8 +663,6 @@ case "$MODE" in
         already_ran_this_boot && exit 0
         attempt=1
         while [ "$attempt" -le "$BOOT_RETRY_MAX" ]; do
-            # No connectivity probe: the download itself is the honest test, and wifi can
-            # take minutes to come up after boot_completed.
             if fetch_remote; then
                 mark_ran_this_boot
                 compare

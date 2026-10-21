@@ -1,16 +1,31 @@
 #!/system/bin/sh
+# ======================================================================
+#  COPG-VD  ::  global device spoofer
+#  Spoof your device fingerprint and build - Zygisk, KernelSU/APatch/Magisk.
+#
+#  Copyright (C) 2026  AlirezaParsi & VD171
+#  SPDX-License-Identifier: Apache-2.0
+#  Fork by VD171.
+#
+#  Licensed under the Apache License, Version 2.0; you may obtain a copy at
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Site           : https://vd171.ru
+#  Site           : https://vd.priv8.ru
+#  Source         : https://github.com/VD171/COPG-VD
+#  GitHub         : @VD171 https://github.com/VD171
+#  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+#  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+#  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+#  E-mail         : vd.priv8@pm.me
+# ======================================================================
 
 MODDIR=${0%/*}
 COPG_VD_JSON="/data/adb/COPG-VD.json"
 
-# What the ROM really is. NEVER getprop here: this script is what falsifies those props, so
-# asking the system would be asking our own lie. /build.prop does not exist on these devices.
 ROM_PROP="/system/build.prop"
-# The Android version belongs to the ROM. Telling apps the SDK is newer than the framework
-# really is makes them call APIs that do not exist: Google's apps crash, the device reboots,
-# and it repeats. Softloop, not bootloop - nothing shows up in the boot logs.
 VERSION_KEYS="ANDROID_VERSION SDK_INT SDK_FULL CODENAME"
-# These are derived, never copied from CODENAME (see aplicar_derivados).
+VERSION_GROUP_KEYS="ANDROID_VERSION SDK_INT SDK_FULL CODENAME INCREMENTAL SECURITY_PATCH PREVIEW_SDK SDK_FINGERPRINT FIRST_API_LEVEL"
 DERIVED_RELCOD="ro.build.version.release_or_codename ro.build.version.release_or_preview_display ro.odm.build.version.release_or_codename ro.odm_dlkm.build.version.release_or_codename ro.product.build.version.release_or_codename ro.system.build.version.release_or_codename ro.system_dlkm.build.version.release_or_codename ro.system_ext.build.version.release_or_codename ro.vendor.build.version.release_or_codename ro.vendor_dlkm.build.version.release_or_codename ro.bootimage.build.version.release_or_codename"
 
 rom_prop() {
@@ -23,8 +38,6 @@ spoof_version_policy() {
     esac
 }
 
-# 0 = apply this version field, 1 = refuse. "rom" only lets through what does not exceed the
-# ROM, which in practice means lowering the SDK - raising it is what breaks the device.
 version_allowed() {
     case "$POLICY_VERSION" in
         force) return 0 ;;
@@ -44,9 +57,6 @@ version_allowed() {
     esac
 }
 
-# AOSP: RELEASE_OR_CODENAME = "REL".equals(CODENAME) ? RELEASE : CODENAME. The old mapping
-# copied CODENAME straight in, which published the literal "REL" where the version number
-# belongs - a combination no real device reports.
 aplicar_derivados() {
     codename="$1"; release="$2"
     [ -n "$codename" ] || codename=$(rom_prop ro.build.version.codename)
@@ -76,6 +86,18 @@ propreset() {
     [ -z "$current" ] || [ "$current" = "$value" ] && return 0
     "$bin_resetprop" -n "$name" "$value" && return 0
     return 1
+}
+
+read_delete_list() {
+    printf '%s' "$json_content" | tr -d '\n' \
+      | grep -o '"COPG-VD-Delete"[[:space:]]*:[[:space:]]*\[[^]]*\]' \
+      | grep -o '"[^"]*"' | sed 's/"//g' | grep -v '^COPG-VD-Delete$'
+}
+
+set_empty() {
+    current=$(echo "$getprop_output" | grep "^\[$1\]:" | sed 's/.*: \[\(.*\)\]/\1/')
+    [ -z "$current" ] && return 0
+    "$bin_resetprop" -n "$1" "" 2>/dev/null
 }
 
 get_prop_mapping() {
@@ -109,34 +131,127 @@ MANUFACTURER|ro.product.manufacturer
 MAPPING
 }
 
-# Re-runnable: fingerprint-update.sh calls "service.sh --props-only" right after refreshing the
-# JSON, so resetprop never disagrees with what the zygisk module will read.
+rp_enabled() {
+    [ -e "$MODDIR/.skip.resetprop" ] && return 1
+    printf '%s' "$json_flat" | grep -qE '"enabled"[[:space:]]*:[[:space:]]*false' && return 1
+    return 0
+}
+group_on() {
+    printf '%s' "$GRUPOS" | grep -qE "\"$1\"[[:space:]]*:[[:space:]]*false" && return 1
+    return 0
+}
+propforce() {
+    [ -z "$1" ] && return 0
+    "$bin_resetprop" -n "$1" "$2" 2>/dev/null
+}
+delprop_re() {
+    echo "$getprop_output" | sed -n 's/^\[\([^]]*\)\]:.*/\1/p' | grep -iE "$1" | while read -r p; do
+        [ -n "$p" ] && "$bin_resetprop" --delete "$p" 2>/dev/null
+    done
+}
+
+apply_boot_state() {
+    for p in ro.boot.verifiedbootstate ro.kernel.androidboot.verifiedbootstate ro.boot.realmebootstate; do
+        propreset "$p" green
+    done
+    propreset ro.boot.vbmeta.device_state locked
+    propreset ro.secureboot.lockstate locked
+    propreset ro.boot.flash.locked 1
+    propreset ro.boot.realme.lockstate 1
+    propreset ro.boot.veritymode enforcing
+    propreset ro.boot.veritymode.managed yes
+    propreset sys.oem_unlock_allowed 0
+    propreset ro.oem_unlock_supported 0
+    propreset ro.boot.warranty_bit 0
+    propreset ro.warranty_bit 0
+    propreset ro.is_ever_orange 0
+    propforce vendor.boot.vbmeta.device_state locked
+    propforce vendor.boot.verifiedbootstate green
+}
+apply_selinux_bootmode() {
+    propreset ro.boot.selinux enforcing
+    propreset ro.build.selinux 1
+    propreset persist.selinux.enforcing 1
+    for p in ro.boot.mode ro.bootmode ro.boot.bootmode vendor.bootmode; do
+        propreset "$p" normal
+    done
+}
+apply_adb_usb() {
+    propreset init.svc.adbd stopped
+    propreset ro.adb.secure 1
+    propreset persist.service.adb.enable 0
+    for p in sys.usb.state sys.usb.config persist.sys.usb.config; do
+        propreset "$p" mtp
+    done
+    propreset sys.usb.ffs.ready 0
+}
+apply_anti_emulator() {
+    propreset ro.debuggable 0
+    propreset ro.force.debuggable 0
+    propreset ro.secure 1
+    propreset ro.allow.mock.location 0
+    propreset persist.sys.root_access 0
+    propreset ro.dalvik.vm.native.bridge 0
+    delprop_re '^(qemu\.|ro\.kernel\.qemu)'
+}
+apply_cleanup() {
+    delprop_re 'pihook|pixelprop|lineage|XLua|LSPosed|spoof\.gms'
+    "$bin_resetprop" --compact 2>/dev/null
+}
+
+apply_global_fields() {
+  [ -n "$GLOBAL_FIELDS" ] || return 0
+  GF_DELETE=$(read_delete_list)
+  get_prop_mapping | while IFS='|' read -r json_key props; do
+    [ -z "$json_key" ] && continue
+    case " $GLOBAL_FIELDS " in *" $json_key "*) ;; *) continue ;; esac
+    case " $VERSION_KEYS " in *" $json_key "*) continue ;; esac
+    case " $GF_DELETE " in *" $json_key "*) continue ;; esac
+    echo "$json_content" | grep -q "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" || continue
+    json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | head -n 1 | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
+    [ -n "$json_value" ] || continue
+    old_ifs="$IFS"; IFS='|'
+    for prop in $props; do propreset "$prop" "$json_value"; done
+    IFS="$old_ifs"
+  done
+}
+
 apply_props() {
   json_content=$(cat "$COPG_VD_JSON")
   getprop_output=$(getprop)
   POLICY_VERSION=$(spoof_version_policy)
+  json_flat=$(echo "$json_content" | tr -d '\n')
+  GRUPOS=$(printf '%s' "$json_flat" | grep -o '"grupos"[[:space:]]*:[[:space:]]*{[^}]*}')
+  SCOPE_MODE=$(printf '%s' "$json_flat" | grep -o '"scope_mode"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n 1 | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
+  [ -n "$SCOPE_MODE" ] || SCOPE_MODE=playstore
+  GLOBAL_FIELDS=$(printf '%s' "$json_flat" | grep -o '"global_fields"[[:space:]]*:[[:space:]]*\[[^]]*\]' | sed 's/.*\[//' | grep -o '"[A-Za-z0-9_]*"' | tr -d '"' | tr '\n' ' ')
+  apply_global_fields
 
-  if [ ! -e "$MODDIR/.skip.resetprop" ]; then
+  if rp_enabled; then
+    DELETE_LIST=$(read_delete_list)
     get_prop_mapping | while IFS='|' read -r json_key props; do
       [ -z "$json_key" ] && continue
-      # head -n1: with more than one object in the file this used to return several lines and
-      # feed a multi-line value straight into resetprop.
+      case " $DELETE_LIST " in *" $json_key "*) continue ;; esac
+      case " $VERSION_GROUP_KEYS " in
+        *" $json_key "*) { [ "$SCOPE_MODE" = global ] && group_on version;  } || continue ;;
+        *)               { [ "$SCOPE_MODE" = global ] && group_on identity; } || continue ;;
+      esac
+      present=0; echo "$json_content" | grep -q "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" && present=1
       json_value=$(echo "$json_content" | grep -o "\"$json_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | head -n 1 | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
       case " $VERSION_KEYS " in
         *" $json_key "*)
-            if [ -n "$json_value" ] && ! version_allowed "$json_key" "$json_value"; then
-                json_value=""      # the semaphore said no
-            fi ;;
+            { [ "$present" = 1 ] && version_allowed "$json_key" "$json_value"; } || continue ;;
       esac
       if [ "$json_key" = "MANUFACTURER" ] && [ "$props" = "ro.product.manufacturer" ] &&
          [ -e "$MODDIR/.skip.manufacturer" ]; then
-        continue                   # "Spoof ro.product.manufacturer" is off
+        continue
       fi
       if [ "$json_key" = "TAGS" ]; then
-        json_value="release-keys"
+        json_value="release-keys"; present=1
       elif [ "$json_key" = "TYPE" ]; then
-        json_value="user"
+        json_value="user"; present=1
       fi
+      [ "$present" = 1 ] || continue
       if [ -n "$json_value" ]; then
           if [ "$json_key" = "SECURITY_PATCH" ]; then
               SECURITY_PATCH="/data/adb/tricky_store/security_patch.txt"
@@ -159,32 +274,53 @@ apply_props() {
               propreset ro.build.description "$DESCRIPTION"
               propreset ro.build.flavor "$FLAVOR"
           fi
-          old_ifs="$IFS"
-          IFS='|'
-          for prop in $props; do
-              propreset "$prop" "$json_value"
-          done
-          IFS="$old_ifs"
       fi
+      old_ifs="$IFS"
+      IFS='|'
+      for prop in $props; do
+          if [ -n "$json_value" ]; then propreset "$prop" "$json_value"
+          else set_empty "$prop"; fi
+      done
+      IFS="$old_ifs"
     done
 
-    # Computed once, from whatever ended up effective - not copied from CODENAME.
+    if [ "$SCOPE_MODE" = global ] && group_on version; then
+      fal=$(printf '%s' "$json_flat" | grep -o '"FIRST_API_LEVEL"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n 1 | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
+      case " $DELETE_LIST " in *" FIRST_API_LEVEL "*) fal="" ;; esac
+      if [ -n "$fal" ]; then
+        propforce ro.product.first_api_level "$fal"
+        propforce ro.board.first_api_level "$fal"
+      fi
+    fi
+
+    for d in $DELETE_LIST; do
+      case " $VERSION_KEYS " in *" $d "*) continue ;; esac
+      case "$d" in
+        ro.*|persist.*|sys.*|vendor.*|debug.*) "$bin_resetprop" --delete "$d" 2>/dev/null ;;
+        *) dprops=$(get_prop_mapping | awk -F'|' -v k="$d" '$1==k{for(i=2;i<=NF;i++) print $i}')
+           for p in $dprops; do "$bin_resetprop" --delete "$p" 2>/dev/null; done ;;
+      esac
+    done
+
     cod=$(echo "$json_content" | grep -o "\"CODENAME\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | head -n 1 | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
     rel=$(echo "$json_content" | grep -o "\"ANDROID_VERSION\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | head -n 1 | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
     version_allowed CODENAME "$cod" || cod=""
     version_allowed ANDROID_VERSION "$rel" || rel=""
-    aplicar_derivados "$cod" "$rel"
+    { [ "$SCOPE_MODE" = global ] && group_on version; } && aplicar_derivados "$cod" "$rel"
+
+    group_on boot_state       && apply_boot_state
+    group_on selinux_bootmode && apply_selinux_bootmode
+    group_on adb_usb          && apply_adb_usb
+    group_on anti_emulator    && apply_anti_emulator
+    group_on cleanup          && apply_cleanup
   fi
 }
 
-# Called back by fingerprint-update.sh after it rewrites the JSON.
 if [ "$1" = "--props-only" ]; then
     apply_props
     exit 0
 fi
 
-# The JSON declares the settings; the flag files are the cache this script and the zygisk
-# module read. Sync before applying, so a config edited by hand takes effect this boot.
 [ -f "$MODDIR/fingerprint-update.sh" ] && sh "$MODDIR/fingerprint-update.sh" sync-settings >/dev/null 2>&1
 
 apply_props
@@ -198,8 +334,6 @@ sleep 2
 chmod 0644 "$COPG_VD_JSON"
 chcon u:object_r:system_file:s0 "$COPG_VD_JSON"
 
-# Once per boot, in the background: the download must never hold the boot up, and wifi
-# usually is not up yet at boot_completed (fingerprint-update.sh keeps retrying on its own).
 if [ ! -e "$MODDIR/.skip.autoupdate" ] && [ -f "$MODDIR/fingerprint-update.sh" ]; then
     sh "$MODDIR/fingerprint-update.sh" boot >/dev/null 2>&1 &
 fi
