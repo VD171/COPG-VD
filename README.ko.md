@@ -70,7 +70,8 @@ Zygisk (KernelSU, APatch 또는 Magisk) 위에서 동작하며, 기본적으로 
     "DRM_SECURITY_LEVEL": "L1"
   },
   "motor_drm": false,
-  "global_fields": ["SECURITY_PATCH"]
+  "global_fields": ["SECURITY_PATCH"],
+  "process_overrides": {}
 }
 ```
 문자열은 반드시 큰따옴표만 사용하세요.  
@@ -117,6 +118,15 @@ Magisk 사용자라면 KOW의 KsuWebUI를 사용하세요(https://github.com/KOW
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-see-also -->
+
+## 관련 앱
+
+- **[VD Infos](https://github.com/VD171/VD-Infos)** - 메서드 디버거
+- **[VD Google](https://github.com/VD171/VD-Google)** - 내 Google 서비스를 기기에서 바로 읽기
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 ---
 

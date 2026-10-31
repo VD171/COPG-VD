@@ -261,6 +261,18 @@
                     </div>
                 </div>
 
+                <div class="about-sec" data-i18n="ui_about_sec_see_also">See also</div>
+                <div class="card about-card2">
+                    <div class="about-row link" data-link="https://github.com/VD171/VD-Infos">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"></path></svg></span>
+                        <div class="about-txt"><div class="about-lbl">VD Infos</div><div class="about-val">github.com/VD171/VD-Infos</div></div>
+                    </div>
+                    <div class="about-row link" data-link="https://github.com/VD171/VD-Google">
+                        <span class="about-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"></path></svg></span>
+                        <div class="about-txt"><div class="about-lbl">VD Google</div><div class="about-val">github.com/VD171/VD-Google</div></div>
+                    </div>
+                </div>
+
                 <div class="about-sec" data-i18n="ui_about_sec_contacts">Contacts</div>
                 <div class="card about-card2">
                     <div class="about-row link" data-link="https://vd171.ru">
@@ -311,6 +323,9 @@
             </div>
 
             <div id="devices-tab" class="tab-content">
+                <div class="device-actions">
+                    <button id="fetch-profile-device" class="action-btn tool-btn" data-i18n="ui_tool_fetch">Fetch Pixel profile</button>
+                </div>
                 <div id="device-list" class="device-list"></div>
             </div>
 
@@ -408,25 +423,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="log-section" id="settings-log-section">
-                    <div class="log-header" id="log-header">
-                        <div class="log-title">
-                            <h2 data-i18n="ui_020">Logs</h2>
-                            <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </div>
-                        <div class="log-actions">
-                            <span class="copy-text" id="copy-log" data-i18n="ui_011">Copy</span>
-                            <span class="clear-text" id="clear-log" data-i18n="ui_008">Clear</span>
-                            <span class="logcat-text" id="start-logcat" data-i18n="ui_034">Start Logcat</span>
-                            <span class="logcat-text" id="stop-logcat" style="display: none;" data-i18n="ui_035">Stop Logcat</span>
-                        </div>
-                    </div>
-                    <div class="log-content" id="log-content">
-                        <div id="output"></div>
-                    </div>
-                </div>
             </div>
 
             <div id="tools-tab" class="tab-content">
@@ -438,21 +434,99 @@
                         </div>
                         <label class="switch"><input type="checkbox" id="toggle-autoupdate"><span class="slider"></span></label>
                     </div>
+                    <div class="tool-item toggle-tool">
+                        <div class="tool-text">
+                            <div class="tool-title" data-i18n="ui_tool_verbose">Verbose logging</div>
+                            <div class="tool-desc" data-i18n="ui_toolsd_verbose">Write detailed module logs to logcat for debugging.</div>
+                        </div>
+                        <label class="switch"><input type="checkbox" id="toggle-verbose"><span class="slider"></span></label>
+                    </div>
                     <div class="tool-item">
                         <div class="tool-desc" data-i18n="ui_toolsd_analyze">Check the current profile for inconsistencies and tells.</div>
                         <button id="analyze-config" class="action-btn tool-btn" data-i18n="ui_003">Analyze</button>
+                        <div class="tool-output collapsed" id="out-analyze">
+                            <div class="tool-output-head">
+                                <span class="tool-output-title" data-i18n="ui_020">Logs</span>
+                                <div class="tool-output-actions">
+                                    <span class="copy-text out-copy" data-i18n="ui_011">Copy</span>
+                                    <span class="clear-text out-clear" data-i18n="ui_008">Clear</span>
+                                </div>
+                                <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="tool-output-body"><div class="output" id="output-analyze"></div></div>
+                        </div>
                     </div>
                     <div class="tool-item">
                         <div class="tool-desc" data-i18n="ui_toolsd_checkupdate">See whether a newer matching factory image is available.</div>
                         <button id="check-update" class="action-btn tool-btn" data-i18n="ui_007">Check Update</button>
+                        <div class="tool-output collapsed" id="out-check">
+                            <div class="tool-output-head">
+                                <span class="tool-output-title" data-i18n="ui_020">Logs</span>
+                                <div class="tool-output-actions">
+                                    <span class="copy-text out-copy" data-i18n="ui_011">Copy</span>
+                                    <span class="clear-text out-clear" data-i18n="ui_008">Clear</span>
+                                </div>
+                                <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="tool-output-body"><div class="output" id="output-check"></div></div>
+                        </div>
                     </div>
                     <div class="tool-item">
                         <div class="tool-desc" data-i18n="ui_toolsd_updatenow">Fetch and apply the newest matching profile values now.</div>
                         <button id="apply-update" class="action-btn tool-btn" data-i18n="ui_040">Update Now</button>
+                        <div class="tool-output collapsed" id="out-apply">
+                            <div class="tool-output-head">
+                                <span class="tool-output-title" data-i18n="ui_020">Logs</span>
+                                <div class="tool-output-actions">
+                                    <span class="copy-text out-copy" data-i18n="ui_011">Copy</span>
+                                    <span class="clear-text out-clear" data-i18n="ui_008">Clear</span>
+                                </div>
+                                <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="tool-output-body"><div class="output" id="output-apply"></div></div>
+                        </div>
+                    </div>
+                    <div class="tool-item">
+                        <div class="tool-desc" data-i18n="ui_toolsd_fetch">Download a Pixel device profile and apply it to the config.</div>
+                        <button id="fetch-profile" class="action-btn tool-btn" data-i18n="ui_tool_fetch">Fetch Pixel profile</button>
                     </div>
                     <div class="tool-item">
                         <div class="tool-desc" data-i18n="ui_toolsd_backup">Save the configuration to a file, or restore it from one.</div>
                         <button id="backup-manager" class="action-btn tool-btn" data-i18n="ui_005">Backup/Restore</button>
+                        <div class="tool-output collapsed" id="out-backup">
+                            <div class="tool-output-head">
+                                <span class="tool-output-title" data-i18n="ui_020">Logs</span>
+                                <div class="tool-output-actions">
+                                    <span class="copy-text out-copy" data-i18n="ui_011">Copy</span>
+                                    <span class="clear-text out-clear" data-i18n="ui_008">Clear</span>
+                                </div>
+                                <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="tool-output-body"><div class="output" id="output-backup"></div></div>
+                        </div>
+                    </div>
+                    <div class="tool-item">
+                        <div class="tool-desc" data-i18n="ui_toolsd_logcat">Stream the module's live log; stopping prompts to save it.</div>
+                        <button id="start-logcat" class="action-btn tool-btn" data-i18n="ui_034">Start Logcat</button>
+                        <button id="stop-logcat" class="action-btn tool-btn" style="display: none;" data-i18n="ui_035">Stop Logcat</button>
+                        <div class="tool-output collapsed" id="out-logcat">
+                            <div class="tool-output-head">
+                                <span class="tool-output-title" data-i18n="ui_020">Logs</span>
+                                <div class="tool-output-actions">
+                                    <span class="copy-text out-copy" data-i18n="ui_011">Copy</span>
+                                    <span class="clear-text out-clear" data-i18n="ui_008">Clear</span>
+                                </div>
+                                <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="tool-output-body"><div class="output" id="output-logcat"></div></div>
+                        </div>
+                    </div>
+                    <div class="tool-item" id="reboot-tool">
+                        <div class="tool-desc" data-i18n="ui_toolsd_reboot">A changed profile applies to an app the next time it starts. Apps already running keep the old one until you close and reopen them.</div>
+                        <div class="reboot-pending" id="reboot-pending" style="display: none;" data-i18n="ui_reboot_pending">Profile changed. Restart Play Services to apply it to Play Integrity now; reopen other apps to update them.</div>
+                        <button id="restart-gms" class="action-btn tool-btn" data-i18n="ui_restart_gms_btn">Restart Play Services</button>
+                        <div class="tool-hint" data-i18n="ui_restart_gms_hint">Applies the profile to Play Integrity now, no reboot. Other apps update when you close and reopen them. A full reboot applies it everywhere at once.</div>
+                        <button id="reboot-device" class="action-btn tool-btn secondary-btn" data-i18n="ui_reboot_btn">Full reboot</button>
                     </div>
                 </div>
             </div>
@@ -646,6 +720,29 @@
                             </svg>
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup" id="fetch-popup">
+        <div class="popup-content">
+            <h3 data-i18n="ui_fetch_title">Fetch Pixel profile</h3>
+            <div class="popup-body">
+                <div class="fetch-source">Source: github.com/VictorGabriel7Dev/build.prop</div>
+                <div class="form-group">
+                    <label for="fetch-device" data-i18n="ui_fetch_device">Device</label>
+                    <select id="fetch-device" class="version-select"></select>
+                </div>
+                <div class="form-group">
+                    <label for="fetch-channel" data-i18n="ui_fetch_channel">Channel</label>
+                    <select id="fetch-channel" class="version-select"></select>
+                </div>
+                <div class="fetch-status output" id="fetch-status"></div>
+                <div class="button-group">
+                    <button id="fetch-cancel" class="action-btn cancel-btn" data-i18n="ui_009">Cancel</button>
+                    <button id="fetch-apply" class="action-btn" data-i18n="ui_fetch_btn">Fetch</button>
+                    <button id="fetch-restart" class="action-btn" data-i18n="ui_restart_gms_btn" style="display:none">Restart Play Services</button>
                 </div>
             </div>
         </div>

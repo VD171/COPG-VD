@@ -1,7 +1,7 @@
 id=COPG-VD
 name=COPG-VD
-version=v6.6.5-vd
-versionCode=60605
+version=v6.9.7-vd
+versionCode=60907
 author=fork by VD171
 description=Spoof your device.
 minMagisk=20.4

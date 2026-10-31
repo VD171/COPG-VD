@@ -70,7 +70,8 @@ COPG-VD هو spoofer للجهاز: يعيد كتابة بصمة الجهاز (fi
     "DRM_SECURITY_LEVEL": "L1"
   },
   "motor_drm": false,
-  "global_fields": ["SECURITY_PATCH"]
+  "global_fields": ["SECURITY_PATCH"],
+  "process_overrides": {}
 }
 ```
 تأكد من استخدام الـ strings بين علامات اقتباس مزدوجة فقط.  
@@ -117,6 +118,15 @@ WebUI اختياري - يمكن تعديل كل شيء في إعداد JSON مب
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-see-also -->
+
+## انظر أيضًا
+
+- **[VD Infos](https://github.com/VD171/VD-Infos)** - مُنقّح الطرق
+- **[VD Google](https://github.com/VD171/VD-Google)** - خدمات Google الخاصة بك، تُقرأ على جهازك
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 ---
 

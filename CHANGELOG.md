@@ -1,5 +1,28 @@
 # Changelog
 
+## v6.7.0-vd .. v6.9.7-vd
+
+Spoofing:
+- Per-process field overrides: a field can take a different value in a specific process through `process_overrides` (a map of process name to field/value), layered on top of the profile. Scoped modes only, per process; the global version safeguards still apply.
+- A changed profile now reaches a newly started or reopened target app without a reboot: the module re-reads the config per targeted process - while the process is still privileged, and only when the file actually changed - instead of once at boot.
+- Boot-state group now also covers `ro.crypto.state` and the Samsung `fmp_config`/`dp_fw_check` properties when the device has them; cleanup normalizes build type/tags to a release build and removes custom-ROM version markers.
+- The attestation security-patch file is written in the keyed per-partition format from the profile's security patch.
+
+Profiles:
+- New "Fetch Pixel profile" button: pick a Pixel device and a release channel (canary / beta / release) and apply its latest profile in one step, from [github.com/VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop).
+- The profile download (this fetch and the on-device JSON auto-update) uses the module's own bundled downloader, not a `curl`/`wget` from `PATH` that may belong to another app and fail to run.
+
+Applying changes:
+- A "Restart Play Services" action applies a changed profile to Play Integrity on its next attestation, with no reboot; other apps apply it when closed and reopened. Tools shows when changes are pending and still offers a full reboot.
+
+WebUI:
+- Each Tools action (Analyze, Check Update, Update Now, Backup/Restore, Logcat) has its own collapsible output panel under its button, instead of one shared log window; Logcat moved to Tools with start/stop controls. Short status messages show as a brief toast.
+- Optional verbose-logging toggle for detailed module logs.
+- The back button returns to the previous tab (closing an open dialog first) instead of always jumping to the About screen.
+- All 21 languages brought fully up to date with every string added across v6.
+
+_A changed profile reaches a process the next time it starts: Play Services and other apps pick it up when restarted or reopened, so a full reboot is no longer required to apply one._
+
 ## v6.0.0-vd .. v6.6.5-vd
 
 Spoofing:
