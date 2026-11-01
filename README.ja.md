@@ -70,7 +70,8 @@ Zygisk (KernelSU、APatch または Magisk) 上で動作し、デフォルトで
     "DRM_SECURITY_LEVEL": "L1"
   },
   "motor_drm": false,
-  "global_fields": ["SECURITY_PATCH"]
+  "global_fields": ["SECURITY_PATCH"],
+  "process_overrides": {}
 }
 ```
 文字列は必ず二重引用符で囲んで使用してください。  
@@ -117,6 +118,15 @@ Magisk ユーザーの場合は、KOW による KsuWebUI を使用してくだ�
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-see-also -->
+
+## 関連アプリ
+
+- **[VD Infos](https://github.com/VD171/VD-Infos)** - メソッドデバッガー
+- **[VD Google](https://github.com/VD171/VD-Google)** - あなたの Google サービスを端末上で読み取る
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 ---
 

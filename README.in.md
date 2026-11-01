@@ -70,7 +70,8 @@ Daftar `"global_fields": [ ... ]` menerapkan field Build yang disebutkan ke selu
     "DRM_SECURITY_LEVEL": "L1"
   },
   "motor_drm": false,
-  "global_fields": ["SECURITY_PATCH"]
+  "global_fields": ["SECURITY_PATCH"],
+  "process_overrides": {}
 }
 ```
 Pastikan untuk menggunakan string hanya dalam tanda kutip ganda.  
@@ -114,6 +115,15 @@ Jika Anda pengguna Magisk, gunakan KsuWebUI oleh KOW (https://github.com/KOWX712
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-see-also -->
+
+## Lihat juga
+
+- **[VD Infos](https://github.com/VD171/VD-Infos)** - Debugger metode
+- **[VD Google](https://github.com/VD171/VD-Google)** - Layanan Google Anda, dibaca di perangkat
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 ---
 

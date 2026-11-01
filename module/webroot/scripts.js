@@ -24,6 +24,9 @@ let configKeyOrder = [];
 let currentConfig = {};
 let editingDevice = null;
 let logcatRunning = false;
+let activeOutput = null;
+let logcatOutput = null;
+let navFromPop = false;
 
 const CONFIG_FILE = "/data/adb/COPG-VD.json";
 const MODULE_ID = 'COPG-VD';
@@ -476,11 +479,11 @@ function showCopyFeedback(element) {
 }
 
 async function saveLogToFile() {
-    const output = document.getElementById('output');
-    const logContent = output.innerText || output.textContent;
-    
+    const output = logcatOutput || document.getElementById('output-logcat');
+    const logContent = output ? (output.innerText || output.textContent) : '';
+
     if (!logContent.trim()) {
-        appendToOutput(t('msg_094'), 'warning');
+        appendToOutput(t('msg_094'), 'warning', logcatOutput);
         return false;
     }
 
@@ -488,10 +491,10 @@ async function saveLogToFile() {
         await execCommand(`mkdir -p /storage/emulated/0/Download/COPG-VD/LOGS`);
         let finalFilename = document.getElementById('save-log-popup').dataset.filename || await generateLogFilename();
         await execCommand(`echo ${shq(logContent)} > ${shq(`/storage/emulated/0/Download/COPG-VD/LOGS/${finalFilename}`)}`);
-        appendToOutput(t('msg_088', {"finalFilename": finalFilename}), 'success');
+        appendToOutput(t('msg_088', {"finalFilename": finalFilename}), 'success', logcatOutput);
         return true;
     } catch (error) {
-        appendToOutput(t('msg_078', {"error": error}), 'error');
+        appendToOutput(t('msg_078', {"error": error}), 'error', logcatOutput);
         return false;
     }
 }
@@ -598,6 +601,7 @@ async function backupFile(filename) {
 }
 
 function showBackupPopup() {
+    activeOutput = openToolOutput('output-backup', false);
     showPopup('backup-popup');
 }
 
@@ -610,17 +614,16 @@ async function startLogcat(e) {
     if (logcatRunning) return;
 
     try {
-        appendToOutput(t('msg_100'), 'info');
+        logcatOutput = openToolOutput('output-logcat');
+        appendToOutput(t('msg_100'), 'info', logcatOutput);
         logcatRunning = true;
         document.getElementById('start-logcat').style.display = 'none';
-        document.getElementById('stop-logcat').style.display = 'inline-block';
-        document.getElementById('log-content').classList.remove('collapsed');
-        document.querySelector('#settings-log-section .toggle-icon').classList.add('expanded');
-        
+        document.getElementById('stop-logcat').style.display = '';
+
         await execCommand("su -c 'logcat -c'");
         readLogcat();
     } catch (error) {
-        appendToOutput(t('msg_080', {"error": error}), 'error');
+        appendToOutput(t('msg_080', {"error": error}), 'error', logcatOutput);
         stopLogcat();
     }
 }
@@ -637,17 +640,17 @@ async function readLogcat() {
                     let logType = 'info';
                     if (line.includes(' E ') || line.includes('ERROR')) logType = 'error';
                     else if (line.includes(' W ') || line.includes('WARN')) logType = 'warning';
-                    appendToOutput(line.trim(), logType);
+                    appendToOutput(line.trim(), logType, logcatOutput);
                 }
             });
         }
-        
+
         await execCommand("su -c 'logcat -c'");
         if (logcatRunning) {
             setTimeout(readLogcat, 10);
         }
     } catch (error) {
-        appendToOutput(t('msg_089', {"error": error}), 'error');
+        appendToOutput(t('msg_089', {"error": error}), 'error', logcatOutput);
         stopLogcat();
     }
 }
@@ -659,11 +662,11 @@ function stopLogcat(e) {
     logcatRunning = false;
     try {
         execCommand("su -c 'logcat -c'").catch(() => {});
-        appendToOutput(t('msg_090'), 'info');
+        appendToOutput(t('msg_090'), 'info', logcatOutput);
     } catch (error) {
-        appendToOutput(t('msg_062', {"error": error}), 'error');
+        appendToOutput(t('msg_062', {"error": error}), 'error', logcatOutput);
     } finally {
-        document.getElementById('start-logcat').style.display = 'inline-block';
+        document.getElementById('start-logcat').style.display = '';
         document.getElementById('stop-logcat').style.display = 'none';
         showSaveLogPopup();
     }
@@ -688,11 +691,11 @@ function toggleTheme() {
     localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
 }
 
-function appendToOutput(content, type = 'info') {
-    const output = document.getElementById('output');
-    const logContent = document.getElementById('log-content');
+function appendToOutput(content, type = 'info', target) {
+    const output = target || activeOutput;
+    if (!output) { showToast(content, type); return; }
     const logEntry = document.createElement('div');
-    
+
     let colorClass = 'log-info';
     let iconClass = 'icon-info';
     
@@ -737,9 +740,39 @@ function appendToOutput(content, type = 'info') {
     logEntry.appendChild(document.createTextNode(
         ` ${new Date().toLocaleTimeString()} - ${content.replace(/^\[.\]\s*/i, '')}`));
     output.appendChild(logEntry);
-    if (!logContent.classList.contains('collapsed')) {
-        logEntry.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    const body = output.closest('.tool-output-body');
+    if (body) body.scrollTop = body.scrollHeight;
+}
+
+function openToolOutput(bodyId, clear = true) {
+    const output = document.getElementById(bodyId);
+    if (!output) return null;
+    if (clear) output.innerHTML = '';
+    const panel = output.closest('.tool-output');
+    if (panel) {
+        panel.classList.remove('collapsed');
+        const icon = panel.querySelector('.toggle-icon');
+        if (icon) icon.classList.add('expanded');
     }
+    return output;
+}
+
+function showToast(content, type = 'info') {
+    let host = document.getElementById('toast-host');
+    if (!host) {
+        host = document.createElement('div');
+        host.id = 'toast-host';
+        document.body.appendChild(host);
+    }
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = content.replace(/^\[.\]\s*/i, '');
+    host.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 250);
+    }, 3600);
 }
 
 async function loadVersion() {
@@ -1347,8 +1380,173 @@ function loadScopeSettings() {
             const el = document.getElementById('grp-' + g);
             if (el) el.checked = grupos[g] !== false;
         });
+        const vb = document.getElementById('toggle-verbose');
+        if (vb) vb.checked = currentConfig['verbose_logs'] === true;
         fillIdentityPlate();
     } catch (e) {}
+}
+
+async function setVerbose(enabled) {
+    currentConfig['verbose_logs'] = enabled;
+    if (!configKeyOrder.includes('verbose_logs')) configKeyOrder.push('verbose_logs');
+    await saveConfig();
+}
+
+async function checkRebootPending() {
+    const el = document.getElementById('reboot-pending');
+    if (!el) return;
+    try {
+        const out = await execCommand(
+            'cfg=$(stat -c %Y ' + shq(CONFIG_FILE) + ' 2>/dev/null || echo 0); ' +
+            'up=$(cut -d. -f1 /proc/uptime 2>/dev/null || echo 0); ' +
+            'now=$(date +%s 2>/dev/null || echo 0); ' +
+            'boot=$((now - up)); [ "$cfg" -gt "$boot" ] && echo pending || echo clean');
+        el.style.display = out.trim() === 'pending' ? '' : 'none';
+    } catch (e) { el.style.display = 'none'; }
+}
+
+async function rebootDevice() {
+    try {
+        await execCommand('(sync; sleep 1; svc power reboot || setprop sys.powerctl reboot || reboot) >/dev/null 2>&1 &');
+        appendToOutput(t('msg_reboot'), 'info');
+    } catch (e) {
+        appendToOutput(t('msg_reboot_fail', {"error": e}), 'error');
+    }
+}
+
+async function restartPlayServices() {
+    try {
+        await execCommand("for p in $(pgrep -f com.google.android.gms.unstable 2>/dev/null); do kill \"$p\" 2>/dev/null; done; true");
+        appendToOutput(t('msg_restart_gms'), 'info');
+    } catch (e) {
+        appendToOutput(t('msg_reboot_fail', {"error": e}), 'error');
+    }
+}
+
+let fetchIndex = null;
+const FETCH_SCRIPT = '/data/adb/modules/COPG-VD/fingerprint-update.sh';
+const FETCH_CHANNEL_ORDER = ['canary', 'beta', 'release'];
+
+function fetchStatus(msg, type) {
+    const el = document.getElementById('fetch-status');
+    if (!el) return;
+    const d = document.createElement('div');
+    d.className = type === 'error' ? 'log-error' : (type === 'success' ? 'log-success' : 'log-info');
+    d.textContent = msg;
+    el.appendChild(d);
+    el.scrollTop = el.scrollHeight;
+}
+
+function currentChannelFor(dev) {
+    if (!fetchIndex || !fetchIndex.devices[dev]) return null;
+    const p = currentConfig['COPG-VD'] || {};
+    const chans = fetchIndex.devices[dev].channels || {};
+    const inc = p.INCREMENTAL, id = p.ID || p.DISPLAY;
+    for (const c in chans) {
+        if (inc && String(chans[c].incremental) === String(inc)) return c;
+    }
+    for (const c in chans) {
+        if (id && chans[c].build && String(chans[c].build) === String(id)) return c;
+    }
+    return null;
+}
+
+function populateFetchChannels(dev) {
+    const sel = document.getElementById('fetch-channel');
+    if (!sel || !fetchIndex || !fetchIndex.devices[dev]) return;
+    sel.innerHTML = '';
+    const ch = fetchIndex.devices[dev].channels || {};
+    Object.keys(ch).sort((a, b) => {
+        const ia = FETCH_CHANNEL_ORDER.indexOf(a), ib = FETCH_CHANNEL_ORDER.indexOf(b);
+        return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b);
+    }).forEach((c) => {
+        const o = document.createElement('option');
+        o.value = c;
+        o.textContent = c + (ch[c] && ch[c].security_patch ? ' (' + ch[c].security_patch + ')' : '');
+        sel.appendChild(o);
+    });
+}
+
+async function openFetchPopup() {
+    const devSel = document.getElementById('fetch-device');
+    const chSel = document.getElementById('fetch-channel');
+    const st = document.getElementById('fetch-status');
+    if (st) st.innerHTML = '';
+    if (devSel) devSel.innerHTML = '';
+    if (chSel) chSel.innerHTML = '';
+    const apBtn = document.getElementById('fetch-apply');
+    const rsBtn = document.getElementById('fetch-restart');
+    if (apBtn) apBtn.style.display = '';
+    if (rsBtn) rsBtn.style.display = 'none';
+    showPopup('fetch-popup');
+    fetchStatus(t('msg_fetch_loading'), 'info');
+    let out;
+    try {
+        out = await execCommand(`sh ${FETCH_SCRIPT} fetch-index`);
+    } catch (e) {
+        fetchStatus(t('msg_fetch_fail', {"error": e}), 'error');
+        return;
+    }
+    let data;
+    try { data = JSON.parse(out); } catch (e) { data = null; }
+    if (!data || !data.devices) {
+        const hint = (out || '').trim().replace(/^status:\s*/, '').slice(0, 120);
+        fetchStatus(t('msg_fetch_noindex') + (hint ? ' (' + hint + ')' : ''), 'error');
+        return;
+    }
+    fetchIndex = data;
+    const devs = Object.keys(data.devices).sort();
+    devs.forEach((d) => {
+        const o = document.createElement('option');
+        o.value = d;
+        o.textContent = data.devices[d].model ? data.devices[d].model + ' (' + d + ')' : d;
+        devSel.appendChild(o);
+    });
+    const curDev = (currentConfig['COPG-VD'] || {}).DEVICE || '';
+    const preDev = data.devices[curDev] ? curDev : devs[0];
+    devSel.value = preDev;
+    populateFetchChannels(preDev);
+    const preChan = currentChannelFor(preDev);
+    if (preChan) chSel.value = preChan;
+    if (st) st.innerHTML = '';
+}
+
+async function doFetchApply() {
+    if (!fetchIndex) return;
+    const dev = document.getElementById('fetch-device').value;
+    const chan = document.getElementById('fetch-channel').value;
+    if (!dev || !chan) return;
+    const meta = ((fetchIndex.devices[dev] || {}).channels || {})[chan] || {};
+    const rel = meta.latest;
+    if (!rel) { fetchStatus(t('msg_fetch_fail', {"error": 'no path'}), 'error'); return; }
+    const btn = document.getElementById('fetch-apply');
+    if (btn) btn.classList.add('loading');
+    fetchStatus(t('msg_fetch_applying') + ' ' + rel, 'info');
+    let out;
+    try {
+        out = await execCommand(`sh ${FETCH_SCRIPT} fetch ${shq(rel)}`);
+    } catch (e) {
+        if (btn) btn.classList.remove('loading');
+        fetchStatus(t('msg_fetch_fail', {"error": e}), 'error');
+        return;
+    }
+    if (btn) btn.classList.remove('loading');
+    const status = (out.split('\n').map((l) => l.trim()).find((l) => l.startsWith('status:')) || '')
+        .replace('status:', '').trim();
+    if (status === 'fetched') {
+        await loadConfig();
+        renderDeviceList();
+        fillIdentityPlate();
+        checkRebootPending();
+        fetchStatus(t('msg_fetch_ok'), 'success');
+        appendToOutput(t('msg_fetch_ok'), 'success');
+        const ap = document.getElementById('fetch-apply');
+        const rs = document.getElementById('fetch-restart');
+        if (ap) ap.style.display = 'none';
+        if (rs) rs.style.display = '';
+    } else {
+        fetchStatus(t('msg_fetch_fail', {"error": status || (out || '').trim().slice(0, 120)}), 'error');
+    }
 }
 
 function fillIdentityPlate() {
@@ -1586,23 +1784,69 @@ function hidePopup(popupId, callback) {
     }
 }
 
-function toggleLogSection(e) {
-    e.stopPropagation();
-    const logContent = document.getElementById('log-content');
-    const toggleIcon = document.querySelector('#settings-log-section .toggle-icon');
-    logContent.classList.toggle('collapsed');
-    toggleIcon.classList.toggle('expanded');
-    if (!logContent.classList.contains('collapsed')) {
-        const output = document.getElementById('output');
-        const lastEntry = output.lastElementChild;
-        if (lastEntry) lastEntry.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }
+function setupToolOutputPanels() {
+    const tools = document.getElementById('tools-tab');
+    if (!tools) return;
+    tools.addEventListener('click', (e) => {
+        const copyBtn = e.target.closest('.out-copy');
+        if (copyBtn) {
+            e.stopPropagation();
+            const body = copyBtn.closest('.tool-output').querySelector('.output');
+            copyToClipboard(body ? (body.innerText || body.textContent) : '');
+            return;
+        }
+        const clearBtn = e.target.closest('.out-clear');
+        if (clearBtn) {
+            e.stopPropagation();
+            const body = clearBtn.closest('.tool-output').querySelector('.output');
+            if (body) body.innerHTML = '';
+            return;
+        }
+        const head = e.target.closest('.tool-output-head');
+        if (head) {
+            const panel = head.closest('.tool-output');
+            panel.classList.toggle('collapsed');
+            const icon = panel.querySelector('.toggle-icon');
+            if (icon) icon.classList.toggle('expanded');
+        }
+    });
+}
+
+function visibleOverlays() {
+    return Array.from(document.querySelectorAll('.modal, .popup')).filter((el) => {
+        try { return getComputedStyle(el).display !== 'none'; } catch (e) { return false; }
+    });
+}
+
+function currentTabId() {
+    const tabs = ['about', 'devices', 'spoofing', 'system', 'tools'];
+    return tabs.find((t) => document.getElementById(`tab-${t}`)?.classList.contains('active'))
+        || tabs.find((t) => document.getElementById(`${t}-tab`)?.classList.contains('active'))
+        || 'about';
+}
+
+function setupBackNav() {
+    try { history.replaceState({ tab: currentTabId() }, ''); } catch (e) {}
+    window.addEventListener('popstate', (e) => {
+        const open = visibleOverlays();
+        if (open.length) {
+            const el = open[open.length - 1];
+            if (el.classList.contains('modal')) closeModal(el.id); else closePopup(el.id);
+            try { history.pushState({ tab: currentTabId() }, ''); } catch (err) {}
+            return;
+        }
+        const target = (e.state && e.state.tab) || 'about';
+        navFromPop = true;
+        switchTab(target);
+        navFromPop = false;
+    });
 }
 
 function switchTab(tabId, direction = null) {
     const tabs = ['about', 'devices', 'spoofing', 'system', 'tools'];
     const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`)?.classList.contains('active'));
     if (currentTab === tabId) return;
+    activeOutput = null;
 
     const currentTabElement = document.getElementById(`${currentTab}-tab`);
     const newTabElement = document.getElementById(`${tabId}-tab`);
@@ -1634,35 +1878,16 @@ function switchTab(tabId, direction = null) {
         if (tabId === 'devices') {
             setTimeout(() => renderDeviceList(), 100);
         }
+        if (tabId === 'tools') {
+            checkRebootPending();
+        }
     });
 
     document.querySelectorAll('.tab-nav .tab-btn.active:not(#info-popup .tab-btn)').forEach(btn => btn.classList.remove('active'))
     document.getElementById(`tab-${tabId}`)?.classList.add('active');
     const sb = document.getElementById('device-savebar');
     if (sb) sb.style.display = (tabId === 'devices') ? '' : 'none';
-}
-
-function copyLogContent() {
-    const output = document.getElementById('output');
-    const logContent = output.innerText || output.textContent;
-    
-    const textarea = document.createElement('textarea');
-    textarea.value = logContent;
-    document.body.appendChild(textarea);
-    textarea.select();
-    
-    try {
-        const successful = document.execCommand('copy');
-        if (successful) {
-            appendToOutput(t('msg_091'), 'success');
-        } else {
-            appendToOutput(t('msg_069'), 'error');
-        }
-    } catch (err) {
-        appendToOutput(t('msg_059') + err, 'error');
-    }
-    
-    document.body.removeChild(textarea);
+    if (!navFromPop) { try { history.pushState({ tab: tabId }, ''); } catch (e) {} }
 }
 
 function applyEventListeners() {
@@ -1707,8 +1932,8 @@ function applyEventListeners() {
 
     document.getElementById('analyze-config').addEventListener('click', async (e) => {
         e.target.classList.add('loading');
-        await runUpdater('analyze');
-        e.target.classList.remove('loading');
+        activeOutput = openToolOutput('output-analyze');
+        try { await runUpdater('analyze'); } finally { activeOutput = null; e.target.classList.remove('loading'); }
     });
     
     document.getElementById('toggle-autoupdate').addEventListener('click', async (e) => {
@@ -1725,14 +1950,14 @@ function applyEventListeners() {
 
     document.getElementById('check-update').addEventListener('click', async (e) => {
         e.target.classList.add('loading');
-        await runUpdater('check');
-        e.target.classList.remove('loading');
+        activeOutput = openToolOutput('output-check');
+        try { await runUpdater('check'); } finally { activeOutput = null; e.target.classList.remove('loading'); }
     });
 
     document.getElementById('apply-update').addEventListener('click', async (e) => {
         e.target.classList.add('loading');
-        await runUpdater('apply');
-        e.target.classList.remove('loading');
+        activeOutput = openToolOutput('output-apply');
+        try { await runUpdater('apply'); } finally { activeOutput = null; e.target.classList.remove('loading'); }
     });
 
     setupBackupListeners();
@@ -1757,17 +1982,27 @@ function applyEventListeners() {
     
     document.getElementById('start-logcat').addEventListener('click', startLogcat);
     document.getElementById('stop-logcat').addEventListener('click', stopLogcat);
-    document.getElementById('log-header').addEventListener('click', toggleLogSection);
-    document.getElementById('clear-log').addEventListener('click', (e) => {
-        e.stopPropagation();
-        const output = document.getElementById('output');
-        output.innerHTML = '';
-        appendToOutput(t('msg_086'), 'success');
+    setupToolOutputPanels();
+    document.getElementById('toggle-verbose').addEventListener('click', async (e) => {
+        const isChecked = e.target.checked;
+        try {
+            await setVerbose(isChecked);
+            appendToOutput(isChecked ? 'Verbose logging enabled' : 'Verbose logging disabled', isChecked ? 'success' : 'info');
+        } catch (error) {
+            appendToOutput(t('msg_082', {"error": error}), 'error');
+            e.target.checked = !isChecked;
+        }
     });
-    document.getElementById('copy-log').addEventListener('click', (e) => {
-        e.stopPropagation();
-        copyLogContent();
-    });
+    document.getElementById('reboot-device').addEventListener('click', rebootDevice);
+    const rfw = document.getElementById('restart-gms');
+    if (rfw) rfw.addEventListener('click', restartPlayServices);
+    document.getElementById('fetch-profile').addEventListener('click', openFetchPopup);
+    const fpDev = document.getElementById('fetch-profile-device');
+    if (fpDev) fpDev.addEventListener('click', openFetchPopup);
+    document.getElementById('fetch-apply').addEventListener('click', doFetchApply);
+    const fRestart = document.getElementById('fetch-restart');
+    if (fRestart) fRestart.addEventListener('click', () => { closePopup('fetch-popup'); restartPlayServices(); });
+    document.getElementById('fetch-device').addEventListener('change', (e) => populateFetchChannels(e.target.value));
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 
     document.getElementById('tab-about').addEventListener('click', () => switchTab('about'));
@@ -1778,6 +2013,7 @@ function applyEventListeners() {
     });
     document.getElementById('tab-system').addEventListener('click', () => switchTab('system'));
     document.getElementById('tab-tools').addEventListener('click', () => switchTab('tools'));
+    setupBackNav();
 
     document.querySelectorAll('.close-btn, .cancel-btn').forEach(btn => btn.addEventListener('click', () => {
         const modal = btn.closest('.modal');

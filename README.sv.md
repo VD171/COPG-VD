@@ -70,7 +70,8 @@ En `"global_fields": [ ... ]`-lista tillämpar de angivna Build-fälten enhetsö
     "DRM_SECURITY_LEVEL": "L1"
   },
   "motor_drm": false,
-  "global_fields": ["SECURITY_PATCH"]
+  "global_fields": ["SECURITY_PATCH"],
+  "process_overrides": {}
 }
 ```
 Se till att endast använda strängar inom dubbla citattecken.  
@@ -114,6 +115,15 @@ Om du är Magisk-användare, använd KsuWebUI av KOW (https://github.com/KOWX712
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-see-also -->
+
+## Se även
+
+- **[VD Infos](https://github.com/VD171/VD-Infos)** - Metod-debugger
+- **[VD Google](https://github.com/VD171/VD-Google)** - Dina Google-tjänster, lästa på din enhet
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 ---
 

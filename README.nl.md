@@ -70,7 +70,8 @@ Een lijst `"global_fields": [ ... ]` past de genoemde Build-velden apparaatbreed
     "DRM_SECURITY_LEVEL": "L1"
   },
   "motor_drm": false,
-  "global_fields": ["SECURITY_PATCH"]
+  "global_fields": ["SECURITY_PATCH"],
+  "process_overrides": {}
 }
 ```
 Zorg ervoor dat je strings alleen tussen dubbele aanhalingstekens gebruikt.  
@@ -117,6 +118,15 @@ Als je een Magisk-gebruiker bent, gebruik dan KsuWebUI van KOW (https://github.c
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-see-also -->
+
+## Zie ook
+
+- **[VD Infos](https://github.com/VD171/VD-Infos)** - Methode-debugger
+- **[VD Google](https://github.com/VD171/VD-Google)** - Je Google-diensten, gelezen op je toestel
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 ---
 

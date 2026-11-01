@@ -21,7 +21,7 @@
 
 ENABLE_GPHOTO_SPOOF=false
 CONFIG_FILE="/data/adb/COPG-VD.json"
-CONFLICT_MODULES="COPG playintegrity playintegrityfix integrity-*box"
+CONFLICT_MODULES="COPG playintegrity playintegrityfix [i][n][t][e][g][r][i][t][y][-]*[b][o][x]"
 
 print_box_start() {
   ui_print "╔═════════════════════════════════╗"

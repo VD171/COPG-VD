@@ -70,7 +70,8 @@ COPG-VD เป็นเครื่องมือปลอมแปลงอุ
     "DRM_SECURITY_LEVEL": "L1"
   },
   "motor_drm": false,
-  "global_fields": ["SECURITY_PATCH"]
+  "global_fields": ["SECURITY_PATCH"],
+  "process_overrides": {}
 }
 ```
 โปรดใช้สตริงภายในเครื่องหมายอัญประกาศคู่เท่านั้น  
@@ -114,6 +115,15 @@ WebUI เป็นตัวเลือก - ทุกอย่างสาม�
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-see-also -->
+
+## ดูเพิ่มเติม
+
+- **[VD Infos](https://github.com/VD171/VD-Infos)** - ตัวดีบักเมธอด
+- **[VD Google](https://github.com/VD171/VD-Google)** - บริการ Google ของคุณ อ่านบนเครื่อง ไม่ใช้อินเทอร์เน็ตเลย
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 ---
 

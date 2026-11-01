@@ -70,7 +70,8 @@ Seznam `"global_fields": [ ... ]` aplikuje uvedená pole Build na celé zaříze
     "DRM_SECURITY_LEVEL": "L1"
   },
   "motor_drm": false,
-  "global_fields": ["SECURITY_PATCH"]
+  "global_fields": ["SECURITY_PATCH"],
+  "process_overrides": {}
 }
 ```
 Dbej na to, abys používal řetězce pouze v dvojitých uvozovkách.  
@@ -117,6 +118,15 @@ Pokud jsi uživatel Magisku, použij KsuWebUI od KOW (https://github.com/KOWX712
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-see-also -->
+
+## Viz také
+
+- **[VD Infos](https://github.com/VD171/VD-Infos)** - Debugger metod
+- **[VD Google](https://github.com/VD171/VD-Google)** - Vaše služby Google, čtené v zařízení
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 ---
 

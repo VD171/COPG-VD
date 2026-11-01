@@ -70,7 +70,8 @@ Uma lista `"global_fields": [ ... ]` aplica os campos Build nomeados no disposit
     "DRM_SECURITY_LEVEL": "L1"
   },
   "motor_drm": false,
-  "global_fields": ["SECURITY_PATCH"]
+  "global_fields": ["SECURITY_PATCH"],
+  "process_overrides": {}
 }
 ```
 Certifique-se de usar strings apenas com aspas duplas.  
@@ -114,6 +115,15 @@ Se você é usuário de Magisk, use o KsuWebUI do KOW (https://github.com/KOWX71
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-see-also -->
+
+## Veja também
+
+- **[VD Infos](https://github.com/VD171/VD-Infos)** - Debugger de métodos
+- **[VD Google](https://github.com/VD171/VD-Google)** - Seus serviços Google, lidos no seu aparelho
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 ---
 

@@ -64,14 +64,14 @@ cleanup() {
 trap cleanup EXIT
 
 find_downloader() {
-    for cmd in curl wget; do
-        command -v "$cmd" >/dev/null 2>&1 && echo "$cmd" && return 0
-    done
     for bb in /data/adb/ksu/bin/busybox /data/adb/ap/bin/busybox /data/adb/magisk/busybox \
               /data/adb/modules/busybox-ndk/system/bin/busybox; do
         [ -x "$bb" ] && echo "$bb wget" && return 0
     done
     command -v busybox >/dev/null 2>&1 && echo "busybox wget" && return 0
+    for cmd in curl wget; do
+        command -v "$cmd" >/dev/null 2>&1 && echo "$cmd" && return 0
+    done
     return 1
 }
 
@@ -82,6 +82,38 @@ download() {
         *)    $DOWNLOADER -q -T 60 -O "$TMP_FILE" "$REMOTE_URL" 2>/dev/null ;;
     esac
 }
+
+download_to() {
+    _u="$1"; _o="$2"
+    case "$DOWNLOADER" in
+        curl) curl -fsSL --max-time 60 -o "$_o" "$_u" 2>/dev/null ;;
+        wget) wget -q -T 60 -O "$_o" "$_u" 2>/dev/null ;;
+        *)    $DOWNLOADER -q -T 60 -O "$_o" "$_u" 2>/dev/null ;;
+    esac
+    [ -s "$_o" ]
+}
+
+FETCH_BASE_URL="https://raw.githubusercontent.com/VictorGabriel7Dev/build.prop/main"
+FETCH_FIELDS="BRAND DEVICE MANUFACTURER MODEL FINGERPRINT PRODUCT DISPLAY ID HOST INCREMENTAL TIMESTAMP PREVIEW_SDK USER SDK_FINGERPRINT UUID SECURITY_PATCH FIRST_API_LEVEL BOARD HARDWARE"
+FETCH_MAP="BRAND:ro.product.system_dlkm.brand,ro.product.brand_for_attestation,ro.product.brand
+DEVICE:ro.product.system_dlkm.device,ro.product.device_for_attestation,ro.product.device
+MANUFACTURER:ro.product.system_dlkm.manufacturer,ro.product.manufacturer_for_attestation,ro.product.manufacturer
+MODEL:ro.product.system_dlkm.model,ro.product.model_for_attestation,ro.product.model
+FINGERPRINT:ro.system_dlkm.build.fingerprint,ro.product.build.fingerprint,ro.build.fingerprint
+PRODUCT:ro.product.system_dlkm.name,ro.product.name_for_attestation,ro.product.name
+DISPLAY:ro.build.display.id,ro.system_dlkm.build.id
+ID:ro.system_dlkm.build.id,ro.build.id
+HOST:ro.build.host
+INCREMENTAL:ro.system_dlkm.build.version.incremental,ro.build.version.incremental
+TIMESTAMP:ro.system_dlkm.build.date.utc,ro.build.date.utc
+PREVIEW_SDK:ro.build.version.preview_sdk
+USER:ro.build.user
+SDK_FINGERPRINT:ro.build.version.preview_sdk_fingerprint
+UUID:ro.system_dlkm.build.uuid,ro.build.uuid
+SECURITY_PATCH:ro.build.version.security_patch
+FIRST_API_LEVEL:ro.product.first_api_level,ro.board.first_api_level
+BOARD:ro.product.board,ro.board.platform
+HARDWARE:ro.hardware,ro.boot.hardware"
 
 json_get() {
     grep -o "\"$2\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" "$1" 2>/dev/null | head -n 1 |
@@ -379,7 +411,7 @@ check_version() {
     case "$sdk" in ''|*[!0-9]*) sdk="" ;; esac
     if [ -n "$sdk" ] && [ "$sdk" -gt "$rom_sdk" ]; then
         if echo "$aplicados" | grep -q "^SDK_INT "; then
-            say_red "config asks for SDK $sdk on a framework that is SDK $rom_sdk, and the semaphore is letting it through - this is the softloop"
+            say_red "config asks for SDK $sdk on a framework that is SDK $rom_sdk, and the semaphore is letting it through - unsafe, remove it"
         else
             say_warn "config carries SDK $sdk (> ROM $rom_sdk) but the semaphore blocks it - dead weight, safe to delete"
         fi
@@ -422,7 +454,7 @@ check_fingerprint() {
     [ -n "$rel" ] || rel=$(rom_prop ro.build.version.release)
     efetivo=$(release_or_codename "$cod" "$rel")
     if [ -n "$efetivo" ] && [ "$fp_relcod" != "$efetivo" ]; then
-        say_info "FINGERPRINT carries ':$fp_relcod/' and this device reports '$efetivo'. Deliberate: that segment is release_or_codename, so a preview build always says a word where a release says a number. Matching it would mean a target build of the same Android version; rewriting it would break attestation"
+        say_info "FINGERPRINT carries ':$fp_relcod/' and this device reports '$efetivo'. Deliberate: that segment is release_or_codename (a preview build shows a word, a release a number) - kept as-is on purpose"
     else
         say_ok "FINGERPRINT agrees with the version this device reports"
     fi
@@ -447,7 +479,7 @@ check_dates() {
     fi
     dias=$(( (e_patch - e_build) / 86400 ))
     if [ "$dias" -lt -60 ] || [ "$dias" -gt 60 ]; then
-        say_warn "security patch ($patch) is ${dias}d away from the build date ($build) - real builds ship within a couple of months"
+        say_warn "security patch ($patch) is ${dias}d away from the build date ($build) - consider aligning them"
     else
         say_ok "security patch ($patch) fits the build date ($build), ${dias}d apart"
     fi
@@ -480,7 +512,7 @@ check_delete() {
             *" $d "*) say_warn "'$d' is a version field - delete never touches the version group (that is the semaphore's job), so this entry does nothing" ; continue ;;
         esac
         case " FINGERPRINT $IDENTITY " in
-            *" $d "*) say_red "deletes '$d', an identity field - the device would report no $d at all, which no real device does" ; continue ;;
+            *" $d "*) say_red "deletes '$d', an identity field - identity fields should be set, not deleted" ; continue ;;
         esac
         grep -q "\"$d\"[[:space:]]*:[[:space:]]*\"" "$conf" &&
             say_warn "'$d' is both set and deleted - delete wins, the set value is dead weight"
@@ -699,8 +731,61 @@ case "$MODE" in
         exit 0
         ;;
 
+    fetch-index)
+        DOWNLOADER="${DOWNLOADER:-$(find_downloader)}"
+        [ -n "$DOWNLOADER" ] || { echo "status: no-downloader"; exit 1; }
+        IDX_TMP="$TMP_FILE.idx"
+        download_to "$FETCH_BASE_URL/index.json" "$IDX_TMP" || { echo "status: download-failed"; exit 1; }
+        grep -q '"devices"' "$IDX_TMP" 2>/dev/null || { rm -f "$IDX_TMP"; echo "status: bad-index"; exit 1; }
+        cat "$IDX_TMP"
+        rm -f "$IDX_TMP"
+        exit 0
+        ;;
+
+    fetch)
+        relpath="$2"
+        [ -n "$relpath" ] || { echo "status: no-arg"; exit 1; }
+        case "$relpath" in
+            */*.prop) : ;;
+            *) echo "status: bad-path"; exit 1 ;;
+        esac
+        case "$relpath" in
+            *..*|/*|*' '*|*'"'*|*'$'*|*'`'*) echo "status: bad-path"; exit 1 ;;
+        esac
+        DOWNLOADER="${DOWNLOADER:-$(find_downloader)}"
+        [ -n "$DOWNLOADER" ] || { echo "status: no-downloader"; exit 1; }
+        PROP_TMP="$TMP_FILE.prop"
+        download_to "$FETCH_BASE_URL/$relpath" "$PROP_TMP" || { echo "status: download-failed"; exit 1; }
+        grep -q '^ro\.build\.' "$PROP_TMP" 2>/dev/null || { rm -f "$PROP_TMP"; echo "status: bad-prop"; exit 1; }
+        echo "$FETCH_MAP" | while IFS= read -r pair; do
+            key=${pair%%:*}; cands=${pair#*:}
+            val=""; old_ifs=$IFS; IFS=,
+            for p in $cands; do
+                v=$(grep -m 1 "^$p=" "$PROP_TMP" | cut -d= -f2-)
+                [ -n "$v" ] && { val="$v"; break; }
+            done
+            IFS=$old_ifs
+            [ -n "$val" ] && printf '%s\n' "COPG_V_$key=$val"
+        done > "$TMP_FILE.env"
+        while IFS='=' read -r k v; do [ -n "$k" ] && export "$k=$v"; done < "$TMP_FILE.env"
+        rm -f "$PROP_TMP" "$TMP_FILE.env"
+        [ -n "$COPG_V_FINGERPRINT" ] && [ -n "$COPG_V_BRAND" ] && [ -n "$COPG_V_MODEL" ] ||
+            { echo "status: map-failed"; exit 1; }
+        target=""
+        for c in $CONFIG_PATHS; do [ -f "$c" ] && { target="$c"; break; }; done
+        [ -n "$target" ] || { echo "status: no-config"; exit 1; }
+        FIELDS="$FETCH_FIELDS"
+        export COPG_V_SOURCE="github.com/VictorGabriel7Dev/build.prop ($relpath)"
+        if write_fields "$target"; then
+            log "fetched $COPG_V_MODEL ($COPG_V_FINGERPRINT) from $relpath"
+            echo "status: fetched"
+            exit 0
+        fi
+        echo "status: write-failed"; exit 1
+        ;;
+
     *)
-        echo "usage: ${0##*/} check|apply|boot|analyze|sync-settings|migrate"
+        echo "usage: ${0##*/} check|apply|boot|analyze|sync-settings|migrate|fetch-index|fetch <path>"
         exit 1
         ;;
 esac

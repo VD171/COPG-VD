@@ -28,6 +28,7 @@
 #include <vector>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include <cstdlib>
 #include <cerrno>
 #include <android/log.h>
@@ -42,6 +43,8 @@
 #define LOG_TAG "COPG-VD"
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 #define ERROR_LOG(...) LOGE("[ERROR] " __VA_ARGS__)
+static bool g_verbose = false;
+#define LOGV(...) do { if (g_verbose) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__); } while (0)
 
 static const std::string config_file = "/data/adb/COPG-VD.json";
 static const std::string rom_prop_file = "/system/build.prop";
@@ -94,6 +97,8 @@ struct ScopeConfig {
     std::vector<std::string> blacklist;
     std::vector<std::string> playstore;
     std::vector<std::string> global_fields;
+    std::map<std::string, std::map<std::string, std::string>> process_overrides;
+    bool verbose_logs = false;
 };
 
 static inline std::string trim(const std::string& str) {
@@ -283,6 +288,8 @@ static bool readConfig(const std::string& path, Config& out, std::set<std::strin
             scope->motor_prop_hook = tokenText(text, val) != "false";
         } else if (scope && keyName == "motor_drm" && val.type == JSMN_PRIMITIVE) {
             scope->motor_drm = tokenText(text, val) == "true";
+        } else if (scope && keyName == "verbose_logs" && val.type == JSMN_PRIMITIVE) {
+            scope->verbose_logs = tokenText(text, val) == "true";
         } else if (scope && val.type == JSMN_ARRAY &&
                    (keyName == "scope_whitelist" || keyName == "scope_blacklist" ||
                     keyName == "scope_playstore_targets" || keyName == "global_fields")) {
@@ -293,6 +300,25 @@ static bool readConfig(const std::string& path, Config& out, std::set<std::strin
             int p = i + 2;
             for (int n = 0; n < val.size; n++) {
                 if (tokens[p].type == JSMN_STRING) dst.push_back(tokenText(text, tokens[p]));
+                p = skipToken(tokens, p);
+            }
+        } else if (scope && keyName == "process_overrides" && val.type == JSMN_OBJECT) {
+            int p = i + 2;
+            for (int n = 0; n < val.size; n++) {
+                const jsmntok_t& procKey = tokens[p];
+                const jsmntok_t& procVal = tokens[p + 1];
+                if (procKey.type == JSMN_STRING && procVal.type == JSMN_OBJECT) {
+                    std::map<std::string, std::string> fields;
+                    int q = p + 2;
+                    for (int m = 0; m < procVal.size; m++) {
+                        const jsmntok_t& fk = tokens[q];
+                        const jsmntok_t& fv = tokens[q + 1];
+                        if (fk.type == JSMN_STRING && (fv.type == JSMN_STRING || fv.type == JSMN_PRIMITIVE))
+                            fields[tokenText(text, fk)] = tokenText(text, fv);
+                        q = skipToken(tokens, q);
+                    }
+                    scope->process_overrides[tokenText(text, procKey)] = fields;
+                }
                 p = skipToken(tokens, p);
             }
         }
@@ -372,6 +398,10 @@ private:
     ScopeConfig scope_cfg;
     Config cfg_device;
     std::set<std::string> cfg_del;
+    Config cfg_effective;
+    std::set<std::string> del_effective;
+    std::string current_proc;
+    time_t cfg_mtime = 0;
     bool cfg_ok = false;
     bool scoped_mode = false;
     bool keep_resident = false;
@@ -379,6 +409,22 @@ private:
     bool isGlobalField(const char* key) const {
         for (const auto& k : scope_cfg.global_fields) if (k == key) return true;
         return false;
+    }
+
+    void reloadConfigIfChanged() {
+        struct stat st;
+        if (stat(config_file.c_str(), &st) != 0) return;
+        if (st.st_mtime == cfg_mtime) return;
+        Config nd;
+        std::set<std::string> ndel;
+        ScopeConfig nsc;
+        if (readConfig(config_file, nd, &ndel, &nsc)) {
+            cfg_device = std::move(nd);
+            cfg_del = std::move(ndel);
+            scope_cfg = std::move(nsc);
+            cfg_ok = true;
+        }
+        cfg_mtime = st.st_mtime;
     }
 
     void spoofDevice() {
@@ -438,8 +484,8 @@ private:
             build_version_device_initial_sdk_intField = getField(versionClass, "DEVICE_INITIAL_SDK_INT", "I");
         }
 
-        Config& device = cfg_device;
-        std::set<std::string>& del = cfg_del;
+        Config& device = cfg_effective;
+        std::set<std::string>& del = del_effective;
         if (!cfg_ok) {
             env->DeleteLocalRef(buildClass);
             if (versionClass) env->DeleteLocalRef(versionClass);
@@ -616,12 +662,12 @@ private:
 
     void installPropHook() {
         if (scope_cfg.motor_prop_hook && scope_cfg.prop_method == "mmap")
-            copgvd::propvirt::install(cfg_device);
+            copgvd::propvirt::install(cfg_effective);
     }
 
     void installDrmHook() {
         if (!scope_cfg.motor_drm) return;
-        const std::string lvl = get(cfg_device, "DRM_SECURITY_LEVEL", "L1");
+        const std::string lvl = get(cfg_effective, "DRM_SECURITY_LEVEL", "L1");
         const bool l3 = (lvl == "L3" || lvl == "l3");
         g_drm_level_int = l3 ? 1 : 3;
         g_drm_level_str = l3 ? "L3" : "L1";
@@ -647,6 +693,19 @@ private:
     }
 
     void applyEngines() {
+        cfg_effective = cfg_device;
+        del_effective = cfg_del;
+        if (!current_proc.empty()) {
+            auto it = scope_cfg.process_overrides.find(current_proc);
+            if (it != scope_cfg.process_overrides.end())
+                for (const auto& kv : it->second) {
+                    cfg_effective[kv.first] = kv.second;
+                    del_effective.erase(kv.first);
+                }
+        }
+        LOGV("applyEngines: proc=%s effective_fields=%zu del=%zu",
+             current_proc.empty() ? "(global)" : current_proc.c_str(),
+             cfg_effective.size(), del_effective.size());
         if (scope_cfg.motor_jni) spoofDevice();
         if (scope_cfg.motor_prop_hook) installPropHook();
         installDrmHook();
@@ -654,6 +713,8 @@ private:
 
     void spoofGlobalFields() {
         if (!scope_cfg.motor_jni || scope_cfg.global_fields.empty()) return;
+        cfg_effective = cfg_device;
+        del_effective = cfg_del;
         restrict_global = true;
         spoofDevice();
         restrict_global = false;
@@ -666,6 +727,12 @@ public:
         if (env) env->GetJavaVM(&jvm);
 
         cfg_ok = readConfig(config_file, cfg_device, &cfg_del, &scope_cfg);
+        { struct stat st0; if (stat(config_file.c_str(), &st0) == 0) cfg_mtime = st0.st_mtime; }
+        g_verbose = scope_cfg.verbose_logs;
+        LOGV("onLoad: cfg_ok=%d mode=%s jni=%d prop_hook=%s drm=%d fields=%zu overrides=%zu",
+             cfg_ok, scope_cfg.mode.c_str(), scope_cfg.motor_jni,
+             scope_cfg.prop_method.c_str(), scope_cfg.motor_drm,
+             cfg_device.size(), scope_cfg.process_overrides.size());
         scoped_mode = !(scope_cfg.mode == "global" || scope_cfg.mode.empty());
         if (!scoped_mode) {
             applyEngines();
@@ -678,14 +745,20 @@ public:
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
         if (!scoped_mode) return;
         refreshEnv();
-        if (!inScope(scope_cfg, niceName(args)))
+        if (!inScope(scope_cfg, niceName(args))) {
             api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
+            return;
+        }
+        reloadConfigIfChanged();
     }
 
     void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
         if (!scoped_mode) return;
         refreshEnv();
-        if (inScope(scope_cfg, niceName(args))) applyEngines();
+        const std::string proc = niceName(args);
+        const bool in = inScope(scope_cfg, proc);
+        LOGV("postAppSpecialize: proc=%s inScope=%d", proc.c_str(), in);
+        if (in) { current_proc = proc; applyEngines(); }
         if (!keep_resident) api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
     }
 };

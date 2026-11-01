@@ -70,7 +70,8 @@ COPG-VD एक डिवाइस स्पूफर है: यह डिवा
     "DRM_SECURITY_LEVEL": "L1"
   },
   "motor_drm": false,
-  "global_fields": ["SECURITY_PATCH"]
+  "global_fields": ["SECURITY_PATCH"],
+  "process_overrides": {}
 }
 ```
 सुनिश्चित करें कि स्ट्रिंग्स केवल डबल-कोट्स में ही उपयोग करें।  
@@ -114,6 +115,15 @@ WebUI वैकल्पिक है - सब कुछ सीधे JSON क�
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-see-also -->
+
+## यह भी देखें
+
+- **[VD Infos](https://github.com/VD171/VD-Infos)** - मेथड डिबगर
+- **[VD Google](https://github.com/VD171/VD-Google)** - आपकी Google सेवाएँ, आपके डिवाइस पर पढ़ी गईं। कभी इंटरनेट नहीं।
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 ---
 

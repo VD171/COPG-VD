@@ -70,7 +70,8 @@ A `"global_fields": [ ... ]` list applies the named Build fields device-wide eve
     "DRM_SECURITY_LEVEL": "L1"
   },
   "motor_drm": false,
-  "global_fields": ["SECURITY_PATCH"]
+  "global_fields": ["SECURITY_PATCH"],
+  "process_overrides": {}
 }
 ```
 Be sure to use strings on double-quotes only.  
@@ -117,6 +118,15 @@ If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWeb
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-see-also -->
+
+## See also
+
+- **[VD Infos](https://github.com/VD171/VD-Infos)** - Device method debugger
+- **[VD Google](https://github.com/VD171/VD-Google)** - Your Google services, read on your device
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 ---
 

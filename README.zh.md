@@ -70,7 +70,8 @@ COPG-VD 是一个设备伪装器：它会重写设备的 fingerprint 和 build�
     "DRM_SECURITY_LEVEL": "L1"
   },
   "motor_drm": false,
-  "global_fields": ["SECURITY_PATCH"]
+  "global_fields": ["SECURITY_PATCH"],
+  "process_overrides": {}
 }
 ```
 请务必只使用双引号包裹的字符串。  
@@ -114,6 +115,15 @@ WebUI 是可选的 - 一切都可以直接在 JSON 配置文件中编辑 - 但�
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-see-also -->
+
+## 另请参阅
+
+- **[VD Infos](https://github.com/VD171/VD-Infos)** - 方法调试器
+- **[VD Google](https://github.com/VD171/VD-Google)** - 你的 Google 服务，在本机读取
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 ---
 

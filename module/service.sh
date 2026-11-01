@@ -165,6 +165,9 @@ apply_boot_state() {
     propreset ro.boot.warranty_bit 0
     propreset ro.warranty_bit 0
     propreset ro.is_ever_orange 0
+    propreset ro.crypto.state encrypted
+    propreset ro.boot.fmp_config 1
+    propreset ro.boot.dp_fw_check 1
     propforce vendor.boot.vbmeta.device_state locked
     propforce vendor.boot.verifiedbootstate green
 }
@@ -195,7 +198,13 @@ apply_anti_emulator() {
     delprop_re '^(qemu\.|ro\.kernel\.qemu)'
 }
 apply_cleanup() {
-    delprop_re 'pihook|pixelprop|lineage|XLua|LSPosed|spoof\.gms'
+    delprop_re 'pihook|pixelprop|lineage|crdroid|modversion|aospa|evolution|pixelos|derpfest|axion|XLua|LSPosed|spoof\.gms'
+    for p in ro.build.type ro.system.build.type ro.vendor.build.type ro.product.build.type ro.odm.build.type ro.system_ext.build.type; do
+        propreset "$p" user
+    done
+    for p in ro.build.tags ro.system.build.tags ro.vendor.build.tags ro.product.build.tags ro.odm.build.tags ro.system_ext.build.tags; do
+        propreset "$p" release-keys
+    done
     "$bin_resetprop" --compact 2>/dev/null
 }
 
@@ -216,6 +225,16 @@ apply_global_fields() {
   done
 }
 
+write_security_patch_txt() {
+  [ -d /data/adb/tricky_store ] || return 0
+  sp=$(echo "$json_content" | grep -o '"SECURITY_PATCH"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n 1 | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
+  [ -n "$sp" ] || return 0
+  sp_sys=$(echo "$sp" | tr -d '-' | cut -c1-6)
+  printf 'system=%s\nboot=%s\nvendor=%s\n' "$sp_sys" "$sp" "$sp" > /data/adb/tricky_store/security_patch.txt
+  chmod 0644 /data/adb/tricky_store/security_patch.txt 2>/dev/null
+  chcon u:object_r:trickystore_data_file:s0 /data/adb/tricky_store/security_patch.txt 2>/dev/null
+}
+
 apply_props() {
   json_content=$(cat "$COPG_VD_JSON")
   getprop_output=$(getprop)
@@ -226,6 +245,7 @@ apply_props() {
   [ -n "$SCOPE_MODE" ] || SCOPE_MODE=playstore
   GLOBAL_FIELDS=$(printf '%s' "$json_flat" | grep -o '"global_fields"[[:space:]]*:[[:space:]]*\[[^]]*\]' | sed 's/.*\[//' | grep -o '"[A-Za-z0-9_]*"' | tr -d '"' | tr '\n' ' ')
   apply_global_fields
+  write_security_patch_txt
 
   if rp_enabled; then
     DELETE_LIST=$(read_delete_list)
@@ -253,12 +273,7 @@ apply_props() {
       fi
       [ "$present" = 1 ] || continue
       if [ -n "$json_value" ]; then
-          if [ "$json_key" = "SECURITY_PATCH" ]; then
-              SECURITY_PATCH="/data/adb/tricky_store/security_patch.txt"
-              if [ -e "$SECURITY_PATCH" ]; then
-                  echo "$json_value" > "$SECURITY_PATCH"
-              fi
-          elif [ "$json_key" = "TIMESTAMP" ]; then
+          if [ "$json_key" = "TIMESTAMP" ]; then
               BUILD_DATE="$(LC_ALL=C TZ=UTC date -u -d "@$json_value")"
               for prop in ro.build.date ro.odm.build.date ro.product.build.date ro.odm_dlkm.build.date ro.system.build.date ro.system_dlkm.build.date ro.system_ext.build.date ro.vendor.build.date ro.vendor_dlkm.build.date; do
                   propreset "$prop" "$BUILD_DATE"
