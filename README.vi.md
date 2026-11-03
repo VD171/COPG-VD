@@ -111,6 +111,7 @@ Nếu bạn là người dùng Magisk, hãy dùng KsuWebUI của KOW (https://gi
 * https://vd171.ru
 * https://vd.priv8.ru
 * **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+* **Channel:** @Priv8_VD https://t.me/Priv8_VD
 * **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
@@ -122,6 +123,7 @@ Nếu bạn là người dùng Magisk, hãy dùng KsuWebUI của KOW (https://gi
 
 - **[VD Infos](https://github.com/VD171/VD-Infos)** - Trình gỡ lỗi phương thức
 - **[VD Google](https://github.com/VD171/VD-Google)** - Dịch vụ Google của bạn, đọc trên máy
+- **[VD Backup](https://github.com/VD171/VD-Backup)** - Sao lưu và khôi phục ứng dụng và dữ liệu của bạn
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 

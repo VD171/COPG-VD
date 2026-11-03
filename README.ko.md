@@ -114,6 +114,7 @@ Magisk 사용자라면 KOW의 KsuWebUI를 사용하세요(https://github.com/KOW
 * https://vd171.ru
 * https://vd.priv8.ru
 * **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+* **Channel:** @Priv8_VD https://t.me/Priv8_VD
 * **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
@@ -125,6 +126,7 @@ Magisk 사용자라면 KOW의 KsuWebUI를 사용하세요(https://github.com/KOW
 
 - **[VD Infos](https://github.com/VD171/VD-Infos)** - 메서드 디버거
 - **[VD Google](https://github.com/VD171/VD-Google)** - 내 Google 서비스를 기기에서 바로 읽기
+- **[VD Backup](https://github.com/VD171/VD-Backup)** - 앱과 데이터를 백업하고 복원
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 

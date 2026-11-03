@@ -114,6 +114,7 @@ WebUI اختياري - يمكن تعديل كل شيء في إعداد JSON مب
 * https://vd171.ru
 * https://vd.priv8.ru
 * **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+* **Channel:** @Priv8_VD https://t.me/Priv8_VD
 * **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
@@ -125,6 +126,7 @@ WebUI اختياري - يمكن تعديل كل شيء في إعداد JSON مب
 
 - **[VD Infos](https://github.com/VD171/VD-Infos)** - مُنقّح الطرق
 - **[VD Google](https://github.com/VD171/VD-Google)** - خدمات Google الخاصة بك، تُقرأ على جهازك
+- **[VD Backup](https://github.com/VD171/VD-Backup)** - انسخ احتياطيًا واستعد تطبيقاتك وبياناتك
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 

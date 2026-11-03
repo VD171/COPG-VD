@@ -111,6 +111,7 @@ WebUI 是可选的 - 一切都可以直接在 JSON 配置文件中编辑 - 但�
 * https://vd171.ru
 * https://vd.priv8.ru
 * **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+* **Channel:** @Priv8_VD https://t.me/Priv8_VD
 * **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
@@ -122,6 +123,7 @@ WebUI 是可选的 - 一切都可以直接在 JSON 配置文件中编辑 - 但�
 
 - **[VD Infos](https://github.com/VD171/VD-Infos)** - 方法调试器
 - **[VD Google](https://github.com/VD171/VD-Google)** - 你的 Google 服务，在本机读取
+- **[VD Backup](https://github.com/VD171/VD-Backup)** - 备份和恢复您的应用和数据
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 

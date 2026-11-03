@@ -111,6 +111,7 @@ Se você é usuário de Magisk, use o KsuWebUI do KOW (https://github.com/KOWX71
 * https://vd171.ru
 * https://vd.priv8.ru
 * **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+* **Channel:** @Priv8_VD https://t.me/Priv8_VD
 * **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
@@ -122,6 +123,7 @@ Se você é usuário de Magisk, use o KsuWebUI do KOW (https://github.com/KOWX71
 
 - **[VD Infos](https://github.com/VD171/VD-Infos)** - Debugger de métodos
 - **[VD Google](https://github.com/VD171/VD-Google)** - Seus serviços Google, lidos no seu aparelho
+- **[VD Backup](https://github.com/VD171/VD-Backup)** - Faça backup e restaure seus apps e dados
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
