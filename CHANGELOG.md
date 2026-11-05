@@ -1,5 +1,8 @@
 # Changelog
 
+## v6.9.9-vd
+- Updated FINGERPRINT and Build info to: ZP11.261016.008 (security patch 2026-11-05).
+
 ## v6.9.8-vd
 
 - Fixed a false-positive risk flag from the KernelSU-Next module scanner: the conflict-module list is written so its wildcard no longer coincides with a risk pattern, with no change to which modules it clears.
