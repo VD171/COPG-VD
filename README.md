@@ -118,6 +118,7 @@ If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWeb
 * **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
 * **E-mail:** vd.priv8@pm.me
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
+* **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
 
 <!-- vd-see-also -->
