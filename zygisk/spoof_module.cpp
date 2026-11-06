@@ -631,6 +631,13 @@ private:
         applyStr(buildClass, build_manufacturerField, "MANUFACTURER");
         applyStr(buildClass, build_fingerprintField, "FINGERPRINT");
         applyStr(buildClass, build_productField, "PRODUCT");
+        // Android's keystore provider prefers these over the ordinary Build
+        // fields. Keep the requested attestation IDs consistent with our identity.
+        applyStr(buildClass, getField(buildClass, "BRAND_FOR_ATTESTATION", "Ljava/lang/String;"), "BRAND");
+        applyStr(buildClass, getField(buildClass, "DEVICE_FOR_ATTESTATION", "Ljava/lang/String;"), "DEVICE");
+        applyStr(buildClass, getField(buildClass, "PRODUCT_FOR_ATTESTATION", "Ljava/lang/String;"), "PRODUCT");
+        applyStr(buildClass, getField(buildClass, "MANUFACTURER_FOR_ATTESTATION", "Ljava/lang/String;"), "MANUFACTURER");
+        applyStr(buildClass, getField(buildClass, "MODEL_FOR_ATTESTATION", "Ljava/lang/String;"), "MODEL");
         applyStr(buildClass, build_boardField, "BOARD");
         applyStr(buildClass, build_bootloaderField, "BOOTLOADER");
         applyStr(buildClass, build_hardwareField, "HARDWARE");

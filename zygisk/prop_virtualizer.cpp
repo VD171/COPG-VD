@@ -41,7 +41,8 @@ std::string overrideFor(const char* raw, const std::map<std::string, std::string
     if (ends(".build.fingerprint"))        return get("FINGERPRINT");
     if (ends(".build.id") || name == "ro.build.id") return get("ID");
     if (ends(".security_patch"))           return get("SECURITY_PATCH");
-    if (ends("api_level"))                 return get("FIRST_API_LEVEL");
+    // Board API levels use a YYYYMM encoding on recent devices, not SDK numbers.
+    if (name == "ro.product.first_api_level") return get("FIRST_API_LEVEL");
     if (ends(".brand"))                    return get("BRAND");
     if (ends(".model"))                    return get("MODEL");
     if (ends(".device"))                   return get("DEVICE");
@@ -100,12 +101,13 @@ bool install(const std::map<std::string, std::string>& values) {
 
     // 3. remap each affected area MAP_PRIVATE (process-local copy of its backing file) and patch
     //    the inline value. prop_info = { uint32_t serial; char value[92]; char name[]; } for the
-    //    short props we handle (all of ours fit in 91 bytes); long props are left untouched.
+    //    replacement values we handle all fit in 91 bytes. An originally long
+    //    property must also lose its long-value flag before readers use the new storage.
     for (auto& t : targets) {
         const uintptr_t a = reinterpret_cast<uintptr_t>(t.pi);
         Region* r = nullptr;
         for (auto& rg : regions)
-            if (a >= rg.start && a < rg.end) { r = &rg; break; }
+            if (a >= rg.start && a <= rg.end - sizeof(uint32_t) - kValueMax) { r = &rg; break; }
         if (!r) continue;
         if (!r->remapped) {
             const int fd = open(r->path.c_str(), O_RDONLY | O_CLOEXEC);
@@ -119,9 +121,17 @@ bool install(const std::map<std::string, std::string>& values) {
                             PROT_READ | PROT_WRITE) != 0) {
             continue;
         }
+        auto* serial = reinterpret_cast<uint32_t*>(a);
+        const uint32_t oldSerial = __atomic_load_n(serial, __ATOMIC_ACQUIRE);
+        __atomic_store_n(serial, oldSerial | 1U, __ATOMIC_RELEASE);
         char* value = reinterpret_cast<char*>(a) + sizeof(uint32_t);
         memset(value, 0, kValueMax);
         memcpy(value, t.value.c_str(), t.value.size());
+        // Bionic serial layout: length in bits 24..31, long flag at bit 16,
+        // dirty flag at bit 0. Publish a clean, short value with a new counter.
+        const uint32_t newSerial = (static_cast<uint32_t>(t.value.size()) << 24) |
+                                   ((oldSerial + 2U) & 0x00fefffeU);
+        __atomic_store_n(serial, newSerial, __ATOMIC_RELEASE);
     }
 
     // 4. restore the original protection on every remapped area
