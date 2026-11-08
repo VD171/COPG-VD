@@ -166,15 +166,19 @@ jobs:
               found && /^## / { exit }
               found { print }
           ' CHANGELOG.md)
-          if [ -n "$(printf '%s' "$notes" | tr -d '[:space:]')" ]; then
-              printf '%s\n' "$notes" > release-notes.md
-              gh release create "$VERSION" "${{ steps.version.outputs.zip_name }}" \
-                --title "$VERSION" --notes-file release-notes.md
-          else
-              echo "::warning::no CHANGELOG section for $VERSION, generating notes from commits"
-              gh release create "$VERSION" "${{ steps.version.outputs.zip_name }}" \
-                --title "$VERSION" --generate-notes
+          if [ -z "$(printf '%s' "$notes" | tr -d '[:space:]')" ]; then
+              echo "::warning::no CHANGELOG section for $VERSION"
+              notes="See the commit history for the changes in this version."
           fi
+          # Every release carries the channel banner (same footer applied by hand to the
+          # manual releases), so automatic fingerprint releases get it too.
+          {
+            printf '%s\n' "$notes"
+            printf '\n---\n'
+            printf '%s\n' "📣 **Join the channel for updates:** @Priv8_VD https://t.me/Priv8_VD"
+          } > release-notes.md
+          gh release create "$VERSION" "${{ steps.version.outputs.zip_name }}" \
+            --title "$VERSION" --notes-file release-notes.md
           # module/update.json already points at this asset, so the in-app updater works
           # the moment the release exists.
 
