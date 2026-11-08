@@ -142,6 +142,6 @@ Det gör ingen nätverksbegäran; allt det behöver levereras inuti modulen.
   Google Play services så att det attesterar om.
 - **Telefonen softloopar efter att versionsspoofing aktiverats.** Det är Android-versionsfällan
   ovan - ställ tillbaka `spoof_version` till `never`.
-- **WebUI öppnas inte på Magisk.** Använd KsuWebUIStandalone (länk ovan).
+- **WebUI öppnas inte på Magisk.** Använd [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases).
 
 *Den här dokumentationen genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar är välkomna - se [../CONTRIBUTING.md](CONTRIBUTING.md).*

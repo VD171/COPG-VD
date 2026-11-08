@@ -147,6 +147,6 @@ Nó không thực hiện yêu cầu mạng nào; mọi thứ nó cần đều đ
   Kết thúc Google Play services để nó chứng thực lại.
 - **Điện thoại softloop sau khi bật giả mạo phiên bản.** Đó là cái bẫy phiên bản Android ở
   trên - đặt `spoof_version` trở lại `never`.
-- **WebUI không mở trên Magisk.** Dùng KsuWebUIStandalone (liên kết ở trên).
+- **WebUI không mở trên Magisk.** Dùng [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases).
 
 *Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Các chỉnh sửa và cải tiến đều được hoan nghênh - xem [../CONTRIBUTING.md](CONTRIBUTING.md).*

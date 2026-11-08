@@ -131,6 +131,6 @@ config를 손으로 편집할 때마다 실행하세요.
   Play services를 종료하여 다시 인증하도록 하세요.
 - **버전 스푸핑을 활성화한 후 전화기가 softloop합니다.** 그것은 위의 Android 버전 함정입니다 -
   `spoof_version`을 `never`로 다시 설정하세요.
-- **Magisk에서 WebUI가 열리지 않습니다.** KsuWebUIStandalone을 사용하세요(위 링크).
+- **Magisk에서 WebUI가 열리지 않습니다.** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases)을 사용하세요.
 
 *이 문서는 Claude (Anthropic)로 생성되었으며 VD171에 의해 유지 관리됩니다. 수정과 개선을 환영합니다 - [../CONTRIBUTING.md](CONTRIBUTING.md)를 참조하세요.*

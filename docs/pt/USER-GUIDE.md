@@ -142,6 +142,6 @@ Ela não faz nenhuma requisição de rede; tudo de que precisa vem dentro do mó
   Google Play services para que ele refaça a atestação.
 - **O telefone entra em softloop depois de ativar o spoofing de versão.** Essa é a armadilha da versão do Android
   acima - volte o `spoof_version` para `never`.
-- **A WebUI não abre no Magisk.** Use o KsuWebUIStandalone (link acima).
+- **A WebUI não abre no Magisk.** Use o [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases).
 
 *Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas - veja [../CONTRIBUTING.md](CONTRIBUTING.md).*

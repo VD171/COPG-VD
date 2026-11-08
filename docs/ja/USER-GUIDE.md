@@ -140,6 +140,6 @@ config を手で編集するたびに実行してください。
   Google Play services を kill して再アテステーションさせてください。
 - **バージョンスプーフを有効にした後、電話が softloop する。** それは上の Android バージョン
   の罠です - `spoof_version` を `never` に戻してください。
-- **Magisk で WebUI が開かない。** KsuWebUIStandalone を使ってください(上のリンク)。
+- **Magisk で WebUI が開かない。** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) を使ってください。
 
 *このドキュメントは Claude (Anthropic) で生成され、VD171 によって保守されています。修正と改善を歓迎します - [../CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。*

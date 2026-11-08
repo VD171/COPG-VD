@@ -127,6 +127,6 @@ WebUI 中的 **Analyze**（或 `fingerprint-update.sh analyze`）会审查当前
   `global_fields` 中，这样它在设备范围内保持一致。结束 Google Play services 以让它重新认证。
 - **启用版本伪装后手机软循环。** 那就是上面的 Android 版本陷阱 - 把 `spoof_version` 改回
   `never`。
-- **WebUI 在 Magisk 上打不开。** 使用 KsuWebUIStandalone（上面的链接）。
+- **WebUI 在 Magisk 上打不开。** 使用 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases)。
 
 *本文档由 Claude (Anthropic) 生成，并由 VD171 维护。欢迎提出更正和改进 - 参见 [../CONTRIBUTING.md](CONTRIBUTING.md)。*

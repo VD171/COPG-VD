@@ -141,6 +141,6 @@ Nedělá žádný síťový požadavek; vše, co potřebuje, přichází uvnitř
   Google Play services, aby znovu provedly atestaci.
 - **Telefon se po zapnutí spoofu verze dostane do softloopu.** To je past na verzi
   Androidu výše - nastavte `spoof_version` zpět na `never`.
-- **WebUI se na Magisku neotevře.** Použijte KsuWebUIStandalone (odkaz výše).
+- **WebUI se na Magisku neotevře.** Použijte [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases).
 
 *Tato dokumentace byla vygenerována pomocí Claude (Anthropic) a je udržována VD171. Opravy a vylepšení jsou vítány - viz [../CONTRIBUTING.md](CONTRIBUTING.md).*

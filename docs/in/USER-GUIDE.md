@@ -148,6 +148,6 @@ modul.
   Google Play services agar ia melakukan atestasi ulang.
 - **Ponsel softloop setelah mengaktifkan version spoofing.** Itu adalah jebakan versi Android
   di atas - setel `spoof_version` kembali ke `never`.
-- **WebUI tidak mau terbuka di Magisk.** Gunakan KsuWebUIStandalone (tautan di atas).
+- **WebUI tidak mau terbuka di Magisk.** Gunakan [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases).
 
 *Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima - lihat [../CONTRIBUTING.md](CONTRIBUTING.md).*

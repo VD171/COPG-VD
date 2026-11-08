@@ -142,6 +142,6 @@ WebUI में **Analyze** (या `fingerprint-update.sh analyze`) config क�
   services को kill करें ताकि यह फिर से attest करे।
 - **संस्करण spoofing सक्षम करने के बाद फ़ोन softloop करता है।** यह ऊपर वाला Android संस्करण जाल
   है - `spoof_version` को वापस `never` पर सेट करें।
-- **Magisk पर WebUI नहीं खुलती।** KsuWebUIStandalone का उपयोग करें (ऊपर लिंक)।
+- **Magisk पर WebUI नहीं खुलती।** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) का उपयोग करें।
 
 *यह दस्तावेज़ीकरण Claude (Anthropic) के साथ तैयार किया गया था और इसका रखरखाव VD171 द्वारा किया जाता है। सुधार और बेहतरी का स्वागत है - [../CONTRIBUTING.md](CONTRIBUTING.md) देखें।*

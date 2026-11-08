@@ -142,6 +142,6 @@ Android version**‏ (`COPG-VD-Settings.spoof_version`) ما إذا كانت س�
   Google Play services كي يعيد الإثبات (attest).
 - **يدخل الهاتف في softloop بعد تفعيل انتحال الإصدار.** هذا هو فخّ إصدار Android
   أعلاه - أعد ضبط `spoof_version` إلى `never`.
-- **لا يفتح الـ WebUI على Magisk.** استخدم KsuWebUIStandalone (الرابط أعلاه).
+- **لا يفتح الـ WebUI على Magisk.** استخدم [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases).
 
 *تم إنشاء هذه الوثائق باستخدام Claude (Anthropic) وتتم صيانتها بواسطة VD171. التصحيحات والتحسينات مرحّب بها - راجع [../CONTRIBUTING.md](CONTRIBUTING.md).*

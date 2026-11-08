@@ -142,6 +142,6 @@ Android version** (`COPG-VD-Settings.spoof_version`) ตัดสินว่า
   Google Play services เพื่อให้มัน re-attest
 - **โทรศัพท์ softloop หลังเปิดการปลอมเวอร์ชัน** นั่นคือกับดักเวอร์ชัน Android
   ด้านบน - ตั้ง `spoof_version` กลับเป็น `never`
-- **WebUI ไม่เปิดบน Magisk** ใช้ KsuWebUIStandalone (ลิงก์ด้านบน)
+- **WebUI ไม่เปิดบน Magisk** ใช้ [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases)
 
 *เอกสารนี้สร้างด้วย Claude (Anthropic) และดูแลรักษาโดย VD171 ยินดีรับการแก้ไขและการปรับปรุง - ดู [../CONTRIBUTING.md](CONTRIBUTING.md)*

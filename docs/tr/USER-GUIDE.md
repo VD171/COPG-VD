@@ -148,6 +148,6 @@ Hiçbir ağ isteği yapmaz; ihtiyacı olan her şey modülün içinde gelir.
   olduğundan emin olun. Yeniden doğrulama yapması için Google Play services'i sonlandırın.
 - **Sürüm sahtelemesini etkinleştirdikten sonra telefon softloop yapıyor.** Bu, yukarıdaki
   Android sürümü tuzağıdır - `spoof_version`'ı tekrar `never` yapın.
-- **WebUI Magisk'te açılmıyor.** KsuWebUIStandalone'u kullanın (yukarıdaki bağlantı).
+- **WebUI Magisk'te açılmıyor.** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases)'u kullanın.
 
 *Bu belge Claude (Anthropic) ile oluşturulmuş ve VD171 tarafından sürdürülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır - bkz. [../CONTRIBUTING.md](CONTRIBUTING.md).*
