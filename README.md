@@ -27,7 +27,7 @@ Each one is independent and can be turned off:
 * **Build fields (JNI)** - rewrites `android.os.Build.*` in the targeted processes.  
 * **Property hook** - presents the spoofed system properties to the targeted processes (a clean-room per-process remap of the property area, no function hook).  
 * **resetprop** - rewrites the system properties, managed by group: identity, version, boot state, SELinux, adb/usb, anti-emulator and a cleanup pass. In a scoped mode the identity and version groups stay out of the device-wide resetprop (Zygisk delivers them per process); the boot/lock/SELinux groups stay global.  
-* **DRM / Widevine** (off by default) - reports a chosen Widevine security level, L1 or L3, to the apps that read it.  
+* **DRM / Widevine** (off by default) - reports a chosen Widevine security level, L1 or L3, to the apps that read it. By default it follows the scope above; set `drm_targets` (a list of apps) to apply the DRM spoof **only** to those apps, independently of `scope_mode` - the module stays loaded in a listed app just for the DRM hook, even when that app is outside the main scope. Empty or absent means follow the scope. (Requires a scoped mode, not Global.)  
 
 ### Fields - set, empty, delete or skip
 Inside the `COPG-VD` object each Build field has four states:  
@@ -47,6 +47,7 @@ A `"global_fields": [ ... ]` list applies the named Build fields device-wide eve
   "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.261016.008-factory-28d56d15.zip",
   "scope_mode": "playstore",
   "motor_drm": false,
+  "drm_targets": [],
   "global_fields": ["SECURITY_PATCH"],
   "process_overrides": [],
   "COPG-VD": {
@@ -120,6 +121,11 @@ If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWeb
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-docs -->
+## Documentation
+
+[User Guide](docs/USER-GUIDE.md) · [Configuration reference](docs/CONFIGURATION.md) · [Architecture](docs/ARCHITECTURE.md) · [File structure](docs/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki)
 
 <!-- vd-see-also -->
 

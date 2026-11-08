@@ -27,7 +27,7 @@ COPG-VD هو spoofer للجهاز: يعيد كتابة بصمة الجهاز (fi
 * **Build fields (JNI)** - يعيد كتابة `android.os.Build.*` في العمليات المستهدفة.  
 * **Property hook** - يعرض properties النظام المنتحلة للعمليات المستهدفة (إعادة تعيين نظيفة لمنطقة الـ properties لكل عملية على حدة، دون hook للدالة).  
 * **resetprop** - يعيد كتابة properties النظام، مُدارة حسب المجموعة: الهوية، والإصدار، وحالة الإقلاع، وSELinux، وadb/usb، ومضاد المحاكي، ومرحلة تنظيف. في الوضع المحدود تبقى مجموعتا الهوية والإصدار خارج resetprop على مستوى الجهاز (يسلّمها Zygisk لكل عملية)؛ وتبقى مجموعات boot/lock/SELinux عامة.  
-* **DRM / Widevine** (معطّل افتراضياً) - يبلّغ عن مستوى أمان Widevine المختار، L1 أو L3، للتطبيقات التي تقرأه.  
+* **DRM / Widevine** (معطّل افتراضياً) - يبلّغ عن مستوى أمان Widevine المختار، L1 أو L3، للتطبيقات التي تقرأه. بشكل افتراضي يتّبع النطاق أعلاه؛ اضبط `drm_targets` (قائمة تطبيقات) لتطبيق انتحال DRM على تلك التطبيقات فقط، بشكل مستقل عن `scope_mode` - يبقى الموديول مُحمَّلاً في تطبيق مُدرَج لأجل خطّاف DRM فقط، حتى عندما يكون ذلك التطبيق خارج النطاق الرئيسي. الفراغ أو الغياب يعني اتّباع النطاق. (يتطلّب وضعاً ذا نطاق، ليس Global.)  
 
 ### Fields - التعيين، أو التفريغ، أو الحذف، أو التخطي
 داخل كائن `COPG-VD` لكل حقل Build أربع حالات:  
@@ -47,6 +47,7 @@ COPG-VD هو spoofer للجهاز: يعيد كتابة بصمة الجهاز (fi
   "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.261016.008-factory-28d56d15.zip",
   "scope_mode": "playstore",
   "motor_drm": false,
+  "drm_targets": [],
   "global_fields": ["SECURITY_PATCH"],
   "process_overrides": [],
   "COPG-VD": {
@@ -120,6 +121,11 @@ WebUI اختياري - يمكن تعديل كل شيء في إعداد JSON مب
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-docs -->
+## التوثيق
+
+[دليل المستخدم](docs/ar/USER-GUIDE.md) · [مرجع الإعداد](docs/ar/CONFIGURATION.md) · [البنية المعمارية](docs/ar/ARCHITECTURE.md) · [بنية الملفات](docs/ar/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/ar-Home)
 
 <!-- vd-see-also -->
 

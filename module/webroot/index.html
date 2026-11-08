@@ -389,6 +389,10 @@
                                         <option value="L3">L3</option>
                                     </select>
                                 </div>
+                                <div id="drm-apps-group" class="toggle-group scope-apps-group" style="display:none">
+                                    <span class="tg-label"><span class="toggle-label" data-i18n="ui_drm_apps">DRM apps</span><button type="button" class="info-btn-item" data-info="drm_apps" aria-label="Info">?</button></span>
+                                    <button id="drm-apps-edit" class="small-btn" data-i18n="ui_scope_apps_edit">Choose apps</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -537,6 +541,22 @@
                                 <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"></path></svg>
                             </div>
                             <div class="tool-output-body"><div class="output" id="output-logcat"></div></div>
+                        </div>
+                    </div>
+                    <div class="tool-item">
+                        <div class="tool-desc" data-i18n="ui_toolsd_diag">Collect everything in one place - module, config, logs, device and load status - to read here and export as one file for a bug report.</div>
+                        <button id="diag-run" class="action-btn tool-btn" data-i18n="ui_tool_diag">Diagnostics</button>
+                        <div class="tool-output collapsed" id="out-diag">
+                            <div class="tool-output-head">
+                                <span class="tool-output-title" data-i18n="ui_diag_report">Report</span>
+                                <div class="tool-output-actions">
+                                    <span class="copy-text out-copy" data-i18n="ui_011">Copy</span>
+                                    <span class="copy-text out-export" data-i18n="ui_diag_export">Export</span>
+                                    <span class="clear-text out-clear" data-i18n="ui_008">Clear</span>
+                                </div>
+                                <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="tool-output-body"><div class="output" id="output-diag"></div></div>
                         </div>
                     </div>
                     <div class="tool-item" id="reboot-tool">

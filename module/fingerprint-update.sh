@@ -33,7 +33,7 @@ CONFIG_PATHS="/data/adb/COPG-VD.json $MODULE_DIR/COPG-VD.json"
 ROM_PROP="/system/build.prop"
 VERSION_FIELDS="ANDROID_VERSION SDK_INT SDK_FULL CODENAME"
 SETTINGS_OBJECT="COPG-VD-Settings"
-KNOWN_KEYS="BRAND DEVICE MANUFACTURER MODEL FINGERPRINT PRODUCT BOOTLOADER BOARD HARDWARE DISPLAY ID HOST INCREMENTAL TIMESTAMP PREVIEW_SDK USER SDK_FINGERPRINT UUID SECURITY_PATCH ANDROID_VERSION SDK_INT SDK_FULL CODENAME TAGS TYPE ODM_SKU SKU FIRST_API_LEVEL"
+KNOWN_KEYS="BRAND DEVICE MANUFACTURER MODEL FINGERPRINT PRODUCT BOOTLOADER BOARD HARDWARE DISPLAY ID HOST INCREMENTAL TIMESTAMP PREVIEW_SDK USER SDK_FINGERPRINT UUID SECURITY_PATCH ANDROID_VERSION SDK_INT SDK_FULL CODENAME TAGS TYPE ODM_SKU SKU FIRST_API_LEVEL DRM_SECURITY_LEVEL"
 STATE_FILE="/data/adb/$MODULE_ID.update.state"
 LOG_FILE="/data/adb/$MODULE_ID.update.log"
 LOG_MAX=32768
@@ -86,11 +86,14 @@ download() {
 }
 
 download_to() {
-    _u="$1"; _o="$2"
+    _u="$1"; _o="$2"; DL_INFO=""
     case "$DOWNLOADER" in
-        curl) curl -fsSL --max-time 60 -o "$_o" "$_u" 2>/dev/null ;;
-        wget) wget -q -T 60 -O "$_o" "$_u" 2>/dev/null ;;
-        *)    $DOWNLOADER -q -T 60 -O "$_o" "$_u" 2>/dev/null ;;
+        curl) DL_INFO=$(curl -fsSL --max-time 60 -w 'http=%{http_code}' -o "$_o" "$_u" 2>/dev/null); _rc=$?
+              [ "$_rc" -ne 0 ] && DL_INFO="${DL_INFO} curl=$_rc" ;;
+        wget) wget -q -T 60 -O "$_o" "$_u" 2>/dev/null; _rc=$?
+              [ "$_rc" -ne 0 ] && DL_INFO="wget=$_rc" ;;
+        *)    $DOWNLOADER -q -T 60 -O "$_o" "$_u" 2>/dev/null; _rc=$?
+              [ "$_rc" -ne 0 ] && DL_INFO="dl=$_rc" ;;
     esac
     [ -s "$_o" ]
 }
@@ -273,7 +276,9 @@ write_fields() {
     ' "$target" "$target" > "$TMP_FILE.new" || return 1
 
     [ -s "$TMP_FILE.new" ] || { log "refusing to write an empty file over $target"; return 1; }
-    grep -q "\"$MODULE_ID\"[[:space:]]*:[[:space:]]*{" "$TMP_FILE.new" ||
+    # Tolerate the block brace on its own line (valid JSON): strip newlines before
+    # matching, so a correctly-formatted config is not falsely rejected (issue #20).
+    tr -d '\n' < "$TMP_FILE.new" | grep -q "\"$MODULE_ID\"[[:space:]]*:[[:space:]]*{" ||
         { log "refusing to write a broken file over $target"; return 1; }
 
     cp -f "$target" "$target.bak" 2>/dev/null
@@ -737,7 +742,7 @@ case "$MODE" in
         DOWNLOADER="${DOWNLOADER:-$(find_downloader)}"
         [ -n "$DOWNLOADER" ] || { echo "status: no-downloader"; exit 1; }
         IDX_TMP="$TMP_FILE.idx"
-        download_to "$FETCH_BASE_URL/index.json" "$IDX_TMP" || { echo "status: download-failed"; exit 1; }
+        download_to "$FETCH_BASE_URL/index.json" "$IDX_TMP" || { echo "status: download-failed${DL_INFO:+ $DL_INFO}"; exit 1; }
         grep -q '"devices"' "$IDX_TMP" 2>/dev/null || { rm -f "$IDX_TMP"; echo "status: bad-index"; exit 1; }
         cat "$IDX_TMP"
         rm -f "$IDX_TMP"
@@ -757,7 +762,7 @@ case "$MODE" in
         DOWNLOADER="${DOWNLOADER:-$(find_downloader)}"
         [ -n "$DOWNLOADER" ] || { echo "status: no-downloader"; exit 1; }
         PROP_TMP="$TMP_FILE.prop"
-        download_to "$FETCH_BASE_URL/$relpath" "$PROP_TMP" || { echo "status: download-failed"; exit 1; }
+        download_to "$FETCH_BASE_URL/$relpath" "$PROP_TMP" || { echo "status: download-failed${DL_INFO:+ $DL_INFO}"; exit 1; }
         grep -q '^ro\.build\.' "$PROP_TMP" 2>/dev/null || { rm -f "$PROP_TMP"; echo "status: bad-prop"; exit 1; }
         echo "$FETCH_MAP" | while IFS= read -r pair; do
             key=${pair%%:*}; cands=${pair#*:}

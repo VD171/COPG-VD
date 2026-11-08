@@ -27,7 +27,7 @@ Každý je nezávislý a lze jej vypnout:
 * **Build fields (JNI)** - přepisuje `android.os.Build.*` v cílových procesech.  
 * **Property hook** - předkládá cílovým procesům spoofované systémové properties (čisté přemapování oblasti properties pro každý proces zvlášť, bez hooku funkce).  
 * **resetprop** - přepisuje systémové properties, spravované po skupinách: identita, verze, stav bootu, SELinux, adb/usb, anti-emulátor a úklidový průchod. V omezeném režimu zůstávají skupiny identity a verze mimo celozařízový resetprop (Zygisk je dodává pro každý proces); skupiny boot/lock/SELinux zůstávají globální.  
-* **DRM / Widevine** (ve výchozím nastavení vypnuto) - hlásí aplikacím, které jej čtou, zvolenou úroveň zabezpečení Widevine, L1 nebo L3.  
+* **DRM / Widevine** (ve výchozím nastavení vypnuto) - hlásí aplikacím, které jej čtou, zvolenou úroveň zabezpečení Widevine, L1 nebo L3. Ve výchozím nastavení následuje rozsah výše; nastav `drm_targets` (seznam aplikací), aby se DRM spoofing použil pouze na tyto aplikace, nezávisle na `scope_mode` - modul zůstává načtený v uvedené aplikaci jen kvůli DRM hooku, i když je ta aplikace mimo hlavní rozsah. Prázdné nebo chybějící znamená následovat rozsah. (Vyžaduje režim s rozsahem, ne Global.)  
 
 ### Fields - nastavit, vyprázdnit, smazat nebo přeskočit
 Uvnitř objektu `COPG-VD` má každé pole Build čtyři stavy:  
@@ -47,6 +47,7 @@ Seznam `"global_fields": [ ... ]` aplikuje uvedená pole Build na celé zaříze
   "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.261016.008-factory-28d56d15.zip",
   "scope_mode": "playstore",
   "motor_drm": false,
+  "drm_targets": [],
   "global_fields": ["SECURITY_PATCH"],
   "process_overrides": [],
   "COPG-VD": {
@@ -120,6 +121,11 @@ Pokud jsi uživatel Magisku, použij KsuWebUI od KOW (https://github.com/KOWX712
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-docs -->
+## Dokumentace
+
+[Uživatelská příručka](docs/cs/USER-GUIDE.md) · [Referenční příručka konfigurace](docs/cs/CONFIGURATION.md) · [Architektura](docs/cs/ARCHITECTURE.md) · [Struktura souborů](docs/cs/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/cs-Home)
 
 <!-- vd-see-also -->
 

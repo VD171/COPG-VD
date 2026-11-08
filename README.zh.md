@@ -27,7 +27,7 @@ COPG-VD 是一个设备伪装器：它会重写设备的 fingerprint 和 build�
 * **Build fields (JNI)** - 在目标进程中重写 `android.os.Build.*`。  
 * **Property hook** - 向目标进程呈现伪装的系统属性（对属性区域进行逐进程的 clean-room 重映射，不 hook 函数）。  
 * **resetprop** - 重写系统属性，按组管理：identity、version、boot state、SELinux、adb/usb、anti-emulator 以及一次清理。在限定范围的模式下，identity 和 version 组不纳入设备范围的 resetprop（由 Zygisk 逐进程交付）；boot/lock/SELinux 组保持 global。  
-* **DRM / Widevine**（默认关闭）- 向读取它的应用报告所选的 Widevine 安全级别，L1 或 L3。  
+* **DRM / Widevine**（默认关闭）- 向读取它的应用报告所选的 Widevine 安全级别，L1 或 L3。默认情况下它跟随上方的范围；设置 `drm_targets`（一个应用列表）可将 DRM 伪装仅应用于那些应用，独立于 `scope_mode` - 即使某个被列出的应用在主范围之外，模块也会仅为 DRM hook 保持在该应用中加载。为空或缺省表示跟随范围。（需要有范围的模式，非 Global。）  
 
 ### Fields - set、empty、delete 或 skip
 在 `COPG-VD` 对象内部，每个 Build 字段有四种状态：  
@@ -47,6 +47,7 @@ COPG-VD 是一个设备伪装器：它会重写设备的 fingerprint 和 build�
   "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.261016.008-factory-28d56d15.zip",
   "scope_mode": "playstore",
   "motor_drm": false,
+  "drm_targets": [],
   "global_fields": ["SECURITY_PATCH"],
   "process_overrides": [],
   "COPG-VD": {
@@ -117,6 +118,11 @@ WebUI 是可选的 - 一切都可以直接在 JSON 配置文件中编辑 - 但�
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-docs -->
+## 文档
+
+[用户指南](docs/zh/USER-GUIDE.md) · [配置参考](docs/zh/CONFIGURATION.md) · [架构](docs/zh/ARCHITECTURE.md) · [文件结构](docs/zh/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/zh-Home)
 
 <!-- vd-see-also -->
 

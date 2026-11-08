@@ -4,6 +4,7 @@
   "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.261016.008-factory-28d56d15.zip",
   "scope_mode": "playstore",
   "motor_drm": false,
+  "drm_targets": [],
   "global_fields": ["SECURITY_PATCH"],
   "process_overrides": [],
   "COPG-VD": {

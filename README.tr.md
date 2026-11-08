@@ -27,7 +27,7 @@ Her biri bağımsızdır ve kapatılabilir:
 * **Build fields (JNI)** - hedeflenen süreçlerde `android.os.Build.*` ögesini yeniden yazar.  
 * **Property hook** - sahtelenen sistem özelliklerini hedeflenen süreçlere sunar (özellik alanının süreç başına clean-room yeniden eşlemesi, işlev hook'u yok).  
 * **resetprop** - sistem özelliklerini yeniden yazar, grup halinde yönetilir: identity, version, boot state, SELinux, adb/usb, anti-emulator ve bir temizlik geçişi. Kapsamı daraltılmış bir modda identity ve version grupları cihaz genelindeki resetprop'un dışında kalır (Zygisk bunları süreç başına teslim eder); boot/lock/SELinux grupları global kalır.  
-* **DRM / Widevine** (varsayılan olarak kapalı) - seçilen bir Widevine güvenlik seviyesini, L1 veya L3, onu okuyan uygulamalara bildirir.  
+* **DRM / Widevine** (varsayılan olarak kapalı) - seçilen bir Widevine güvenlik seviyesini, L1 veya L3, onu okuyan uygulamalara bildirir. Varsayılan olarak yukarıdaki kapsamı izler; DRM spoof'unu yalnızca belirli uygulamalara uygulamak için `drm_targets` (bir uygulama listesi) ayarlayın, `scope_mode`'dan bağımsız olarak - modül, listelenen bir uygulamada yalnızca DRM hook için yüklü kalır, o uygulama ana kapsamın dışında olsa bile. Boş veya yok, kapsamı izlemek anlamına gelir. (Kapsamlı bir mod gerektirir, Global değil.)  
 
 ### Fields - set, empty, delete veya skip
 `COPG-VD` nesnesinin içinde her Build alanının dört durumu vardır:  
@@ -47,6 +47,7 @@ Bir `"global_fields": [ ... ]` listesi, bir değeri her yerde tutarlı tutmak i�
   "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.261016.008-factory-28d56d15.zip",
   "scope_mode": "playstore",
   "motor_drm": false,
+  "drm_targets": [],
   "global_fields": ["SECURITY_PATCH"],
   "process_overrides": [],
   "COPG-VD": {
@@ -117,6 +118,11 @@ Magisk kullanıcısıysanız, KOW tarafından geliştirilen KsuWebUI'yi kullanı
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-docs -->
+## Belgeler
+
+[Kullanıcı Kılavuzu](docs/tr/USER-GUIDE.md) · [Yapılandırma referansı](docs/tr/CONFIGURATION.md) · [Mimari](docs/tr/ARCHITECTURE.md) · [Dosya yapısı](docs/tr/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/tr-Home)
 
 <!-- vd-see-also -->
 

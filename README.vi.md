@@ -27,7 +27,7 @@ Mỗi engine là độc lập và có thể tắt:
 * **Build fields (JNI)** - ghi lại `android.os.Build.*` trong các tiến trình mục tiêu.  
 * **Property hook** - trình bày các thuộc tính hệ thống giả mạo cho các tiến trình mục tiêu (một bản ánh xạ lại vùng thuộc tính theo từng tiến trình kiểu clean-room, không hook hàm).  
 * **resetprop** - ghi lại các thuộc tính hệ thống, được quản lý theo nhóm: identity, version, boot state, SELinux, adb/usb, anti-emulator và một lượt dọn dẹp. Trong một chế độ có giới hạn phạm vi, các nhóm identity và version nằm ngoài resetprop trên toàn thiết bị (Zygisk cung cấp chúng theo từng tiến trình); các nhóm boot/lock/SELinux vẫn mang tính global.  
-* **DRM / Widevine** (mặc định tắt) - báo cáo một mức bảo mật Widevine được chọn, L1 hoặc L3, cho các ứng dụng đọc nó.  
+* **DRM / Widevine** (mặc định tắt) - báo cáo một mức bảo mật Widevine được chọn, L1 hoặc L3, cho các ứng dụng đọc nó. Theo mặc định nó tuân theo phạm vi ở trên; đặt `drm_targets` (một danh sách ứng dụng) để áp dụng giả mạo DRM chỉ cho những ứng dụng đó, độc lập với `scope_mode` - mô-đun vẫn được tải trong một ứng dụng được liệt kê chỉ để phục vụ DRM hook, ngay cả khi ứng dụng đó nằm ngoài phạm vi chính. Trống hoặc không có nghĩa là tuân theo phạm vi. (Yêu cầu một chế độ có phạm vi, không phải Global.)  
 
 ### Fields - set, empty, delete hoặc skip
 Bên trong đối tượng `COPG-VD`, mỗi trường Build có bốn trạng thái:  
@@ -47,6 +47,7 @@ Một danh sách `"global_fields": [ ... ]` áp dụng các trường Build đư
   "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.261016.008-factory-28d56d15.zip",
   "scope_mode": "playstore",
   "motor_drm": false,
+  "drm_targets": [],
   "global_fields": ["SECURITY_PATCH"],
   "process_overrides": [],
   "COPG-VD": {
@@ -117,6 +118,11 @@ Nếu bạn là người dùng Magisk, hãy dùng KsuWebUI của KOW (https://gi
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-docs -->
+## Tài liệu
+
+[Hướng dẫn sử dụng](docs/vi/USER-GUIDE.md) · [Tham chiếu cấu hình](docs/vi/CONFIGURATION.md) · [Kiến trúc](docs/vi/ARCHITECTURE.md) · [Cấu trúc tệp](docs/vi/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/vi-Home)
 
 <!-- vd-see-also -->
 

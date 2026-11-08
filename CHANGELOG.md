@@ -1,7 +1,12 @@
 # Changelog
 
-## v6.9.9-vd
-- Updated FINGERPRINT and Build info to: ZP11.261016.008 (security patch 2026-11-05).
+## v6.10-vd
+
+- New: a dedicated DRM / Widevine target list, independent of the main scope - the DRM spoof can now apply to its own set of apps (off by default).
+- Keep attestation IDs and native properties coherent: fixed a native system-property crash and the `*_FOR_ATTESTATION` fields, so the keystore no longer reports `CANNOT_ATTEST_IDS`.
+- Diagnostics: one button under Tools to read and export module, config, logs, device and load status for a bug report.
+- Clearer errors: the profile fetch and the updater now show the real reason instead of a generic exit code.
+- Fixed the updater refusing a correctly-formatted config, and restored missing English strings.
 
 ## v6.9.8-vd
 

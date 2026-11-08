@@ -27,7 +27,7 @@ Masing-masing bersifat independen dan dapat dimatikan:
 * **Build fields (JNI)** - menulis ulang `android.os.Build.*` di proses yang ditargetkan.  
 * **Property hook** - menyajikan properti sistem yang di-spoof ke proses yang ditargetkan (pemetaan ulang area properti per proses secara clean-room, tanpa hook fungsi).  
 * **resetprop** - menulis ulang properti sistem, dikelola per grup: identitas, versi, keadaan boot, SELinux, adb/usb, anti-emulator, dan sebuah lintasan pembersihan. Dalam mode bercakupan terbatas, grup identitas dan versi tetap di luar resetprop yang berlaku untuk seluruh perangkat (Zygisk mengirimkannya per proses); grup boot/lock/SELinux tetap global.  
-* **DRM / Widevine** (nonaktif secara default) - melaporkan tingkat keamanan Widevine yang dipilih, L1 atau L3, ke aplikasi yang membacanya.  
+* **DRM / Widevine** (nonaktif secara default) - melaporkan tingkat keamanan Widevine yang dipilih, L1 atau L3, ke aplikasi yang membacanya. Secara default ia mengikuti cakupan di atas; atur `drm_targets` (daftar aplikasi) untuk menerapkan spoof DRM **hanya** ke aplikasi tersebut, terlepas dari `scope_mode` - modul tetap dimuat dalam aplikasi yang terdaftar hanya untuk hook DRM, bahkan ketika aplikasi itu berada di luar cakupan utama. Kosong atau tidak ada berarti mengikuti cakupan. (Membutuhkan mode bercakupan terbatas, bukan Global.)  
 
 ### Fields - set, kosongkan, hapus, atau lewati
 Di dalam objek `COPG-VD`, setiap field Build memiliki empat keadaan:  
@@ -47,6 +47,7 @@ Daftar `"global_fields": [ ... ]` menerapkan field Build yang disebutkan ke selu
   "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.261016.008-factory-28d56d15.zip",
   "scope_mode": "playstore",
   "motor_drm": false,
+  "drm_targets": [],
   "global_fields": ["SECURITY_PATCH"],
   "process_overrides": [],
   "COPG-VD": {
@@ -117,6 +118,11 @@ Jika Anda pengguna Magisk, gunakan KsuWebUI oleh KOW (https://github.com/KOWX712
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-docs -->
+## Dokumentasi
+
+[Panduan Pengguna](docs/in/USER-GUIDE.md) · [Referensi konfigurasi](docs/in/CONFIGURATION.md) · [Arsitektur](docs/in/ARCHITECTURE.md) · [Struktur file](docs/in/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/in-Home)
 
 <!-- vd-see-also -->
 

@@ -351,6 +351,14 @@ sleep 2
 chmod 0644 "$COPG_VD_JSON"
 chcon u:object_r:system_file:s0 "$COPG_VD_JSON"
 
+# Mirror the config into the module dir so the zygisk side can read it via getModuleDir():
+# an already-open dir fd needs no /data/adb path traversal, so this keeps working even if a
+# future Zygisk Next drops the adb_data_file dir-search again (the live /data/adb copy stays
+# primary; this is the fallback). Refreshed each boot.
+cp -f "$COPG_VD_JSON" "$MODDIR/COPG-VD.json" 2>/dev/null
+chmod 0644 "$MODDIR/COPG-VD.json" 2>/dev/null
+chcon u:object_r:system_file:s0 "$MODDIR/COPG-VD.json" 2>/dev/null
+
 if [ ! -e "$MODDIR/.skip.autoupdate" ] && [ -f "$MODDIR/fingerprint-update.sh" ]; then
     sh "$MODDIR/fingerprint-update.sh" boot >/dev/null 2>&1 &
 fi

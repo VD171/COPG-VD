@@ -27,7 +27,7 @@ Zygisk (KernelSU、APatch または Magisk) 上で動作し、デフォルトで
 * **Build fields (JNI)** - 対象のプロセスで `android.os.Build.*` を書き換えます。  
 * **Property hook** - スプーフされたシステムプロパティを対象のプロセスに提示します (プロパティ領域のプロセスごとのクリーンルーム再マッピングであり、関数フックは行いません)。  
 * **resetprop** - システムプロパティを書き換えます。グループごとに管理されます: 識別情報、バージョン、起動状態、SELinux、adb/usb、アンチエミュレーター、およびクリーンアップのパス。スコープ付きモードでは、識別情報とバージョンのグループはデバイス全体の resetprop から除外されます (Zygisk がそれらをプロセスごとに配信します)。boot/lock/SELinux のグループはグローバルのままです。  
-* **DRM / Widevine** (デフォルトでオフ) - 選択した Widevine セキュリティレベル (L1 または L3) を、それを読み取るアプリに報告します。  
+* **DRM / Widevine** (デフォルトでオフ) - 選択した Widevine セキュリティレベル (L1 または L3) を、それを読み取るアプリに報告します。 デフォルトでは上記の範囲に従います。DRM スプーフをそれらのアプリ**のみ**に適用するには `drm_targets` (アプリのリスト) を設定します。これは `scope_mode` とは独立しています - 対象のアプリがメインの範囲の外にある場合でも、モジュールは DRM フックのためだけにリスト内のアプリに読み込まれたままになります。空または未設定は範囲に従うことを意味します。(スコープ付きモードが必要です。Global ではありません。)  
 
 ### フィールド - 設定、空、削除、スキップ
 `COPG-VD` オブジェクト内で、各 Build フィールドには 4 つの状態があります:  
@@ -47,6 +47,7 @@ Zygisk (KernelSU、APatch または Magisk) 上で動作し、デフォルトで
   "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.261016.008-factory-28d56d15.zip",
   "scope_mode": "playstore",
   "motor_drm": false,
+  "drm_targets": [],
   "global_fields": ["SECURITY_PATCH"],
   "process_overrides": [],
   "COPG-VD": {
@@ -120,6 +121,11 @@ Magisk ユーザーの場合は、KOW による KsuWebUI を使用してくだ�
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-docs -->
+## ドキュメント
+
+[ユーザーガイド](docs/ja/USER-GUIDE.md) · [設定リファレンス](docs/ja/CONFIGURATION.md) · [アーキテクチャ](docs/ja/ARCHITECTURE.md) · [ファイル構造](docs/ja/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/ja-Home)
 
 <!-- vd-see-also -->
 

@@ -27,7 +27,7 @@ COPG-VD یک جعل‌کننده دستگاه است: fingerprint و build دس�
 * **Build fields (JNI)** - `android.os.Build.*` را در پروسه‌های هدف بازنویسی می‌کند.  
 * **Property hook** - propertyهای سیستمی جعلی را به پروسه‌های هدف ارائه می‌دهد (یک remap پر-پروسه از ناحیه property به‌شیوه clean-room، بدون هیچ hook تابعی).  
 * **resetprop** - propertyهای سیستم را بازنویسی می‌کند، مدیریت‌شده بر اساس گروه: identity، version، boot state، SELinux، adb/usb، anti-emulator و یک پاس پاکسازی. در یک حالت با دامنه محدود، گروه‌های identity و version خارج از resetprop سراسری دستگاه می‌مانند (Zygisk آن‌ها را پر-پروسه تحویل می‌دهد)؛ گروه‌های boot/lock/SELinux سراسری می‌مانند.  
-* **DRM / Widevine** (به‌طور پیش‌فرض خاموش) - یک سطح امنیتی Widevine انتخاب‌شده، L1 یا L3، را به اپ‌هایی که آن را می‌خوانند گزارش می‌دهد.  
+* **DRM / Widevine** (به‌طور پیش‌فرض خاموش) - یک سطح امنیتی Widevine انتخاب‌شده، L1 یا L3، را به اپ‌هایی که آن را می‌خوانند گزارش می‌دهد. به‌طور پیش‌فرض از دامنه بالا پیروی می‌کند؛ `drm_targets` (فهرستی از اپ‌ها) را تنظیم کنید تا جعل DRM فقط روی آن اپ‌ها اعمال شود، مستقل از `scope_mode` - ماژول فقط برای قلاب DRM در یک اپ فهرست‌شده بارگذاری‌شده می‌ماند، حتی وقتی آن اپ بیرون از دامنه اصلی باشد. خالی یا غایب یعنی پیروی از دامنه. (به یک حالت دارای دامنه نیاز دارد، نه Global.)  
 
 ### Fields - تنظیم، خالی، حذف یا رد کردن
 درون آبجکت `COPG-VD` هر فیلد Build چهار حالت دارد:  
@@ -47,6 +47,7 @@ COPG-VD یک جعل‌کننده دستگاه است: fingerprint و build دس�
   "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.261016.008-factory-28d56d15.zip",
   "scope_mode": "playstore",
   "motor_drm": false,
+  "drm_targets": [],
   "global_fields": ["SECURITY_PATCH"],
   "process_overrides": [],
   "COPG-VD": {
@@ -117,6 +118,11 @@ WebUI اختیاری است - همه چیز را می‌توان مستقیما 
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-docs -->
+## مستندات
+
+[راهنمای کاربر](docs/fa/USER-GUIDE.md) · [مرجع پیکربندی](docs/fa/CONFIGURATION.md) · [معماری](docs/fa/ARCHITECTURE.md) · [ساختار فایل](docs/fa/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/fa-Home)
 
 <!-- vd-see-also -->
 

@@ -139,7 +139,12 @@ async function execCommand(command) {
             if (errno === 0) {
                 resolve(stdout || "");
             } else {
-                reject(stderr || `Command failed with error code ${errno}`);
+                // Surface the script's own reason (its `status:` line on stdout, or stderr)
+                // instead of a bare exit code, so error reports are actionable everywhere.
+                const sout = (stdout || "").trim();
+                const line = sout.split("\n").map((s) => s.trim()).find((s) => s.startsWith("status:"));
+                const detail = line ? line.replace(/^status:\s*/, "") : ((stderr || "").trim() || sout);
+                reject(detail || `Command failed with error code ${errno}`);
             }
         };
         
@@ -498,6 +503,63 @@ async function saveLogToFile() {
     } catch (error) {
         appendToOutput(t('msg_078', {"error": error}), 'error', logcatOutput);
         return false;
+    }
+}
+
+// Unified diagnostics: one place to read + export everything useful for a bug report.
+async function gatherDiagnostics() {
+    const cmd = `D=/data/adb; M="$D/modules/COPG-VD"
+echo "===== COPG-VD Diagnostics ====="
+echo "generated: $(date 2>/dev/null)"
+echo; echo "[module]"
+grep -E "^(id|version|versionCode)=" "$M/module.prop" 2>/dev/null
+echo "loaded_in_maps: $(cat /proc/*/maps 2>/dev/null | grep -c COPG-VD/zygisk)"
+echo "disabled: $([ -f "$M/disable" ] && echo yes || echo no)"
+echo; echo "[root / zygisk]"
+echo "rezygisk: $(grep -E ^version= "$D/modules/rezygisk/module.prop" 2>/dev/null | cut -d= -f2)"
+echo "manager: $(for m in ksu ap magisk; do [ -d "$D/$m" ] && echo -n "$m "; done)"
+echo; echo "[device]"
+echo "fingerprint: $(getprop ro.build.fingerprint)"
+echo "model: $(getprop ro.product.model) | android $(getprop ro.build.version.release) sdk $(getprop ro.build.version.sdk)"
+echo; echo "[config] $D/COPG-VD.json"
+cat "$D/COPG-VD.json" 2>/dev/null || echo "(no config)"
+echo; echo "[update log - last 60]"
+tail -n 60 "$D/COPG-VD.update.log" 2>/dev/null || echo "(none)"
+echo; echo "[module logcat - last 120]"
+logcat -d -s COPG-VD 2>/dev/null | tail -n 120 || echo "(unavailable)"
+echo; echo "===== end ====="`;
+    return await execCommand(cmd);
+}
+
+async function runDiagnostics() {
+    const btn = document.getElementById('diag-run');
+    const out = document.getElementById('output-diag');
+    const panel = document.getElementById('out-diag');
+    if (panel) panel.classList.remove('collapsed');
+    if (btn) btn.classList.add('loading');
+    if (out) out.textContent = t('msg_diag_running');
+    try {
+        if (out) out.textContent = await gatherDiagnostics();
+    } catch (e) {
+        if (out) out.textContent = String(e);
+    } finally {
+        if (btn) btn.classList.remove('loading');
+    }
+}
+
+async function exportOutputToDownload(text, prefix) {
+    const target = document.getElementById('output-diag');
+    if (!text || !text.trim()) { appendToOutput(t('msg_094'), 'warning', target); return; }
+    try {
+        const dir = '/storage/emulated/0/Download/COPG-VD/LOGS';
+        await execCommand(`mkdir -p ${shq(dir)}`);
+        const n = new Date(), pad = (x) => String(x).padStart(2, '0');
+        const ts = `${n.getFullYear()}${pad(n.getMonth() + 1)}${pad(n.getDate())}-${pad(n.getHours())}${pad(n.getMinutes())}${pad(n.getSeconds())}`;
+        const fn = `${prefix}-${ts}.txt`;
+        await execCommand(`echo ${shq(text)} > ${shq(dir + '/' + fn)}`);
+        appendToOutput(t('msg_088', {"finalFilename": fn}), 'success', target);
+    } catch (e) {
+        appendToOutput(t('msg_078', {"error": e}), 'error', target);
     }
 }
 
@@ -1377,6 +1439,8 @@ function loadScopeSettings() {
         if (dlvl) dlvl.value = (currentConfig['motor_drm'] === true)
             ? (((currentConfig['COPG-VD'] || {})['DRM_SECURITY_LEVEL'] === 'L3') ? 'L3' : 'L1')
             : 'off';
+        const drmGrp = document.getElementById('drm-apps-group');
+        if (drmGrp) drmGrp.style.display = (currentConfig['motor_drm'] === true) ? '' : 'none';
         const grupos = (currentConfig['resetprop'] && currentConfig['resetprop'].grupos) || {};
         RP_GROUPS.forEach((g) => {
             const el = document.getElementById('grp-' + g);
@@ -1427,6 +1491,25 @@ async function restartPlayServices() {
 
 let fetchIndex = null;
 const FETCH_SCRIPT = '/data/adb/modules/COPG-VD/fingerprint-update.sh';
+
+// Turn the script's own status code (e.g. "download-failed http=000 curl=6") into a
+// localized human message, keeping the technical detail in brackets. Unknown codes
+// (or a raw JS error) pass through unchanged. #8
+function localizeFetchError(e) {
+    const raw = String(e == null ? '' : e).trim();
+    const code = raw.split(/\s+/)[0];
+    const map = {
+        'download-failed': 'msg_fe_download', 'no-downloader': 'msg_fe_nodl',
+        'bad-prop': 'msg_fe_badprop', 'bad-index': 'msg_fe_badindex',
+        'bad-path': 'msg_fe_badpath', 'map-failed': 'msg_fe_mapfail',
+        'no-config': 'msg_fe_nocfg', 'write-failed': 'msg_fe_writefail',
+        'no-arg': 'msg_fe_noarg'
+    };
+    const key = map[code];
+    if (!key) return raw;
+    const detail = raw.slice(code.length).trim();
+    return detail ? (t(key) + ' [' + detail + ']') : t(key);
+}
 const FETCH_CHANNEL_ORDER = ['canary', 'beta', 'release'];
 
 function fetchStatus(msg, type) {
@@ -1486,7 +1569,7 @@ async function openFetchPopup() {
     try {
         out = await execCommand(`sh ${FETCH_SCRIPT} fetch-index`);
     } catch (e) {
-        fetchStatus(t('msg_fetch_fail', {"error": e}), 'error');
+        fetchStatus(t('msg_fetch_fail', {"error": localizeFetchError(e)}), 'error');
         return;
     }
     let data;
@@ -1529,7 +1612,7 @@ async function doFetchApply() {
         out = await execCommand(`sh ${FETCH_SCRIPT} fetch ${shq(rel)}`);
     } catch (e) {
         if (btn) btn.classList.remove('loading');
-        fetchStatus(t('msg_fetch_fail', {"error": e}), 'error');
+        fetchStatus(t('msg_fetch_fail', {"error": localizeFetchError(e)}), 'error');
         return;
     }
     if (btn) btn.classList.remove('loading');
@@ -1596,6 +1679,8 @@ async function setDrm(value) {
         profile['DRM_SECURITY_LEVEL'] = value;
         currentConfig['COPG-VD'] = profile;
     }
+    const drmGrp = document.getElementById('drm-apps-group');
+    if (drmGrp) drmGrp.style.display = (value !== 'off') ? '' : 'none';
     await saveConfig();
 }
 async function setVersionPolicy(value, selectEl) {
@@ -1625,9 +1710,7 @@ async function setGroup(name, value) {
     await saveConfig();
 }
 
-async function openScopeApps() {
-    const mode = currentConfig['scope_mode'] || 'playstore';
-    const key = mode === 'blacklist' ? 'scope_blacklist' : 'scope_whitelist';
+async function openAppPicker(key, title) {
     const current = Array.isArray(currentConfig[key]) ? currentConfig[key] : [];
     let pkgs = [];
     try {
@@ -1650,7 +1733,7 @@ async function openScopeApps() {
             '<button class="cancel-btn scope-apps-cancel"></button>' +
           '</div>' +
         '</div>';
-    overlay.querySelector('h3').textContent = t('ui_scope_apps');
+    overlay.querySelector('h3').textContent = title;
     overlay.querySelector('.scope-apps-save').textContent = t('ui_029');
     overlay.querySelector('.scope-apps-cancel').textContent = t('ui_006');
     const list = overlay.querySelector('.scope-app-list');
@@ -1678,6 +1761,16 @@ async function openScopeApps() {
         overlay.remove();
     });
     document.body.appendChild(overlay);
+}
+
+async function openScopeApps() {
+    const mode = currentConfig['scope_mode'] || 'playstore';
+    const key = mode === 'blacklist' ? 'scope_blacklist' : 'scope_whitelist';
+    return openAppPicker(key, t('ui_scope_apps'));
+}
+
+async function openDrmApps() {
+    return openAppPicker('drm_targets', t('ui_drm_apps'));
 }
 
 async function loadVersionPolicy() {
@@ -1797,6 +1890,13 @@ function setupToolOutputPanels() {
             copyToClipboard(body ? (body.innerText || body.textContent) : '');
             return;
         }
+        const exportBtn = e.target.closest('.out-export');
+        if (exportBtn) {
+            e.stopPropagation();
+            const body = exportBtn.closest('.tool-output').querySelector('.output');
+            exportOutputToDownload(body ? (body.innerText || body.textContent) : '', 'COPG-VD-DIAG');
+            return;
+        }
         const clearBtn = e.target.closest('.out-clear');
         if (clearBtn) {
             e.stopPropagation();
@@ -1907,6 +2007,8 @@ function applyEventListeners() {
     });
     const scopeAppsBtn = document.getElementById('scope-apps-edit');
     if (scopeAppsBtn) scopeAppsBtn.addEventListener('click', openScopeApps);
+    const drmAppsBtn = document.getElementById('drm-apps-edit');
+    if (drmAppsBtn) drmAppsBtn.addEventListener('click', openDrmApps);
     const deviceSaveBtn = document.getElementById('device-save-btn');
     if (deviceSaveBtn) deviceSaveBtn.addEventListener('click', saveDeviceInline);
     document.getElementById('toggle-resetprop').addEventListener('click', async (e) => {
@@ -1999,6 +2101,7 @@ function applyEventListeners() {
     const rfw = document.getElementById('restart-gms');
     if (rfw) rfw.addEventListener('click', restartPlayServices);
     document.getElementById('fetch-profile').addEventListener('click', openFetchPopup);
+    document.getElementById('diag-run')?.addEventListener('click', runDiagnostics);
     const fpDev = document.getElementById('fetch-profile-device');
     if (fpDev) fpDev.addEventListener('click', openFetchPopup);
     document.getElementById('fetch-apply').addEventListener('click', doFetchApply);

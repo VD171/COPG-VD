@@ -98,6 +98,7 @@ struct ScopeConfig {
     std::vector<std::string> blacklist;
     std::vector<std::string> playstore;
     std::vector<std::string> global_fields;
+    std::vector<std::string> drm_targets;
     std::map<std::string, std::map<std::string, std::string>> process_overrides;
     bool verbose_logs = false;
 };
@@ -114,6 +115,26 @@ static inline std::string trim(const std::string& str) {
 
 static bool readFile(const std::string& path, std::string& out) {
     const int fd = open(path.c_str(), O_RDONLY | O_CLOEXEC);
+    if (fd < 0) return false;
+    out.clear();
+    char buf[4096];
+    for (;;) {
+        const ssize_t n = read(fd, buf, sizeof(buf));
+        if (n < 0) { close(fd); return false; }
+        if (n == 0) break;
+        out.append(buf, static_cast<size_t>(n));
+        if (out.size() > (1u << 20)) break;
+    }
+    close(fd);
+    return true;
+}
+
+// Read a file relative to a directory fd (e.g. Zygisk getModuleDir()). openat() goes
+// through the already-open dir fd, so it does not need path-based access to /data/adb -
+// which Zygisk Next 1.5.3 stopped granting. Used as a fallback to the absolute path.
+static bool readFileAt(int dirfd, const char* rel, std::string& out) {
+    if (dirfd < 0) return false;
+    const int fd = openat(dirfd, rel, O_RDONLY | O_CLOEXEC);
     if (fd < 0) return false;
     out.clear();
     char buf[4096];
@@ -242,9 +263,12 @@ static bool validTree(const std::string& text, const std::vector<jsmntok_t>& t, 
 }
 
 static bool readConfig(const std::string& path, Config& out, std::set<std::string>* del = nullptr,
-                       ScopeConfig* scope = nullptr) {
+                       ScopeConfig* scope = nullptr, int module_dir_fd = -1) {
     std::string text;
-    if (!readFile(path, text)) return false;
+    // Prefer the absolute path (the live config the WebUI writes); if that read fails -
+    // e.g. a future Zygisk Next drops the adb_data_file access again - fall back to the
+    // module-dir copy via the open dir fd, which does not need path access.
+    if (!readFile(path, text) && !readFileAt(module_dir_fd, "COPG-VD.json", text)) return false;
 
     jsmn_parser parser;
     jsmn_init(&parser);
@@ -293,10 +317,12 @@ static bool readConfig(const std::string& path, Config& out, std::set<std::strin
             scope->verbose_logs = tokenText(text, val) == "true";
         } else if (scope && val.type == JSMN_ARRAY &&
                    (keyName == "scope_whitelist" || keyName == "scope_blacklist" ||
-                    keyName == "scope_playstore_targets" || keyName == "global_fields")) {
+                    keyName == "scope_playstore_targets" || keyName == "global_fields" ||
+                    keyName == "drm_targets")) {
             std::vector<std::string>& dst = keyName == "scope_whitelist" ? scope->whitelist
                                           : keyName == "scope_blacklist" ? scope->blacklist
                                           : keyName == "global_fields"   ? scope->global_fields
+                                          : keyName == "drm_targets"     ? scope->drm_targets
                                                                          : scope->playstore;
             int p = i + 2;
             for (int n = 0; n < val.size; n++) {
@@ -355,6 +381,15 @@ static bool inScope(const ScopeConfig& sc, const std::string& proc) {
     }
     return true;
 }
+// DRM/Widevine has its own optional target list, decoupled from the main scope.
+// Non-empty: the DRM hook applies only to these processes. Empty: follow the main scope.
+static bool inDrmScope(const ScopeConfig& sc, const std::string& proc) {
+    if (!sc.drm_targets.empty()) {
+        for (const auto& e : sc.drm_targets) if (procMatches(e, proc)) return true;
+        return false;
+    }
+    return inScope(sc, proc);
+}
 
 static jint   (*orig_drm_getSecurityLevel)(JNIEnv*, jobject) = nullptr;
 static jint   (*orig_drm_getSecurityLevelSession)(JNIEnv*, jobject, jbyteArray) = nullptr;
@@ -388,6 +423,7 @@ static jstring drm_getPropertyString(JNIEnv* env, jobject thiz, jstring name) {
 class COPGVDModule : public zygisk::ModuleBase {
 private:
     zygisk::Api* api = nullptr;
+    int module_dir_fd = -1;   // Zygisk getModuleDir(); fd-based config fallback (see readConfig)
     JNIEnv* env = nullptr;
     JavaVM* jvm = nullptr;
 
@@ -414,12 +450,13 @@ private:
 
     void reloadConfigIfChanged() {
         struct stat st;
-        if (stat(config_file.c_str(), &st) != 0) return;
+        if (stat(config_file.c_str(), &st) != 0 &&
+            (module_dir_fd < 0 || fstatat(module_dir_fd, "COPG-VD.json", &st, 0) != 0)) return;
         if (st.st_mtime == cfg_mtime) return;
         Config nd;
         std::set<std::string> ndel;
         ScopeConfig nsc;
-        if (readConfig(config_file, nd, &ndel, &nsc)) {
+        if (readConfig(config_file, nd, &ndel, &nsc, module_dir_fd)) {
             cfg_device = std::move(nd);
             cfg_del = std::move(ndel);
             scope_cfg = std::move(nsc);
@@ -675,7 +712,7 @@ private:
 
     void installDrmHook() {
         if (!scope_cfg.motor_drm) return;
-        const std::string lvl = get(cfg_effective, "DRM_SECURITY_LEVEL", "L1");
+        const std::string lvl = get(cfg_device, "DRM_SECURITY_LEVEL", "L1");
         const bool l3 = (lvl == "L3" || lvl == "l3");
         g_drm_level_int = l3 ? 1 : 3;
         g_drm_level_str = l3 ? "L3" : "L1";
@@ -716,7 +753,6 @@ private:
              cfg_effective.size(), del_effective.size());
         if (scope_cfg.motor_jni) spoofDevice();
         if (scope_cfg.motor_prop_hook) installPropHook();
-        installDrmHook();
     }
 
     void spoofGlobalFields() {
@@ -734,8 +770,12 @@ public:
         this->env = env;
         if (env) env->GetJavaVM(&jvm);
 
-        cfg_ok = readConfig(config_file, cfg_device, &cfg_del, &scope_cfg);
-        { struct stat st0; if (stat(config_file.c_str(), &st0) == 0) cfg_mtime = st0.st_mtime; }
+        module_dir_fd = api ? api->getModuleDir() : -1;
+        cfg_ok = readConfig(config_file, cfg_device, &cfg_del, &scope_cfg, module_dir_fd);
+        { struct stat st0;
+          if (stat(config_file.c_str(), &st0) == 0 ||
+              (module_dir_fd >= 0 && fstatat(module_dir_fd, "COPG-VD.json", &st0, 0) == 0))
+              cfg_mtime = st0.st_mtime; }
         g_verbose = scope_cfg.verbose_logs;
         LOGV("onLoad: cfg_ok=%d mode=%s jni=%d prop_hook=%s drm=%d fields=%zu overrides=%zu",
              cfg_ok, scope_cfg.mode.c_str(), scope_cfg.motor_jni,
@@ -744,6 +784,7 @@ public:
         scoped_mode = !(scope_cfg.mode == "global" || scope_cfg.mode.empty());
         if (!scoped_mode) {
             applyEngines();
+            installDrmHook();
             if (!keep_resident) api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
         } else {
             spoofGlobalFields();
@@ -753,7 +794,10 @@ public:
     void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
         if (!scoped_mode) return;
         refreshEnv();
-        if (!inScope(scope_cfg, niceName(args))) {
+        const std::string proc = niceName(args);
+        const bool inMain = inScope(scope_cfg, proc);
+        const bool inDrm  = scope_cfg.motor_drm && inDrmScope(scope_cfg, proc);
+        if (!inMain && !inDrm) {
             api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
             return;
         }
@@ -764,9 +808,11 @@ public:
         if (!scoped_mode) return;
         refreshEnv();
         const std::string proc = niceName(args);
-        const bool in = inScope(scope_cfg, proc);
-        LOGV("postAppSpecialize: proc=%s inScope=%d", proc.c_str(), in);
-        if (in) { current_proc = proc; applyEngines(); }
+        const bool inMain = inScope(scope_cfg, proc);
+        const bool inDrm  = scope_cfg.motor_drm && inDrmScope(scope_cfg, proc);
+        LOGV("postAppSpecialize: proc=%s inScope=%d inDrm=%d", proc.c_str(), inMain, inDrm);
+        if (inMain) { current_proc = proc; applyEngines(); }
+        if (inDrm) installDrmHook();
         if (!keep_resident) api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
     }
 };

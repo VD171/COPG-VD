@@ -27,7 +27,7 @@ COPG-VD एक डिवाइस स्पूफर है: यह डिवा
 * **Build fields (JNI)** - लक्षित प्रक्रियाओं में `android.os.Build.*` को फिर से लिखता है।  
 * **Property hook** - लक्षित प्रक्रियाओं को स्पूफ की गई सिस्टम प्रॉपर्टीज़ प्रस्तुत करता है (प्रॉपर्टी क्षेत्र का प्रति-प्रक्रिया clean-room रीमैप, बिना किसी फ़ंक्शन hook के)।  
 * **resetprop** - सिस्टम प्रॉपर्टीज़ को फिर से लिखता है, समूह के अनुसार प्रबंधित: identity, version, boot state, SELinux, adb/usb, anti-emulator और एक cleanup पास। सीमित दायरे वाले मोड में identity और version समूह पूरे-डिवाइस वाले resetprop से बाहर रहते हैं (Zygisk उन्हें प्रति प्रक्रिया पहुँचाता है); boot/lock/SELinux समूह ग्लोबल रहते हैं।  
-* **DRM / Widevine** (डिफ़ॉल्ट रूप से बंद) - इसे पढ़ने वाले ऐप्स को एक चुना हुआ Widevine सुरक्षा स्तर, L1 या L3, रिपोर्ट करता है।  
+* **DRM / Widevine** (डिफ़ॉल्ट रूप से बंद) - इसे पढ़ने वाले ऐप्स को एक चुना हुआ Widevine सुरक्षा स्तर, L1 या L3, रिपोर्ट करता है। डिफ़ॉल्ट रूप से यह ऊपर दिए गए दायरे का पालन करता है; DRM स्पूफ को **केवल** उन ऐप्स पर लागू करने के लिए `drm_targets` (ऐप्स की एक सूची) सेट करें, `scope_mode` से स्वतंत्र - मॉड्यूल केवल DRM hook के लिए एक सूचीबद्ध ऐप में लोड रहता है, भले ही वह ऐप मुख्य दायरे से बाहर हो। खाली या अनुपस्थित होने का अर्थ है दायरे का पालन करना। (एक सीमित दायरे वाला मोड आवश्यक है, Global नहीं।)  
 
 ### Fields - सेट, खाली, डिलीट या छोड़ना
 `COPG-VD` ऑब्जेक्ट के भीतर हर Build फ़ील्ड की चार अवस्थाएँ होती हैं:  
@@ -47,6 +47,7 @@ COPG-VD एक डिवाइस स्पूफर है: यह डिवा
   "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.261016.008-factory-28d56d15.zip",
   "scope_mode": "playstore",
   "motor_drm": false,
+  "drm_targets": [],
   "global_fields": ["SECURITY_PATCH"],
   "process_overrides": [],
   "COPG-VD": {
@@ -117,6 +118,11 @@ WebUI वैकल्पिक है - सब कुछ सीधे JSON क�
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-docs -->
+## दस्तावेज़ीकरण
+
+[उपयोगकर्ता गाइड](docs/hi/USER-GUIDE.md) · [कॉन्फ़िगरेशन संदर्भ](docs/hi/CONFIGURATION.md) · [आर्किटेक्चर](docs/hi/ARCHITECTURE.md) · [फ़ाइल संरचना](docs/hi/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/hi-Home)
 
 <!-- vd-see-also -->
 

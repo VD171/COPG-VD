@@ -4,7 +4,8 @@
 #   version.sh read            print the current version, nothing is written
 #   version.sh patch|minor|major   bump it, rewrite module.prop and update.json
 #
-# Version is v<major>.<minor>.<patch>-vd; versionCode = major*10000 + minor*100 + patch (two digits
+# Version is v<major>.<minor>[.<patch>]-vd (the .patch is omitted when it is 0, e.g. v6.10-vd =
+# v6.10.0); versionCode = major*10000 + minor*100 + patch (two digits
 # each, so parts up to 99 never collide and the code only grows - what Magisk/KernelSU require).
 # Writes version/versionCode/zip/tag to $GITHUB_OUTPUT when running in Actions.
 set -euo pipefail
@@ -23,8 +24,8 @@ prop() { sed -n "s/^$1=//p" "$MODULE_PROP" | head -n 1; }
 current="$(prop version)"
 current_code="$(prop versionCode)"
 
-if ! printf '%s' "$current" | grep -qE "^v[0-9]+\.[0-9]+\.[0-9]+${SUFFIX}$"; then
-    echo "::error::version '$current' does not look like v<major>.<minor>.<patch>${SUFFIX}"
+if ! printf '%s' "$current" | grep -qE "^v[0-9]+\.[0-9]+(\.[0-9]+)?${SUFFIX}$"; then
+    echo "::error::version '$current' does not look like v<major>.<minor>[.<patch>]${SUFFIX}"
     exit 1
 fi
 if ! printf '%s' "$current_code" | grep -qE '^[0-9]+$'; then
@@ -35,9 +36,9 @@ fi
 numbers="${current#v}"
 numbers="${numbers%$SUFFIX}"
 major="${numbers%%.*}"
-patch="${numbers##*.}"
-minor="${numbers#*.}"
-minor="${minor%.*}"
+rest="${numbers#*.}"
+minor="${rest%%.*}"
+if [ "$rest" = "$minor" ]; then patch=0; else patch="${rest#*.}"; fi
 
 case "$action" in
     read)
@@ -51,7 +52,7 @@ case "$action" in
 esac
 
 if [ "$action" != "read" ]; then
-    version="v${major}.${minor}.${patch}${SUFFIX}"
+    if [ "$patch" -eq 0 ]; then version="v${major}.${minor}${SUFFIX}"; else version="v${major}.${minor}.${patch}${SUFFIX}"; fi
     if [ "$minor" -gt 99 ] || [ "$patch" -gt 99 ]; then
         echo "::error::$version cannot be packed: minor and patch hold two digits each."
         exit 1

@@ -27,7 +27,7 @@ Każdy z nich jest niezależny i można go wyłączyć:
 * **Build fields (JNI)** - przepisuje `android.os.Build.*` w docelowych procesach.  
 * **Property hook** - przedstawia spoofowane właściwości systemowe docelowym procesom (czyste, przeprowadzane per proces remapowanie obszaru właściwości, bez hooka funkcji).  
 * **resetprop** - przepisuje właściwości systemowe, zarządzane grupami: tożsamość, wersja, stan rozruchu, SELinux, adb/usb, anty-emulator i przebieg czyszczący. W trybie z zakresem grupy tożsamości i wersji pozostają poza obejmującym całe urządzenie resetprop (Zygisk dostarcza je per proces); grupy rozruchu/blokady/SELinux pozostają globalne.  
-* **DRM / Widevine** (domyślnie wyłączone) - zgłasza wybrany poziom bezpieczeństwa Widevine, L1 lub L3, aplikacjom, które go odczytują.  
+* **DRM / Widevine** (domyślnie wyłączone) - zgłasza wybrany poziom bezpieczeństwa Widevine, L1 lub L3, aplikacjom, które go odczytują. Domyślnie podąża za zakresem powyżej; ustaw `drm_targets` (listę aplikacji), aby zastosować spoof DRM **tylko** do tych aplikacji, niezależnie od `scope_mode` - moduł pozostaje załadowany w wymienionej aplikacji wyłącznie dla hooka DRM, nawet gdy ta aplikacja znajduje się poza głównym zakresem. Puste lub brak oznacza podążanie za zakresem. (Wymaga trybu z zakresem, nie Global.)  
 
 ### Pola - ustaw, puste, usuń lub pomiń
 Wewnątrz obiektu `COPG-VD` każde pole Build ma cztery stany:  
@@ -47,6 +47,7 @@ Lista `"global_fields": [ ... ]` stosuje wymienione pola Build dla całego urzą
   "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.261016.008-factory-28d56d15.zip",
   "scope_mode": "playstore",
   "motor_drm": false,
+  "drm_targets": [],
   "global_fields": ["SECURITY_PATCH"],
   "process_overrides": [],
   "COPG-VD": {
@@ -117,6 +118,11 @@ Jeśli jesteś użytkownikiem Magisk, użyj KsuWebUI autorstwa KOW (https://gith
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-docs -->
+## Dokumentacja
+
+[Przewodnik użytkownika](docs/pl/USER-GUIDE.md) · [Dokumentacja konfiguracji](docs/pl/CONFIGURATION.md) · [Architektura](docs/pl/ARCHITECTURE.md) · [Struktura plików](docs/pl/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/pl-Home)
 
 <!-- vd-see-also -->
 

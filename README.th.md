@@ -27,7 +27,7 @@ COPG-VD เป็นเครื่องมือปลอมแปลงอุ
 * **Build fields (JNI)** - เขียน `android.os.Build.*` ใหม่ในโปรเซสเป้าหมาย  
 * **Property hook** - แสดงพรอเพอร์ตีระบบที่ปลอมแปลงให้กับโปรเซสเป้าหมาย (การ remap พื้นที่พรอเพอร์ตีแบบ clean-room แยกรายโปรเซส ไม่มีการ hook ฟังก์ชัน)  
 * **resetprop** - เขียนพรอเพอร์ตีระบบใหม่ จัดการเป็นกลุ่ม: identity, version, boot state, SELinux, adb/usb, anti-emulator และรอบทำความสะอาด ในโหมดที่จำกัดขอบเขต กลุ่ม identity และ version จะไม่อยู่ใน resetprop ระดับทั้งอุปกรณ์ (Zygisk ส่งมอบแยกรายโปรเซส) ส่วนกลุ่ม boot/lock/SELinux จะยังคงเป็น global  
-* **DRM / Widevine** (ปิดตามค่าเริ่มต้น) - รายงานระดับความปลอดภัย Widevine ที่เลือกไว้ คือ L1 หรือ L3 ให้กับแอปที่อ่านมัน  
+* **DRM / Widevine** (ปิดตามค่าเริ่มต้น) - รายงานระดับความปลอดภัย Widevine ที่เลือกไว้ คือ L1 หรือ L3 ให้กับแอปที่อ่านมัน โดยค่าเริ่มต้นจะทำตามขอบเขตด้านบน ตั้งค่า `drm_targets` (รายการแอป) เพื่อใช้การปลอมแปลง DRM กับเฉพาะแอปเหล่านั้น โดยไม่ขึ้นกับ `scope_mode` - โมดูลจะยังคงโหลดอยู่ในแอปที่อยู่ในรายการเพียงเพื่อ DRM hook แม้ว่าแอปนั้นจะอยู่นอกขอบเขตหลัก เว้นว่างหรือไม่ได้กำหนดหมายถึงทำตามขอบเขต (ต้องใช้โหมดที่มีขอบเขต ไม่ใช่ Global)  
 
 ### Fields - set, empty, delete หรือ skip
 ภายในออบเจกต์ `COPG-VD` แต่ละฟิลด์ Build มีสี่สถานะ:  
@@ -47,6 +47,7 @@ COPG-VD เป็นเครื่องมือปลอมแปลงอุ
   "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.261016.008-factory-28d56d15.zip",
   "scope_mode": "playstore",
   "motor_drm": false,
+  "drm_targets": [],
   "global_fields": ["SECURITY_PATCH"],
   "process_overrides": [],
   "COPG-VD": {
@@ -117,6 +118,11 @@ WebUI เป็นตัวเลือก - ทุกอย่างสาม�
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-docs -->
+## เอกสารประกอบ
+
+[คู่มือผู้ใช้](docs/th/USER-GUIDE.md) · [ข้อมูลอ้างอิงการตั้งค่า](docs/th/CONFIGURATION.md) · [สถาปัตยกรรม](docs/th/ARCHITECTURE.md) · [โครงสร้างไฟล์](docs/th/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/th-Home)
 
 <!-- vd-see-also -->
 

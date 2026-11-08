@@ -1,0 +1,7 @@
+# Zygisk Next 1.5.3 dropped the default "allow zygote adb_data_file dir search" that the
+# injected (zygote) process relied on to read /data/adb/COPG-VD.json. Without it stat() got
+# EACCES and the config never loaded, so every app looked "not configured" and ran
+# unspoofed. We ship the permission ourselves, so the module spoofs on Zygisk Next 1.5.3
+# and older versions alike (mirrors upstream COPG v7.7.1).
+allow zygote adb_data_file dir { search getattr open read }
+allow zygote adb_data_file file { open read getattr }

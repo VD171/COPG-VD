@@ -27,7 +27,7 @@ Ognuno è indipendente e può essere disattivato:
 * **Build fields (JNI)** - riscrive `android.os.Build.*` nei processi interessati.  
 * **Property hook** - presenta le proprietà di sistema spoofate ai processi interessati (una rimappatura clean-room per processo dell'area delle proprietà, senza hook di funzione).  
 * **resetprop** - riscrive le proprietà di sistema, gestite per gruppo: identità, versione, stato di avvio, SELinux, adb/usb, anti-emulatore e una passata di pulizia. In una modalità con ambito limitato i gruppi identità e versione restano fuori dal resetprop applicato a tutto il dispositivo (Zygisk li consegna per processo); i gruppi boot/lock/SELinux restano globali.  
-* **DRM / Widevine** (disattivato per impostazione predefinita) - riporta un livello di sicurezza Widevine scelto, L1 o L3, alle app che lo leggono.  
+* **DRM / Widevine** (disattivato per impostazione predefinita) - riporta un livello di sicurezza Widevine scelto, L1 o L3, alle app che lo leggono. Per impostazione predefinita segue l'ambito sopra; imposta `drm_targets` (un elenco di app) per applicare lo spoof DRM **solo** a quelle app, indipendentemente da `scope_mode` - il modulo resta caricato in un'app elencata solo per l'hook DRM, anche quando quell'app è fuori dall'ambito principale. Vuoto o assente significa seguire l'ambito. (Richiede una modalità con ambito limitato, non Global.)  
 
 ### Campi - impostare, vuoto, eliminare o saltare
 All'interno dell'oggetto `COPG-VD` ogni campo Build ha quattro stati:  
@@ -47,6 +47,7 @@ Una lista `"global_fields": [ ... ]` applica i campi Build indicati a tutto il d
   "Strings extracted from": "https://dl.google.com/developers/android/CANARY/images/factory/tegu_beta-zp11.261016.008-factory-28d56d15.zip",
   "scope_mode": "playstore",
   "motor_drm": false,
+  "drm_targets": [],
   "global_fields": ["SECURITY_PATCH"],
   "process_overrides": [],
   "COPG-VD": {
@@ -120,6 +121,11 @@ Se sei un utente Magisk, usa KsuWebUI di KOW (https://github.com/KOWX712/KsuWebU
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
+
+<!-- vd-docs -->
+## Documentazione
+
+[Guida utente](docs/it/USER-GUIDE.md) · [Riferimento di configurazione](docs/it/CONFIGURATION.md) · [Architettura](docs/it/ARCHITECTURE.md) · [Struttura dei file](docs/it/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/it-Home)
 
 <!-- vd-see-also -->
 
