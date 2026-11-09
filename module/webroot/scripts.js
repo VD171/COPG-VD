@@ -139,8 +139,6 @@ async function execCommand(command) {
             if (errno === 0) {
                 resolve(stdout || "");
             } else {
-                // Surface the script's own reason (its `status:` line on stdout, or stderr)
-                // instead of a bare exit code, so error reports are actionable everywhere.
                 const sout = (stdout || "").trim();
                 const line = sout.split("\n").map((s) => s.trim()).find((s) => s.startsWith("status:"));
                 const detail = line ? line.replace(/^status:\s*/, "") : ((stderr || "").trim() || sout);
@@ -506,7 +504,6 @@ async function saveLogToFile() {
     }
 }
 
-// Unified diagnostics: one place to read + export everything useful for a bug report.
 async function gatherDiagnostics() {
     const cmd = `D=/data/adb; M="$D/modules/COPG-VD"
 echo "===== COPG-VD Diagnostics ====="
@@ -1492,9 +1489,6 @@ async function restartPlayServices() {
 let fetchIndex = null;
 const FETCH_SCRIPT = '/data/adb/modules/COPG-VD/fingerprint-update.sh';
 
-// Turn the script's own status code (e.g. "download-failed http=000 curl=6") into a
-// localized human message, keeping the technical detail in brackets. Unknown codes
-// (or a raw JS error) pass through unchanged. #8
 function localizeFetchError(e) {
     const raw = String(e == null ? '' : e).trim();
     const code = raw.split(/\s+/)[0];

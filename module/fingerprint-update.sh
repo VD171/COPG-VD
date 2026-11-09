@@ -276,8 +276,6 @@ write_fields() {
     ' "$target" "$target" > "$TMP_FILE.new" || return 1
 
     [ -s "$TMP_FILE.new" ] || { log "refusing to write an empty file over $target"; return 1; }
-    # Tolerate the block brace on its own line (valid JSON): strip newlines before
-    # matching, so a correctly-formatted config is not falsely rejected (issue #20).
     tr -d '\n' < "$TMP_FILE.new" | grep -q "\"$MODULE_ID\"[[:space:]]*:[[:space:]]*{" ||
         { log "refusing to write a broken file over $target"; return 1; }
 

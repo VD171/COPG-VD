@@ -20,15 +20,6 @@
 #  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
 #  E-mail         : vd.priv8@pm.me
 # ======================================================================
-# Single source of truth for the module version: module/module.prop.
-#
-#   version.sh read            print the current version, nothing is written
-#   version.sh patch|minor|major   bump it, rewrite module.prop and update.json
-#
-# Version is v<major>.<minor>[.<patch>]-vd (the .patch is omitted when it is 0, e.g. v6.10-vd =
-# v6.10.0); versionCode = major*10000 + minor*100 + patch (two digits
-# each, so parts up to 99 never collide and the code only grows - what Magisk/KernelSU require).
-# Writes version/versionCode/zip/tag to $GITHUB_OUTPUT when running in Actions.
 set -euo pipefail
 
 MODULE_PROP="module/module.prop"

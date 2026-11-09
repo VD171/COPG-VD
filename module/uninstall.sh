@@ -21,10 +21,6 @@
 #  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
 #  E-mail         : vd.priv8@pm.me
 # ======================================================================
-# Runs when the module is removed.
-#
-# Your config is deliberately kept: /data/adb/COPG-VD.json and its .bak survive, so
-# reinstalling does not cost you your profile. Only what the module generates by itself goes.
 
 rm -f /data/adb/COPG-VD.update.state
 rm -f /data/adb/COPG-VD.update.log

@@ -22,8 +22,6 @@
  *  E-mail         : vd.priv8@pm.me
  * ======================================================================
  */
-/* Fonts served from inside the module: the WebUI must not touch the network.
-   Latin subset of Poppins 400/500/600 and Roboto Mono 400, from Google Fonts (OFL). */
 
 @font-face {
   font-family: 'Poppins';
