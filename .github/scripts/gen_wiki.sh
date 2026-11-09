@@ -1,24 +1,36 @@
 #!/usr/bin/env bash
-# Generate the project Wiki from docs/. Used by the GitHub wiki-sync workflow: docs/ is the
-# source of truth; this only renders a Home, a _Sidebar and a Languages index around the
-# mirrored pages.
+# ======================================================================
+#  COPG-VD  ::  global device spoofer
+#  Spoof your device fingerprint and build - Zygisk, KernelSU/APatch/Magisk.
 #
-#   gen_wiki.sh <docs_dir> <wiki_dir>
+#  Copyright (C) 2026  VD171
+#  SPDX-License-Identifier: Apache-2.0
+#  Fork by VD171.
+#
+#  Licensed under the Apache License, Version 2.0; you may obtain a copy at
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Site           : https://vd171.ru
+#  Site           : https://vd.priv8.ru
+#  Source         : https://github.com/VD171/COPG-VD
+#  GitHub         : @VD171 https://github.com/VD171
+#  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+#  XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+#  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+#  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+#  E-mail         : vd.priv8@pm.me
+# ======================================================================
 set -euo pipefail
 SRC="${1:?usage: gen_wiki.sh <docs_dir> <wiki_dir>}"
 WIKI="${2:?usage: gen_wiki.sh <docs_dir> <wiki_dir>}"
 [ -d "$SRC" ] || { echo "no docs dir: $SRC" >&2; exit 1; }
 mkdir -p "$WIKI"
 
-# English docs (source of truth) -> top-level wiki pages (keep file names).
 for f in "$SRC"/*.md; do
   [ -f "$f" ] || continue
   cp "$f" "$WIKI/$(basename "$f")"
 done
-# screenshots gallery: copy it so pages that embed it resolve (flattened by the python pass).
 [ -d "$SRC/screenshots" ] && { rm -rf "$WIKI/screenshots"; cp -r "$SRC/screenshots" "$WIKI/screenshots"; }
-# Some English docs live at the repo root (CHANGELOG, CONTRIBUTING, ...) while their
-# translations are under docs/<lang>/. Mirror each English source as a top-level page.
 ROOT_DIR="$(cd "$SRC/.." && pwd)"
 en_src() {
   for _p in "$SRC/$1.md" "$ROOT_DIR/$1.md"; do
@@ -26,7 +38,6 @@ en_src() {
   done
   return 0
 }
-# full doc-name set = what a reference language dir carries, plus any docs/*.md EN-only.
 DOCS=""
 for _d in "$SRC"/*/; do
   [ -d "$_d" ] || continue
@@ -45,7 +56,6 @@ for _b in $DOCS; do
   [ -n "$_s" ] && cp "$_s" "$WIKI/$_b.md"
 done
 
-# Translations in docs/<lang>/ -> "<lang>-<DOC>" pages.
 for d in "$SRC"/*/; do
   [ -d "$d" ] || continue
   lang="$(basename "$d")"
@@ -55,9 +65,8 @@ for d in "$SRC"/*/; do
   done
 done
 
-# --- helpers -------------------------------------------------------------
 have() { [ -f "$WIKI/$1.md" ]; }
-doclabel() {   # <base> <code> : the doc's own H1 title in that language (fallback: base name)
+doclabel() {
   if [ "$2" = en ]; then _df="$WIKI/$1.md"; else _df="$SRC/$2/$1.md"; fi
   if [ -f "$_df" ]; then
     _h="$(grep -m1 '^#\{1,\} ' "$_df" | sed -e 's/^#\{1,\}[[:space:]]*//' -e 's/&amp;/\&/g')"
@@ -65,17 +74,16 @@ doclabel() {   # <base> <code> : the doc's own H1 title in that language (fallba
   fi
   printf '%s' "$1"
 }
-dlink() {   # <base> <lang-prefix-or-empty> <code> : a localized doc link for that language
+dlink() {
   if [ -n "$2" ]; then _pg="$2-$1"; else _pg="$1"; fi
   [ -f "$WIKI/$_pg.md" ] || return 0
   echo "- [[$(doclabel "$1" "$3")|$_pg]]"
 }
-tagline() {   # <code> : first prose line of that language's README
+tagline() {
   if [ "$1" = en ]; then _rf="$ROOT_DIR/README.md"; else _rf="$ROOT_DIR/README.$1.md"; fi
   [ -f "$_rf" ] || return 0
   awk 'NF==0{next} /^#/{next} /^\[/{next} /^>/{next} /^</{next} /^\|/{next} {sub(/[ \t]+$/,""); print; exit}' "$_rf"
 }
-# Home chrome, localized (section title / all-languages label / footer note).
 t_doc() { case "$1" in
   en) printf Documentation ;; ar) printf '%s' "التوثيق" ;; cs) printf Dokumentace ;; de) printf Dokumentation ;;
   es) printf '%s' "Documentación" ;; fa) printf '%s' "مستندات" ;; fr) printf Documentation ;; hi) printf '%s' "दस्तावेज़ीकरण" ;;
@@ -120,7 +128,6 @@ endonym() { case "$1" in
   nl) printf Nederlands ;; pl) printf Polski ;; pt) printf '%s' "Português" ;; ru) printf '%s' "Русский" ;;
   sv) printf Svenska ;; th) printf '%s' "ไทย" ;; tr) printf '%s' "Türkçe" ;; vi) printf '%s' "Tiếng Việt" ;;
   zh) printf '%s' "中文" ;; esac; }
-# Home-level language switcher: links each language's Home (current shown plain).
 home_switcher() {
   _s="**Languages:**"
   for _hc in en $NAV_LANGS; do
@@ -131,8 +138,7 @@ home_switcher() {
   printf '%s\n' "${_s% |}"
 }
 
-# Home (landing) per language: switcher + localized tagline + localized doc links.
-write_home() {   # <code>
+write_home() {
   _c="$1"
   if [ "$_c" = en ]; then _file="$WIKI/Home.md"; _px=""; else _file="$WIKI/${_c}-Home.md"; _px="$_c"; fi
   {
@@ -159,7 +165,6 @@ write_home() {   # <code>
 write_home en
 for _c in $NAV_LANGS; do write_home "$_c"; done
 
-# Sidebar: the key pages in order, then the Languages index.
 {
   for b in USER-GUIDE CONFIGURATION ARCHITECTURE FILE-STRUCTURE CONTRIBUTING CODE_OF_CONDUCT SECURITY; do
     have "$b" && echo "- [[$b]]"
@@ -167,7 +172,6 @@ for _c in $NAV_LANGS; do write_home "$_c"; done
   echo "- [[Languages]]"
 } > "$WIKI/_Sidebar.md"
 
-# Languages: per language, link to each translated doc.
 {
   echo "# Languages"
   echo
@@ -185,9 +189,7 @@ for _c in $NAV_LANGS; do write_home "$_c"; done
   done
 } > "$WIKI/Languages.md"
 
-# Per-page language switcher: prepend a "Languages:" line to every doc page linking the
-# SAME document in each language it exists in (the current one shown plain).
-doc_body() {   # <file> : strip a leading repo-relative language switcher if present
+doc_body() {
   awk '
     NR==1 && $0 ~ /^> \*\*Languages:\*\*/ { drop=1; next }
     drop==1 { if ($0 ~ /^---[[:space:]]*$/) { drop=2 } next }
@@ -195,7 +197,7 @@ doc_body() {   # <file> : strip a leading repo-relative language switcher if pre
     { print }
   ' "$1"
 }
-prepend_nav() {   # <file> <base> <current-code>
+prepend_nav() {
   _f="$1"; _base="$2"; _cur="$3"; _nav="**Languages:**"
   for _pc in en $NAV_LANGS; do
     if [ "$_pc" = en ]; then _page="$_base"; else _page="${_pc}-${_base}"; fi
@@ -214,8 +216,6 @@ for _b in $DOCS; do
   done
 done
 
-# Rewrite body cross-doc links (`](path/DOC.md#a)`) to flat wiki page links in the page's
-# own language, and flatten screenshot image paths so they resolve on the flat wiki.
 DOC_SET="$DOCS" NAV="$NAV_LANGS" python3 - "$WIKI" <<'PY'
 import os, re, sys
 wiki = sys.argv[1]
@@ -237,4 +237,4 @@ for fn in os.listdir(wiki):
         open(p, "w", encoding="utf-8").write(nt)
 PY
 
-echo "wiki generated: $(ls "$WIKI"/*.md | wc -l) pages in $WIKI (per-page language switcher)"
+echo "wiki generated: $(ls "$WIKI"/*.md | wc -l) pages in $WIKI"

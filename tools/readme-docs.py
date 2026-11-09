@@ -1,11 +1,31 @@
 #!/usr/bin/env python3
-# Insert or refresh a "Documentation" section in every README - links to docs/ in the
-# README's own language plus the project wiki - right before the <!-- vd-see-also -->
-# marker. Deterministic and idempotent: it reuses each doc's own H1 title as the label and
-# brackets its block with <!-- vd-docs --> so a re-run replaces it cleanly. Run after
-# adding a doc or a language.
+# ======================================================================
+#  COPG-VD  ::  global device spoofer
+#  Spoof your device fingerprint and build - Zygisk, KernelSU/APatch/Magisk.
 #
-#   tools/readme-docs.py [repo_root]
+#  Copyright (C) 2026  VD171
+#  SPDX-License-Identifier: Apache-2.0
+#  Fork by VD171.
+#
+#  Licensed under the Apache License, Version 2.0; you may obtain a copy at
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Site           : https://vd171.ru
+#  Site           : https://vd.priv8.ru
+#  Source         : https://github.com/VD171/COPG-VD
+#  GitHub         : @VD171 https://github.com/VD171
+#  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+#  XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+#  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+#  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+#  E-mail         : vd.priv8@pm.me
+# ======================================================================
+"""Insert or refresh a "Documentation" section in every README (links to docs/ in
+the README's own language plus the wiki), before the <!-- vd-see-also --> marker.
+Deterministic and idempotent. Run after adding a doc or a language.
+
+    tools/readme-docs.py [repo_root]
+"""
 import os, re, sys
 
 ROOT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.getcwd()

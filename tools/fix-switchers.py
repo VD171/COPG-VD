@@ -1,10 +1,30 @@
 #!/usr/bin/env python3
-# Set the "> **Languages:**" switcher line on every in-repo doc file, deterministically,
-# from the file's own location. Run after adding a translation or a new language. The EN
-# community docs live at the repo root; the EN technical docs and all translations live
-# under docs/. Idempotent: it replaces an existing leading switcher or inserts one.
+# ======================================================================
+#  COPG-VD  ::  global device spoofer
+#  Spoof your device fingerprint and build - Zygisk, KernelSU/APatch/Magisk.
 #
-#   tools/fix-switchers.py [repo_root]
+#  Copyright (C) 2026  VD171
+#  SPDX-License-Identifier: Apache-2.0
+#  Fork by VD171.
+#
+#  Licensed under the Apache License, Version 2.0; you may obtain a copy at
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Site           : https://vd171.ru
+#  Site           : https://vd.priv8.ru
+#  Source         : https://github.com/VD171/COPG-VD
+#  GitHub         : @VD171 https://github.com/VD171
+#  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+#  XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+#  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+#  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+#  E-mail         : vd.priv8@pm.me
+# ======================================================================
+"""Set the "> **Languages:**" switcher on every in-repo doc, from the file's own
+location. Idempotent. Run after adding a translation or a new language.
+
+    tools/fix-switchers.py [repo_root]
+"""
 import os, sys
 
 ROOT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.getcwd()
@@ -17,7 +37,7 @@ ENDO = {"en": "English", "ar": "العربية", "cs": "Čeština", "de": "Deuts
 DOCS_BASES = ["USER-GUIDE", "CONFIGURATION", "ARCHITECTURE", "FILE-STRUCTURE"]
 ROOT_BASES = ["CONTRIBUTING", "CODE_OF_CONDUCT", "SECURITY"]
 
-def lang_path(base, code):   # path of <base> in <code>, relative to ROOT
+def lang_path(base, code):
     if code == "en":
         return f"docs/{base}.md" if base in DOCS_BASES else f"{base}.md"
     return f"docs/{code}/{base}.md"
