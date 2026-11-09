@@ -129,9 +129,6 @@ static bool readFile(const std::string& path, std::string& out) {
     return true;
 }
 
-// Read a file relative to a directory fd (e.g. Zygisk getModuleDir()). openat() goes
-// through the already-open dir fd, so it does not need path-based access to /data/adb -
-// which Zygisk Next 1.5.3 stopped granting. Used as a fallback to the absolute path.
 static bool readFileAt(int dirfd, const char* rel, std::string& out) {
     if (dirfd < 0) return false;
     const int fd = openat(dirfd, rel, O_RDONLY | O_CLOEXEC);
@@ -265,9 +262,6 @@ static bool validTree(const std::string& text, const std::vector<jsmntok_t>& t, 
 static bool readConfig(const std::string& path, Config& out, std::set<std::string>* del = nullptr,
                        ScopeConfig* scope = nullptr, int module_dir_fd = -1) {
     std::string text;
-    // Prefer the absolute path (the live config the WebUI writes); if that read fails -
-    // e.g. a future Zygisk Next drops the adb_data_file access again - fall back to the
-    // module-dir copy via the open dir fd, which does not need path access.
     if (!readFile(path, text) && !readFileAt(module_dir_fd, "COPG-VD.json", text)) return false;
 
     jsmn_parser parser;
@@ -381,8 +375,6 @@ static bool inScope(const ScopeConfig& sc, const std::string& proc) {
     }
     return true;
 }
-// DRM/Widevine has its own optional target list, decoupled from the main scope.
-// Non-empty: the DRM hook applies only to these processes. Empty: follow the main scope.
 static bool inDrmScope(const ScopeConfig& sc, const std::string& proc) {
     if (!sc.drm_targets.empty()) {
         for (const auto& e : sc.drm_targets) if (procMatches(e, proc)) return true;
@@ -668,8 +660,6 @@ private:
         applyStr(buildClass, build_manufacturerField, "MANUFACTURER");
         applyStr(buildClass, build_fingerprintField, "FINGERPRINT");
         applyStr(buildClass, build_productField, "PRODUCT");
-        // Android's keystore provider prefers these over the ordinary Build
-        // fields. Keep the requested attestation IDs consistent with our identity.
         applyStr(buildClass, getField(buildClass, "BRAND_FOR_ATTESTATION", "Ljava/lang/String;"), "BRAND");
         applyStr(buildClass, getField(buildClass, "DEVICE_FOR_ATTESTATION", "Ljava/lang/String;"), "DEVICE");
         applyStr(buildClass, getField(buildClass, "PRODUCT_FOR_ATTESTATION", "Ljava/lang/String;"), "PRODUCT");

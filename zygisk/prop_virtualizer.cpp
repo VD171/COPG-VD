@@ -1,6 +1,26 @@
-// COPG-VD prop_hook engine - clean-room, Apache-2.0. See the header. Written from the public
-// bionic property API (<sys/system_properties.h>) and the public prop_info layout; no code from
-// any GPL project was used.
+/*
+ * ======================================================================
+ *  COPG-VD  ::  global device spoofer
+ *  Spoof your device fingerprint and build - Zygisk, KernelSU/APatch/Magisk.
+ *
+ *  Copyright (C) 2026  VD171
+ *  SPDX-License-Identifier: Apache-2.0
+ *  Fork by VD171.
+ *
+ *  Licensed under the Apache License, Version 2.0; you may obtain a copy at
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Site           : https://vd171.ru
+ *  Site           : https://vd.priv8.ru
+ *  Source         : https://github.com/VD171/COPG-VD
+ *  GitHub         : @VD171 https://github.com/VD171
+ *  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+ *  XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+ *  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+ *  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+ *  E-mail         : vd.priv8@pm.me
+ * ======================================================================
+ */
 #include "prop_virtualizer.hpp"
 
 #include <sys/mman.h>
@@ -16,7 +36,7 @@
 namespace copgvd::propvirt {
 namespace {
 
-constexpr size_t kValueMax = 92;      // PROP_VALUE_MAX
+constexpr size_t kValueMax = 92;
 
 struct Region {
     uintptr_t start = 0, end = 0;
@@ -26,8 +46,6 @@ struct Region {
     bool remapped = false;
 };
 
-// Prop name -> spoofed value from the Build fields, for the identity/version props apps and
-// attestation read natively. Suffix matches cover the per-partition variants. Empty = no override.
 std::string overrideFor(const char* raw, const std::map<std::string, std::string>& v) {
     const std::string name(raw);
     auto get = [&](const char* k) -> std::string {
@@ -41,7 +59,6 @@ std::string overrideFor(const char* raw, const std::map<std::string, std::string
     if (ends(".build.fingerprint"))        return get("FINGERPRINT");
     if (ends(".build.id") || name == "ro.build.id") return get("ID");
     if (ends(".security_patch"))           return get("SECURITY_PATCH");
-    // Board API levels use a YYYYMM encoding on recent devices, not SDK numbers.
     if (name == "ro.product.first_api_level") return get("FIRST_API_LEVEL");
     if (ends(".brand"))                    return get("BRAND");
     if (ends(".model"))                    return get("MODEL");
@@ -60,7 +77,6 @@ struct Inner { Ctx* ctx; const prop_info* pi; };
 }  // namespace
 
 bool install(const std::map<std::string, std::string>& values) {
-    // 1. this process's /dev/__properties__ mappings
     std::vector<Region> regions;
     FILE* f = fopen("/proc/self/maps", "r");
     if (!f) return false;
@@ -85,7 +101,6 @@ bool install(const std::map<std::string, std::string>& values) {
     fclose(f);
     if (regions.empty()) return false;
 
-    // 2. enumerate properties, collect the ones we override
     std::vector<Target> targets;
     Ctx ctx{&values, &targets};
     __system_property_foreach([](const prop_info* pi, void* c) {
@@ -99,10 +114,6 @@ bool install(const std::map<std::string, std::string>& values) {
     }, &ctx);
     if (targets.empty()) return false;
 
-    // 3. remap each affected area MAP_PRIVATE (process-local copy of its backing file) and patch
-    //    the inline value. prop_info = { uint32_t serial; char value[92]; char name[]; } for the
-    //    replacement values we handle all fit in 91 bytes. An originally long
-    //    property must also lose its long-value flag before readers use the new storage.
     for (auto& t : targets) {
         const uintptr_t a = reinterpret_cast<uintptr_t>(t.pi);
         Region* r = nullptr;
@@ -127,14 +138,11 @@ bool install(const std::map<std::string, std::string>& values) {
         char* value = reinterpret_cast<char*>(a) + sizeof(uint32_t);
         memset(value, 0, kValueMax);
         memcpy(value, t.value.c_str(), t.value.size());
-        // Bionic serial layout: length in bits 24..31, long flag at bit 16,
-        // dirty flag at bit 0. Publish a clean, short value with a new counter.
         const uint32_t newSerial = (static_cast<uint32_t>(t.value.size()) << 24) |
                                    ((oldSerial + 2U) & 0x00fefffeU);
         __atomic_store_n(serial, newSerial, __ATOMIC_RELEASE);
     }
 
-    // 4. restore the original protection on every remapped area
     for (auto& rg : regions)
         if (rg.remapped)
             mprotect(reinterpret_cast<void*>(rg.start), rg.end - rg.start, rg.prot);
