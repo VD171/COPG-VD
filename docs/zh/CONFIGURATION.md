@@ -4,8 +4,10 @@
 
 # 配置参考
 
-整个模块由一个文件驱动：`/data/adb/COPG-VD.json`。WebUI 会为你写入它，但你也可以手动编辑。
+整个模块由一个文件驱动：`/data/adb/COPG-VD/COPG-VD.json`。WebUI 会为你写入它，但你也可以手动编辑。
 一个随附的示例位于 `module/COPG-VD.json.example`。
+这是唯一的事实来源；模块目录下的副本只是一个只读的默认值。位于 `/data/adb/COPG-VD.json` 的旧版本遗留配置会被
+自动移动到此目录中。模块自己的日志和状态（`update.log`、`update.state`）也存放在这里。
 
 规则：
 

@@ -25,7 +25,7 @@ als we kunnen en vermelden je als je dat wilt.
 
 ## Scope-opmerkingen
 
-- De configuratie bevindt zich op `/data/adb/COPG-VD.json`, alleen leesbaar door root. De module
+- De configuratie bevindt zich op `/data/adb/COPG-VD/COPG-VD.json`, alleen leesbaar door root. De module
   leest die vanuit het geïnjecteerde proces via een toegewijde SELinux-regel die het zelf meelevert; het
   bevat geen credentials of wachtwoordzinnen.
 - De spoofing-hooks zijn gekoppeld aan live apps en zijn null-gecheckt zodat een misvormd profiel

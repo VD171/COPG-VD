@@ -18,7 +18,7 @@ COPG-VD는 디바이스의 fingerprint와 build를 다시 작성하여 선택한
 
 모듈을 조작하려면 root 관리자에서 WebUI를 엽니다. Magisk 사용자는
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases)으로 엽니다. 모든 것은
-`/data/adb/COPG-VD.json`에서 직접 편집할 수도 있습니다.
+`/data/adb/COPG-VD/COPG-VD.json`에서 직접 편집할 수도 있습니다.
 
 ## 누가 스푸핑을 보는가 (스코프)
 
@@ -64,7 +64,7 @@ fingerprint는 낡습니다: Google이 factory image를 교체하고, 오래된 
 - 절대 뒤로 가지 않으며(더 오래된 upstream build는 거부됨), 프로파일이 다른 디바이스를 스푸핑하는
   경우 아무것도 적용하지 않습니다 - 다른 프로파일 위의 Pixel fingerprint는 오래된 것보다 나쁩니다.
 - `resetprop`는 업데이트 직후 다시 적용되지만, `android.os.Build`는 zygote가 시작될 때 작성되므로
-  새 값이 앱에 도달하려면 **재부팅**하세요. 로그: `/data/adb/COPG-VD.update.log`.
+  새 값이 앱에 도달하려면 **재부팅**하세요. 로그: `/data/adb/COPG-VD/update.log`.
 
 ## Android 버전 함정
 

@@ -4,8 +4,11 @@
 
 # Configuration reference
 
-The whole module is driven by one file: `/data/adb/COPG-VD.json`. The WebUI writes it for
+The whole module is driven by one file: `/data/adb/COPG-VD/COPG-VD.json`. The WebUI writes it for
 you, but you can edit it by hand. A shipped example lives at `module/COPG-VD.json.example`.
+This is the single source of truth; the copy under the module directory is only a read-only default.
+A config left over from an older version at `/data/adb/COPG-VD.json` is moved into this directory
+automatically. The module's own log and state (`update.log`, `update.state`) live here too.
 
 Rules:
 

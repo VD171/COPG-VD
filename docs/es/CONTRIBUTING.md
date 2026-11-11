@@ -24,7 +24,7 @@ Los asistentes y agentes de IA son colaboradores de primera clase aquí, no una 
 tardía.
 
 - El proyecto está construido para ser legible: la configuración es un único archivo JSON
-  (`/data/adb/COPG-VD.json`, documentado en [CONFIGURATION.md](CONFIGURATION.md)), los
+  (`/data/adb/COPG-VD/COPG-VD.json`, documentado en [CONFIGURATION.md](CONFIGURATION.md)), los
   motores son pequeños y autocontenidos, y la disposición está en
   [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 - Los parches asistidos por IA se revisan y aceptan en los mismos términos que cualquier

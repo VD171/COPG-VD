@@ -5,6 +5,13 @@
 COPG-VD هو spoofer للجهاز: يعيد كتابة بصمة الجهاز (fingerprint) والـ build بحيث ترى التطبيقات الجهاز الذي تختاره بدلاً من الجهاز الحقيقي.  
 يعمل على Zygisk (KernelSU أو APatch أو Magisk) وبشكل افتراضي يقصر الانتحال على حزمة Google Play - لذا فهو بديل أخف وأكثر متانة لـ PlayIntegrityFix.  
 
+<!-- vd-docs -->
+## التوثيق
+
+[دليل المستخدم](docs/ar/USER-GUIDE.md) · [مرجع الإعداد](docs/ar/CONFIGURATION.md) · [البنية المعمارية](docs/ar/ARCHITECTURE.md) · [بنية الملفات](docs/ar/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/ar-Home)
+
+<!-- /vd-docs -->
+
 ## لقطات الشاشة
 
 <p align="center">
@@ -13,7 +20,7 @@ COPG-VD هو spoofer للجهاز: يعيد كتابة بصمة الجهاز (fi
 
 ## كيفية الاستخدام؟
 ثبّت الموديول، أعد التشغيل، ويتم انتحال الملف الشخصي المرفق (جهاز Pixel) للتطبيقات المستهدفة. مع بصمة تعمل بشكل صحيح لا تحتاج إلى PlayIntegrityFix أو GooglePhotosUnlimited.  
-يتم ضبط كل شيء في `/data/adb/COPG-VD.json`، أو من WebUI. جميع الحقول اختيارية - أي حقل لا يتم توفيره يتم تخطيه.  
+يتم ضبط كل شيء في `/data/adb/COPG-VD/COPG-VD.json`، أو من WebUI. جميع الحقول اختيارية - أي حقل لا يتم توفيره يتم تخطيه.  
 
 ### Scope - من يرى الانتحال
 `scope_mode` يحدد العمليات التي تحصل على الهوية المنتحلة. في الوضع المحدود، يسلّم Zygisk الهوية لكل عملية على حدة ولا تتسرب إلى بقية النظام عبر الـ properties العامة.  
@@ -39,7 +46,7 @@ COPG-VD هو spoofer للجهاز: يعيد كتابة بصمة الجهاز (fi
 تطبّق قائمة `"global_fields": [ ... ]` حقول Build المذكورة على مستوى الجهاز حتى في الوضع المحدود، للحفاظ على قيمة متسقة في كل مكان - فقط للحقول الآمنة من ناحية الاتساق (الـ security patch مثلاً)، وليس الهوية أبداً وليس مجموعة إصدار Android أبداً.  
 
 ### مثال على ملف إعدادات JSON
-`/data/adb/COPG-VD.json`
+`/data/adb/COPG-VD/COPG-VD.json`
 ```json
 {
   "Instructions": "Use strings on double-quotes only.",
@@ -80,7 +87,7 @@ COPG-VD هو spoofer للجهاز: يعيد كتابة بصمة الجهاز (fi
 
 ### إبقاء البصمة محدّثة
 `fingerprint-update.sh` يسحب ذلك الملف ويحدّث إعداداتك، من WebUI (**Check Update** / **Update Now**) أو من تلقاء نفسه **مرة واحدة لكل إقلاع** (**Auto-update JSON on boot**، مفعّل افتراضياً).  
-* يتم تحديث كل من `/data/adb/COPG-VD.json` و`/data/adb/modules/COPG-VD/COPG-VD.json` عند وجود كليهما، ويُحتفظ بالمحتوى السابق كـ `.bak`.  
+* يتم تحديث `/data/adb/COPG-VD/COPG-VD.json` في مكانه، ويُحتفظ بالمحتوى السابق بجواره كـ `COPG-VD.json.bak`.  
 * تُعاد كتابة حقول build فقط (fingerprint، ID، incremental، timestamp، security patch، SDK، UUID، host، user). كل ما خصّصته غير ذلك يُحتفظ به: المفاتيح الإضافية، و`scope_mode`، و`BOOTLOADER`/`BOARD`/`HARDWARE`، والكائنات الأخرى، وترتيب المفاتيح والتنسيق.  
 * لا يرجع إلى الوراء أبداً: يُرفض أي build upstream أقدم من المثبّت. هذا
   أمر روتيني (قد يتأخر الـ repo خلف إعداد حدّثته يدوياً) وهو أيضاً الحماية
@@ -89,7 +96,7 @@ COPG-VD هو spoofer للجهاز: يعيد كتابة بصمة الجهاز (fi
 * إذا كان ملفك الشخصي ينتحل **جهازاً آخر** (`BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT` مختلفة)، فلا يُطبَّق شيء - بصمة Pixel على ملف شخصي آخر أسوأ من بصمة قديمة.  
 * عند الإقلاع يعمل في الخلفية ويستمر في إعادة المحاولة لمدة ~10 دقائق، لأن الواي فاي عادة لا يكون جاهزاً بعد عند انتهاء الإقلاع. وهو لا يؤخر الإقلاع أبداً.  
 * يُعاد تطبيق `resetprop` مباشرة بعد التحديث، لكن `android.os.Build` يكتبه موديول zygisk عند بدء zygote: **أعد التشغيل** لكي تصل القيم الجديدة إلى التطبيقات.  
-* السجل في `/data/adb/COPG-VD.update.log`.  
+* السجل في `/data/adb/COPG-VD/update.log`.  
 
 ### إصدار Android - ولماذا لا يتم انتحاله
 `ANDROID_VERSION` و`SDK_INT` و`SDK_FULL` و`CODENAME` تصف **الـ ROM الخاصة بك**، لا الجهاز الذي يُنتحل. إخبار التطبيقات بأن الـ SDK أحدث مما هو عليه الـ framework فعلاً يجعلها تستدعي APIs غير موجودة: تنهار تطبيقات Google، ويعيد الهاتف التشغيل، ثم يبدأ من جديد. الإقلاع نفسه يكتمل، لذا فهي **softloop** ولا يظهر أي شيء في سجلات الإقلاع.  
@@ -108,7 +115,7 @@ WebUI اختياري - يمكن تعديل كل شيء في إعداد JSON مب
 إذا كنت مستخدم Magisk، فاستخدم KsuWebUI من KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
 
 ### الإعدادات في ملف الإعداد
-يحمل `COPG-VD.json` إعداداته بجوار الملف الشخصي، بحيث تسافر اختياراتك مع النسخة الاحتياطية ويمكن تعديلها يدوياً: `scope_mode`، ومفاتيح الـ engines، ومجموعات resetprop، و`global_fields`، وكائن `COPG-VD-Settings` (`resetprop`، و`autoupdate`، و`spoof_manufacturer`، و`spoof_version`). يكتب WebUI كلاً من الإعداد وملفات الـ flag التي تقرؤها سكربتات الإقلاع. `"spoof_version": "force"` يُرفض من الملف ويُخفَّض: استعادة نسخة احتياطية قديمة يجب ألا تعيد تفعيله من وراء ظهرك.  
+يحمل `COPG-VD.json` إعداداته بجوار الملف الشخصي، بحيث تسافر اختياراتك مع النسخة الاحتياطية ويمكن تعديلها يدوياً: `scope_mode`، ومفاتيح الـ engines، ومجموعات resetprop، و`global_fields`، وكائن `COPG-VD-Settings` (`resetprop`، و`autoupdate`، و`spoof_manufacturer`، و`spoof_version`). كل شيء موجود في هذا الملف الواحد - تقرأ سكربتات الإقلاع وWebUI الإعدادات منه مباشرةً، لذا تبقى اختياراتك بعد تحديث الوحدة. `"spoof_version": "force"` يُرفض من الملف ويُخفَّض: استعادة نسخة احتياطية قديمة يجب ألا تعيد تفعيله من وراء ظهرك.  
 
 ## جهات الاتصال
 
@@ -121,11 +128,6 @@ WebUI اختياري - يمكن تعديل كل شيء في إعداد JSON مب
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
-
-<!-- vd-docs -->
-## التوثيق
-
-[دليل المستخدم](docs/ar/USER-GUIDE.md) · [مرجع الإعداد](docs/ar/CONFIGURATION.md) · [البنية المعمارية](docs/ar/ARCHITECTURE.md) · [بنية الملفات](docs/ar/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/ar-Home)
 
 <!-- vd-see-also -->
 

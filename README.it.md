@@ -5,6 +5,13 @@
 COPG-VD è uno spoofer di dispositivo: riscrive il fingerprint e la build del dispositivo in modo che le app vedano il dispositivo che scegli invece di quello reale.  
 Funziona su Zygisk (KernelSU, APatch o Magisk) e, per impostazione predefinita, limita lo spoof allo stack di Google Play - quindi è un'alternativa più leggera e più robusta a PlayIntegrityFix.  
 
+<!-- vd-docs -->
+## Documentazione
+
+[Guida utente](docs/it/USER-GUIDE.md) · [Riferimento di configurazione](docs/it/CONFIGURATION.md) · [Architettura](docs/it/ARCHITECTURE.md) · [Struttura dei file](docs/it/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/it-Home)
+
+<!-- /vd-docs -->
+
 ## Screenshot
 
 <p align="center">
@@ -13,7 +20,7 @@ Funziona su Zygisk (KernelSU, APatch o Magisk) e, per impostazione predefinita, 
 
 ## Come si usa?
 Installa il modulo, riavvia, e il profilo distribuito (un Pixel) viene spoofato verso le app interessate. Con un fingerprint funzionante non hai bisogno di PlayIntegrityFix o GooglePhotosUnlimited.  
-Tutto si configura in `/data/adb/COPG-VD.json`, oppure dalla WebUI. Tutti i campi sono OPZIONALI - un campo non fornito viene saltato.  
+Tutto si configura in `/data/adb/COPG-VD/COPG-VD.json`, oppure dalla WebUI. Tutti i campi sono OPZIONALI - un campo non fornito viene saltato.  
 
 ### Scope - chi vede lo spoof
 `scope_mode` decide quali processi ricevono l'identità spoofata. In una modalità con ambito limitato l'identità viene consegnata per processo da Zygisk e non trapela al resto del sistema attraverso le proprietà globali.  
@@ -39,7 +46,7 @@ All'interno dell'oggetto `COPG-VD` ogni campo Build ha quattro stati:
 Una lista `"global_fields": [ ... ]` applica i campi Build indicati a tutto il dispositivo anche in una modalità con ambito limitato, per mantenere un valore coerente ovunque - solo per campi sicuri dal punto di vista della coerenza (la security patch, ad esempio), mai l'identità e mai il gruppo della versione di Android.  
 
 ### Esempio di file di configurazione JSON
-`/data/adb/COPG-VD.json`
+`/data/adb/COPG-VD/COPG-VD.json`
 ```json
 {
   "Instructions": "Use strings on double-quotes only.",
@@ -80,7 +87,7 @@ Il blocco qui sopra e `module/COPG-VD.json.example` vengono aggiornati quotidian
 
 ### Mantenere aggiornato il fingerprint
 `fingerprint-update.sh` scarica quel file e aggiorna la tua configurazione, dalla WebUI (**Check Update** / **Update Now**) oppure da solo **una volta per avvio** (**Auto-update JSON on boot**, attivo per impostazione predefinita).  
-* Sia `/data/adb/COPG-VD.json` sia `/data/adb/modules/COPG-VD/COPG-VD.json` vengono aggiornati quando esistono entrambi, e il contenuto precedente viene conservato come `.bak`.  
+* `/data/adb/COPG-VD/COPG-VD.json` viene aggiornato sul posto, e il contenuto precedente viene conservato accanto come `COPG-VD.json.bak`.  
 * Vengono riscritti solo i campi di build (fingerprint, ID, incremental, timestamp, security patch, SDK, UUID, host, user). Tutto il resto che hai personalizzato viene preservato: chiavi extra, `scope_mode`, `BOOTLOADER`/`BOARD`/`HARDWARE`, altri oggetti, ordine delle chiavi e formattazione.  
 * Non torna mai indietro: una build upstream più vecchia di quella installata viene rifiutata. Questo è
   normale (il repository può restare indietro rispetto a una configurazione che hai aggiornato a mano) ed è anche la protezione che
@@ -89,7 +96,7 @@ Il blocco qui sopra e `module/COPG-VD.json.example` vengono aggiornati quotidian
 * Se il tuo profilo fa lo spoofing di **un altro dispositivo** (`BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT` diversi), non viene applicato nulla - un fingerprint Pixel su un altro profilo è peggio di un fingerprint vecchio.  
 * All'avvio viene eseguito in background e continua a riprovare per circa 10 minuti, perché di solito il wifi non è ancora attivo quando l'avvio finisce. Non ritarda mai l'avvio.  
 * `resetprop` viene riapplicato subito dopo un aggiornamento, ma `android.os.Build` viene scritto dal modulo zygisk quando zygote si avvia: **riavvia** affinché i nuovi valori raggiungano le app.  
-* Log in `/data/adb/COPG-VD.update.log`.  
+* Log in `/data/adb/COPG-VD/update.log`.  
 
 ### Versione di Android - e perché non viene falsificata
 `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` e `CODENAME` descrivono **la tua ROM**, non il dispositivo di cui si fa lo spoofing. Dire alle app che l'SDK è più recente di quanto il framework sia realmente le fa chiamare API che non esistono: le app di Google si bloccano, il telefono si riavvia e tutto ricomincia. L'avvio stesso si completa, quindi è un **softloop** e nei log di avvio non compare nulla.  
@@ -108,7 +115,7 @@ La WebUI è opzionale - tutto può essere modificato direttamente nella configur
 Se sei un utente Magisk, usa KsuWebUI di KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
 
 ### Impostazioni nella configurazione
-`COPG-VD.json` porta le sue impostazioni accanto al profilo, così le tue scelte viaggiano con un backup e possono essere modificate a mano: `scope_mode`, gli interruttori degli engine, i gruppi resetprop, `global_fields` e un oggetto `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). La WebUI scrive sia la configurazione sia i file flag che gli script di avvio leggono. `"spoof_version": "force"` viene rifiutato dal file e declassato: ripristinare un vecchio backup non deve riattivarlo a tua insaputa.  
+`COPG-VD.json` porta le sue impostazioni accanto al profilo, così le tue scelte viaggiano con un backup e possono essere modificate a mano: `scope_mode`, gli interruttori degli engine, i gruppi resetprop, `global_fields` e un oggetto `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). Tutto risiede in questo unico file - gli script di avvio e la WebUI leggono le impostazioni direttamente da esso, così le tue scelte sopravvivono a un aggiornamento del modulo. `"spoof_version": "force"` viene rifiutato dal file e declassato: ripristinare un vecchio backup non deve riattivarlo a tua insaputa.  
 
 ## Contatti
 
@@ -121,11 +128,6 @@ Se sei un utente Magisk, usa KsuWebUI di KOW (https://github.com/KOWX712/KsuWebU
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
-
-<!-- vd-docs -->
-## Documentazione
-
-[Guida utente](docs/it/USER-GUIDE.md) · [Riferimento di configurazione](docs/it/CONFIGURATION.md) · [Architettura](docs/it/ARCHITECTURE.md) · [Struttura dei file](docs/it/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/it-Home)
 
 <!-- vd-see-also -->
 

@@ -5,6 +5,13 @@
 COPG-VD är en enhetsspoofer: den skriver om enhetens fingerprint och build så att appar ser enheten du väljer i stället för den verkliga.  
 Den körs på Zygisk (KernelSU, APatch eller Magisk) och begränsar som standard spoofingen till Google Play-stacken - vilket gör den till ett lättare och mer robust alternativ till PlayIntegrityFix.  
 
+<!-- vd-docs -->
+## Dokumentation
+
+[Användarguide](docs/sv/USER-GUIDE.md) · [Konfigurationsreferens](docs/sv/CONFIGURATION.md) · [Arkitektur](docs/sv/ARCHITECTURE.md) · [Filstruktur](docs/sv/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/sv-Home)
+
+<!-- /vd-docs -->
+
 ## Skärmdumpar
 
 <p align="center">
@@ -13,7 +20,7 @@ Den körs på Zygisk (KernelSU, APatch eller Magisk) och begränsar som standard
 
 ## Hur använder man den?
 Installera modulen, starta om, så spoofas den medföljande profilen (en Pixel) till målapparna. Med ett fungerande fingerprint behöver du inte PlayIntegrityFix eller GooglePhotosUnlimited.  
-Allt konfigureras i `/data/adb/COPG-VD.json`, eller från WebUI. Alla fält är VALFRIA - ett fält som inte anges hoppas över.  
+Allt konfigureras i `/data/adb/COPG-VD/COPG-VD.json`, eller från WebUI. Alla fält är VALFRIA - ett fält som inte anges hoppas över.  
 
 ### Omfattning - vem som ser spoofingen
 `scope_mode` avgör vilka processer som får den spoofade identiteten. I ett läge med omfattning levereras identiteten per process av Zygisk och läcker inte ut till resten av systemet via de globala egenskaperna.  
@@ -39,7 +46,7 @@ Inuti `COPG-VD`-objektet har varje Build-fält fyra tillstånd:
 En `"global_fields": [ ... ]`-lista tillämpar de angivna Build-fälten enhetsövergripande även i ett läge med omfattning, för att hålla ett värde konsekvent överallt - endast för koherenssäkra fält (säkerhetspatchen, till exempel), aldrig identitet och aldrig gruppen för Android-versionen.  
 
 ### Exempel på JSON-konfigurationsfil
-`/data/adb/COPG-VD.json`
+`/data/adb/COPG-VD/COPG-VD.json`
 ```json
 {
   "Instructions": "Use strings on double-quotes only.",
@@ -80,13 +87,13 @@ Blocket ovan och `module/COPG-VD.json.example` uppdateras dagligen av arbetsflö
 
 ### Att hålla fingerprint aktuellt
 `fingerprint-update.sh` hämtar den filen och uppdaterar din konfiguration, antingen från WebUI (**Check Update** / **Update Now**) eller på egen hand **en gång per start** (**Auto-update JSON on boot**, på som standard).  
-* Både `/data/adb/COPG-VD.json` och `/data/adb/modules/COPG-VD/COPG-VD.json` uppdateras när båda finns, och det tidigare innehållet behålls som `.bak`.  
+* `/data/adb/COPG-VD/COPG-VD.json` uppdateras på plats, och det tidigare innehållet behålls bredvid den som `COPG-VD.json.bak`.  
 * Endast build-fälten skrivs om (fingerprint, ID, incremental, timestamp, security patch, SDK, UUID, host, user). Allt annat som du har anpassat bevaras: extra nycklar, `scope_mode`, `BOOTLOADER`/`BOARD`/`HARDWARE`, andra objekt, nyckelordning och formatering.  
 * Den går aldrig bakåt: en uppströms-build som är äldre än den installerade avvisas. Detta är rutin (repot kan ligga efter en konfiguration som du uppdaterat för hand) och det är också det skydd som spelar störst roll på Android, där den enda tillgängliga nedladdaren är busybox `wget`, som inte kan validera TLS-certifikat - varje värde valideras före användning av samma skäl.  
 * Om din profil spoofar **en annan enhet** (annat `BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT`) tillämpas ingenting - ett Pixel-fingerprint på en annan profil är värre än ett gammalt fingerprint.  
 * Vid start körs den i bakgrunden och fortsätter försöka i cirka 10 minuter, eftersom wifi oftast inte är uppe ännu när starten är klar. Den fördröjer aldrig starten.  
 * `resetprop` tillämpas på nytt direkt efter en uppdatering, men `android.os.Build` skrivs av zygisk-modulen när zygote startar: **starta om** för att de nya värdena ska nå apparna.  
-* Logg i `/data/adb/COPG-VD.update.log`.  
+* Logg i `/data/adb/COPG-VD/update.log`.  
 
 ### Android-versionen - och varför den inte spoofas
 `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` och `CODENAME` beskriver **din ROM**, inte enheten som spoofas. Att berätta för appar att SDK:n är nyare än vad ramverket faktiskt är får dem att anropa API:er som inte finns: Googles appar kraschar, telefonen startar om, och det börjar om. Själva starten slutförs, så det är en **softloop** och ingenting syns i startloggarna.  
@@ -105,7 +112,7 @@ WebUI är valfritt - allt kan redigeras direkt i JSON-konfigurationen - men det 
 Om du är Magisk-användare, använd KsuWebUI av KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
 
 ### Inställningar i konfigurationen
-`COPG-VD.json` bär sina inställningar bredvid profilen, så dina val följer med en säkerhetskopia och kan redigeras för hand: `scope_mode`, motor-brytarna, resetprop-grupperna, `global_fields` och ett `COPG-VD-Settings`-objekt (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). WebUI skriver både konfigurationen och de flagg-filer som startskripten läser. `"spoof_version": "force"` avvisas från filen och nedgraderas: att återställa en gammal säkerhetskopia får inte återaktivera det bakom din rygg.  
+`COPG-VD.json` bär sina inställningar bredvid profilen, så dina val följer med en säkerhetskopia och kan redigeras för hand: `scope_mode`, motor-brytarna, resetprop-grupperna, `global_fields` och ett `COPG-VD-Settings`-objekt (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). Allt finns i denna enda fil - startskripten och WebUI läser inställningarna direkt från den, så dina val överlever en moduluppdatering. `"spoof_version": "force"` avvisas från filen och nedgraderas: att återställa en gammal säkerhetskopia får inte återaktivera det bakom din rygg.  
 
 ## Kontakter
 
@@ -118,11 +125,6 @@ Om du är Magisk-användare, använd KsuWebUI av KOW (https://github.com/KOWX712
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
-
-<!-- vd-docs -->
-## Dokumentation
-
-[Användarguide](docs/sv/USER-GUIDE.md) · [Konfigurationsreferens](docs/sv/CONFIGURATION.md) · [Arkitektur](docs/sv/ARCHITECTURE.md) · [Filstruktur](docs/sv/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/sv-Home)
 
 <!-- vd-see-also -->
 

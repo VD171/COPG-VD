@@ -183,6 +183,8 @@
   "msg_fe_noarg": "Nenhum perfil selecionado",
   "msg_fetch_noindex": "Índice de aparelhos ainda indisponível",
   "ui_toolsd_autoupdate": "Atualiza o perfil para a imagem compatível mais nova automaticamente a cada boot.",
+  "ui_autoupdate_failed": "a última atualização automática não alcançou a fonte",
+  "ui_autoupdate_ok": "última atualização automática ok",
   "ui_tab_about": "Sobre",
   "ui_about_callout": "Esta WebUI roda inteiramente no seu aparelho e não faz nenhuma requisição de rede.",
   "ui_about_sec_project": "Projeto",

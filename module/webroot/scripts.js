@@ -30,7 +30,8 @@ let activeOutput = null;
 let logcatOutput = null;
 let navFromPop = false;
 
-const CONFIG_FILE = "/data/adb/COPG-VD.json";
+const CONFIG_FILE = "/data/adb/COPG-VD/COPG-VD.json";
+const FORCE_MARKER = "/data/adb/COPG-VD/.force";
 const MODULE_ID = 'COPG-VD';
 const androidToSdkMapping = {
     '10': 29, '10.0': 29,
@@ -290,6 +291,12 @@ async function loadMarkdownContent() {
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             
             let text = await response.text();
+            if (url === 'README.md') {
+                text = text.replace(/^.*\]\(README\.[a-z-]+\.md\).*$/gmi, '');
+                text = text.replace(/<img[^>]*>/gi, '');
+                text = text.replace(/!\[[^\]]*\]\([^)]*\)/g, '');
+                text = text.replace(/\]\((?!https?:\/\/|#|mailto:)([^)]+)\)/g, '](https://github.com/VD171/COPG-VD/blob/main/$1)');
+            }
             text = text.replace(/<center>([\s\S]*?)<\/center>/g, (match, content) => {
                 const cleanedContent = content.replace(/^\s+/gm, '');
                 return `<div class="centered-text">${cleanedContent}</div>`;
@@ -846,14 +853,33 @@ async function loadVersion() {
     }
 }
 
+async function migrateDataDir() {
+    try {
+        await execCommand(`D=/data/adb/COPG-VD; mkdir -p "$D"; chmod 0700 "$D"; chcon u:object_r:system_file:s0 "$D" 2>/dev/null; [ -f /data/adb/COPG-VD.json ] && { [ -e "$D/COPG-VD.json" ] || mv -f /data/adb/COPG-VD.json "$D/COPG-VD.json"; rm -f /data/adb/COPG-VD.json; }; [ -f /data/adb/COPG-VD.json.bak ] && mv -f /data/adb/COPG-VD.json.bak "$D/COPG-VD.json.bak" 2>/dev/null; [ -f /data/adb/COPG-VD.update.state ] && mv -f /data/adb/COPG-VD.update.state "$D/update.state" 2>/dev/null; [ -f /data/adb/COPG-VD.update.log ] && mv -f /data/adb/COPG-VD.update.log "$D/update.log" 2>/dev/null; rm -f /data/adb/.COPG-VD.update.* 2>/dev/null`);
+    } catch (e) {}
+}
+
+async function readSetting(key) {
+    try {
+        return (await execCommand(`tr -d '\\n' < ${shq(CONFIG_FILE)} 2>/dev/null | grep -o '"COPG-VD-Settings"[[:space:]]*:[[:space:]]*{[^}]*}' | grep -oE '"${key}"[[:space:]]*:[[:space:]]*("[^"]*"|true|false)' | head -n1 | sed 's/.*:[[:space:]]*//; s/"//g'`)).trim();
+    } catch (e) { return ''; }
+}
+
 async function loadToggleStates() {
     try {
         const resetpropToggle = document.getElementById('toggle-resetprop');
         const roproductmanufacturerToggle = document.getElementById('toggle-ro-product-manufacturer');
         const autoupdateToggle = document.getElementById('toggle-autoupdate');
-        resetpropToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG-VD/.skip.resetprop ] && echo 0 || echo 1")).trim() === "1";
-        roproductmanufacturerToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG-VD/.skip.manufacturer ] && echo 0 || echo 1")).trim() === "1";
-        autoupdateToggle.checked = (await execCommand("[ -e /data/adb/modules/COPG-VD/.skip.autoupdate ] && echo 0 || echo 1")).trim() === "1";
+        resetpropToggle.checked = (await readSetting('resetprop')) !== 'false';
+        roproductmanufacturerToggle.checked = (await readSetting('spoof_manufacturer')) !== 'false';
+        autoupdateToggle.checked = (await readSetting('autoupdate')) !== 'false';
+        const st = (await execCommand("cat /data/adb/COPG-VD/update.status 2>/dev/null")).trim();
+        const su = document.getElementById('autoupdate-status');
+        if (su) {
+            if (/^no-network/.test(st)) { su.textContent = '⚠ ' + t('ui_autoupdate_failed') + ' (' + st.replace(/^no-network\s*/, '') + ')'; su.style.color = 'var(--warn)'; }
+            else if (/^ok/.test(st)) { su.textContent = '✓ ' + t('ui_autoupdate_ok') + ' ' + st.replace(/^ok\s*/, ''); su.style.color = ''; }
+            else { su.textContent = ''; }
+        }
         await loadVersionPolicy();
     } catch (error) {
         appendToOutput(t('msg_072') + error, 'error');
@@ -1680,7 +1706,8 @@ async function setDrm(value) {
 async function setVersionPolicy(value, selectEl) {
     if (selectEl) selectEl.classList.toggle('danger', value === 'force');
     try {
-        await execCommand(`echo ${shq(value)} > /data/adb/modules/COPG-VD/.spoof.version`);
+        if (value === 'force') await execCommand(`touch ${shq(FORCE_MARKER)}`);
+        else await execCommand(`rm -f ${shq(FORCE_MARKER)}`);
         await writeSetting('spoof_version', value === 'force' ? 'rom' : value);
         if (value === 'force') appendToOutput(t('msg_064'), 'error');
         else if (value === 'rom') appendToOutput(t('msg_105'), 'warning');
@@ -1772,7 +1799,9 @@ async function loadVersionPolicy() {
     const hint = document.getElementById('version-rom-hint');
     if (!select || !hint) return;
     try {
-        const state = (await execCommand("cat /data/adb/modules/COPG-VD/.spoof.version 2>/dev/null || echo never")).trim();
+        const forced = (await execCommand(`[ -e ${shq(FORCE_MARKER)} ] && echo 1 || echo 0`)).trim() === "1";
+        const persisted = (await readSetting('spoof_version')) || 'never';
+        const state = forced ? 'force' : (['never', 'rom'].includes(persisted) ? persisted : 'never');
         select.value = ['never', 'rom', 'force'].includes(state) ? state : 'never';
         select.classList.toggle('danger', select.value === 'force');
         const rom = (await execCommand(
@@ -2008,7 +2037,6 @@ function applyEventListeners() {
     document.getElementById('toggle-resetprop').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
-            await execCommand(`${isChecked ? "rm -f" : "touch"} /data/adb/modules/COPG-VD/.skip.resetprop`);
             await writeSetting('resetprop', isChecked);
             appendToOutput(isChecked ? "Resetprop Enabled. Reboot to see changes" : "Resetprop Disabled. Reboot to see changes", isChecked ? 'success' : 'error');
         } catch (error) {
@@ -2019,7 +2047,6 @@ function applyEventListeners() {
     document.getElementById('toggle-ro-product-manufacturer').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
-            await execCommand(`${isChecked ? "rm -f" : "touch"} /data/adb/modules/COPG-VD/.skip.manufacturer`);
             await writeSetting('spoof_manufacturer', isChecked);
             appendToOutput(isChecked ? "Ro.Product.Manufacturer Enabled. Reboot to see changes" : "Ro.Product.Manufacturer Disabled. Reboot to see changes", isChecked ? 'success' : 'error');
         } catch (error) {
@@ -2037,7 +2064,6 @@ function applyEventListeners() {
     document.getElementById('toggle-autoupdate').addEventListener('click', async (e) => {
         const isChecked = e.target.checked;
         try {
-            await execCommand(`${isChecked ? "rm -f" : "touch"} /data/adb/modules/COPG-VD/.skip.autoupdate`);
             await writeSetting('autoupdate', isChecked);
             appendToOutput(isChecked ? "JSON auto-update enabled (once per boot)" : "JSON auto-update disabled", isChecked ? 'success' : 'info');
         } catch (error) {
@@ -2224,6 +2250,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
     appendToOutput(t('msg_102'), 'success');
     await loadVersion();
+    await migrateDataDir();
     await loadToggleStates();
     await loadConfig();
     loadScopeSettings();

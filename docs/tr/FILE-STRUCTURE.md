@@ -62,8 +62,8 @@ COPG-VD/
 
 ## Çalışma zamanı yapılandırması (depoda değil)
 
-Cihazdaki `/data/adb/COPG-VD.json`, profili ve ayarları tutar (bkz.
-[CONFIGURATION.md](CONFIGURATION.md)). Asla commit edilmez; `module/COPG-VD.json.example`
-şablondur.
+Cihazdaki `/data/adb/COPG-VD/`, modülün kendi dizinidir: `COPG-VD.json`, profili ve ayarları tutar
+(bkz. [CONFIGURATION.md](CONFIGURATION.md)), `update.log`, `update.state` ve `update.status` ile birlikte.
+Yapılandırma asla commit edilmez; `module/COPG-VD.json.example` şablondur.
 
 *Bu belge Claude (Anthropic) ile oluşturulmuş ve VD171 tarafından sürdürülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır - bkz. [../CONTRIBUTING.md](CONTRIBUTING.md).*

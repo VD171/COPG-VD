@@ -5,6 +5,13 @@
 COPG-VD est un usurpateur d'appareil : il réécrit le fingerprint et le build de l'appareil pour que les applications voient l'appareil que vous choisissez au lieu du vrai.  
 Il fonctionne sur Zygisk (KernelSU, APatch ou Magisk) et, par défaut, limite la portée de l'usurpation à la pile Google Play - ce qui en fait une alternative plus légère et plus robuste à PlayIntegrityFix.  
 
+<!-- vd-docs -->
+## Documentation
+
+[Guide de l'utilisateur](docs/fr/USER-GUIDE.md) · [Référence de configuration](docs/fr/CONFIGURATION.md) · [Architecture](docs/fr/ARCHITECTURE.md) · [Structure des fichiers](docs/fr/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/fr-Home)
+
+<!-- /vd-docs -->
+
 ## Captures d'écran
 
 <p align="center">
@@ -13,7 +20,7 @@ Il fonctionne sur Zygisk (KernelSU, APatch ou Magisk) et, par défaut, limite la
 
 ## Comment l'utiliser ?
 Installez le module, redémarrez, et le profil livré (un Pixel) est usurpé auprès des applications ciblées. Avec un fingerprint fonctionnel, vous n'avez besoin ni de PlayIntegrityFix ni de GooglePhotosUnlimited.  
-Tout se configure dans `/data/adb/COPG-VD.json`, ou depuis la WebUI. Tous les champs sont OPTIONNELS - un champ qui n'est pas fourni est ignoré.  
+Tout se configure dans `/data/adb/COPG-VD/COPG-VD.json`, ou depuis la WebUI. Tous les champs sont OPTIONNELS - un champ qui n'est pas fourni est ignoré.  
 
 ### Scope - qui voit l'usurpation
 `scope_mode` décide quels processus reçoivent l'identité usurpée. Dans un mode à portée restreinte, l'identité est livrée par processus par Zygisk et n'est pas divulguée au reste du système via les propriétés globales.  
@@ -39,7 +46,7 @@ Chacun est indépendant et peut être désactivé :
 Une liste `"global_fields": [ ... ]` applique les champs Build nommés à tout l'appareil même dans un mode à portée restreinte, afin de garder une valeur cohérente partout - uniquement pour les champs sûrs vis-à-vis de la cohérence (le security patch, par exemple), jamais l'identité et jamais le groupe de la version d'Android.  
 
 ### Exemple de fichier de configuration JSON
-`/data/adb/COPG-VD.json`
+`/data/adb/COPG-VD/COPG-VD.json`
 ```json
 {
   "Instructions": "Use strings on double-quotes only.",
@@ -80,13 +87,13 @@ Le bloc ci-dessus et `module/COPG-VD.json.example` sont actualisés quotidiennem
 
 ### Garder le fingerprint à jour
 `fingerprint-update.sh` récupère ce fichier et met à jour votre configuration, depuis la WebUI (**Check Update** / **Update Now**) ou de lui-même **une fois par démarrage** (**Auto-update JSON on boot**, activé par défaut).  
-* `/data/adb/COPG-VD.json` et `/data/adb/modules/COPG-VD/COPG-VD.json` sont tous deux mis à jour lorsqu'ils existent tous les deux, et le contenu précédent est conservé sous `.bak`.  
+* `/data/adb/COPG-VD/COPG-VD.json` est mis à jour sur place, et le contenu précédent est conservé à côté sous le nom `COPG-VD.json.bak`.  
 * Seuls les champs de build sont réécrits (fingerprint, ID, incremental, timestamp, security patch, SDK, UUID, host, user). Tout le reste que vous avez personnalisé est préservé : clés supplémentaires, `scope_mode`, `BOOTLOADER`/`BOARD`/`HARDWARE`, autres objets, ordre des clés et formatage.  
 * Cela ne revient jamais en arrière : un build amont plus ancien que celui installé est refusé. C'est normal (le dépôt peut rester en retard par rapport à une config que vous avez mise à jour à la main) et c'est aussi la protection qui compte le plus sur Android, où le seul téléchargeur disponible est le `wget` de busybox, qui ne peut pas valider les certificats TLS - chaque valeur est validée avant utilisation pour la même raison.  
 * Si votre profil usurpe **un autre appareil** (`BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT` différents), rien n'est appliqué - un fingerprint Pixel sur un autre profil est pire qu'un fingerprint ancien.  
 * Au démarrage, il s'exécute en arrière-plan et continue de réessayer pendant environ 10 minutes, car le wifi n'est généralement pas encore actif à la fin du démarrage. Il ne retarde jamais le démarrage.  
 * `resetprop` est réappliqué juste après une mise à jour, mais `android.os.Build` est écrit par le module zygisk lorsque zygote démarre : **redémarrez** pour que les nouvelles valeurs atteignent les applications.  
-* Journal dans `/data/adb/COPG-VD.update.log`.  
+* Journal dans `/data/adb/COPG-VD/update.log`.  
 
 ### Version d'Android - et pourquoi elle n'est pas usurpée
 `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` et `CODENAME` décrivent **votre ROM**, pas l'appareil usurpé. Dire aux applications que le SDK est plus récent que le framework ne l'est réellement les fait appeler des API qui n'existent pas : les applications de Google plantent, le téléphone redémarre, et cela recommence. Le démarrage lui-même se termine, c'est donc une **softloop** et rien n'apparaît dans les journaux de démarrage.  
@@ -105,7 +112,7 @@ La WebUI est optionnelle - tout peut être édité directement dans la config JS
 Si vous êtes un utilisateur de Magisk, utilisez KsuWebUI par KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
 
 ### Réglages dans la config
-`COPG-VD.json` porte ses réglages à côté du profil, de sorte que vos choix voyagent avec une sauvegarde et peuvent être édités à la main : `scope_mode`, les interrupteurs des engines, les groupes resetprop, `global_fields`, et un objet `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). La WebUI écrit à la fois la config et les fichiers indicateurs (flag) que lisent les scripts de démarrage. `"spoof_version": "force"` est refusé depuis le fichier et rétrogradé : restaurer une ancienne sauvegarde ne doit pas le réarmer à votre insu.  
+`COPG-VD.json` porte ses réglages à côté du profil, de sorte que vos choix voyagent avec une sauvegarde et peuvent être édités à la main : `scope_mode`, les interrupteurs des engines, les groupes resetprop, `global_fields`, et un objet `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). Tout réside dans ce seul fichier - les scripts de démarrage et la WebUI y lisent les réglages directement, de sorte que vos choix survivent à une mise à jour du module. `"spoof_version": "force"` est refusé depuis le fichier et rétrogradé : restaurer une ancienne sauvegarde ne doit pas le réarmer à votre insu.  
 
 ## Contacts
 
@@ -118,11 +125,6 @@ Si vous êtes un utilisateur de Magisk, utilisez KsuWebUI par KOW (https://githu
 * **XDA-Developers :** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub :** @VD171 https://github.com/VD171
-
-<!-- vd-docs -->
-## Documentation
-
-[Guide de l'utilisateur](docs/fr/USER-GUIDE.md) · [Référence de configuration](docs/fr/CONFIGURATION.md) · [Architecture](docs/fr/ARCHITECTURE.md) · [Structure des fichiers](docs/fr/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/fr-Home)
 
 <!-- vd-see-also -->
 

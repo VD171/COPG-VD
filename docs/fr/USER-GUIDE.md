@@ -21,7 +21,7 @@ pour son fonctionnement interne, voir [ARCHITECTURE.md](ARCHITECTURE.md).
 
 Ouvrez la WebUI depuis votre gestionnaire root pour piloter le module. Les utilisateurs de
 Magisk l'ouvrent avec [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases).
-Tout peut aussi être édité directement dans `/data/adb/COPG-VD.json`.
+Tout peut aussi être édité directement dans `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Qui voit le spoof (scope)
 
@@ -74,7 +74,7 @@ récente image d'usine Google.
   autre profil est pire qu'un ancien.
 - `resetprop` est réappliqué juste après une mise à jour, mais `android.os.Build` est écrit
   au démarrage de zygote, donc **redémarrez** pour que les nouvelles valeurs atteignent les
-  applications. Journal : `/data/adb/COPG-VD.update.log`.
+  applications. Journal : `/data/adb/COPG-VD/update.log`.
 
 ## Le piège de la version d'Android
 

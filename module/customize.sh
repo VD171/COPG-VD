@@ -22,7 +22,9 @@
 # ======================================================================
 
 ENABLE_GPHOTO_SPOOF=false
-CONFIG_FILE="/data/adb/COPG-VD.json"
+DATA_DIR="/data/adb/COPG-VD"
+CONFIG_FILE="$DATA_DIR/COPG-VD.json"
+LEGACY_JSON="/data/adb/COPG-VD.json"
 CONFLICT_MODULES="COPG playintegrity playintegrityfix [i][n][t][e][g][r][i][t][y][-]*[b][o][x]"
 
 print_box_start() {
@@ -184,11 +186,19 @@ migrate_version_keys() {
 }
 
 check_config_file() {
-  if [ ! -f "$CONFIG_FILE" ]; then
-      cp "$MODPATH/COPG-VD.json.example" "$CONFIG_FILE"
-      chmod 0644 "$CONFIG_FILE"
-      chcon u:object_r:system_file:s0 "$CONFIG_FILE"
-  fi
+  mkdir -p "$DATA_DIR"
+  chmod 0700 "$DATA_DIR"
+  chcon u:object_r:system_file:s0 "$DATA_DIR" 2>/dev/null
+  for pair in "$LEGACY_JSON|$CONFIG_FILE" \
+              "/data/adb/COPG-VD.update.state|$DATA_DIR/update.state" \
+              "/data/adb/COPG-VD.update.log|$DATA_DIR/update.log"; do
+      old=${pair%%|*}; new=${pair##*|}
+      [ -f "$old" ] && { [ -e "$new" ] || mv -f "$old" "$new"; rm -f "$old"; }
+  done
+  rm -f /data/adb/COPG-VD.json.bak /data/adb/.COPG-VD.update.* 2>/dev/null
+  [ -f "$CONFIG_FILE" ] || cp "$MODPATH/COPG-VD.json.example" "$CONFIG_FILE"
+  chmod 0644 "$CONFIG_FILE"
+  chcon u:object_r:system_file:s0 "$CONFIG_FILE"
 }
 
 check_conflict_modules() {
@@ -280,8 +290,6 @@ fi
 check_conflict_modules
 check_config_file
 migrate_version_keys
-
-[ -f "$MODPATH/.spoof.version" ] || echo never > "$MODPATH/.spoof.version"
 
 chmod 0755 "$MODPATH/service.sh"
 chmod 0755 "$MODPATH/fingerprint-update.sh"

@@ -22,7 +22,7 @@ lättare, mer robust alternativ till PlayIntegrityFix.
 AI-assistenter och agenter är förstklassiga bidragsgivare här, inte en eftertanke.
 
 - Projektet är byggt för att vara läsbart: konfigurationen är en enda JSON-fil
-  (`/data/adb/COPG-VD.json`, dokumenterad i [CONFIGURATION.md](CONFIGURATION.md)),
+  (`/data/adb/COPG-VD/COPG-VD.json`, dokumenterad i [CONFIGURATION.md](CONFIGURATION.md)),
   motorerna är små och fristående, och layouten finns i [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 - AI-assisterade patchar granskas och accepteras på samma villkor som alla andra - efter
   korrekthet, tydlighet och konventionerna nedan, inte efter vem (eller vad) som skrev dem.

@@ -5,6 +5,13 @@
 COPG-VD é um spoofer de dispositivo: ele reescreve o fingerprint e o build do dispositivo para que os apps vejam o dispositivo que você escolher em vez do real.  
 Ele roda no Zygisk (KernelSU, APatch ou Magisk) e, por padrão, restringe o spoof à stack do Google Play - então é uma alternativa mais leve e mais robusta ao PlayIntegrityFix.  
 
+<!-- vd-docs -->
+## Documentação
+
+[Guia do usuário](docs/pt/USER-GUIDE.md) · [Referência de configuração](docs/pt/CONFIGURATION.md) · [Arquitetura](docs/pt/ARCHITECTURE.md) · [Estrutura de arquivos](docs/pt/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/pt-Home)
+
+<!-- /vd-docs -->
+
 ## Capturas de tela
 
 <p align="center">
@@ -13,7 +20,7 @@ Ele roda no Zygisk (KernelSU, APatch ou Magisk) e, por padrão, restringe o spoo
 
 ## Como usar?
 Instale o módulo, reinicie, e o perfil incluído (um Pixel) é spoofado para os apps alvo. Com um fingerprint funcional você não precisa do PlayIntegrityFix nem do GooglePhotosUnlimited.  
-Tudo é configurado em `/data/adb/COPG-VD.json`, ou pela WebUI. Todos os campos são OPCIONAIS - um campo que não for informado é ignorado.  
+Tudo é configurado em `/data/adb/COPG-VD/COPG-VD.json`, ou pela WebUI. Todos os campos são OPCIONAIS - um campo que não for informado é ignorado.  
 
 ### Escopo - quem vê o spoof
 `scope_mode` decide quais processos recebem a identidade spoofada. Em um modo com escopo, a identidade é entregue por processo pelo Zygisk e não vaza para o resto do sistema pelas propriedades globais.  
@@ -39,7 +46,7 @@ Dentro do objeto `COPG-VD`, cada campo Build tem quatro estados:
 Uma lista `"global_fields": [ ... ]` aplica os campos Build nomeados no dispositivo inteiro mesmo em um modo com escopo, para manter um valor consistente em todo lugar - apenas para campos seguros quanto à coerência (o security patch, por exemplo), nunca identidade e nunca o grupo da versão do Android.  
 
 ### Exemplo de arquivo de configuração JSON
-`/data/adb/COPG-VD.json`
+`/data/adb/COPG-VD/COPG-VD.json`
 ```json
 {
   "Instructions": "Use strings on double-quotes only.",
@@ -80,13 +87,13 @@ O bloco acima e `module/COPG-VD.json.example` são atualizados diariamente pelo 
 
 ### Mantendo o fingerprint atualizado
 `fingerprint-update.sh` baixa esse arquivo e atualiza sua configuração, pela WebUI (**Check Update** / **Update Now**) ou por conta própria **uma vez por boot** (**Auto-update JSON on boot**, ativado por padrão).  
-* Tanto `/data/adb/COPG-VD.json` quanto `/data/adb/modules/COPG-VD/COPG-VD.json` são atualizados quando ambos existem, e o conteúdo anterior é mantido como `.bak`.  
+* `/data/adb/COPG-VD/COPG-VD.json` é atualizado no lugar, e o conteúdo anterior é mantido ao lado como `COPG-VD.json.bak`.  
 * Apenas os campos de build são reescritos (fingerprint, ID, incremental, timestamp, security patch, SDK, UUID, host, user). Todo o resto que você personalizou é preservado: chaves extras, `scope_mode`, `BOOTLOADER`/`BOARD`/`HARDWARE`, outros objetos, ordem das chaves e formatação.  
 * Ele nunca retrocede: um build upstream mais antigo do que o instalado é recusado. Isso é rotineiro (o repositório pode ficar atrás de uma configuração que você atualizou à mão) e também é a proteção que mais importa no Android, onde o único downloader disponível é o busybox `wget`, que não consegue validar certificados TLS - todo valor é validado antes do uso pelo mesmo motivo.  
 * Se o seu perfil faz spoof de **outro dispositivo** (`BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT` diferentes), nada é aplicado - um fingerprint de Pixel em outro perfil é pior do que um fingerprint antigo.  
 * No boot ele roda em segundo plano e segue tentando por ~10 minutos, porque o wifi geralmente ainda não subiu quando o boot termina. Ele nunca atrasa o boot.  
 * `resetprop` é reaplicado logo após uma atualização, mas `android.os.Build` é escrito pelo módulo zygisk quando o zygote inicia: **reinicie** para os novos valores chegarem aos apps.  
-* Log em `/data/adb/COPG-VD.update.log`.  
+* Log em `/data/adb/COPG-VD/update.log`.  
 
 ### Versão do Android - e por que ela não é falsificada
 `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` e `CODENAME` descrevem **a sua ROM**, não o dispositivo que está sendo spoofado. Dizer aos apps que o SDK é mais novo do que o framework realmente é faz com que eles chamem APIs que não existem: os apps do Google travam, o celular reinicia, e tudo recomeça. O boot em si se completa, então é um **softloop** e nada aparece nos logs de boot.  
@@ -105,7 +112,7 @@ A WebUI é opcional - tudo pode ser editado diretamente na configuração JSON -
 Se você é usuário de Magisk, use o KsuWebUI do KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
 
 ### Configurações na config
-`COPG-VD.json` carrega suas configurações junto ao perfil, então suas escolhas viajam com um backup e podem ser editadas à mão: `scope_mode`, as chaves das engines, os grupos do resetprop, `global_fields`, e um objeto `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). A WebUI escreve tanto a configuração quanto os arquivos de flag que os scripts de boot leem. `"spoof_version": "force"` é recusado a partir do arquivo e rebaixado: restaurar um backup antigo não deve rearmá-lo sem você saber.  
+`COPG-VD.json` carrega suas configurações junto ao perfil, então suas escolhas viajam com um backup e podem ser editadas à mão: `scope_mode`, as chaves das engines, os grupos do resetprop, `global_fields`, e um objeto `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). Tudo fica nesse único arquivo - os scripts de boot e a WebUI leem as configurações direto dele, então suas escolhas sobrevivem a uma atualização do módulo. `"spoof_version": "force"` é recusado a partir do arquivo e rebaixado: restaurar um backup antigo não deve rearmá-lo sem você saber.  
 
 ## Contatos
 
@@ -118,11 +125,6 @@ Se você é usuário de Magisk, use o KsuWebUI do KOW (https://github.com/KOWX71
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
-
-<!-- vd-docs -->
-## Documentação
-
-[Guia do usuário](docs/pt/USER-GUIDE.md) · [Referência de configuração](docs/pt/CONFIGURATION.md) · [Arquitetura](docs/pt/ARCHITECTURE.md) · [Estrutura de arquivos](docs/pt/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/pt-Home)
 
 <!-- vd-see-also -->
 

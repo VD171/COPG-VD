@@ -5,6 +5,13 @@
 COPG-VD je spoofer zařízení: přepisuje fingerprint a build zařízení tak, aby aplikace viděly zařízení, které si zvolíš, místo toho skutečného.  
 Běží na Zygisku (KernelSU, APatch nebo Magisk) a ve výchozím nastavení omezuje spoofing na stack Google Play - takže je lehčí a robustnější alternativou k PlayIntegrityFix.  
 
+<!-- vd-docs -->
+## Dokumentace
+
+[Uživatelská příručka](docs/cs/USER-GUIDE.md) · [Referenční příručka konfigurace](docs/cs/CONFIGURATION.md) · [Architektura](docs/cs/ARCHITECTURE.md) · [Struktura souborů](docs/cs/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/cs-Home)
+
+<!-- /vd-docs -->
+
 ## Snímky obrazovky
 
 <p align="center">
@@ -13,7 +20,7 @@ Běží na Zygisku (KernelSU, APatch nebo Magisk) a ve výchozím nastavení ome
 
 ## Jak se používá?
 Nainstaluj modul, restartuj, a dodávaný profil (Pixel) se spoofuje cílovým aplikacím. S funkčním fingerprintem nepotřebuješ PlayIntegrityFix ani GooglePhotosUnlimited.  
-Vše se konfiguruje v `/data/adb/COPG-VD.json` nebo z WebUI. Všechna pole jsou VOLITELNÁ - pole, které není uvedeno, se přeskočí.  
+Vše se konfiguruje v `/data/adb/COPG-VD/COPG-VD.json` nebo z WebUI. Všechna pole jsou VOLITELNÁ - pole, které není uvedeno, se přeskočí.  
 
 ### Scope - kdo spoofing vidí
 `scope_mode` rozhoduje, které procesy dostanou spoofovanou identitu. V omezeném režimu dodává identitu Zygisk pro každý proces zvlášť a neuniká do zbytku systému přes globální properties.  
@@ -39,7 +46,7 @@ Uvnitř objektu `COPG-VD` má každé pole Build čtyři stavy:
 Seznam `"global_fields": [ ... ]` aplikuje uvedená pole Build na celé zařízení i v omezeném režimu, aby hodnota byla všude konzistentní - pouze pro pole bezpečná z hlediska koherence (například security patch), nikdy identitu a nikdy skupinu verze Androidu.  
 
 ### Příklad konfiguračního souboru JSON
-`/data/adb/COPG-VD.json`
+`/data/adb/COPG-VD/COPG-VD.json`
 ```json
 {
   "Instructions": "Use strings on double-quotes only.",
@@ -80,7 +87,7 @@ Blok výše a `module/COPG-VD.json.example` jsou denně aktualizovány workflow 
 
 ### Udržování fingerprintu aktuálního
 `fingerprint-update.sh` stáhne tento soubor a aktualizuje tvou konfiguraci, z WebUI (**Check Update** / **Update Now**) nebo sám od sebe **jednou za boot** (**Auto-update JSON on boot**, ve výchozím stavu zapnuto).  
-* `/data/adb/COPG-VD.json` i `/data/adb/modules/COPG-VD/COPG-VD.json` se aktualizují, pokud existují oba, a předchozí obsah se uchová jako `.bak`.  
+* `/data/adb/COPG-VD/COPG-VD.json` se aktualizuje na místě a předchozí obsah se uchová vedle něj jako `COPG-VD.json.bak`.  
 * Přepisují se pouze pole build (fingerprint, ID, incremental, timestamp, security patch, SDK, UUID, host, user). Vše ostatní, co sis přizpůsobil, se zachová: další klíče, `scope_mode`, `BOOTLOADER`/`BOARD`/`HARDWARE`, jiné objekty, pořadí klíčů a formátování.  
 * Nikdy nejde zpět: upstream build starší než nainstalovaný je odmítnut. To je
   běžné (repo může zaostávat za konfigurací, kterou jsi aktualizoval ručně) a je to také ochrana, na které
@@ -89,7 +96,7 @@ Blok výše a `module/COPG-VD.json.example` jsou denně aktualizovány workflow 
 * Pokud tvůj profil spoofuje **jiné zařízení** (odlišné `BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT`), nic se neaplikuje - fingerprint Pixelu v jiném profilu je horší než starý fingerprint.  
 * Při bootu běží na pozadí a zkouší to znovu po dobu ~10 minut, protože wifi obvykle ještě nenaběhla, když boot skončí. Boot nikdy nezdržuje.  
 * `resetprop` se znovu aplikuje hned po aktualizaci, ale `android.os.Build` zapisuje zygisk modul při startu zygoty: **restartuj**, aby nové hodnoty dorazily k aplikacím.  
-* Log v `/data/adb/COPG-VD.update.log`.  
+* Log v `/data/adb/COPG-VD/update.log`.  
 
 ### Verze Androidu - a proč se nespoofuje
 `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` a `CODENAME` popisují **tvou ROM**, nikoli spoofované zařízení. Tvrdit aplikacím, že SDK je novější, než je framework ve skutečnosti, je přiměje volat API, která neexistují: aplikace Google spadnou, telefon se restartuje a začne znovu. Samotný boot se dokončí, takže jde o **softloop** a v boot logách se nic neobjeví.  
@@ -108,7 +115,7 @@ WebUI je volitelné - vše lze upravovat přímo v JSON konfiguraci - ale je to 
 Pokud jsi uživatel Magisku, použij KsuWebUI od KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
 
 ### Nastavení v konfiguraci
-`COPG-VD.json` nese svá nastavení hned vedle profilu, takže tvá rozhodnutí cestují se zálohou a dají se upravovat ručně: `scope_mode`, přepínače engines, skupiny resetprop, `global_fields` a objekt `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). WebUI zapisuje jak konfiguraci, tak flag soubory, které čtou boot skripty. `"spoof_version": "force"` je ze souboru odmítnut a snížen: obnovení staré zálohy ho nesmí za tvými zády znovu aktivovat.  
+`COPG-VD.json` nese svá nastavení hned vedle profilu, takže tvá rozhodnutí cestují se zálohou a dají se upravovat ručně: `scope_mode`, přepínače engines, skupiny resetprop, `global_fields` a objekt `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). Vše je v tomto jediném souboru - boot skripty i WebUI čtou nastavení přímo z něj, takže tvá rozhodnutí přežijí aktualizaci modulu. `"spoof_version": "force"` je ze souboru odmítnut a snížen: obnovení staré zálohy ho nesmí za tvými zády znovu aktivovat.  
 
 ## Kontakty
 
@@ -121,11 +128,6 @@ Pokud jsi uživatel Magisku, použij KsuWebUI od KOW (https://github.com/KOWX712
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
-
-<!-- vd-docs -->
-## Dokumentace
-
-[Uživatelská příručka](docs/cs/USER-GUIDE.md) · [Referenční příručka konfigurace](docs/cs/CONFIGURATION.md) · [Architektura](docs/cs/ARCHITECTURE.md) · [Struktura souborů](docs/cs/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/cs-Home)
 
 <!-- vd-see-also -->
 

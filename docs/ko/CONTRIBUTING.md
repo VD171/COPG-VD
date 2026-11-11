@@ -22,7 +22,7 @@ COPG-VD는 **Zygisk 디바이스 스푸퍼**입니다: 디바이스의 fingerpri
 AI 어시스턴트와 에이전트는 여기서 나중에 생각난 것이 아니라 일급 기여자입니다.
 
 - 프로젝트는 읽기 쉽도록 만들어졌습니다: 구성은 단일 JSON 파일
-  (`/data/adb/COPG-VD.json`, [CONFIGURATION.md](CONFIGURATION.md)에 문서화됨)이고, 엔진은 작고
+  (`/data/adb/COPG-VD/COPG-VD.json`, [CONFIGURATION.md](CONFIGURATION.md)에 문서화됨)이고, 엔진은 작고
   자체 완결적이며, 레이아웃은 [FILE-STRUCTURE.md](FILE-STRUCTURE.md)에 있습니다.
 - AI 지원 패치는 다른 것과 동일한 조건으로 검토되고 수락됩니다 - 누가(또는 무엇이) 작성했는지가
   아니라 정확성, 명확성, 아래의 관례에 따라.

@@ -12,7 +12,7 @@ optional profile fetch, no network.
 ## Lifecycle
 
 1. **Zygote start.** When the zygote boots, the loader calls the module's `onLoad`. It
-   reads `/data/adb/COPG-VD.json` once: the scope configuration and the profile.
+   reads `/data/adb/COPG-VD/COPG-VD.json` once: the scope configuration and the profile.
 2. **App fork.** For every app the zygote forks, the module decides in
    `preAppSpecialize` whether this process is in scope:
    - **in the main scope** (`playstore` / `global` / `whitelist` / `blacklist`), or

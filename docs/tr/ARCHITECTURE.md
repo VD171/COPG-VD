@@ -12,7 +12,7 @@ isteğe bağlı profil getirme dışında ağ yoktur.
 ## Yaşam döngüsü
 
 1. **Zygote başlangıcı.** Zygote önyüklendiğinde, yükleyici modülün `onLoad`'ını çağırır.
-   `/data/adb/COPG-VD.json` dosyasını bir kez okur: kapsam yapılandırmasını ve profili.
+   `/data/adb/COPG-VD/COPG-VD.json` dosyasını bir kez okur: kapsam yapılandırmasını ve profili.
 2. **App fork.** Zygote'un fork ettiği her uygulama için, modül `preAppSpecialize` içinde
    bu sürecin kapsamda olup olmadığına karar verir:
    - **ana kapsamda** (`playstore` / `global` / `whitelist` / `blacklist`) veya

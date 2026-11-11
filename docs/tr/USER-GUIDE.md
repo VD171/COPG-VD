@@ -21,7 +21,7 @@ değer için [CONFIGURATION.md](CONFIGURATION.md) bölümüne, iç işleyişi i�
 
 Modülü yönetmek için root yöneticinizden WebUI'yi açın. Magisk kullanıcıları onu
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) ile açar. Her
-şey ayrıca doğrudan `/data/adb/COPG-VD.json` içinde de düzenlenebilir.
+şey ayrıca doğrudan `/data/adb/COPG-VD/COPG-VD.json` içinde de düzenlenebilir.
 
 ## Sahteleme kimi etkiler (kapsam)
 
@@ -73,7 +73,7 @@ kaybeder. `fingerprint-update.sh` sizinkini en yeni Google fabrika imajından g�
   eski bir parmak izinden daha kötüdür.
 - Güncellemeden hemen sonra `resetprop` yeniden uygulanır, ancak `android.os.Build` zygote
   başladığında yazılır, bu yüzden yeni değerlerin uygulamalara ulaşması için **yeniden
-  başlatın**. Günlük: `/data/adb/COPG-VD.update.log`.
+  başlatın**. Günlük: `/data/adb/COPG-VD/update.log`.
 
 ## Android sürümü tuzağı
 

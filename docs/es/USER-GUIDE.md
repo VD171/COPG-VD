@@ -20,7 +20,7 @@ consulta [CONFIGURATION.md](CONFIGURATION.md); para saber cómo funciona por den
 
 Abre la WebUI desde tu gestor de root para controlar el módulo. Los usuarios de Magisk la
 abren con [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Todo
-también puede editarse directamente en `/data/adb/COPG-VD.json`.
+también puede editarse directamente en `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Quién ve el spoof (alcance)
 
@@ -77,7 +77,7 @@ Google más reciente.
   antigua.
 - `resetprop` se vuelve a aplicar justo después de una actualización, pero
   `android.os.Build` se escribe cuando arranca zygote, así que **reinicia** para que los
-  nuevos valores lleguen a las apps. Log: `/data/adb/COPG-VD.update.log`.
+  nuevos valores lleguen a las apps. Log: `/data/adb/COPG-VD/update.log`.
 
 ## La trampa de la versión de Android
 

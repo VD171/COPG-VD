@@ -22,6 +22,11 @@
 #  E-mail         : vd.priv8@pm.me
 # ======================================================================
 
-rm -f /data/adb/COPG-VD.update.state
-rm -f /data/adb/COPG-VD.update.log
-rm -f /data/adb/.COPG-VD.update.*
+rm -f /data/adb/COPG-VD/update.state
+rm -f /data/adb/COPG-VD/update.log
+rm -f /data/adb/COPG-VD/update.status
+rm -f /data/adb/COPG-VD/COPG-VD.json.bak
+rm -f /data/adb/COPG-VD/.force
+rm -f /data/adb/COPG-VD/.update.*
+rm -f /data/adb/COPG-VD.update.state /data/adb/COPG-VD.update.log
+rm -f /data/adb/COPG-VD.json.bak /data/adb/.COPG-VD.update.*

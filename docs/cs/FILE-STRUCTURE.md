@@ -62,8 +62,8 @@ COPG-VD/
 
 ## Runtime konfigurace (není v repozitáři)
 
-`/data/adb/COPG-VD.json` na zařízení drží profil a nastavení (viz
-[CONFIGURATION.md](CONFIGURATION.md)). Nikdy se necommituje; `module/COPG-VD.json.example`
-je šablona.
+`/data/adb/COPG-VD/` na zařízení je vlastní adresář modulu: `COPG-VD.json` drží profil a nastavení
+(viz [CONFIGURATION.md](CONFIGURATION.md)), vedle `update.log`, `update.state` a `update.status`.
+Konfigurace se nikdy necommituje; `module/COPG-VD.json.example` je šablona.
 
 *Tato dokumentace byla vygenerována pomocí Claude (Anthropic) a je udržována VD171. Opravy a vylepšení jsou vítány - viz [../CONTRIBUTING.md](CONTRIBUTING.md).*

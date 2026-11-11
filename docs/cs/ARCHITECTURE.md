@@ -12,7 +12,7 @@ stažení profilu žádná síť.
 ## Životní cyklus
 
 1. **Start zygote.** Když zygote nabootuje, loader volá modulovou funkci `onLoad`. Jednou
-   přečte `/data/adb/COPG-VD.json`: konfiguraci rozsahu a profil.
+   přečte `/data/adb/COPG-VD/COPG-VD.json`: konfiguraci rozsahu a profil.
 2. **Fork aplikace.** Pro každou aplikaci, kterou zygote forkne, modul v `preAppSpecialize`
    rozhodne, zda je tento proces v rozsahu:
    - **v hlavním rozsahu** (`playstore` / `global` / `whitelist` / `blacklist`), nebo

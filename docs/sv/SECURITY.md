@@ -25,7 +25,7 @@ vi kan och ger dig erkännande om du önskar.
 
 ## Anmärkningar om omfattning
 
-- Konfigurationen finns i `/data/adb/COPG-VD.json`, läsbar endast av root. Modulen
+- Konfigurationen finns i `/data/adb/COPG-VD/COPG-VD.json`, läsbar endast av root. Modulen
   läser den från den injicerade processen via en dedikerad SELinux-regel som den levererar själv; den
   håller inga autentiseringsuppgifter eller lösenfraser.
 - Spoofing-hookarna fästs vid körande appar och är null-kontrollerade så att en felaktig profil

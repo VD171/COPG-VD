@@ -1,5 +1,14 @@
 # Changelog
 
+## v6.11-vd
+
+- Fixed a regression from v6.10 that could break hardware-backed integrity and WebView on some setups: a module file descriptor is now released before the app starts, instead of lingering in the target process.
+- Configuration, logs and state now live in their own `/data/adb/COPG-VD/` directory; an existing `/data/adb/COPG-VD.json` is moved there automatically and keeps working.
+- Settings (resetprop, auto-update, manufacturer, version policy) are kept in the config file, so they survive a module update.
+- The boot-time profile auto-update now reports its result and fails visibly instead of silently when the source cannot be reached.
+- A minified config file no longer trips the analyzer or the updater.
+- The README tab in the WebUI renders cleanly, and the bundled fonts and library now ship their licenses.
+
 ## v6.10-vd
 
 - New: a dedicated DRM / Widevine target list, independent of the main scope - the DRM spoof can now apply to its own set of apps (off by default).

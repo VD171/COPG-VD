@@ -62,8 +62,8 @@ COPG-VD/
 
 ## A configuração de runtime (não está no repositório)
 
-`/data/adb/COPG-VD.json` no dispositivo guarda o perfil e as configurações (veja
-[CONFIGURATION.md](CONFIGURATION.md)). Nunca é commitado; `module/COPG-VD.json.example`
-é o template.
+`/data/adb/COPG-VD/` no dispositivo é o diretório próprio do módulo: `COPG-VD.json` guarda o perfil e as
+configurações (veja [CONFIGURATION.md](CONFIGURATION.md)), junto com `update.log`, `update.state` e
+`update.status`. A configuração nunca é commitada; `module/COPG-VD.json.example` é o template.
 
 *Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas - veja [../CONTRIBUTING.md](CONTRIBUTING.md).*

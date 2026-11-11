@@ -19,7 +19,7 @@ Pixel を見せます。このガイドはインストールから動作する�
 
 モジュールを操作するには、root マネージャーから WebUI を開きます。Magisk ユーザーは
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) で開きます。すべては
-`/data/adb/COPG-VD.json` で直接編集することもできます。
+`/data/adb/COPG-VD/COPG-VD.json` で直接編集することもできます。
 
 ## 誰がスプーフを見るか(スコープ)
 
@@ -70,7 +70,7 @@ fingerprint は古くなります: Google はファクトリーイメージを�
   古いものより悪いからです。
 - `resetprop` は更新直後に再適用されますが、`android.os.Build` は zygote の起動時に
   書き込まれるため、新しい値がアプリに届くには **再起動** してください。ログ:
-  `/data/adb/COPG-VD.update.log`。
+  `/data/adb/COPG-VD/update.log`。
 
 ## Android バージョンの罠
 

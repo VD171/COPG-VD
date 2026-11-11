@@ -22,7 +22,7 @@ leichtere, robustere Alternative zu PlayIntegrityFix ist.
 KI-Assistenten und -Agenten sind hier erstklassige Beitragende, kein nachträglicher Gedanke.
 
 - Das Projekt ist darauf ausgelegt, lesbar zu sein: die Konfiguration ist eine einzige JSON-Datei
-  (`/data/adb/COPG-VD.json`, dokumentiert in [CONFIGURATION.md](CONFIGURATION.md)),
+  (`/data/adb/COPG-VD/COPG-VD.json`, dokumentiert in [CONFIGURATION.md](CONFIGURATION.md)),
   die Engines sind klein und eigenständig, und das Layout steht in [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 - KI-gestützte Patches werden zu denselben Bedingungen geprüft und akzeptiert wie alle anderen - nach
   Korrektheit, Klarheit und den Konventionen unten, nicht danach, wer (oder was) sie geschrieben hat.

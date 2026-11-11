@@ -21,7 +21,7 @@ trị, xem [CONFIGURATION.md](CONFIGURATION.md); để biết cách nó hoạt �
 
 Mở WebUI từ trình quản lý root của bạn để điều khiển mô-đun. Người dùng Magisk mở nó bằng
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Mọi thứ cũng
-có thể được chỉnh sửa trực tiếp trong `/data/adb/COPG-VD.json`.
+có thể được chỉnh sửa trực tiếp trong `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Ai thấy sự giả mạo (phạm vi)
 
@@ -74,7 +74,7 @@ mới nhất của Google.
   hồ sơ khác còn tệ hơn một dấu vân tay cũ.
 - `resetprop` được áp dụng lại ngay sau một lần cập nhật, nhưng `android.os.Build` được ghi
   khi zygote khởi động, nên hãy **khởi động lại** để các giá trị mới đến được với ứng dụng.
-  Nhật ký: `/data/adb/COPG-VD.update.log`.
+  Nhật ký: `/data/adb/COPG-VD/update.log`.
 
 ## Cái bẫy phiên bản Android
 

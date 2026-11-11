@@ -4,8 +4,11 @@
 
 # 설정 레퍼런스
 
-모듈 전체는 하나의 파일 `/data/adb/COPG-VD.json`으로 구동됩니다. WebUI가 당신을 위해 그것을
+모듈 전체는 하나의 파일 `/data/adb/COPG-VD/COPG-VD.json`으로 구동됩니다. WebUI가 당신을 위해 그것을
 작성하지만, 손으로 편집할 수 있습니다. 제공되는 예시는 `module/COPG-VD.json.example`에 있습니다.
+이것이 유일한 신뢰 출처입니다; 모듈 디렉터리 아래의 사본은 읽기 전용 기본값일 뿐입니다.
+이전 버전에서 `/data/adb/COPG-VD.json`에 남은 설정은 이 디렉터리로 자동으로 이동됩니다.
+모듈 자신의 로그와 상태(`update.log`, `update.state`)도 여기에 존재합니다.
 
 규칙:
 

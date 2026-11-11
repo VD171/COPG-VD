@@ -25,7 +25,7 @@ possibile e ti accrediteremo se lo desideri.
 
 ## Note sullo scope
 
-- La configurazione si trova in `/data/adb/COPG-VD.json`, leggibile solo da root. Il modulo
+- La configurazione si trova in `/data/adb/COPG-VD/COPG-VD.json`, leggibile solo da root. Il modulo
   la legge dal processo iniettato tramite una regola SELinux dedicata che include esso stesso; non
   contiene credenziali o passphrase.
 - Gli hook di spoofing sono attaccati alle app live e sono null-checked così da far sì che un profilo malformato

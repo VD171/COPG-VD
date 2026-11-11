@@ -1,3 +1,27 @@
+/*
+ * ======================================================================
+ *  COPG-VD  ::  global device spoofer
+ *  Spoof your device fingerprint and build - Zygisk, KernelSU/APatch/Magisk.
+ *
+ *  Copyright (C) 2026  VD171
+ *  SPDX-License-Identifier: Apache-2.0
+ *  Fork by VD171.
+ *
+ *  Licensed under the Apache License, Version 2.0; you may obtain a copy at
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Site           : https://vd171.ru
+ *  Site           : https://vd.priv8.ru
+ *  Source         : https://github.com/VD171/COPG-VD
+ *  GitHub         : @VD171 https://github.com/VD171
+ *  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+ *  XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+ *  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+ *  Channel        : @Priv8_VD https://t.me/Priv8_VD
+ *  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+ *  E-mail         : vd.priv8@pm.me
+ * ======================================================================
+ */
 window.__I18N_EN = {
   "ui_001": "About",
   "ui_002": "Add New Device Profile",
@@ -185,6 +209,8 @@ window.__I18N_EN = {
   "msg_fe_noarg": "No profile selected",
   "msg_fetch_noindex": "Device index not available yet",
   "ui_toolsd_autoupdate": "Refresh the profile to the newest matching image automatically on every boot.",
+  "ui_autoupdate_failed": "last auto-update could not reach the source",
+  "ui_autoupdate_ok": "last auto-update ok",
   "ui_version_policy": "Spoof Android version",
   "ui_infoT_states": "Field state",
   "ui_info_btn": "Info",

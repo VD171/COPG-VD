@@ -62,7 +62,7 @@ COPG-VD/
 
 ## 运行时配置（不在仓库中）
 
-设备上的 `/data/adb/COPG-VD.json` 保存配置文件和设置（参见
-[CONFIGURATION.md](CONFIGURATION.md)）。它从不提交；`module/COPG-VD.json.example` 是模板。
+设备上的 `/data/adb/COPG-VD/` 是模块自己的目录：`COPG-VD.json` 保存配置文件和设置（参见
+[CONFIGURATION.md](CONFIGURATION.md)），还有 `update.log`、`update.state` 和 `update.status`。配置文件从不提交；`module/COPG-VD.json.example` 是模板。
 
 *本文档由 Claude (Anthropic) 生成，并由 VD171 维护。欢迎提出更正和改进 - 参见 [../CONTRIBUTING.md](CONTRIBUTING.md)。*

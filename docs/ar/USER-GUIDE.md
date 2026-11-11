@@ -19,7 +19,7 @@
 
 افتح الـ WebUI من مدير الـ root لديك للتحكم في الوحدة. يفتحها مستخدمو Magisk عبر
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). كما يمكن
-تحرير كل شيء مباشرة في `/data/adb/COPG-VD.json`.
+تحرير كل شيء مباشرة في `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## من يرى الانتحال (النطاق)
 
@@ -71,7 +71,7 @@
   من بصمة قديمة.
 - تُعاد تطبيق `resetprop` مباشرة بعد التحديث، لكن `android.os.Build` يُكتب عند
   بدء zygote، لذا **أعد التشغيل** كي تصل القيم الجديدة إلى التطبيقات. السجل:
-  `/data/adb/COPG-VD.update.log`.
+  `/data/adb/COPG-VD/update.log`.
 
 ## فخّ إصدار Android
 

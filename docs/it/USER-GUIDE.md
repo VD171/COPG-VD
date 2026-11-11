@@ -19,7 +19,7 @@ per capire come funziona internamente, vedi [ARCHITECTURE.md](ARCHITECTURE.md).
 
 Apri la WebUI dal tuo root manager per pilotare il modulo. Gli utenti Magisk la aprono con
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Tutto
-può anche essere modificato direttamente in `/data/adb/COPG-VD.json`.
+può anche essere modificato direttamente in `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Chi vede lo spoof (scope)
 
@@ -71,7 +71,7 @@ Un fingerprint invecchia: Google ruota le factory image, e uno vecchio perde len
   di uno vecchio.
 - `resetprop` viene riapplicato subito dopo un aggiornamento, ma `android.os.Build` viene scritto quando
   lo zygote si avvia, quindi **riavvia** affinché i nuovi valori raggiungano le app. Log:
-  `/data/adb/COPG-VD.update.log`.
+  `/data/adb/COPG-VD/update.log`.
 
 ## La trappola della versione Android
 

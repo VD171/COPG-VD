@@ -12,7 +12,7 @@ COPG-VD เป็นโมดูล Zygisk: ไลบรารี native ขน�
 ## วงจรชีวิต
 
 1. **Zygote เริ่ม** เมื่อ zygote บูต ตัวโหลดเรียก `onLoad` ของโมดูล มัน
-   อ่าน `/data/adb/COPG-VD.json` หนึ่งครั้ง: การตั้งค่าขอบเขตและโปรไฟล์
+   อ่าน `/data/adb/COPG-VD/COPG-VD.json` หนึ่งครั้ง: การตั้งค่าขอบเขตและโปรไฟล์
 2. **App fork** สำหรับทุกแอปที่ zygote fork โมดูลตัดสินใจใน
    `preAppSpecialize` ว่าโปรเซสนี้อยู่ในขอบเขตหรือไม่:
    - **อยู่ในขอบเขตหลัก** (`playstore` / `global` / `whitelist` / `blacklist`) หรือ

@@ -22,7 +22,7 @@ bardziej odporną alternatywą dla PlayIntegrityFix.
 Asystenci i agenci AI są tu pełnoprawnymi współtwórcami, a nie dodatkiem.
 
 - Projekt jest zbudowany tak, aby był czytelny: konfiguracja to jeden plik JSON
-  (`/data/adb/COPG-VD.json`, udokumentowany w [CONFIGURATION.md](CONFIGURATION.md)),
+  (`/data/adb/COPG-VD/COPG-VD.json`, udokumentowany w [CONFIGURATION.md](CONFIGURATION.md)),
   silniki są małe i samodzielne, a układ znajduje się w [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 - Łatki wspierane przez AI są recenzowane i akceptowane na tych samych warunkach co każde inne - według
   poprawności, przejrzystości i poniższych konwencji, a nie według tego, kto (lub co) je napisał.

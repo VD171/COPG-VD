@@ -22,7 +22,7 @@ più leggera e più robusta a PlayIntegrityFix.
 Gli assistenti e agenti AI qui sono contributori di prima classe, non un ripensamento.
 
 - Il progetto è costruito per essere leggibile: la configurazione è un singolo file JSON
-  (`/data/adb/COPG-VD.json`, documentato in [CONFIGURATION.md](CONFIGURATION.md)),
+  (`/data/adb/COPG-VD/COPG-VD.json`, documentato in [CONFIGURATION.md](CONFIGURATION.md)),
   i motori sono piccoli e autocontenuti, e il layout è in [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 - Le patch assistite dall'AI vengono revisionate e accettate alle stesse condizioni di qualsiasi altra - per
   correttezza, chiarezza e le convenzioni qui sotto, non per chi (o cosa) le ha scritte.

@@ -12,7 +12,7 @@ COPG-VD는 Zygisk 모듈입니다: Zygisk 로더가 zygote에 주입하고, 거�
 ## 라이프사이클
 
 1. **zygote 시작.** zygote가 부팅되면 로더가 모듈의 `onLoad`를 호출합니다. 그것은
-   `/data/adb/COPG-VD.json`을 한 번 읽습니다: 스코프 구성과 프로파일입니다.
+   `/data/adb/COPG-VD/COPG-VD.json`을 한 번 읽습니다: 스코프 구성과 프로파일입니다.
 2. **앱 fork.** zygote가 fork하는 모든 앱에 대해, 모듈은 `preAppSpecialize`에서 이 프로세스가
    스코프 내에 있는지 결정합니다:
    - **메인 스코프 내** (`playstore` / `global` / `whitelist` / `blacklist`), 또는

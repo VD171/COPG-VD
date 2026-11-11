@@ -20,7 +20,7 @@ di dalam, lihat [ARCHITECTURE.md](ARCHITECTURE.md).
 
 Buka WebUI dari root manager Anda untuk mengendalikan modul. Pengguna Magisk membukanya dengan
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Semuanya juga
-dapat diedit langsung di `/data/adb/COPG-VD.json`.
+dapat diedit langsung di `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Siapa yang melihat spoof (scope)
 
@@ -72,7 +72,7 @@ Google terbaru.
   profil lain lebih buruk daripada yang lama.
 - `resetprop` diterapkan ulang tepat setelah pembaruan, tetapi `android.os.Build` ditulis
   saat zygote mulai, jadi **reboot** agar nilai baru mencapai aplikasi. Log:
-  `/data/adb/COPG-VD.update.log`.
+  `/data/adb/COPG-VD/update.log`.
 
 ## Jebakan versi Android
 

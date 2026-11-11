@@ -4,8 +4,11 @@
 
 # Tham chiếu cấu hình
 
-Toàn bộ mô-đun được điều khiển bởi một tệp: `/data/adb/COPG-VD.json`. WebUI ghi nó cho bạn,
+Toàn bộ mô-đun được điều khiển bởi một tệp: `/data/adb/COPG-VD/COPG-VD.json`. WebUI ghi nó cho bạn,
 nhưng bạn có thể chỉnh sửa bằng tay. Một ví dụ đi kèm nằm tại `module/COPG-VD.json.example`.
+Đây là nguồn chân lý duy nhất; bản sao nằm trong thư mục module chỉ là một mặc định chỉ đọc.
+Một cấu hình còn sót lại từ một phiên bản cũ tại `/data/adb/COPG-VD.json` sẽ tự động được chuyển vào
+thư mục này. Nhật ký và trạng thái của riêng module (`update.log`, `update.state`) cũng nằm ở đây.
 
 Quy tắc:
 

@@ -5,6 +5,13 @@
 COPG-VD bir cihaz sahteleyicidir: cihazın fingerprint ve build bilgisini yeniden yazar, böylece uygulamalar gerçek cihaz yerine sizin seçtiğiniz cihazı görür.  
 Zygisk (KernelSU, APatch veya Magisk) üzerinde çalışır ve varsayılan olarak sahteciliğin kapsamını Google Play yığınına daraltır - bu yüzden PlayIntegrityFix'e göre daha hafif ve daha sağlam bir alternatiftir.  
 
+<!-- vd-docs -->
+## Belgeler
+
+[Kullanıcı Kılavuzu](docs/tr/USER-GUIDE.md) · [Yapılandırma referansı](docs/tr/CONFIGURATION.md) · [Mimari](docs/tr/ARCHITECTURE.md) · [Dosya yapısı](docs/tr/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/tr-Home)
+
+<!-- /vd-docs -->
+
 ## Ekran görüntüleri
 
 <p align="center">
@@ -13,7 +20,7 @@ Zygisk (KernelSU, APatch veya Magisk) üzerinde çalışır ve varsayılan olara
 
 ## Nasıl kullanılır?
 Modülü kurun, yeniden başlatın; böylece birlikte gelen profil (bir Pixel) hedeflenen uygulamalara sahtelenir. Çalışan bir fingerprint ile PlayIntegrityFix veya GooglePhotosUnlimited'e ihtiyacınız olmaz.  
-Her şey `/data/adb/COPG-VD.json` içinde ya da WebUI'den yapılandırılır. Tüm alanlar İSTEĞE BAĞLIDIR - sağlanmayan bir alan atlanır.  
+Her şey `/data/adb/COPG-VD/COPG-VD.json` içinde ya da WebUI'den yapılandırılır. Tüm alanlar İSTEĞE BAĞLIDIR - sağlanmayan bir alan atlanır.  
 
 ### Scope - sahteciliği kim görür
 `scope_mode`, sahtelenen kimliği hangi süreçlerin alacağına karar verir. Kapsamı daraltılmış bir modda kimlik, Zygisk tarafından süreç başına teslim edilir ve global özellikler aracılığıyla sistemin geri kalanına sızmaz.  
@@ -39,7 +46,7 @@ Her biri bağımsızdır ve kapatılabilir:
 Bir `"global_fields": [ ... ]` listesi, bir değeri her yerde tutarlı tutmak için, kapsamı daraltılmış bir modda bile adı verilen Build alanlarını cihaz genelinde uygular - yalnızca tutarlılık açısından güvenli alanlar için (örneğin güvenlik yaması), asla identity için ve asla Android sürüm grubu için değil.  
 
 ### Example JSON config file
-`/data/adb/COPG-VD.json`
+`/data/adb/COPG-VD/COPG-VD.json`
 ```json
 {
   "Instructions": "Use strings on double-quotes only.",
@@ -80,13 +87,13 @@ Yukarıdaki blok ve `module/COPG-VD.json.example`, en yeni Google fabrika imajı
 
 ### Fingerprint'i güncel tutmak
 `fingerprint-update.sh` o dosyayı çeker ve yapılandırmanızı günceller; bunu ya WebUI'den (**Check Update** / **Update Now**) ya da kendi kendine **her açılışta bir kez** (**Auto-update JSON on boot**, varsayılan olarak açık) yapar.  
-* Her ikisi de mevcut olduğunda hem `/data/adb/COPG-VD.json` hem de `/data/adb/modules/COPG-VD/COPG-VD.json` güncellenir ve önceki içerik `.bak` olarak saklanır.  
+* `/data/adb/COPG-VD/COPG-VD.json` yerinde güncellenir ve önceki içerik yanında `COPG-VD.json.bak` olarak saklanır.  
 * Yalnızca build alanları yeniden yazılır (fingerprint, ID, incremental, timestamp, güvenlik yaması, SDK, UUID, host, user). Özelleştirdiğiniz diğer her şey korunur: ek anahtarlar, `scope_mode`, `BOOTLOADER`/`BOARD`/`HARDWARE`, diğer nesneler, anahtar sırası ve biçimlendirme.  
 * Asla geriye gitmez: yüklü olandan daha eski bir üst kaynak (upstream) build reddedilir. Bu olağandır (repo, elle güncellediğiniz bir yapılandırmanın gerisinde kalabilir) ve ayrıca Android'de en çok önem taşıyan korumadır; çünkü Android'de mevcut tek indirici busybox `wget`'tir ve bu da TLS sertifikalarını doğrulayamaz - aynı nedenle her değer kullanılmadan önce doğrulanır.  
 * Profiliniz **başka bir cihazı** sahteliyorsa (farklı `BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT`), hiçbir şey uygulanmaz - başka bir profildeki bir Pixel fingerprint'i, eski bir fingerprint'ten daha kötüdür.  
 * Açılışta arka planda çalışır ve yaklaşık 10 dakika boyunca tekrar denemeyi sürdürür; çünkü açılış tamamlandığında genellikle wifi henüz hazır değildir. Açılışı asla geciktirmez.  
 * `resetprop`, bir güncellemeden hemen sonra yeniden uygulanır, ancak `android.os.Build`, zygote başladığında zygisk modülü tarafından yazılır: yeni değerlerin uygulamalara ulaşması için **yeniden başlatın**.  
-* Günlük `/data/adb/COPG-VD.update.log` konumundadır.  
+* Günlük `/data/adb/COPG-VD/update.log` konumundadır.  
 
 ### Android sürümü - ve neden sahtelenmiyor
 `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` ve `CODENAME`, sahtelenen cihazı değil **sizin ROM'unuzu** tanımlar. Uygulamalara SDK'nın framework'ün gerçekte olduğundan daha yeni olduğunu söylemek, onların var olmayan API'leri çağırmasına neden olur: Google'ın uygulamaları çöker, telefon yeniden başlar ve her şey baştan başlar. Açılışın kendisi tamamlandığı için bu bir **softloop**'tur ve açılış günlüklerinde hiçbir şey görünmez.  
@@ -105,7 +112,7 @@ WebUI isteğe bağlıdır - her şey doğrudan JSON yapılandırmasında düzenl
 Magisk kullanıcısıysanız, KOW tarafından geliştirilen KsuWebUI'yi kullanın (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
 
 ### Yapılandırmadaki ayarlar
-`COPG-VD.json` ayarlarını profilin yanında taşır, böylece seçimleriniz bir yedekle birlikte taşınır ve elle düzenlenebilir: `scope_mode`, engine anahtarları, resetprop grupları, `global_fields` ve bir `COPG-VD-Settings` nesnesi (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). WebUI hem yapılandırmayı hem de açılış betiklerinin okuduğu bayrak dosyalarını yazar. `"spoof_version": "force"` dosyadan reddedilir ve düşürülür: eski bir yedeği geri yüklemek, onu arkanızdan yeniden etkinleştirmemelidir.  
+`COPG-VD.json` ayarlarını profilin yanında taşır, böylece seçimleriniz bir yedekle birlikte taşınır ve elle düzenlenebilir: `scope_mode`, engine anahtarları, resetprop grupları, `global_fields` ve bir `COPG-VD-Settings` nesnesi (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). Her şey bu tek dosyada bulunur - açılış betikleri ve WebUI ayarları doğrudan oradan okur, böylece seçimleriniz bir modül güncellemesinden sağ çıkar. `"spoof_version": "force"` dosyadan reddedilir ve düşürülür: eski bir yedeği geri yüklemek, onu arkanızdan yeniden etkinleştirmemelidir.  
 
 ## İletişim
 
@@ -118,11 +125,6 @@ Magisk kullanıcısıysanız, KOW tarafından geliştirilen KsuWebUI'yi kullanı
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
-
-<!-- vd-docs -->
-## Belgeler
-
-[Kullanıcı Kılavuzu](docs/tr/USER-GUIDE.md) · [Yapılandırma referansı](docs/tr/CONFIGURATION.md) · [Mimari](docs/tr/ARCHITECTURE.md) · [Dosya yapısı](docs/tr/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/tr-Home)
 
 <!-- vd-see-also -->
 

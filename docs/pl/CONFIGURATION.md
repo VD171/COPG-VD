@@ -4,8 +4,11 @@
 
 # Dokumentacja konfiguracji
 
-Cały moduł jest sterowany jednym plikiem: `/data/adb/COPG-VD.json`. WebUI zapisuje go za
+Cały moduł jest sterowany jednym plikiem: `/data/adb/COPG-VD/COPG-VD.json`. WebUI zapisuje go za
 Ciebie, ale możesz go edytować ręcznie. Dostarczany przykład znajduje się w `module/COPG-VD.json.example`.
+To jest jedyne źródło prawdy; kopia w katalogu modułu jest tylko domyślną wartością tylko do odczytu.
+Konfiguracja pozostała po starszej wersji w `/data/adb/COPG-VD.json` jest automatycznie przenoszona do tego katalogu.
+Własny log i stan modułu (`update.log`, `update.state`) również znajdują się tutaj.
 
 Zasady:
 

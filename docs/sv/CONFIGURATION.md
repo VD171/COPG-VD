@@ -4,8 +4,11 @@
 
 # Konfigurationsreferens
 
-Hela modulen styrs av en enda fil: `/data/adb/COPG-VD.json`. WebUI skriver den åt
+Hela modulen styrs av en enda fil: `/data/adb/COPG-VD/COPG-VD.json`. WebUI skriver den åt
 dig, men du kan redigera den för hand. Ett levererat exempel finns i `module/COPG-VD.json.example`.
+Detta är den enda sanningskällan; kopian under modulkatalogen är bara ett skrivskyddat standardvärde.
+En konfiguration som blivit kvar från en äldre version i `/data/adb/COPG-VD.json` flyttas automatiskt till den här katalogen.
+Modulens egen logg och tillstånd (`update.log`, `update.state`) finns också här.
 
 Regler:
 

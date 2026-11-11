@@ -39,6 +39,7 @@ HEAD = {"en": "Documentation", "ar": "التوثيق", "cs": "Dokumentace", "de"
 DOCS = ["USER-GUIDE", "CONFIGURATION", "ARCHITECTURE", "FILE-STRUCTURE"]
 WIKI = "https://github.com/VD171/COPG-VD/wiki"
 MARK = "<!-- vd-docs -->"
+ENDMARK = "<!-- /vd-docs -->"
 SEEALSO = "<!-- vd-see-also -->"
 
 def h1(path):
@@ -58,17 +59,20 @@ def section(lang):
         links.append(f"[{label}]({doc_path(lang, d)})")
     wiki = WIKI if lang == "en" else f"{WIKI}/{lang}-Home"
     links.append(f"[Wiki]({wiki})")
-    return f"{MARK}\n## {HEAD[lang]}\n\n" + " · ".join(links) + "\n\n"
+    return f"{MARK}\n## {HEAD[lang]}\n\n" + " · ".join(links) + f"\n\n{ENDMARK}\n\n"
 
 def apply(lang):
     rp = os.path.join(ROOT, "README.md" if lang == "en" else f"README.{lang}.md")
     if not os.path.exists(rp):
         return False
     t = open(rp, encoding="utf-8").read()
-    if SEEALSO not in t:
-        return False
+    t = re.sub(re.escape(MARK) + r".*?" + re.escape(ENDMARK) + r"\n*", "", t, flags=re.S)
     t = re.sub(re.escape(MARK) + r".*?(?=" + re.escape(SEEALSO) + r")", "", t, flags=re.S)
-    t = t.replace(SEEALSO, section(lang) + SEEALSO, 1)
+    heads = [m.start() for m in re.finditer(r"(?m)^## ", t)]
+    if len(heads) < 2:
+        return False
+    pos = heads[1]
+    t = t[:pos] + section(lang) + t[pos:]
     open(rp, "w", encoding="utf-8").write(t)
     return True
 

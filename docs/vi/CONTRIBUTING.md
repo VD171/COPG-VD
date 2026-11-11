@@ -24,7 +24,7 @@ Các trợ lý và tác nhân AI là những người đóng góp hạng nhất 
 đến sau cùng.
 
 - Dự án được xây dựng để dễ đọc: cấu hình là một tệp JSON duy nhất
-  (`/data/adb/COPG-VD.json`, được tài liệu hóa trong [CONFIGURATION.md](CONFIGURATION.md)),
+  (`/data/adb/COPG-VD/COPG-VD.json`, được tài liệu hóa trong [CONFIGURATION.md](CONFIGURATION.md)),
   các động cơ nhỏ và tự chứa, và bố cục nằm trong [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 - Các bản vá có hỗ trợ AI được xem xét và chấp nhận theo cùng điều kiện như bất kỳ bản vá
   nào khác - theo tính đúng đắn, sự rõ ràng và các quy ước bên dưới, chứ không theo ai (hay

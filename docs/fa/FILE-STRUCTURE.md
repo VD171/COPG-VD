@@ -62,8 +62,8 @@ COPG-VD/
 
 ## config زمان-اجرا (در مخزن نیست)
 
-`/data/adb/COPG-VD.json` روی دستگاه پروفایل و تنظیمات را نگه می‌دارد (ببینید
-[CONFIGURATION.md](CONFIGURATION.md)). هرگز commit نمی‌شود؛ `module/COPG-VD.json.example`
-الگوی آن است.
+`/data/adb/COPG-VD/` روی دستگاه دایرکتوری خودِ ماژول است: `COPG-VD.json` پروفایل و تنظیمات را
+نگه می‌دارد (ببینید [CONFIGURATION.md](CONFIGURATION.md))، در کنار `update.log`، `update.state`
+و `update.status`. این config هرگز commit نمی‌شود؛ `module/COPG-VD.json.example` الگوی آن است.
 
 *این مستندات با Claude (Anthropic) تولید شده و توسط VD171 نگهداری می‌شود. اصلاحات و بهبودها خوش‌آمدند - [../CONTRIBUTING.md](CONTRIBUTING.md) را ببینید.*

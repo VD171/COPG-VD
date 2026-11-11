@@ -5,6 +5,13 @@
 COPG-VD adalah pengusur (spoofer) perangkat: ia menulis ulang fingerprint dan build perangkat sehingga aplikasi melihat perangkat yang Anda pilih alih-alih perangkat yang sebenarnya.  
 Ia berjalan di Zygisk (KernelSU, APatch, atau Magisk) dan, secara default, membatasi cakupan spoofing ke tumpukan Google Play - sehingga menjadi alternatif yang lebih ringan dan lebih tangguh dibandingkan PlayIntegrityFix.  
 
+<!-- vd-docs -->
+## Dokumentasi
+
+[Panduan Pengguna](docs/in/USER-GUIDE.md) · [Referensi konfigurasi](docs/in/CONFIGURATION.md) · [Arsitektur](docs/in/ARCHITECTURE.md) · [Struktur file](docs/in/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/in-Home)
+
+<!-- /vd-docs -->
+
 ## Tangkapan layar
 
 <p align="center">
@@ -13,7 +20,7 @@ Ia berjalan di Zygisk (KernelSU, APatch, atau Magisk) dan, secara default, memba
 
 ## Cara menggunakannya?
 Pasang modul, reboot, dan profil yang disertakan (sebuah Pixel) di-spoof ke aplikasi yang ditargetkan. Dengan fingerprint yang berfungsi, Anda tidak memerlukan PlayIntegrityFix atau GooglePhotosUnlimited.  
-Semuanya dikonfigurasi di `/data/adb/COPG-VD.json`, atau dari WebUI. Semua field bersifat OPSIONAL - field yang tidak disediakan akan dilewati.  
+Semuanya dikonfigurasi di `/data/adb/COPG-VD/COPG-VD.json`, atau dari WebUI. Semua field bersifat OPSIONAL - field yang tidak disediakan akan dilewati.  
 
 ### Scope - siapa yang melihat spoofing
 `scope_mode` menentukan proses mana yang mendapatkan identitas yang di-spoof. Dalam mode bercakupan terbatas, identitas dikirimkan per proses oleh Zygisk dan tidak bocor ke seluruh sistem lainnya melalui properti global.  
@@ -39,7 +46,7 @@ Di dalam objek `COPG-VD`, setiap field Build memiliki empat keadaan:
 Daftar `"global_fields": [ ... ]` menerapkan field Build yang disebutkan ke seluruh perangkat bahkan dalam mode bercakupan terbatas, untuk menjaga sebuah nilai tetap konsisten di mana saja - hanya untuk field yang aman terhadap koherensi (security patch, misalnya), tidak pernah identitas dan tidak pernah grup versi Android.  
 
 ### Contoh file konfigurasi JSON
-`/data/adb/COPG-VD.json`
+`/data/adb/COPG-VD/COPG-VD.json`
 ```json
 {
   "Instructions": "Use strings on double-quotes only.",
@@ -80,13 +87,13 @@ Blok di atas dan `module/COPG-VD.json.example` disegarkan setiap hari oleh workf
 
 ### Menjaga fingerprint tetap baru
 `fingerprint-update.sh` menarik file tersebut dan memperbarui konfigurasi Anda, dari WebUI (**Check Update** / **Update Now**) atau dengan sendirinya **sekali per boot** (**Auto-update JSON on boot**, aktif secara default).  
-* Baik `/data/adb/COPG-VD.json` maupun `/data/adb/modules/COPG-VD/COPG-VD.json` diperbarui ketika keduanya ada, dan konten sebelumnya disimpan sebagai `.bak`.  
+* `/data/adb/COPG-VD/COPG-VD.json` diperbarui di tempat, dan konten sebelumnya disimpan di sampingnya sebagai `COPG-VD.json.bak`.  
 * Hanya field build yang ditulis ulang (fingerprint, ID, incremental, timestamp, security patch, SDK, UUID, host, user). Semua yang lain yang Anda sesuaikan tetap dipertahankan: kunci tambahan, `scope_mode`, `BOOTLOADER`/`BOARD`/`HARDWARE`, objek lain, urutan kunci, dan pemformatan.  
 * Ini tidak pernah mundur: build hulu yang lebih lama daripada yang terpasang akan ditolak. Ini hal biasa (repo bisa tertinggal di belakang konfigurasi yang Anda perbarui secara manual) dan ini juga merupakan penjaga yang paling penting di Android, di mana satu-satunya pengunduh yang tersedia adalah `wget` busybox, yang tidak dapat memvalidasi sertifikat TLS - setiap nilai divalidasi sebelum digunakan dengan alasan yang sama.  
 * Jika profil Anda melakukan spoofing **perangkat lain** (`BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT` yang berbeda), tidak ada yang diterapkan - fingerprint Pixel pada profil lain lebih buruk daripada fingerprint yang lama.  
 * Saat boot, ia berjalan di latar belakang dan terus mencoba lagi selama sekitar 10 menit, karena wifi biasanya belum aktif ketika boot selesai. Ia tidak pernah menunda boot.  
 * `resetprop` diterapkan kembali segera setelah pembaruan, tetapi `android.os.Build` ditulis oleh modul zygisk saat zygote dimulai: **reboot** agar nilai-nilai baru sampai ke aplikasi.  
-* Log di `/data/adb/COPG-VD.update.log`.  
+* Log di `/data/adb/COPG-VD/update.log`.  
 
 ### Versi Android - dan mengapa tidak di-spoof
 `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL`, dan `CODENAME` menggambarkan **ROM Anda**, bukan perangkat yang sedang di-spoof. Memberi tahu aplikasi bahwa SDK lebih baru daripada framework yang sebenarnya membuat mereka memanggil API yang tidak ada: aplikasi Google crash, ponsel reboot, dan mulai dari awal lagi. Boot itu sendiri selesai, jadi ini adalah **softloop** dan tidak ada yang muncul di log boot.  
@@ -105,7 +112,7 @@ WebUI bersifat opsional - semuanya dapat diedit langsung di konfigurasi JSON - t
 Jika Anda pengguna Magisk, gunakan KsuWebUI oleh KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
 
 ### Pengaturan dalam konfigurasi
-`COPG-VD.json` membawa pengaturannya di samping profil, sehingga pilihan Anda ikut bersama cadangan dan dapat diedit secara manual: `scope_mode`, sakelar-sakelar engine, grup-grup resetprop, `global_fields`, dan sebuah objek `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). WebUI menulis keduanya, konfigurasi dan file flag yang dibaca skrip boot. `"spoof_version": "force"` ditolak dari file dan diturunkan: memulihkan cadangan lama tidak boleh mengaktifkannya kembali tanpa sepengetahuan Anda.  
+`COPG-VD.json` membawa pengaturannya di samping profil, sehingga pilihan Anda ikut bersama cadangan dan dapat diedit secara manual: `scope_mode`, sakelar-sakelar engine, grup-grup resetprop, `global_fields`, dan sebuah objek `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). Semuanya berada di satu file ini - skrip boot dan WebUI membaca pengaturan langsung darinya, sehingga pilihan Anda bertahan melewati pembaruan modul. `"spoof_version": "force"` ditolak dari file dan diturunkan: memulihkan cadangan lama tidak boleh mengaktifkannya kembali tanpa sepengetahuan Anda.  
 
 ## Kontak
 
@@ -118,11 +125,6 @@ Jika Anda pengguna Magisk, gunakan KsuWebUI oleh KOW (https://github.com/KOWX712
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
-
-<!-- vd-docs -->
-## Dokumentasi
-
-[Panduan Pengguna](docs/in/USER-GUIDE.md) · [Referensi konfigurasi](docs/in/CONFIGURATION.md) · [Arsitektur](docs/in/ARCHITECTURE.md) · [Struktur file](docs/in/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/in-Home)
 
 <!-- vd-see-also -->
 

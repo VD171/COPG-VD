@@ -19,7 +19,7 @@ COPG-VD شناسه دستگاه (fingerprint) و build را بازنویسی م�
 
 WebUI را از مدیر روت خود باز کنید تا ماژول را هدایت کنید. کاربران Magisk آن را با
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) باز می‌کنند. همه چیز
-همچنین مستقیماً در `/data/adb/COPG-VD.json` قابل ویرایش است.
+همچنین مستقیماً در `/data/adb/COPG-VD/COPG-VD.json` قابل ویرایش است.
 
 ## چه کسی spoof را می‌بیند (scope)
 
@@ -72,7 +72,7 @@ WebUI را از مدیر روت خود باز کنید تا ماژول را هد
   بدتر از یک fingerprint قدیمی است.
 - `resetprop` بلافاصله پس از یک به‌روزرسانی دوباره اعمال می‌شود، اما `android.os.Build`
   هنگام شروع zygote نوشته می‌شود، پس برای رسیدن مقادیر جدید به اپ‌ها **ری‌استارت** کنید. لاگ:
-  `/data/adb/COPG-VD.update.log`.
+  `/data/adb/COPG-VD/update.log`.
 
 ## تله نسخه اندروید
 

@@ -25,7 +25,7 @@ cuanto podamos y te daremos crédito si lo deseas.
 
 ## Notas de alcance
 
-- La configuración vive en `/data/adb/COPG-VD.json`, legible solo por root. El módulo la lee
+- La configuración vive en `/data/adb/COPG-VD/COPG-VD.json`, legible solo por root. El módulo la lee
   desde el proceso inyectado mediante una regla SELinux dedicada que él mismo incluye; no
   contiene credenciales ni frases de contraseña.
 - Los hooks de spoofing están adjuntos a apps vivas y tienen comprobación de null, de modo

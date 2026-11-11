@@ -12,7 +12,7 @@ de optionele profielophaling, geen netwerk.
 ## Levenscyclus
 
 1. **Zygote-start.** Wanneer de zygote boot, roept de loader de `onLoad` van de module aan. Het
-   leest `/data/adb/COPG-VD.json` eenmaal: de scope-configuratie en het profiel.
+   leest `/data/adb/COPG-VD/COPG-VD.json` eenmaal: de scope-configuratie en het profiel.
 2. **App-fork.** Voor elke app die de zygote forkt, beslist de module in
    `preAppSpecialize` of dit proces binnen de scope valt:
    - **in de hoofdscope** (`playstore` / `global` / `whitelist` / `blacklist`), of

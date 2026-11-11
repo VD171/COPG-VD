@@ -4,9 +4,13 @@
 
 # Konfigurationsreferenz
 
-Das gesamte Modul wird von einer Datei gesteuert: `/data/adb/COPG-VD.json`. Die WebUI schreibt
+Das gesamte Modul wird von einer Datei gesteuert: `/data/adb/COPG-VD/COPG-VD.json`. Die WebUI schreibt
 sie für dich, aber du kannst sie von Hand bearbeiten. Ein mitgeliefertes Beispiel liegt unter
 `module/COPG-VD.json.example`.
+Dies ist die einzige Quelle der Wahrheit; die Kopie im Modulverzeichnis ist nur ein
+schreibgeschützter Standard. Eine aus einer älteren Version übrig gebliebene Konfiguration unter
+`/data/adb/COPG-VD.json` wird automatisch in dieses Verzeichnis verschoben. Das eigene
+Log und der Zustand des Moduls (`update.log`, `update.state`) liegen ebenfalls hier.
 
 Regeln:
 

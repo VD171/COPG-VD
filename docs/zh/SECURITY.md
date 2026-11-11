@@ -23,7 +23,7 @@ COPG-VD 以 root 身份运行，并通过 Zygisk 注入到应用进程中。我�
 
 ## 范围说明
 
-- 配置位于 `/data/adb/COPG-VD.json`，仅 root 可读。模块通过它自己附带的一条专用 SELinux 规则
+- 配置位于 `/data/adb/COPG-VD/COPG-VD.json`，仅 root 可读。模块通过它自己附带的一条专用 SELinux 规则
   从被注入的进程中读取它；它不保存任何凭据或口令。
 - 伪装 hook 附着在运行中的应用上，并做了空值检查，因此一个格式错误的配置文件会优雅降级，而
   不是使应用崩溃。

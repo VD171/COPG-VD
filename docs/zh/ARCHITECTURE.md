@@ -11,7 +11,7 @@ COPG-VD 是一个 Zygisk 模块：一个很小的原生库（`libspoof.so`），
 ## 生命周期
 
 1. **Zygote 启动。** 当 zygote 启动时，加载器调用模块的 `onLoad`。它读取一次
-   `/data/adb/COPG-VD.json`：作用范围配置和配置文件。
+   `/data/adb/COPG-VD/COPG-VD.json`：作用范围配置和配置文件。
 2. **应用 fork。** 对于 zygote fork 出的每一个应用，模块在 `preAppSpecialize` 中决定该进程是
    否在作用范围内：
    - **在主作用范围内**（`playstore` / `global` / `whitelist` / `blacklist`），或

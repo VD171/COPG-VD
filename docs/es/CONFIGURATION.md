@@ -4,9 +4,13 @@
 
 # Referencia de configuración
 
-Todo el módulo se controla con un único archivo: `/data/adb/COPG-VD.json`. La WebUI lo
+Todo el módulo se controla con un único archivo: `/data/adb/COPG-VD/COPG-VD.json`. La WebUI lo
 escribe por ti, pero puedes editarlo a mano. Un ejemplo incluido está en
 `module/COPG-VD.json.example`.
+Esta es la única fuente de verdad; la copia bajo el directorio del módulo es solo un valor
+predeterminado de solo lectura. Una configuración heredada de una versión anterior en
+`/data/adb/COPG-VD.json` se traslada a este directorio automáticamente. El propio
+registro y estado del módulo (`update.log`, `update.state`) también viven aquí.
 
 Reglas:
 

@@ -62,8 +62,9 @@ COPG-VD/
 
 ## Config runtime (tidak ada di repositori)
 
-`/data/adb/COPG-VD.json` di perangkat menyimpan profil dan pengaturan (lihat
-[CONFIGURATION.md](CONFIGURATION.md)). Ia tidak pernah di-commit; `module/COPG-VD.json.example`
+`/data/adb/COPG-VD/` di perangkat adalah direktori milik modul sendiri: `COPG-VD.json` menyimpan
+profil dan pengaturan (lihat [CONFIGURATION.md](CONFIGURATION.md)), bersama `update.log`,
+`update.state`, dan `update.status`. Config ini tidak pernah di-commit; `module/COPG-VD.json.example`
 adalah templatnya.
 
 *Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima - lihat [../CONTRIBUTING.md](CONTRIBUTING.md).*

@@ -19,7 +19,7 @@ jak to funguje uvnitř, viz [ARCHITECTURE.md](ARCHITECTURE.md).
 
 Otevřete WebUI ze svého root manageru pro ovládání modulu. Uživatelé Magisku ji otevřou
 pomocí [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Vše
-lze také upravovat přímo v `/data/adb/COPG-VD.json`.
+lze také upravovat přímo v `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Kdo vidí spoof (rozsah)
 
@@ -70,7 +70,7 @@ Otisk stárne: Google rotuje tovární obrazy a starý pomalu ztrácí hodnotu.
   zařízení, neaplikuje nic - otisk Pixelu na jiném profilu je horší než starý.
 - `resetprop` je znovu aplikován hned po aktualizaci, ale `android.os.Build` se zapisuje
   při startu zygote, takže **restartujte**, aby nové hodnoty dorazily k aplikacím. Log:
-  `/data/adb/COPG-VD.update.log`.
+  `/data/adb/COPG-VD/update.log`.
 
 ## Past na verzi Androidu
 

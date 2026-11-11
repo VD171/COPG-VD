@@ -24,7 +24,7 @@ AI asistanları ve ajanları burada birinci sınıf katkıda bulunanlardır, son
 bir şey değil.
 
 - Proje okunabilir olacak şekilde inşa edilmiştir: yapılandırma tek bir JSON dosyasıdır
-  (`/data/adb/COPG-VD.json`, [CONFIGURATION.md](CONFIGURATION.md) içinde belgelenmiş),
+  (`/data/adb/COPG-VD/COPG-VD.json`, [CONFIGURATION.md](CONFIGURATION.md) içinde belgelenmiş),
   motorlar küçük ve kendi kendine yeterlidir ve düzen [FILE-STRUCTURE.md](FILE-STRUCTURE.md)
   içindedir.
 - AI destekli yamalar, herhangi bir diğeriyle aynı koşullarda incelenir ve kabul edilir -

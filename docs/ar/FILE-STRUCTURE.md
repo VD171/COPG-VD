@@ -62,8 +62,8 @@ COPG-VD/
 
 ## إعداد وقت التشغيل (ليس في المستودع)
 
-يحتفظ `/data/adb/COPG-VD.json` على الجهاز بملف التعريف والإعدادات (راجع
-[CONFIGURATION.md](CONFIGURATION.md)). لا يُرفع (commit) أبداً؛ و`module/COPG-VD.json.example`
-هو القالب.
+`/data/adb/COPG-VD/` على الجهاز هو الدليل الخاص بالوحدة: يحتفظ `COPG-VD.json` بملف التعريف
+والإعدادات (راجع [CONFIGURATION.md](CONFIGURATION.md))، إلى جانب `update.log` و`update.state`
+و`update.status`. لا يُرفع الإعداد (commit) أبداً؛ و`module/COPG-VD.json.example` هو القالب.
 
 *تم إنشاء هذه الوثائق باستخدام Claude (Anthropic) وتتم صيانتها بواسطة VD171. التصحيحات والتحسينات مرحّب بها - راجع [../CONTRIBUTING.md](CONTRIBUTING.md).*

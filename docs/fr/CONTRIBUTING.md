@@ -23,7 +23,7 @@ alternative plus légère et plus robuste à PlayIntegrityFix.
 Les assistants et agents IA sont ici des contributeurs de premier plan, pas une arrière-pensée.
 
 - Le projet est conçu pour être lisible : la configuration est un unique fichier JSON
-  (`/data/adb/COPG-VD.json`, documenté dans [CONFIGURATION.md](CONFIGURATION.md)), les
+  (`/data/adb/COPG-VD/COPG-VD.json`, documenté dans [CONFIGURATION.md](CONFIGURATION.md)), les
   moteurs sont petits et autonomes, et l'agencement est dans [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 - Les correctifs assistés par IA sont examinés et acceptés aux mêmes conditions que
   n'importe quel autre - sur la justesse, la clarté et les conventions ci-dessous, pas sur

@@ -47,9 +47,10 @@
 static bool g_verbose = false;
 #define LOGV(...) do { if (g_verbose) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__); } while (0)
 
-static const std::string config_file = "/data/adb/COPG-VD.json";
+static const std::string config_file = "/data/adb/COPG-VD/COPG-VD.json";
+static const std::string legacy_config = "/data/adb/COPG-VD.json";
 static const std::string rom_prop_file = "/system/build.prop";
-static const std::string version_policy_file = "/data/adb/modules/COPG-VD/.spoof.version";
+static const std::string force_marker = "/data/adb/COPG-VD/.force";
 
 enum class VersionPolicy { Never, Rom, Force };
 
@@ -187,12 +188,19 @@ static RomVersion readRomVersion() {
 }
 
 static VersionPolicy readVersionPolicy() {
+    struct stat st;
+    if (stat(force_marker.c_str(), &st) == 0) return VersionPolicy::Force;
     std::string text;
-    if (!readFile(version_policy_file, text)) return VersionPolicy::Never;
-    const size_t nl = text.find('\n');
-    const std::string value = trim(nl == std::string::npos ? text : text.substr(0, nl));
-    if (value == "force") return VersionPolicy::Force;
-    if (value == "rom") return VersionPolicy::Rom;
+    if (!readFile(config_file, text) && !readFile(legacy_config, text)) return VersionPolicy::Never;
+    size_t p = text.find("\"spoof_version\"");
+    if (p != std::string::npos && (p = text.find(':', p)) != std::string::npos) {
+        const size_t q = text.find('"', p);
+        if (q != std::string::npos) {
+            const size_t e = text.find('"', q + 1);
+            if (e != std::string::npos && text.substr(q + 1, e - q - 1) == "rom")
+                return VersionPolicy::Rom;
+        }
+    }
     return VersionPolicy::Never;
 }
 
@@ -262,7 +270,7 @@ static bool validTree(const std::string& text, const std::vector<jsmntok_t>& t, 
 static bool readConfig(const std::string& path, Config& out, std::set<std::string>* del = nullptr,
                        ScopeConfig* scope = nullptr, int module_dir_fd = -1) {
     std::string text;
-    if (!readFile(path, text) && !readFileAt(module_dir_fd, "COPG-VD.json", text)) return false;
+    if (!readFile(path, text) && !readFile(legacy_config, text) && !readFileAt(module_dir_fd, "COPG-VD.json", text)) return false;
 
     jsmn_parser parser;
     jsmn_init(&parser);
@@ -415,7 +423,6 @@ static jstring drm_getPropertyString(JNIEnv* env, jobject thiz, jstring name) {
 class COPGVDModule : public zygisk::ModuleBase {
 private:
     zygisk::Api* api = nullptr;
-    int module_dir_fd = -1;   // Zygisk getModuleDir(); fd-based config fallback (see readConfig)
     JNIEnv* env = nullptr;
     JavaVM* jvm = nullptr;
 
@@ -442,13 +449,12 @@ private:
 
     void reloadConfigIfChanged() {
         struct stat st;
-        if (stat(config_file.c_str(), &st) != 0 &&
-            (module_dir_fd < 0 || fstatat(module_dir_fd, "COPG-VD.json", &st, 0) != 0)) return;
+        if (stat(config_file.c_str(), &st) != 0 && stat(legacy_config.c_str(), &st) != 0) return;
         if (st.st_mtime == cfg_mtime) return;
         Config nd;
         std::set<std::string> ndel;
         ScopeConfig nsc;
-        if (readConfig(config_file, nd, &ndel, &nsc, module_dir_fd)) {
+        if (readConfig(config_file, nd, &ndel, &nsc)) {
             cfg_device = std::move(nd);
             cfg_del = std::move(ndel);
             scope_cfg = std::move(nsc);
@@ -760,12 +766,14 @@ public:
         this->env = env;
         if (env) env->GetJavaVM(&jvm);
 
-        module_dir_fd = api ? api->getModuleDir() : -1;
-        cfg_ok = readConfig(config_file, cfg_device, &cfg_del, &scope_cfg, module_dir_fd);
+        const int mfd = api ? api->getModuleDir() : -1;
+        cfg_ok = readConfig(config_file, cfg_device, &cfg_del, &scope_cfg, mfd);
         { struct stat st0;
           if (stat(config_file.c_str(), &st0) == 0 ||
-              (module_dir_fd >= 0 && fstatat(module_dir_fd, "COPG-VD.json", &st0, 0) == 0))
+              stat(legacy_config.c_str(), &st0) == 0 ||
+              (mfd >= 0 && fstatat(mfd, "COPG-VD.json", &st0, 0) == 0))
               cfg_mtime = st0.st_mtime; }
+        if (mfd >= 0) close(mfd);
         g_verbose = scope_cfg.verbose_logs;
         LOGV("onLoad: cfg_ok=%d mode=%s jni=%d prop_hook=%s drm=%d fields=%zu overrides=%zu",
              cfg_ok, scope_cfg.mode.c_str(), scope_cfg.motor_jni,

@@ -22,7 +22,7 @@ robustnější alternativa k PlayIntegrityFix.
 AI asistenti a agenti jsou zde prvotřídní přispěvatelé, ne dodatečný nápad.
 
 - Projekt je postaven tak, aby byl čitelný: konfigurace je jediný JSON soubor
-  (`/data/adb/COPG-VD.json`, dokumentovaný v [CONFIGURATION.md](CONFIGURATION.md)),
+  (`/data/adb/COPG-VD/COPG-VD.json`, dokumentovaný v [CONFIGURATION.md](CONFIGURATION.md)),
   enginy jsou malé a soběstačné a rozvržení je v [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 - Patche s pomocí AI jsou posuzovány a přijímány za stejných podmínek jako jakékoli jiné -
   podle správnosti, srozumitelnosti a konvencí níže, ne podle toho, kdo (nebo co) je napsal.

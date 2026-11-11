@@ -12,7 +12,7 @@ opcjonalnym pobieraniem profilu, nie ma sieci.
 ## Cykl życia
 
 1. **Start zygote.** Gdy zygote się uruchamia, loader wywołuje `onLoad` modułu. Odczytuje
-   `/data/adb/COPG-VD.json` raz: konfigurację zakresu i profil.
+   `/data/adb/COPG-VD/COPG-VD.json` raz: konfigurację zakresu i profil.
 2. **Fork aplikacji.** Dla każdej aplikacji, którą zygote forkuje, moduł decyduje w
    `preAppSpecialize`, czy ten proces jest w zakresie:
    - **w głównym zakresie** (`playstore` / `global` / `whitelist` / `blacklist`), lub

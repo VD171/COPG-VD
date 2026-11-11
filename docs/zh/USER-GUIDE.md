@@ -18,7 +18,7 @@ COPG-VD 会重写设备指纹（fingerprint）和 build 信息，使你选择的
 
 从你的 root 管理器打开 WebUI 来驱动该模块。Magisk 用户用
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) 打开它。一切
-也都可以直接在 `/data/adb/COPG-VD.json` 中编辑。
+也都可以直接在 `/data/adb/COPG-VD/COPG-VD.json` 中编辑。
 
 ## 谁看到伪装（作用范围）
 
@@ -63,7 +63,7 @@ Google 出厂镜像出发，使你的指纹保持最新。
 - 它绝不会倒退（更旧的上游 build 会被拒绝），而且如果你的配置文件伪装的是另一台设备，它什么
   都不会应用 - 在另一个配置文件上套用 Pixel 指纹比用一个旧指纹更糟。
 - 更新之后会立即重新应用 `resetprop`，但 `android.os.Build` 是在 zygote 启动时写入的，因此要让
-  新值到达应用，需**重启**。日志：`/data/adb/COPG-VD.update.log`。
+  新值到达应用，需**重启**。日志：`/data/adb/COPG-VD/update.log`。
 
 ## Android 版本陷阱
 

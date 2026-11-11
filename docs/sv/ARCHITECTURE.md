@@ -12,7 +12,7 @@ den valfria profilhämtningen, inget nätverk.
 ## Livscykel
 
 1. **Zygote-start.** När zygote bootar anropar laddaren modulens `onLoad`. Den
-   läser `/data/adb/COPG-VD.json` en gång: omfattningskonfigurationen och profilen.
+   läser `/data/adb/COPG-VD/COPG-VD.json` en gång: omfattningskonfigurationen och profilen.
 2. **App-fork.** För varje app som zygote forkar avgör modulen i
    `preAppSpecialize` om den här processen är inom omfattningen:
    - **inom huvudomfattningen** (`playstore` / `global` / `whitelist` / `blacklist`), eller

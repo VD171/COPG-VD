@@ -25,7 +25,7 @@ jak zdołamy, i podamy Ci kredyt, jeśli sobie tego życzysz.
 
 ## Uwagi o zakresie
 
-- Konfiguracja znajduje się w `/data/adb/COPG-VD.json`, czytelna tylko dla roota. Moduł
+- Konfiguracja znajduje się w `/data/adb/COPG-VD/COPG-VD.json`, czytelna tylko dla roota. Moduł
   odczytuje ją z wstrzykniętego procesu poprzez dedykowaną regułę SELinux, którą sam dostarcza; nie
   przechowuje żadnych poświadczeń ani haseł.
 - Haki spoofujące są dołączane do żywych aplikacji i mają sprawdzanie null, więc wadliwy profil

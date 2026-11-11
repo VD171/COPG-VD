@@ -19,7 +19,7 @@ znajdziesz w [CONFIGURATION.md](CONFIGURATION.md); jak to działa od środka - z
 
 Otwórz WebUI z poziomu menedżera roota, aby sterować modułem. Użytkownicy Magisk otwierają je za pomocą
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Wszystko
-można też edytować bezpośrednio w `/data/adb/COPG-VD.json`.
+można też edytować bezpośrednio w `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Kto widzi spoof (zakres)
 
@@ -71,7 +71,7 @@ Odcisk się starzeje: Google rotuje obrazy fabryczne, a stary powoli traci warto
   niż stary.
 - `resetprop` jest ponownie stosowane zaraz po aktualizacji, ale `android.os.Build` jest zapisywane,
   gdy startuje zygote, więc **uruchom ponownie**, aby nowe wartości dotarły do aplikacji. Log:
-  `/data/adb/COPG-VD.update.log`.
+  `/data/adb/COPG-VD/update.log`.
 
 ## Pułapka wersji Androida
 

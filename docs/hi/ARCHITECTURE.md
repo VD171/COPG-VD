@@ -12,7 +12,7 @@ COPG-VD एक Zygisk मॉड्यूल है: एक छोटी native �
 ## जीवनचक्र
 
 1. **Zygote शुरू।** जब zygote boot होता है, loader मॉड्यूल के `onLoad` को कॉल करता है। यह
-   `/data/adb/COPG-VD.json` को एक बार पढ़ता है: scope कॉन्फ़िगरेशन और प्रोफ़ाइल।
+   `/data/adb/COPG-VD/COPG-VD.json` को एक बार पढ़ता है: scope कॉन्फ़िगरेशन और प्रोफ़ाइल।
 2. **ऐप fork।** zygote जिस भी ऐप को fork करता है, मॉड्यूल `preAppSpecialize` में तय करता है कि
    यह प्रोसेस scope में है या नहीं:
    - **मुख्य scope में** (`playstore` / `global` / `whitelist` / `blacklist`), या

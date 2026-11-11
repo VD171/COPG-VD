@@ -25,7 +25,7 @@ sớm nhất có thể và ghi nhận công lao của bạn nếu bạn muốn.
 
 ## Ghi chú về phạm vi
 
-- Cấu hình nằm tại `/data/adb/COPG-VD.json`, chỉ root mới đọc được. Mô-đun đọc nó từ tiến
+- Cấu hình nằm tại `/data/adb/COPG-VD/COPG-VD.json`, chỉ root mới đọc được. Mô-đun đọc nó từ tiến
   trình được tiêm thông qua một quy tắc SELinux chuyên dụng mà chính nó đi kèm; nó không giữ
   thông tin xác thực (credential) hay cụm mật khẩu nào.
 - Các hook giả mạo được gắn vào các ứng dụng đang chạy và được kiểm tra null để một hồ sơ

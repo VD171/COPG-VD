@@ -4,9 +4,10 @@
 
 # Referensi konfigurasi
 
-Seluruh modul dikendalikan oleh satu file: `/data/adb/COPG-VD.json`. WebUI menuliskannya
+Seluruh modul dikendalikan oleh satu file: `/data/adb/COPG-VD/COPG-VD.json`. WebUI menuliskannya
 untuk Anda, tetapi Anda dapat mengeditnya secara manual. Contoh yang disertakan ada di
 `module/COPG-VD.json.example`.
+Inilah satu-satunya sumber kebenaran; salinan di bawah direktori modul hanyalah default yang hanya-baca. Konfigurasi yang tersisa dari versi lama di `/data/adb/COPG-VD.json` dipindahkan ke direktori ini secara otomatis. Log dan keadaan milik modul sendiri (`update.log`, `update.state`) juga berada di sini.
 
 Aturan:
 

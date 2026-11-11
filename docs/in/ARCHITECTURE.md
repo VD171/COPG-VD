@@ -12,7 +12,7 @@ aplikasi dan, selain pengambilan profil opsional, tidak ada jaringan.
 ## Siklus hidup
 
 1. **Zygote mulai.** Ketika zygote boot, loader memanggil `onLoad` modul. Ia membaca
-   `/data/adb/COPG-VD.json` sekali: konfigurasi scope dan profil.
+   `/data/adb/COPG-VD/COPG-VD.json` sekali: konfigurasi scope dan profil.
 2. **Fork aplikasi.** Untuk setiap aplikasi yang di-fork zygote, modul memutuskan di
    `preAppSpecialize` apakah proses ini berada dalam scope:
    - **dalam scope utama** (`playstore` / `global` / `whitelist` / `blacklist`), atau

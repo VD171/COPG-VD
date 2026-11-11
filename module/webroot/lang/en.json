@@ -183,6 +183,8 @@
   "msg_fe_noarg": "No profile selected",
   "msg_fetch_noindex": "Device index not available yet",
   "ui_toolsd_autoupdate": "Refresh the profile to the newest matching image automatically on every boot.",
+  "ui_autoupdate_failed": "last auto-update could not reach the source",
+  "ui_autoupdate_ok": "last auto-update ok",
   "ui_tab_about": "About",
   "ui_about_callout": "This WebUI runs entirely on your device and makes no network request.",
   "ui_about_sec_project": "Project",

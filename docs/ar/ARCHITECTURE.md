@@ -12,7 +12,7 @@ COPG-VD وحدة Zygisk: مكتبة أصلية صغيرة (`libspoof.so`) يحق
 ## دورة الحياة
 
 1. **بدء zygote.** عندما يُقلع zygote، يستدعي المُحمِّل الدالة `onLoad` الخاصة بالوحدة. تقرأ
-   `/data/adb/COPG-VD.json` مرة واحدة: إعداد النطاق وملف التعريف.
+   `/data/adb/COPG-VD/COPG-VD.json` مرة واحدة: إعداد النطاق وملف التعريف.
 2. **تفريع (fork) التطبيق.** لكل تطبيق يفرّعه zygote، تقرّر الوحدة في
    `preAppSpecialize` ما إذا كانت هذه العملية ضمن النطاق:
    - **في النطاق الرئيسي** (`playstore` / `global` / `whitelist` / `blacklist`)، أو

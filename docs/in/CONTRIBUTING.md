@@ -23,7 +23,7 @@ alternatif yang lebih ringan dan lebih tangguh daripada PlayIntegrityFix.
 Asisten dan agen AI di sini adalah kontributor kelas satu, bukan sekadar pelengkap.
 
 - Proyek ini dibuat agar mudah dibaca: konfigurasinya adalah satu file JSON
-  (`/data/adb/COPG-VD.json`, didokumentasikan di [CONFIGURATION.md](CONFIGURATION.md)),
+  (`/data/adb/COPG-VD/COPG-VD.json`, didokumentasikan di [CONFIGURATION.md](CONFIGURATION.md)),
   mesin-mesinnya kecil dan mandiri, dan tata letaknya ada di [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 - Patch yang dibantu AI ditinjau dan diterima dengan ketentuan yang sama seperti lainnya -
   berdasarkan kebenaran, kejelasan, dan konvensi di bawah ini, bukan berdasarkan siapa (atau

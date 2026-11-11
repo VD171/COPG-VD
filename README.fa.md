@@ -5,6 +5,13 @@
 COPG-VD یک جعل‌کننده دستگاه است: fingerprint و build دستگاه را بازنویسی می‌کند تا اپ‌ها به‌جای دستگاه واقعی، دستگاهی را که شما انتخاب می‌کنید ببینند.  
 روی Zygisk (KernelSU، APatch یا Magisk) اجرا می‌شود و به‌طور پیش‌فرض دامنه جعل را به استک Google Play محدود می‌کند - پس جایگزینی سبک‌تر و مقاوم‌تر برای PlayIntegrityFix است.  
 
+<!-- vd-docs -->
+## مستندات
+
+[راهنمای کاربر](docs/fa/USER-GUIDE.md) · [مرجع پیکربندی](docs/fa/CONFIGURATION.md) · [معماری](docs/fa/ARCHITECTURE.md) · [ساختار فایل](docs/fa/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/fa-Home)
+
+<!-- /vd-docs -->
+
 ## اسکرین‌شات‌ها
 
 <p align="center">
@@ -13,7 +20,7 @@ COPG-VD یک جعل‌کننده دستگاه است: fingerprint و build دس�
 
 ## چگونه استفاده کنیم؟
 ماژول را نصب کنید، ریبوت کنید، و پروفایل ارائه‌شده (یک Pixel) برای اپ‌های هدف جعل می‌شود. با یک fingerprint سالم نیازی به PlayIntegrityFix یا GooglePhotosUnlimited ندارید.  
-همه چیز در `/data/adb/COPG-VD.json` یا از طریق WebUI پیکربندی می‌شود. همه فیلدها اختیاری هستند - فیلدی که ارائه نشود نادیده گرفته می‌شود.  
+همه چیز در `/data/adb/COPG-VD/COPG-VD.json` یا از طریق WebUI پیکربندی می‌شود. همه فیلدها اختیاری هستند - فیلدی که ارائه نشود نادیده گرفته می‌شود.  
 
 ### Scope - چه کسی جعل را می‌بیند
 `scope_mode` تصمیم می‌گیرد کدام پروسه‌ها هویت جعلی را دریافت کنند. در یک حالت با دامنه محدود، هویت توسط Zygisk به‌صورت پر-پروسه تحویل داده می‌شود و از طریق propertyهای سراسری به بقیه سیستم نشت نمی‌کند.  
@@ -39,7 +46,7 @@ COPG-VD یک جعل‌کننده دستگاه است: fingerprint و build دس�
 یک فهرست `"global_fields": [ ... ]` فیلدهای Build نام‌برده را حتی در یک حالت با دامنه محدود به‌صورت سراسری روی کل دستگاه اعمال می‌کند، تا یک مقدار همه‌جا یکدست بماند - فقط برای فیلدهای امن از نظر انسجام (مثلا security patch)، هرگز identity و هرگز گروه نسخه Android.  
 
 ### نمونه فایل پیکربندی JSON
-`/data/adb/COPG-VD.json`
+`/data/adb/COPG-VD/COPG-VD.json`
 ```json
 {
   "Instructions": "Use strings on double-quotes only.",
@@ -80,13 +87,13 @@ COPG-VD یک جعل‌کننده دستگاه است: fingerprint و build دس�
 
 ### به‌روز نگه داشتن fingerprint
 `fingerprint-update.sh` آن فایل را دریافت کرده و پیکربندی شما را به‌روز می‌کند، از طریق WebUI (**Check Update** / **Update Now**) یا به‌طور خودکار **یک بار در هر بوت** (**Auto-update JSON on boot**، به‌طور پیش‌فرض روشن).  
-* وقتی هر دو فایل `/data/adb/COPG-VD.json` و `/data/adb/modules/COPG-VD/COPG-VD.json` وجود داشته باشند، هر دو به‌روز می‌شوند و محتوای قبلی با پسوند `.bak` نگه داشته می‌شود.  
+* `/data/adb/COPG-VD/COPG-VD.json` در جای خود به‌روز می‌شود و محتوای قبلی در کنار آن با نام `COPG-VD.json.bak` نگه داشته می‌شود.  
 * فقط فیلدهای build بازنویسی می‌شوند (fingerprint، ID، incremental، timestamp، security patch، SDK، UUID، host، user). هر چیز دیگری که سفارشی کرده‌اید حفظ می‌شود: کلیدهای اضافی، `scope_mode`، `BOOTLOADER`/`BOARD`/`HARDWARE`، آبجکت‌های دیگر، ترتیب کلیدها و قالب‌بندی.  
 * هرگز به عقب برنمی‌گردد: یک build از upstream که قدیمی‌تر از نسخه نصب‌شده باشد رد می‌شود. این موضوع عادی است (مخزن می‌تواند از پیکربندی‌ای که دستی به‌روز کرده‌اید عقب بماند) و همچنین همان محافظتی است که روی Android بیش از همه اهمیت دارد، جایی که تنها دانلودر موجود busybox `wget` است، که نمی‌تواند گواهی‌های TLS را اعتبارسنجی کند - به همین دلیل هر مقدار پیش از استفاده اعتبارسنجی می‌شود.  
 * اگر پروفایل شما **دستگاه دیگری** را جعل کند (مقادیر `BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT` متفاوت)، هیچ چیزی اعمال نمی‌شود - یک fingerprint مربوط به Pixel روی پروفایلی دیگر بدتر از یک fingerprint قدیمی است.  
 * هنگام بوت در پس‌زمینه اجرا می‌شود و حدود ۱۰ دقیقه مدام تلاش را تکرار می‌کند، چون معمولا هنگام پایان بوت هنوز wifi بالا نیامده است. هرگز بوت را به تاخیر نمی‌اندازد.  
 * `resetprop` بلافاصله پس از یک به‌روزرسانی دوباره اعمال می‌شود، اما `android.os.Build` را ماژول zygisk هنگام شروع zygote می‌نویسد: برای رسیدن مقادیر جدید به اپ‌ها **ریبوت** کنید.  
-* لاگ در `/data/adb/COPG-VD.update.log`.  
+* لاگ در `/data/adb/COPG-VD/update.log`.  
 
 ### نسخه Android - و چرا جعل نمی‌شود
 `ANDROID_VERSION`، `SDK_INT`، `SDK_FULL` و `CODENAME` توصیف‌کننده **رام شما** هستند، نه دستگاهی که جعل می‌شود. گفتن به اپ‌ها که SDK جدیدتر از آن چیزی است که framework واقعا هست، باعث می‌شود APIهایی را فراخوانی کنند که وجود ندارند: اپ‌های Google کرش می‌کنند، گوشی ریبوت می‌شود و از نو شروع می‌شود. خود بوت کامل می‌شود، پس این یک **softloop** است و چیزی در لاگ‌های بوت نمایان نمی‌شود.  
@@ -105,7 +112,7 @@ WebUI اختیاری است - همه چیز را می‌توان مستقیما 
 اگر کاربر Magisk هستید، از KsuWebUI ساخته KOW استفاده کنید (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
 
 ### تنظیمات درون پیکربندی
-`COPG-VD.json` تنظیماتش را در کنار پروفایل نگه می‌دارد، تا انتخاب‌های شما همراه با یک پشتیبان جابجا شوند و بتوان آن‌ها را دستی ویرایش کرد: `scope_mode`، کلیدهای engineها، گروه‌های resetprop، `global_fields`، و یک آبجکت `COPG-VD-Settings` (`resetprop`، `autoupdate`، `spoof_manufacturer`، `spoof_version`). WebUI هم پیکربندی و هم فایل‌های flag را که اسکریپت‌های بوت می‌خوانند می‌نویسد. `"spoof_version": "force"` از درون فایل رد شده و تنزل داده می‌شود: بازگرداندن یک پشتیبان قدیمی نباید آن را از پشت سر شما دوباره مسلح کند.  
+`COPG-VD.json` تنظیماتش را در کنار پروفایل نگه می‌دارد، تا انتخاب‌های شما همراه با یک پشتیبان جابجا شوند و بتوان آن‌ها را دستی ویرایش کرد: `scope_mode`، کلیدهای engineها، گروه‌های resetprop، `global_fields`، و یک آبجکت `COPG-VD-Settings` (`resetprop`، `autoupdate`، `spoof_manufacturer`، `spoof_version`). همه چیز در همین یک فایل قرار دارد - اسکریپت‌های بوت و WebUI تنظیمات را مستقیما از آن می‌خوانند، پس انتخاب‌های شما پس از یک به‌روزرسانی ماژول حفظ می‌شوند. `"spoof_version": "force"` از درون فایل رد شده و تنزل داده می‌شود: بازگرداندن یک پشتیبان قدیمی نباید آن را از پشت سر شما دوباره مسلح کند.  
 
 ## تماس
 
@@ -118,11 +125,6 @@ WebUI اختیاری است - همه چیز را می‌توان مستقیما 
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
-
-<!-- vd-docs -->
-## مستندات
-
-[راهنمای کاربر](docs/fa/USER-GUIDE.md) · [مرجع پیکربندی](docs/fa/CONFIGURATION.md) · [معماری](docs/fa/ARCHITECTURE.md) · [ساختار فایل](docs/fa/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/fa-Home)
 
 <!-- vd-see-also -->
 

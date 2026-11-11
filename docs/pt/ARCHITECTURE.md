@@ -12,7 +12,7 @@ fetch opcional do perfil, não há rede.
 ## Ciclo de vida
 
 1. **Início do zygote.** Quando o zygote inicia, o loader chama o `onLoad` do módulo. Ele
-   lê `/data/adb/COPG-VD.json` uma vez: a configuração de escopo e o perfil.
+   lê `/data/adb/COPG-VD/COPG-VD.json` uma vez: a configuração de escopo e o perfil.
 2. **Fork do app.** Para cada app que o zygote faz fork, o módulo decide em
    `preAppSpecialize` se esse processo está no escopo:
    - **no escopo principal** (`playstore` / `global` / `whitelist` / `blacklist`), ou

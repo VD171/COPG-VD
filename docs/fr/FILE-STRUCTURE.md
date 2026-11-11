@@ -62,8 +62,9 @@ COPG-VD/
 
 ## La config d'exécution (pas dans le dépôt)
 
-`/data/adb/COPG-VD.json` sur l'appareil contient le profil et les réglages (voir
-[CONFIGURATION.md](CONFIGURATION.md)). Il n'est jamais commité ; `module/COPG-VD.json.example`
+`/data/adb/COPG-VD/` sur l'appareil est le répertoire propre au module : `COPG-VD.json` contient
+le profil et les réglages (voir [CONFIGURATION.md](CONFIGURATION.md)), aux côtés de `update.log`,
+`update.state` et `update.status`. La config n'est jamais commitée ; `module/COPG-VD.json.example`
 est le modèle.
 
 *Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues - voir [../CONTRIBUTING.md](CONTRIBUTING.md).*

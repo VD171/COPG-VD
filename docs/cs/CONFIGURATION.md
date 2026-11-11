@@ -4,8 +4,11 @@
 
 # Referenční příručka konfigurace
 
-Celý modul je řízen jedním souborem: `/data/adb/COPG-VD.json`. WebUI jej zapisuje za vás,
+Celý modul je řízen jedním souborem: `/data/adb/COPG-VD/COPG-VD.json`. WebUI jej zapisuje za vás,
 ale můžete jej upravovat ručně. Dodávaný příklad leží v `module/COPG-VD.json.example`.
+Toto je jediný zdroj pravdy; kopie v adresáři modulu je jen výchozí hodnota pouze pro čtení.
+Konfigurace zbylá ze starší verze v `/data/adb/COPG-VD.json` se automaticky přesune do
+tohoto adresáře. Vlastní log a stav modulu (`update.log`, `update.state`) jsou také zde.
 
 Pravidla:
 

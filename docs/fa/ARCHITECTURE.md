@@ -12,7 +12,7 @@ Zygisk آن را به درون zygote و، از آنجا، به درون پرد�
 ## چرخه حیات
 
 1. **شروع Zygote.** وقتی zygote boot می‌شود، loader تابع `onLoad` ماژول را فراخوانی می‌کند.
-   یک بار `/data/adb/COPG-VD.json` را می‌خواند: پیکربندی scope و پروفایل.
+   یک بار `/data/adb/COPG-VD/COPG-VD.json` را می‌خواند: پیکربندی scope و پروفایل.
 2. **Fork اپ.** برای هر اپی که zygote آن را fork می‌کند، ماژول در `preAppSpecialize`
    تصمیم می‌گیرد که آیا این پردازه در scope است:
    - **در scope اصلی** (`playstore` / `global` / `whitelist` / `blacklist`)، یا

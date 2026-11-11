@@ -19,7 +19,7 @@ COPG-VD เขียนทับลายนิ้วมือ (fingerprint) แ
 
 เปิด WebUI จากตัวจัดการ root ของคุณเพื่อควบคุมโมดูล ผู้ใช้ Magisk เปิดด้วย
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) ทุกอย่าง
-ยังสามารถแก้ไขได้โดยตรงใน `/data/adb/COPG-VD.json`
+ยังสามารถแก้ไขได้โดยตรงใน `/data/adb/COPG-VD/COPG-VD.json`
 
 ## ใครเห็นการปลอม (ขอบเขต)
 
@@ -71,7 +71,7 @@ COPG-VD เขียนทับลายนิ้วมือ (fingerprint) แ
   ตัวเก่า
 - `resetprop` จะถูกใช้ซ้ำทันทีหลังการอัปเดต แต่ `android.os.Build` ถูกเขียนตอน
   zygote เริ่ม ดังนั้นให้ **รีบูต** เพื่อให้ค่าใหม่ไปถึงแอป ล็อก:
-  `/data/adb/COPG-VD.update.log`
+  `/data/adb/COPG-VD/update.log`
 
 ## กับดักเวอร์ชัน Android
 

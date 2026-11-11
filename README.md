@@ -5,6 +5,13 @@
 COPG-VD is a device spoofer: it rewrites the device fingerprint and build so apps see the device you choose instead of the real one.  
 It runs on Zygisk (KernelSU, APatch or Magisk) and, by default, scopes the spoof to the Google Play stack - so it is a lighter, more robust alternative to PlayIntegrityFix.  
 
+<!-- vd-docs -->
+## Documentation
+
+[User Guide](docs/USER-GUIDE.md) · [Configuration reference](docs/CONFIGURATION.md) · [Architecture](docs/ARCHITECTURE.md) · [File structure](docs/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki)
+
+<!-- /vd-docs -->
+
 ## Screenshots
 
 <p align="center">
@@ -13,7 +20,7 @@ It runs on Zygisk (KernelSU, APatch or Magisk) and, by default, scopes the spoof
 
 ## How to use?
 Install the module, reboot, and the shipped profile (a Pixel) is spoofed to the targeted apps. With a working fingerprint you do not need PlayIntegrityFix or GooglePhotosUnlimited.  
-Everything is configured in `/data/adb/COPG-VD.json`, or from the WebUI. All fields are OPTIONAL - a field that is not provided is skipped.  
+Everything is configured in `/data/adb/COPG-VD/COPG-VD.json`, or from the WebUI. All fields are OPTIONAL - a field that is not provided is skipped.  
 
 ### Scope - who sees the spoof
 `scope_mode` decides which processes get the spoofed identity. In a scoped mode the identity is delivered per process by Zygisk and is not leaked to the rest of the system through the global properties.  
@@ -39,7 +46,7 @@ Inside the `COPG-VD` object each Build field has four states:
 A `"global_fields": [ ... ]` list applies the named Build fields device-wide even in a scoped mode, to keep a value consistent everywhere - for coherence-safe fields only (the security patch, for example), never identity and never the Android version group.  
 
 ### Example JSON config file
-`/data/adb/COPG-VD.json`
+`/data/adb/COPG-VD/COPG-VD.json`
 ```json
 {
   "Instructions": "Use strings on double-quotes only.",
@@ -80,7 +87,7 @@ The block above and `module/COPG-VD.json.example` are refreshed daily by the [Up
 
 ### Keeping the fingerprint fresh
 `fingerprint-update.sh` pulls that file and updates your config, from the WebUI (**Check Update** / **Update Now**) or by itself **once per boot** (**Auto-update JSON on boot**, on by default).  
-* Both `/data/adb/COPG-VD.json` and `/data/adb/modules/COPG-VD/COPG-VD.json` are updated when both exist, and the previous content is kept as `.bak`.  
+* `/data/adb/COPG-VD/COPG-VD.json` is updated in place, and the previous content is kept next to it as `COPG-VD.json.bak`.  
 * Only the build fields are rewritten (fingerprint, ID, incremental, timestamp, security patch, SDK, UUID, host, user). Everything else you customized is preserved: extra keys, `scope_mode`, `BOOTLOADER`/`BOARD`/`HARDWARE`, other objects, key order and formatting.  
 * It never goes backwards: an upstream build older than the one installed is refused. This is
   routine (the repo can sit behind a config you updated by hand) and it is also the guard that
@@ -89,7 +96,7 @@ The block above and `module/COPG-VD.json.example` are refreshed daily by the [Up
 * If your profile spoofs **another device** (different `BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT`), nothing is applied - a Pixel fingerprint on another profile is worse than an old fingerprint.  
 * At boot it runs in the background and keeps retrying for ~10 minutes, because wifi is usually not up yet when the boot finishes. It never delays the boot.  
 * `resetprop` is re-applied right after an update, but `android.os.Build` is written by the zygisk module when zygote starts: **reboot** for the new values to reach apps.  
-* Log at `/data/adb/COPG-VD.update.log`.  
+* Log at `/data/adb/COPG-VD/update.log`.  
 
 ### Android version - and why it is not spoofed
 `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` and `CODENAME` describe **your ROM**, not the device being spoofed. Telling apps the SDK is newer than the framework really is makes them call APIs that do not exist: Google's apps crash, the phone reboots, and it starts over. The boot itself completes, so it is a **softloop** and nothing shows up in the boot logs.  
@@ -108,7 +115,7 @@ The WebUI is optional - everything can be edited in the JSON config directly - b
 If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
 
 ### Settings in the config
-`COPG-VD.json` carries its settings next to the profile, so your choices travel with a backup and can be edited by hand: `scope_mode`, the engine switches, the resetprop groups, `global_fields`, and a `COPG-VD-Settings` object (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). The WebUI writes both the config and the flag files the boot scripts read. `"spoof_version": "force"` is refused from the file and downgraded: restoring an old backup must not re-arm it behind your back.  
+`COPG-VD.json` carries its settings next to the profile, so your choices travel with a backup and can be edited by hand: `scope_mode`, the engine switches, the resetprop groups, `global_fields`, and a `COPG-VD-Settings` object (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). Everything lives in this one file - the boot scripts and the WebUI read the settings straight from it, so your choices survive a module update. `"spoof_version": "force"` is refused from the file and downgraded: restoring an old backup must not re-arm it behind your back.  
 
 ## Contacts
 
@@ -121,11 +128,6 @@ If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWeb
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
-
-<!-- vd-docs -->
-## Documentation
-
-[User Guide](docs/USER-GUIDE.md) · [Configuration reference](docs/CONFIGURATION.md) · [Architecture](docs/ARCHITECTURE.md) · [File structure](docs/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki)
 
 <!-- vd-see-also -->
 

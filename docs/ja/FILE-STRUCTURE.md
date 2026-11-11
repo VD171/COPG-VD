@@ -62,8 +62,9 @@ COPG-VD/
 
 ## ランタイム config(リポジトリには含まれない)
 
-デバイス上の `/data/adb/COPG-VD.json` はプロファイルと設定を保持します(
-[CONFIGURATION.md](CONFIGURATION.md) を参照)。決してコミットされません; `module/COPG-VD.json.example`
+デバイス上の `/data/adb/COPG-VD/` はモジュール自身のディレクトリです: `COPG-VD.json` がプロファイルと
+設定を保持し([CONFIGURATION.md](CONFIGURATION.md) を参照)、`update.log`、`update.state`、`update.status`
+が隣にあります。設定は決してコミットされません; `module/COPG-VD.json.example`
 がテンプレートです。
 
 *このドキュメントは Claude (Anthropic) で生成され、VD171 によって保守されています。修正と改善を歓迎します - [../CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。*

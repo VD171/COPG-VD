@@ -12,7 +12,7 @@ aparte de la obtención opcional del perfil, no hay red.
 ## Ciclo de vida
 
 1. **Arranque de zygote.** Cuando el zygote arranca, el loader llama a la función `onLoad`
-   del módulo. Lee `/data/adb/COPG-VD.json` una vez: la configuración de alcance y el perfil.
+   del módulo. Lee `/data/adb/COPG-VD/COPG-VD.json` una vez: la configuración de alcance y el perfil.
 2. **Fork de app.** Para cada app que el zygote forkea, el módulo decide en
    `preAppSpecialize` si este proceso está en el alcance:
    - **en el alcance principal** (`playstore` / `global` / `whitelist` / `blacklist`), o

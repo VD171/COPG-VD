@@ -62,8 +62,9 @@ COPG-VD/
 
 ## De runtime-config (niet in de repo)
 
-`/data/adb/COPG-VD.json` op het apparaat bevat het profiel en de instellingen (zie
-[CONFIGURATION.md](CONFIGURATION.md)). Het wordt nooit gecommit; `module/COPG-VD.json.example`
+`/data/adb/COPG-VD/` op het apparaat is de eigen map van de module: `COPG-VD.json` bevat het profiel
+en de instellingen (zie [CONFIGURATION.md](CONFIGURATION.md)), naast `update.log`, `update.state` en
+`update.status`. De config wordt nooit gecommit; `module/COPG-VD.json.example`
 is het sjabloon.
 
 *Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom - zie [../CONTRIBUTING.md](CONTRIBUTING.md).*

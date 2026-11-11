@@ -4,8 +4,12 @@
 
 # Riferimento di configurazione
 
-L'intero modulo è pilotato da un solo file: `/data/adb/COPG-VD.json`. La WebUI lo scrive per
+L'intero modulo è pilotato da un solo file: `/data/adb/COPG-VD/COPG-VD.json`. La WebUI lo scrive per
 te, ma puoi modificarlo a mano. Un esempio incluso si trova in `module/COPG-VD.json.example`.
+Questa è l'unica fonte di verità; la copia nella directory del modulo è solo un valore predefinito di
+sola lettura. Una configurazione rimasta da una versione precedente in `/data/adb/COPG-VD.json` viene
+spostata automaticamente in questa directory. Anche il log e lo stato propri del modulo (`update.log`,
+`update.state`) risiedono qui.
 
 Regole:
 

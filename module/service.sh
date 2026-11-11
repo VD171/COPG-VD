@@ -23,7 +23,32 @@
 # ======================================================================
 
 MODDIR=${0%/*}
-COPG_VD_JSON="/data/adb/COPG-VD.json"
+DATA_DIR="/data/adb/COPG-VD"
+COPG_VD_JSON="$DATA_DIR/COPG-VD.json"
+LEGACY_JSON="/data/adb/COPG-VD.json"
+FORCE_MARKER="$DATA_DIR/.force"
+
+cfg_setting() {
+    [ -f "$COPG_VD_JSON" ] || return 0
+    tr -d '\n' < "$COPG_VD_JSON" 2>/dev/null \
+      | grep -o '"COPG-VD-Settings"[[:space:]]*:[[:space:]]*{[^}]*}' \
+      | grep -oE "\"$1\"[[:space:]]*:[[:space:]]*(\"[^\"]*\"|true|false)" | head -n 1 \
+      | sed 's/.*:[[:space:]]*//; s/"//g'
+}
+
+migrate_data_dir() {
+    mkdir -p "$DATA_DIR" 2>/dev/null
+    chmod 0700 "$DATA_DIR" 2>/dev/null
+    chcon u:object_r:system_file:s0 "$DATA_DIR" 2>/dev/null
+    for pair in "$LEGACY_JSON|$COPG_VD_JSON" \
+                "/data/adb/COPG-VD.json.bak|$DATA_DIR/COPG-VD.json.bak" \
+                "/data/adb/COPG-VD.update.state|$DATA_DIR/update.state" \
+                "/data/adb/COPG-VD.update.log|$DATA_DIR/update.log"; do
+        old=${pair%%|*}; new=${pair##*|}
+        [ -f "$old" ] && { [ -e "$new" ] || mv -f "$old" "$new" 2>/dev/null; rm -f "$old" 2>/dev/null; }
+    done
+    rm -f /data/adb/.COPG-VD.update.* 2>/dev/null
+}
 
 ROM_PROP="/system/build.prop"
 VERSION_KEYS="ANDROID_VERSION SDK_INT SDK_FULL CODENAME"
@@ -35,8 +60,9 @@ rom_prop() {
 }
 
 spoof_version_policy() {
-    case "$(cat "$MODDIR/.spoof.version" 2>/dev/null)" in
-        rom) echo rom ;; force) echo force ;; *) echo never ;;
+    [ -e "$FORCE_MARKER" ] && { echo force; return; }
+    case "$(cfg_setting spoof_version)" in
+        rom|force) echo rom ;; *) echo never ;;
     esac
 }
 
@@ -134,7 +160,7 @@ MAPPING
 }
 
 rp_enabled() {
-    [ -e "$MODDIR/.skip.resetprop" ] && return 1
+    [ "$(cfg_setting resetprop)" = false ] && return 1
     printf '%s' "$json_flat" | grep -qE '"enabled"[[:space:]]*:[[:space:]]*false' && return 1
     return 0
 }
@@ -265,7 +291,7 @@ apply_props() {
             { [ "$present" = 1 ] && version_allowed "$json_key" "$json_value"; } || continue ;;
       esac
       if [ "$json_key" = "MANUFACTURER" ] && [ "$props" = "ro.product.manufacturer" ] &&
-         [ -e "$MODDIR/.skip.manufacturer" ]; then
+         [ "$(cfg_setting spoof_manufacturer)" = false ]; then
         continue
       fi
       if [ "$json_key" = "TAGS" ]; then
@@ -333,12 +359,14 @@ apply_props() {
   fi
 }
 
+migrate_data_dir
+
 if [ "$1" = "--props-only" ]; then
     apply_props
     exit 0
 fi
 
-[ -f "$MODDIR/fingerprint-update.sh" ] && sh "$MODDIR/fingerprint-update.sh" sync-settings >/dev/null 2>&1
+rm -f "$FORCE_MARKER" 2>/dev/null
 
 apply_props
 
@@ -355,6 +383,6 @@ cp -f "$COPG_VD_JSON" "$MODDIR/COPG-VD.json" 2>/dev/null
 chmod 0644 "$MODDIR/COPG-VD.json" 2>/dev/null
 chcon u:object_r:system_file:s0 "$MODDIR/COPG-VD.json" 2>/dev/null
 
-if [ ! -e "$MODDIR/.skip.autoupdate" ] && [ -f "$MODDIR/fingerprint-update.sh" ]; then
+if [ "$(cfg_setting autoupdate)" != false ] && [ -f "$MODDIR/fingerprint-update.sh" ]; then
     sh "$MODDIR/fingerprint-update.sh" boot >/dev/null 2>&1 &
 fi

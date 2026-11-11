@@ -12,7 +12,7 @@ ngoài việc tải hồ sơ tùy chọn, không có mạng.
 ## Vòng đời
 
 1. **Zygote khởi động.** Khi zygote khởi động, trình nạp gọi `onLoad` của mô-đun. Nó đọc
-   `/data/adb/COPG-VD.json` một lần: cấu hình phạm vi và hồ sơ.
+   `/data/adb/COPG-VD/COPG-VD.json` một lần: cấu hình phạm vi và hồ sơ.
 2. **App fork.** Với mỗi ứng dụng mà zygote fork, mô-đun quyết định trong `preAppSpecialize`
    liệu tiến trình này có trong phạm vi hay không:
    - **trong phạm vi chính** (`playstore` / `global` / `whitelist` / `blacklist`), hoặc

@@ -12,7 +12,7 @@ a pas d'application et, hormis la récupération optionnelle du profil, pas de r
 ## Cycle de vie
 
 1. **Démarrage de Zygote.** Quand le zygote démarre, le loader appelle le `onLoad` du
-   module. Il lit `/data/adb/COPG-VD.json` une fois : la configuration du scope et le profil.
+   module. Il lit `/data/adb/COPG-VD/COPG-VD.json` une fois : la configuration du scope et le profil.
 2. **Fork de l'application.** Pour chaque application que le zygote fork, le module décide
    dans `preAppSpecialize` si ce processus est dans le scope :
    - **dans le scope principal** (`playstore` / `global` / `whitelist` / `blacklist`), ou

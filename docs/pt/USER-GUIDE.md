@@ -19,7 +19,7 @@ para entender como funciona por dentro, veja [ARCHITECTURE.md](ARCHITECTURE.md).
 
 Abra a WebUI pelo seu gerenciador de root para controlar o módulo. Usuários do Magisk a abrem com o
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Tudo
-também pode ser editado diretamente em `/data/adb/COPG-VD.json`.
+também pode ser editado diretamente em `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Quem vê o spoof (escopo)
 
@@ -71,7 +71,7 @@ O `fingerprint-update.sh` mantém o seu atual, a partir da imagem de fábrica Go
   do que um antigo.
 - O `resetprop` é reaplicado logo após uma atualização, mas `android.os.Build` é escrito quando o
   zygote inicia, então **reinicie** para que os novos valores cheguem aos apps. Log:
-  `/data/adb/COPG-VD.update.log`.
+  `/data/adb/COPG-VD/update.log`.
 
 ## A armadilha da versão do Android
 

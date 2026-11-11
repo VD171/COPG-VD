@@ -20,7 +20,7 @@ COPG-VD डिवाइस fingerprint और build को फिर से ल�
 
 मॉड्यूल को चलाने के लिए अपने root मैनेजर से WebUI खोलें। Magisk उपयोगकर्ता इसे
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) के साथ खोलते हैं।
-सब कुछ `/data/adb/COPG-VD.json` में सीधे भी संपादित किया जा सकता है।
+सब कुछ `/data/adb/COPG-VD/COPG-VD.json` में सीधे भी संपादित किया जा सकता है।
 
 ## spoof को कौन देखता है (scope)
 
@@ -72,7 +72,7 @@ Zygisk द्वारा प्रति-प्रोसेस वितरि�
   fingerprint एक पुराने से भी बदतर है।
 - एक अपडेट के ठीक बाद `resetprop` फिर से लागू किया जाता है, लेकिन `android.os.Build` तब लिखा जाता
   है जब zygote शुरू होता है, इसलिए नए मान ऐप्स तक पहुँचने के लिए **रीबूट** करें। लॉग:
-  `/data/adb/COPG-VD.update.log`।
+  `/data/adb/COPG-VD/update.log`।
 
 ## Android संस्करण का जाल
 

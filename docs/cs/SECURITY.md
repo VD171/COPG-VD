@@ -25,7 +25,7 @@ jako autora, pokud si to přejete.
 
 ## Poznámky k rozsahu
 
-- Konfigurace leží v `/data/adb/COPG-VD.json`, čitelná pouze rootem. Modul ji čte z
+- Konfigurace leží v `/data/adb/COPG-VD/COPG-VD.json`, čitelná pouze rootem. Modul ji čte z
   injektovaného procesu přes dedikované SELinux pravidlo, které si sám přináší; nedrží
   žádné přihlašovací údaje ani přístupové fráze.
 - Spoofing hooky jsou připojeny k živým aplikacím a mají kontrolu na null, takže poškozený

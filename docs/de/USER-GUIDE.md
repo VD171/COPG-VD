@@ -19,7 +19,7 @@ Wert siehe [CONFIGURATION.md](CONFIGURATION.md); wie es intern funktioniert, sie
 
 Öffne die WebUI aus deinem Root-Manager, um das Modul zu steuern. Magisk-Nutzer öffnen sie mit
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Alles lässt sich
-auch direkt in `/data/adb/COPG-VD.json` bearbeiten.
+auch direkt in `/data/adb/COPG-VD/COPG-VD.json` bearbeiten.
 
 ## Wer die Täuschung sieht (Scope)
 
@@ -71,7 +71,7 @@ Ein Fingerprint altert: Google rotiert die Werks-Images, und ein alter verliert 
   Profil ist schlimmer als ein alter.
 - `resetprop` wird direkt nach einem Update erneut angewandt, aber `android.os.Build` wird beim
   Zygote-Start geschrieben, also **starte neu**, damit neue Werte die Apps erreichen. Log:
-  `/data/adb/COPG-VD.update.log`.
+  `/data/adb/COPG-VD/update.log`.
 
 ## Die Android-Versions-Falle
 

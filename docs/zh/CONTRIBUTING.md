@@ -21,7 +21,7 @@ COPG-VD 是一个 **Zygisk 设备伪装器（Zygisk device spoofer）**：一个
 
 AI 助手和智能体在这里是一等的贡献者，而不是事后才考虑的东西。
 
-- 本项目的构建以可读为目标：配置是单个 JSON 文件（`/data/adb/COPG-VD.json`，在
+- 本项目的构建以可读为目标：配置是单个 JSON 文件（`/data/adb/COPG-VD/COPG-VD.json`，在
   [CONFIGURATION.md](CONFIGURATION.md) 中有文档说明），各引擎小而自洽，布局在
   [FILE-STRUCTURE.md](FILE-STRUCTURE.md) 中。
 - 由 AI 协助的补丁与任何其他补丁按同样的条件被审查和接受 - 依据正确性、清晰度和下面的约定，

@@ -28,16 +28,47 @@ BRANCH="main"
 REMOTE_URL="https://raw.githubusercontent.com/VD171/COPG-VD/$BRANCH/module/COPG-VD.json.example"
 
 MODULE_DIR="/data/adb/modules/$MODULE_ID"
-CONFIG_PATHS="/data/adb/COPG-VD.json $MODULE_DIR/COPG-VD.json"
+DATA_DIR="/data/adb/COPG-VD"
+LEGACY_JSON="/data/adb/COPG-VD.json"
+CONFIG_PATHS="$DATA_DIR/COPG-VD.json $LEGACY_JSON $MODULE_DIR/COPG-VD.json"
+FORCE_MARKER="$DATA_DIR/.force"
 
 ROM_PROP="/system/build.prop"
 VERSION_FIELDS="ANDROID_VERSION SDK_INT SDK_FULL CODENAME"
 SETTINGS_OBJECT="COPG-VD-Settings"
 KNOWN_KEYS="BRAND DEVICE MANUFACTURER MODEL FINGERPRINT PRODUCT BOOTLOADER BOARD HARDWARE DISPLAY ID HOST INCREMENTAL TIMESTAMP PREVIEW_SDK USER SDK_FINGERPRINT UUID SECURITY_PATCH ANDROID_VERSION SDK_INT SDK_FULL CODENAME TAGS TYPE ODM_SKU SKU FIRST_API_LEVEL DRM_SECURITY_LEVEL"
-STATE_FILE="/data/adb/$MODULE_ID.update.state"
-LOG_FILE="/data/adb/$MODULE_ID.update.log"
+STATE_FILE="$DATA_DIR/update.state"
+LOG_FILE="$DATA_DIR/update.log"
+STATUS_FILE="$DATA_DIR/update.status"
 LOG_MAX=32768
-TMP_FILE="/data/adb/.$MODULE_ID.update.$$"
+TMP_FILE="$DATA_DIR/.update.$$"
+
+migrate_data_dir() {
+    mkdir -p "$DATA_DIR" 2>/dev/null
+    chmod 0700 "$DATA_DIR" 2>/dev/null
+    chcon u:object_r:system_file:s0 "$DATA_DIR" 2>/dev/null
+    for pair in "$LEGACY_JSON|$DATA_DIR/COPG-VD.json" \
+                "/data/adb/COPG-VD.json.bak|$DATA_DIR/COPG-VD.json.bak" \
+                "/data/adb/COPG-VD.update.state|$STATE_FILE" \
+                "/data/adb/COPG-VD.update.log|$LOG_FILE"; do
+        old=${pair%%|*}; new=${pair##*|}
+        [ -f "$old" ] && { [ -e "$new" ] || mv -f "$old" "$new" 2>/dev/null; rm -f "$old" 2>/dev/null; }
+    done
+    rm -f /data/adb/.COPG-VD.update.* 2>/dev/null
+    [ -f "$LOG_FILE" ] || : > "$LOG_FILE" 2>/dev/null
+    chmod 0600 "$LOG_FILE" 2>/dev/null
+}
+migrate_data_dir
+
+cfg_setting() {
+    conf=""
+    for p in $CONFIG_PATHS; do [ -f "$p" ] && conf="$p" && break; done
+    [ -f "$conf" ] || return 0
+    tr -d '\n' < "$conf" 2>/dev/null \
+      | grep -o '"COPG-VD-Settings"[[:space:]]*:[[:space:]]*{[^}]*}' \
+      | grep -oE "\"$1\"[[:space:]]*:[[:space:]]*(\"[^\"]*\"|true|false)" | head -n 1 \
+      | sed 's/.*:[[:space:]]*//; s/"//g'
+}
 
 AWK=$(command -v awk 2>/dev/null)
 if [ -z "$AWK" ]; then
@@ -61,7 +92,7 @@ log() {
 }
 
 cleanup() {
-    rm -f "$TMP_FILE" "$TMP_FILE.new" 2>/dev/null
+    rm -f "$TMP_FILE" "$TMP_FILE.new" "$TMP_FILE.norm" 2>/dev/null
 }
 trap cleanup EXIT
 
@@ -147,19 +178,14 @@ validate_remote() {
     return 0
 }
 
-json_get_raw() {
-    grep -o "\"$2\"[[:space:]]*:[[:space:]]*[^,}[:space:]]*" "$1" 2>/dev/null | head -n 1 |
-        sed "s/^\"[^\"]*\"[[:space:]]*:[[:space:]]*//; s/\"//g"
-}
-
 rom_prop() {
     grep -m 1 "^$1=" "$ROM_PROP" 2>/dev/null | cut -d= -f2-
 }
 
 spoof_version_policy() {
-    case "$(cat "$MODULE_DIR/.spoof.version" 2>/dev/null)" in
-        rom) echo rom ;;
-        force) echo force ;;
+    [ -e "$FORCE_MARKER" ] && { echo force; return; }
+    case "$(cfg_setting spoof_version)" in
+        rom|force) echo rom ;;
         *) echo never ;;
     esac
 }
@@ -193,33 +219,40 @@ effective_version_fields() {
     done
 }
 
-sync_settings() {
-    conf=""
-    for path in $CONFIG_PATHS; do [ -f "$path" ] && conf="$path" && break; done
-    [ -n "$conf" ] || return 0
-    grep -q "\"$SETTINGS_OBJECT\"" "$conf" 2>/dev/null || return 0
+normalize_json() {
+    $AWK '
+    function ind(d,  r,k){ r=""; for(k=0;k<d;k++) r=r "  "; return r }
+    { s = s $0 "\n" }
+    END {
+        instr=0; esc=0; depth=0; n=length(s)
+        for(i=1;i<=n;i++){
+            c=substr(s,i,1)
+            if(instr){ out=out c; if(esc)esc=0; else if(c=="\\")esc=1; else if(c=="\"")instr=0; continue }
+            if(c=="\""){ instr=1; out=out c; continue }
+            if(c=="{"||c=="["){ depth++; out=out c "\n" ind(depth); continue }
+            if(c=="}"||c=="]"){ depth--; out=out "\n" ind(depth) c; continue }
+            if(c==","){ out=out c "\n" ind(depth); continue }
+            if(c==":"){ out=out ": "; continue }
+            if(c==" "||c=="\t"||c=="\n"||c=="\r") continue
+            out=out c
+        }
+        print out
+    }' "$1"
+}
 
-    for pair in "resetprop .skip.resetprop" "autoupdate .skip.autoupdate" \
-                "spoof_manufacturer .skip.manufacturer"; do
-        key=${pair%% *}; flag=${pair##* }
-        case "$(json_get_raw "$conf" "$key")" in
-            false) [ -e "$MODULE_DIR/$flag" ] || { : > "$MODULE_DIR/$flag"; log "settings: $key off"; } ;;
-            true)  [ -e "$MODULE_DIR/$flag" ] && { rm -f "$MODULE_DIR/$flag"; log "settings: $key on"; } ;;
-        esac
-    done
-
-    case "$(json_get_raw "$conf" spoof_version)" in
-        never) echo never > "$MODULE_DIR/.spoof.version" ;;
-        rom)   echo rom   > "$MODULE_DIR/.spoof.version" ;;
-        force) echo rom   > "$MODULE_DIR/.spoof.version"
-               log "settings: spoof_version=force in the config is downgraded to 'rom' - arm it in the WebUI" ;;
-    esac
-    return 0
+normalize_if_minified() {
+    [ -f "$1" ] || return 0
+    [ "$(wc -l < "$1" 2>/dev/null || echo 0)" -ge 3 ] && return 0
+    [ -n "$AWK" ] || return 0
+    normalize_json "$1" > "$TMP_FILE.norm" 2>/dev/null
+    [ -s "$TMP_FILE.norm" ] && grep -q "\"$MODULE_ID\"" "$TMP_FILE.norm" && cp "$TMP_FILE.norm" "$1"
+    rm -f "$TMP_FILE.norm"
 }
 
 write_fields() {
     target="$1"
     [ -n "$AWK" ] || { log "no awk available"; return 1; }
+    normalize_if_minified "$target"
     $AWK -v id="$MODULE_ID" -v keys="$FIELDS" -v src="$COPG_V_SOURCE" '
         function depth_of(s,   i, ch, d) {
             d = 0
@@ -346,6 +379,7 @@ say_red()  { log "  [RED]  $*"; A_RED=$((A_RED + 1)); }
 
 check_shape() {
     conf="$1"
+    normalize_if_minified "$conf"
     opens=$(tr -cd '{' < "$conf" | wc -c); closes=$(tr -cd '}' < "$conf" | wc -c)
     quotes=$(tr -cd '"' < "$conf" | wc -c)
     if [ "$opens" != "$closes" ]; then
@@ -528,7 +562,7 @@ check_applied() {
     conf="$1"
     fp_conf=$(json_get "$conf" FINGERPRINT)
     fp_live=$(getprop ro.build.fingerprint 2>/dev/null)
-    if [ -e "$MODULE_DIR/.skip.resetprop" ]; then
+    if [ "$(cfg_setting resetprop)" = false ]; then
         say_warn "resetprop is off - the props keep the ROM's values (the zygisk side still spoofs)"
     elif [ -n "$fp_conf" ] && [ "$fp_conf" != "$fp_live" ]; then
         say_warn "the config asks for a fingerprint the props do not show yet - reboot, or resetprop failed"
@@ -631,7 +665,7 @@ apply() {
     done
     [ -n "$written" ] || return 1
 
-    if [ -e "$MODDIR/.skip.resetprop" ]; then
+    if [ "$(cfg_setting resetprop)" = false ]; then
         log "resetprop is disabled, props not re-applied"
     elif [ -f "$MODDIR/service.sh" ]; then
         sh "$MODDIR/service.sh" --props-only >/dev/null 2>&1 &&
@@ -695,7 +729,7 @@ case "$MODE" in
         ;;
 
     boot)
-        [ -e "$MODDIR/.skip.autoupdate" ] && exit 0
+        [ "$(cfg_setting autoupdate)" = false ] && exit 0
         wait_for_boot
         already_ran_this_boot && exit 0
         attempt=1
@@ -712,12 +746,16 @@ case "$MODE" in
                     3) log "no config file to update" ;;
                     4) log "upstream is not newer than what is installed, nothing applied" ;;
                 esac
+                echo "ok $(date '+%Y-%m-%d %H:%M')" > "$STATUS_FILE" 2>/dev/null
+                chmod 0600 "$STATUS_FILE" 2>/dev/null
                 exit 0
             fi
             attempt=$((attempt + 1))
             sleep "$BOOT_RETRY_SLEEP"
         done
-        log "gave up after $BOOT_RETRY_MAX attempts, no network"
+        log "gave up after $BOOT_RETRY_MAX attempts, upstream unreachable or gone"
+        echo "no-network $(date '+%Y-%m-%d %H:%M')" > "$STATUS_FILE" 2>/dev/null
+        chmod 0600 "$STATUS_FILE" 2>/dev/null
         exit 1
         ;;
 
@@ -727,7 +765,7 @@ case "$MODE" in
         ;;
 
     sync-settings)
-        sync_settings
+        migrate_data_dir
         exit 0
         ;;
 

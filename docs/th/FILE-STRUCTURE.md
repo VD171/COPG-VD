@@ -62,8 +62,8 @@ COPG-VD/
 
 ## คอนฟิก runtime (ไม่อยู่ใน repo)
 
-`/data/adb/COPG-VD.json` บนอุปกรณ์เก็บโปรไฟล์และการตั้งค่า (ดู
-[CONFIGURATION.md](CONFIGURATION.md)) มันไม่เคยถูก commit; `module/COPG-VD.json.example`
-คือแม่แบบ
+`/data/adb/COPG-VD/` บนอุปกรณ์คือไดเรกทอรีของโมดูลเอง: `COPG-VD.json` เก็บโปรไฟล์
+และการตั้งค่า (ดู [CONFIGURATION.md](CONFIGURATION.md)) พร้อมกับ `update.log`, `update.state` และ
+`update.status` การกำหนดค่าไม่เคยถูก commit; `module/COPG-VD.json.example` คือแม่แบบ
 
 *เอกสารนี้สร้างด้วย Claude (Anthropic) และดูแลรักษาโดย VD171 ยินดีรับการแก้ไขและการปรับปรุง - ดู [../CONTRIBUTING.md](CONTRIBUTING.md)*

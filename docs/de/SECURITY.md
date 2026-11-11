@@ -25,7 +25,7 @@ wir können und nennen Sie als Finder, wenn Sie das wünschen.
 
 ## Hinweise zum Geltungsbereich
 
-- Die Konfiguration liegt unter `/data/adb/COPG-VD.json`, nur von root lesbar. Das Modul
+- Die Konfiguration liegt unter `/data/adb/COPG-VD/COPG-VD.json`, nur von root lesbar. Das Modul
   liest sie aus dem injizierten Prozess über eine dedizierte SELinux-Regel, die es selbst mitliefert; es
   hält keine Zugangsdaten oder Passphrasen.
 - Die Spoofing-Hooks sind an laufende Apps angehängt und null-geprüft, sodass ein fehlerhaftes Profil

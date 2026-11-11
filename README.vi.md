@@ -5,6 +5,13 @@
 COPG-VD là một trình giả mạo thiết bị: nó ghi lại fingerprint và build của thiết bị để các ứng dụng thấy thiết bị bạn chọn thay vì thiết bị thật.  
 Nó chạy trên Zygisk (KernelSU, APatch hoặc Magisk) và theo mặc định, giới hạn phạm vi giả mạo vào ngăn xếp Google Play - do đó nó là một giải pháp thay thế nhẹ hơn và bền bỉ hơn cho PlayIntegrityFix.  
 
+<!-- vd-docs -->
+## Tài liệu
+
+[Hướng dẫn sử dụng](docs/vi/USER-GUIDE.md) · [Tham chiếu cấu hình](docs/vi/CONFIGURATION.md) · [Kiến trúc](docs/vi/ARCHITECTURE.md) · [Cấu trúc tệp](docs/vi/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/vi-Home)
+
+<!-- /vd-docs -->
+
 ## Ảnh chụp màn hình
 
 <p align="center">
@@ -13,7 +20,7 @@ Nó chạy trên Zygisk (KernelSU, APatch hoặc Magisk) và theo mặc định,
 
 ## Cách sử dụng?
 Cài đặt module, khởi động lại, và hồ sơ đi kèm (một chiếc Pixel) được giả mạo cho các ứng dụng mục tiêu. Với một fingerprint hoạt động được, bạn không cần PlayIntegrityFix hay GooglePhotosUnlimited.  
-Mọi thứ được cấu hình trong `/data/adb/COPG-VD.json`, hoặc từ WebUI. Tất cả các trường đều TÙY CHỌN - một trường không được cung cấp sẽ bị bỏ qua.  
+Mọi thứ được cấu hình trong `/data/adb/COPG-VD/COPG-VD.json`, hoặc từ WebUI. Tất cả các trường đều TÙY CHỌN - một trường không được cung cấp sẽ bị bỏ qua.  
 
 ### Scope - ai thấy sự giả mạo
 `scope_mode` quyết định tiến trình nào nhận được danh tính giả mạo. Trong một chế độ có giới hạn phạm vi, danh tính được Zygisk cung cấp theo từng tiến trình và không bị rò rỉ ra phần còn lại của hệ thống qua các global properties.  
@@ -39,7 +46,7 @@ Bên trong đối tượng `COPG-VD`, mỗi trường Build có bốn trạng th
 Một danh sách `"global_fields": [ ... ]` áp dụng các trường Build được nêu tên trên toàn thiết bị ngay cả trong một chế độ có giới hạn phạm vi, để giữ cho một giá trị nhất quán ở mọi nơi - chỉ dành cho các trường an toàn về tính nhất quán (ví dụ bản vá bảo mật), không bao giờ dành cho identity và không bao giờ dành cho nhóm phiên bản Android.  
 
 ### Example JSON config file
-`/data/adb/COPG-VD.json`
+`/data/adb/COPG-VD/COPG-VD.json`
 ```json
 {
   "Instructions": "Use strings on double-quotes only.",
@@ -80,13 +87,13 @@ Khối ở trên và `module/COPG-VD.json.example` được làm mới hằng ng
 
 ### Giữ cho fingerprint luôn mới
 `fingerprint-update.sh` tải tệp đó về và cập nhật cấu hình của bạn, từ WebUI (**Check Update** / **Update Now**) hoặc tự động **mỗi lần khởi động một lần** (**Auto-update JSON on boot**, bật theo mặc định).  
-* Cả `/data/adb/COPG-VD.json` lẫn `/data/adb/modules/COPG-VD/COPG-VD.json` đều được cập nhật khi cả hai cùng tồn tại, và nội dung trước đó được giữ lại dưới dạng `.bak`.  
+* `/data/adb/COPG-VD/COPG-VD.json` được cập nhật tại chỗ, và nội dung trước đó được giữ lại ngay bên cạnh dưới dạng `COPG-VD.json.bak`.  
 * Chỉ các trường build được ghi lại (fingerprint, ID, incremental, timestamp, bản vá bảo mật, SDK, UUID, host, user). Mọi thứ khác mà bạn đã tùy chỉnh đều được giữ nguyên: các khóa bổ sung, `scope_mode`, `BOOTLOADER`/`BOARD`/`HARDWARE`, các đối tượng khác, thứ tự khóa và định dạng.  
 * Nó không bao giờ lùi về sau: một bản build thượng nguồn cũ hơn bản đã cài sẽ bị từ chối. Đây là chuyện thường tình (repo có thể tụt lại sau một cấu hình bạn đã cập nhật bằng tay) và cũng là lớp bảo vệ quan trọng nhất trên Android, nơi trình tải xuống duy nhất có sẵn là busybox `wget`, vốn không thể xác thực chứng chỉ TLS - vì cùng lý do đó, mọi giá trị đều được xác thực trước khi sử dụng.  
 * Nếu hồ sơ của bạn giả mạo **một thiết bị khác** (`BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT` khác), sẽ không có gì được áp dụng - một fingerprint Pixel trên một hồ sơ khác còn tệ hơn một fingerprint cũ.  
 * Khi khởi động, nó chạy trong nền và tiếp tục thử lại trong khoảng 10 phút, vì wifi thường chưa hoạt động khi quá trình khởi động hoàn tất. Nó không bao giờ làm chậm quá trình khởi động.  
 * `resetprop` được áp dụng lại ngay sau một lần cập nhật, nhưng `android.os.Build` được ghi bởi module zygisk khi zygote khởi động: **khởi động lại** để các giá trị mới đến được với các ứng dụng.  
-* Nhật ký tại `/data/adb/COPG-VD.update.log`.  
+* Nhật ký tại `/data/adb/COPG-VD/update.log`.  
 
 ### Phiên bản Android - và vì sao nó không bị giả mạo
 `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` và `CODENAME` mô tả **ROM của bạn**, không phải thiết bị đang bị giả mạo. Việc nói với các ứng dụng rằng SDK mới hơn framework thực tế khiến chúng gọi những API không tồn tại: các ứng dụng của Google bị sập, điện thoại khởi động lại, rồi lặp lại từ đầu. Bản thân quá trình khởi động vẫn hoàn tất, nên đây là một **softloop** và không có gì hiện ra trong nhật ký khởi động.  
@@ -105,7 +112,7 @@ WebUI là tùy chọn - mọi thứ đều có thể chỉnh sửa trực tiếp
 Nếu bạn là người dùng Magisk, hãy dùng KsuWebUI của KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
 
 ### Cài đặt trong cấu hình
-`COPG-VD.json` mang các cài đặt của nó ngay cạnh hồ sơ, để các lựa chọn của bạn đi theo cùng bản sao lưu và có thể chỉnh sửa bằng tay: `scope_mode`, các công tắc của engine, các nhóm resetprop, `global_fields`, và một đối tượng `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). WebUI ghi cả cấu hình lẫn các tệp cờ (flag) mà các script khởi động đọc. `"spoof_version": "force"` bị từ chối từ tệp và bị hạ cấp: việc khôi phục một bản sao lưu cũ không được tự ý kích hoạt lại nó sau lưng bạn.  
+`COPG-VD.json` mang các cài đặt của nó ngay cạnh hồ sơ, để các lựa chọn của bạn đi theo cùng bản sao lưu và có thể chỉnh sửa bằng tay: `scope_mode`, các công tắc của engine, các nhóm resetprop, `global_fields`, và một đối tượng `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). Mọi thứ đều nằm trong một tệp duy nhất này - các script khởi động và WebUI đọc các cài đặt trực tiếp từ nó, nên các lựa chọn của bạn vẫn còn sau một lần cập nhật module. `"spoof_version": "force"` bị từ chối từ tệp và bị hạ cấp: việc khôi phục một bản sao lưu cũ không được tự ý kích hoạt lại nó sau lưng bạn.  
 
 ## Liên hệ
 
@@ -118,11 +125,6 @@ Nếu bạn là người dùng Magisk, hãy dùng KsuWebUI của KOW (https://gi
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
-
-<!-- vd-docs -->
-## Tài liệu
-
-[Hướng dẫn sử dụng](docs/vi/USER-GUIDE.md) · [Tham chiếu cấu hình](docs/vi/CONFIGURATION.md) · [Kiến trúc](docs/vi/ARCHITECTURE.md) · [Cấu trúc tệp](docs/vi/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/vi-Home)
 
 <!-- vd-see-also -->
 

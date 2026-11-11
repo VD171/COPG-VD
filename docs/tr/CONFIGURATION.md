@@ -4,9 +4,12 @@
 
 # Yapılandırma referansı
 
-Tüm modül tek bir dosya tarafından yönetilir: `/data/adb/COPG-VD.json`. WebUI onu sizin
+Tüm modül tek bir dosya tarafından yönetilir: `/data/adb/COPG-VD/COPG-VD.json`. WebUI onu sizin
 için yazar, ancak elle de düzenleyebilirsiniz. Birlikte gelen bir örnek
 `module/COPG-VD.json.example` konumundadır.
+Bu, tek doğruluk kaynağıdır; modül dizinindeki kopya yalnızca salt okunur bir varsayılandır.
+`/data/adb/COPG-VD.json` konumundaki daha eski bir sürümden kalan bir yapılandırma otomatik olarak bu
+dizine taşınır. Modülün kendi günlüğü ve durumu (`update.log`, `update.state`) da burada bulunur.
 
 Kurallar:
 

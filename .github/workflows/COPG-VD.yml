@@ -172,12 +172,19 @@ jobs:
           fi
           # Every release carries the channel banner (same footer applied by hand to the
           # manual releases), so automatic fingerprint releases get it too.
+          # sha256 of the zip and each shipped .so, published so anyone can verify the bytes.
+          sha256sum "${{ steps.version.outputs.zip_name }}" > SHA256SUMS.txt
+          ( cd module/zygisk && sha256sum *.so ) >> SHA256SUMS.txt
           {
             printf '%s\n' "$notes"
+            printf '\n### Checksums (sha256)\n\n'
+            printf '```\n'
+            cat SHA256SUMS.txt
+            printf '```\n'
             printf '\n---\n'
             printf '%s\n' "📣 **Join the channel for updates:** @Priv8_VD https://t.me/Priv8_VD"
           } > release-notes.md
-          gh release create "$VERSION" "${{ steps.version.outputs.zip_name }}" \
+          gh release create "$VERSION" "${{ steps.version.outputs.zip_name }}" SHA256SUMS.txt \
             --title "$VERSION" --notes-file release-notes.md
           # module/update.json already points at this asset, so the in-app updater works
           # the moment the release exists.

@@ -19,7 +19,7 @@ COPG-VD переписывает отпечаток (fingerprint) и build ус�
 
 Откройте WebUI из вашего root-менеджера, чтобы управлять модулем. Пользователи Magisk открывают его через
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Всё
-можно также редактировать напрямую в `/data/adb/COPG-VD.json`.
+можно также редактировать напрямую в `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Кто видит подмену (область действия)
 
@@ -71,7 +71,7 @@ COPG-VD переписывает отпечаток (fingerprint) и build ус�
   чем старый.
 - `resetprop` применяется заново сразу после обновления, но `android.os.Build` записывается, когда
   стартует zygote, поэтому **перезагрузитесь**, чтобы новые значения дошли до приложений. Лог:
-  `/data/adb/COPG-VD.update.log`.
+  `/data/adb/COPG-VD/update.log`.
 
 ## Ловушка версии Android
 

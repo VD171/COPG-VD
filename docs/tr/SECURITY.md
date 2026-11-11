@@ -25,7 +25,7 @@ Açık bir açıklama ve mümkünse yeniden üretme adımlarını ekleyin. Elimi
 
 ## Kapsam notları
 
-- Yapılandırma `/data/adb/COPG-VD.json` konumunda bulunur, yalnızca root tarafından
+- Yapılandırma `/data/adb/COPG-VD/COPG-VD.json` konumunda bulunur, yalnızca root tarafından
   okunabilir. Modül onu, kendisinin getirdiği özel bir SELinux kuralı aracılığıyla enjekte
   edilen süreçten okur; hiçbir kimlik bilgisi (credential) veya parola ifadesi tutmaz.
 - Sahteleme hook'ları canlı uygulamalara bağlıdır ve null kontrolünden geçer, böylece bozuk

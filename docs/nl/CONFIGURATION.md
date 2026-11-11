@@ -4,8 +4,11 @@
 
 # Configuratiereferentie
 
-De hele module wordt aangestuurd door één bestand: `/data/adb/COPG-VD.json`. De WebUI schrijft het
+De hele module wordt aangestuurd door één bestand: `/data/adb/COPG-VD/COPG-VD.json`. De WebUI schrijft het
 voor je, maar je kunt het met de hand bewerken. Een meegeleverd voorbeeld staat in `module/COPG-VD.json.example`.
+Dit is de enige bron van waarheid; de kopie onder de modulemap is slechts een alleen-lezen standaard.
+Een configuratie die van een oudere versie is achtergebleven op `/data/adb/COPG-VD.json` wordt automatisch
+naar deze map verplaatst. De eigen log en status van de module (`update.log`, `update.state`) staan hier ook.
 
 Regels:
 

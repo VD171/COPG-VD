@@ -25,7 +25,7 @@ akan merespons secepat mungkin dan memberi Anda kredit jika Anda mau.
 
 ## Catatan scope
 
-- Konfigurasi berada di `/data/adb/COPG-VD.json`, hanya dapat dibaca oleh root. Modul
+- Konfigurasi berada di `/data/adb/COPG-VD/COPG-VD.json`, hanya dapat dibaca oleh root. Modul
   membacanya dari proses yang disuntikkan melalui aturan SELinux khusus yang disertakannya
   sendiri; ia tidak menyimpan kredensial atau frasa sandi.
 - Hook spoofing ditempelkan ke aplikasi yang aktif dan null-checked sehingga profil yang

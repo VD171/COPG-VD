@@ -5,6 +5,13 @@
 COPG-VD はデバイススプーファーです: デバイスの fingerprint と build を書き換え、アプリが実際のデバイスではなく、あなたが選んだデバイスを見るようにします。  
 Zygisk (KernelSU、APatch または Magisk) 上で動作し、デフォルトではスプーフの対象を Google Play スタックに限定します - そのため PlayIntegrityFix より軽量で堅牢な代替手段です。  
 
+<!-- vd-docs -->
+## ドキュメント
+
+[ユーザーガイド](docs/ja/USER-GUIDE.md) · [設定リファレンス](docs/ja/CONFIGURATION.md) · [アーキテクチャ](docs/ja/ARCHITECTURE.md) · [ファイル構造](docs/ja/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/ja-Home)
+
+<!-- /vd-docs -->
+
 ## スクリーンショット
 
 <p align="center">
@@ -13,7 +20,7 @@ Zygisk (KernelSU、APatch または Magisk) 上で動作し、デフォルトで
 
 ## 使い方
 モジュールをインストールして再起動すると、同梱のプロファイル (Pixel) が対象のアプリに対してスプーフィングされます。動作する fingerprint があれば、PlayIntegrityFix や GooglePhotosUnlimited は必要ありません。  
-すべては `/data/adb/COPG-VD.json` で、または WebUI から設定します。すべてのフィールドは任意 (OPTIONAL) です - 指定されていないフィールドはスキップされます。  
+すべては `/data/adb/COPG-VD/COPG-VD.json` で、または WebUI から設定します。すべてのフィールドは任意 (OPTIONAL) です - 指定されていないフィールドはスキップされます。  
 
 ### Scope - 誰がスプーフを見るか
 `scope_mode` は、どのプロセスがスプーフされた識別情報を受け取るかを決定します。スコープ付きモードでは、識別情報は Zygisk によってプロセスごとに配信され、グローバルプロパティを通じてシステムの他の部分に漏れることはありません。  
@@ -39,7 +46,7 @@ Zygisk (KernelSU、APatch または Magisk) 上で動作し、デフォルトで
 `"global_fields": [ ... ]` のリストは、スコープ付きモードであっても、指定された Build フィールドをデバイス全体に適用し、値をどこでも一貫させます - 一貫性の観点から安全なフィールド (例えば security patch) のみを対象とし、識別情報は決して対象とせず、Android バージョンのグループも決して対象としません。  
 
 ### JSON 設定ファイルの例
-`/data/adb/COPG-VD.json`
+`/data/adb/COPG-VD/COPG-VD.json`
 ```json
 {
   "Instructions": "Use strings on double-quotes only.",
@@ -80,7 +87,7 @@ Zygisk (KernelSU、APatch または Magisk) 上で動作し、デフォルトで
 
 ### fingerprint を最新に保つ
 `fingerprint-update.sh` はそのファイルを取得して設定を更新します。WebUI から (**Check Update** / **Update Now**)、またはそれ自身で**起動ごとに一度** (**Auto-update JSON on boot**、デフォルトで有効) 実行されます。  
-* `/data/adb/COPG-VD.json` と `/data/adb/modules/COPG-VD/COPG-VD.json` の両方が存在する場合は両方が更新され、以前の内容は `.bak` として保持されます。  
+* `/data/adb/COPG-VD/COPG-VD.json` はその場で更新され、以前の内容はその隣に `COPG-VD.json.bak` として保持されます。  
 * 書き換えられるのはビルドフィールドのみです (fingerprint、ID、incremental、timestamp、security patch、SDK、UUID、host、user)。カスタマイズしたその他すべては保持されます: 追加のキー、`scope_mode`、`BOOTLOADER`/`BOARD`/`HARDWARE`、他のオブジェクト、キーの順序、書式。  
 * 決して後退しません: インストール済みより古い上流ビルドは拒否されます。これは
   通常のことであり (リポジトリは手動で更新した設定より遅れることがあります)、同時に Android において
@@ -89,7 +96,7 @@ Zygisk (KernelSU、APatch または Magisk) 上で動作し、デフォルトで
 * プロファイルが**別のデバイス**をスプーフィングしている場合 (`BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT` が異なる)、何も適用されません - 別のプロファイルに Pixel の fingerprint を使うのは、古い fingerprint よりも悪いからです。  
 * 起動時にはバックグラウンドで実行され、約 10 分間リトライを続けます。起動完了時には通常まだ wifi が立ち上がっていないためです。起動を遅らせることは決してありません。  
 * 更新直後に `resetprop` が再適用されますが、`android.os.Build` は zygote の開始時に zygisk モジュールによって書き込まれます: 新しい値をアプリに届けるには**再起動**してください。  
-* ログは `/data/adb/COPG-VD.update.log` にあります。  
+* ログは `/data/adb/COPG-VD/update.log` にあります。  
 
 ### Android バージョン - そしてなぜスプーフィングされないのか
 `ANDROID_VERSION`、`SDK_INT`、`SDK_FULL`、`CODENAME` は、スプーフィングされるデバイスではなく、**あなたの ROM** を表します。SDK が実際のフレームワークより新しいとアプリに伝えると、存在しない API を呼び出すようになります: Google のアプリがクラッシュし、端末が再起動し、それを繰り返します。起動自体は完了するため、これは **softloop** であり、起動ログには何も表示されません。  
@@ -108,7 +115,7 @@ WebUI は任意です - すべては JSON 設定で直接編集できます - �
 Magisk ユーザーの場合は、KOW による KsuWebUI を使用してください (https://github.com/KOWX712/KsuWebUIStandalone/releases)。  
 
 ### 設定内の設定項目
-`COPG-VD.json` は設定をプロファイルの隣に保持するため、あなたの選択はバックアップとともに移動し、手動で編集できます: `scope_mode`、エンジンのスイッチ、resetprop グループ、`global_fields`、そして `COPG-VD-Settings` オブジェクト (`resetprop`、`autoupdate`、`spoof_manufacturer`、`spoof_version`)。WebUI は設定と、起動スクリプトが読み取るフラグファイルの両方を書き込みます。`"spoof_version": "force"` はファイルからは拒否され、ダウングレードされます: 古いバックアップを復元しても、知らないうちに再び有効化されてはならないからです。  
+`COPG-VD.json` は設定をプロファイルの隣に保持するため、あなたの選択はバックアップとともに移動し、手動で編集できます: `scope_mode`、エンジンのスイッチ、resetprop グループ、`global_fields`、そして `COPG-VD-Settings` オブジェクト (`resetprop`、`autoupdate`、`spoof_manufacturer`、`spoof_version`)。すべてはこの 1 つのファイルに存在します - 起動スクリプトと WebUI は設定をそこから直接読み取るため、あなたの選択はモジュールの更新を越えて残ります。`"spoof_version": "force"` はファイルからは拒否され、ダウングレードされます: 古いバックアップを復元しても、知らないうちに再び有効化されてはならないからです。  
 
 ## 連絡先
 
@@ -121,11 +128,6 @@ Magisk ユーザーの場合は、KOW による KsuWebUI を使用してくだ�
 * **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
-
-<!-- vd-docs -->
-## ドキュメント
-
-[ユーザーガイド](docs/ja/USER-GUIDE.md) · [設定リファレンス](docs/ja/CONFIGURATION.md) · [アーキテクチャ](docs/ja/ARCHITECTURE.md) · [ファイル構造](docs/ja/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/ja-Home)
 
 <!-- vd-see-also -->
 

@@ -62,8 +62,8 @@ COPG-VD/
 
 ## Конфигурация времени выполнения (не в репозитории)
 
-`/data/adb/COPG-VD.json` на устройстве хранит профиль и настройки (смотрите
-[CONFIGURATION.md](CONFIGURATION.md)). Он никогда не коммитится; `module/COPG-VD.json.example`
-- это шаблон.
+`/data/adb/COPG-VD/` на устройстве - это собственный каталог модуля: `COPG-VD.json` хранит профиль
+и настройки (смотрите [CONFIGURATION.md](CONFIGURATION.md)), рядом с `update.log`, `update.state` и
+`update.status`. Конфигурация никогда не коммитится; `module/COPG-VD.json.example` - это шаблон.
 
 *Эта документация была сгенерирована с Claude (Anthropic) и поддерживается VD171. Исправления и улучшения приветствуются - смотрите [../CONTRIBUTING.md](CONTRIBUTING.md).*

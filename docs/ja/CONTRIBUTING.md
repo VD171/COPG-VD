@@ -22,7 +22,7 @@ COPG(AlirezaParsi による)のフォークで、VD171 が Apache-2.0 ライセ�
 AI アシスタントとエージェントは、ここでは後付けではなく、一流の貢献者です。
 
 - プロジェクトは読みやすいように作られています: 設定は単一の JSON ファイル
-  (`/data/adb/COPG-VD.json`、[CONFIGURATION.md](CONFIGURATION.md) に文書化)、
+  (`/data/adb/COPG-VD/COPG-VD.json`、[CONFIGURATION.md](CONFIGURATION.md) に文書化)、
   エンジンは小さく自己完結的で、レイアウトは [FILE-STRUCTURE.md](FILE-STRUCTURE.md) にあります。
 - AI 支援によるパッチは、他のものと同じ条件でレビューされ受け入れられます - 誰が(または何が)
   書いたかではなく、正確さ、明瞭さ、そして下記の慣習によって。

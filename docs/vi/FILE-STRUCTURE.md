@@ -62,8 +62,8 @@ COPG-VD/
 
 ## Cấu hình thời gian chạy (không có trong repo)
 
-`/data/adb/COPG-VD.json` trên thiết bị giữ hồ sơ và các thiết lập (xem
-[CONFIGURATION.md](CONFIGURATION.md)). Nó không bao giờ được commit; `module/COPG-VD.json.example`
-là mẫu.
+`/data/adb/COPG-VD/` trên thiết bị là thư mục riêng của module: `COPG-VD.json` giữ hồ sơ và các thiết lập
+(xem [CONFIGURATION.md](CONFIGURATION.md)), cùng với `update.log`, `update.state` và `update.status`.
+Cấu hình không bao giờ được commit; `module/COPG-VD.json.example` là mẫu.
 
 *Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Các chỉnh sửa và cải tiến đều được hoan nghênh - xem [../CONTRIBUTING.md](CONTRIBUTING.md).*

@@ -19,7 +19,7 @@ för hur det fungerar inuti, se [ARCHITECTURE.md](ARCHITECTURE.md).
 
 Öppna WebUI från din root-hanterare för att styra modulen. Magisk-användare öppnar det med
 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Allt
-kan också redigeras direkt i `/data/adb/COPG-VD.json`.
+kan också redigeras direkt i `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Vem ser spoofen (omfattning)
 
@@ -71,7 +71,7 @@ Ett fingerprint åldras: Google roterar fabriksavbildningarna och ett gammalt ta
   än ett gammalt.
 - `resetprop` tillämpas på nytt direkt efter en uppdatering, men `android.os.Build` skrivs när
   zygote startar, så **starta om** för att nya värden ska nå apparna. Logg:
-  `/data/adb/COPG-VD.update.log`.
+  `/data/adb/COPG-VD/update.log`.
 
 ## Android-versionsfällan
 

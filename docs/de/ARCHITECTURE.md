@@ -12,7 +12,7 @@ optionalen Profilabruf, kein Netzwerk.
 ## Lebenszyklus
 
 1. **Zygote-Start.** Wenn Zygote bootet, ruft der Loader das `onLoad` des Moduls auf. Es
-   liest `/data/adb/COPG-VD.json` einmal: die Geltungsbereichskonfiguration und das Profil.
+   liest `/data/adb/COPG-VD/COPG-VD.json` einmal: die Geltungsbereichskonfiguration und das Profil.
 2. **App-Fork.** Für jede App, die Zygote forkt, entscheidet das Modul in
    `preAppSpecialize`, ob dieser Prozess im Geltungsbereich ist:
    - **im Haupt-Geltungsbereich** (`playstore` / `global` / `whitelist` / `blacklist`), oder
