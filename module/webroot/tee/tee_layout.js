@@ -5,7 +5,6 @@ const get = id => document.getElementById(id);
 function mount() {
  const panel=get('tee-tab');
  if(!panel || panel.dataset.layoutReady)return;
- panel.dataset.layoutReady='1';
  const existingApps=get('tee-app-load')?.closest('section');
  const root=panel.firstElementChild;
  root.className='tee-layout';root.removeAttribute('style');
@@ -27,8 +26,11 @@ function mount() {
  manual.append(field(get('tee-package'),'Package'),field(get('tee-mode'),'Auto / Generate / Hack'));
  targets.append(manual,actions(get('tee-add')),field(get('tee-target'),'target.txt'),actions(get('tee-load'),get('tee-save')));
  const schedule=card('tee_schedule','Keybox update schedule');schedule.id='tee-schedule-card';schedule.hidden=true;
- const diagnostics=card('ui_tool_diag','Diagnostics');diagnostics.append(actions(get('tee-logs'),get('tee-reset')));
- get('tee-reset').classList.add('tee-danger');
+ const diagnostics=card('ui_tool_diag','Diagnostics');
+ // Keep the reference before moving the control into a detached section.
+ const reset=get('tee-reset');
+ if(reset)reset.classList.add('tee-danger');
+ diagnostics.append(actions(get('tee-logs'),reset));
  root.replaceChildren(status,keybox,targets,schedule,diagnostics);
  if(existingApps)appSlot.append(existingApps);
  get('tee-target').rows=8;
@@ -79,6 +81,7 @@ function mount() {
  window.addEventListener('resize',()=>{if(panel.classList.contains('active'))requestAnimationFrame(expand);});
  if(panel.classList.contains('active'))expand();
  I18N.apply(panel);
+ panel.dataset.layoutReady='1';
 }
 const link=document.createElement('link');link.rel='stylesheet';link.href='tee/tee.css';document.head.append(link);
 function ready(){if(get('tee-tab')){mount();return;}const observer=new MutationObserver(()=>{if(get('tee-tab')){observer.disconnect();mount();}});observer.observe(document.body,{childList:true,subtree:true});}
