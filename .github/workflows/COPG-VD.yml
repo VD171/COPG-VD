@@ -1,8 +1,10 @@
 name: TOPG integrated build
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
   push:
-    branches: [feature/tee-integration]
+    branches: [main, feature/tee-integration]
   pull_request:
     branches: [main]
 permissions:
@@ -18,51 +20,103 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Resolve engine release
+        id: engine
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re, urllib.request, urllib.parse
+          sha='d8099e29e38af7750dd9e3563cc4a38db9aa96bb'
+          if os.environ['EVENT_NAME'] in ('schedule','workflow_dispatch'):
+              base='https://api.github.com/repos/wfire06100/TEESimulator-RS/'
+              def api(path):
+                  request=urllib.request.Request(base+path,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','User-Agent':'TOPG-release-builder'})
+                  with urllib.request.urlopen(request,timeout=30) as response:
+                      return json.load(response)
+              tag=api('releases/latest')['tag_name']
+              sha=api('commits/'+urllib.parse.quote(tag,safe=''))['sha']
+          if not re.fullmatch('[0-9a-f]{40}',sha):
+              raise SystemExit('Invalid engine commit')
+          with open(os.environ['GITHUB_OUTPUT'],'a') as output:
+              output.write('sha='+sha+'\n')
+          PY
+      - uses: actions/cache/restore@v4
+        id: built
+        with:
+          path: .tee-build-success
+          key: topg-engine-${{ github.sha }}-${{ steps.engine.outputs.sha }}
       - uses: actions/checkout@v4
+        if: steps.built.outputs.cache-hit != 'true'
         with:
           repository: wfire06100/TEESimulator-RS
-          ref: d8099e29e38af7750dd9e3563cc4a38db9aa96bb
+          ref: ${{ steps.engine.outputs.sha }}
           path: upstream-tee
           submodules: recursive
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-java@v4
+        if: steps.built.outputs.cache-hit != 'true'
         with:
           distribution: temurin
           java-version: '21'
       - uses: android-actions/setup-android@v3
+        if: steps.built.outputs.cache-hit != 'true'
         with:
           packages: 'platform-tools'
       - name: Install Android components
+        if: steps.built.outputs.cache-hit != 'true'
         run: sdkmanager 'ndk;27.3.13750724' 'platforms;android-36' 'build-tools;36.0.0'
       - uses: dtolnay/rust-toolchain@stable
+        if: steps.built.outputs.cache-hit != 'true'
         with:
           targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
       - run: cargo install cargo-ndk --locked
-      - name: Adapt pinned TEE source
+        if: steps.built.outputs.cache-hit != 'true'
+      - name: Adapt engine and enable TOPG features
+        if: steps.built.outputs.cache-hit != 'true'
+        env:
+          ENGINE_SHA: ${{ steps.engine.outputs.sha }}
         run: |
-          python3 tools/tee/relocate_engine.py upstream-tee
+          python3 tools/tee/update_features.py upstream-tee "$ENGINE_SHA"
           python3 tools/tee/assemble_topg.py patch upstream-tee
       - name: Test and build TEE
+        if: steps.built.outputs.cache-hit != 'true'
         working-directory: upstream-tee
         run: |
           chmod +x gradlew
           ./gradlew :app:testDebugUnitTest zipRelease -Dorg.gradle.jvmargs=-Xmx2048m
       - name: Build COPG libraries
+        if: steps.built.outputs.cache-hit != 'true'
         run: |
           for abi in arm64-v8a armeabi-v7a x86_64; do
             cmake -S zygisk -B "zygisk/build/$abi" -DCMAKE_TOOLCHAIN_FILE="$ANDROID_HOME/ndk/27.3.13750724/build/cmake/android.toolchain.cmake" -DANDROID_ABI="$abi" -DANDROID_PLATFORM=android-28 -DCMAKE_BUILD_TYPE=Release
             cmake --build "zygisk/build/$abi" --parallel 2
           done
       - name: Assemble single TOPG module
+        if: steps.built.outputs.cache-hit != 'true'
         run: |
           set -eu
           set -- upstream-tee/out/*Release*.zip
           test "$#" -eq 1
           python3 tools/tee/assemble_topg.py assemble . "$1" upstream-tee staging/TOPG
       - uses: actions/upload-artifact@v4
+        if: steps.built.outputs.cache-hit != 'true'
         with:
           name: TOPG-integrated-device-validation-required
           path: staging/TOPG-integrated.zip
           if-no-files-found: error
           retention-days: 14
+      - name: Record successful engine build
+        if: steps.built.outputs.cache-hit != 'true'
+        env:
+          ENGINE_SHA: ${{ steps.engine.outputs.sha }}
+        run: |
+          mkdir -p .tee-build-success
+          printf '%s\n' "$ENGINE_SHA" > .tee-build-success/revision
+      - uses: actions/cache/save@v4
+        if: steps.built.outputs.cache-hit != 'true'
+        with:
+          path: .tee-build-success
+          key: topg-engine-${{ github.sha }}-${{ steps.engine.outputs.sha }}
