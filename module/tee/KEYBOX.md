@@ -1,9 +1,9 @@
-# Keybox adapter
+# Standalone keybox adapter
 
-TOPG integration: wfire06100. The optional native asfetch downloader is built from AlwaysStrong / Evokerr and contributors, via wfire06100/alwayswrong commit 0f6657a39bd066f6afe5a1c40c0bcaa4dcad629c. Its original GPL-3.0 license and source archive are shipped beside it. TOPG's shell and UI adapter is separately implemented.
+TOPG integration: wfire06100. The adapter is implemented in TOPG and does not clone, compile, install or require AlwaysStrong, alwayswrong or asfetch. It uses curl, system wget or the root manager's existing BusyBox wget. Rust remains part of the TEESimulator-RS engine build, not of keybox retrieval.
 
-The verified AlwaysStrong automatic protocol is http://evoker.qzz.io/key returning base64 XML. The adapter maps Evoker's base address and /keys guide address to that API; it does not scrape the guide. Other endpoints must be direct XML or base64 download URLs. Repository HTML pages are rejected. KOWX712 interactive repository selection is not implemented by this adapter.
+Default endpoint: http://evoker.qzz.io/key. Existing Evoker base or /keys guide addresses are normalized to /key for compatibility. Other providers must supply a direct XML or base64 download URL. No repository webpage scraping or interactive KOWX712 integration is performed.
 
-The working downloader is tried first; fallback order is asfetch, BusyBox wget, curl, system wget. Attempts are bounded, payloads are capped, personal mode is protected, and the active keybox is kept when decoding or validation fails. Unchanged content returns success with the text unchanged, to remain compatible with the existing TOPG scheduler. Validation checks structure only, not signatures, revocation or service acceptance. HTTP does not authenticate the mirror.
+The downloader accepts raw AndroidAttestation XML or base64-encoded XML, rejects HTML and XML entities, limits payload size and request duration, and preserves the active keybox on failure. Validation checks structure only, not cryptographic signatures, revocation or service acceptance. HTTP does not authenticate the source.
 
-Keybox mode and endpoint are stored under /data/adb/COPG-VD/tee. Mode changes are saved and read back by the WebUI. Switching to auto authorizes scheduled replacement; importing a personal keybox returns to protected mode. Invalid or unreadable settings are shown as an error rather than silently displayed as personal.
+Personal mode remains protected. Automatic mode and the endpoint are saved under /data/adb/COPG-VD/tee and read back by the WebUI. Download failures do not reset the mode. The scheduler uses this same adapter. Unchanged data is a successful no-op. Existing private keys and persistent engine keys are not reset by this change.

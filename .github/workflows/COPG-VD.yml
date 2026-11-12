@@ -56,13 +56,6 @@ jobs:
           submodules: recursive
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/checkout@v4
-        if: steps.built.outputs.cache-hit != 'true'
-        with:
-          repository: wfire06100/alwayswrong
-          ref: 0f6657a39bd066f6afe5a1c40c0bcaa4dcad629c
-          path: upstream-keybox
-          persist-credentials: false
       - uses: actions/setup-java@v4
         if: steps.built.outputs.cache-hit != 'true'
         with:
@@ -81,24 +74,7 @@ jobs:
           targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
       - run: cargo install cargo-ndk --locked
         if: steps.built.outputs.cache-hit != 'true'
-      - name: Build pinned AlwaysStrong native downloader
-        if: steps.built.outputs.cache-hit != 'true'
-        env:
-          CARGO_TARGET_DIR: ${{ runner.temp }}/topg-asfetch
-        run: |
-          set -eu
-          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.3.13750724"
-          cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 build --release --locked --manifest-path upstream-keybox/native/asfetch/Cargo.toml
-          for pair in arm64-v8a:aarch64-linux-android armeabi-v7a:armv7-linux-androideabi x86_64:x86_64-linux-android; do
-            abi=${pair%%:*}; target=${pair#*:}
-            mkdir -p "module/tee/bin/$abi"
-            cp "$CARGO_TARGET_DIR/$target/release/asfetch" "module/tee/bin/$abi/asfetch"
-            test -s "module/tee/bin/$abi/asfetch"
-            chmod 755 "module/tee/bin/$abi/asfetch"
-          done
-          cp upstream-keybox/LICENSE module/tee/asfetch-LICENSE
-          tar -czf module/tee/asfetch-source.tar.gz -C upstream-keybox native/asfetch LICENSE
-      - name: Route keybox operations to isolated adapter
+      - name: Route standalone keybox operations and set complete default URL
         if: steps.built.outputs.cache-hit != 'true'
         run: |
           python3 - <<'PY'
@@ -110,12 +86,22 @@ jobs:
               raise SystemExit('Keybox dispatch anchor changed')
           text=text.replace(anchor,'case "$cmd" in\nconfig|configure|update|import) exec sh "$M/tee_keybox.sh" "$cmd" "$@" ;;\nstatus)',1)
           p.write_text(text)
+          p=Path('tools/tee/update_features.py')
+          text=p.read_text()
+          anchor='echo http://evoker.qzz.io >'
+          if text.count(anchor)!=1:
+              raise SystemExit('Default keybox URL anchor changed')
+          text=text.replace(anchor,'echo http://evoker.qzz.io/key >',1)
+          text=text.replace('Default mirror: http://evoker.qzz.io (AlwaysWrong).','Default endpoint: http://evoker.qzz.io/key.')
+          text=text.replace('Miroir par défaut : http://evoker.qzz.io (AlwaysWrong).','URL par défaut : http://evoker.qzz.io/key.')
+          text=text.replace('automatic mode using the AlwaysWrong mirror','automatic mode using the configured keybox URL')
+          p.write_text(text)
           p=Path('tools/tee/assemble_topg.py')
           text=p.read_text()
           anchor='def once(path, old, new):'
           if text.count(anchor)!=1:
               raise SystemExit('I18N integration anchor changed')
-          extra="EN.update({'tee_endpoint':'Evoker address or direct XML/base64 download URL'})\nFR.update({'tee_endpoint':'Adresse Evoker ou URL directe de téléchargement XML/base64'})\n\n"
+          extra="EN.update({'tee_endpoint':'Keybox download URL (XML or base64)'})\nFR.update({'tee_endpoint':'URL de téléchargement de keybox (XML ou base64)'})\n\n"
           p.write_text(text.replace(anchor,extra+anchor,1))
           PY
           sh -n module/tee/tee_keybox.sh

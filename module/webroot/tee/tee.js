@@ -7,6 +7,7 @@ const quote=s=>"'"+String(s).replace(/'/g,"'\\''")+"'";
 let sequence=0,pending=Promise.resolve();
 function execute(command){return new Promise((resolve,reject)=>{const callback='topg_tee_'+Date.now()+'_'+(++sequence);window[callback]=(code,stdout,stderr)=>{delete window[callback];if(code===0||code==='0')resolve(stdout||'');else reject(new Error([stdout,stderr].filter(Boolean).join('\n')||'Command failed: '+code));};try{if(typeof ksu==='undefined'||typeof ksu.exec!=='function')throw new Error('Root bridge unavailable');ksu.exec(command,'{}',callback);}catch(e){delete window[callback];reject(e);}});}
 function run(action,...args){const next=pending.then(()=>execute('sh '+quote(cli)+' '+[action,...args].map(quote).join(' ')));pending=next.catch(()=>undefined);return next;}
+function normalizeEndpoint(value){let u=String(value).trim().split('#')[0].replace(/\/$/,'');if(!u)u='http://evoker.qzz.io/key';if(/^https?:\/\/evoker\.qzz\.io(?:\/keys)?$/.test(u))u=u.replace(/\/keys$/,'')+'/key';return u;}
 function parseSettings(raw){const values={};for(const line of String(raw).split(/\r?\n/)){const i=line.indexOf('=');if(i>0)values[line.slice(0,i).trim()]=line.slice(i+1).trim();}if(!['auto','personal'].includes(values.mode)||values.endpoint===undefined)throw new Error('Invalid persisted keybox settings');return {mode:values.mode,endpoint:values.endpoint};}
 function init(){
  const nav=document.getElementById('tab-tools')?.parentElement,box=document.getElementById('tab-container');if(!nav||!box)return;
@@ -18,9 +19,8 @@ function init(){
  function applySettings(s){lastSettings=s;settingsLoaded=true;el('tee-source').value=s.mode;el('tee-endpoint').value=s.endpoint;guard();}
  async function readSettings(){const s=parseSettings(await run('config'));applySettings(s);return s;}
  async function saveSettings(){
-  const mode=el('tee-source').value;let endpoint=el('tee-endpoint').value.trim().replace(/\/$/,'');
+  const mode=el('tee-source').value;const endpoint=normalizeEndpoint(el('tee-endpoint').value);
   if(!['auto','personal'].includes(mode))throw new Error('Invalid keybox mode');
-  if(mode==='auto'&&!endpoint)endpoint='http://evoker.qzz.io';
   let wrote=false;
   try{await run('configure',mode,enc(endpoint));wrote=true;const s=await readSettings();if(s.mode!==mode||s.endpoint!==endpoint)throw new Error('Keybox settings verification failed');return t('tee_done');}
   catch(e){if(!wrote&&lastSettings)applySettings(lastSettings);else{settingsLoaded=false;lastSettings=null;el('tee-source').selectedIndex=-1;guard();}throw e;}
