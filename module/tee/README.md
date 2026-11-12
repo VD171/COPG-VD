@@ -1,32 +1,13 @@
 # TOPG TEE integration
 
-Integration author: wfire06100.
+Integration: wfire06100. COPG-VD: AlirezaParsi and VD171 (Apache-2.0). TEESimulator: JingMatrix and TEESimulator-RS contributors (GPL-3.0; original NOTICE retained). AlwaysWrong's BASE/key protocol is reimplemented here; its shell code is not copied. The combined ZIP includes the modified engine and adapter sources and upstream notices.
 
-## Status
+The TOPG integrated workflow compiles the pinned engine, runs upstream JVM tests, builds COPG Zygisk libraries and assembles one module. Core hooks are applied only in a checked staging tree. The existing module ID remains COPG-VD. The generated package does not use the upstream COPG updateJson URL. No release is published automatically.
 
-This initial commit provides path constants and a target-entry formatter only. It does not install, start, migrate or disable any engine. Full integration is not yet implemented or device-tested.
+Installation offers migration or clean setup if legacy data exists. Updates preserve initialized TOPG data. Migration occurs after reboot, with snapshot hashes and full backup under /data/adb/COPG-VD/tee-backups. The legacy source is never deleted. Links, special files or invalid identity-file lengths fail closed. Migration errors never trigger clean initialization. Conflicting TEE modules are disabled, PIF conflicts are reported, and reboot is mandatory.
 
-## Layout
+Runtime data is /data/adb/COPG-VD/tee. COPG owns security patches and boot policy. boot_props_mode=disable is internal, not another UI setting. Existing persisted boot identity is preferred over live properties. Personal keyboxes are protected by default. Auto mode requires an explicit mirror base URL: BASE/key returns base64 XML. HTTPS is recommended; HTTP is unauthenticated. Structural checks do not establish cryptographic validity or revocation status. Updates run after boot and every six hours. Backups contain sensitive material and must remain private.
 
-The repository module/ directory is the module package root. Its existing module ID is COPG-VD. Therefore module/tee/ is installed as /data/adb/modules/COPG-VD/tee/, not as an additional nested module/copg-vd directory.
+The TEE panel uses existing COPG I18N. English and French are provided; other languages use English fallback until translated. Target sections/comments remain editable. New packages inherit the last keybox section. Auto has no suffix, Generate uses !, Hack uses ?. Reset is deferred to reboot with backup and may break applications using old keys.
 
-Mutable TEE data belongs in /data/adb/COPG-VD/tee/. Existing COPG-VD paths remain unchanged. /data/adb/tricky_store/ is a potential migration source only, not the intended runtime dependency. Engine source paths and SELinux access still require adaptation and verification.
-
-## Approved implementation requirements
-
-- Preserve the existing WebUI; add an isolated TEE tab using its existing translations and language selector, with English fallback.
-- Integrate the engine from wfire06100/TEESimulator-RS and the keybox update mechanism from wfire06100/alwayswrong after source and license review.
-- Support automatic keybox updates and personal keybox import without silently overwriting personal keys. Never commit private keybox data or persistent keys.
-- Support target modes auto (no suffix), generate (!) and hack (?), preserving multi-keybox sections.
-- Keep COPG-VD authoritative for security patches and boot-property policy. Verify actual boot_props_mode code before adapting it; do not add a duplicate UI setting.
-- If legacy data exists, offer Migrate existing data or Clean installation. Otherwise perform normal initialization. Existing TOPG data takes priority on updates.
-- Preserve persistent_keys, hbk, boot_key.bin, boot_hash.bin, keyboxes, targets and additional required state after verifying their relationships in source.
-- Back up and verify migration; do not mix key stores, delete source data, regenerate migrated keys or fall back silently to a clean installation.
-- Detect conflicting TEE modules by metadata, display them and disable them before integrated-engine activation. Show English instructions to uninstall PIF / Play Integrity Fix modules and other conflicting TEE managers, and reboot. Do not automatically uninstall modules or delete their data.
-- Keep all new installer text, code comments and integration documentation in English.
-- Preserve original author credits and license notices; add wfire06100 credits. Review component license obligations before importing code; do not blanket-relicense COPG-VD.
-- Pin upstream revisions, isolate adapters and document update procedures and diagnostics.
-
-## Helper
-
-Source tee_common.sh and call tee_target_entry with a package name and auto, generate or hack. The helper prints one entry only; it does not rewrite target.txt or remove section headers. Callers must handle file locking, atomic updates and permissions. Path constants alone do not relocate the upstream engine.
+Build-time syntax checks and upstream JVM tests are not real-device validation. Migration, SELinux access, app behavior and rollback need device testing before release. No Strong Integrity, Wallet or hardware-backed security guarantee is made. Do not install intermediate engine-only ZIPs.
