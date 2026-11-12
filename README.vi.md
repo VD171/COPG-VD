@@ -23,11 +23,11 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases">Releases</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki">Wiki</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/USER-GUIDE">User guide</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/CONFIGURATION">Configuration</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/ARCHITECTURE">Architecture</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/FILE-STRUCTURE">File structure</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/vi-Home">Wiki</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/vi-USER-GUIDE">Hướng dẫn sử dụng</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/vi-CONFIGURATION">Tham chiếu cấu hình</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/vi-ARCHITECTURE">Kiến trúc</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/vi-FILE-STRUCTURE">Cấu trúc tệp</a> ·
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 

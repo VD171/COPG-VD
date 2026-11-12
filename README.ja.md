@@ -23,11 +23,11 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases">Releases</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki">Wiki</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/USER-GUIDE">User guide</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/CONFIGURATION">Configuration</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/ARCHITECTURE">Architecture</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/FILE-STRUCTURE">File structure</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ja-Home">Wiki</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ja-USER-GUIDE">ユーザーガイド</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ja-CONFIGURATION">設定リファレンス</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ja-ARCHITECTURE">アーキテクチャ</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ja-FILE-STRUCTURE">ファイル構造</a> ·
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 

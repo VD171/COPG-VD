@@ -23,11 +23,11 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases">Releases</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki">Wiki</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/USER-GUIDE">User guide</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/CONFIGURATION">Configuration</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/ARCHITECTURE">Architecture</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/FILE-STRUCTURE">File structure</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ko-Home">Wiki</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ko-USER-GUIDE">사용자 가이드</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ko-CONFIGURATION">설정 레퍼런스</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ko-ARCHITECTURE">아키텍처</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ko-FILE-STRUCTURE">파일 구조</a> ·
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
