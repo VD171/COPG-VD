@@ -1,3 +1,33 @@
+# TOPG
+
+TOPG is a COPG-VD integration fork maintained by wfire06100. It preserves the COPG-VD base and adds a separately maintained TEESimulator-RS integration. The original COPG-VD README is retained unchanged below, including its documentation, screenshots, contacts and credits.
+
+## TOPG additions
+
+- An additional TEE tab using the existing WebUI language and theme system.
+- Application targeting with Auto (no suffix), Generate (`!`) and Hack (`?`) modes in `target.txt`.
+- Personal keybox import and scheduled XML/base64 keybox downloads. The default endpoint is `http://evoker.qzz.io/key`; no AlwaysStrong module, repository checkout or native downloader is required for keybox retrieval.
+- Installation choices to migrate existing TEE data or initialize clean data, with backup safeguards and preservation of persistent keys.
+- Isolated TEE runtime files in the existing COPG-VD module and persistent data under `/data/adb/COPG-VD/tee/`. The module ID remains `COPG-VD` for compatibility.
+- Build-time version stamping shared by the module, installer, WebUI metadata and versioned ZIP filename. The base version is defined in `module/module.prop`; the engine version is recorded separately.
+
+## Building and installation
+
+Use the [TOPG integrated build workflow](.github/workflows/COPG-VD.yml) and install the generated versioned TOPG module ZIP, not a GitHub source archive. The combined TEE build requires Android 10 or newer. Back up existing TEE data before testing, follow the installer prompts and reboot to complete installation or migration.
+
+This integration is under development. A successful build does not establish on-device compatibility. Keybox structure checks do not prove cryptographic validity or non-revocation, and no Play Integrity, Wallet or hardware-backed security result is guaranteed. The default HTTP endpoint does not authenticate the mirror.
+
+## Credits and licenses
+
+- TOPG integration and adaptations: wfire06100.
+- COPG / COPG-VD foundation: AlirezaParsi and VD171; original credits and documentation are preserved below.
+- Original TEESimulator: JingMatrix; TEESimulator-RS authors and contributors retain their credits and notices. The integrated engine is sourced from [wfire06100/TEESimulator-RS](https://github.com/wfire06100/TEESimulator-RS).
+- COPG-VD retains its Apache-2.0 license. TEESimulator-RS retains its GPL-3.0 license and component notices; these are not replaced by the TOPG name.
+
+---
+
+The following section is the original COPG-VD documentation. It describes the upstream base; the TOPG-specific additions and limitations are listed above.
+
 ## COPG-VD
 
 [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
