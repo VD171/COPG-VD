@@ -172,6 +172,7 @@ window.__I18N_EN = {
   "ui_about_license": "License",
   "ui_about_sec_contacts": "Contacts",
   "ui_about_sec_support": "Support",
+  "ui_about_trademarks": "COPG-VD is an independent, unofficial project. It is not affiliated with, endorsed by, or sponsored by Google LLC. \"Google\", \"Google Play\", \"Play Integrity\", \"Pixel\", \"Android\" and related names and logos are trademarks of Google LLC. COPG-VD runs entirely on your device.",
   "ui_tab_tools": "Tools",
   "ui_toolsd_analyze": "Check the current profile for inconsistencies.",
   "ui_toolsd_checkupdate": "See whether a newer matching factory image is available for this profile.",
