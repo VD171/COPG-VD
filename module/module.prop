@@ -1,9 +1,8 @@
 id=COPG-VD
-name=COPG-VD
-version=v6.11-vd
-versionCode=61100
-author=fork by VD171
-support=https://t.me/Priv8_VD
-description=Spoof your device.
+name=TOPG
+version=v6.12.0
+versionCode=61200
+author=wfire06100; COPG-VD: AlirezaParsi & VD171; TEESimulator contributors
+support=https://github.com/wfire06100/TOPG
+description=COPG-VD with isolated TEESimulator-RS integration
 minMagisk=20.4
-updateJson=https://raw.githubusercontent.com/VD171/COPG-VD/main/module/update.json

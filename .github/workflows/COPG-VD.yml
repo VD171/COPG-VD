@@ -101,11 +101,17 @@ jobs:
           set -- upstream-tee/out/*Release*.zip
           test "$#" -eq 1
           python3 tools/tee/assemble_topg.py assemble . "$1" upstream-tee staging/TOPG
-      - uses: actions/upload-artifact@v4
+      - name: Stamp version and validate flashable ZIP
+        id: package
+        if: steps.built.outputs.cache-hit != 'true'
+        env:
+          ENGINE_SHA: ${{ steps.engine.outputs.sha }}
+        run: python3 tools/tee/package_topg.py . staging/TOPG
+      - uses: actions/upload-artifact@v7
         if: steps.built.outputs.cache-hit != 'true'
         with:
-          name: TOPG-integrated-device-validation-required
-          path: staging/TOPG-integrated.zip
+          path: ${{ steps.package.outputs.zip_path }}
+          archive: false
           if-no-files-found: error
           retention-days: 14
       - name: Record successful engine build

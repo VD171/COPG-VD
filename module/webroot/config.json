@@ -1,7 +1,9 @@
 {
-    "title": "COPG-VD",
-    "icon": "icon.png",
-    "backHandler": false,
-    "contentSecurityPolicy": "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'none'; base-uri 'none'",
-    "windowResize": false
+  "title": "TOPG",
+  "version": "v6.12.0",
+  "versionCode": 61200,
+  "icon": "icon.png",
+  "backHandler": false,
+  "contentSecurityPolicy": "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: ksu:; font-src 'self'; connect-src 'self'; form-action 'none'; base-uri 'none'",
+  "windowResize": false
 }
