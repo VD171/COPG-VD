@@ -138,7 +138,10 @@ WebUI वैकल्पिक है - सब कुछ सीधे JSON क�
 <!-- vd-docs -->
 ## दस्तावेज़ीकरण
 
-[उपयोगकर्ता गाइड](docs/hi/USER-GUIDE.md) · [कॉन्फ़िगरेशन संदर्भ](docs/hi/CONFIGURATION.md) · [आर्किटेक्चर](docs/hi/ARCHITECTURE.md) · [फ़ाइल संरचना](docs/hi/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/hi-Home)
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/hi-Home)**: पूरा दस्तावेज़ीकरण, ऑनलाइन देखने योग्य।
+- **[उपयोगकर्ता गाइड](https://github.com/VD171/COPG-VD/wiki/hi-USER-GUIDE)**: इंस्टॉल करना, WebUI, और रोज़मर्रा का उपयोग।
+- **[कॉन्फ़िगरेशन संदर्भ](https://github.com/VD171/COPG-VD/wiki/hi-CONFIGURATION)**: कॉन्फ़िग फ़ाइल की हर सेटिंग और वह क्या करती है।
+- **[आर्किटेक्चर](https://github.com/VD171/COPG-VD/wiki/hi-ARCHITECTURE)** और **[फ़ाइल संरचना](https://github.com/VD171/COPG-VD/wiki/hi-FILE-STRUCTURE)**: स्पूफिंग कैसे काम करती है और सब कुछ कहाँ है।
 
 <!-- /vd-docs -->
 

@@ -138,7 +138,10 @@ Jika Anda pengguna Magisk, gunakan KsuWebUI oleh KOW (https://github.com/KOWX712
 <!-- vd-docs -->
 ## Dokumentasi
 
-[Panduan Pengguna](docs/in/USER-GUIDE.md) · [Referensi konfigurasi](docs/in/CONFIGURATION.md) · [Arsitektur](docs/in/ARCHITECTURE.md) · [Struktur file](docs/in/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/in-Home)
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/in-Home)**: dokumentasi lengkap, dapat dibaca online.
+- **[Panduan Pengguna](https://github.com/VD171/COPG-VD/wiki/in-USER-GUIDE)**: cara memasang, WebUI, dan penggunaan sehari-hari.
+- **[Referensi konfigurasi](https://github.com/VD171/COPG-VD/wiki/in-CONFIGURATION)**: setiap pengaturan di berkas konfigurasi dan fungsinya.
+- **[Arsitektur](https://github.com/VD171/COPG-VD/wiki/in-ARCHITECTURE)** dan **[Struktur file](https://github.com/VD171/COPG-VD/wiki/in-FILE-STRUCTURE)**: cara kerja spoofing dan lokasi semua berkas.
 
 <!-- /vd-docs -->
 

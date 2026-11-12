@@ -138,7 +138,10 @@ Jeśli jesteś użytkownikiem Magisk, użyj KsuWebUI autorstwa KOW (https://gith
 <!-- vd-docs -->
 ## Dokumentacja
 
-[Przewodnik użytkownika](docs/pl/USER-GUIDE.md) · [Dokumentacja konfiguracji](docs/pl/CONFIGURATION.md) · [Architektura](docs/pl/ARCHITECTURE.md) · [Struktura plików](docs/pl/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/pl-Home)
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/pl-Home)**: pełna dokumentacja, dostępna online.
+- **[Przewodnik użytkownika](https://github.com/VD171/COPG-VD/wiki/pl-USER-GUIDE)**: instalacja, WebUI i codzienne użytkowanie.
+- **[Dokumentacja konfiguracji](https://github.com/VD171/COPG-VD/wiki/pl-CONFIGURATION)**: każde ustawienie w pliku konfiguracyjnym i jego działanie.
+- **[Architektura](https://github.com/VD171/COPG-VD/wiki/pl-ARCHITECTURE)** i **[Struktura plików](https://github.com/VD171/COPG-VD/wiki/pl-FILE-STRUCTURE)**: jak działa spoofing i gdzie wszystko się znajduje.
 
 <!-- /vd-docs -->
 

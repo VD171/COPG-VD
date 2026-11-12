@@ -141,7 +141,10 @@ Magisk ユーザーの場合は、KOW による KsuWebUI を使用してくだ�
 <!-- vd-docs -->
 ## ドキュメント
 
-[ユーザーガイド](docs/ja/USER-GUIDE.md) · [設定リファレンス](docs/ja/CONFIGURATION.md) · [アーキテクチャ](docs/ja/ARCHITECTURE.md) · [ファイル構造](docs/ja/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/ja-Home)
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/ja-Home)**: オンラインで閲覧できる完全なドキュメント。
+- **[ユーザーガイド](https://github.com/VD171/COPG-VD/wiki/ja-USER-GUIDE)**: インストール、WebUI、日々の使い方。
+- **[設定リファレンス](https://github.com/VD171/COPG-VD/wiki/ja-CONFIGURATION)**: 設定ファイルの各項目とその役割。
+- **[アーキテクチャ](https://github.com/VD171/COPG-VD/wiki/ja-ARCHITECTURE)** と **[ファイル構造](https://github.com/VD171/COPG-VD/wiki/ja-FILE-STRUCTURE)**: スプーフィングの仕組みと各ファイルの場所。
 
 <!-- /vd-docs -->
 

@@ -138,7 +138,10 @@ WebUI เป็นตัวเลือก - ทุกอย่างสาม�
 <!-- vd-docs -->
 ## เอกสารประกอบ
 
-[คู่มือผู้ใช้](docs/th/USER-GUIDE.md) · [ข้อมูลอ้างอิงการตั้งค่า](docs/th/CONFIGURATION.md) · [สถาปัตยกรรม](docs/th/ARCHITECTURE.md) · [โครงสร้างไฟล์](docs/th/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/th-Home)
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/th-Home)**: เอกสารฉบับเต็ม อ่านได้ทางออนไลน์
+- **[คู่มือผู้ใช้](https://github.com/VD171/COPG-VD/wiki/th-USER-GUIDE)**: การติดตั้ง WebUI และการใช้งานประจำวัน
+- **[ข้อมูลอ้างอิงการตั้งค่า](https://github.com/VD171/COPG-VD/wiki/th-CONFIGURATION)**: ทุกการตั้งค่าในไฟล์คอนฟิกและหน้าที่ของมัน
+- **[สถาปัตยกรรม](https://github.com/VD171/COPG-VD/wiki/th-ARCHITECTURE)** และ **[โครงสร้างไฟล์](https://github.com/VD171/COPG-VD/wiki/th-FILE-STRUCTURE)**: สปูฟทำงานอย่างไรและทุกอย่างอยู่ที่ไหน
 
 <!-- /vd-docs -->
 

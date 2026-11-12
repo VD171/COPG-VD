@@ -138,7 +138,10 @@ Magisk kullanıcısıysanız, KOW tarafından geliştirilen KsuWebUI'yi kullanı
 <!-- vd-docs -->
 ## Belgeler
 
-[Kullanıcı Kılavuzu](docs/tr/USER-GUIDE.md) · [Yapılandırma referansı](docs/tr/CONFIGURATION.md) · [Mimari](docs/tr/ARCHITECTURE.md) · [Dosya yapısı](docs/tr/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/tr-Home)
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/tr-Home)**: çevrimiçi göz atılabilen tam belgeler.
+- **[Kullanıcı Kılavuzu](https://github.com/VD171/COPG-VD/wiki/tr-USER-GUIDE)**: kurulumu, WebUI ve günlük kullanımı.
+- **[Yapılandırma referansı](https://github.com/VD171/COPG-VD/wiki/tr-CONFIGURATION)**: yapılandırma dosyasındaki her ayar ve ne işe yaradığı.
+- **[Mimari](https://github.com/VD171/COPG-VD/wiki/tr-ARCHITECTURE)** ve **[Dosya yapısı](https://github.com/VD171/COPG-VD/wiki/tr-FILE-STRUCTURE)**: spoofing'in nasıl çalıştığı ve her şeyin nerede olduğu.
 
 <!-- /vd-docs -->
 

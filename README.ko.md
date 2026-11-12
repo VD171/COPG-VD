@@ -141,7 +141,10 @@ Magisk 사용자라면 KOW의 KsuWebUI를 사용하세요(https://github.com/KOW
 <!-- vd-docs -->
 ## 문서
 
-[사용자 가이드](docs/ko/USER-GUIDE.md) · [설정 레퍼런스](docs/ko/CONFIGURATION.md) · [아키텍처](docs/ko/ARCHITECTURE.md) · [파일 구조](docs/ko/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/ko-Home)
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/ko-Home)**: 온라인으로 볼 수 있는 전체 문서.
+- **[사용자 가이드](https://github.com/VD171/COPG-VD/wiki/ko-USER-GUIDE)**: 설치, WebUI, 그리고 일상적인 사용법.
+- **[설정 레퍼런스](https://github.com/VD171/COPG-VD/wiki/ko-CONFIGURATION)**: 설정 파일의 모든 항목과 그 역할.
+- **[아키텍처](https://github.com/VD171/COPG-VD/wiki/ko-ARCHITECTURE)** 및 **[파일 구조](https://github.com/VD171/COPG-VD/wiki/ko-FILE-STRUCTURE)**: 스푸핑 작동 방식과 모든 파일의 위치.
 
 <!-- /vd-docs -->
 

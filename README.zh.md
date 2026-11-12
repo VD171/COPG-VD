@@ -138,7 +138,10 @@ WebUI 是可选的 - 一切都可以直接在 JSON 配置文件中编辑 - 但�
 <!-- vd-docs -->
 ## 文档
 
-[用户指南](docs/zh/USER-GUIDE.md) · [配置参考](docs/zh/CONFIGURATION.md) · [架构](docs/zh/ARCHITECTURE.md) · [文件结构](docs/zh/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/zh-Home)
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/zh-Home)**: 完整文档，可在线浏览。
+- **[用户指南](https://github.com/VD171/COPG-VD/wiki/zh-USER-GUIDE)**: 安装、WebUI 以及日常使用。
+- **[配置参考](https://github.com/VD171/COPG-VD/wiki/zh-CONFIGURATION)**: 配置文件中的每一项设置及其作用。
+- **[架构](https://github.com/VD171/COPG-VD/wiki/zh-ARCHITECTURE)** 和 **[文件结构](https://github.com/VD171/COPG-VD/wiki/zh-FILE-STRUCTURE)**: 欺骗如何工作以及各文件的位置。
 
 <!-- /vd-docs -->
 

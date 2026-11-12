@@ -140,7 +140,10 @@ WebUI اختیاری است - همه چیز را می‌توان مستقیما 
 <!-- vd-docs -->
 ## مستندات
 
-[راهنمای کاربر](docs/fa/USER-GUIDE.md) · [مرجع پیکربندی](docs/fa/CONFIGURATION.md) · [معماری](docs/fa/ARCHITECTURE.md) · [ساختار فایل](docs/fa/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/fa-Home)
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/fa-Home)**: مستندات کامل، قابل مرور به صورت آنلاین.
+- **[راهنمای کاربر](https://github.com/VD171/COPG-VD/wiki/fa-USER-GUIDE)**: نصب، WebUI و استفاده روزمره.
+- **[مرجع پیکربندی](https://github.com/VD171/COPG-VD/wiki/fa-CONFIGURATION)**: هر تنظیم در فایل پیکربندی و کاری که انجام می‌دهد.
+- **[معماری](https://github.com/VD171/COPG-VD/wiki/fa-ARCHITECTURE)** و **[ساختار فایل](https://github.com/VD171/COPG-VD/wiki/fa-FILE-STRUCTURE)**: نحوه کار جعل و محل قرارگیری همه چیز.
 
 <!-- /vd-docs -->
 

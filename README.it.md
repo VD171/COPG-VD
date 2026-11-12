@@ -138,7 +138,10 @@ Se sei un utente Magisk, usa KsuWebUI di KOW (https://github.com/KOWX712/KsuWebU
 <!-- vd-docs -->
 ## Documentazione
 
-[Guida utente](docs/it/USER-GUIDE.md) · [Riferimento di configurazione](docs/it/CONFIGURATION.md) · [Architettura](docs/it/ARCHITECTURE.md) · [Struttura dei file](docs/it/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/it-Home)
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/it-Home)**: la documentazione completa, consultabile online.
+- **[Guida utente](https://github.com/VD171/COPG-VD/wiki/it-USER-GUIDE)**: l'installazione, la WebUI e l'uso quotidiano.
+- **[Riferimento di configurazione](https://github.com/VD171/COPG-VD/wiki/it-CONFIGURATION)**: ogni impostazione del file di configurazione e cosa fa.
+- **[Architettura](https://github.com/VD171/COPG-VD/wiki/it-ARCHITECTURE)** e **[Struttura dei file](https://github.com/VD171/COPG-VD/wiki/it-FILE-STRUCTURE)**: come funziona lo spoofing e dove si trova tutto.
 
 <!-- /vd-docs -->
 

@@ -141,7 +141,10 @@ Pokud jsi uživatel Magisku, použij KsuWebUI od KOW (https://github.com/KOWX712
 <!-- vd-docs -->
 ## Dokumentace
 
-[Uživatelská příručka](docs/cs/USER-GUIDE.md) · [Referenční příručka konfigurace](docs/cs/CONFIGURATION.md) · [Architektura](docs/cs/ARCHITECTURE.md) · [Struktura souborů](docs/cs/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/cs-Home)
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/cs-Home)**: kompletní dokumentace, k prohlížení online.
+- **[Uživatelská příručka](https://github.com/VD171/COPG-VD/wiki/cs-USER-GUIDE)**: instalace, WebUI a každodenní používání.
+- **[Referenční příručka konfigurace](https://github.com/VD171/COPG-VD/wiki/cs-CONFIGURATION)**: každé nastavení v konfiguračním souboru a co dělá.
+- **[Architektura](https://github.com/VD171/COPG-VD/wiki/cs-ARCHITECTURE)** a **[Struktura souborů](https://github.com/VD171/COPG-VD/wiki/cs-FILE-STRUCTURE)**: jak spoofing funguje a kde všechno najdete.
 
 <!-- /vd-docs -->
 

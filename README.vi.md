@@ -138,7 +138,10 @@ Nếu bạn là người dùng Magisk, hãy dùng KsuWebUI của KOW (https://gi
 <!-- vd-docs -->
 ## Tài liệu
 
-[Hướng dẫn sử dụng](docs/vi/USER-GUIDE.md) · [Tham chiếu cấu hình](docs/vi/CONFIGURATION.md) · [Kiến trúc](docs/vi/ARCHITECTURE.md) · [Cấu trúc tệp](docs/vi/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/vi-Home)
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/vi-Home)**: tài liệu đầy đủ, có thể xem trực tuyến.
+- **[Hướng dẫn sử dụng](https://github.com/VD171/COPG-VD/wiki/vi-USER-GUIDE)**: cách cài đặt, WebUI và sử dụng hàng ngày.
+- **[Tham chiếu cấu hình](https://github.com/VD171/COPG-VD/wiki/vi-CONFIGURATION)**: mọi thiết lập trong tệp cấu hình và chức năng của nó.
+- **[Kiến trúc](https://github.com/VD171/COPG-VD/wiki/vi-ARCHITECTURE)** và **[Cấu trúc tệp](https://github.com/VD171/COPG-VD/wiki/vi-FILE-STRUCTURE)**: cách spoofing hoạt động và mọi thứ nằm ở đâu.
 
 <!-- /vd-docs -->
 

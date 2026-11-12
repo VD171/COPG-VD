@@ -141,7 +141,10 @@ WebUI اختياري - يمكن تعديل كل شيء في إعداد JSON مب
 <!-- vd-docs -->
 ## التوثيق
 
-[دليل المستخدم](docs/ar/USER-GUIDE.md) · [مرجع الإعداد](docs/ar/CONFIGURATION.md) · [البنية المعمارية](docs/ar/ARCHITECTURE.md) · [بنية الملفات](docs/ar/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/ar-Home)
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/ar-Home)**: الوثائق الكاملة، يمكن تصفحها عبر الإنترنت.
+- **[دليل المستخدم](https://github.com/VD171/COPG-VD/wiki/ar-USER-GUIDE)**: التثبيت وواجهة WebUI والاستخدام اليومي.
+- **[مرجع الإعداد](https://github.com/VD171/COPG-VD/wiki/ar-CONFIGURATION)**: كل إعداد في ملف الإعدادات وما يفعله.
+- **[البنية المعمارية](https://github.com/VD171/COPG-VD/wiki/ar-ARCHITECTURE)** و **[بنية الملفات](https://github.com/VD171/COPG-VD/wiki/ar-FILE-STRUCTURE)**: كيف يعمل التزييف وأين يوجد كل شيء.
 
 <!-- /vd-docs -->
 

@@ -142,7 +142,10 @@ WebUI необов'язковий - усе можна редагувати бе�
 <!-- vd-docs -->
 ## Документація
 
-[Посібник користувача](docs/uk/USER-GUIDE.md) · [Довідник з конфігурації](docs/uk/CONFIGURATION.md) · [Архітектура](docs/uk/ARCHITECTURE.md) · [Структура файлів](docs/uk/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/uk-Home)
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/uk-Home)**: повна документація, доступна онлайн.
+- **[Посібник користувача](https://github.com/VD171/COPG-VD/wiki/uk-USER-GUIDE)**: встановлення, WebUI та щоденне використання.
+- **[Довідник з конфігурації](https://github.com/VD171/COPG-VD/wiki/uk-CONFIGURATION)**: кожне налаштування у файлі конфігурації та що воно робить.
+- **[Архітектура](https://github.com/VD171/COPG-VD/wiki/uk-ARCHITECTURE)** та **[Структура файлів](https://github.com/VD171/COPG-VD/wiki/uk-FILE-STRUCTURE)**: як працює спуфінг і де все розташоване.
 
 <!-- /vd-docs -->
 
