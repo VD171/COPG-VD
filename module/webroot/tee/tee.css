@@ -1,0 +1,49 @@
+/* Copyright (C) 2026 wfire06100; SPDX-License-Identifier: Apache-2.0 */
+#tee-tab{min-width:0;width:100%}
+#tee-tab.active{display:block;height:auto!important;max-height:none!important;overflow:visible!important;padding-bottom:calc(var(--safe-b,0px) + 24px)}
+#tee-tab .tee-layout{display:grid;gap:14px;min-width:0}
+#tee-tab .tee-card{padding:16px;overflow:visible;min-width:0}
+#tee-tab .tee-card[hidden]{display:none}
+#tee-tab .tee-heading{font-size:16px;font-weight:600;line-height:1.4;margin:0 0 12px;color:var(--ink)}
+#tee-tab .tee-subheading{font-size:13px;font-weight:600;margin:0 0 10px}
+#tee-tab p{font-size:12px;line-height:1.65;color:var(--muted);margin:8px 0;overflow-wrap:anywhere}
+#tee-tab .tee-field{display:flex;flex-direction:column;gap:7px;margin:12px 0;min-width:0}
+#tee-tab label{display:block;font-size:12px;font-weight:500;color:var(--muted);overflow-wrap:anywhere}
+#tee-tab input,#tee-tab select,#tee-tab textarea{display:block;width:100%!important;max-width:100%;min-width:0;min-height:44px;padding:11px 12px;border:1px solid var(--line);border-radius:var(--r-ctrl,11px);background:var(--surface-2);color:var(--ink);font:inherit;box-sizing:border-box;color-scheme:light}
+body.dark-theme #tee-tab input,body.dark-theme #tee-tab select,body.dark-theme #tee-tab textarea{color-scheme:dark}
+#tee-tab input:focus-visible,#tee-tab select:focus-visible,#tee-tab textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+#tee-tab input::placeholder,#tee-tab textarea::placeholder{color:var(--muted);opacity:.8}
+#tee-tab option{background:var(--surface);color:var(--ink)}
+#tee-tab textarea{font-family:var(--mono);font-size:12px;line-height:1.7;min-height:180px;resize:vertical}
+#tee-tab input[type=file]{font-size:12px;overflow:hidden}
+#tee-tab input[type=file]::file-selector-button{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:7px 9px;margin-right:8px;font:inherit}
+#tee-tab button{max-width:100%;min-width:0;min-height:44px;font-family:var(--sans);line-height:1.45;white-space:normal;overflow-wrap:anywhere;cursor:pointer}
+#tee-tab .action-btn{background:var(--surface-2);color:var(--ink);border:1px solid var(--line);margin:0;font-size:12.5px;padding:11px 12px}
+#tee-tab #tee-save,#tee-tab #tee-configure,#tee-tab #tee-add{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+#tee-tab .tee-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+#tee-tab .tee-actions>button{flex:1 1 130px}
+#tee-tab button:disabled{opacity:.5;cursor:wait}
+#tee-tab .tee-danger{background:var(--danger-weak)!important;color:var(--danger)!important;border-color:var(--danger)!important}
+#tee-tab .tee-manual{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+#tee-tab .tee-help{border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:9px 11px;margin:10px 0}
+#tee-tab .tee-help summary{font-size:12px;color:var(--muted);cursor:pointer}
+#tee-tab pre{background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:10px;font-family:var(--mono);font-size:11.5px;line-height:1.7;padding:11px;margin:12px 0 0;max-height:220px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
+#tee-tab pre:empty{display:none}
+#tee-tab .tee-picker{min-width:0;border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+#tee-tab #tee-app-load{width:100%;margin-bottom:10px}
+#tee-tab #tee-app-search{margin-bottom:10px}
+#tee-tab #tee-app-list{display:grid;gap:6px;max-height:min(360px,48vh);overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:2px}
+#tee-tab .tee-app-row{display:flex;align-items:center;gap:10px;width:100%;text-align:start;background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:11px;padding:10px;font-size:12px}
+#tee-tab .tee-app-row[aria-pressed=true]{border-color:var(--accent);background:var(--accent-weak)}
+#tee-tab .tee-app-row:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+#tee-tab .tee-avatar{display:grid;place-items:center;position:relative;width:38px;height:38px;flex:0 0 38px;border-radius:10px;background:var(--surface);color:var(--muted);overflow:hidden}
+#tee-tab .tee-avatar-image{position:absolute;width:34px;height:34px;object-fit:contain}
+#tee-tab .tee-avatar-fallback{font-family:var(--sans);font-size:15px;font-weight:600}
+#tee-tab .tee-app-copy{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+#tee-tab .tee-app-name{font-weight:500;overflow-wrap:anywhere;line-height:1.4}
+#tee-tab .tee-app-package{font-family:var(--mono);font-size:10px;color:var(--muted);overflow-wrap:anywhere}
+#tee-tab #tee-app-selected{display:flex;align-items:center;gap:10px;font-size:12px;overflow-wrap:anywhere;border:1px solid var(--accent);border-radius:11px;background:var(--accent-weak);padding:10px;margin:10px 0}
+#tee-tab #tee-app-selected:empty{display:none}
+#tee-tab #tee-app-error:empty{display:none}
+#tee-tab #tee-app-error{color:var(--danger)}
+@media(max-width:380px){#tee-tab .tee-manual{grid-template-columns:minmax(0,1fr)}#tee-tab .tee-card{padding:13px}#tee-tab .tee-actions>button{flex-basis:100%}}

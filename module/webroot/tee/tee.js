@@ -26,3 +26,9 @@ function init(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
+(function(){
+'use strict';
+const script=document.createElement('script');
+script.src='tee/tee_layout.js';
+document.head.append(script);
+})();
