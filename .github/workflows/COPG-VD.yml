@@ -47,6 +47,14 @@ jobs:
         with:
           path: .tee-build-success
           key: topg-engine-${{ github.sha }}-${{ steps.engine.outputs.sha }}
+      - name: Apply portable locks and test descriptor inheritance
+        if: steps.built.outputs.cache-hit != 'true'
+        run: |
+          python3 tools/tee/portable_lock.py
+          sh -n module/tee/tee_lock.sh
+          sh -n module/tee/tee_manager.sh
+          sh -n module/tee/tee_keybox.sh
+          python3 tests/tee-lock.test.py
       - uses: actions/checkout@v4
         if: steps.built.outputs.cache-hit != 'true'
         with:
