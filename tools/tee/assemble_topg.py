@@ -33,6 +33,8 @@ FR = {
  'tee_done':'Terminé', 'tee_invalid':'Entrée invalide ou fichier trop volumineux',
  'ui_about_callout':'Cette WebUI fonctionne localement. Les mises à jour optionnelles de profils et de keybox utilisent le réseau.'
 }
+EN.update({'tee_picker_open':'Choose applications','tee_filter_user':'User apps','tee_filter_system':'System apps','tee_filter_all':'All','tee_picker_more':'Show more','tee_picker_loading':'Loading installed applications…','tee_picker_mode':'Mode','tee_picker_help':'Tap to enable or disable a target. Hold an app or use Mode to choose Auto, Generate or Hack. Save applies changes; closing discards them.'})
+FR.update({'tee_picker_open':'Choisir les applications','tee_filter_user':'Utilisateur','tee_filter_system':'Système','tee_filter_all':'Toutes','tee_picker_more':'Afficher la suite','tee_picker_loading':'Chargement des applications…','tee_picker_mode':'Mode','tee_picker_help':'Appuyez pour cocher ou décocher une cible. Maintenez une application ou utilisez Mode pour choisir Auto, Generate ou Hack. Enregistrer applique les changements ; fermer les annule.'})
 
 def once(path, old, new):
  s=path.read_text()
@@ -70,6 +72,7 @@ def assemble(root,engine,upstream,out):
  with (out/'sepolicy.rule').open('a') as f: f.write('\n# TEESimulator-RS component\n'+policy+'\nallow keystore adb_data_file dir { search getattr open read write add_name remove_name }\nallow keystore system_file dir search\n')
  once(web/'index.html','</body>','<script src="tee/tee.js" defer></script>\n</body>')
  html=(web/'index.html').read_text().replace('<title>COPG-VD</title>','<title>TOPG</title>').replace('>COPG-VD <span','>TOPG <span')
+ html=html.replace('</body>','<script src="tee/tee_picker.js" defer></script>\n</body>')
  (web/'index.html').write_text(html)
  with (web/'lang/en.js').open('a') as f: f.write('\nObject.assign(window.__I18N_EN, '+json.dumps(EN,ensure_ascii=False)+');\n')
  for lang,extra in [('en',EN),('fr',FR)]:
@@ -87,11 +90,13 @@ def assemble(root,engine,upstream,out):
  (out/'zygisk').mkdir(exist_ok=True)
  for abi in ('arm64-v8a','armeabi-v7a','x86_64'): shutil.copy(root/'zygisk/build'/abi/'libspoof.so',out/'zygisk'/(abi+'.so'))
  for p in out.rglob('*.sh'): subprocess.run(['sh','-n',str(p)],check=True)
- subprocess.run(['node','--check',str(web/'tee/tee.js')],check=True)
+ for name in ('tee.js','tee_layout.js','tee_apps.js','tee_picker.js'): subprocess.run(['node','--check',str(web/'tee'/name)],check=True)
+ subprocess.run(['node',str(root/'tests/tee-layout-detachment.test.cjs')],check=True)
+ subprocess.run(['node',str(root/'tests/tee-picker-targets.test.cjs'),str(web/'tee/tee_picker.js')],check=True)
  for p in [*out.glob('*.sh'),tee/'tee_manager.sh',out/'META-INF/com/google/android/update-binary']: p.chmod(0o755)
  shutil.make_archive(str(out.parent/'TOPG-integrated'),'zip',out)
 
 if __name__=='__main__':
  if len(sys.argv)==3 and sys.argv[1]=='patch': patch(Path(sys.argv[2]).resolve())
  elif len(sys.argv)==6 and sys.argv[1]=='assemble': assemble(*(Path(x).resolve() for x in sys.argv[2:]))
- else: raise SystemExit('Usage: assemble_topg.py patch UPSTREAM | assemble ROOT ENGINE_ZIP UPSTREAM OUTPUT')
+ else: raise SystemExit('Usage: assemble_topg.py patch UPSTREAM | assemble ROOT_ENGINE_ZIP UPSTREAM OUTPUT')
