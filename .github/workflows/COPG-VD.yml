@@ -31,6 +31,8 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
       - name: Install Android components
         run: sdkmanager 'ndk;27.3.13750724' 'platforms;android-36' 'build-tools;36.0.0'
       - uses: dtolnay/rust-toolchain@stable
