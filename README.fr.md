@@ -1,22 +1,43 @@
-## COPG-VD
+<!--
+  COPG-VD - global device spoofer: spoof your device fingerprint and build.
+  Copyright (C) 2026  AlirezaParsi & VD171 - SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+-->
 
-[English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+# COPG-VD
 
-COPG-VD est un usurpateur d'appareil : il réécrit le fingerprint et le build de l'appareil pour que les applications voient l'appareil que vous choisissez au lieu du vrai.  
-Il fonctionne sur Zygisk (KernelSU, APatch ou Magisk) et, par défaut, limite la portée de l'usurpation à la pile Google Play - ce qui en fait une alternative plus légère et plus robuste à PlayIntegrityFix.  
+<p align="center">
+  <img src="images/logo-wordmark.png" alt="COPG-VD" width="320">
+</p>
 
-<!-- vd-docs -->
-## Documentation
+<p align="center">
+  <a href="https://github.com/VD171/COPG-VD/releases/latest"><img src="https://img.shields.io/github/v/release/VD171/COPG-VD?label=release&color=2ee89d" alt="Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1a7f37" alt="License"></a>
+  <a href="https://github.com/VD171/COPG-VD/releases"><img src="https://img.shields.io/github/downloads/VD171/COPG-VD/total?label=downloads&color=8250df" alt="Downloads"></a>
+  <a href="https://github.com/VD171/COPG-VD/stargazers"><img src="https://img.shields.io/github/stars/VD171/COPG-VD?color=d29922" alt="Stars"></a>
+</p>
 
-[Guide de l'utilisateur](docs/fr/USER-GUIDE.md) · [Référence de configuration](docs/fr/CONFIGURATION.md) · [Architecture](docs/fr/ARCHITECTURE.md) · [Structure des fichiers](docs/fr/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/fr-Home)
+<p align="center">
+  <b>Un usurpateur d'appareil : il réécrit le fingerprint et le build de l'appareil pour que les applications voient l'appareil que vous choisissez au lieu du vrai.</b><br>
+  Il fonctionne sur Zygisk (KernelSU, APatch ou Magisk) et, par défaut, limite la portée de l'usurpation à la pile Google Play - une alternative plus légère et plus robuste à PlayIntegrityFix.
+</p>
 
-<!-- /vd-docs -->
+<p align="center">
+  <a href="https://github.com/VD171/COPG-VD/releases">Releases</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki">Wiki</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/USER-GUIDE">User guide</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/CONFIGURATION">Configuration</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ARCHITECTURE">Architecture</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/FILE-STRUCTURE">File structure</a> ·
+  <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
+</p>
 
-## Captures d'écran
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
   <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
 </p>
+
+---
 
 ## Comment l'utiliser ?
 Installez le module, redémarrez, et le profil livré (un Pixel) est usurpé auprès des applications ciblées. Avec un fingerprint fonctionnel, vous n'avez besoin ni de PlayIntegrityFix ni de GooglePhotosUnlimited.  
@@ -112,30 +133,45 @@ La WebUI est optionnelle - tout peut être édité directement dans la config JS
 Si vous êtes un utilisateur de Magisk, utilisez KsuWebUI par KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
 
 ### Réglages dans la config
-`COPG-VD.json` porte ses réglages à côté du profil, de sorte que vos choix voyagent avec une sauvegarde et peuvent être édités à la main : `scope_mode`, les interrupteurs des engines, les groupes resetprop, `global_fields`, et un objet `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). Tout réside dans ce seul fichier - les scripts de démarrage et la WebUI y lisent les réglages directement, de sorte que vos choix survivent à une mise à jour du module. `"spoof_version": "force"` est refusé depuis le fichier et rétrogradé : restaurer une ancienne sauvegarde ne doit pas le réarmer à votre insu.  
+`COPG-VD.json` porte ses réglages à côté du profil, de sorte que vos choix voyagent avec une sauvegarde et peuvent être édités à la main : `scope_mode`, les interrupteurs des engines, les groupes resetprop, `global_fields`, et un objet `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_version`). Tout réside dans ce seul fichier - les scripts de démarrage et la WebUI y lisent les réglages directement, de sorte que vos choix survivent à une mise à jour du module. `"spoof_version": "force"` est refusé depuis le fichier et rétrogradé : restaurer une ancienne sauvegarde ne doit pas le réarmer à votre insu.  
+
+<!-- vd-docs -->
+## Documentation
+
+[Guide de l'utilisateur](docs/fr/USER-GUIDE.md) · [Référence de configuration](docs/fr/CONFIGURATION.md) · [Architecture](docs/fr/ARCHITECTURE.md) · [Structure des fichiers](docs/fr/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/fr-Home)
+
+<!-- /vd-docs -->
+
+## Voir aussi
+
+Projets frères du même auteur :
+
+- **[VDInfos](https://github.com/VD171/VD-Infos)** : un débogueur de méthodes de l'appareil qui lit chaque élément via toutes les méthodes capables de le lire et les compare côte à côte.
+- **[VDGoogle](https://github.com/VD171/VD-Google)** : vos services Google (RCS, Wallet, attestations Play Integrity), lus sur votre appareil sans internet.
+- **[VDBackup](https://github.com/VD171/VD-Backup)** : sauvegarde et restauration complètes des applications et des données en root, pilotées entièrement depuis une WebUI.
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 ## Contacts
 
 * https://vd171.ru
 * https://vd.priv8.ru
-* **Telegram :** @VD_Priv8 https://t.me/VD_Priv8
+* **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
 * **Channel:** @Priv8_VD https://t.me/Priv8_VD
-* **Discord :** @VD.Priv8 https://discord.com/users/1296831918989639721
-* **E-mail :** vd.priv8@pm.me
-* **XDA-Developers :** @VD171 https://xdaforums.com/m/vd171.4699873/
+* **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
+* **E-mail:** vd.priv8@pm.me
+* **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
-* **GitHub :** @VD171 https://github.com/VD171
+* **GitHub:** @VD171 https://github.com/VD171
 
-<!-- vd-see-also -->
+## Licence
 
-## Voir aussi
+**Apache-2.0** - voir [LICENSE](LICENSE). COPG-VD est un fork par VD171 du COPG original d'AlirezaParsi, poursuivi sous la même licence.
 
-- **[VD Infos](https://github.com/VD171/VD-Infos)** - Débogueur de méthodes
-- **[VD Google](https://github.com/VD171/VD-Google)** - Vos services Google, lus sur votre appareil
-- **[VD Backup](https://github.com/VD171/VD-Backup)** - Sauvegardez et restaurez vos apps et données
+## Marques
 
-Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
+COPG-VD est un projet indépendant et non officiel. Il n'est ni affilié à, ni approuvé par, ni sponsorisé par Google LLC. "Google", "Google Play", "Play Integrity", "Pixel", "Android" et les noms et logos associés sont des marques de Google LLC. COPG-VD s'exécute entièrement sur votre appareil.
 
----
+## Tags
 
-**Tags:** `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG` `COPG-VD`
+`Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG` `COPG-VD`

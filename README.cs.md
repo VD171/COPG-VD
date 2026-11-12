@@ -1,22 +1,43 @@
-## COPG-VD
+<!--
+  COPG-VD - global device spoofer: spoof your device fingerprint and build.
+  Copyright (C) 2026  AlirezaParsi & VD171 - SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+-->
 
-[English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+# COPG-VD
 
-COPG-VD je spoofer zařízení: přepisuje fingerprint a build zařízení tak, aby aplikace viděly zařízení, které si zvolíš, místo toho skutečného.  
-Běží na Zygisku (KernelSU, APatch nebo Magisk) a ve výchozím nastavení omezuje spoofing na stack Google Play - takže je lehčí a robustnější alternativou k PlayIntegrityFix.  
+<p align="center">
+  <img src="images/logo-wordmark.png" alt="COPG-VD" width="320">
+</p>
 
-<!-- vd-docs -->
-## Dokumentace
+<p align="center">
+  <a href="https://github.com/VD171/COPG-VD/releases/latest"><img src="https://img.shields.io/github/v/release/VD171/COPG-VD?label=release&color=2ee89d" alt="Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1a7f37" alt="License"></a>
+  <a href="https://github.com/VD171/COPG-VD/releases"><img src="https://img.shields.io/github/downloads/VD171/COPG-VD/total?label=downloads&color=8250df" alt="Downloads"></a>
+  <a href="https://github.com/VD171/COPG-VD/stargazers"><img src="https://img.shields.io/github/stars/VD171/COPG-VD?color=d29922" alt="Stars"></a>
+</p>
 
-[Uživatelská příručka](docs/cs/USER-GUIDE.md) · [Referenční příručka konfigurace](docs/cs/CONFIGURATION.md) · [Architektura](docs/cs/ARCHITECTURE.md) · [Struktura souborů](docs/cs/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/cs-Home)
+<p align="center">
+  <b>COPG-VD je spoofer zařízení: přepisuje fingerprint a build zařízení tak, aby aplikace viděly zařízení, které si zvolíš, místo toho skutečného.</b><br>
+  Běží na Zygisku (KernelSU, APatch nebo Magisk) a ve výchozím nastavení omezuje spoofing na stack Google Play - takže je lehčí a robustnější alternativou k PlayIntegrityFix.
+</p>
 
-<!-- /vd-docs -->
+<p align="center">
+  <a href="https://github.com/VD171/COPG-VD/releases">Releases</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki">Wiki</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/USER-GUIDE">User guide</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/CONFIGURATION">Configuration</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ARCHITECTURE">Architecture</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/FILE-STRUCTURE">File structure</a> ·
+  <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
+</p>
 
-## Snímky obrazovky
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
   <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
 </p>
+
+---
 
 ## Jak se používá?
 Nainstaluj modul, restartuj, a dodávaný profil (Pixel) se spoofuje cílovým aplikacím. S funkčním fingerprintem nepotřebuješ PlayIntegrityFix ani GooglePhotosUnlimited.  
@@ -115,7 +136,24 @@ WebUI je volitelné - vše lze upravovat přímo v JSON konfiguraci - ale je to 
 Pokud jsi uživatel Magisku, použij KsuWebUI od KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
 
 ### Nastavení v konfiguraci
-`COPG-VD.json` nese svá nastavení hned vedle profilu, takže tvá rozhodnutí cestují se zálohou a dají se upravovat ručně: `scope_mode`, přepínače engines, skupiny resetprop, `global_fields` a objekt `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_manufacturer`, `spoof_version`). Vše je v tomto jediném souboru - boot skripty i WebUI čtou nastavení přímo z něj, takže tvá rozhodnutí přežijí aktualizaci modulu. `"spoof_version": "force"` je ze souboru odmítnut a snížen: obnovení staré zálohy ho nesmí za tvými zády znovu aktivovat.  
+`COPG-VD.json` nese svá nastavení hned vedle profilu, takže tvá rozhodnutí cestují se zálohou a dají se upravovat ručně: `scope_mode`, přepínače engines, skupiny resetprop, `global_fields` a objekt `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_version`). Vše je v tomto jediném souboru - boot skripty i WebUI čtou nastavení přímo z něj, takže tvá rozhodnutí přežijí aktualizaci modulu. `"spoof_version": "force"` je ze souboru odmítnut a snížen: obnovení staré zálohy ho nesmí za tvými zády znovu aktivovat.  
+
+<!-- vd-docs -->
+## Dokumentace
+
+[Uživatelská příručka](docs/cs/USER-GUIDE.md) · [Referenční příručka konfigurace](docs/cs/CONFIGURATION.md) · [Architektura](docs/cs/ARCHITECTURE.md) · [Struktura souborů](docs/cs/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/cs-Home)
+
+<!-- /vd-docs -->
+
+## Viz také
+
+Sourozenecké projekty od stejného autora:
+
+- **[VDInfos](https://github.com/VD171/VD-Infos)**: debugger metod zařízení, který čte každou položku přes každou metodu, která ji umí přečíst, a porovnává je vedle sebe.
+- **[VDGoogle](https://github.com/VD171/VD-Google)**: tvé služby Google (RCS, Wallet, atestace Play Integrity), čtené na tvém zařízení bez internetu.
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: kompletní záloha a obnova aplikací a dat jako root, ovládaná výhradně z WebUI.
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork od @T3SL4).
 
 ## Kontakty
 
@@ -129,16 +167,14 @@ Pokud jsi uživatel Magisku, použij KsuWebUI od KOW (https://github.com/KOWX712
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
 
-<!-- vd-see-also -->
+## Licence
 
-## Viz také
+**Apache-2.0** - viz [LICENSE](LICENSE). COPG-VD je fork od VD171 původního COPG od AlirezaParsi, pokračující pod stejnou licencí.
 
-- **[VD Infos](https://github.com/VD171/VD-Infos)** - Debugger metod
-- **[VD Google](https://github.com/VD171/VD-Google)** - Vaše služby Google, čtené v zařízení
-- **[VD Backup](https://github.com/VD171/VD-Backup)** - Zálohujte a obnovujte své aplikace a data
+## Ochranné známky
 
-Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
+COPG-VD je nezávislý, neoficiální projekt. Není spojen s Google LLC, ani jí podporován či sponzorován. „Google", „Google Play", „Play Integrity", „Pixel", „Android" a související názvy a loga jsou ochranné známky společnosti Google LLC. COPG-VD běží výhradně na tvém zařízení.
 
----
+## Štítky
 
-**Tags:** `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG` `COPG-VD`
+`Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG` `COPG-VD`

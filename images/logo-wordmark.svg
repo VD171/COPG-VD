@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ======================================================================
+   COPG-VD  ::  global device spoofer
+   Spoof your device fingerprint and build - Zygisk, KernelSU/APatch/Magisk.
+
+   Copyright (C) 2026  AlirezaParsi & VD171
+   SPDX-License-Identifier: Apache-2.0
+   Fork by VD171.
+
+   Site           : https://vd171.ru
+   Site           : https://vd.priv8.ru
+   Source         : https://github.com/VD171/COPG-VD
+   GitHub         : @VD171 https://github.com/VD171
+   XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+   XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+   Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+   Channel        : @Priv8_VD https://t.me/Priv8_VD
+   Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+   E-mail         : vd.priv8@pm.me
+  ======================================================================
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 180" width="680" height="180" role="img" aria-label="COPG-VD">
+  <g fill="#2EE89D" stroke="#2EE89D">
+    <!-- glitch marks -->
+    <line x1="55" y1="26" x2="66" y2="48" stroke-width="9" stroke-linecap="round"/>
+    <line x1="112" y1="26" x2="101" y2="48" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="60" cy="64" r="6" stroke="none"/>
+    <circle cx="107" cy="64" r="6" stroke="none"/>
+    <!-- android head -->
+    <path d="M40 150 a43.5 43.5 0 0 1 87 0 z" stroke="none"/>
+    <line x1="56" y1="92" x2="48" y2="80" stroke-width="8" stroke-linecap="round"/>
+    <line x1="111" y1="92" x2="119" y2="80" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="70" cy="118" r="6" fill="#0d1117" stroke="none"/>
+    <circle cx="97" cy="118" r="6" fill="#0d1117" stroke="none"/>
+  </g>
+  <text x="155" y="120" font-family="DejaVu Sans, Arial, sans-serif" font-weight="700" font-size="80" letter-spacing="-1" fill="#2EE89D">COPG-VD</text>
+</svg>

@@ -1,22 +1,43 @@
-## COPG-VD
+<!--
+  COPG-VD - global device spoofer: spoof your device fingerprint and build.
+  Copyright (C) 2026  AlirezaParsi & VD171 - SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+-->
 
-[English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+# COPG-VD
 
-COPG-VD はデバイススプーファーです: デバイスの fingerprint と build を書き換え、アプリが実際のデバイスではなく、あなたが選んだデバイスを見るようにします。  
-Zygisk (KernelSU、APatch または Magisk) 上で動作し、デフォルトではスプーフの対象を Google Play スタックに限定します - そのため PlayIntegrityFix より軽量で堅牢な代替手段です。  
+<p align="center">
+  <img src="images/logo-wordmark.png" alt="COPG-VD" width="320">
+</p>
 
-<!-- vd-docs -->
-## ドキュメント
+<p align="center">
+  <a href="https://github.com/VD171/COPG-VD/releases/latest"><img src="https://img.shields.io/github/v/release/VD171/COPG-VD?label=release&color=2ee89d" alt="Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1a7f37" alt="License"></a>
+  <a href="https://github.com/VD171/COPG-VD/releases"><img src="https://img.shields.io/github/downloads/VD171/COPG-VD/total?label=downloads&color=8250df" alt="Downloads"></a>
+  <a href="https://github.com/VD171/COPG-VD/stargazers"><img src="https://img.shields.io/github/stars/VD171/COPG-VD?color=d29922" alt="Stars"></a>
+</p>
 
-[ユーザーガイド](docs/ja/USER-GUIDE.md) · [設定リファレンス](docs/ja/CONFIGURATION.md) · [アーキテクチャ](docs/ja/ARCHITECTURE.md) · [ファイル構造](docs/ja/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/ja-Home)
+<p align="center">
+  <b>COPG-VD はデバイススプーファーです: デバイスの fingerprint と build を書き換え、アプリが実際のデバイスではなく、あなたが選んだデバイスを見るようにします。</b><br>
+  Zygisk (KernelSU、APatch または Magisk) 上で動作し、デフォルトではスプーフの対象を Google Play スタックに限定します - PlayIntegrityFix より軽量で堅牢な代替手段です。
+</p>
 
-<!-- /vd-docs -->
+<p align="center">
+  <a href="https://github.com/VD171/COPG-VD/releases">Releases</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki">Wiki</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/USER-GUIDE">User guide</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/CONFIGURATION">Configuration</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ARCHITECTURE">Architecture</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/FILE-STRUCTURE">File structure</a> ·
+  <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
+</p>
 
-## スクリーンショット
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
   <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
 </p>
+
+---
 
 ## 使い方
 モジュールをインストールして再起動すると、同梱のプロファイル (Pixel) が対象のアプリに対してスプーフィングされます。動作する fingerprint があれば、PlayIntegrityFix や GooglePhotosUnlimited は必要ありません。  
@@ -115,7 +136,24 @@ WebUI は任意です - すべては JSON 設定で直接編集できます - �
 Magisk ユーザーの場合は、KOW による KsuWebUI を使用してください (https://github.com/KOWX712/KsuWebUIStandalone/releases)。  
 
 ### 設定内の設定項目
-`COPG-VD.json` は設定をプロファイルの隣に保持するため、あなたの選択はバックアップとともに移動し、手動で編集できます: `scope_mode`、エンジンのスイッチ、resetprop グループ、`global_fields`、そして `COPG-VD-Settings` オブジェクト (`resetprop`、`autoupdate`、`spoof_manufacturer`、`spoof_version`)。すべてはこの 1 つのファイルに存在します - 起動スクリプトと WebUI は設定をそこから直接読み取るため、あなたの選択はモジュールの更新を越えて残ります。`"spoof_version": "force"` はファイルからは拒否され、ダウングレードされます: 古いバックアップを復元しても、知らないうちに再び有効化されてはならないからです。  
+`COPG-VD.json` は設定をプロファイルの隣に保持するため、あなたの選択はバックアップとともに移動し、手動で編集できます: `scope_mode`、エンジンのスイッチ、resetprop グループ、`global_fields`、そして `COPG-VD-Settings` オブジェクト (`resetprop`、`autoupdate`、`spoof_version`)。すべてはこの 1 つのファイルに存在します - 起動スクリプトと WebUI は設定をそこから直接読み取るため、あなたの選択はモジュールの更新を越えて残ります。`"spoof_version": "force"` はファイルからは拒否され、ダウングレードされます: 古いバックアップを復元しても、知らないうちに再び有効化されてはならないからです。  
+
+<!-- vd-docs -->
+## ドキュメント
+
+[ユーザーガイド](docs/ja/USER-GUIDE.md) · [設定リファレンス](docs/ja/CONFIGURATION.md) · [アーキテクチャ](docs/ja/ARCHITECTURE.md) · [ファイル構造](docs/ja/FILE-STRUCTURE.md) · [Wiki](https://github.com/VD171/COPG-VD/wiki/ja-Home)
+
+<!-- /vd-docs -->
+
+## 関連アプリ
+
+同じ作者による姉妹プロジェクト:
+
+- **[VDInfos](https://github.com/VD171/VD-Infos)**: 各項目を、それを読み取れるあらゆるメソッドを通して読み取り、並べて比較するデバイスメソッドデバッガーです。
+- **[VDGoogle](https://github.com/VD171/VD-Google)**: あなたの Google サービス (RCS、Wallet、Play Integrity の認証) を、インターネットなしで端末上で読み取ります。
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: アプリとデータの完全なバックアップと復元を root として行い、すべて WebUI から操作します。
+
+Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 ## 連絡先
 
@@ -129,16 +167,14 @@ Magisk ユーザーの場合は、KOW による KsuWebUI を使用してくだ�
 * **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
 * **GitHub:** @VD171 https://github.com/VD171
 
-<!-- vd-see-also -->
+## ライセンス
 
-## 関連アプリ
+**Apache-2.0** - [LICENSE](LICENSE) を参照してください。COPG-VD は、AlirezaParsi によるオリジナルの COPG を VD171 がフォークしたもので、同じライセンスの下で継続されています。
 
-- **[VD Infos](https://github.com/VD171/VD-Infos)** - メソッドデバッガー
-- **[VD Google](https://github.com/VD171/VD-Google)** - あなたの Google サービスを端末上で読み取る
-- **[VD Backup](https://github.com/VD171/VD-Backup)** - アプリとデータをバックアップ・復元
+## 商標
 
-Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
+COPG-VD は独立した非公式プロジェクトです。Google LLC とは提携しておらず、承認も後援も受けていません。「Google」、「Google Play」、「Play Integrity」、「Pixel」、「Android」および関連する名称とロゴは Google LLC の商標です。COPG-VD は完全にあなたの端末上で動作します。
 
----
+## Tags
 
-**タグ:** `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG` `COPG-VD`
+`Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG` `COPG-VD`
