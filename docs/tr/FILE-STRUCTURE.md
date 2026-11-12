@@ -67,3 +67,9 @@ Cihazdaki `/data/adb/COPG-VD/`, modülün kendi dizinidir: `COPG-VD.json`, profi
 Yapılandırma asla commit edilmez; `module/COPG-VD.json.example` şablondur.
 
 *Bu belge Claude (Anthropic) ile oluşturulmuş ve VD171 tarafından sürdürülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır - bkz. [../CONTRIBUTING.md](CONTRIBUTING.md).*
+
+<!-- doc-footer -->
+
+---
+
+> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır; bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._

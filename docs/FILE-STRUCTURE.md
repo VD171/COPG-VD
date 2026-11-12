@@ -67,3 +67,9 @@ and settings (see [CONFIGURATION.md](CONFIGURATION.md)), alongside `update.log`,
 `update.status`. The config is never committed; `module/COPG-VD.json.example` is the template.
 
 *This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome - see [../CONTRIBUTING.md](../CONTRIBUTING.md).*
+
+<!-- doc-footer -->
+
+---
+
+> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome; see [CONTRIBUTING.md](../CONTRIBUTING.md)._

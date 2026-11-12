@@ -151,3 +151,9 @@ Hiçbir ağ isteği yapmaz; ihtiyacı olan her şey modülün içinde gelir.
 - **WebUI Magisk'te açılmıyor.** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases)'u kullanın.
 
 *Bu belge Claude (Anthropic) ile oluşturulmuş ve VD171 tarafından sürdürülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır - bkz. [../CONTRIBUTING.md](CONTRIBUTING.md).*
+
+<!-- doc-footer -->
+
+---
+
+> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır; bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._

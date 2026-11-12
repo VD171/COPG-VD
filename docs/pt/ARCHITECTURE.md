@@ -74,3 +74,9 @@ softloop. O grupo de versão é, portanto, desligado por padrão e protegido por
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
 *Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas - veja [../CONTRIBUTING.md](CONTRIBUTING.md).*
+
+<!-- doc-footer -->
+
+---
+
+> _Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas; veja [CONTRIBUTING.md](CONTRIBUTING.md)._

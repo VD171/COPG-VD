@@ -66,3 +66,9 @@ COPG-VD/
 [CONFIGURATION.md](CONFIGURATION.md)），还有 `update.log`、`update.state` 和 `update.status`。配置文件从不提交；`module/COPG-VD.json.example` 是模板。
 
 *本文档由 Claude (Anthropic) 生成，并由 VD171 维护。欢迎提出更正和改进 - 参见 [../CONTRIBUTING.md](CONTRIBUTING.md)。*
+
+<!-- doc-footer -->
+
+---
+
+> _本文档由 Claude (Anthropic) 生成，并由 VD171 维护。欢迎修正和改进；请参阅 [CONTRIBUTING.md](CONTRIBUTING.md)。_

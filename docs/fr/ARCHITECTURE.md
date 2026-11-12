@@ -79,3 +79,9 @@ depuis `/system/build.prop`, jamais depuis `getprop`, parce que `getprop` est ex
 qu'il falsifie. Voir le piège dans [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
 *Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues - voir [../CONTRIBUTING.md](CONTRIBUTING.md).*
+
+<!-- doc-footer -->
+
+---
+
+> _Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues ; voir [CONTRIBUTING.md](CONTRIBUTING.md)._

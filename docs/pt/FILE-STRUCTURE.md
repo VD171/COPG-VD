@@ -67,3 +67,9 @@ configurações (veja [CONFIGURATION.md](CONFIGURATION.md)), junto com `update.l
 `update.status`. A configuração nunca é commitada; `module/COPG-VD.json.example` é o template.
 
 *Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas - veja [../CONTRIBUTING.md](CONTRIBUTING.md).*
+
+<!-- doc-footer -->
+
+---
+
+> _Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas; veja [CONTRIBUTING.md](CONTRIBUTING.md)._
