@@ -21,7 +21,9 @@ This integration is under development. A successful build does not establish on-
 
 - TOPG integration and adaptations: wfire06100.
 - COPG / COPG-VD foundation: AlirezaParsi and VD171; original credits and documentation are preserved below.
-- Original TEESimulator: JingMatrix; TEESimulator-RS authors and contributors retain their credits and notices. The integrated engine is sourced from [wfire06100/TEESimulator-RS](https://github.com/wfire06100/TEESimulator-RS).
+- Original TEESimulator: [JingMatrix](https://github.com/JingMatrix/TEESimulator), for the original project and interception design.
+- TEESimulator-RS: [Enginex0](https://github.com/Enginex0), for [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS), the Rust-based fork of JingMatrix's TEESimulator. All contributors retain their credits and notices.
+- TOPG uses the adapted engine source maintained in [wfire06100/TEESimulator-RS](https://github.com/wfire06100/TEESimulator-RS); this does not replace the original authorship credits above.
 - COPG-VD retains its Apache-2.0 license. TEESimulator-RS retains its GPL-3.0 license and component notices; these are not replaced by the TOPG name.
 
 ---
