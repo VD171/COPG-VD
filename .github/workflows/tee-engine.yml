@@ -1,0 +1,66 @@
+name: TOPG TEE engine build
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: topg-tee-engine-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  engine:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout TOPG
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout pinned TEE source
+        uses: actions/checkout@v4
+        with:
+          repository: wfire06100/TEESimulator-RS
+          ref: d8099e29e38af7750dd9e3563cc4a38db9aa96bb
+          path: upstream-tee
+          submodules: recursive
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install Android components
+        run: sdkmanager 'ndk;27.3.13750724'
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked
+      - name: Relocate engine paths
+        run: python3 tools/tee/relocate_engine.py upstream-tee
+      - name: Run upstream unit tests
+        working-directory: upstream-tee
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:testDebugUnitTest -Dorg.gradle.jvmargs=-Xmx2048m
+      - name: Compile relocated engine
+        working-directory: upstream-tee
+        run: ./gradlew zipRelease zipDebug -Dorg.gradle.jvmargs=-Xmx2048m
+      - name: Collect provenance and notices
+        run: |
+          mkdir -p tee-build-notices
+          cp upstream-tee/LICENSE upstream-tee/NOTICE upstream-tee/topg-relocation.json tee-build-notices/
+          git -C upstream-tee diff --binary > tee-build-notices/topg-paths.patch
+      - name: Upload intermediate engine artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: TOPG-TEE-intermediate-not-installable
+          path: |
+            upstream-tee/out/*.zip
+            tee-build-notices/
+            upstream-tee/app/build/reports/tests/
+          if-no-files-found: error
+          retention-days: 14
