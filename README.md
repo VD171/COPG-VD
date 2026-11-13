@@ -1,6 +1,6 @@
 <!--
-  COPG-VD - global device spoofer: spoof your device fingerprint and build.
-  Copyright (C) 2026  AlirezaParsi & VD171 - SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+  COPG-VD: global device spoofer: spoof your device fingerprint and build.
+  Copyright (C) 2026  AlirezaParsi & VD171. SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
 -->
 
 # COPG-VD
@@ -18,7 +18,7 @@
 
 <p align="center">
   <b>A device spoofer: it rewrites the device fingerprint and build so apps see the device you choose instead of the real one.</b><br>
-  It runs on Zygisk (KernelSU, APatch or Magisk) and, by default, scopes the spoof to the Google Play stack - a lighter, more robust alternative to PlayIntegrityFix.
+  It runs on Zygisk (KernelSU, APatch or Magisk) and, by default, scopes the spoof to the Google Play stack: a lighter, more robust alternative to PlayIntegrityFix.
 </p>
 
 <p align="center">
@@ -41,30 +41,30 @@
 
 ## How to use?
 Install the module, reboot, and the shipped profile (a Pixel) is spoofed to the targeted apps. With a working fingerprint you do not need PlayIntegrityFix or GooglePhotosUnlimited.  
-Everything is configured in `/data/adb/COPG-VD/COPG-VD.json`, or from the WebUI. All fields are OPTIONAL - a field that is not provided is skipped.  
+Everything is configured in `/data/adb/COPG-VD/COPG-VD.json`, or from the WebUI. All fields are OPTIONAL: a field that is not provided is skipped.  
 
-### Scope - who sees the spoof
+### Scope: who sees the spoof
 `scope_mode` decides which processes get the spoofed identity. In a scoped mode the identity is delivered per process by Zygisk and is not leaked to the rest of the system through the global properties.  
-* **Google Play** (`playstore`, the default) - only the Play stack (Google Play services, its unstable process and the Play Store).  
-* **Global** - the whole device; every process sees it.  
-* **Whitelist** - only the apps in `scope_whitelist`.  
-* **Blacklist** - every app except the ones in `scope_blacklist`.  
+* **Google Play** (`playstore`, the default): only the Play stack (Google Play services, its unstable process and the Play Store).  
+* **Global**: the whole device; every process sees it.  
+* **Whitelist**: only the apps in `scope_whitelist`.  
+* **Blacklist**: every app except the ones in `scope_blacklist`.  
 
-### Engines - how the spoof is delivered
+### Engines: how the spoof is delivered
 Each one is independent and can be turned off:  
-* **Build fields (JNI)** - rewrites `android.os.Build.*` in the targeted processes.  
-* **Property hook** - presents the spoofed system properties to the targeted processes (a clean-room per-process remap of the property area, no function hook).  
-* **resetprop** - rewrites the system properties, managed by group: identity, version, boot state, SELinux, adb/usb, anti-emulator and a cleanup pass. In a scoped mode the identity and version groups stay out of the device-wide resetprop (Zygisk delivers them per process); the boot/lock/SELinux groups stay global.  
-* **DRM / Widevine** (off by default) - reports a chosen Widevine security level, L1 or L3, to the apps that read it. By default it follows the scope above; set `drm_targets` (a list of apps) to apply the DRM spoof **only** to those apps, independently of `scope_mode` - the module stays loaded in a listed app just for the DRM hook, even when that app is outside the main scope. Empty or absent means follow the scope. (Requires a scoped mode, not Global.)  
+* **Build fields (JNI)**: rewrites `android.os.Build.*` in the targeted processes.  
+* **Property hook**: presents the spoofed system properties to the targeted processes (a clean-room per-process remap of the property area, no function hook).  
+* **resetprop**: rewrites the system properties, managed by group: identity, version, boot state, SELinux, adb/usb, anti-emulator and a cleanup pass. In a scoped mode the identity and version groups stay out of the device-wide resetprop (Zygisk delivers them per process); the boot/lock/SELinux groups stay global.  
+* **DRM / Widevine** (off by default): reports a chosen Widevine security level, L1 or L3, to the apps that read it. By default it follows the scope above; set `drm_targets` (a list of apps) to apply the DRM spoof **only** to those apps, independently of `scope_mode`: the module stays loaded in a listed app just for the DRM hook, even when that app is outside the main scope. Empty or absent means follow the scope. (Requires a scoped mode, not Global.)  
 
-### Fields - set, empty, delete or skip
+### Fields: set, empty, delete or skip
 Inside the `COPG-VD` object each Build field has four states:  
-* **Set** - `"KEY": "value"` writes the value.  
-* **Empty** - `"KEY": ""` writes an empty value.  
-* **Delete** - list the key in a top-level `"COPG-VD-Delete": [ ... ]` to remove it (a Build field becomes null, a property is removed with `resetprop --delete`).  
-* **Skip** - leave the key out entirely; the ROM's own value is kept.  
+* **Set**: `"KEY": "value"` writes the value.  
+* **Empty**: `"KEY": ""` writes an empty value.  
+* **Delete**: list the key in a top-level `"COPG-VD-Delete": [ ... ]` to remove it (a Build field becomes null, a property is removed with `resetprop --delete`).  
+* **Skip**: leave the key out entirely; the ROM's own value is kept.  
 
-A `"global_fields": [ ... ]` list applies the named Build fields device-wide even in a scoped mode, to keep a value consistent everywhere - for coherence-safe fields only (the security patch, for example), never identity and never the Android version group.  
+A `"global_fields": [ ... ]` list applies the named Build fields device-wide even in a scoped mode, to keep a value consistent everywhere: for coherence-safe fields only (the security patch, for example), never identity and never the Android version group.  
 
 ### Example JSON config file
 `/data/adb/COPG-VD/COPG-VD.json`
@@ -113,30 +113,30 @@ The block above and `module/COPG-VD.json.example` are refreshed daily by the [Up
 * It never goes backwards: an upstream build older than the one installed is refused. This is
   routine (the repo can sit behind a config you updated by hand) and it is also the guard that
   matters most on Android, where the only downloader available is busybox `wget`, which cannot
-  validate TLS certificates - every value is validated before use for the same reason.  
-* If your profile spoofs **another device** (different `BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT`), nothing is applied - a Pixel fingerprint on another profile is worse than an old fingerprint.  
+  validate TLS certificates: every value is validated before use for the same reason.  
+* If your profile spoofs **another device** (different `BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT`), nothing is applied: a Pixel fingerprint on another profile is worse than an old fingerprint.  
 * At boot it runs in the background and keeps retrying for ~10 minutes, because wifi is usually not up yet when the boot finishes. It never delays the boot.  
 * `resetprop` is re-applied right after an update, but `android.os.Build` is written by the zygisk module when zygote starts: **reboot** for the new values to reach apps.  
 * Log at `/data/adb/COPG-VD/update.log`.  
 
-### Android version - and why it is not spoofed
+### Android version: and why it is not spoofed
 `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` and `CODENAME` describe **your ROM**, not the device being spoofed. Telling apps the SDK is newer than the framework really is makes them call APIs that do not exist: Google's apps crash, the phone reboots, and it starts over. The boot itself completes, so it is a **softloop** and nothing shows up in the boot logs.  
 * They are not in the shipped config and the updater never writes them.  
 * **Spoof Android version** in the WebUI decides whether they are applied at all:  
-  * **Never** (default) - the ROM's own version is used.  
-  * **Up to this ROM** - only what does not exceed it, which in practice means lowering the SDK.  
-  * **Force** - exactly what the config says. This is what causes the softloop.  
-* The real version is read from `/system/build.prop`, never from `getprop` - that is the very thing this module falsifies.  
+  * **Never** (default): the ROM's own version is used.  
+  * **Up to this ROM**: only what does not exceed it, which in practice means lowering the SDK.  
+  * **Force**: exactly what the config says. This is what causes the softloop.  
+* The real version is read from `/system/build.prop`, never from `getprop`: that is the very thing this module falsifies.  
 
 ### Analyze
 **Analyze** in the WebUI (or `fingerprint-update.sh analyze`) audits the config as it stands: version against the ROM, whether the file still parses at all (a broken one makes the module spoof **nothing**, and only logcat says so), whether the fingerprint agrees with the fields around it, keys the module does not read, dates, and whether the props already carry what the config asks for.  
 
 ### WebUI
-The WebUI is optional - everything can be edited in the JSON config directly - but it is the easy way to drive the module. It has five tabs: **About**, **Device** (every field, set per state, grouped by category), **Spoofing** (scope and engines), **System** (the resetprop groups) and **Tools** (Analyze, Check Update, Update Now, Backup/Restore and the boot auto-update). It makes no network request; everything it needs ships inside the module.  
+The WebUI is optional (everything can be edited in the JSON config directly) but it is the easy way to drive the module. It has five tabs: **About**, **Device** (every field, set per state, grouped by category), **Spoofing** (scope and engines), **System** (the resetprop groups) and **Tools** (Analyze, Check Update, Update Now, Backup/Restore and the boot auto-update). It makes no network request; everything it needs ships inside the module.  
 If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
 
 ### Settings in the config
-`COPG-VD.json` carries its settings next to the profile, so your choices travel with a backup and can be edited by hand: `scope_mode`, the engine switches, the resetprop groups, `global_fields`, and a `COPG-VD-Settings` object (`resetprop`, `autoupdate`, `spoof_version`). Everything lives in this one file - the boot scripts and the WebUI read the settings straight from it, so your choices survive a module update. `"spoof_version": "force"` is refused from the file and downgraded: restoring an old backup must not re-arm it behind your back.  
+`COPG-VD.json` carries its settings next to the profile, so your choices travel with a backup and can be edited by hand: `scope_mode`, the engine switches, the resetprop groups, `global_fields`, and a `COPG-VD-Settings` object (`resetprop`, `autoupdate`, `spoof_version`). Everything lives in this one file: the boot scripts and the WebUI read the settings straight from it, so your choices survive a module update. `"spoof_version": "force"` is refused from the file and downgraded: restoring an old backup must not re-arm it behind your back.  
 
 <!-- vd-docs -->
 ## Documentation
@@ -155,6 +155,7 @@ Sibling projects by the same author:
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: a device method debugger that reads each item through every method that can read it and compares them side by side.
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: your Google services (RCS, Wallet, Play Integrity attestations), read on your device with no internet.
 - **[VDBackup](https://github.com/VD171/VD-Backup)**: full app and data backup and restore as root, driven entirely from a WebUI.
+- **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: a standalone rooted SSH daemon (Dropbear).
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
@@ -172,7 +173,7 @@ Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorG
 
 ## License
 
-**Apache-2.0** - see [LICENSE](LICENSE). COPG-VD is a fork by VD171 of the original COPG by AlirezaParsi, continued under the same license.
+**Apache-2.0**: see [LICENSE](LICENSE). COPG-VD is a fork by VD171 of the original COPG by AlirezaParsi, continued under the same license.
 
 ## Trademarks
 

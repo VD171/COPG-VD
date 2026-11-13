@@ -1,6 +1,6 @@
 <!--
-  COPG-VD - global device spoofer: spoof your device fingerprint and build.
-  Copyright (C) 2026  AlirezaParsi & VD171 - SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+  COPG-VD: global device spoofer: spoof your device fingerprint and build.
+  Copyright (C) 2026  AlirezaParsi & VD171. SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
 -->
 
 # COPG-VD
@@ -18,7 +18,7 @@
 
 <p align="center">
   <b>COPG-VD はデバイススプーファーです: デバイスの fingerprint と build を書き換え、アプリが実際のデバイスではなく、あなたが選んだデバイスを見るようにします。</b><br>
-  Zygisk (KernelSU、APatch または Magisk) 上で動作し、デフォルトではスプーフの対象を Google Play スタックに限定します - PlayIntegrityFix より軽量で堅牢な代替手段です。
+  Zygisk (KernelSU、APatch または Magisk) 上で動作し、デフォルトではスプーフの対象を Google Play スタックに限定します: PlayIntegrityFix より軽量で堅牢な代替手段です。
 </p>
 
 <p align="center">
@@ -41,30 +41,30 @@
 
 ## 使い方
 モジュールをインストールして再起動すると、同梱のプロファイル (Pixel) が対象のアプリに対してスプーフィングされます。動作する fingerprint があれば、PlayIntegrityFix や GooglePhotosUnlimited は必要ありません。  
-すべては `/data/adb/COPG-VD/COPG-VD.json` で、または WebUI から設定します。すべてのフィールドは任意 (OPTIONAL) です - 指定されていないフィールドはスキップされます。  
+すべては `/data/adb/COPG-VD/COPG-VD.json` で、または WebUI から設定します。すべてのフィールドは任意 (OPTIONAL) です: 指定されていないフィールドはスキップされます。  
 
-### Scope - 誰がスプーフを見るか
+### Scope: 誰がスプーフを見るか
 `scope_mode` は、どのプロセスがスプーフされた識別情報を受け取るかを決定します。スコープ付きモードでは、識別情報は Zygisk によってプロセスごとに配信され、グローバルプロパティを通じてシステムの他の部分に漏れることはありません。  
-* **Google Play** (`playstore`、デフォルト) - Play スタックのみ (Google Play services、その unstable プロセス、および Play Store)。  
-* **Global** - デバイス全体。すべてのプロセスがそれを見ます。  
-* **Whitelist** - `scope_whitelist` にあるアプリのみ。  
-* **Blacklist** - `scope_blacklist` にあるものを除くすべてのアプリ。  
+* **Google Play** (`playstore`、デフォルト): Play スタックのみ (Google Play services、その unstable プロセス、および Play Store)。  
+* **Global**: デバイス全体。すべてのプロセスがそれを見ます。  
+* **Whitelist**: `scope_whitelist` にあるアプリのみ。  
+* **Blacklist**: `scope_blacklist` にあるものを除くすべてのアプリ。  
 
-### Engine - スプーフがどのように配信されるか
+### Engine: スプーフがどのように配信されるか
 それぞれは独立しており、オフにできます:  
-* **Build fields (JNI)** - 対象のプロセスで `android.os.Build.*` を書き換えます。  
-* **Property hook** - スプーフされたシステムプロパティを対象のプロセスに提示します (プロパティ領域のプロセスごとのクリーンルーム再マッピングであり、関数フックは行いません)。  
-* **resetprop** - システムプロパティを書き換えます。グループごとに管理されます: 識別情報、バージョン、起動状態、SELinux、adb/usb、アンチエミュレーター、およびクリーンアップのパス。スコープ付きモードでは、識別情報とバージョンのグループはデバイス全体の resetprop から除外されます (Zygisk がそれらをプロセスごとに配信します)。boot/lock/SELinux のグループはグローバルのままです。  
-* **DRM / Widevine** (デフォルトでオフ) - 選択した Widevine セキュリティレベル (L1 または L3) を、それを読み取るアプリに報告します。 デフォルトでは上記の範囲に従います。DRM スプーフをそれらのアプリ**のみ**に適用するには `drm_targets` (アプリのリスト) を設定します。これは `scope_mode` とは独立しています - 対象のアプリがメインの範囲の外にある場合でも、モジュールは DRM フックのためだけにリスト内のアプリに読み込まれたままになります。空または未設定は範囲に従うことを意味します。(スコープ付きモードが必要です。Global ではありません。)  
+* **Build fields (JNI)**: 対象のプロセスで `android.os.Build.*` を書き換えます。  
+* **Property hook**: スプーフされたシステムプロパティを対象のプロセスに提示します (プロパティ領域のプロセスごとのクリーンルーム再マッピングであり、関数フックは行いません)。  
+* **resetprop**: システムプロパティを書き換えます。グループごとに管理されます: 識別情報、バージョン、起動状態、SELinux、adb/usb、アンチエミュレーター、およびクリーンアップのパス。スコープ付きモードでは、識別情報とバージョンのグループはデバイス全体の resetprop から除外されます (Zygisk がそれらをプロセスごとに配信します)。boot/lock/SELinux のグループはグローバルのままです。  
+* **DRM / Widevine** (デフォルトでオフ): 選択した Widevine セキュリティレベル (L1 または L3) を、それを読み取るアプリに報告します。 デフォルトでは上記の範囲に従います。DRM スプーフをそれらのアプリ**のみ**に適用するには `drm_targets` (アプリのリスト) を設定します。これは `scope_mode` とは独立しています: 対象のアプリがメインの範囲の外にある場合でも、モジュールは DRM フックのためだけにリスト内のアプリに読み込まれたままになります。空または未設定は範囲に従うことを意味します。(スコープ付きモードが必要です。Global ではありません。)  
 
-### フィールド - 設定、空、削除、スキップ
+### フィールド: 設定、空、削除、スキップ
 `COPG-VD` オブジェクト内で、各 Build フィールドには 4 つの状態があります:  
-* **Set** - `"KEY": "value"` は値を書き込みます。  
-* **Empty** - `"KEY": ""` は空の値を書き込みます。  
-* **Delete** - キーを削除するには、トップレベルの `"COPG-VD-Delete": [ ... ]` にそのキーを列挙します (Build フィールドは null になり、プロパティは `resetprop --delete` で削除されます)。  
-* **Skip** - キーを完全に省略します。ROM 自身の値が保持されます。  
+* **Set**: `"KEY": "value"` は値を書き込みます。  
+* **Empty**: `"KEY": ""` は空の値を書き込みます。  
+* **Delete**: キーを削除するには、トップレベルの `"COPG-VD-Delete": [ ... ]` にそのキーを列挙します (Build フィールドは null になり、プロパティは `resetprop --delete` で削除されます)。  
+* **Skip**: キーを完全に省略します。ROM 自身の値が保持されます。  
 
-`"global_fields": [ ... ]` のリストは、スコープ付きモードであっても、指定された Build フィールドをデバイス全体に適用し、値をどこでも一貫させます - 一貫性の観点から安全なフィールド (例えば security patch) のみを対象とし、識別情報は決して対象とせず、Android バージョンのグループも決して対象としません。  
+`"global_fields": [ ... ]` のリストは、スコープ付きモードであっても、指定された Build フィールドをデバイス全体に適用し、値をどこでも一貫させます: 一貫性の観点から安全なフィールド (例えば security patch) のみを対象とし、識別情報は決して対象とせず、Android バージョンのグループも決して対象としません。  
 
 ### JSON 設定ファイルの例
 `/data/adb/COPG-VD/COPG-VD.json`
@@ -113,30 +113,30 @@
 * 決して後退しません: インストール済みより古い上流ビルドは拒否されます。これは
   通常のことであり (リポジトリは手動で更新した設定より遅れることがあります)、同時に Android において
   最も重要な保護でもあります。Android で利用できる唯一のダウンローダーは busybox の `wget` で、TLS 証明書を
-  検証できないためです - 同じ理由で、すべての値は使用前に検証されます。  
-* プロファイルが**別のデバイス**をスプーフィングしている場合 (`BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT` が異なる)、何も適用されません - 別のプロファイルに Pixel の fingerprint を使うのは、古い fingerprint よりも悪いからです。  
+  検証できないためです: 同じ理由で、すべての値は使用前に検証されます。  
+* プロファイルが**別のデバイス**をスプーフィングしている場合 (`BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT` が異なる)、何も適用されません: 別のプロファイルに Pixel の fingerprint を使うのは、古い fingerprint よりも悪いからです。  
 * 起動時にはバックグラウンドで実行され、約 10 分間リトライを続けます。起動完了時には通常まだ wifi が立ち上がっていないためです。起動を遅らせることは決してありません。  
 * 更新直後に `resetprop` が再適用されますが、`android.os.Build` は zygote の開始時に zygisk モジュールによって書き込まれます: 新しい値をアプリに届けるには**再起動**してください。  
 * ログは `/data/adb/COPG-VD/update.log` にあります。  
 
-### Android バージョン - そしてなぜスプーフィングされないのか
+### Android バージョン: そしてなぜスプーフィングされないのか
 `ANDROID_VERSION`、`SDK_INT`、`SDK_FULL`、`CODENAME` は、スプーフィングされるデバイスではなく、**あなたの ROM** を表します。SDK が実際のフレームワークより新しいとアプリに伝えると、存在しない API を呼び出すようになります: Google のアプリがクラッシュし、端末が再起動し、それを繰り返します。起動自体は完了するため、これは **softloop** であり、起動ログには何も表示されません。  
 * これらは配布される設定には含まれておらず、アップデーターが書き込むこともありません。  
 * WebUI の **Spoof Android version** が、これらを適用するかどうかを決定します:  
-  * **Never** (デフォルト) - ROM 自身のバージョンが使用されます。  
-  * **Up to this ROM** - それを超えないものだけ、つまり実際には SDK を下げることを意味します。  
-  * **Force** - 設定どおり正確に。これが softloop を引き起こすものです。  
-* 実際のバージョンは `/system/build.prop` から読み取られ、`getprop` からは決して読み取られません - それこそがこのモジュールが偽装するものだからです。  
+  * **Never** (デフォルト): ROM 自身のバージョンが使用されます。  
+  * **Up to this ROM**: それを超えないものだけ、つまり実際には SDK を下げることを意味します。  
+  * **Force**: 設定どおり正確に。これが softloop を引き起こすものです。  
+* 実際のバージョンは `/system/build.prop` から読み取られ、`getprop` からは決して読み取られません: それこそがこのモジュールが偽装するものだからです。  
 
 ### Analyze
 WebUI の **Analyze** (または `fingerprint-update.sh analyze`) は、現状の設定を監査します: ROM に対するバージョン、ファイルがそもそもまだパースできるか (壊れていると、モジュールは**何も**スプーフィングせず、logcat だけがそれを伝えます)、fingerprint が周囲のフィールドと一致するか、モジュールが読まないキー、日付、そして props がすでに設定の要求する内容を保持しているか。  
 
 ### WebUI
-WebUI は任意です - すべては JSON 設定で直接編集できます - が、モジュールを操作する簡単な方法です。5 つのタブがあります: **About**、**Device** (すべてのフィールドを状態ごとに設定し、カテゴリごとにグループ化)、**Spoofing** (スコープとエンジン)、**System** (resetprop グループ)、**Tools** (Analyze、Check Update、Update Now、Backup/Restore、および起動時の自動更新)。ネットワークリクエストは一切行いません。必要なものはすべてモジュール内に同梱されています。  
+WebUI は任意です (すべては JSON 設定で直接編集できます) が、モジュールを操作する簡単な方法です。5 つのタブがあります: **About**、**Device** (すべてのフィールドを状態ごとに設定し、カテゴリごとにグループ化)、**Spoofing** (スコープとエンジン)、**System** (resetprop グループ)、**Tools** (Analyze、Check Update、Update Now、Backup/Restore、および起動時の自動更新)。ネットワークリクエストは一切行いません。必要なものはすべてモジュール内に同梱されています。  
 Magisk ユーザーの場合は、KOW による KsuWebUI を使用してください (https://github.com/KOWX712/KsuWebUIStandalone/releases)。  
 
 ### 設定内の設定項目
-`COPG-VD.json` は設定をプロファイルの隣に保持するため、あなたの選択はバックアップとともに移動し、手動で編集できます: `scope_mode`、エンジンのスイッチ、resetprop グループ、`global_fields`、そして `COPG-VD-Settings` オブジェクト (`resetprop`、`autoupdate`、`spoof_version`)。すべてはこの 1 つのファイルに存在します - 起動スクリプトと WebUI は設定をそこから直接読み取るため、あなたの選択はモジュールの更新を越えて残ります。`"spoof_version": "force"` はファイルからは拒否され、ダウングレードされます: 古いバックアップを復元しても、知らないうちに再び有効化されてはならないからです。  
+`COPG-VD.json` は設定をプロファイルの隣に保持するため、あなたの選択はバックアップとともに移動し、手動で編集できます: `scope_mode`、エンジンのスイッチ、resetprop グループ、`global_fields`、そして `COPG-VD-Settings` オブジェクト (`resetprop`、`autoupdate`、`spoof_version`)。すべてはこの 1 つのファイルに存在します: 起動スクリプトと WebUI は設定をそこから直接読み取るため、あなたの選択はモジュールの更新を越えて残ります。`"spoof_version": "force"` はファイルからは拒否され、ダウングレードされます: 古いバックアップを復元しても、知らないうちに再び有効化されてはならないからです。  
 
 <!-- vd-docs -->
 ## ドキュメント
@@ -155,6 +155,7 @@ Magisk ユーザーの場合は、KOW による KsuWebUI を使用してくだ�
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: 各項目を、それを読み取れるあらゆるメソッドを通して読み取り、並べて比較するデバイスメソッドデバッガーです。
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: あなたの Google サービス (RCS、Wallet、Play Integrity の認証) を、インターネットなしで端末上で読み取ります。
 - **[VDBackup](https://github.com/VD171/VD-Backup)**: アプリとデータの完全なバックアップと復元を root として行い、すべて WebUI から操作します。
+- **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: root として動作するスタンドアロンの SSH デーモン (Dropbear)。
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
@@ -172,7 +173,7 @@ Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorG
 
 ## ライセンス
 
-**Apache-2.0** - [LICENSE](LICENSE) を参照してください。COPG-VD は、AlirezaParsi によるオリジナルの COPG を VD171 がフォークしたもので、同じライセンスの下で継続されています。
+**Apache-2.0**: [LICENSE](LICENSE) を参照してください。COPG-VD は、AlirezaParsi によるオリジナルの COPG を VD171 がフォークしたもので、同じライセンスの下で継続されています。
 
 ## 商標
 

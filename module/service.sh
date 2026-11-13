@@ -1,7 +1,7 @@
 #!/system/bin/sh
 # ======================================================================
 #  COPG-VD  ::  global device spoofer
-#  Spoof your device fingerprint and build - Zygisk, KernelSU/APatch/Magisk.
+#  Spoof your device fingerprint and build: Zygisk, KernelSU/APatch/Magisk.
 #
 #  Copyright (C) 2026  AlirezaParsi & VD171
 #  SPDX-License-Identifier: Apache-2.0
