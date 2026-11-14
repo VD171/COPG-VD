@@ -130,7 +130,7 @@ Khối ở trên và `module/COPG-VD.json.example` được làm mới hằng ng
 
 ### WebUI
 WebUI là tùy chọn (mọi thứ đều có thể chỉnh sửa trực tiếp trong tệp cấu hình JSON) nhưng nó là cách dễ dàng để điều khiển module. Nó có năm tab: **About**, **Device** (mọi trường, đặt theo từng trạng thái, nhóm theo danh mục), **Spoofing** (scope và engines), **System** (các nhóm resetprop) và **Tools** (Analyze, Check Update, Update Now, Backup/Restore và tự động cập nhật khi khởi động). Nó không thực hiện yêu cầu mạng nào; mọi thứ nó cần đều đi kèm bên trong module.  
-Nếu bạn là người dùng Magisk, hãy dùng KsuWebUI của KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases).  
+Nếu bạn là người dùng Magisk, hãy dùng KsuWebUI của KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases). Bạn cũng có thể dùng WebUI-X Portable của MMRL (https://github.com/MMRLApp/WebUI-X-Portable/releases).  
 
 ### Cài đặt trong cấu hình
 `COPG-VD.json` mang các cài đặt của nó ngay cạnh hồ sơ, để các lựa chọn của bạn đi theo cùng bản sao lưu và có thể chỉnh sửa bằng tay: `scope_mode`, các công tắc của engine, các nhóm resetprop, `global_fields`, và một đối tượng `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_version`). Mọi thứ đều nằm trong một tệp duy nhất này: các script khởi động và WebUI đọc các cài đặt trực tiếp từ nó, nên các lựa chọn của bạn vẫn còn sau một lần cập nhật module. `"spoof_version": "force"` bị từ chối từ tệp và bị hạ cấp: việc khôi phục một bản sao lưu cũ không được tự ý kích hoạt lại nó sau lưng bạn.  
@@ -158,15 +158,15 @@ Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorG
 
 ## Contacts
 
-* https://vd171.ru
-* https://vd.priv8.ru
-* **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
-* **Channel:** @Priv8_VD https://t.me/Priv8_VD
-* **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
-* **E-mail:** vd.priv8@pm.me
-* **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
-* **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
-* **GitHub:** @VD171 https://github.com/VD171
+- https://vd171.ru
+- https://vd.priv8.ru
+- *Telegram:* @VD_Priv8 https://t.me/VD_Priv8
+- *Channel:* @Priv8_VD https://t.me/Priv8_VD
+- *Discord:* @VD.Priv8 https://discord.com/users/1296831918989639721
+- *E-mail:* vd.priv8@pm.me
+- *XDA-Developers:* @VD171 https://xdaforums.com/m/vd171.4699873/
+- *XDA thread:* https://xdaforums.com/t/COPG-VD.4807698/
+- *GitHub:* @VD171 https://github.com/VD171
 
 ## License
 
