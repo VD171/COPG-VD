@@ -3,8 +3,8 @@
 # POSIX sh (mksh/busybox/toybox). Env in: VDLU_DIR, MODULE_DIR, MODID.
 # Contract: INTERFACES.md (CLI/layout/JSON keys = immutable) + MODULO_VDLU.md.
 
-ENGINE_VERSION=2
-MAX_FILE_BYTES=268435456     # 256 MiB per-file ceiling: anti zstd-bomb / disk DoS
+ENGINE_VERSION=3
+MAX_FILE_BYTES=268435456     # 256 MiB per-file ceiling: anti decompression-bomb / disk DoS
 MAX_MANIFEST_BYTES=4194304   # 4 MiB manifest ceiling: anti OOM
 TAB=$(printf '\t')
 LOCKDIR=""
@@ -12,15 +12,27 @@ LOCKDIR=""
 die() { echo "VDLU: $*" >&2; exit 1; }
 
 # ---- tool discovery -------------------------------------------------------
-# A module that bundles its own binaries (public modules ship curl/zstd/openssl under
-# bin/<abi>/) may be launched with a bare env (the WebUI's ksu.exec sets no PATH). Put
-# the host module's bin dir on PATH/LD_LIBRARY_PATH so those tools resolve; a file://
-# module that bundles nothing is unaffected. Prefer the device ABI, else the one bin dir
-# the installer kept. No-op when MODULE_DIR has no bin/ (the engine's own test harness).
+# Slim (Abordagem B, doc §16): the only on-device tools are the embedded ed25519-mini (verify)
+# and the static curl the WebUI bootstraps into Tier-2 ($VDLU_DIR/tools/<abi>). gzip/sha256sum/
+# base64 come from toybox. The engine may be launched with a bare env (the WebUI's ksu.exec sets
+# no PATH), so put the Tier-2 tools dir (and any legacy module bin/<abi>, e.g. vdantiroot) on
+# PATH/LD_LIBRARY_PATH. No-op when neither exists (the engine's own test harness).
 bundled_bins_on_path() {
-	local abi bd d ld
-	[ -n "${MODULE_DIR:-}" ] && [ -d "$MODULE_DIR/bin" ] || return 0
+	local abi bd d ld tt
 	abi=$(getprop ro.product.cpu.abi 2>/dev/null)
+	# Tier-2 fetched toolchain (slim: the static curl the WebUI bootstrapped) - preferred, survives
+	# module updates. Slim modules bundle NO bin/; the tools live in $VDLU_DIR/tools/<abi>.
+	if [ -n "${VDLU_DIR:-}" ] && [ -d "$VDLU_DIR/tools" ]; then
+		tt=""
+		[ -n "$abi" ] && [ -d "$VDLU_DIR/tools/$abi" ] && tt="$VDLU_DIR/tools/$abi"
+		[ -z "$tt" ] && for d in "$VDLU_DIR"/tools/*/; do [ -d "$d" ] && { tt=${d%/}; break; }; done
+		if [ -n "$tt" ] && [ -d "$tt" ]; then
+			case ":$PATH:" in *":$tt:"*) : ;; *) PATH="$tt:$PATH"; export PATH ;; esac
+			[ -d "$tt/lib" ] && case ":${LD_LIBRARY_PATH:-}:" in *":$tt/lib:"*) : ;; *) LD_LIBRARY_PATH="$tt/lib:${LD_LIBRARY_PATH:-}"; export LD_LIBRARY_PATH ;; esac
+		fi
+	fi
+	# Legacy: a module that still bundles its own bin/<abi> (e.g. vdantiroot). Slim modules have none.
+	[ -n "${MODULE_DIR:-}" ] && [ -d "$MODULE_DIR/bin" ] || return 0
 	bd="$MODULE_DIR/bin/$abi"
 	[ -n "$abi" ] && [ -d "$bd" ] || { bd=""; for d in "$MODULE_DIR"/bin/*/; do [ -d "$d" ] && { bd=${d%/}; abi=${bd##*/}; break; }; done; }
 	[ -n "$bd" ] && [ -d "$bd" ] || return 0
@@ -39,7 +51,16 @@ init_tools() {
 	else die "no sha256sum"; fi
 	CURL=$(command -v curl 2>/dev/null) || CURL=""
 	WGET=$(command -v wget 2>/dev/null) || WGET=""
-	ZSTD=$(command -v zstd 2>/dev/null) || ZSTD=""
+	GZIP=$(command -v gzip 2>/dev/null) || GZIP=""
+	# The static curl uses mbedTLS with NO built-in CA bundle, so https cert validation needs the
+	# Android trust store (--capath). Config `ca_path` overrides; else auto-detect. The ed25519
+	# signature stays the integrity root - the cert check is defense-in-depth on the transport.
+	CAPATH=$(cfg ca_path "")
+	if [ -z "$CAPATH" ]; then
+		for _p in /system/etc/security/cacerts /apex/com.android.conscrypt/cacerts /etc/security/cacerts; do
+			[ -d "$_p" ] && { CAPATH="$_p"; break; }
+		done
+	fi
 }
 
 sha256f() { $SHA "$1" 2>/dev/null | cut -d' ' -f1; }
@@ -68,6 +89,10 @@ init_paths() {
 	PLANDEL="$VDLU_DIR/plan.del"
 	CANCEL="$VDLU_DIR/cancel"
 	mkdir -p "$VDLU_DIR" "$BLOBS" "$ROLLBACK" "$STAGED" "$WORK" 2>/dev/null
+	# Baseline seed (fix from:0): a fresh install ships the signed manifest of its own version as
+	# vdlu/baseline.json; seed current.json from it so the device is born "current" (no self-update,
+	# no re-fetch of what it already has). Only when current is absent - never overwrites real state.
+	[ -f "$CURRENT" ] || { [ -f "$MODULE_DIR/vdlu/baseline.json" ] && cp -f "$MODULE_DIR/vdlu/baseline.json" "$CURRENT" 2>/dev/null; }
 	SOURCE=$(cfg source "")
 	TGTVER=0
 	FROMVER=0
@@ -169,7 +194,9 @@ fetch_url() { # url dest
 	case "$url" in
 		file://*) src=${url#file://}; cp -f "$src" "$dest" 2>/dev/null ;;
 		http://*|https://*)
-			if [ -n "$CURL" ]; then "$CURL" -fsSL --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"
+			if [ -n "$CURL" ]; then
+				if [ -n "$CAPATH" ]; then "$CURL" -fsSL --capath "$CAPATH" --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"
+				else "$CURL" -fsSL --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"; fi
 			elif [ -n "$WGET" ]; then "$WGET" -q -O "$dest" "$url"
 			else echo "VDLU: no curl/wget available" >&2; return 1; fi ;;
 		*) echo "VDLU: unsupported source url: $url" >&2; return 1 ;;
@@ -245,7 +272,7 @@ validate_plan() {
 		case "$size" in *[!0-9]*) echo "VDLU: invalid size rejected for: $path" >&2; return 1 ;; esac
 		[ "${size:-0}" -le "$MAX_FILE_BYTES" ] || { echo "VDLU: file too large rejected for: $path" >&2; return 1; }
 		case "$class" in live|soft|reboot) ;; *) echo "VDLU: invalid class rejected for: $path" >&2; return 1 ;; esac
-		case "$enc" in raw|zst) ;; *) echo "VDLU: invalid enc rejected for: $path" >&2; return 1 ;; esac
+		case "$enc" in raw|gz) ;; *) echo "VDLU: invalid enc rejected for: $path" >&2; return 1 ;; esac
 	done <"$WORK/plan.work"
 	if [ -s "$WORK/plan.del" ]; then
 		while IFS= read -r p; do
@@ -280,7 +307,19 @@ build_plan() { # manifest.flat -> class<TAB>mode<TAB>enc<TAB>sha<TAB>size<TAB>pa
 }
 
 finalize_plan() { # raw -> class<TAB>st<TAB>mode<TAB>enc<TAB>sha<TAB>size<TAB>path
-	local class mode enc sha size path dc nst live
+	local class mode enc sha size path dc nst live csha
+	# path->sha of the CURRENT (installed) manifest. A target file that is ABSENT on disk but UNCHANGED
+	# from current is not a live file the device is missing: it is installer scaffolding (META-INF/*,
+	# customize.sh) that ksud consumes at flash, or content the installer prunes per-device. Those must
+	# NOT be fetched - the device already IS at this version for them, so re-fetching = phantom update.
+	if [ -f "$WORK/current.flat" ]; then
+		awk -F'\t' '
+			$1 ~ /^files\/[0-9]+\/path$/   { k=$1; sub(/\/path$/,"",k); P[k]=$2 }
+			$1 ~ /^files\/[0-9]+\/sha256$/ { k=$1; sub(/\/sha256$/,"",k); if (k in P) print P[k] "\t" $2 }
+		' "$WORK/current.flat" >"$WORK/current.paths" 2>/dev/null
+	else
+		: >"$WORK/current.paths"
+	fi
 	while IFS="$TAB" read -r class mode enc sha size path; do
 		[ -n "$path" ] || continue
 		dc=$(derive_class "$path")
@@ -290,7 +329,12 @@ finalize_plan() { # raw -> class<TAB>st<TAB>mode<TAB>enc<TAB>sha<TAB>size<TAB>pa
 		[ -n "$enc" ] || enc=raw
 		nst=pending
 		live="$MODULE_DIR/$path"
-		[ -f "$live" ] && [ "$(sha256f "$live")" = "$sha" ] && nst=skipped
+		if [ -f "$live" ] && [ "$(sha256f "$live")" = "$sha" ]; then
+			nst=skipped
+		elif [ ! -f "$live" ]; then
+			csha=$(awk -F'\t' -v p="$path" '$1==p{print $2; exit}' "$WORK/current.paths" 2>/dev/null)
+			[ "$csha" = "$sha" ] && nst=skipped
+		fi
 		printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$class" "$nst" "$mode" "$enc" "$sha" "$size" "$path"
 	done < "$1"
 }
@@ -345,16 +389,16 @@ dl_blob() { # sha enc size
 	[ -f "$cache" ] && [ "$(sha256f "$cache")" = "$sha" ] && return 0
 	rm -f "$cache"
 	seed_local "$sha" && return 0
-	if [ "$enc" = zst ] && [ -z "$ZSTD" ]; then echo "VDLU: zstd needed but missing" >&2; return 1; fi
+	if [ "$enc" = gz ] && [ -z "$GZIP" ]; then echo "VDLU: gzip needed but missing" >&2; return 1; fi
 	part="$cache.part"
 	n=0
 	while [ "$n" -lt 3 ]; do
 		n=$((n+1))
-		url="${SOURCE%/}/blobs/$sha"; [ "$enc" = zst ] && url="$url.zst"
+		url="${SOURCE%/}/blobs/$sha"; [ "$enc" = gz ] && url="$url.gz"
 		rm -f "$part" "$part.raw"
 		if fetch_url "$url" "$part"; then
-			if [ "$enc" = zst ]; then
-				if "$ZSTD" -d -c "$part" 2>/dev/null | head -c "$cap" >"$part.raw" && [ "$(sha256f "$part.raw")" = "$sha" ]; then
+			if [ "$enc" = gz ]; then
+				if "$GZIP" -d -c "$part" 2>/dev/null | head -c "$cap" >"$part.raw" && [ "$(sha256f "$part.raw")" = "$sha" ]; then
 					mv -f "$part.raw" "$cache"; rm -f "$part"; return 0
 				fi
 			else
@@ -681,6 +725,45 @@ cmd_cancel() {
 	echo "VDLU: cancel requested"
 }
 
+# extract the sha256 of an exact path from a compact sorted-keys manifest (vdlu-pack form:
+# ...,"path":"<p>","sha256":"<64hex>",...). Returns 1 if the path is absent.
+tool_sha() { # manifest_content path
+	_c=$1; _p=$2
+	case "$_c" in *"\"path\":\"$_p\",\"sha256\":\""*) : ;; *) return 1;; esac
+	_r=${_c#*\"path\":\"$_p\",\"sha256\":\"}
+	printf '%s' "${_r%%\"*}"
+}
+
+# install-tool <abi>: adopt a fetched toolchain binary (the static curl) into Tier-2, but ONLY
+# after the embedded ed25519-mini verifies the SIGNED tools-manifest and the binary's hash matches
+# it. The tool runs as root, so this guard is MANDATORY regardless of profile (closes root RCE from
+# an untrusted downloader). The WebUI fetches <WORK>/tools-manifest.json + <WORK>/tool.<abi> first.
+cmd_install_tool() { # <abi>
+	local abi tm toolf keyring pd c sha dst
+	abi=$2
+	[ -n "$abi" ] || { echo "VDLU: install-tool needs an abi" >&2; exit 64; }
+	case "$abi" in */*|..|.|*"$TAB"*|'') echo "VDLU: unsafe abi: $abi" >&2; exit 2 ;; esac
+	tm="$WORK/tools-manifest.json"; toolf="$WORK/tool.$abi"
+	[ -f "$tm" ] && [ -f "$toolf" ] || { echo "VDLU: install-tool: fetch $tm and $toolf first" >&2; exit 2; }
+	pd=$(cfg pubkey_dir keyring); case "$pd" in ''|*/*|*..*) pd=keyring ;; esac
+	keyring="$MODULE_DIR/vdlu/$pd"
+	sh "$MODULE_DIR/vdlu/vdlu-verify" "$tm" "$keyring" || { echo "VDLU: tools-manifest signature rejected" >&2; exit 1; }
+	c=$(cat "$tm")
+	sha=$(tool_sha "$c" "$abi/curl") || { echo "VDLU: no curl entry for $abi in tools-manifest" >&2; exit 1; }
+	sha_ok "$sha" || { echo "VDLU: malformed curl sha in tools-manifest" >&2; exit 1; }
+	[ "$(sha256f "$toolf")" = "$sha" ] || { echo "VDLU: fetched curl hash != tools-manifest; refusing" >&2; exit 1; }
+	dst="$VDLU_DIR/tools/$abi"
+	mkdir -p "$dst" 2>/dev/null
+	contained "$dst/curl" "$VDLU_DIR/tools" || { echo "VDLU: tool path escapes tools dir" >&2; exit 1; }
+	if cp -f "$toolf" "$dst/curl.tmp" 2>/dev/null && chmod 0755 "$dst/curl.tmp" 2>/dev/null \
+		&& [ "$(sha256f "$dst/curl.tmp")" = "$sha" ] && mv -f "$dst/curl.tmp" "$dst/curl" 2>/dev/null; then
+		rm -f "$tm" "$toolf" "$dst/curl.tmp" 2>/dev/null
+		echo "VDLU: installed verified curl for $abi" >&2
+		exit 0
+	fi
+	rm -f "$dst/curl.tmp"; echo "VDLU: tool install failed" >&2; exit 1
+}
+
 # ---- main -----------------------------------------------------------------
 init_tools
 init_paths
@@ -692,5 +775,6 @@ case "$1" in
 	boot)   cmd_boot ;;
 	status) cmd_status ;;
 	cancel) cmd_cancel ;;
-	*) echo "usage: update.sh {check|run|resume|boot|status|cancel}" >&2; exit 64 ;;
+	install-tool) cmd_install_tool "$@" ;;
+	*) echo "usage: update.sh {check|run|resume|boot|status|cancel|install-tool <abi>}" >&2; exit 64 ;;
 esac

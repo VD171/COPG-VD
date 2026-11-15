@@ -699,6 +699,56 @@ mark_ran_this_boot() {
     chmod 0600 "$STATE_FILE" 2>/dev/null
 }
 
+# --- device-aware update (issue #28) --------------------------------------
+# A profile fetched from VictorGabriel7Dev/build.prop (any Pixel other than the
+# bundled example) could never update: the updater only knew the example profile,
+# so compare() returned "skipped-custom-device" and the user was stuck. Resolve the
+# newest .prop for the device the config actually carries, from the build.prop
+# index, and refresh that device instead of forcing the bundled one.
+index_field() {
+    # <index_file> <device> <channel> <field> -> value on stdout; rc 1 if absent
+    $AWK -v dev="\"$2\":" -v chan="\"$3\":" -v fld="\"$4\":" '
+        { s = s $0 "\n" }
+        END {
+            di = index(s, dev); if (!di) exit 1
+            s = substr(s, di + length(dev)); depth = 0; obj = ""
+            for (i = 1; i <= length(s); i++) {
+                c = substr(s, i, 1); obj = obj c
+                if (c == "{") depth++
+                else if (c == "}") { if (--depth == 0) break }
+            }
+            ci = index(obj, chan); if (!ci) exit 1
+            t = substr(obj, ci + length(chan)); ce = index(t, "}"); t = substr(t, 1, ce)
+            fi = index(t, fld); if (!fi) exit 1
+            v = substr(t, fi + length(fld)); sub(/^[ \t]*/, "", v)
+            if (substr(v, 1, 1) == "\"") { v = substr(v, 2); q = index(v, "\""); print substr(v, 1, q - 1) }
+            else { match(v, /[0-9A-Za-z._-]+/); print substr(v, RSTART, RLENGTH) }
+            exit 0
+        }' "$1"
+}
+
+fetched_device_update() {
+    # uses $REFERENCE (set by compare); sets DEV_LATEST/DEV_LINCR/DEV_RINCR on rc 0.
+    # rc: 0 newer available, 1 already newest, 2 not a build.prop device, 3 no network
+    [ -n "$AWK" ] || return 2
+    _dev=$(json_get "$REFERENCE" DEVICE); [ -n "$_dev" ] || return 2
+    case "$_dev" in *[!A-Za-z0-9_-]*) return 2 ;; esac
+    _src=$(json_get "$REFERENCE" "Strings extracted from")
+    case "$_src" in *_beta_*|*beta/*) _chan=beta ;; *) _chan=release ;; esac
+    DOWNLOADER="${DOWNLOADER:-$(find_downloader)}"; [ -n "$DOWNLOADER" ] || return 3
+    _idx="$TMP_FILE.idx"
+    download_to "$FETCH_BASE_URL/index.json" "$_idx" || { rm -f "$_idx"; return 3; }
+    DEV_LATEST=$(index_field "$_idx" "$_dev" "$_chan" latest)
+    DEV_RINCR=$(index_field "$_idx" "$_dev" "$_chan" incremental)
+    rm -f "$_idx"
+    [ -n "$DEV_LATEST" ] && [ -n "$DEV_RINCR" ] || return 2
+    case "$DEV_LATEST" in */*.prop) : ;; *) return 2 ;; esac
+    DEV_LINCR=$(json_get "$REFERENCE" INCREMENTAL)
+    case "$DEV_LINCR$DEV_RINCR" in *[!0-9]*|"") return 1 ;; esac
+    [ "$DEV_RINCR" -le "$DEV_LINCR" ] && return 1
+    return 0
+}
+
 MODE="${1:-check}"
 
 case "$MODE" in
@@ -707,8 +757,25 @@ case "$MODE" in
         compare
         case $? in
             1) log "already on the newest build"; echo "status: up-to-date"; exit 0 ;;
-            2) log "this is not the upstream device profile, nothing applied"
-               echo "status: skipped-custom-device"; exit 0 ;;
+            2) fetched_device_update
+               case $? in
+                   0) if [ "$MODE" = "check" ]; then
+                          log "update available for $_dev: $DEV_LINCR -> $DEV_RINCR"
+                          echo "status: update-available"; exit 0
+                      fi
+                      if sh "$0" fetch "$DEV_LATEST" >/dev/null 2>&1; then
+                          [ "$(cfg_setting resetprop)" != false ] && [ -f "$MODDIR/service.sh" ] &&
+                              sh "$MODDIR/service.sh" --props-only >/dev/null 2>&1
+                          log "refreshed $_dev to the newest build ($DEV_RINCR)"
+                          echo "status: applied"; exit 0
+                      fi
+                      echo "status: failed"; exit 1 ;;
+                   1) log "fetched device already on the newest build"
+                      echo "status: up-to-date"; exit 0 ;;
+                   3) echo "status: failed"; exit 1 ;;
+                   *) log "this is not an upstream build.prop device, nothing applied"
+                      echo "status: skipped-custom-device"; exit 0 ;;
+               esac ;;
             3) echo "status: no-config"; exit 1 ;;
             4) log "upstream ($REMOTE_ID) is not newer than what is installed ($LOCAL_ID)"
                echo "status: local-newer"; exit 0 ;;
@@ -742,7 +809,16 @@ case "$MODE" in
                        if [ "$A_RED" -eq 0 ]; then apply
                        else log "config file is broken - not updating on top of it"; fi ;;
                     1) log "already on the newest build" ;;
-                    2) log "this is not the upstream device profile, nothing applied" ;;
+                    2) fetched_device_update
+                       case $? in
+                           0) if sh "$0" fetch "$DEV_LATEST" >/dev/null 2>&1; then
+                                  [ "$(cfg_setting resetprop)" != false ] && [ -f "$MODDIR/service.sh" ] &&
+                                      sh "$MODDIR/service.sh" --props-only >/dev/null 2>&1
+                                  log "refreshed $_dev to the newest build ($DEV_RINCR)"
+                              else log "failed to refresh $_dev"; fi ;;
+                           1) log "fetched device already on the newest build" ;;
+                           *) log "this is not an upstream build.prop device, nothing applied" ;;
+                       esac ;;
                     3) log "no config file to update" ;;
                     4) log "upstream is not newer than what is installed, nothing applied" ;;
                 esac

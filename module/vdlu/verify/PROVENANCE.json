@@ -1,0 +1,30 @@
+{
+  "component": "ed25519-mini",
+  "purpose": "verify-only ed25519 signature checker for VDLU (replaces openssl on-device)",
+  "cli": "ed25519-mini <pubkey32> <msg> <sig64>  ; rc 0=valid 1=invalid 2=usage/IO",
+  "crypto": {
+    "library": "TweetNaCl",
+    "author": "D. J. Bernstein, Bernard van Gastel, Wesley Janssen, Tanja Lange, Peter Schwabe, Sjaak Smetsers",
+    "license": "public domain",
+    "version": "20140427",
+    "url_c": "https://tweetnacl.cr.yp.to/20140427/tweetnacl.c",
+    "url_h": "https://tweetnacl.cr.yp.to/20140427/tweetnacl.h",
+    "sha256_tweetnacl_c": "02e65bc3013ff2168983365e55906bc783c4c7e0a60d8100f17bb303a17175c4",
+    "sha256_tweetnacl_h": "43f29ad721d9927b747b0100ab4160c119e7bb180c7c98a66e4bf79d31244287"
+  },
+  "wrapper": { "file": "main.c", "sha256": "51e676d8154fa1011e518682063fb4294b4c76fe7da333f0e549af7738e72b2e" },
+  "verify_primitive": "crypto_sign_open over sig||msg (detached); message NOT hashed by the tool",
+  "build": {
+    "toolchain": "Android NDK r29 clang",
+    "api": 28,
+    "linkage": "dynamic against bionic libc.so/libdl.so only (no third-party .so, no closure)",
+    "flags": "-O2 -ffunction-sections -fdata-sections -Wl,--gc-sections, then llvm-strip",
+    "script": "build.sh"
+  },
+  "binaries": {
+    "arm64-v8a":   { "sha256": "a05deda8f50671b899f9ae4adaf64e28be5a7242c76e0a3273852f415180e0f7",   "bytes": 18152 },
+    "armeabi-v7a": { "sha256": "868a7cdc934ecdd6d502522c8c21f5fb0b1f0e2d0aabf0f59b6bad4552bf795f", "bytes": 25336 },
+    "x86_64":      { "sha256": "0c8304fee06ce65d3a109318de63cd44ffa21708837c8b3d6bdea4eff33928e4",      "bytes": 25312 }
+  },
+  "tested_on_device": "merlin1 (aarch64): valid=rc0, tampered=rc1, wrong-size=rc2, usage=rc2"
+}

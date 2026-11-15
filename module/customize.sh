@@ -218,19 +218,11 @@ setup_vdlu() {
   [ -f "$MODPATH/vdlu/update.sh" ] || return 0
   chmod 0755 "$MODPATH/vdlu/update.sh" "$MODPATH/vdlu/vdlu-verify" 2>/dev/null
   [ -f "$MODPATH/post-fs-data.sh" ] && chmod 0755 "$MODPATH/post-fs-data.sh" 2>/dev/null
-  if [ -d "$MODPATH/bin" ]; then
-    case "$ARCH" in
-      arm64) ABIDIR=arm64-v8a ;;
-      arm)   ABIDIR=armeabi-v7a ;;
-      x64)   ABIDIR=x86_64 ;;
-      *)     ABIDIR="" ;;
-    esac
-    for d in "$MODPATH"/bin/*/; do
-      [ -d "$d" ] || continue
-      [ "$(basename "$d")" = "$ABIDIR" ] || rm -rf "$d"
-    done
-    find "$MODPATH/bin" -type f ! -name '.gitkeep' ! -name 'PROVENANCE.json' -exec chmod 0755 {} + 2>/dev/null
-  fi
+  # Slim build (Approach B): no bin/ ships. The embedded ed25519-mini verifiers
+  # (all ABIs, ~20KB each) stay so the on-device tree matches the VDLU manifest;
+  # the heavy curl toolchain is fetched into Tier-2 on first use, not bundled.
+  [ -d "$MODPATH/vdlu/verify" ] &&
+    find "$MODPATH/vdlu/verify" -name ed25519-mini -exec chmod 0755 {} + 2>/dev/null
   VDLU_DIR="$DATA_DIR/vdlu"
   if [ ! -f "$VDLU_DIR/config" ] && [ -f "$MODPATH/vdlu/config.default" ]; then
     mkdir -p "$VDLU_DIR"

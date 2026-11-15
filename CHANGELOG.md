@@ -1,5 +1,10 @@
 # Changelog
 
+## v6.13-vd
+
+- The flashable zip is a fraction of its former size (about 2 MB, down from ~13 MB). COPG-VD no longer bundles the update toolchain inside the module: the signature check is a tiny embedded verifier, and the downloader is fetched once over HTTPS, checked against a signed and pinned hash before it is ever run, and kept outside the module so it is never fetched again unless you fully reinstall. Updates are gzip-based now, so no compressor ships either.
+- Profile updates are device-aware: a Pixel profile you fetched yourself (any device, not only the one that ships in the box) now updates to its own newest build, instead of refusing because it is not the bundled profile. Thanks to wfire06100 for the report (#28).
+
 ## v6.12-vd
 
 - COPG-VD now updates itself in place, with no re-flash: it fetches only the files that changed (content-addressed blobs plus a signed manifest) instead of pulling the whole zip again. Every update must carry a valid ed25519 signature and downgrades are refused, so the update channel cannot hand you a tampered or older build; the full zip stays available as a fallback. A new Updates panel in the WebUI shows progress and lets you cancel, and the update state lives outside the module so it survives a re-flash. When an update touches the native library it is staged and applied on the next reboot.

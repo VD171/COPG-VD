@@ -1,7 +1,9 @@
 #!/system/bin/sh
 # vdlu-verify <manifest.json> <keyring_dir> - verify a VDLU manifest signature on-device.
 # rc 0 = signature valid against the keyring pubkey whose id matches key_id; rc != 0 = reject.
-# POSIX sh + openssl only (toybox/busybox + the module's openssl bin; NO jq). INTERFACES.md §6.
+# SLIM (Abordagem B, MODULO_VDLU.md §16): toybox sha256sum/base64 + the embedded ed25519-mini,
+# NO openssl. The keyring pubkey is RAW 32 bytes. Same CLI/rc as the openssl version it replaces,
+# so the engine's verify_manifest is unchanged. INTERFACES.md §6.
 set -eu
 
 if [ $# -ne 2 ]; then
@@ -15,10 +17,27 @@ keyring=$2
 [ -f "$manifest" ] || { echo "vdlu-verify: no such manifest: $manifest" >&2; exit 2; }
 [ -d "$keyring" ] || { echo "vdlu-verify: no such keyring dir: $keyring" >&2; exit 2; }
 
+here=$(dirname "$0")
+
+# locate the ed25519-mini verifier: pruned single (customize keeps the device ABI), else per-ABI.
+mini="$here/ed25519-mini"
+if [ ! -x "$mini" ]; then
+	abi=$(getprop ro.product.cpu.abi 2>/dev/null)
+	case "$abi" in
+		'') case "$(uname -m 2>/dev/null)" in
+				aarch64) abi=arm64-v8a ;;
+				armv7l|armv7*|armv8l) abi=armeabi-v7a ;;
+				x86_64) abi=x86_64 ;;
+			esac ;;
+	esac
+	mini="$here/verify/$abi/ed25519-mini"
+fi
+[ -x "$mini" ] || { echo "vdlu-verify: ed25519-mini not found/executable (near $here)" >&2; exit 2; }
+
 # --- shared canonicalization (identical in producer/vdlu-sign) -------------------
-# Canonical form = the manifest text with the "sig" field removed. The manifest is
-# stored compact + sorted-keys (vdlu-pack), so "sig" is always ,"sig":"...", bracketed
-# by "schema" (before) and "version" (after). We hash the sha256 hex of that form.
+# Canonical form = the manifest text with the "sig" field removed. The manifest is stored compact +
+# sorted-keys (vdlu-pack), so "sig" is always ,"sig":"...". We hash the sha256 hex of that form; that
+# 64-char ASCII hex string is the exact message the signature covers (ed25519 hashes it internally).
 vdlu_canon_sha256() {
 	_c=$1
 	case "$_c" in *'"sig":"'*) : ;; *) echo "vdlu: manifest has no sig field" >&2; return 1;; esac
@@ -47,19 +66,19 @@ sig=$(field "$c" sig) || { echo "vdlu-verify: no sig in manifest" >&2; exit 1; }
 case "$key_id" in */*|..|.|*'"'*) echo "vdlu-verify: unsafe key_id: $key_id" >&2; exit 1;; esac
 pub="$keyring/$key_id.pub"
 [ -f "$pub" ] || { echo "vdlu-verify: no pubkey for key_id=$key_id in $keyring" >&2; exit 1; }
+pubsz=$(wc -c <"$pub" 2>/dev/null || echo 0)
+[ "$pubsz" -eq 32 ] || { echo "vdlu-verify: keyring pubkey not raw 32 bytes (got $pubsz) for key_id=$key_id" >&2; exit 1; }
 
 hex=$(vdlu_canon_sha256 "$c")
 
 tmpd=$(mktemp -d "${TMPDIR:-/data/local/tmp}/vdlu-verify.XXXXXX" 2>/dev/null || mktemp -d)
 trap 'rm -rf "$tmpd"' EXIT INT TERM
 printf '%s' "$hex" > "$tmpd/msg"
-printf '%s' "$sig" > "$tmpd/sig.b64"
-if ! openssl base64 -d -A -in "$tmpd/sig.b64" -out "$tmpd/sig.bin" 2>/dev/null; then
-	echo "vdlu-verify: malformed base64 signature" >&2
-	exit 1
-fi
+printf '%s' "$sig" | base64 -d > "$tmpd/sig.bin" 2>/dev/null || { echo "vdlu-verify: malformed base64 signature" >&2; exit 1; }
+sigsz=$(wc -c <"$tmpd/sig.bin" 2>/dev/null || echo 0)
+[ "$sigsz" -eq 64 ] || { echo "vdlu-verify: signature not 64 bytes (got $sigsz)" >&2; exit 1; }
 
-if openssl pkeyutl -verify -pubin -inkey "$pub" -rawin -in "$tmpd/msg" -sigfile "$tmpd/sig.bin" >/dev/null 2>&1; then
+if "$mini" "$pub" "$tmpd/msg" "$tmpd/sig.bin" >/dev/null 2>&1; then
 	echo "vdlu-verify: OK key_id=$key_id canon_sha256=$hex" >&2
 	exit 0
 fi
