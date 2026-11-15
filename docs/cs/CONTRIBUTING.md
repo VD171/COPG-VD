@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · Čeština · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · Čeština · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Українська](../uk/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -33,7 +33,7 @@ AI asistenti a agenti jsou zde prvotřídní přispěvatelé, ne dodatečný ná
 
 - Pro testování potřebujete rootnuté zařízení nebo emulátor se Zygiskem (KernelSU, APatch
   nebo Magisk).
-- Sestavte nativní knihovnu per ABI pomocí NDK (r29) a CMake - přesný příkaz viz krok
+- Sestavte nativní knihovnu per ABI pomocí NDK (r29) a CMake: přesný příkaz viz krok
   `Build zygisk libraries` v [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml).
   CI sestaví všechny tři ABI za vás.
 - Sestavte flashovatelný zip: zkopírujte sestavené `libspoof.so` do `module/zygisk/<abi>.so`,
@@ -59,17 +59,17 @@ AI asistenti a agenti jsou zde prvotřídní přispěvatelé, ne dodatečný ná
 - Pro přidání nebo změnu řetězce: upravte `en.js` **a** `en.json`, pak aktualizujte každý
   `<code>.json`. Dotknout se viditelného popisku znamená aktualizovat **všechny** jazykové
   soubory a **všechny** `README.<code>.md`.
-- Překlady jsou prostý JSON - skvělý první příspěvek.
+- Překlady jsou prostý JSON: skvělý první příspěvek.
 
 ## Commity a PR
 
 - Udržujte PR zaměřené. Popište co a proč.
 - Podepište své commity (DCO): `git commit -s` (přidá `Signed-off-by:`).
-- CI musí zůstat zelené. Buďte laskaví v recenzích - viz [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+- CI musí zůstat zelené. Buďte laskaví v recenzích: viz [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Dobré první úkoly
 
 Hledejte štítky `good first issue` a `help wanted`. Překlady, dokumentace a nové profily
 Pixelů jsou skvělé výchozí body.
 
-*Tato dokumentace byla vygenerována pomocí Claude (Anthropic) a je udržována VD171. Opravy a vylepšení jsou vítány - viz [CONTRIBUTING.md](CONTRIBUTING.md).*
+*Tato dokumentace byla vygenerována pomocí Claude (Anthropic) a je udržována VD171. Opravy a vylepšení jsou vítány: viz [CONTRIBUTING.md](CONTRIBUTING.md).*

@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · Čeština · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
+> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · Čeština · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Українська](../uk/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
 
 ---
 
@@ -54,7 +54,7 @@ atestační cestě hlásit jinou hodnotu než prostou, takže keystore zůstáv�
 > **Skupina verze je speciální.** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` a `CODENAME`
 > popisují vaši ROM, ne podvržené zařízení. Jejich zvýšení dostane telefon do softloopu.
 > Nejsou v dodávaném profilu a aplikují se pouze, když to `COPG-VD-Settings.spoof_version`
-> dovolí - viz [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
+> dovolí: viz [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
 ### Stavy pole
 
@@ -78,7 +78,6 @@ Nastavení, která cestují s profilem, takže záloha nese vaše volby.
 |---|---|---|
 | `resetprop` | bool | Zda běží engine resetprop napříč zařízením. |
 | `autoupdate` | bool | Zda `fingerprint-update.sh` běží jednou za boot. Výchozí zapnuto. |
-| `spoof_manufacturer` | bool | Zda je podvrženo i pole výrobce. |
 | `spoof_version` | `never` / `rom` / `force` | Jak se aplikuje skupina verze Androidu. `never` je výchozí; `force` je odmítnut při obnově zálohy. |
 
 ## `global_fields`
@@ -116,7 +115,7 @@ Androidu.
 }
 ```
 
-*Tato dokumentace byla vygenerována pomocí Claude (Anthropic) a je udržována VD171. Opravy a vylepšení jsou vítány - viz [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Tato dokumentace byla vygenerována pomocí Claude (Anthropic) a je udržována VD171. Opravy a vylepšení jsou vítány: viz [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

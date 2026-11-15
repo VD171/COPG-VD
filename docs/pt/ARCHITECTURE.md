@@ -1,4 +1,4 @@
-> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · Português · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
+> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · Português · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Українська](../uk/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
 
 ---
 
@@ -24,7 +24,7 @@ fetch opcional do perfil, não há rede.
 
 Como os forks herdam a cópia de memória copy-on-write do zygote, cada app começa a partir da configuração
 lida no boot. O módulo relê o arquivo por processo alvo somente quando ele de fato
-mudou, então um app recém-iniciado ou reaberto pega um perfil editado - mas a própria decisão de
+mudou, então um app recém-iniciado ou reaberto pega um perfil editado: mas a própria decisão de
 escopo é tomada no início do zygote, então **mudar o escopo, os motores ou
 `drm_targets` exige uma reinicialização**.
 
@@ -37,7 +37,7 @@ Cada um é independente e alternável.
 - **Hook de propriedades (`motor_prop_hook`).** Apresenta as propriedades de sistema falsificadas ao
   processo por meio de um remapeamento clean-room, por processo, da área de propriedades (`prop_virtualizer`).
   É um remapeamento de memória, não um hook de função, então não há pegada de função com hook.
-- **resetprop (em todo o dispositivo).** Escreve as propriedades de sistema por grupo - identidade, versão,
+- **resetprop (em todo o dispositivo).** Escreve as propriedades de sistema por grupo: identidade, versão,
   estado de boot, SELinux, adb/usb, anti-emulador, mais uma passada de limpeza. Os scripts de boot o
   rodam. Em um modo com escopo, os grupos de identidade e versão ficam de fora (o Zygisk os entrega
   por processo); os grupos boot, lock e SELinux permanecem globais para que o dispositivo seja coerente.
@@ -73,7 +73,7 @@ softloop. O grupo de versão é, portanto, desligado por padrão e protegido por
 `getprop`, porque o `getprop` é exatamente o que ele falsifica. Veja a armadilha em
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas - veja [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas: veja [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · हिन्दी · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · हिन्दी · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -19,7 +19,7 @@ COPG-VD डिवाइस fingerprint और build को फिर से ल�
    GooglePhotosUnlimited की आवश्यकता नहीं है।
 
 मॉड्यूल को चलाने के लिए अपने root मैनेजर से WebUI खोलें। Magisk उपयोगकर्ता इसे
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) के साथ खोलते हैं।
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) या [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) के साथ खोलते हैं।
 सब कुछ `/data/adb/COPG-VD/COPG-VD.json` में सीधे भी संपादित किया जा सकता है।
 
 ## spoof को कौन देखता है (scope)
@@ -42,16 +42,16 @@ Zygisk द्वारा प्रति-प्रोसेस वितरि�
 
 हर इंजन स्वतंत्र है और इसे बंद किया जा सकता है। DRM को छोड़कर सभी डिफ़ॉल्ट रूप से चालू हैं।
 
-- **Build फ़ील्ड (`motor_jni`)** - लक्षित प्रोसेस में `android.os.Build.*` को फिर से लिखता है।
+- **Build फ़ील्ड (`motor_jni`)**: लक्षित प्रोसेस में `android.os.Build.*` को फिर से लिखता है।
   यही वह है जो अधिकांश ऐप्स पढ़ते हैं।
-- **Property hook (`motor_prop_hook`)** - property क्षेत्र के एक clean-room प्रति-प्रोसेस remap के
+- **Property hook (`motor_prop_hook`)**: property क्षेत्र के एक clean-room प्रति-प्रोसेस remap के
   माध्यम से, लक्षित प्रोसेस को जाली सिस्टम properties प्रस्तुत करता है (कोई फ़ंक्शन hook नहीं)।
-- **resetprop** - सिस्टम properties को डिवाइस-भर में, समूह के अनुसार फिर से लिखता है (identity,
+- **resetprop**: सिस्टम properties को डिवाइस-भर में, समूह के अनुसार फिर से लिखता है (identity,
   version, boot state, SELinux, adb/usb, anti-emulator, और एक सफ़ाई पास)। एक scoped मोड में
   identity और version समूह डिवाइस-भर के पास से बाहर रहते हैं (Zygisk उन्हें प्रति-प्रोसेस वितरित
   करता है); boot, lock और SELinux समूह वैश्विक रहते हैं। इसे `COPG-VD-Settings.resetprop` में
   टॉगल करें।
-- **DRM / Widevine (`motor_drm`, डिफ़ॉल्ट रूप से बंद)** - इसे पढ़ने वाले ऐप्स को एक चुना गया
+- **DRM / Widevine (`motor_drm`, डिफ़ॉल्ट रूप से बंद)**: इसे पढ़ने वाले ऐप्स को एक चुना गया
   Widevine सुरक्षा स्तर (L1 या L3) रिपोर्ट करता है। नीचे DRM अनुभाग देखें।
 
 ## fingerprint को ताज़ा रखना
@@ -68,7 +68,7 @@ Zygisk द्वारा प्रति-प्रोसेस वितरि�
   patch, SDK, UUID, host, user)। आपके द्वारा अनुकूलित सब कुछ रखा जाता है, और पिछली सामग्री
   `.bak` के रूप में सहेजी जाती है।
 - यह कभी पीछे नहीं जाता (एक पुराना upstream build अस्वीकार कर दिया जाता है), और यदि आपकी प्रोफ़ाइल
-  किसी भिन्न डिवाइस को spoof करती है तो यह कुछ भी लागू नहीं करता - किसी अन्य प्रोफ़ाइल पर एक Pixel
+  किसी भिन्न डिवाइस को spoof करती है तो यह कुछ भी लागू नहीं करता: किसी अन्य प्रोफ़ाइल पर एक Pixel
   fingerprint एक पुराने से भी बदतर है।
 - एक अपडेट के ठीक बाद `resetprop` फिर से लागू किया जाता है, लेकिन `android.os.Build` तब लिखा जाता
   है जब zygote शुरू होता है, इसलिए नए मान ऐप्स तक पहुँचने के लिए **रीबूट** करें। लॉग:
@@ -85,9 +85,9 @@ Zygisk द्वारा प्रति-प्रोसेस वितरि�
 ये फ़ील्ड भेजी गई config में नहीं हैं और updater इन्हें कभी नहीं लिखता। **Spoof Android version**
 (`COPG-VD-Settings.spoof_version`) तय करता है कि ये बिल्कुल लागू होंगे या नहीं:
 
-- `never` (डिफ़ॉल्ट) - ROM के अपने संस्करण का उपयोग होता है।
-- `rom` - केवल वही लागू करता है जो ROM से अधिक नहीं होता, जिसका व्यवहार में अर्थ है SDK को कम करना।
-- `force` - ठीक वही लागू करता है जो config कहती है। यही softloop का कारण बनता है; इसका उपयोग तभी
+- `never` (डिफ़ॉल्ट): ROM के अपने संस्करण का उपयोग होता है।
+- `rom`: केवल वही लागू करता है जो ROM से अधिक नहीं होता, जिसका व्यवहार में अर्थ है SDK को कम करना।
+- `force`: ठीक वही लागू करता है जो config कहती है। यही softloop का कारण बनता है; इसका उपयोग तभी
   करें जब आप जानते हों कि लक्ष्य framework इसका समर्थन करता है।
 
 असली संस्करण `/system/build.prop` से पढ़ा जाता है, कभी `getprop` से नहीं (जो ठीक वही चीज़ है
@@ -100,7 +100,7 @@ Zygisk द्वारा प्रति-प्रोसेस वितरि�
 `DRM_SECURITY_LEVEL` (`L1` या `L3`), रिपोर्ट करता है।
 
 डिफ़ॉल्ट रूप से DRM spoof `scope_mode` का अनुसरण करता है। इसे इसके बजाय ऐप्स के एक विशिष्ट समूह पर
-लागू करने के लिए - मुख्य scope से स्वतंत्र रूप से - उन्हें `drm_targets` में सूचीबद्ध करें। तब
+लागू करने के लिए, मुख्य scope से स्वतंत्र रूप से, उन्हें `drm_targets` में सूचीबद्ध करें। तब
 मॉड्यूल किसी सूचीबद्ध ऐप में **केवल** DRM hook के लिए लोडेड रहता है, भले ही वह ऐप मुख्य scope से
 बाहर हो; एक खाली या अनुपस्थित सूची का अर्थ है scope का अनुसरण करना। इसके लिए एक scoped मोड की
 आवश्यकता होती है (`global` नहीं), और यह अगले **रीबूट** पर प्रभावी होता है।
@@ -123,11 +123,11 @@ WebUI में **Analyze** (या `fingerprint-update.sh analyze`) config क�
 
 वैकल्पिक, लेकिन सब कुछ चलाने का आसान तरीका। पाँच टैब:
 
-- **About** - मॉड्यूल और संस्करण जानकारी।
-- **Device** - हर build फ़ील्ड, प्रति state सेट और श्रेणी के अनुसार समूहीकृत।
-- **Spoofing** - scope मोड और इंजन स्विच।
-- **System** - resetprop समूह।
-- **Tools** - Analyze, Check Update, Update Now, Backup / Restore, boot पर स्वतः-अपडेट, और
+- **About**: मॉड्यूल और संस्करण जानकारी।
+- **Device**: हर build फ़ील्ड, प्रति state सेट और श्रेणी के अनुसार समूहीकृत।
+- **Spoofing**: scope मोड और इंजन स्विच।
+- **System**: resetprop समूह।
+- **Tools**: Analyze, Check Update, Update Now, Backup / Restore, boot पर स्वतः-अपडेट, और
   Diagnostics रिपोर्ट (एक बग रिपोर्ट के लिए उपयोगी हर चीज़ को पढ़ने और निर्यात करने के लिए एक बटन)।
 
 यह कोई नेटवर्क अनुरोध नहीं करता; इसे जो भी चाहिए वह मॉड्यूल के भीतर ही आता है।
@@ -136,15 +136,15 @@ WebUI में **Analyze** (या `fingerprint-update.sh analyze`) config क�
 
 - **एक ऐप अभी भी असली डिवाइस देखता है।** scope जाँचें: `playstore` में केवल Play स्टैक कवर होता
   है। पुष्टि करें कि config parse होती है (Analyze चलाएँ)। इंजन, `drm_targets` या प्रोफ़ाइल बदलने
-  के बाद, **रीबूट** करें - zygote शुरू होने पर Zygisk scope पढ़ता है।
+  के बाद, **रीबूट** करें: zygote शुरू होने पर Zygisk scope पढ़ता है।
 - **Play Integrity अभी भी विफल होता है।** सुनिश्चित करें कि fingerprint ताज़ा है (Check Update)
   और कि `SECURITY_PATCH` `global_fields` में है ताकि यह डिवाइस-भर में सुसंगत रहे। Google Play
   services को kill करें ताकि यह फिर से attest करे।
 - **संस्करण spoofing सक्षम करने के बाद फ़ोन softloop करता है।** यह ऊपर वाला Android संस्करण जाल
-  है - `spoof_version` को वापस `never` पर सेट करें।
-- **Magisk पर WebUI नहीं खुलती।** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) का उपयोग करें।
+  है: `spoof_version` को वापस `never` पर सेट करें।
+- **Magisk पर WebUI नहीं खुलती।** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) या [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) का उपयोग करें।
 
-*यह दस्तावेज़ीकरण Claude (Anthropic) के साथ तैयार किया गया था और इसका रखरखाव VD171 द्वारा किया जाता है। सुधार और बेहतरी का स्वागत है - [../CONTRIBUTING.md](CONTRIBUTING.md) देखें।*
+*यह दस्तावेज़ीकरण Claude (Anthropic) के साथ तैयार किया गया था और इसका रखरखाव VD171 द्वारा किया जाता है। सुधार और बेहतरी का स्वागत है: [../CONTRIBUTING.md](CONTRIBUTING.md) देखें।*
 
 <!-- doc-footer -->
 

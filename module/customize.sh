@@ -27,6 +27,12 @@ CONFIG_FILE="$DATA_DIR/COPG-VD.json"
 LEGACY_JSON="/data/adb/COPG-VD.json"
 CONFLICT_MODULES="COPG playintegrity playintegrityfix [i][n][t][e][g][r][i][t][y][-]*[b][o][x]"
 
+# Headless/commandline mode: resolve the volume prompts to their default without the
+# hardware key wait. On when a marker/env is set, or when `timeout` is missing (then the
+# getevent prompt cannot be time-boxed and would block forever).
+CLI_MODE=false
+{ [ -f /data/local/tmp/.copgvd_cli ] || [ -n "$COPGVD_CLI" ] || ! command -v timeout >/dev/null 2>&1; } && CLI_MODE=true
+
 print_box_start() {
   ui_print "╔═════════════════════════════════╗"
   ui_print "                                 "
@@ -87,6 +93,13 @@ prompt_gphoto_spoof() {
   ui_print " ➤ Volume Up: Yes (Recommended)  "
   ui_print " ➤ Volume Down: No               "
   print_box_end
+
+  if $CLI_MODE; then
+    [ -n "$COPGVD_GPHOTO" ] && ENABLE_GPHOTO_SPOOF="$COPGVD_GPHOTO"
+    [ -f /data/local/tmp/.copgvd_gphoto ] && ENABLE_GPHOTO_SPOOF="$(cat /data/local/tmp/.copgvd_gphoto 2>/dev/null || echo false)"
+    ui_print " ⌨ CLI mode: Google Photos spoof = $ENABLE_GPHOTO_SPOOF"
+    return
+  fi
 
   TIMEOUT=10
   START_TIME=$(date +%s)
@@ -201,6 +214,32 @@ check_config_file() {
   chcon u:object_r:system_file:s0 "$CONFIG_FILE"
 }
 
+setup_vdlu() {
+  [ -f "$MODPATH/vdlu/update.sh" ] || return 0
+  chmod 0755 "$MODPATH/vdlu/update.sh" "$MODPATH/vdlu/vdlu-verify" 2>/dev/null
+  [ -f "$MODPATH/post-fs-data.sh" ] && chmod 0755 "$MODPATH/post-fs-data.sh" 2>/dev/null
+  if [ -d "$MODPATH/bin" ]; then
+    case "$ARCH" in
+      arm64) ABIDIR=arm64-v8a ;;
+      arm)   ABIDIR=armeabi-v7a ;;
+      x64)   ABIDIR=x86_64 ;;
+      *)     ABIDIR="" ;;
+    esac
+    for d in "$MODPATH"/bin/*/; do
+      [ -d "$d" ] || continue
+      [ "$(basename "$d")" = "$ABIDIR" ] || rm -rf "$d"
+    done
+    find "$MODPATH/bin" -type f ! -name '.gitkeep' ! -name 'PROVENANCE.json' -exec chmod 0755 {} + 2>/dev/null
+  fi
+  VDLU_DIR="$DATA_DIR/vdlu"
+  if [ ! -f "$VDLU_DIR/config" ] && [ -f "$MODPATH/vdlu/config.default" ]; then
+    mkdir -p "$VDLU_DIR"
+    cp -f "$MODPATH/vdlu/config.default" "$VDLU_DIR/config"
+    chmod 0644 "$VDLU_DIR/config"
+    chcon u:object_r:system_file:s0 "$VDLU_DIR/config" 2>/dev/null
+  fi
+}
+
 check_conflict_modules() {
   FOUND=""
   for module in $CONFLICT_MODULES; do
@@ -221,6 +260,21 @@ check_conflict_modules() {
   ui_print " ➤ Volume Up: Uninstall all them. "
   ui_print " ➤ Volume Down: Do it after. "
   print_box_end
+
+  if $CLI_MODE; then
+    if [ -n "$COPGVD_CONFLICT_UNINSTALL" ]; then
+      ui_print " ⌨ CLI mode: uninstalling conflicting modules"
+      for found in $FOUND; do
+        touch "$found/disable"
+        touch "$found/remove"
+      done
+      return
+    fi
+    ui_print " ⌨ CLI mode: conflicting modules present - aborting"
+    ui_print "   (uninstall them first, or set COPGVD_CONFLICT_UNINSTALL=1)"
+    print_failure_and_exit
+    return
+  fi
 
   TIMEOUT=10
   START_TIME=$(date +%s)
@@ -290,6 +344,7 @@ fi
 check_conflict_modules
 check_config_file
 migrate_version_keys
+setup_vdlu
 
 chmod 0755 "$MODPATH/service.sh"
 chmod 0755 "$MODPATH/fingerprint-update.sh"

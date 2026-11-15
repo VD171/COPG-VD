@@ -1,4 +1,4 @@
-> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · Svenska · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
+> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · Svenska · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Українська](../uk/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
 
 ---
 
@@ -24,7 +24,7 @@ den valfria profilhämtningen, inget nätverk.
 
 Eftersom forkar ärver zygotes copy-on-write-minneskopia startar varje app från konfigurationen som
 lästes vid boot. Modulen läser om filen per riktad process endast när den faktiskt har
-ändrats, så en nystartad eller återöppnad app plockar upp en redigerad profil - men själva
+ändrats, så en nystartad eller återöppnad app plockar upp en redigerad profil: men själva
 omfattningsbeslutet fattas vid zygote-start, så **att ändra omfattningen, motorerna eller
 `drm_targets` kräver en omstart**.
 
@@ -37,7 +37,7 @@ Var och en är oberoende och omkopplingsbar.
 - **Property-hook (`motor_prop_hook`).** Presenterar de spoofade systemproperties för
   processen genom en clean-room-ommappning, per process, av property-området (`prop_virtualizer`).
   Det är en minnesommappning, inte en funktionshook, så det finns inget avtryck av en hookad funktion.
-- **resetprop (över hela enheten).** Skriver systemproperties per grupp - identitet, version,
+- **resetprop (över hela enheten).** Skriver systemproperties per grupp: identitet, version,
   boot-tillstånd, SELinux, adb/usb, anti-emulator, plus ett upprensningspass. Boot-skripten kör
   det. I ett läge med omfattning lämnas identitets- och versionsgrupperna utanför (Zygisk levererar dem
   per process); grupperna boot, lock och SELinux förblir globala så att enheten är koherent.
@@ -73,7 +73,7 @@ softloop. Versionsgruppen är därför av som standard och grindad bakom
 `getprop`, eftersom `getprop` är precis det som den förfalskar. Se fällan i
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Den här dokumentationen genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar är välkomna - se [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Den här dokumentationen genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar är välkomna: se [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

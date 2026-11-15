@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · Bahasa Indonesia · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · Bahasa Indonesia · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -19,7 +19,7 @@ di dalam, lihat [ARCHITECTURE.md](ARCHITECTURE.md).
    PlayIntegrityFix atau GooglePhotosUnlimited.
 
 Buka WebUI dari root manager Anda untuk mengendalikan modul. Pengguna Magisk membukanya dengan
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Semuanya juga
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) atau [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases). Semuanya juga
 dapat diedit langsung di `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Siapa yang melihat spoof (scope)
@@ -42,16 +42,16 @@ tanpa mengekspos spoof ke aplikasi yang tidak terkait.
 
 Setiap mesin bersifat independen dan dapat dimatikan. Semua aktif secara default kecuali DRM.
 
-- **Field Build (`motor_jni`)** - menulis ulang `android.os.Build.*` di proses yang
+- **Field Build (`motor_jni`)**: menulis ulang `android.os.Build.*` di proses yang
   ditargetkan. Inilah yang dibaca sebagian besar aplikasi.
-- **Property hook (`motor_prop_hook`)** - menyajikan properti sistem palsu ke proses yang
+- **Property hook (`motor_prop_hook`)**: menyajikan properti sistem palsu ke proses yang
   ditargetkan, melalui remap clean-room per proses dari area properti (tanpa hook fungsi).
-- **resetprop** - menulis ulang properti sistem di seluruh perangkat, per grup (identity,
+- **resetprop**: menulis ulang properti sistem di seluruh perangkat, per grup (identity,
   version, boot state, SELinux, adb/usb, anti-emulator, dan satu pass pembersihan). Dalam
   mode scoped, grup identity dan version tetap di luar pass seluruh perangkat (Zygisk
   mengirimkannya per proses); grup boot, lock, dan SELinux tetap global. Nyalakan/matikan di
   `COPG-VD-Settings.resetprop`.
-- **DRM / Widevine (`motor_drm`, nonaktif secara default)** - melaporkan tingkat keamanan
+- **DRM / Widevine (`motor_drm`, nonaktif secara default)**: melaporkan tingkat keamanan
   Widevine yang dipilih (L1 atau L3) ke aplikasi yang membacanya. Lihat bagian DRM di bawah.
 
 ## Menjaga fingerprint tetap segar
@@ -68,7 +68,7 @@ Google terbaru.
   patch, SDK, UUID, host, user). Semua yang Anda sesuaikan tetap dipertahankan, dan konten
   sebelumnya disimpan sebagai `.bak`.
 - Ia tidak pernah mundur (build upstream yang lebih lama ditolak), dan jika profil Anda
-  men-spoof perangkat yang berbeda ia tidak menerapkan apa pun - fingerprint Pixel pada
+  men-spoof perangkat yang berbeda ia tidak menerapkan apa pun: fingerprint Pixel pada
   profil lain lebih buruk daripada yang lama.
 - `resetprop` diterapkan ulang tepat setelah pembaruan, tetapi `android.os.Build` ditulis
   saat zygote mulai, jadi **reboot** agar nilai baru mencapai aplikasi. Log:
@@ -86,10 +86,10 @@ Field-field ini tidak ada dalam config yang dikirimkan dan updater tidak pernah 
 **Spoof Android version** (`COPG-VD-Settings.spoof_version`) menentukan apakah mereka
 diterapkan sama sekali:
 
-- `never` (default) - versi ROM itu sendiri yang digunakan.
-- `rom` - hanya menerapkan apa yang tidak melebihi ROM, yang dalam praktiknya berarti
+- `never` (default): versi ROM itu sendiri yang digunakan.
+- `rom`: hanya menerapkan apa yang tidak melebihi ROM, yang dalam praktiknya berarti
   menurunkan SDK.
-- `force` - menerapkan persis apa yang dikatakan config. Inilah yang menyebabkan softloop;
+- `force`: menerapkan persis apa yang dikatakan config. Inilah yang menyebabkan softloop;
   gunakan hanya jika Anda tahu framework target mendukungnya.
 
 Versi sebenarnya dibaca dari `/system/build.prop`, tidak pernah dari `getprop` (yang justru
@@ -102,7 +102,7 @@ Nonaktif secara default (`motor_drm`). Ketika aktif, ia melaporkan tingkat Widev
 dipilih, `DRM_SECURITY_LEVEL` (`L1` atau `L3`), ke aplikasi yang membacanya.
 
 Secara default spoof DRM mengikuti `scope_mode`. Untuk menerapkannya ke sekumpulan aplikasi
-tertentu alih-alih - secara independen dari scope utama - daftarkan mereka di `drm_targets`.
+tertentu alih-alih, secara independen dari scope utama, daftarkan mereka di `drm_targets`.
 Modul kemudian tetap dimuat di aplikasi yang terdaftar **hanya** untuk hook DRM, bahkan
 ketika aplikasi itu berada di luar scope utama; daftar yang kosong atau tidak ada berarti
 mengikuti scope. Ini memerlukan mode scoped (bukan `global`), dan berlaku pada **reboot**
@@ -126,11 +126,11 @@ Jalankan setiap kali Anda mengedit config secara manual.
 
 Opsional, tetapi cara mudah untuk mengendalikan segalanya. Lima tab:
 
-- **About** - info modul dan versi.
-- **Device** - setiap field build, diatur per state dan dikelompokkan berdasarkan kategori.
-- **Spoofing** - mode scope dan saklar mesin.
-- **System** - grup resetprop.
-- **Tools** - Analyze, Check Update, Update Now, Backup / Restore, auto-update saat boot, dan
+- **About**: info modul dan versi.
+- **Device**: setiap field build, diatur per state dan dikelompokkan berdasarkan kategori.
+- **Spoofing**: mode scope dan saklar mesin.
+- **System**: grup resetprop.
+- **Tools**: Analyze, Check Update, Update Now, Backup / Restore, auto-update saat boot, dan
   laporan Diagnostics (satu tombol untuk membaca dan mengekspor semua yang berguna untuk
   laporan bug).
 
@@ -141,16 +141,16 @@ modul.
 
 - **Sebuah aplikasi masih melihat perangkat yang sebenarnya.** Periksa scope: pada
   `playstore` hanya stack Play yang tercakup. Pastikan config dapat diparse (jalankan
-  Analyze). Setelah mengubah mesin, `drm_targets` atau profil, **reboot** - Zygisk membaca
+  Analyze). Setelah mengubah mesin, `drm_targets` atau profil, **reboot**: Zygisk membaca
   scope saat zygote mulai.
 - **Play Integrity masih gagal.** Pastikan fingerprint segar (Check Update) dan bahwa
   `SECURITY_PATCH` ada di `global_fields` sehingga tetap koheren di seluruh perangkat. Kill
   Google Play services agar ia melakukan atestasi ulang.
 - **Ponsel softloop setelah mengaktifkan version spoofing.** Itu adalah jebakan versi Android
-  di atas - setel `spoof_version` kembali ke `never`.
-- **WebUI tidak mau terbuka di Magisk.** Gunakan [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases).
+  di atas: setel `spoof_version` kembali ke `never`.
+- **WebUI tidak mau terbuka di Magisk.** Gunakan [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) atau [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima - lihat [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima: lihat [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

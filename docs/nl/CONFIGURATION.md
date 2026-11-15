@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · Nederlands · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
+> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · Nederlands · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Українська](../uk/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
 
 ---
 
@@ -54,7 +54,7 @@ attestatiepad een andere waarde rapporteren dan de gewone, zodat de keystore coh
 > **De versiegroep is speciaal.** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` en `CODENAME`
 > beschrijven jouw ROM, niet het gespoofte apparaat. Ze verhogen softloopt de telefoon. Ze zitten niet
 > in het meegeleverde profiel en zijn alleen van toepassing wanneer `COPG-VD-Settings.spoof_version` het
-> toestaat - zie [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
+> toestaat: zie [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
 ### Veldstatussen
 
@@ -77,13 +77,12 @@ Instellingen die met het profiel meereizen, zodat een back-up je keuzes meedraag
 |---|---|---|
 | `resetprop` | bool | Of de apparaatbrede resetprop-engine draait. |
 | `autoupdate` | bool | Of `fingerprint-update.sh` eenmaal per boot draait. Standaard aan. |
-| `spoof_manufacturer` | bool | Of het manufacturer-veld ook wordt gespooft. |
 | `spoof_version` | `never` / `rom` / `force` | Hoe de Android-versiegroep wordt toegepast. `never` is de standaard; `force` wordt geweigerd bij het herstellen van een back-up. |
 
 ## `global_fields`
 
 Build-velden in deze lijst worden apparaatbreed toegepast, zelfs in een scoped modus, om een waarde
-overal consistent te houden. Gebruik het alleen voor coherentie-veilige velden - de security patch is de
+overal consistent te houden. Gebruik het alleen voor coherentie-veilige velden: de security patch is de
 gebruikelijke. Zet **nooit** identiteit of de Android-versiegroep hier.
 
 ```json
@@ -114,7 +113,7 @@ gebruikelijke. Zet **nooit** identiteit of de Android-versiegroep hier.
 }
 ```
 
-*Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom - zie [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom: zie [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

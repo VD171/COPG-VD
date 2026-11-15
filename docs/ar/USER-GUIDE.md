@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · العربية · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · العربية · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -18,7 +18,7 @@
    GooglePhotosUnlimited.
 
 افتح الـ WebUI من مدير الـ root لديك للتحكم في الوحدة. يفتحها مستخدمو Magisk عبر
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). كما يمكن
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) أو [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases). كما يمكن
 تحرير كل شيء مباشرة في `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## من يرى الانتحال (النطاق)
@@ -41,17 +41,17 @@
 
 كل محرك مستقل ويمكن إيقاف تشغيله. جميعها مفعّلة افتراضياً باستثناء DRM.
 
-- **حقول Build‏ (`motor_jni`)** - يعيد كتابة `android.os.Build.*` في العمليات
+- **حقول Build‏ (`motor_jni`)**: يعيد كتابة `android.os.Build.*` في العمليات
   المستهدفة. هذا ما تقرأه معظم التطبيقات.
-- **خطّاف الخصائص‏ (`motor_prop_hook`)** - يقدّم خصائص النظام المنتحَلة إلى العمليات
+- **خطّاف الخصائص‏ (`motor_prop_hook`)**: يقدّم خصائص النظام المنتحَلة إلى العمليات
   المستهدفة، عبر إعادة تخطيط نظيفة (clean-room) لمنطقة الخصائص لكل عملية على حدة (بدون
   خطّاف دالة).
-- **resetprop** - يعيد كتابة خصائص النظام على مستوى الجهاز بأكمله، حسب المجموعة (الهوية،
+- **resetprop**: يعيد كتابة خصائص النظام على مستوى الجهاز بأكمله، حسب المجموعة (الهوية،
   الإصدار، حالة الإقلاع، SELinux، adb/usb، مكافحة المحاكي، وتمريرة تنظيف). في وضع ذي نطاق
   تبقى مجموعتا الهوية والإصدار خارج التمريرة على مستوى الجهاز (يسلّمها Zygisk لكل عملية)؛
   وتبقى مجموعات الإقلاع والقفل وSELinux عامة. بدّله في
   `COPG-VD-Settings.resetprop`.
-- **DRM / Widevine‏ (`motor_drm`، معطّل افتراضياً)** - يبلّغ عن مستوى أمان Widevine
+- **DRM / Widevine‏ (`motor_drm`، معطّل افتراضياً)**: يبلّغ عن مستوى أمان Widevine
   مختار (L1 أو L3) للتطبيقات التي تقرأه. راجع قسم DRM أدناه.
 
 ## إبقاء البصمة محدّثة
@@ -67,7 +67,7 @@
   patch، SDK، UUID، host، user). يُحتفظ بكل ما خصّصته، ويُحفظ المحتوى
   السابق كـ `.bak`.
 - لا يتراجع أبداً (يُرفض أي build أقدم من الـ upstream)، وإذا كان ملفك الشخصي ينتحل
-  جهازاً مختلفاً فإنه لا يطبّق شيئاً - بصمة Pixel على ملف تعريف آخر أسوأ
+  جهازاً مختلفاً فإنه لا يطبّق شيئاً: بصمة Pixel على ملف تعريف آخر أسوأ
   من بصمة قديمة.
 - تُعاد تطبيق `resetprop` مباشرة بعد التحديث، لكن `android.os.Build` يُكتب عند
   بدء zygote، لذا **أعد التشغيل** كي تصل القيم الجديدة إلى التطبيقات. السجل:
@@ -84,9 +84,9 @@
 هذه الحقول ليست في الإعداد المرفق ولا يكتبها المحدِّث أبداً. يقرّر **Spoof
 Android version**‏ (`COPG-VD-Settings.spoof_version`) ما إذا كانت ستُطبَّق أصلاً:
 
-- `never` (الافتراضي) - يُستخدم إصدار الـ ROM الخاص به.
-- `rom` - يطبّق فقط ما لا يتجاوز الـ ROM، وهو ما يعني عملياً خفض الـ SDK.
-- `force` - يطبّق بالضبط ما يقوله الإعداد. هذا ما يسبب الـ softloop؛ استخدمه
+- `never` (الافتراضي): يُستخدم إصدار الـ ROM الخاص به.
+- `rom`: يطبّق فقط ما لا يتجاوز الـ ROM، وهو ما يعني عملياً خفض الـ SDK.
+- `force`: يطبّق بالضبط ما يقوله الإعداد. هذا ما يسبب الـ softloop؛ استخدمه
   فقط إذا كنت تعرف أن الـ framework المستهدف يدعمه.
 
 يُقرأ الإصدار الحقيقي من `/system/build.prop`، لا من `getprop` أبداً (وهو تحديداً ما
@@ -99,7 +99,7 @@ Android version**‏ (`COPG-VD-Settings.spoof_version`) ما إذا كانت س�
 `DRM_SECURITY_LEVEL`‏ (`L1` أو `L3`)، للتطبيقات التي تقرأه.
 
 افتراضياً يتبع انتحال DRM قيمة `scope_mode`. لتطبيقه بدلاً من ذلك على مجموعة محددة من
-التطبيقات - بشكل مستقل عن النطاق الرئيسي - أدرجها في `drm_targets`. تبقى الوحدة عندئذٍ
+التطبيقات, بشكل مستقل عن النطاق الرئيسي, أدرجها في `drm_targets`. تبقى الوحدة عندئذٍ
 محمَّلة في تطبيق مدرَج **فقط** من أجل خطّاف DRM، حتى عندما يكون ذلك التطبيق خارج النطاق
 الرئيسي؛ وتعني القائمة الفارغة أو الغائبة اتّباع النطاق. يتطلب هذا وضعاً ذا نطاق (لا
 `global`)، ويسري مفعوله عند **إعادة التشغيل** التالية.
@@ -122,11 +122,11 @@ Android version**‏ (`COPG-VD-Settings.spoof_version`) ما إذا كانت س�
 
 اختياري، لكنه الطريقة السهلة للتحكم في كل شيء. خمسة تبويبات:
 
-- **About** - معلومات الوحدة والإصدار.
-- **Device** - كل حقل build، مضبوط حسب الحالة ومجمَّع حسب الفئة.
-- **Spoofing** - وضع النطاق ومفاتيح المحركات.
-- **System** - مجموعات resetprop.
-- **Tools** - Analyze وCheck Update وUpdate Now وBackup / Restore، والتحديث التلقائي عند
+- **About**: معلومات الوحدة والإصدار.
+- **Device**: كل حقل build، مضبوط حسب الحالة ومجمَّع حسب الفئة.
+- **Spoofing**: وضع النطاق ومفاتيح المحركات.
+- **System**: مجموعات resetprop.
+- **Tools**: Analyze وCheck Update وUpdate Now وBackup / Restore، والتحديث التلقائي عند
   الإقلاع، وتقرير Diagnostics (زر واحد لقراءة وتصدير كل ما هو مفيد لتقرير
   خطأ).
 
@@ -136,15 +136,15 @@ Android version**‏ (`COPG-VD-Settings.spoof_version`) ما إذا كانت س�
 
 - **لا يزال تطبيق يرى الجهاز الحقيقي.** افحص النطاق: في `playstore` يُغطّى مكدس Play
   فقط. تأكد من أن الإعداد يُحلَّل (شغّل Analyze). بعد تغيير المحركات أو
-  `drm_targets` أو ملف التعريف، **أعد التشغيل** - يقرأ Zygisk النطاق عند بدء zygote.
+  `drm_targets` أو ملف التعريف، **أعد التشغيل**: يقرأ Zygisk النطاق عند بدء zygote.
 - **لا يزال Play Integrity يفشل.** تأكد من أن البصمة حديثة (Check Update) وأن
   `SECURITY_PATCH` موجود في `global_fields` كي يبقى متسقاً على مستوى الجهاز بأكمله. أوقف
   Google Play services كي يعيد الإثبات (attest).
 - **يدخل الهاتف في softloop بعد تفعيل انتحال الإصدار.** هذا هو فخّ إصدار Android
-  أعلاه - أعد ضبط `spoof_version` إلى `never`.
-- **لا يفتح الـ WebUI على Magisk.** استخدم [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases).
+  أعلاه: أعد ضبط `spoof_version` إلى `never`.
+- **لا يفتح الـ WebUI على Magisk.** استخدم [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) أو [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*تم إنشاء هذه الوثائق باستخدام Claude (Anthropic) وتتم صيانتها بواسطة VD171. التصحيحات والتحسينات مرحّب بها - راجع [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*تم إنشاء هذه الوثائق باستخدام Claude (Anthropic) وتتم صيانتها بواسطة VD171. التصحيحات والتحسينات مرحّب بها: راجع [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

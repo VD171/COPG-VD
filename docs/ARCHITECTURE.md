@@ -1,4 +1,4 @@
-> **Languages:** English · [العربية](ar/ARCHITECTURE.md) · [Čeština](cs/ARCHITECTURE.md) · [Deutsch](de/ARCHITECTURE.md) · [Español](es/ARCHITECTURE.md) · [فارسی](fa/ARCHITECTURE.md) · [Français](fr/ARCHITECTURE.md) · [हिन्दी](hi/ARCHITECTURE.md) · [Bahasa Indonesia](in/ARCHITECTURE.md) · [Italiano](it/ARCHITECTURE.md) · [日本語](ja/ARCHITECTURE.md) · [한국어](ko/ARCHITECTURE.md) · [Nederlands](nl/ARCHITECTURE.md) · [Polski](pl/ARCHITECTURE.md) · [Português](pt/ARCHITECTURE.md) · [Русский](ru/ARCHITECTURE.md) · [Svenska](sv/ARCHITECTURE.md) · [ไทย](th/ARCHITECTURE.md) · [Türkçe](tr/ARCHITECTURE.md) · [Tiếng Việt](vi/ARCHITECTURE.md) · [中文](zh/ARCHITECTURE.md)
+> **Languages:** English · [العربية](ar/ARCHITECTURE.md) · [Čeština](cs/ARCHITECTURE.md) · [Deutsch](de/ARCHITECTURE.md) · [Español](es/ARCHITECTURE.md) · [فارسی](fa/ARCHITECTURE.md) · [Français](fr/ARCHITECTURE.md) · [हिन्दी](hi/ARCHITECTURE.md) · [Bahasa Indonesia](in/ARCHITECTURE.md) · [Italiano](it/ARCHITECTURE.md) · [日本語](ja/ARCHITECTURE.md) · [한국어](ko/ARCHITECTURE.md) · [Nederlands](nl/ARCHITECTURE.md) · [Polski](pl/ARCHITECTURE.md) · [Português](pt/ARCHITECTURE.md) · [Русский](ru/ARCHITECTURE.md) · [Svenska](sv/ARCHITECTURE.md) · [ไทย](th/ARCHITECTURE.md) · [Türkçe](tr/ARCHITECTURE.md) · [Українська](uk/ARCHITECTURE.md) · [Tiếng Việt](vi/ARCHITECTURE.md) · [中文](zh/ARCHITECTURE.md)
 
 ---
 
@@ -24,7 +24,7 @@ optional profile fetch, no network.
 
 Because forks inherit the zygote's memory copy-on-write, each app starts from the config
 read at boot. The module re-reads the file per targeted process only when it has actually
-changed, so a newly started or reopened app picks up an edited profile - but the scope
+changed, so a newly started or reopened app picks up an edited profile: but the scope
 decision itself is made at zygote start, so **changing the scope, the engines or
 `drm_targets` needs a reboot**.
 
@@ -37,7 +37,7 @@ Each is independent and switchable.
 - **Property hook (`motor_prop_hook`).** Presents the spoofed system properties to the
   process through a clean-room, per-process remap of the property area (`prop_virtualizer`).
   It is a memory remap, not a function hook, so there is no hooked-function footprint.
-- **resetprop (device-wide).** Writes system properties by group - identity, version,
+- **resetprop (device-wide).** Writes system properties by group: identity, version,
   boot state, SELinux, adb/usb, anti-emulator, plus a cleanup pass. The boot scripts run
   it. In a scoped mode the identity and version groups are left out (Zygisk delivers them
   per process); boot, lock and SELinux groups stay global so the device is coherent.
@@ -73,7 +73,7 @@ softloop. The version group is therefore off by default and gated behind
 `getprop`, because `getprop` is exactly what it falsifies. See the trap in
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome - see [../CONTRIBUTING.md](../CONTRIBUTING.md).*
+*This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome: see [../CONTRIBUTING.md](../CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

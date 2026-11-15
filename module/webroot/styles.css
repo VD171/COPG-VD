@@ -905,3 +905,22 @@ body.dark-theme .version-select {
 .about-val { font-size: 15px; font-weight: 500; color: var(--ink); word-break: break-word; }
 .about-row.link .about-val { color: var(--accent); }
 .about-trademarks { margin: 18px 4px 4px; font-size: 0.72rem; line-height: 1.5; color: var(--muted); }
+
+/* VDLU widget theme bridge: expose the widget's expected variable names from COPG's
+   tokens. Declared on body so var() resolves against the active theme (body.dark-theme). */
+body {
+    --fg: var(--ink);
+    --fg2: var(--muted);
+    --fg3: var(--muted);
+    --surface2: var(--surface-2);
+    --border: var(--line);
+    --orange: var(--warn);
+    --orange-dim: var(--warn-weak);
+    --red: var(--danger);
+    --green: #22c55e;
+    --window-inset-top: var(--safe-t);
+    --window-inset-bottom: var(--safe-b);
+    --vdlu-accent: var(--accent);
+    --vdlu-radius: var(--r-card);
+    --vdlu-radius-sm: var(--r-ctrl);
+}

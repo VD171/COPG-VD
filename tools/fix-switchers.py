@@ -17,6 +17,7 @@
 #  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
 #  XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
 #  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+#  Channel        : @Priv8_VD https://t.me/Priv8_VD
 #  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
 #  E-mail         : vd.priv8@pm.me
 # ======================================================================
@@ -29,11 +30,11 @@ import os, sys
 
 ROOT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.getcwd()
 LANGS = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "in", "it", "ja", "ko",
-         "nl", "pl", "pt", "ru", "sv", "th", "tr", "vi", "zh"]
+         "nl", "pl", "pt", "ru", "sv", "th", "tr", "uk", "vi", "zh"]
 ENDO = {"en": "English", "ar": "العربية", "cs": "Čeština", "de": "Deutsch", "es": "Español",
         "fa": "فارسی", "fr": "Français", "hi": "हिन्दी", "in": "Bahasa Indonesia", "it": "Italiano",
         "ja": "日本語", "ko": "한국어", "nl": "Nederlands", "pl": "Polski", "pt": "Português",
-        "ru": "Русский", "sv": "Svenska", "th": "ไทย", "tr": "Türkçe", "vi": "Tiếng Việt", "zh": "中文"}
+        "ru": "Русский", "sv": "Svenska", "th": "ไทย", "tr": "Türkçe", "uk": "Українська", "vi": "Tiếng Việt", "zh": "中文"}
 DOCS_BASES = ["USER-GUIDE", "CONFIGURATION", "ARCHITECTURE", "FILE-STRUCTURE"]
 ROOT_BASES = ["CONTRIBUTING", "CODE_OF_CONDUCT", "SECURITY"]
 

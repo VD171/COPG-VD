@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · Español · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
+> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · Español · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Українська](../uk/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
 
 ---
 
@@ -57,7 +57,7 @@ keystore se mantenga coherente.
 > **El grupo de versión es especial.** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` y `CODENAME`
 > describen tu ROM, no el dispositivo falsificado. Subirlos mete el teléfono en un softloop.
 > No están en el perfil incluido y solo se aplican cuando `COPG-VD-Settings.spoof_version` lo
-> permite - consulta [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
+> permite: consulta [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
 ### Estados de campo
 
@@ -81,14 +81,13 @@ Ajustes que viajan con el perfil, de modo que una copia de seguridad lleva tus d
 |---|---|---|
 | `resetprop` | bool | Si se ejecuta el motor resetprop en todo el dispositivo. |
 | `autoupdate` | bool | Si `fingerprint-update.sh` se ejecuta una vez por arranque. Activado de forma predeterminada. |
-| `spoof_manufacturer` | bool | Si el campo de fabricante también se falsifica. |
 | `spoof_version` | `never` / `rom` / `force` | Cómo se aplica el grupo de versión de Android. `never` es el predeterminado; `force` se rechaza al restaurar una copia de seguridad. |
 
 ## `global_fields`
 
 Los campos Build de esta lista se aplican en todo el dispositivo incluso en un modo con
 alcance acotado, para mantener un valor consistente en todas partes. Úsalo solo para campos
-seguros en cuanto a coherencia - el parche de seguridad es el habitual. **Nunca** pongas aquí
+seguros en cuanto a coherencia: el parche de seguridad es el habitual. **Nunca** pongas aquí
 la identidad ni el grupo de versión de Android.
 
 ```json
@@ -119,7 +118,7 @@ la identidad ni el grupo de versión de Android.
 }
 ```
 
-*Esta documentación fue generada con Claude (Anthropic) y es mantenida por VD171. Las correcciones y mejoras son bienvenidas - consulta [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Esta documentación fue generada con Claude (Anthropic) y es mantenida por VD171. Las correcciones y mejoras son bienvenidas: consulta [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

@@ -1,4 +1,4 @@
-> **Languages:** [English](../../SECURITY.md) · [العربية](../ar/SECURITY.md) · [Čeština](../cs/SECURITY.md) · [Deutsch](../de/SECURITY.md) · [Español](../es/SECURITY.md) · فارسی · [Français](../fr/SECURITY.md) · [हिन्दी](../hi/SECURITY.md) · [Bahasa Indonesia](../in/SECURITY.md) · [Italiano](../it/SECURITY.md) · [日本語](../ja/SECURITY.md) · [한국어](../ko/SECURITY.md) · [Nederlands](../nl/SECURITY.md) · [Polski](../pl/SECURITY.md) · [Português](../pt/SECURITY.md) · [Русский](../ru/SECURITY.md) · [Svenska](../sv/SECURITY.md) · [ไทย](../th/SECURITY.md) · [Türkçe](../tr/SECURITY.md) · [Tiếng Việt](../vi/SECURITY.md) · [中文](../zh/SECURITY.md)
+> **Languages:** [English](../../SECURITY.md) · [العربية](../ar/SECURITY.md) · [Čeština](../cs/SECURITY.md) · [Deutsch](../de/SECURITY.md) · [Español](../es/SECURITY.md) · فارسی · [Français](../fr/SECURITY.md) · [हिन्दी](../hi/SECURITY.md) · [Bahasa Indonesia](../in/SECURITY.md) · [Italiano](../it/SECURITY.md) · [日本語](../ja/SECURITY.md) · [한국어](../ko/SECURITY.md) · [Nederlands](../nl/SECURITY.md) · [Polski](../pl/SECURITY.md) · [Português](../pt/SECURITY.md) · [Русский](../ru/SECURITY.md) · [Svenska](../sv/SECURITY.md) · [ไทย](../th/SECURITY.md) · [Türkçe](../tr/SECURITY.md) · [Українська](../uk/SECURITY.md) · [Tiếng Việt](../vi/SECURITY.md) · [中文](../zh/SECURITY.md)
 
 ---
 
@@ -16,7 +16,7 @@ COPG-VD به عنوان روت اجرا می‌شود و از طریق Zygisk ب
 - **XDA-Developers:** [@VD171](https://xdaforums.com/m/vd171.4699873/)
 - **رشته XDA:** https://xdaforums.com/t/COPG-VD.4807698/
 - **Telegram:** [@VD_Priv8](https://t.me/VD_Priv8)
-- **Telegram:** [@Priv8_VD](https://t.me/Priv8_VD)
+- **Channel:** [@Priv8_VD](https://t.me/Priv8_VD)
 - **Discord:** [@VD.Priv8](https://discord.com/users/1296831918989639721)
 - **ایمیل:** vd.priv8@pm.me
 
@@ -37,4 +37,4 @@ COPG-VD به عنوان روت اجرا می‌شود و از طریق Zygisk ب
 - هر باینری و کتابخانه از پیش‌ساخته‌شده قابل ردیابی به یک upstream عمومی پین‌شده است و در CI
   از منبعی که می‌توانید بازرسی کنید ساخته می‌شود.
 
-*این مستندات با Claude (Anthropic) تولید شده و توسط VD171 نگهداری می‌شود. اصلاحات و بهبودها خوش‌آمدند - [CONTRIBUTING.md](CONTRIBUTING.md) را ببینید.*
+*این مستندات با Claude (Anthropic) تولید شده و توسط VD171 نگهداری می‌شود. اصلاحات و بهبودها خوش‌آمدند: [CONTRIBUTING.md](CONTRIBUTING.md) را ببینید.*

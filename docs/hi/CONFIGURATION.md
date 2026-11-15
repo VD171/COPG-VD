@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · हिन्दी · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
+> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · हिन्दी · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Українська](../uk/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
 
 ---
 
@@ -52,7 +52,7 @@
 > **version समूह विशेष है।** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` और `CODENAME` आपके ROM का
 > वर्णन करते हैं, spoof किए गए डिवाइस का नहीं। इन्हें बढ़ाने से फ़ोन softloop करता है। ये भेजी गई
 > प्रोफ़ाइल में नहीं हैं और केवल तभी लागू होते हैं जब `COPG-VD-Settings.spoof_version` इसकी अनुमति
-> देता है - [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap) देखें।
+> देता है: [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap) देखें।
 
 ### फ़ील्ड states
 
@@ -76,13 +76,12 @@
 |---|---|---|
 | `resetprop` | bool | क्या डिवाइस-भर resetprop इंजन चलता है। |
 | `autoupdate` | bool | क्या `fingerprint-update.sh` प्रति boot एक बार चलता है। डिफ़ॉल्ट चालू। |
-| `spoof_manufacturer` | bool | क्या manufacturer फ़ील्ड को भी spoof किया जाता है। |
 | `spoof_version` | `never` / `rom` / `force` | Android version समूह कैसे लागू होता है। `never` डिफ़ॉल्ट है; `force` को backup बहाल करते समय अस्वीकार किया जाता है। |
 
 ## `global_fields`
 
 इस सूची में Build फ़ील्ड scoped मोड में भी डिवाइस-भर में लागू होते हैं, ताकि एक मान हर जगह सुसंगत
-रहे। इसका उपयोग केवल सुसंगतता-सुरक्षित फ़ील्ड के लिए करें - security patch सामान्य वाला है।
+रहे। इसका उपयोग केवल सुसंगतता-सुरक्षित फ़ील्ड के लिए करें: security patch सामान्य वाला है।
 identity या Android version समूह को यहाँ **कभी** न रखें।
 
 ```json
@@ -113,7 +112,7 @@ identity या Android version समूह को यहाँ **कभी** �
 }
 ```
 
-*यह दस्तावेज़ीकरण Claude (Anthropic) के साथ तैयार किया गया था और इसका रखरखाव VD171 द्वारा किया जाता है। सुधार और बेहतरी का स्वागत है - [../CONTRIBUTING.md](CONTRIBUTING.md) देखें।*
+*यह दस्तावेज़ीकरण Claude (Anthropic) के साथ तैयार किया गया था और इसका रखरखाव VD171 द्वारा किया जाता है। सुधार और बेहतरी का स्वागत है: [../CONTRIBUTING.md](CONTRIBUTING.md) देखें।*
 
 <!-- doc-footer -->
 

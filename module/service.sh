@@ -154,8 +154,7 @@ PRODUCT|ro.product.name|ro.product.odm.name|ro.product.product.name|ro.product.s
 DEVICE|ro.product.device|ro.product.odm.device|ro.product.product.device|ro.product.system.device|ro.product.system_ext.device|ro.product.vendor.device|ro.product.vendor_dlkm.device|ro.miui.cust_device|ro.product.marketname|ro.product.odm.marketname|ro.product.product.marketname|ro.product.system.marketname|ro.product.system_ext.marketname|ro.product.vendor.marketname|ro.product.device_for_attestation|ro.product.name_for_attestation|ro.product.odm_dlkm.device|ro.product.system_dlkm.device|ro.quick_start.device_id
 FINGERPRINT|ro.build.fingerprint|ro.odm.build.fingerprint|ro.product.build.fingerprint|ro.system.build.fingerprint|ro.system_ext.build.fingerprint|ro.vendor.build.fingerprint|ro.vendor_dlkm.build.fingerprint|ro.bootimage.build.fingerprint|ro.system_dlkm.build.fingerprint|ro.odm_dlkm.build.fingerprint
 UUID|ro.build.uuid|ro.product.build.uuid
-MANUFACTURER|ro.product.system_ext.manufacturer|ro.product.vendor.manufacturer|ro.product.vendor_dlkm.manufacturer|ro.product.odm.manufacturer|ro.product.product.manufacturer|ro.product.system.manufacturer|ro.fota.oem|ro.product.manufacturer_for_attestation|ro.product.odm_dlkm.manufacturer|ro.product.system_dlkm.manufacturer|ro.soc.manufacturer
-MANUFACTURER|ro.product.manufacturer
+MANUFACTURER|ro.product.manufacturer|ro.product.system_ext.manufacturer|ro.product.vendor.manufacturer|ro.product.vendor_dlkm.manufacturer|ro.product.odm.manufacturer|ro.product.product.manufacturer|ro.product.system.manufacturer|ro.fota.oem|ro.product.manufacturer_for_attestation|ro.product.odm_dlkm.manufacturer|ro.product.system_dlkm.manufacturer|ro.soc.manufacturer
 MAPPING
 }
 
@@ -290,10 +289,6 @@ apply_props() {
         *" $json_key "*)
             { [ "$present" = 1 ] && version_allowed "$json_key" "$json_value"; } || continue ;;
       esac
-      if [ "$json_key" = "MANUFACTURER" ] && [ "$props" = "ro.product.manufacturer" ] &&
-         [ "$(cfg_setting spoof_manufacturer)" = false ]; then
-        continue
-      fi
       if [ "$json_key" = "TAGS" ]; then
         json_value="release-keys"; present=1
       elif [ "$json_key" = "TYPE" ]; then

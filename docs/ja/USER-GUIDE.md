@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · 日本語 · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · 日本語 · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -18,7 +18,7 @@ Pixel を見せます。このガイドはインストールから動作する�
    GooglePhotosUnlimited は不要です。
 
 モジュールを操作するには、root マネージャーから WebUI を開きます。Magisk ユーザーは
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) で開きます。すべては
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) または [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) で開きます。すべては
 `/data/adb/COPG-VD/COPG-VD.json` で直接編集することもできます。
 
 ## 誰がスプーフを見るか(スコープ)
@@ -41,16 +41,16 @@ identity は Zygisk によってプロセスごとに配信され、グローバ
 
 各エンジンは独立しており、オフにできます。DRM を除き、すべてデフォルトでオンです。
 
-- **Build フィールド(`motor_jni`)** - 対象プロセスで `android.os.Build.*` を書き換えます。
+- **Build フィールド(`motor_jni`)**: 対象プロセスで `android.os.Build.*` を書き換えます。
   これはほとんどのアプリが読むものです。
-- **プロパティフック(`motor_prop_hook`)** - プロパティ領域のクリーンルームなプロセスごとの
+- **プロパティフック(`motor_prop_hook`)**: プロパティ領域のクリーンルームなプロセスごとの
   リマップを通じて、対象プロセスにスプーフされたシステムプロパティを提示します(関数フックなし)。
-- **resetprop** - システムプロパティをデバイス全体で、グループごと(identity、
+- **resetprop**: システムプロパティをデバイス全体で、グループごと(identity、
   version、boot 状態、SELinux、adb/usb、anti-emulator、そしてクリーンアップのパス)に書き換えます。
   スコープ付きモードでは identity と version グループはデバイス全体のパスから外れます(Zygisk が
   プロセスごとに配信します);boot、lock、SELinux グループはグローバルのままです。
   `COPG-VD-Settings.resetprop` で切り替えます。
-- **DRM / Widevine(`motor_drm`、デフォルトでオフ)** - 選択した Widevine セキュリティレベル
+- **DRM / Widevine(`motor_drm`、デフォルトでオフ)**: 選択した Widevine セキュリティレベル
   (L1 または L3)をそれを読むアプリに報告します。下の DRM セクションを参照してください。
 
 ## fingerprint を新鮮に保つ
@@ -66,7 +66,7 @@ fingerprint は古くなります: Google はファクトリーイメージを�
   patch、SDK、UUID、host、user)のみを書き換えます。カスタマイズしたものはすべて保持され、以前の
   内容は `.bak` として保存されます。
 - 決して後退しません(より古い upstream build は拒否されます)。プロファイルが
-  別のデバイスをスプーフしている場合は何も適用しません - 別のプロファイル上の Pixel fingerprint は
+  別のデバイスをスプーフしている場合は何も適用しません: 別のプロファイル上の Pixel fingerprint は
   古いものより悪いからです。
 - `resetprop` は更新直後に再適用されますが、`android.os.Build` は zygote の起動時に
   書き込まれるため、新しい値がアプリに届くには **再起動** してください。ログ:
@@ -83,9 +83,9 @@ fingerprint は古くなります: Google はファクトリーイメージを�
 これらのフィールドは同梱の config にはなく、updater は決して書き込みません。**Spoof
 Android version**(`COPG-VD-Settings.spoof_version`)が、これらがそもそも適用されるかを決めます:
 
-- `never`(デフォルト) - ROM 自身のバージョンが使われます。
-- `rom` - ROM を超えないものだけを適用します。実際には SDK を下げることを意味します。
-- `force` - config が言う通り正確に適用します。これが softloop を引き起こすものです; 対象の
+- `never`(デフォルト): ROM 自身のバージョンが使われます。
+- `rom`: ROM を超えないものだけを適用します。実際には SDK を下げることを意味します。
+- `force`: config が言う通り正確に適用します。これが softloop を引き起こすものです; 対象の
   framework がそれをサポートしていると分かっている場合にのみ使用してください。
 
 実際のバージョンは `/system/build.prop` から読まれ、決して `getprop` からは読まれません
@@ -98,7 +98,7 @@ Android version**(`COPG-VD-Settings.spoof_version`)が、これらがそもそ�
 `DRM_SECURITY_LEVEL`(`L1` または `L3`)をそれを読むアプリに報告します。
 
 デフォルトでは DRM スプーフは `scope_mode` に従います。代わりに特定のアプリのセットに
-適用するには - メインスコープとは独立して - それらを `drm_targets` に列挙します。するとモジュールは
+適用するには, メインスコープとは独立して, それらを `drm_targets` に列挙します。するとモジュールは
 列挙されたアプリがメインスコープの外にあっても、DRM フックの**ためだけに**そのアプリ内に
 ロードされたままになります; 空または存在しないリストはスコープに従うことを意味します。これはスコープ付きモード
 (`global` ではない)が必要で、次の **再起動** で有効になります。
@@ -121,11 +121,11 @@ config を手で編集するたびに実行してください。
 
 オプションですが、すべてを操作する簡単な方法です。5 つのタブ:
 
-- **About** - モジュールとバージョンの情報。
-- **Device** - すべての Build フィールド、状態ごとに設定されカテゴリごとにグループ化。
-- **Spoofing** - スコープモードとエンジンのスイッチ。
-- **System** - resetprop グループ。
-- **Tools** - Analyze、Check Update、Update Now、Backup / Restore、起動時自動更新、
+- **About**: モジュールとバージョンの情報。
+- **Device**: すべての Build フィールド、状態ごとに設定されカテゴリごとにグループ化。
+- **Spoofing**: スコープモードとエンジンのスイッチ。
+- **System**: resetprop グループ。
+- **Tools**: Analyze、Check Update、Update Now、Backup / Restore、起動時自動更新、
   そして Diagnostics レポート(バグレポートに有用なすべてを読み取ってエクスポートする 1 つのボタン)。
 
 ネットワークリクエストは行いません; 必要なものはすべてモジュール内に同梱されています。
@@ -134,15 +134,15 @@ config を手で編集するたびに実行してください。
 
 - **アプリがまだ実際のデバイスを見ている。** スコープを確認してください: `playstore` では Play
   スタックのみがカバーされます。config がパースされることを確認してください(Analyze を実行)。エンジン、
-  `drm_targets`、プロファイルを変更した後は **再起動** してください - Zygisk は zygote の起動時にスコープを読みます。
+  `drm_targets`、プロファイルを変更した後は **再起動** してください: Zygisk は zygote の起動時にスコープを読みます。
 - **Play Integrity がまだ失敗する。** fingerprint が新鮮であること(Check Update)、そして
   `SECURITY_PATCH` が `global_fields` にあってデバイス全体で一貫性を保つことを確認してください。
   Google Play services を kill して再アテステーションさせてください。
 - **バージョンスプーフを有効にした後、電話が softloop する。** それは上の Android バージョン
-  の罠です - `spoof_version` を `never` に戻してください。
-- **Magisk で WebUI が開かない。** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) を使ってください。
+  の罠です: `spoof_version` を `never` に戻してください。
+- **Magisk で WebUI が開かない。** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) または [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) を使ってください。
 
-*このドキュメントは Claude (Anthropic) で生成され、VD171 によって保守されています。修正と改善を歓迎します - [../CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。*
+*このドキュメントは Claude (Anthropic) で生成され、VD171 によって保守されています。修正と改善を歓迎します: [../CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。*
 
 <!-- doc-footer -->
 

@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · हिन्दी · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · हिन्दी · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Українська](../uk/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -25,7 +25,7 @@ AI सहायक और एजेंट यहाँ प्रथम-श्र
 - प्रोजेक्ट को पठनीय बनाने के लिए बनाया गया है: कॉन्फ़िगरेशन एक एकल JSON फ़ाइल है
   (`/data/adb/COPG-VD/COPG-VD.json`, [CONFIGURATION.md](CONFIGURATION.md) में प्रलेखित), इंजन छोटे
   और आत्मनिर्भर हैं, और लेआउट [FILE-STRUCTURE.md](FILE-STRUCTURE.md) में है।
-- AI-सहायता प्राप्त पैच की समीक्षा और स्वीकृति किसी भी अन्य के समान शर्तों पर होती है - शुद्धता,
+- AI-सहायता प्राप्त पैच की समीक्षा और स्वीकृति किसी भी अन्य के समान शर्तों पर होती है: शुद्धता,
   स्पष्टता और नीचे दी गई परंपराओं से, न कि इससे कि किसने (या किसने) उन्हें लिखा।
 - सबके लिए समान मानदंड: एक वास्तविक फ़ीचर कभी कमज़ोर नहीं किया जाता, spoof सुसंगत रहता है, और कुछ भी
   गुप्त या डिवाइस-विशिष्ट रिपॉज़िटरी में नहीं उतरता (देखें [.gitignore](../../.gitignore))।
@@ -33,7 +33,7 @@ AI सहायक और एजेंट यहाँ प्रथम-श्र
 ## Dev सेटअप
 
 - परीक्षण के लिए आपको Zygisk (KernelSU, APatch या Magisk) के साथ एक rooted डिवाइस या एमुलेटर चाहिए।
-- native लाइब्रेरी को प्रति ABI NDK (r29) और CMake के साथ बनाएँ - सटीक कमांड के लिए
+- native लाइब्रेरी को प्रति ABI NDK (r29) और CMake के साथ बनाएँ: सटीक कमांड के लिए
   [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml) में `Build zygisk libraries`
   चरण देखें। CI आपके लिए तीनों ABI बनाती है।
 - एक flashable zip बनाएँ: बने हुए `libspoof.so` को `module/zygisk/<abi>.so` में कॉपी करें, फिर
@@ -59,17 +59,17 @@ AI सहायक और एजेंट यहाँ प्रथम-श्र
 - एक स्ट्रिंग जोड़ने या बदलने के लिए: `en.js` **और** `en.json` को संपादित करें, फिर हर `<code>.json`
   को अपडेट करें। एक दृश्यमान लेबल को छूने का अर्थ है **सभी** भाषा फ़ाइलों और **सभी** `README.<code>.md`
   को अपडेट करना।
-- अनुवाद सादे JSON हैं - एक बेहतरीन पहला योगदान।
+- अनुवाद सादे JSON हैं: एक बेहतरीन पहला योगदान।
 
 ## Commits और PR
 
 - PR को केंद्रित रखें। बताएँ क्या और क्यों।
 - अपने commits को sign off करें (DCO): `git commit -s` (`Signed-off-by:` जोड़ता है)।
-- CI हरी रहनी चाहिए। समीक्षाओं में दयालु रहें - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) देखें।
+- CI हरी रहनी चाहिए। समीक्षाओं में दयालु रहें: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) देखें।
 
 ## अच्छे पहले issues
 
 `good first issue` और `help wanted` लेबल देखें। अनुवाद, दस्तावेज़ीकरण, और नई Pixel प्रोफ़ाइलें सभी
 बेहतरीन शुरुआती बिंदु हैं।
 
-*यह दस्तावेज़ीकरण Claude (Anthropic) के साथ तैयार किया गया था और इसका रखरखाव VD171 द्वारा किया जाता है। सुधार और बेहतरी का स्वागत है - [CONTRIBUTING.md](CONTRIBUTING.md) देखें।*
+*यह दस्तावेज़ीकरण Claude (Anthropic) के साथ तैयार किया गया था और इसका रखरखाव VD171 द्वारा किया जाता है। सुधार और बेहतरी का स्वागत है: [CONTRIBUTING.md](CONTRIBUTING.md) देखें।*

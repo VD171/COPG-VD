@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · Türkçe · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · Türkçe · [Українська](../uk/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -36,7 +36,7 @@ bir şey değil.
 
 - Test etmek için Zygisk'li (KernelSU, APatch veya Magisk) root'lanmış bir cihaza veya
   emülatöre ihtiyacınız var.
-- Native kütüphaneyi ABI başına NDK (r29) ve CMake ile derleyin - tam komut için
+- Native kütüphaneyi ABI başına NDK (r29) ve CMake ile derleyin: tam komut için
   [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml) içindeki `Build zygisk
   libraries` adımına bakın. CI her üç ABI'yi sizin için derler.
 - Flash edilebilir bir zip derleyin: derlenen `libspoof.so` dosyasını `module/zygisk/<abi>.so`
@@ -62,17 +62,17 @@ bir şey değil.
 - Bir dize eklemek veya değiştirmek için: `en.js` **ve** `en.json` dosyalarını düzenleyin,
   ardından her `<code>.json` dosyasını güncelleyin. Görünür bir etikete dokunmak, **tüm**
   dil dosyalarını ve **tüm** `README.<code>.md` dosyalarını güncellemek anlamına gelir.
-- Çeviriler düz JSON'dur - harika bir ilk katkı.
+- Çeviriler düz JSON'dur: harika bir ilk katkı.
 
 ## Commit'ler ve PR'lar
 
 - PR'ları odaklı tutun. Neyi ve neden yaptığınızı açıklayın.
 - Commit'lerinizi onaylayın (DCO): `git commit -s` (`Signed-off-by:` ekler).
-- CI yeşil kalmalıdır. İncelemelerde nazik olun - bkz. [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+- CI yeşil kalmalıdır. İncelemelerde nazik olun: bkz. [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## İyi ilk konular (good first issues)
 
 `good first issue` ve `help wanted` etiketlerine bakın. Çeviriler, belgeler ve yeni Pixel
 profilleri harika başlangıç noktalarıdır.
 
-*Bu belge Claude (Anthropic) ile oluşturulmuş ve VD171 tarafından sürdürülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır - bkz. [CONTRIBUTING.md](CONTRIBUTING.md).*
+*Bu belge Claude (Anthropic) ile oluşturulmuş ve VD171 tarafından sürdürülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır: bkz. [CONTRIBUTING.md](CONTRIBUTING.md).*

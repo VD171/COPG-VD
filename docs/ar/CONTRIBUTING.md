@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · العربية · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · العربية · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Українська](../uk/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -24,7 +24,7 @@ COPG-VD هو **منتحِل جهاز بتقنية Zygisk**: مكتبة أصلي�
 - بُني المشروع ليكون قابلاً للقراءة: الإعداد ملف JSON واحد
   (`/data/adb/COPG-VD/COPG-VD.json`، موثَّق في [CONFIGURATION.md](CONFIGURATION.md))،
   والمحركات صغيرة ومكتفية ذاتياً، والتخطيط موجود في [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
-- تُراجع الرقع (patches) المساعَدة بالذكاء الاصطناعي وتُقبل بالشروط نفسها كأي رقعة أخرى - حسب
+- تُراجع الرقع (patches) المساعَدة بالذكاء الاصطناعي وتُقبل بالشروط نفسها كأي رقعة أخرى: حسب
   الصحة والوضوح والقواعد أدناه، لا حسب من (أو ما) كتبها.
 - المعيار نفسه للجميع: لا تُضعَف ميزة حقيقية أبداً، ويبقى الانتحال متسقاً،
   ولا يصل أي شيء سرّي أو خاص بالجهاز إلى المستودع (راجع [.gitignore](../../.gitignore)).
@@ -32,7 +32,7 @@ COPG-VD هو **منتحِل جهاز بتقنية Zygisk**: مكتبة أصلي�
 ## إعداد بيئة التطوير
 
 - تحتاج إلى جهاز مُروَّت (rooted) أو محاكٍ مع Zygisk (KernelSU أو APatch أو Magisk) للاختبار.
-- ابنِ المكتبة الأصلية لكل ABI باستخدام NDK (r29) وCMake - راجع خطوة `Build zygisk
+- ابنِ المكتبة الأصلية لكل ABI باستخدام NDK (r29) وCMake: راجع خطوة `Build zygisk
   libraries` في [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml) لمعرفة
   الأمر الدقيق. يبني الـ CI جميع الـ ABIs الثلاثة نيابةً عنك.
 - ابنِ ملف zip قابلاً للتفليش: انسخ `libspoof.so` المبني إلى `module/zygisk/<abi>.so`، ثم
@@ -58,17 +58,17 @@ COPG-VD هو **منتحِل جهاز بتقنية Zygisk**: مكتبة أصلي�
 - لإضافة سلسلة أو تغييرها: حرّر `en.js` **و** `en.json`، ثم حدّث كل
   `<code>.json`. لمس تسمية مرئية يعني تحديث **جميع** ملفات اللغات و
   **جميع** ملفات `README.<code>.md`.
-- الترجمات هي JSON خام - مساهمة أولى رائعة.
+- الترجمات هي JSON خام: مساهمة أولى رائعة.
 
 ## الـ Commits و الـ PRs
 
 - أبقِ الـ PRs مركّزة. صِف ماذا ولماذا.
 - وقّع على commitاتك (DCO): `git commit -s` (يضيف `Signed-off-by:`).
-- يجب أن يبقى الـ CI أخضر. كن لطيفاً في المراجعات - راجع [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+- يجب أن يبقى الـ CI أخضر. كن لطيفاً في المراجعات: راجع [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## مهام أولى جيدة
 
 ابحث عن الوسمين `good first issue` و`help wanted`. الترجمات والوثائق وملفات تعريف Pixel
 الجديدة كلها نقاط انطلاق رائعة.
 
-*تم إنشاء هذه الوثائق باستخدام Claude (Anthropic) وتتم صيانتها بواسطة VD171. التصحيحات والتحسينات مرحّب بها - راجع [CONTRIBUTING.md](CONTRIBUTING.md).*
+*تم إنشاء هذه الوثائق باستخدام Claude (Anthropic) وتتم صيانتها بواسطة VD171. التصحيحات والتحسينات مرحّب بها: راجع [CONTRIBUTING.md](CONTRIBUTING.md).*

@@ -868,10 +868,8 @@ async function readSetting(key) {
 async function loadToggleStates() {
     try {
         const resetpropToggle = document.getElementById('toggle-resetprop');
-        const roproductmanufacturerToggle = document.getElementById('toggle-ro-product-manufacturer');
         const autoupdateToggle = document.getElementById('toggle-autoupdate');
         resetpropToggle.checked = (await readSetting('resetprop')) !== 'false';
-        roproductmanufacturerToggle.checked = (await readSetting('spoof_manufacturer')) !== 'false';
         autoupdateToggle.checked = (await readSetting('autoupdate')) !== 'false';
         const st = (await execCommand("cat /data/adb/COPG-VD/update.status 2>/dev/null")).trim();
         const su = document.getElementById('autoupdate-status');
@@ -1944,7 +1942,7 @@ function visibleOverlays() {
 }
 
 function currentTabId() {
-    const tabs = ['about', 'devices', 'spoofing', 'system', 'tools'];
+    const tabs = ['about', 'devices', 'spoofing', 'system', 'tools', 'updates'];
     return tabs.find((t) => document.getElementById(`tab-${t}`)?.classList.contains('active'))
         || tabs.find((t) => document.getElementById(`${t}-tab`)?.classList.contains('active'))
         || 'about';
@@ -1967,8 +1965,26 @@ function setupBackNav() {
     });
 }
 
+let vdluPanelMounted = false;
+function setupVdlu() {
+    if (typeof VDLU === 'undefined') return;
+    VDLU.init({
+        moduleDir: '/data/adb/modules/COPG-VD',
+        vdluDir: '/data/adb/COPG-VD/vdlu',
+        modid: 'COPG-VD',
+        module: 'COPG-VD',
+        exec: execCommand
+    });
+    VDLU.onWebUIOpen();
+}
+function mountVdluPanel() {
+    if (vdluPanelMounted || typeof VDLU === 'undefined') return;
+    VDLU.mountUpdatesPanel('vdlu-updates-mount');
+    vdluPanelMounted = true;
+}
+
 function switchTab(tabId, direction = null) {
-    const tabs = ['about', 'devices', 'spoofing', 'system', 'tools'];
+    const tabs = ['about', 'devices', 'spoofing', 'system', 'tools', 'updates'];
     const currentTab = tabs.find(tab => document.getElementById(`${tab}-tab`)?.classList.contains('active'));
     if (currentTab === tabId) return;
     activeOutput = null;
@@ -2005,6 +2021,9 @@ function switchTab(tabId, direction = null) {
         }
         if (tabId === 'tools') {
             checkRebootPending();
+        }
+        if (tabId === 'updates') {
+            mountVdluPanel();
         }
     });
 
@@ -2044,17 +2063,6 @@ function applyEventListeners() {
             e.target.checked = !isChecked;
         }
     });
-    document.getElementById('toggle-ro-product-manufacturer').addEventListener('click', async (e) => {
-        const isChecked = e.target.checked;
-        try {
-            await writeSetting('spoof_manufacturer', isChecked);
-            appendToOutput(isChecked ? "Ro.Product.Manufacturer Enabled. Reboot to see changes" : "Ro.Product.Manufacturer Disabled. Reboot to see changes", isChecked ? 'success' : 'error');
-        } catch (error) {
-            appendToOutput(t('msg_082', {"error": error}), 'error');
-            e.target.checked = !isChecked;
-        }
-    });
-
     document.getElementById('analyze-config').addEventListener('click', async (e) => {
         e.target.classList.add('loading');
         activeOutput = openToolOutput('output-analyze');
@@ -2138,6 +2146,8 @@ function applyEventListeners() {
     });
     document.getElementById('tab-system').addEventListener('click', () => switchTab('system'));
     document.getElementById('tab-tools').addEventListener('click', () => switchTab('tools'));
+    document.getElementById('tab-updates')?.addEventListener('click', () => switchTab('updates'));
+    setupVdlu();
     setupBackNav();
 
     document.querySelectorAll('.close-btn, .cancel-btn').forEach(btn => btn.addEventListener('click', () => {
@@ -2180,7 +2190,7 @@ const LANG_NAMES = {
     hi: "\u0939\u093f\u0928\u094d\u0926\u0940", in: "Bahasa Indonesia", it: "Italiano",
     ja: "\u65e5\u672c\u8a9e", ko: "\ud55c\uad6d\uc5b4", nl: "Nederlands", pl: "Polski",
     pt: "Portugu\u00eas", ru: "\u0420\u0443\u0441\u0441\u043a\u0438\u0439", sv: "Svenska",
-    th: "\u0e44\u0e17\u0e22", tr: "T\u00fcrk\u00e7e", vi: "Ti\u1ebfng Vi\u1ec7t", zh: "\u4e2d\u6587"
+    th: "\u0e44\u0e17\u0e22", tr: "T\u00fcrk\u00e7e", uk: "\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430", vi: "Ti\u1ebfng Vi\u1ec7t", zh: "\u4e2d\u6587"
 };
 
 function setupLanguageSelector() {

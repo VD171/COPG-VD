@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · Nederlands · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · Nederlands · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Українська](../uk/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -24,7 +24,7 @@ AI-assistenten en -agents zijn hier eersteklas bijdragers, geen bijzaak.
 - Het project is gebouwd om leesbaar te zijn: de configuratie is een enkel JSON-bestand
   (`/data/adb/COPG-VD/COPG-VD.json`, gedocumenteerd in [CONFIGURATION.md](CONFIGURATION.md)),
   de engines zijn klein en op zichzelf staand, en de indeling staat in [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
-- AI-ondersteunde patches worden beoordeeld en geaccepteerd op dezelfde voorwaarden als elke andere - op
+- AI-ondersteunde patches worden beoordeeld en geaccepteerd op dezelfde voorwaarden als elke andere: op
   correctheid, duidelijkheid en de conventies hieronder, niet op wie (of wat) ze heeft geschreven.
 - Dezelfde lat voor iedereen: een echte functie wordt nooit verzwakt, de spoof blijft coherent, en
   niets geheims of apparaatspecifieks belandt in de repo (zie de [.gitignore](../../.gitignore)).
@@ -32,7 +32,7 @@ AI-assistenten en -agents zijn hier eersteklas bijdragers, geen bijzaak.
 ## Ontwikkelopstelling
 
 - Je hebt een geroot apparaat of emulator met Zygisk (KernelSU, APatch of Magisk) nodig om te testen.
-- Bouw de native library per ABI met de NDK (r29) en CMake - zie de stap `Build zygisk
+- Bouw de native library per ABI met de NDK (r29) en CMake: zie de stap `Build zygisk
   libraries` in [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml) voor
   het exacte commando. CI bouwt alle drie de ABI's voor je.
 - Bouw een flashbare zip: kopieer de gebouwde `libspoof.so` naar `module/zygisk/<abi>.so`, dan
@@ -58,17 +58,17 @@ AI-assistenten en -agents zijn hier eersteklas bijdragers, geen bijzaak.
 - Om een string toe te voegen of te wijzigen: bewerk `en.js` **en** `en.json`, update dan elke
   `<code>.json`. Een zichtbaar label aanraken betekent **alle** taalbestanden en
   **alle** `README.<code>.md` updaten.
-- Vertalingen zijn gewone JSON - een geweldige eerste bijdrage.
+- Vertalingen zijn gewone JSON: een geweldige eerste bijdrage.
 
 ## Commits & PR's
 
 - Houd PR's gericht. Beschrijf wat en waarom.
 - Sign off je commits (DCO): `git commit -s` (voegt `Signed-off-by:` toe).
-- CI moet groen blijven. Wees vriendelijk in reviews - zie [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+- CI moet groen blijven. Wees vriendelijk in reviews: zie [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Goede eerste issues
 
 Zoek naar de labels `good first issue` en `help wanted`. Vertalingen, docs en nieuwe
 Pixel-profielen zijn allemaal geweldige startpunten.
 
-*Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom - zie [CONTRIBUTING.md](CONTRIBUTING.md).*
+*Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom: zie [CONTRIBUTING.md](CONTRIBUTING.md).*

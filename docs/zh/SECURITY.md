@@ -1,4 +1,4 @@
-> **Languages:** [English](../../SECURITY.md) · [العربية](../ar/SECURITY.md) · [Čeština](../cs/SECURITY.md) · [Deutsch](../de/SECURITY.md) · [Español](../es/SECURITY.md) · [فارسی](../fa/SECURITY.md) · [Français](../fr/SECURITY.md) · [हिन्दी](../hi/SECURITY.md) · [Bahasa Indonesia](../in/SECURITY.md) · [Italiano](../it/SECURITY.md) · [日本語](../ja/SECURITY.md) · [한국어](../ko/SECURITY.md) · [Nederlands](../nl/SECURITY.md) · [Polski](../pl/SECURITY.md) · [Português](../pt/SECURITY.md) · [Русский](../ru/SECURITY.md) · [Svenska](../sv/SECURITY.md) · [ไทย](../th/SECURITY.md) · [Türkçe](../tr/SECURITY.md) · [Tiếng Việt](../vi/SECURITY.md) · 中文
+> **Languages:** [English](../../SECURITY.md) · [العربية](../ar/SECURITY.md) · [Čeština](../cs/SECURITY.md) · [Deutsch](../de/SECURITY.md) · [Español](../es/SECURITY.md) · [فارسی](../fa/SECURITY.md) · [Français](../fr/SECURITY.md) · [हिन्दी](../hi/SECURITY.md) · [Bahasa Indonesia](../in/SECURITY.md) · [Italiano](../it/SECURITY.md) · [日本語](../ja/SECURITY.md) · [한국어](../ko/SECURITY.md) · [Nederlands](../nl/SECURITY.md) · [Polski](../pl/SECURITY.md) · [Português](../pt/SECURITY.md) · [Русский](../ru/SECURITY.md) · [Svenska](../sv/SECURITY.md) · [ไทย](../th/SECURITY.md) · [Türkçe](../tr/SECURITY.md) · [Українська](../uk/SECURITY.md) · [Tiếng Việt](../vi/SECURITY.md) · 中文
 
 ---
 
@@ -15,7 +15,7 @@ COPG-VD 以 root 身份运行，并通过 Zygisk 注入到应用进程中。我�
 - **XDA-Developers：** [@VD171](https://xdaforums.com/m/vd171.4699873/)
 - **XDA 主题帖：** https://xdaforums.com/t/COPG-VD.4807698/
 - **Telegram：** [@VD_Priv8](https://t.me/VD_Priv8)
-- **Telegram：** [@Priv8_VD](https://t.me/Priv8_VD)
+- **Channel：** [@Priv8_VD](https://t.me/Priv8_VD)
 - **Discord：** [@VD.Priv8](https://discord.com/users/1296831918989639721)
 - **电子邮件：** vd.priv8@pm.me
 
@@ -34,4 +34,4 @@ COPG-VD 以 root 身份运行，并通过 Zygisk 注入到应用进程中。我�
 - 每一个预构建的二进制文件和库都可追溯到一个被固定（pinned）的公开上游，并在 CI 中从你可以
   检查的源码构建。
 
-*本文档由 Claude (Anthropic) 生成，并由 VD171 维护。欢迎提出更正和改进 - 参见 [CONTRIBUTING.md](CONTRIBUTING.md)。*
+*本文档由 Claude (Anthropic) 生成，并由 VD171 维护。欢迎提出更正和改进: 参见 [CONTRIBUTING.md](CONTRIBUTING.md)。*

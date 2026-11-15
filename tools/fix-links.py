@@ -17,6 +17,7 @@
 #  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
 #  XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
 #  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+#  Channel        : @Priv8_VD https://t.me/Priv8_VD
 #  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
 #  E-mail         : vd.priv8@pm.me
 # ======================================================================
@@ -30,7 +31,7 @@ import os, re, sys
 
 ROOT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.getcwd()
 LANGS = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "in", "it", "ja", "ko",
-         "nl", "pl", "pt", "ru", "sv", "th", "tr", "vi", "zh"]
+         "nl", "pl", "pt", "ru", "sv", "th", "tr", "uk", "vi", "zh"]
 DOCS_BASES = ["USER-GUIDE", "CONFIGURATION", "ARCHITECTURE", "FILE-STRUCTURE"]
 ROOT_BASES = ["CONTRIBUTING", "CODE_OF_CONDUCT", "SECURITY"]
 BASES = DOCS_BASES + ROOT_BASES
@@ -58,10 +59,17 @@ def fix_file(path, lang):
     if not os.path.exists(path):
         return False
     d = os.path.dirname(path)
-    t = open(path, encoding="utf-8").read()
-    nt = LINK.sub(lambda m: "](" + rewrite_target(m.group(1), d, lang) + ")", t)
-    if nt != t:
-        open(path, "w", encoding="utf-8").write(nt)
+    lines = open(path, encoding="utf-8").read().split("\n")
+    i = 0
+    if lines and lines[0].startswith("> **Languages:**"):   # switcher is owned by fix-switchers.py;
+        i = 1                                               # its links are intentionally cross-language
+        while i < len(lines) and lines[i].strip() != "---":
+            i += 1
+        i += 1
+    head, body = lines[:i], "\n".join(lines[i:])
+    nb = LINK.sub(lambda m: "](" + rewrite_target(m.group(1), d, lang) + ")", body)
+    if nb != body:
+        open(path, "w", encoding="utf-8").write("\n".join(head + [nb]))
     return True
 
 n = 0

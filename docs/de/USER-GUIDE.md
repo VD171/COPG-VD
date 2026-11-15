@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · Deutsch · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · Deutsch · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -18,7 +18,7 @@ Wert siehe [CONFIGURATION.md](CONFIGURATION.md); wie es intern funktioniert, sie
    PlayIntegrityFix noch GooglePhotosUnlimited.
 
 Öffne die WebUI aus deinem Root-Manager, um das Modul zu steuern. Magisk-Nutzer öffnen sie mit
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Alles lässt sich
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) oder [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases). Alles lässt sich
 auch direkt in `/data/adb/COPG-VD/COPG-VD.json` bearbeiten.
 
 ## Wer die Täuschung sieht (Scope)
@@ -41,17 +41,17 @@ ohne die Täuschung unbeteiligten Apps preiszugeben.
 
 Jede Engine ist unabhängig und kann abgeschaltet werden. Alle sind standardmäßig an, außer DRM.
 
-- **Build-Felder (`motor_jni`)** - schreibt `android.os.Build.*` in den anvisierten
+- **Build-Felder (`motor_jni`)**: schreibt `android.os.Build.*` in den anvisierten
   Prozessen um. Das ist, was die meisten Apps lesen.
-- **Property-Hook (`motor_prop_hook`)** - präsentiert den anvisierten Prozessen die
+- **Property-Hook (`motor_prop_hook`)**: präsentiert den anvisierten Prozessen die
   gefälschten System-Properties, über ein Clean-Room-Remapping des Property-Bereichs pro Prozess
   (kein Funktions-Hook).
-- **resetprop** - schreibt die System-Properties geräteweit um, gruppenweise (Identität,
+- **resetprop**: schreibt die System-Properties geräteweit um, gruppenweise (Identität,
   Version, Boot-State, SELinux, adb/usb, Anti-Emulator und ein Aufräumdurchlauf). In einem
   Scope-Modus bleiben die Gruppen Identität und Version aus dem geräteweiten Durchlauf heraus
   (Zygisk liefert sie pro Prozess); die Gruppen Boot, Lock und SELinux bleiben global. Schalte
   es in `COPG-VD-Settings.resetprop` um.
-- **DRM / Widevine (`motor_drm`, standardmäßig aus)** - meldet Apps, die es lesen, eine
+- **DRM / Widevine (`motor_drm`, standardmäßig aus)**: meldet Apps, die es lesen, eine
   gewählte Widevine-Sicherheitsstufe (L1 oder L3). Siehe Abschnitt DRM unten.
 
 ## Den Fingerprint frisch halten
@@ -67,7 +67,7 @@ Ein Fingerprint altert: Google rotiert die Werks-Images, und ein alter verliert 
   Patch, SDK, UUID, Host, User). Alles von dir Angepasste bleibt erhalten, und der vorherige
   Inhalt wird als `.bak` gespeichert.
 - Es geht nie rückwärts (ein älterer Upstream-Build wird abgelehnt), und wenn dein Profil ein
-  anderes Gerät vortäuscht, wird nichts angewandt - ein Pixel-Fingerprint auf einem anderen
+  anderes Gerät vortäuscht, wird nichts angewandt: ein Pixel-Fingerprint auf einem anderen
   Profil ist schlimmer als ein alter.
 - `resetprop` wird direkt nach einem Update erneut angewandt, aber `android.os.Build` wird beim
   Zygote-Start geschrieben, also **starte neu**, damit neue Werte die Apps erreichen. Log:
@@ -84,9 +84,9 @@ es ist also ein **Softloop**, der nichts in den Boot-Logs hinterlässt.
 Diese Felder sind nicht in der mitgelieferten Konfiguration, und der Updater schreibt sie nie.
 **Spoof Android version** (`COPG-VD-Settings.spoof_version`) entscheidet, ob sie überhaupt greifen:
 
-- `never` (Standard) - die eigene Version der ROM wird verwendet.
-- `rom` - wendet nur an, was die ROM nicht überschreitet, was in der Praxis ein Absenken des SDK bedeutet.
-- `force` - wendet genau das an, was die Konfiguration sagt. Das ist, was den Softloop auslöst;
+- `never` (Standard): die eigene Version der ROM wird verwendet.
+- `rom`: wendet nur an, was die ROM nicht überschreitet, was in der Praxis ein Absenken des SDK bedeutet.
+- `force`: wendet genau das an, was die Konfiguration sagt. Das ist, was den Softloop auslöst;
   nutze es nur, wenn du weißt, dass das Ziel-Framework es unterstützt.
 
 Die echte Version wird aus `/system/build.prop` gelesen, nie aus `getprop` (genau das, was
@@ -99,7 +99,7 @@ Standardmäßig aus (`motor_drm`). Wenn an, meldet es Apps, die es lesen, eine g
 Widevine-Stufe, `DRM_SECURITY_LEVEL` (`L1` oder `L3`).
 
 Standardmäßig folgt die DRM-Täuschung dem `scope_mode`. Um sie stattdessen auf eine bestimmte
-App-Menge anzuwenden - unabhängig vom Haupt-Scope - liste sie in `drm_targets`. Das Modul bleibt
+App-Menge anzuwenden, unabhängig vom Haupt-Scope, liste sie in `drm_targets`. Das Modul bleibt
 dann in einer aufgeführten App **nur** für den DRM-Hook geladen, selbst wenn diese App außerhalb
 des Haupt-Scopes liegt; eine leere oder fehlende Liste bedeutet, dem Scope zu folgen. Dies
 erfordert einen Scope-Modus (nicht `global`) und greift beim nächsten **Neustart**.
@@ -122,11 +122,11 @@ Führe es jedes Mal aus, wenn du die Konfiguration von Hand bearbeitest.
 
 Optional, aber der einfache Weg, alles zu steuern. Fünf Tabs:
 
-- **About** - Modul- und Versionsinfo.
-- **Device** - jedes Build-Feld, pro Zustand gesetzt und nach Kategorie gruppiert.
-- **Spoofing** - Scope-Modus und die Engine-Schalter.
-- **System** - die resetprop-Gruppen.
-- **Tools** - Analyze, Check Update, Update Now, Backup / Restore, das Auto-Update beim Boot
+- **About**: Modul- und Versionsinfo.
+- **Device**: jedes Build-Feld, pro Zustand gesetzt und nach Kategorie gruppiert.
+- **Spoofing**: Scope-Modus und die Engine-Schalter.
+- **System**: die resetprop-Gruppen.
+- **Tools**: Analyze, Check Update, Update Now, Backup / Restore, das Auto-Update beim Boot
   und der Diagnostics-Bericht (ein Knopf, um alles für einen Fehlerbericht Nützliche zu lesen und zu exportieren).
 
 Es stellt keine Netzwerkanfrage; alles, was es braucht, wird im Modul mitgeliefert.
@@ -135,16 +135,16 @@ Es stellt keine Netzwerkanfrage; alles, was es braucht, wird im Modul mitgeliefe
 
 - **Eine App sieht weiterhin das echte Gerät.** Prüfe den Scope: in `playstore` ist nur der
   Play-Stack abgedeckt. Bestätige, dass die Konfiguration parst (führe Analyze aus). Nach dem
-  Ändern von Engines, `drm_targets` oder dem Profil **starte neu** - Zygisk liest den Scope beim
+  Ändern von Engines, `drm_targets` oder dem Profil **starte neu**: Zygisk liest den Scope beim
   Zygote-Start.
 - **Play Integrity schlägt weiterhin fehl.** Stelle sicher, dass der Fingerprint frisch ist
   (Check Update) und dass `SECURITY_PATCH` in `global_fields` steht, damit er geräteweit
   kohärent bleibt. Beende die Google Play services, damit er sich neu attestiert.
 - **Das Telefon geht nach dem Aktivieren des Versions-Spoofings in einen Softloop.** Das ist die
-  Android-Versions-Falle oben - setze `spoof_version` zurück auf `never`.
-- **Die WebUI öffnet sich auf Magisk nicht.** Nutze [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases).
+  Android-Versions-Falle oben: setze `spoof_version` zurück auf `never`.
+- **Die WebUI öffnet sich auf Magisk nicht.** Nutze [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) oder [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen - siehe [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen: siehe [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

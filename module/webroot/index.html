@@ -33,6 +33,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'none'; base-uri 'none'">
     <link rel="stylesheet" href="fonts.css">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="vdlu.css">
     <script src="marked.min.js"></script>
 </head>
 <body>
@@ -233,6 +234,7 @@
             <button id="tab-spoofing" class="tab-btn" data-i18n="ui_tab_spoofing">Spoofing</button>
             <button id="tab-system" class="tab-btn" data-i18n="ui_tab_system">System</button>
             <button id="tab-tools" class="tab-btn" data-i18n="ui_tab_tools">Tools</button>
+            <button id="tab-updates" class="tab-btn">Updates</button>
         </div>
 
         <div class="device-savebar" id="device-savebar" style="display:none">
@@ -415,11 +417,7 @@
                                     <label class="switch"><input type="checkbox" id="grp-identity"><span class="slider"></span></label>
                                 </div>
                                 <div class="toggle-group">
-                                    <div class="tg-col"><span class="tg-label"><span class="toggle-label" data-i18n="ui_033">Spoof ro.product.manufacturer</span><button type="button" class="info-btn-item" data-info="manufacturer" aria-label="Info">?</button></span><small class="toggle-sub" data-i18n="ui_sub_manufacturer">The ro.product.manufacturer property (can be a tell)</small></div>
-                                    <label class="switch"><input type="checkbox" id="toggle-ro-product-manufacturer"><span class="slider"></span></label>
-                                </div>
-                                <div class="toggle-group">
-                                    <div class="tg-col"><span class="tg-label"><span class="toggle-label" data-i18n="ui_grp_version">Version</span><button type="button" class="info-btn-item" data-info="grp_version" aria-label="Info" data-i18n-title="ui_info_btn">?</button></span><small class="toggle-sub" data-i18n="ui_sub_grp_version">Android version props - off avoids boot loops</small></div>
+                                    <div class="tg-col"><span class="tg-label"><span class="toggle-label" data-i18n="ui_grp_version">Version</span><button type="button" class="info-btn-item" data-info="grp_version" aria-label="Info" data-i18n-title="ui_info_btn">?</button></span><small class="toggle-sub" data-i18n="ui_sub_grp_version">Android version props: off avoids boot loops</small></div>
                                     <label class="switch"><input type="checkbox" id="grp-version"><span class="slider"></span></label>
                                 </div>
                                 <div class="toggle-group">
@@ -546,7 +544,7 @@
                         </div>
                     </div>
                     <div class="tool-item">
-                        <div class="tool-desc" data-i18n="ui_toolsd_diag">Collect everything in one place - module, config, logs, device and load status - to read here and export as one file for a bug report.</div>
+                        <div class="tool-desc" data-i18n="ui_toolsd_diag">Collect everything in one place (module, config, logs, device and load status) to read here and export as one file for a bug report.</div>
                         <button id="diag-run" class="action-btn tool-btn" data-i18n="ui_tool_diag">Diagnostics</button>
                         <div class="tool-output collapsed" id="out-diag">
                             <div class="tool-output-head">
@@ -569,6 +567,10 @@
                         <button id="reboot-device" class="action-btn tool-btn secondary-btn" data-i18n="ui_reboot_btn">Full reboot</button>
                     </div>
                 </div>
+            </div>
+
+            <div id="updates-tab" class="tab-content">
+                <div id="vdlu-updates-mount"></div>
             </div>
 
         </div>
@@ -847,6 +849,7 @@
 
     <script src="lang/en.js"></script>
     <script src="i18n.js"></script>
+    <script src="vdlu.js"></script>
     <script src="scripts.js"></script>
 </body>
 </html>

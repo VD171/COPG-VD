@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · فارسی · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
+> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · فارسی · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Українська](../uk/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
 
 ---
 
@@ -53,7 +53,7 @@ attestation اجازه می‌دهند مقداری متفاوت از مقدار
 > **گروه version خاص است.** `ANDROID_VERSION`، `SDK_INT`، `SDK_FULL` و `CODENAME`
 > رام شما را توصیف می‌کنند، نه دستگاه spoof‌شده را. بالا بردن آن‌ها تلفن را softloop می‌کند.
 > آن‌ها در پروفایل عرضه‌شده نیستند و فقط وقتی `COPG-VD-Settings.spoof_version` اجازه دهد
-> اعمال می‌شوند - [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap) را ببینید.
+> اعمال می‌شوند: [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap) را ببینید.
 
 ### state های فیلد
 
@@ -76,7 +76,6 @@ attestation اجازه می‌دهند مقداری متفاوت از مقدار
 |---|---|---|
 | `resetprop` | bool | اینکه آیا موتور سراسری resetprop اجرا شود. |
 | `autoupdate` | bool | اینکه آیا `fingerprint-update.sh` یک بار در هر boot اجرا شود. پیش‌فرض روشن. |
-| `spoof_manufacturer` | bool | اینکه آیا فیلد manufacturer نیز spoof شود. |
 | `spoof_version` | `never` / `rom` / `force` | چگونه گروه version اندروید اعمال شود. `never` پیش‌فرض است؛ `force` هنگام بازگردانی یک backup رد می‌شود. |
 
 ## `global_fields`
@@ -113,7 +112,7 @@ security patch مورد معمول است. **هرگز** identity یا گروه v
 }
 ```
 
-*این مستندات با Claude (Anthropic) تولید شده و توسط VD171 نگهداری می‌شود. اصلاحات و بهبودها خوش‌آمدند - [../CONTRIBUTING.md](CONTRIBUTING.md) را ببینید.*
+*این مستندات با Claude (Anthropic) تولید شده و توسط VD171 نگهداری می‌شود. اصلاحات و بهبودها خوش‌آمدند: [../CONTRIBUTING.md](CONTRIBUTING.md) را ببینید.*
 
 <!-- doc-footer -->
 

@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · Svenska · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · Svenska · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -18,7 +18,7 @@ för hur det fungerar inuti, se [ARCHITECTURE.md](ARCHITECTURE.md).
    GooglePhotosUnlimited.
 
 Öppna WebUI från din root-hanterare för att styra modulen. Magisk-användare öppnar det med
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Allt
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) eller [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases). Allt
 kan också redigeras direkt i `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Vem ser spoofen (omfattning)
@@ -41,17 +41,17 @@ utan att exponera spoofen för orelaterade appar.
 
 Varje motor är oberoende och kan stängas av. Alla är på som standard utom DRM.
 
-- **Build-fält (`motor_jni`)** - skriver om `android.os.Build.*` i de riktade
+- **Build-fält (`motor_jni`)**: skriver om `android.os.Build.*` i de riktade
   processerna. Det är detta de flesta appar läser.
-- **Property-hook (`motor_prop_hook`)** - presenterar de spoofade systemproperties för de
+- **Property-hook (`motor_prop_hook`)**: presenterar de spoofade systemproperties för de
   riktade processerna, genom en clean-room-ommappning per process av property-området (ingen
   funktionshook).
-- **resetprop** - skriver om systemproperties över hela enheten, per grupp (identitet,
+- **resetprop**: skriver om systemproperties över hela enheten, per grupp (identitet,
   version, boot-tillstånd, SELinux, adb/usb, anti-emulator och ett upprensningspass). I ett läge
   med omfattning hålls identitets- och versionsgrupperna utanför passet över hela enheten (Zygisk levererar
   dem per process); grupperna boot, lock och SELinux förblir globala. Växla det i
   `COPG-VD-Settings.resetprop`.
-- **DRM / Widevine (`motor_drm`, av som standard)** - rapporterar en vald Widevine-säkerhetsnivå
+- **DRM / Widevine (`motor_drm`, av som standard)**: rapporterar en vald Widevine-säkerhetsnivå
   (L1 eller L3) till appar som läser den. Se DRM-avsnittet nedan.
 
 ## Att hålla fingerprintet färskt
@@ -67,7 +67,7 @@ Ett fingerprint åldras: Google roterar fabriksavbildningarna och ett gammalt ta
   patch, SDK, UUID, host, user). Allt du anpassat behålls, och det tidigare innehållet
   sparas som `.bak`.
 - Det går aldrig bakåt (en äldre upstream-build nekas), och om din profil spoofar
-  en annan enhet tillämpar det ingenting - ett Pixel-fingerprint på en annan profil är sämre
+  en annan enhet tillämpar det ingenting: ett Pixel-fingerprint på en annan profil är sämre
   än ett gammalt.
 - `resetprop` tillämpas på nytt direkt efter en uppdatering, men `android.os.Build` skrivs när
   zygote startar, så **starta om** för att nya värden ska nå apparna. Logg:
@@ -84,9 +84,9 @@ inte lämnar något i boot-loggarna.
 Dessa fält finns inte i den levererade konfigurationen och uppdateraren skriver dem aldrig. **Spoof
 Android version** (`COPG-VD-Settings.spoof_version`) avgör om de tillämpas alls:
 
-- `never` (standard) - ROM:ens egen version används.
-- `rom` - tillämpar endast det som inte överskrider ROM:en, vilket i praktiken innebär att sänka SDK.
-- `force` - tillämpar exakt det konfigurationen säger. Det är detta som orsakar softloopen; använd det
+- `never` (standard): ROM:ens egen version används.
+- `rom`: tillämpar endast det som inte överskrider ROM:en, vilket i praktiken innebär att sänka SDK.
+- `force`: tillämpar exakt det konfigurationen säger. Det är detta som orsakar softloopen; använd det
   endast om du vet att målramverket stödjer det.
 
 Den riktiga versionen läses från `/system/build.prop`, aldrig från `getprop` (vilket är precis
@@ -99,7 +99,7 @@ Av som standard (`motor_drm`). När det är på rapporterar det en vald Widevine
 `DRM_SECURITY_LEVEL` (`L1` eller `L3`), till appar som läser den.
 
 Som standard följer DRM-spoofen `scope_mode`. För att istället tillämpa den på en specifik uppsättning appar
-- oberoende av huvudomfattningen - lista dem i `drm_targets`. Modulen förblir då
+- oberoende av huvudomfattningen: lista dem i `drm_targets`. Modulen förblir då
 inläst i en listad app **enbart** för DRM-hooken, även när den appen är utanför
 huvudomfattningen; en tom eller frånvarande lista betyder följ omfattningen. Detta kräver ett läge med omfattning (inte
 `global`), och träder i kraft vid nästa **omstart**.
@@ -122,11 +122,11 @@ Kör det varje gång du redigerar konfigurationen för hand.
 
 Valfritt, men det enkla sättet att styra allt. Fem flikar:
 
-- **About** - modul- och versionsinfo.
-- **Device** - varje build-fält, satt per tillstånd och grupperat per kategori.
-- **Spoofing** - omfattningsläge och motoromkopplarna.
-- **System** - resetprop-grupperna.
-- **Tools** - Analyze, Check Update, Update Now, Backup / Restore, auto-uppdateringen vid boot
+- **About**: modul- och versionsinfo.
+- **Device**: varje build-fält, satt per tillstånd och grupperat per kategori.
+- **Spoofing**: omfattningsläge och motoromkopplarna.
+- **System**: resetprop-grupperna.
+- **Tools**: Analyze, Check Update, Update Now, Backup / Restore, auto-uppdateringen vid boot
   och Diagnostics-rapporten (en knapp för att läsa och exportera allt användbart för en
   buggrapport).
 
@@ -136,15 +136,15 @@ Det gör ingen nätverksbegäran; allt det behöver levereras inuti modulen.
 
 - **En app ser fortfarande den riktiga enheten.** Kontrollera omfattningen: i `playstore` täcks bara Play-
   stacken. Bekräfta att konfigurationen parsas (kör Analyze). Efter att ha ändrat motorer,
-  `drm_targets` eller profilen, **starta om** - Zygisk läser omfattningen när zygote startar.
+  `drm_targets` eller profilen, **starta om**: Zygisk läser omfattningen när zygote startar.
 - **Play Integrity misslyckas fortfarande.** Se till att fingerprintet är färskt (Check Update) och
   att `SECURITY_PATCH` finns i `global_fields` så att det förblir koherent över hela enheten. Döda
   Google Play services så att det attesterar om.
 - **Telefonen softloopar efter att versionsspoofing aktiverats.** Det är Android-versionsfällan
-  ovan - ställ tillbaka `spoof_version` till `never`.
-- **WebUI öppnas inte på Magisk.** Använd [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases).
+  ovan: ställ tillbaka `spoof_version` till `never`.
+- **WebUI öppnas inte på Magisk.** Använd [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) eller [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Den här dokumentationen genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar är välkomna - se [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Den här dokumentationen genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar är välkomna: se [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

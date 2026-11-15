@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · Tiếng Việt · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Українська](../uk/CONTRIBUTING.md) · Tiếng Việt · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -27,7 +27,7 @@ Các trợ lý và tác nhân AI là những người đóng góp hạng nhất 
   (`/data/adb/COPG-VD/COPG-VD.json`, được tài liệu hóa trong [CONFIGURATION.md](CONFIGURATION.md)),
   các động cơ nhỏ và tự chứa, và bố cục nằm trong [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 - Các bản vá có hỗ trợ AI được xem xét và chấp nhận theo cùng điều kiện như bất kỳ bản vá
-  nào khác - theo tính đúng đắn, sự rõ ràng và các quy ước bên dưới, chứ không theo ai (hay
+  nào khác: theo tính đúng đắn, sự rõ ràng và các quy ước bên dưới, chứ không theo ai (hay
   cái gì) đã viết chúng.
 - Cùng một tiêu chuẩn cho mọi người: một tính năng thật không bao giờ bị làm yếu đi, sự giả
   mạo vẫn nhất quán, và không gì bí mật hay dành riêng cho thiết bị lọt vào repo (xem
@@ -37,7 +37,7 @@ Các trợ lý và tác nhân AI là những người đóng góp hạng nhất 
 
 - Bạn cần một thiết bị đã root hoặc máy ảo có Zygisk (KernelSU, APatch hoặc Magisk) để kiểm
   thử.
-- Build thư viện native theo từng ABI với NDK (r29) và CMake - xem bước `Build zygisk
+- Build thư viện native theo từng ABI với NDK (r29) và CMake: xem bước `Build zygisk
   libraries` trong [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml) để biết
   lệnh chính xác. CI build cả ba ABI cho bạn.
 - Build một tệp zip có thể flash: sao chép `libspoof.so` đã build vào `module/zygisk/<abi>.so`,
@@ -63,17 +63,17 @@ Các trợ lý và tác nhân AI là những người đóng góp hạng nhất 
 - Để thêm hoặc thay đổi một chuỗi: chỉnh sửa `en.js` **và** `en.json`, sau đó cập nhật mọi
   `<code>.json`. Chạm vào một nhãn hiển thị nghĩa là cập nhật **tất cả** các tệp ngôn ngữ và
   **tất cả** `README.<code>.md`.
-- Các bản dịch là JSON thuần - một đóng góp đầu tiên tuyệt vời.
+- Các bản dịch là JSON thuần: một đóng góp đầu tiên tuyệt vời.
 
 ## Commit và PR
 
 - Giữ các PR tập trung. Mô tả cái gì và tại sao.
 - Ký xác nhận các commit của bạn (DCO): `git commit -s` (thêm `Signed-off-by:`).
-- CI phải giữ màu xanh. Hãy tử tế trong các lần review - xem [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+- CI phải giữ màu xanh. Hãy tử tế trong các lần review: xem [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Những vấn đề tốt để bắt đầu (good first issues)
 
 Tìm các nhãn `good first issue` và `help wanted`. Dịch thuật, tài liệu và các hồ sơ Pixel
 mới đều là những điểm khởi đầu tuyệt vời.
 
-*Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Các chỉnh sửa và cải tiến đều được hoan nghênh - xem [CONTRIBUTING.md](CONTRIBUTING.md).*
+*Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Các chỉnh sửa và cải tiến đều được hoan nghênh: xem [CONTRIBUTING.md](CONTRIBUTING.md).*

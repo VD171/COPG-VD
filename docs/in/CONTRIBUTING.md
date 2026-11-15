@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · Bahasa Indonesia · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · Bahasa Indonesia · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Українська](../uk/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -36,7 +36,7 @@ Asisten dan agen AI di sini adalah kontributor kelas satu, bukan sekadar pelengk
 
 - Anda memerlukan perangkat atau emulator yang di-root dengan Zygisk (KernelSU, APatch atau
   Magisk) untuk menguji.
-- Bangun library native per ABI dengan NDK (r29) dan CMake - lihat langkah `Build zygisk
+- Bangun library native per ABI dengan NDK (r29) dan CMake: lihat langkah `Build zygisk
   libraries` di [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml) untuk
   perintah yang tepat. CI membangun ketiga ABI untuk Anda.
 - Bangun zip yang dapat di-flash: salin `libspoof.so` yang sudah dibangun ke
@@ -63,17 +63,17 @@ Asisten dan agen AI di sini adalah kontributor kelas satu, bukan sekadar pelengk
 - Untuk menambah atau mengubah string: edit `en.js` **dan** `en.json`, lalu perbarui setiap
   `<code>.json`. Menyentuh label yang terlihat berarti memperbarui **semua** file bahasa dan
   **semua** `README.<code>.md`.
-- Terjemahan adalah JSON biasa - kontribusi pertama yang bagus.
+- Terjemahan adalah JSON biasa: kontribusi pertama yang bagus.
 
 ## Commit & PR
 
 - Jaga PR tetap fokus. Jelaskan apa dan mengapa.
 - Sign off commit Anda (DCO): `git commit -s` (menambahkan `Signed-off-by:`).
-- CI harus tetap hijau. Bersikaplah baik dalam review - lihat [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+- CI harus tetap hijau. Bersikaplah baik dalam review: lihat [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Good first issues
 
 Cari label `good first issue` dan `help wanted`. Terjemahan, dokumentasi, dan profil Pixel
 baru semuanya merupakan titik awal yang bagus.
 
-*Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima - lihat [CONTRIBUTING.md](CONTRIBUTING.md).*
+*Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima: lihat [CONTRIBUTING.md](CONTRIBUTING.md).*

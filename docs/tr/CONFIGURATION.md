@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · Türkçe · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
+> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · Türkçe · [Українська](../uk/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
 
 ---
 
@@ -56,7 +56,7 @@ tutarlı kalır.
 > **Sürüm grubu özeldir.** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` ve `CODENAME`
 > ROM'unuzu tanımlar, sahtelenen cihazı değil. Onları yükseltmek telefonu softloop yapar.
 > Birlikte gelen profilde yoktur ve yalnızca `COPG-VD-Settings.spoof_version` izin
-> verdiğinde uygulanır - bkz. [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
+> verdiğinde uygulanır: bkz. [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
 ### Alan durumları
 
@@ -80,14 +80,13 @@ Profille birlikte seyahat eden ayarlar, böylece bir yedek seçimlerinizi taşı
 |---|---|---|
 | `resetprop` | bool | Cihaz geneli resetprop motorunun çalışıp çalışmayacağı. |
 | `autoupdate` | bool | `fingerprint-update.sh`'nin önyükleme başına bir kez çalışıp çalışmayacağı. Varsayılan açık. |
-| `spoof_manufacturer` | bool | Manufacturer alanının da sahtelenip sahtelenmeyeceği. |
 | `spoof_version` | `never` / `rom` / `force` | Android sürüm grubunun nasıl uygulanacağı. `never` varsayılandır; `force` bir yedek geri yüklenirken reddedilir. |
 
 ## `global_fields`
 
 Bu listedeki Build alanları, bir değerin her yerde tutarlı olması için kapsamlı bir modda
 bile cihaz genelinde uygulanır. Onu yalnızca tutarlılık açısından güvenli alanlar için
-kullanın - security patch olağan olanıdır. Buraya identity veya Android sürüm grubunu
+kullanın: security patch olağan olanıdır. Buraya identity veya Android sürüm grubunu
 **asla** koymayın.
 
 ```json
@@ -118,7 +117,7 @@ kullanın - security patch olağan olanıdır. Buraya identity veya Android sür
 }
 ```
 
-*Bu belge Claude (Anthropic) ile oluşturulmuş ve VD171 tarafından sürdürülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır - bkz. [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Bu belge Claude (Anthropic) ile oluşturulmuş ve VD171 tarafından sürdürülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır: bkz. [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

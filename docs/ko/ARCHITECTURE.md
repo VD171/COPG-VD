@@ -1,4 +1,4 @@
-> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · 한국어 · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
+> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · 한국어 · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Українська](../uk/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
 
 ---
 
@@ -23,7 +23,7 @@ COPG-VD는 Zygisk 모듈입니다: Zygisk 로더가 zygote에 주입하고, 거�
 
 fork는 zygote의 메모리를 copy-on-write로 상속하므로, 각 앱은 부팅 시 읽힌 config에서 시작합니다.
 모듈은 파일이 실제로 변경되었을 때만 대상 프로세스별로 파일을 다시 읽으므로, 새로 시작되거나 다시
-열린 앱은 편집된 프로파일을 가져옵니다 - 그러나 스코프 결정 자체는 zygote 시작 시 이루어지므로,
+열린 앱은 편집된 프로파일을 가져옵니다: 그러나 스코프 결정 자체는 zygote 시작 시 이루어지므로,
 **스코프, 엔진 또는 `drm_targets` 변경에는 재부팅이 필요합니다**.
 
 ## 엔진
@@ -35,7 +35,7 @@ fork는 zygote의 메모리를 copy-on-write로 상속하므로, 각 앱은 부�
 - **속성 후크 (`motor_prop_hook`).** 속성 영역(`prop_virtualizer`)의 clean-room 프로세스별 리맵을
   통해 프로세스에 스푸핑된 시스템 속성을 제시합니다. 이것은 함수 후크가 아니라 메모리 리맵이므로,
   후크된 함수 흔적이 없습니다.
-- **resetprop (디바이스 전체).** 시스템 속성을 그룹별로 작성합니다 - identity, version, boot 상태,
+- **resetprop (디바이스 전체).** 시스템 속성을 그룹별로 작성합니다: identity, version, boot 상태,
   SELinux, adb/usb, anti-emulator, 그리고 정리 패스. boot 스크립트가 그것을 실행합니다. 스코프
   모드에서는 identity와 version 그룹이 제외됩니다(Zygisk가 프로세스별로 전달); boot, lock, SELinux
   그룹은 전역으로 유지되어 디바이스가 일관됩니다.
@@ -70,7 +70,7 @@ fork는 zygote의 메모리를 copy-on-write로 상속하므로, 각 앱은 부�
 위조하는 것이기 때문입니다. [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap)의 함정을
 참조하세요.
 
-*이 문서는 Claude (Anthropic)로 생성되었으며 VD171에 의해 유지 관리됩니다. 수정과 개선을 환영합니다 - [../CONTRIBUTING.md](CONTRIBUTING.md)를 참조하세요.*
+*이 문서는 Claude (Anthropic)로 생성되었으며 VD171에 의해 유지 관리됩니다. 수정과 개선을 환영합니다: [../CONTRIBUTING.md](CONTRIBUTING.md)를 참조하세요.*
 
 <!-- doc-footer -->
 

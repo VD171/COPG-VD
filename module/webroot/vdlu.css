@@ -1,0 +1,179 @@
+/*
+ * VDLU widget - estilos do toast de progresso, banner de reboot e aba "Updates".
+ * Tema escuro. Reaproveita as variáveis do index.html hospedeiro quando existem
+ * (var(--surface, fallback)); os fallbacks mantêm o widget correto standalone (demo).
+ */
+:root {
+  --vdlu-accent: #38bdf8;
+  --vdlu-radius: 12px;
+  --vdlu-radius-sm: 8px;
+}
+
+/* ---- banner persistente (reboot pendente) ------------------------------------------------------ */
+.vdlu-banner {
+  position: sticky; top: 0; z-index: 90;
+  display: flex; align-items: center; gap: 10px;
+  margin: 0 0 12px; padding: 11px 14px;
+  padding-top: calc(var(--window-inset-top, env(safe-area-inset-top, 0px)) + 11px);
+  background: var(--orange-dim, rgba(245, 158, 11, 0.15));
+  border: 1px solid var(--orange, #f59e0b);
+  border-radius: var(--vdlu-radius);
+  color: var(--orange, #f59e0b); font-size: 0.82rem; font-weight: 600; line-height: 1.4;
+}
+.vdlu-banner[hidden] { display: none; }
+.vdlu-banner-ic { font-size: 1rem; flex: 0 0 auto; }
+.vdlu-banner-tx { min-width: 0; overflow-wrap: anywhere; }
+.vdlu-banner code { color: var(--fg, #e2e8f0); background: rgba(0, 0, 0, 0.25); padding: 1px 5px; border-radius: 5px; }
+
+/* ---- toast de progresso (overlay não-bloqueante, canto) ---------------------------------------- */
+.vdlu-toast {
+  position: fixed; z-index: 100;
+  right: 16px; left: 16px;
+  bottom: calc(var(--window-inset-bottom, env(safe-area-inset-bottom, 0px)) + 16px);
+  max-width: 420px; margin-left: auto;
+  background: var(--surface2, #1f252e);
+  border: 1px solid var(--border, #2a3240);
+  border-radius: var(--vdlu-radius);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  padding: 13px 14px; color: var(--fg, #e2e8f0);
+  animation: vdlu-rise 0.2s ease;
+}
+.vdlu-toast[hidden] { display: none; }
+@keyframes vdlu-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.vdlu-toast.ok { border-color: var(--green, #22c55e); }
+.vdlu-toast.err { border-color: var(--red, #ef4444); }
+.vdlu-toast.warn { border-color: var(--orange, #f59e0b); }
+
+.vdlu-toast-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+.vdlu-toast-ttl { font-size: 0.84rem; font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
+.vdlu-toast-x {
+  margin-left: auto; flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+  border: none; background: transparent; color: var(--fg2, #94a3b8);
+  font-size: 1.2rem; line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vdlu-toast-x:active { transform: scale(0.9); }
+
+.vdlu-bar {
+  height: 7px; border-radius: 4px; overflow: hidden;
+  background: var(--bg, #0f1318); border: 1px solid var(--border, #2a3240);
+  margin-bottom: 8px;
+}
+.vdlu-bar i {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--vdlu-accent), #818cf8);
+  transition: width 0.3s ease;
+}
+.vdlu-toast.ok .vdlu-bar i { background: var(--green, #22c55e); width: 100% !important; }
+.vdlu-toast.err .vdlu-bar i { background: var(--red, #ef4444); }
+.vdlu-toast.warn .vdlu-bar i { background: var(--orange, #f59e0b); }
+.vdlu-toast.ind .vdlu-bar i {
+  width: 35% !important; background: linear-gradient(90deg, transparent, var(--vdlu-accent), transparent);
+  animation: vdlu-slide 1.1s ease-in-out infinite;
+}
+@keyframes vdlu-slide { 0% { transform: translateX(-120%); } 100% { transform: translateX(340%); } }
+
+.vdlu-toast-ln { font-size: 0.76rem; color: var(--fg2, #94a3b8); line-height: 1.45; overflow-wrap: anywhere; }
+.vdlu-toast-ln b { color: var(--fg, #e2e8f0); font-weight: 600; }
+.vdlu-toast-ln code { color: var(--vdlu-accent); }
+.vdlu-toast.err .vdlu-toast-ln b { color: var(--red, #ef4444); }
+.vdlu-toast-ft { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; }
+.vdlu-toast-ft:empty { display: none; }
+
+/* ---- botões (reutilizados no toast e no painel) ------------------------------------------------ */
+.vdlu-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 8px 15px; border-radius: 20px; font-size: 0.76rem; font-weight: 600;
+  cursor: pointer; border: 1px solid var(--border, #2a3240);
+  background: var(--surface, #181d24); color: var(--fg2, #94a3b8);
+  -webkit-tap-highlight-color: transparent; transition: transform 0.1s, background 0.12s;
+}
+.vdlu-btn:active { transform: scale(0.96); }
+.vdlu-btn.pri { background: var(--vdlu-accent); color: #05121b; border-color: var(--vdlu-accent); }
+.vdlu-btn.ghost { background: transparent; }
+
+/* ---- aba "Updates" ----------------------------------------------------------------------------- */
+.vdlu-panel { color: var(--fg, #e2e8f0); }
+.vdlu-sec {
+  background: var(--surface, #181d24); border: 1px solid var(--border, #2a3240);
+  border-radius: var(--vdlu-radius); padding: 14px; margin-bottom: 12px;
+}
+.vdlu-sec-ttl {
+  font-size: 0.68rem; font-weight: 700; color: var(--fg3, #64748b);
+  text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px;
+}
+.vdlu-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.vdlu-actions .vdlu-btn { flex: 1 1 auto; }
+
+.vdlu-result {
+  margin-top: 12px; padding: 11px 13px; border-radius: var(--vdlu-radius-sm);
+  background: var(--surface2, #1f252e); border: 1px solid var(--border, #2a3240);
+  font-size: 0.78rem; line-height: 1.5; color: var(--fg2, #94a3b8); overflow-wrap: anywhere;
+}
+.vdlu-result[hidden] { display: none; }
+.vdlu-result b { color: var(--fg, #e2e8f0); }
+.vdlu-result.ok { border-color: rgba(34, 197, 94, 0.4); }
+.vdlu-result.ok b { color: var(--green, #22c55e); }
+.vdlu-result.upd { border-color: var(--vdlu-accent); }
+.vdlu-result.upd b { color: var(--vdlu-accent); }
+.vdlu-result.err { border-color: rgba(239, 68, 68, 0.4); }
+.vdlu-result.err b { color: var(--red, #ef4444); }
+.vdlu-tag {
+  display: inline-block; font-size: 0.64rem; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+  background: var(--orange-dim, rgba(245, 158, 11, 0.15)); color: var(--orange, #f59e0b);
+}
+
+.vdlu-tg { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border, #2a3240); }
+.vdlu-tg:last-child { border-bottom: none; }
+.vdlu-tg-tx { min-width: 0; flex: 1 1 auto; }
+.vdlu-tg-tx b { font-size: 0.82rem; font-weight: 600; color: var(--fg, #e2e8f0); }
+.vdlu-tg-tx small { display: block; font-size: 0.68rem; color: var(--fg3, #64748b); margin-top: 2px; line-height: 1.45; }
+.vdlu-tg-tx code { color: var(--vdlu-accent); }
+
+.vdlu-sw {
+  position: relative; width: 46px; height: 26px; border-radius: 13px; flex: 0 0 auto;
+  cursor: pointer; transition: background 0.2s; background: var(--fg3, #64748b);
+  -webkit-tap-highlight-color: transparent;
+}
+.vdlu-sw.on { background: var(--green, #22c55e); }
+.vdlu-sw::after {
+  content: ''; position: absolute; top: 2px; left: 2px; width: 22px; height: 22px;
+  border-radius: 50%; background: #fff; transition: transform 0.2s;
+}
+.vdlu-sw.on::after { transform: translateX(20px); }
+.vdlu-sw:active { transform: scale(0.95); }
+.vdlu-sw:focus-visible { outline: 2px solid var(--vdlu-accent); outline-offset: 2px; }
+
+.vdlu-fld { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.vdlu-fld > span { flex: 0 0 64px; font-size: 0.7rem; color: var(--fg3, #64748b); font-family: monospace; }
+.vdlu-inp, .vdlu-sel {
+  flex: 1 1 auto; min-width: 0; width: 100%; padding: 8px 10px;
+  border: 1px solid var(--border, #2a3240); border-radius: var(--vdlu-radius-sm);
+  background: var(--bg, #0f1318); color: var(--fg, #e2e8f0); font-size: 0.78rem; outline: none;
+}
+.vdlu-inp { font-family: monospace; }
+.vdlu-inp:focus, .vdlu-sel:focus { border-color: var(--vdlu-accent); }
+.vdlu-hint { font-size: 0.72rem; color: var(--green, #22c55e); margin-top: 4px; }
+.vdlu-hint[hidden], .vdlu-btn[hidden] { display: none; }
+
+.vdlu-spin {
+  display: inline-block; width: 13px; height: 13px; vertical-align: -2px;
+  border: 2px solid var(--border, #2a3240); border-top-color: var(--vdlu-accent);
+  border-radius: 50%; animation: vdlu-sp 0.7s linear infinite;
+}
+@keyframes vdlu-sp { to { transform: rotate(360deg); } }
+
+/* ---- minitoast fallback (quando o host não injeta toast próprio) ------------------------------- */
+.vdlu-minitoast {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(var(--window-inset-bottom, env(safe-area-inset-bottom, 0px)) + 24px);
+  background: var(--surface2, #1f252e); color: var(--fg, #e2e8f0);
+  border: 1px solid var(--border, #2a3240); padding: 9px 18px; border-radius: var(--vdlu-radius-sm);
+  font-size: 0.8rem; z-index: 120; opacity: 0; transition: opacity 0.25s; pointer-events: none;
+}
+.vdlu-minitoast.show { opacity: 1; }
+
+@media (max-width: 420px) {
+  .vdlu-toast { right: 12px; left: 12px; }
+  .vdlu-fld { flex-wrap: wrap; }
+  .vdlu-fld > span { flex-basis: 100%; }
+}

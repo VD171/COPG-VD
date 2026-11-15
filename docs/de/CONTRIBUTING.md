@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · Deutsch · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · Deutsch · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Українська](../uk/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -24,7 +24,7 @@ KI-Assistenten und -Agenten sind hier erstklassige Beitragende, kein nachträgli
 - Das Projekt ist darauf ausgelegt, lesbar zu sein: die Konfiguration ist eine einzige JSON-Datei
   (`/data/adb/COPG-VD/COPG-VD.json`, dokumentiert in [CONFIGURATION.md](CONFIGURATION.md)),
   die Engines sind klein und eigenständig, und das Layout steht in [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
-- KI-gestützte Patches werden zu denselben Bedingungen geprüft und akzeptiert wie alle anderen - nach
+- KI-gestützte Patches werden zu denselben Bedingungen geprüft und akzeptiert wie alle anderen: nach
   Korrektheit, Klarheit und den Konventionen unten, nicht danach, wer (oder was) sie geschrieben hat.
 - Dieselbe Messlatte für alle: eine echte Funktion wird nie geschwächt, der Spoof bleibt kohärent, und
   nichts Geheimes oder Gerätespezifisches landet im Repo (siehe die [.gitignore](../../.gitignore)).
@@ -32,7 +32,7 @@ KI-Assistenten und -Agenten sind hier erstklassige Beitragende, kein nachträgli
 ## Dev-Setup
 
 - Sie brauchen ein gerootetes Gerät oder einen Emulator mit Zygisk (KernelSU, APatch oder Magisk) zum Testen.
-- Bauen Sie die native Bibliothek pro ABI mit dem NDK (r29) und CMake - siehe den Schritt `Build zygisk
+- Bauen Sie die native Bibliothek pro ABI mit dem NDK (r29) und CMake: siehe den Schritt `Build zygisk
   libraries` in [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml) für
   den genauen Befehl. CI baut alle drei ABIs für Sie.
 - Bauen Sie ein flashbares Zip: kopieren Sie die gebaute `libspoof.so` in `module/zygisk/<abi>.so`, dann
@@ -58,17 +58,17 @@ KI-Assistenten und -Agenten sind hier erstklassige Beitragende, kein nachträgli
 - Um einen String hinzuzufügen oder zu ändern: bearbeiten Sie `en.js` **und** `en.json`, dann aktualisieren Sie jede
   `<code>.json`. Ein sichtbares Label anzufassen bedeutet, **alle** Sprachdateien und
   **alle** `README.<code>.md` zu aktualisieren.
-- Übersetzungen sind reines JSON - ein großartiger erster Beitrag.
+- Übersetzungen sind reines JSON: ein großartiger erster Beitrag.
 
 ## Commits & PRs
 
 - Halten Sie PRs fokussiert. Beschreiben Sie das Was und Warum.
 - Signieren Sie Ihre Commits (DCO): `git commit -s` (fügt `Signed-off-by:` hinzu).
-- CI muss grün bleiben. Seien Sie freundlich in Reviews - siehe [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+- CI muss grün bleiben. Seien Sie freundlich in Reviews: siehe [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Gute erste Issues
 
 Halten Sie Ausschau nach den Labels `good first issue` und `help wanted`. Übersetzungen, Dokumentation und neue
 Pixel-Profile sind allesamt großartige Ausgangspunkte.
 
-*Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen - siehe [CONTRIBUTING.md](CONTRIBUTING.md).*
+*Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen: siehe [CONTRIBUTING.md](CONTRIBUTING.md).*

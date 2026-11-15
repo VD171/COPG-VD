@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · Tiếng Việt · [中文](../zh/CONFIGURATION.md)
+> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Українська](../uk/CONFIGURATION.md) · Tiếng Việt · [中文](../zh/CONFIGURATION.md)
 
 ---
 
@@ -56,7 +56,7 @@ nhất quán.
 > **Nhóm version là đặc biệt.** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` và `CODENAME` mô tả
 > ROM của bạn, không phải thiết bị được giả mạo. Nâng chúng lên sẽ làm điện thoại softloop.
 > Chúng không có trong hồ sơ đi kèm và chỉ áp dụng khi `COPG-VD-Settings.spoof_version` cho
-> phép - xem [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
+> phép: xem [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
 ### Trạng thái của trường
 
@@ -79,14 +79,13 @@ Các thiết lập đi cùng với hồ sơ, nên một bản sao lưu mang theo
 |---|---|---|
 | `resetprop` | bool | Liệu động cơ resetprop toàn thiết bị có chạy không. |
 | `autoupdate` | bool | Liệu `fingerprint-update.sh` có chạy một lần mỗi lần khởi động không. Mặc định bật. |
-| `spoof_manufacturer` | bool | Liệu trường manufacturer có được giả mạo hay không. |
 | `spoof_version` | `never` / `rom` / `force` | Cách nhóm phiên bản Android được áp dụng. `never` là mặc định; `force` bị từ chối khi khôi phục một bản sao lưu. |
 
 ## `global_fields`
 
 Các trường Build trong danh sách này được áp dụng trên toàn thiết bị ngay cả trong chế độ
 có phạm vi, để giữ một giá trị nhất quán ở mọi nơi. Chỉ dùng nó cho các trường an toàn về
-tính nhất quán - security patch là trường thường dùng. **Không bao giờ** đặt identity hoặc
+tính nhất quán: security patch là trường thường dùng. **Không bao giờ** đặt identity hoặc
 nhóm phiên bản Android ở đây.
 
 ```json
@@ -117,7 +116,7 @@ nhóm phiên bản Android ở đây.
 }
 ```
 
-*Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Các chỉnh sửa và cải tiến đều được hoan nghênh - xem [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Các chỉnh sửa và cải tiến đều được hoan nghênh: xem [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

@@ -1,4 +1,4 @@
-> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · Tiếng Việt · [中文](../zh/ARCHITECTURE.md)
+> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Українська](../uk/ARCHITECTURE.md) · Tiếng Việt · [中文](../zh/ARCHITECTURE.md)
 
 ---
 
@@ -25,7 +25,7 @@ ngoài việc tải hồ sơ tùy chọn, không có mạng.
 Vì các fork kế thừa bản sao bộ nhớ copy-on-write của zygote, mỗi ứng dụng bắt đầu từ cấu
 hình được đọc lúc khởi động. Mô-đun đọc lại tệp theo từng tiến trình được nhắm tới chỉ khi
 nó thực sự thay đổi, nên một ứng dụng vừa khởi động hoặc mở lại sẽ nhận được hồ sơ đã chỉnh
-sửa - nhưng quyết định về phạm vi thì được đưa ra lúc zygote khởi động, nên **thay đổi phạm
+sửa: nhưng quyết định về phạm vi thì được đưa ra lúc zygote khởi động, nên **thay đổi phạm
 vi, các động cơ hoặc `drm_targets` cần khởi động lại**.
 
 ## Các động cơ
@@ -38,7 +38,7 @@ Mỗi động cơ đều độc lập và có thể bật/tắt.
   trình thông qua việc ánh xạ lại vùng thuộc tính theo từng tiến trình kiểu clean-room
   (`prop_virtualizer`). Đó là một ánh xạ lại bộ nhớ, không phải hook hàm, nên không có dấu
   vết hàm bị hook.
-- **resetprop (toàn thiết bị).** Ghi các thuộc tính hệ thống theo nhóm - identity, version,
+- **resetprop (toàn thiết bị).** Ghi các thuộc tính hệ thống theo nhóm: identity, version,
   boot state, SELinux, adb/usb, anti-emulator, cộng với một lượt dọn dẹp. Các script khởi
   động chạy nó. Trong một chế độ có phạm vi, các nhóm identity và version được bỏ ra (Zygisk
   chuyển giao chúng theo từng tiến trình); các nhóm boot, lock và SELinux vẫn ở mức toàn cục
@@ -77,7 +77,7 @@ thoại vào một softloop. Nhóm version do đó tắt theo mặc định và 
 `getprop`, bởi vì `getprop` chính là thứ nó làm giả. Xem cái bẫy trong
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Các chỉnh sửa và cải tiến đều được hoan nghênh - xem [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Các chỉnh sửa và cải tiến đều được hoan nghênh: xem [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

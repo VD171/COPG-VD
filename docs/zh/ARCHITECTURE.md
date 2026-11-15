@@ -1,4 +1,4 @@
-> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · 中文
+> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Українська](../uk/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · 中文
 
 ---
 
@@ -22,7 +22,7 @@ COPG-VD 是一个 Zygisk 模块：一个很小的原生库（`libspoof.so`），
 
 由于各个 fork 继承了 zygote 的写时复制（copy-on-write）内存，每个应用都从开机时读取的配置开
 始。模块只有在文件确实发生变化时才会按目标进程重新读取它，因此一个新启动或重新打开的应用会
-获取到被编辑过的配置文件 - 但作用范围的决定本身是在 zygote 启动时做出的，所以**更改作用范
+获取到被编辑过的配置文件: 但作用范围的决定本身是在 zygote 启动时做出的，所以**更改作用范
 围、引擎或 `drm_targets` 需要重启**。
 
 ## 各个引擎
@@ -34,7 +34,7 @@ COPG-VD 是一个 Zygisk 模块：一个很小的原生库（`libspoof.so`），
 - **属性 hook（`motor_prop_hook`）。** 通过对属性区域进行净室的、按进程的重映射
   （`prop_virtualizer`），向进程呈现被伪装的系统属性。它是一次内存重映射，而不是函数 hook，
   因此没有被 hook 的函数痕迹。
-- **resetprop（设备范围）。** 按组写入系统属性 - identity、version、boot state、SELinux、
+- **resetprop（设备范围）。** 按组写入系统属性: identity、version、boot state、SELinux、
   adb/usb、anti-emulator，外加一次清理处理。开机脚本运行它。在一个有范围限制的模式下，
   identity 和 version 组被排除在外（由 Zygisk 按进程投递）；boot、lock 和 SELinux 组保持全
   局，以使设备保持一致。
@@ -66,7 +66,7 @@ API，这会使 Google 的应用崩溃并把手机重启进一个软循环。因
 为 `getprop` 正是它所伪造的东西。参见 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap)
 中的陷阱。
 
-*本文档由 Claude (Anthropic) 生成，并由 VD171 维护。欢迎提出更正和改进 - 参见 [../CONTRIBUTING.md](CONTRIBUTING.md)。*
+*本文档由 Claude (Anthropic) 生成，并由 VD171 维护。欢迎提出更正和改进: 参见 [../CONTRIBUTING.md](CONTRIBUTING.md)。*
 
 <!-- doc-footer -->
 

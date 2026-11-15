@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · Português · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · Português · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -18,7 +18,7 @@ para entender como funciona por dentro, veja [ARCHITECTURE.md](ARCHITECTURE.md).
    GooglePhotosUnlimited.
 
 Abra a WebUI pelo seu gerenciador de root para controlar o módulo. Usuários do Magisk a abrem com o
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Tudo
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) ou [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases). Tudo
 também pode ser editado diretamente em `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Quem vê o spoof (escopo)
@@ -41,17 +41,17 @@ sem expor o spoof a apps não relacionados.
 
 Cada motor é independente e pode ser desligado. Todos vêm ligados por padrão, exceto o DRM.
 
-- **Campos de Build (`motor_jni`)** - reescreve `android.os.Build.*` nos processos
+- **Campos de Build (`motor_jni`)**: reescreve `android.os.Build.*` nos processos
   alvo. É o que a maioria dos apps lê.
-- **Hook de propriedades (`motor_prop_hook`)** - apresenta as propriedades de sistema falsificadas aos
+- **Hook de propriedades (`motor_prop_hook`)**: apresenta as propriedades de sistema falsificadas aos
   processos alvo, por meio de um remapeamento clean-room da área de propriedades por processo (sem
   hook de função).
-- **resetprop** - reescreve as propriedades de sistema em todo o dispositivo, por grupo (identidade,
+- **resetprop**: reescreve as propriedades de sistema em todo o dispositivo, por grupo (identidade,
   versão, estado de boot, SELinux, adb/usb, anti-emulador e uma passada de limpeza). Em um modo com
   escopo, os grupos de identidade e versão ficam de fora da passada em todo o dispositivo (o Zygisk os entrega
   por processo); os grupos boot, lock e SELinux permanecem globais. Alterne em
   `COPG-VD-Settings.resetprop`.
-- **DRM / Widevine (`motor_drm`, desligado por padrão)** - reporta um nível de segurança Widevine
+- **DRM / Widevine (`motor_drm`, desligado por padrão)**: reporta um nível de segurança Widevine
   escolhido (L1 ou L3) aos apps que o leem. Veja a seção DRM abaixo.
 
 ## Mantendo o fingerprint atualizado
@@ -67,7 +67,7 @@ O `fingerprint-update.sh` mantém o seu atual, a partir da imagem de fábrica Go
   patch, SDK, UUID, host, user). Tudo o que você personalizou é mantido, e o conteúdo anterior
   é salvo como `.bak`.
 - Nunca retrocede (um build de upstream mais antigo é recusado), e se o seu perfil falsifica
-  um dispositivo diferente, nada é aplicado - um fingerprint Pixel em outro perfil é pior
+  um dispositivo diferente, nada é aplicado: um fingerprint Pixel em outro perfil é pior
   do que um antigo.
 - O `resetprop` é reaplicado logo após uma atualização, mas `android.os.Build` é escrito quando o
   zygote inicia, então **reinicie** para que os novos valores cheguem aos apps. Log:
@@ -84,9 +84,9 @@ não deixa nada nos logs de boot.
 Esses campos não estão na configuração enviada e o atualizador nunca os escreve. **Spoof
 Android version** (`COPG-VD-Settings.spoof_version`) decide se eles são aplicados:
 
-- `never` (padrão) - a própria versão da ROM é usada.
-- `rom` - aplica apenas o que não excede a ROM, o que na prática significa abaixar o SDK.
-- `force` - aplica exatamente o que a configuração diz. É isso que causa o softloop; use-o
+- `never` (padrão): a própria versão da ROM é usada.
+- `rom`: aplica apenas o que não excede a ROM, o que na prática significa abaixar o SDK.
+- `force`: aplica exatamente o que a configuração diz. É isso que causa o softloop; use-o
   somente se você souber que o framework alvo o suporta.
 
 A versão real é lida de `/system/build.prop`, nunca do `getprop` (que é justamente
@@ -99,7 +99,7 @@ Desligado por padrão (`motor_drm`). Quando ligado, reporta um nível Widevine e
 `DRM_SECURITY_LEVEL` (`L1` ou `L3`), aos apps que o leem.
 
 Por padrão, o spoof de DRM segue o `scope_mode`. Para aplicá-lo a um conjunto específico de apps
-em vez disso - independentemente do escopo principal - liste-os em `drm_targets`. O módulo então
+em vez disso, independentemente do escopo principal, liste-os em `drm_targets`. O módulo então
 permanece carregado em um app listado **apenas** para o hook de DRM, mesmo quando esse app está fora do
 escopo principal; uma lista vazia ou ausente significa seguir o escopo. Isso requer um modo com escopo (não
 `global`), e passa a valer na próxima **reinicialização**.
@@ -122,11 +122,11 @@ Rode sempre que editar a configuração à mão.
 
 Opcional, mas a forma fácil de controlar tudo. Cinco abas:
 
-- **About** - informações de módulo e versão.
-- **Device** - cada campo de build, definido por estado e agrupado por categoria.
-- **Spoofing** - modo de escopo e as chaves dos motores.
-- **System** - os grupos do resetprop.
-- **Tools** - Analyze, Check Update, Update Now, Backup / Restore, a auto-atualização no boot
+- **About**: informações de módulo e versão.
+- **Device**: cada campo de build, definido por estado e agrupado por categoria.
+- **Spoofing**: modo de escopo e as chaves dos motores.
+- **System**: os grupos do resetprop.
+- **Tools**: Analyze, Check Update, Update Now, Backup / Restore, a auto-atualização no boot
   e o relatório de Diagnostics (um botão para ler e exportar tudo que é útil para um report de
   bug).
 
@@ -136,15 +136,15 @@ Ela não faz nenhuma requisição de rede; tudo de que precisa vem dentro do mó
 
 - **Um app ainda vê o dispositivo real.** Verifique o escopo: em `playstore` só a stack do Play
   é coberta. Confirme que a configuração faz parse (rode o Analyze). Depois de mudar motores,
-  `drm_targets` ou o perfil, **reinicie** - o Zygisk lê o escopo quando o zygote inicia.
+  `drm_targets` ou o perfil, **reinicie**: o Zygisk lê o escopo quando o zygote inicia.
 - **O Play Integrity ainda falha.** Garanta que o fingerprint esteja atualizado (Check Update) e
   que o `SECURITY_PATCH` esteja em `global_fields` para que ele fique coerente em todo o dispositivo. Mate os
   Google Play services para que ele refaça a atestação.
 - **O telefone entra em softloop depois de ativar o spoofing de versão.** Essa é a armadilha da versão do Android
-  acima - volte o `spoof_version` para `never`.
-- **A WebUI não abre no Magisk.** Use o [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases).
+  acima: volte o `spoof_version` para `never`.
+- **A WebUI não abre no Magisk.** Use o [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) ou [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas - veja [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas: veja [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

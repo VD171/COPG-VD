@@ -1,4 +1,4 @@
-> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · Deutsch · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
+> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · Deutsch · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Українська](../uk/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
 
 ---
 
@@ -24,7 +24,7 @@ optionalen Profilabruf, kein Netzwerk.
 
 Weil Forks die Speicherkopie von Zygote per Copy-on-Write erben, startet jede App von der beim Boot
 gelesenen Konfiguration. Das Modul liest die Datei pro anvisiertem Prozess nur dann erneut, wenn sie sich
-tatsächlich geändert hat, sodass eine neu gestartete oder wieder geöffnete App ein bearbeitetes Profil aufgreift - aber
+tatsächlich geändert hat, sodass eine neu gestartete oder wieder geöffnete App ein bearbeitetes Profil aufgreift: aber
 die Geltungsbereichsentscheidung selbst wird beim Start von Zygote getroffen, sodass **das Ändern des Geltungsbereichs, der Engines oder von
 `drm_targets` einen Neustart erfordert**.
 
@@ -37,7 +37,7 @@ Jede ist unabhängig und schaltbar.
 - **Property-Hook (`motor_prop_hook`).** Präsentiert dem Prozess die gespooften Systemeigenschaften
   über ein Clean-Room-Remapping des Eigenschaftsbereichs pro Prozess (`prop_virtualizer`).
   Es ist ein Speicher-Remapping, kein Funktions-Hook, sodass es keinen Fußabdruck einer gehookten Funktion gibt.
-- **resetprop (geräteweit).** Schreibt Systemeigenschaften nach Gruppe - Identität,
+- **resetprop (geräteweit).** Schreibt Systemeigenschaften nach Gruppe: Identität,
   Version, Boot-State, SELinux, adb/usb, Anti-Emulator, plus ein Bereinigungsdurchlauf. Die Boot-Skripte führen
   es aus. In einem bereichsbezogenen Modus werden die Gruppen Identität und Version weggelassen (Zygisk liefert sie
   prozessweise); die Gruppen Boot, Lock und SELinux bleiben global, damit das Gerät kohärent ist.
@@ -73,7 +73,7 @@ Softloop neu startet. Die Versionsgruppe ist daher standardmäßig aus und hinte
 `getprop`, weil `getprop` genau das ist, was es fälscht. Siehe die Falle in
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen - siehe [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen: siehe [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

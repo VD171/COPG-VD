@@ -1,4 +1,4 @@
-> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · ไทย · [Türkçe](../tr/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
+> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · ไทย · [Türkçe](../tr/ARCHITECTURE.md) · [Українська](../uk/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
 
 ---
 
@@ -24,7 +24,7 @@ COPG-VD เป็นโมดูล Zygisk: ไลบรารี native ขน�
 
 เพราะ fork สืบทอดสำเนาหน่วยความจำแบบ copy-on-write ของ zygote แต่ละแอปจึงเริ่มจากคอนฟิก
 ที่อ่านตอนบูต โมดูลอ่านไฟล์ซ้ำต่อโปรเซสเป้าหมายก็ต่อเมื่อมันเปลี่ยนแปลงจริง ๆ
-ดังนั้นแอปที่เพิ่งเริ่มหรือเปิดใหม่จะรับโปรไฟล์ที่แก้ไขแล้ว - แต่การตัดสิน
+ดังนั้นแอปที่เพิ่งเริ่มหรือเปิดใหม่จะรับโปรไฟล์ที่แก้ไขแล้ว: แต่การตัดสิน
 ขอบเขตเองถูกทำตอน zygote เริ่ม ดังนั้น **การเปลี่ยนขอบเขต, เครื่องยนต์ หรือ
 `drm_targets` ต้องรีบูต**
 
@@ -37,7 +37,7 @@ COPG-VD เป็นโมดูล Zygisk: ไลบรารี native ขน�
 - **Property hook (`motor_prop_hook`)** นำเสนอพร็อพเพอร์ตีระบบที่ปลอมขึ้นให้กับ
   โปรเซสผ่านการรีแมปพื้นที่พร็อพเพอร์ตีแบบ clean-room รายโปรเซส (`prop_virtualizer`)
   มันคือการรีแมปหน่วยความจำ ไม่ใช่การ hook ฟังก์ชัน ดังนั้นจึงไม่มีรอยเท้าของฟังก์ชันที่ถูก hook
-- **resetprop (ทั้งอุปกรณ์)** เขียนพร็อพเพอร์ตีระบบเป็นกลุ่ม - identity, version,
+- **resetprop (ทั้งอุปกรณ์)** เขียนพร็อพเพอร์ตีระบบเป็นกลุ่ม: identity, version,
   boot state, SELinux, adb/usb, anti-emulator บวกกับการเก็บกวาดอีกรอบ สคริปต์บูตเรียก
   ใช้มัน ในโหมดที่มีขอบเขต กลุ่ม identity และ version จะถูกละไว้ (Zygisk ส่งให้
   เป็นรายโปรเซส) กลุ่ม boot, lock และ SELinux ยังคงเป็นส่วนกลางเพื่อให้อุปกรณ์สอดคล้อง
@@ -73,7 +73,7 @@ softloop กลุ่ม version จึงปิดโดยค่าเริ�
 `getprop` เพราะ `getprop` คือสิ่งที่มันปลอม ดูกับดักใน
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap)
 
-*เอกสารนี้สร้างด้วย Claude (Anthropic) และดูแลรักษาโดย VD171 ยินดีรับการแก้ไขและการปรับปรุง - ดู [../CONTRIBUTING.md](CONTRIBUTING.md)*
+*เอกสารนี้สร้างด้วย Claude (Anthropic) และดูแลรักษาโดย VD171 ยินดีรับการแก้ไขและการปรับปรุง: ดู [../CONTRIBUTING.md](CONTRIBUTING.md)*
 
 <!-- doc-footer -->
 

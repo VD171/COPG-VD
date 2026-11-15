@@ -1,4 +1,4 @@
-> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · Bahasa Indonesia · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
+> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · Bahasa Indonesia · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Українська](../uk/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
 
 ---
 
@@ -25,7 +25,7 @@ aplikasi dan, selain pengambilan profil opsional, tidak ada jaringan.
 Karena fork mewarisi salinan copy-on-write dari memori zygote, setiap aplikasi dimulai dari
 config yang dibaca saat boot. Modul membaca ulang file per proses yang ditargetkan hanya
 ketika file itu benar-benar berubah, sehingga aplikasi yang baru dijalankan atau dibuka
-kembali akan mengambil profil yang telah diedit - tetapi keputusan scope itu sendiri dibuat
+kembali akan mengambil profil yang telah diedit: tetapi keputusan scope itu sendiri dibuat
 saat zygote mulai, jadi **mengubah scope, mesin, atau `drm_targets` memerlukan reboot**.
 
 ## Mesin-mesin (engines)
@@ -37,7 +37,7 @@ Masing-masing independen dan dapat diaktifkan/dimatikan.
 - **Property hook (`motor_prop_hook`).** Menyajikan properti sistem palsu ke proses melalui
   remap clean-room per proses dari area properti (`prop_virtualizer`). Ini adalah remap
   memori, bukan hook fungsi, jadi tidak ada jejak fungsi yang di-hook.
-- **resetprop (seluruh perangkat).** Menulis properti sistem per grup - identity, version,
+- **resetprop (seluruh perangkat).** Menulis properti sistem per grup: identity, version,
   boot state, SELinux, adb/usb, anti-emulator, ditambah satu pass pembersihan. Skrip boot
   menjalankannya. Dalam mode scoped, grup identity dan version ditinggalkan (Zygisk
   mengirimkannya per proses); grup boot, lock, dan SELinux tetap global agar perangkat
@@ -75,7 +75,7 @@ ke dalam softloop. Oleh karena itu grup version nonaktif secara default dan diku
 `getprop`, karena `getprop` justru hal yang dipalsukannya. Lihat jebakannya di
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima - lihat [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima: lihat [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

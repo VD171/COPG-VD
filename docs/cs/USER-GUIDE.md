@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · Čeština · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · Čeština · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -18,7 +18,7 @@ jak to funguje uvnitř, viz [ARCHITECTURE.md](ARCHITECTURE.md).
    GooglePhotosUnlimited.
 
 Otevřete WebUI ze svého root manageru pro ovládání modulu. Uživatelé Magisku ji otevřou
-pomocí [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Vše
+pomocí [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) nebo [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases). Vše
 lze také upravovat přímo v `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Kdo vidí spoof (rozsah)
@@ -41,17 +41,17 @@ spoof vystavovala nesouvisejícím aplikacím.
 
 Každý engine je nezávislý a lze jej vypnout. Všechny jsou ve výchozím stavu zapnuté kromě DRM.
 
-- **Pole Build (`motor_jni`)** - přepisuje `android.os.Build.*` v cílených procesech. To je
+- **Pole Build (`motor_jni`)**: přepisuje `android.os.Build.*` v cílených procesech. To je
   to, co čte většina aplikací.
-- **Hook vlastností (`motor_prop_hook`)** - předkládá cíleným procesům podvržené systémové
+- **Hook vlastností (`motor_prop_hook`)**: předkládá cíleným procesům podvržené systémové
   vlastnosti, pomocí clean-room přemapování oblasti vlastností per proces (žádný hook
   funkce).
-- **resetprop** - přepisuje systémové vlastnosti napříč zařízením, po skupinách (identita,
+- **resetprop**: přepisuje systémové vlastnosti napříč zařízením, po skupinách (identita,
   verze, stav bootu, SELinux, adb/usb, anti-emulátor a čisticí průchod). V rozsahovém
   režimu zůstávají skupiny identity a verze mimo průchod napříč zařízením (Zygisk je
   doručuje per proces); skupiny bootu, zámku a SELinuxu zůstávají globální. Přepněte jej
   v `COPG-VD-Settings.resetprop`.
-- **DRM / Widevine (`motor_drm`, ve výchozím stavu vypnuto)** - hlásí zvolenou
+- **DRM / Widevine (`motor_drm`, ve výchozím stavu vypnuto)**: hlásí zvolenou
   bezpečnostní úroveň Widevine (L1 nebo L3) aplikacím, které ji čtou. Viz sekce DRM níže.
 
 ## Udržování otisku čerstvého
@@ -67,7 +67,7 @@ Otisk stárne: Google rotuje tovární obrazy a starý pomalu ztrácí hodnotu.
   SDK, UUID, host, user). Vše, co jste si přizpůsobili, je zachováno a předchozí obsah je
   uložen jako `.bak`.
 - Nikdy nejde zpět (starší upstream build je odmítnut), a pokud váš profil podvrhuje jiné
-  zařízení, neaplikuje nic - otisk Pixelu na jiném profilu je horší než starý.
+  zařízení, neaplikuje nic: otisk Pixelu na jiném profilu je horší než starý.
 - `resetprop` je znovu aplikován hned po aktualizaci, ale `android.os.Build` se zapisuje
   při startu zygote, takže **restartujte**, aby nové hodnoty dorazily k aplikacím. Log:
   `/data/adb/COPG-VD/update.log`.
@@ -83,9 +83,9 @@ takže je to **softloop**, který nic nezanechá v boot logách.
 Tato pole nejsou v dodávané konfiguraci a updater je nikdy nezapisuje. **Spoof Android
 version** (`COPG-VD-Settings.spoof_version`) rozhoduje, zda se vůbec aplikují:
 
-- `never` (výchozí) - použije se vlastní verze ROM.
-- `rom` - aplikuj pouze to, co nepřekračuje ROM, což v praxi znamená snížení SDK.
-- `force` - aplikuj přesně to, co říká konfigurace. To je to, co způsobuje softloop;
+- `never` (výchozí): použije se vlastní verze ROM.
+- `rom`: aplikuj pouze to, co nepřekračuje ROM, což v praxi znamená snížení SDK.
+- `force`: aplikuj přesně to, co říká konfigurace. To je to, co způsobuje softloop;
   použijte jej pouze, pokud víte, že cílový framework jej podporuje.
 
 Skutečná verze se čte z `/system/build.prop`, nikdy z `getprop` (což je právě to, co
@@ -98,7 +98,7 @@ Ve výchozím stavu vypnuto (`motor_drm`). Když je zapnuto, hlásí zvolenou ú
 `DRM_SECURITY_LEVEL` (`L1` nebo `L3`), aplikacím, které ji čtou.
 
 Ve výchozím stavu DRM spoof následuje `scope_mode`. Chcete-li jej místo toho aplikovat na
-konkrétní sadu aplikací - nezávisle na hlavním rozsahu - uveďte je v `drm_targets`. Modul
+konkrétní sadu aplikací, nezávisle na hlavním rozsahu, uveďte je v `drm_targets`. Modul
 pak zůstává v uvedené aplikaci načten **pouze** kvůli DRM hooku, i když je tato aplikace
 mimo hlavní rozsah; prázdný nebo chybějící seznam znamená následovat rozsah. To vyžaduje
 rozsahový režim (ne `global`) a projeví se při příštím **restartu**.
@@ -121,11 +121,11 @@ Spusťte jej, kdykoli konfiguraci upravíte ručně.
 
 Volitelné, ale snadný způsob, jak vše ovládat. Pět záložek:
 
-- **About** - informace o modulu a verzi.
-- **Device** - každé pole build, nastavené per stav a seskupené podle kategorie.
-- **Spoofing** - režim rozsahu a přepínače enginů.
-- **System** - skupiny resetprop.
-- **Tools** - Analyze, Check Update, Update Now, Backup / Restore, automatická aktualizace
+- **About**: informace o modulu a verzi.
+- **Device**: každé pole build, nastavené per stav a seskupené podle kategorie.
+- **Spoofing**: režim rozsahu a přepínače enginů.
+- **System**: skupiny resetprop.
+- **Tools**: Analyze, Check Update, Update Now, Backup / Restore, automatická aktualizace
   při bootu a report Diagnostics (jedno tlačítko pro přečtení a export všeho užitečného
   pro hlášení chyby).
 
@@ -135,15 +135,15 @@ Nedělá žádný síťový požadavek; vše, co potřebuje, přichází uvnitř
 
 - **Aplikace stále vidí skutečné zařízení.** Zkontrolujte rozsah: v `playstore` je pokryt
   pouze stack Play. Potvrďte, že se konfigurace parsuje (spusťte Analyze). Po změně enginů,
-  `drm_targets` nebo profilu **restartujte** - Zygisk čte rozsah při startu zygote.
+  `drm_targets` nebo profilu **restartujte**: Zygisk čte rozsah při startu zygote.
 - **Play Integrity stále selhává.** Ujistěte se, že otisk je čerstvý (Check Update) a že
   `SECURITY_PATCH` je v `global_fields`, aby zůstal koherentní napříč zařízením. Ukončete
   Google Play services, aby znovu provedly atestaci.
 - **Telefon se po zapnutí spoofu verze dostane do softloopu.** To je past na verzi
-  Androidu výše - nastavte `spoof_version` zpět na `never`.
-- **WebUI se na Magisku neotevře.** Použijte [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases).
+  Androidu výše: nastavte `spoof_version` zpět na `never`.
+- **WebUI se na Magisku neotevře.** Použijte [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) nebo [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Tato dokumentace byla vygenerována pomocí Claude (Anthropic) a je udržována VD171. Opravy a vylepšení jsou vítány - viz [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Tato dokumentace byla vygenerována pomocí Claude (Anthropic) a je udržována VD171. Opravy a vylepšení jsou vítány: viz [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

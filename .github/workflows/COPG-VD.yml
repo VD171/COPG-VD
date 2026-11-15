@@ -132,11 +132,21 @@ jobs:
           # The WebUI reads these locally instead of fetching them from GitHub at runtime.
           cp README.md LICENSE module/webroot/
 
-          chmod 755 module/customize.sh module/service.sh module/fingerprint-update.sh module/META-INF/com/google/android/update-binary
+          chmod 755 module/customize.sh module/service.sh module/fingerprint-update.sh module/post-fs-data.sh module/vdlu/update.sh module/vdlu/vdlu-verify module/META-INF/com/google/android/update-binary
+
+          # VDLU bundled tools (openssl/curl/zstd per ABI): ship them executable and
+          # refuse to release any ABI that lacks its supply-chain provenance.
+          # Regenerate with .github/scripts/build_bin.sh (see module/vdlu/RELEASE.md).
+          if [ -d module/bin ]; then
+            find module/bin -type f ! -name '.gitkeep' ! -name 'PROVENANCE.json' -exec chmod 755 {} +
+            for d in module/bin/*/; do
+              [ -f "$d/PROVENANCE.json" ] || { echo "::error::missing provenance: $d"; exit 1; }
+            done
+          fi
 
       - name: Package module
         run: |
-          cd module && zip -r9 "../${{ steps.version.outputs.zip_name }}" . -x '.git*'
+          cd module && zip -r9 "../${{ steps.version.outputs.zip_name }}" . -x '.git*' -x 'vdlu/RELEASE.md' -x 'bin/*/.gitkeep'
           cd .. && unzip -l "${{ steps.version.outputs.zip_name }}" | tail -n 1
 
       - name: Commit the bump

@@ -17,6 +17,7 @@
  *  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
  *  XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
  *  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+ *  Channel        : @Priv8_VD https://t.me/Priv8_VD
  *  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
  *  E-mail         : vd.priv8@pm.me
  * ======================================================================
@@ -680,6 +681,8 @@ private:
         applyStr(buildClass, build_odm_skuField, "ODM_SKU", fb_product);
         applyStr(buildClass, build_skuField, "SKU", fb_hardware);
         applyStr(buildClass, build_userField, "USER");
+        applyStr(buildClass, getField(buildClass, "SOC_MANUFACTURER", "Ljava/lang/String;"), "MANUFACTURER");
+        applyStr(buildClass, getField(buildClass, "SOC_MODEL", "Ljava/lang/String;"), "HARDWARE");
         setLong(buildClass, build_timeField, spoof_info.time);
         setStr(buildClass, build_tagsField, "release-keys");
         setStr(buildClass, build_typeField, "user");

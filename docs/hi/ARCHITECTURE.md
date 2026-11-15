@@ -1,4 +1,4 @@
-> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · हिन्दी · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
+> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · हिन्दी · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Українська](../uk/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
 
 ---
 
@@ -24,7 +24,7 @@ COPG-VD एक Zygisk मॉड्यूल है: एक छोटी native �
 
 चूँकि fork zygote की copy-on-write मेमोरी प्रति को विरासत में लेते हैं, हर ऐप boot पर पढ़ी गई config
 से शुरू होता है। मॉड्यूल फ़ाइल को प्रति लक्षित प्रोसेस केवल तभी फिर से पढ़ता है जब वह वास्तव में बदल
-गई हो, इसलिए एक नई शुरू या फिर से खोली गई ऐप एक संपादित प्रोफ़ाइल उठा लेती है - लेकिन scope का निर्णय
+गई हो, इसलिए एक नई शुरू या फिर से खोली गई ऐप एक संपादित प्रोफ़ाइल उठा लेती है: लेकिन scope का निर्णय
 स्वयं zygote शुरू होने पर किया जाता है, इसलिए **scope, इंजन या `drm_targets` बदलने के लिए एक रीबूट की
 आवश्यकता होती है**।
 
@@ -37,7 +37,7 @@ COPG-VD एक Zygisk मॉड्यूल है: एक छोटी native �
 - **Property hook (`motor_prop_hook`)।** property क्षेत्र (`prop_virtualizer`) के एक clean-room,
   प्रति-प्रोसेस remap के माध्यम से प्रोसेस को जाली सिस्टम properties प्रस्तुत करता है। यह एक मेमोरी
   remap है, फ़ंक्शन hook नहीं, इसलिए कोई hooked-function फ़ुटप्रिंट नहीं है।
-- **resetprop (डिवाइस-भर)।** सिस्टम properties को समूह के अनुसार लिखता है - identity, version,
+- **resetprop (डिवाइस-भर)।** सिस्टम properties को समूह के अनुसार लिखता है: identity, version,
   boot state, SELinux, adb/usb, anti-emulator, साथ ही एक सफ़ाई पास। boot स्क्रिप्ट इसे चलाती हैं।
   एक scoped मोड में identity और version समूह छोड़ दिए जाते हैं (Zygisk उन्हें प्रति-प्रोसेस वितरित
   करता है); boot, lock और SELinux समूह वैश्विक रहते हैं ताकि डिवाइस सुसंगत रहे।
@@ -71,7 +71,7 @@ parse किया जाता है; एक फ़ाइल जो parse न�
 असली संस्करण `/system/build.prop` से पढ़ता है, कभी `getprop` से नहीं, क्योंकि `getprop` ठीक वही है
 जिसे यह झुठलाता है। जाल को [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap) में देखें।
 
-*यह दस्तावेज़ीकरण Claude (Anthropic) के साथ तैयार किया गया था और इसका रखरखाव VD171 द्वारा किया जाता है। सुधार और बेहतरी का स्वागत है - [../CONTRIBUTING.md](CONTRIBUTING.md) देखें।*
+*यह दस्तावेज़ीकरण Claude (Anthropic) के साथ तैयार किया गया था और इसका रखरखाव VD171 द्वारा किया जाता है। सुधार और बेहतरी का स्वागत है: [../CONTRIBUTING.md](CONTRIBUTING.md) देखें।*
 
 <!-- doc-footer -->
 

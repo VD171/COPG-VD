@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · 한국어 · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
+> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · 한국어 · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Українська](../uk/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
 
 ---
 
@@ -76,13 +76,12 @@
 |---|---|---|
 | `resetprop` | bool | 디바이스 전체 resetprop 엔진이 실행되는지 여부. |
 | `autoupdate` | bool | `fingerprint-update.sh`가 부팅마다 한 번 실행되는지 여부. 기본적으로 켜짐. |
-| `spoof_manufacturer` | bool | manufacturer 필드도 스푸핑되는지 여부. |
 | `spoof_version` | `never` / `rom` / `force` | Android version 그룹이 적용되는 방식. `never`가 기본값; `force`는 백업을 복원할 때 거부됩니다. |
 
 ## `global_fields`
 
 이 리스트의 Build 필드는 스코프 모드에서도 디바이스 전체에 적용되어 값을 어디서나 일관되게
-유지합니다. 일관성에 안전한 필드에만 사용하세요 - security patch가 일반적인 것입니다. identity나
+유지합니다. 일관성에 안전한 필드에만 사용하세요: security patch가 일반적인 것입니다. identity나
 Android version 그룹을 여기에 **절대** 넣지 마세요.
 
 ```json
@@ -113,7 +112,7 @@ Android version 그룹을 여기에 **절대** 넣지 마세요.
 }
 ```
 
-*이 문서는 Claude (Anthropic)로 생성되었으며 VD171에 의해 유지 관리됩니다. 수정과 개선을 환영합니다 - [../CONTRIBUTING.md](CONTRIBUTING.md)를 참조하세요.*
+*이 문서는 Claude (Anthropic)로 생성되었으며 VD171에 의해 유지 관리됩니다. 수정과 개선을 환영합니다: [../CONTRIBUTING.md](CONTRIBUTING.md)를 참조하세요.*
 
 <!-- doc-footer -->
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## v6.12-vd
+
+- COPG-VD now updates itself in place, with no re-flash: it fetches only the files that changed (content-addressed blobs plus a signed manifest) instead of pulling the whole zip again. Every update must carry a valid ed25519 signature and downgrades are refused, so the update channel cannot hand you a tampered or older build; the full zip stays available as a fallback. A new Updates panel in the WebUI shows progress and lets you cancel, and the update state lives outside the module so it survives a re-flash. When an update touches the native library it is staged and applied on the next reboot.
+- The device manufacturer is now always spoofed in step with the rest of the profile. The separate manufacturer on/off switch is gone: turning it off kept the real manufacturer while the brand, model and device were spoofed, which read as inconsistent.
+- Cold-started apps always see the spoofed fingerprint now: fixed a case where a process that read no property before the module kicked in could keep the real build fingerprint. Thanks to Hsukqi Lee for the report and fix.
+- Headless / command-line installs (ksud / magisk from a shell) no longer wait on the volume-key prompts: they resolve to their defaults, so an install over SSH or in a script no longer hangs. The volume prompts still work normally when you flash from the manager app.
+- The chip (SoC) maker and model reported by `Build.SOC_MANUFACTURER` and `Build.SOC_MODEL` now follow the profile too, in step with the matching system properties.
+
 ## v6.11-vd
 
 - Fixed a regression from v6.10 that could break hardware-backed integrity and WebView on some setups: a module file descriptor is now released before the app starts, instead of lingering in the target process.

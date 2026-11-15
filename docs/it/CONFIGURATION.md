@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · Italiano · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
+> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · Italiano · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Українська](../uk/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
 
 ---
 
@@ -79,13 +79,12 @@ Impostazioni che viaggiano con il profilo, così un backup porta con sé le tue 
 |---|---|---|
 | `resetprop` | bool | Se il motore resetprop device-wide viene eseguito. |
 | `autoupdate` | bool | Se `fingerprint-update.sh` viene eseguito una volta per boot. Attivo di default. |
-| `spoof_manufacturer` | bool | Se anche il campo manufacturer viene falsificato. |
 | `spoof_version` | `never` / `rom` / `force` | Come si applica il gruppo versione Android. `never` è il predefinito; `force` viene rifiutato durante il ripristino di un backup. |
 
 ## `global_fields`
 
 I campi Build in questa lista vengono applicati a livello dell'intero dispositivo anche in una modalità scoped, per mantenere un valore
-coerente ovunque. Usala solo per campi sicuri per la coerenza - la security patch è quello
+coerente ovunque. Usala solo per campi sicuri per la coerenza: la security patch è quello
 abituale. **Mai** mettere qui l'identità o il gruppo versione Android.
 
 ```json
@@ -116,7 +115,7 @@ abituale. **Mai** mettere qui l'identità o il gruppo versione Android.
 }
 ```
 
-*Questa documentazione è stata generata con Claude (Anthropic) ed è mantenuta da VD171. Correzioni e miglioramenti sono benvenuti - vedi [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Questa documentazione è stata generata con Claude (Anthropic) ed è mantenuta da VD171. Correzioni e miglioramenti sono benvenuti: vedi [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

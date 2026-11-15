@@ -1,4 +1,4 @@
-> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · Polski · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
+> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · Polski · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Українська](../uk/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
 
 ---
 
@@ -24,7 +24,7 @@ opcjonalnym pobieraniem profilu, nie ma sieci.
 
 Ponieważ forki dziedziczą kopię pamięci zygote w trybie copy-on-write, każda aplikacja startuje z konfiguracji
 odczytanej przy rozruchu. Moduł ponownie odczytuje plik per docelowy proces tylko wtedy, gdy faktycznie
-się zmienił, więc nowo uruchomiona lub ponownie otwarta aplikacja podchwytuje edytowany profil - ale sama
+się zmienił, więc nowo uruchomiona lub ponownie otwarta aplikacja podchwytuje edytowany profil: ale sama
 decyzja o zakresie jest podejmowana przy starcie zygote, więc **zmiana zakresu, silników lub
 `drm_targets` wymaga ponownego uruchomienia**.
 
@@ -37,7 +37,7 @@ Każdy jest niezależny i przełączalny.
 - **Hak właściwości (`motor_prop_hook`).** Prezentuje sfałszowane właściwości systemowe
   procesowi poprzez czyste (clean-room), per proces remapowanie obszaru właściwości (`prop_virtualizer`).
   To remapowanie pamięci, nie hak na funkcję, więc nie ma śladu po zahaczonej funkcji.
-- **resetprop (na poziomie całego urządzenia).** Zapisuje właściwości systemowe grupami - tożsamość, wersja,
+- **resetprop (na poziomie całego urządzenia).** Zapisuje właściwości systemowe grupami: tożsamość, wersja,
   stan rozruchu, SELinux, adb/usb, anty-emulator, plus przebieg porządkujący. Uruchamiają go skrypty
   rozruchowe. W trybie z zakresem grupy tożsamości i wersji są pomijane (Zygisk dostarcza je
   per proces); grupy boot, lock i SELinux pozostają globalne, aby urządzenie było spójne.
@@ -73,7 +73,7 @@ softloop. Grupa wersji jest zatem domyślnie wyłączona i strzeżona przez
 `getprop`, ponieważ `getprop` jest dokładnie tym, co fałszuje. Zobacz pułapkę w
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Ta dokumentacja została wygenerowana z Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane - zobacz [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Ta dokumentacja została wygenerowana z Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane: zobacz [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

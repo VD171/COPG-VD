@@ -25,7 +25,7 @@
 (function () {
   "use strict";
   var AVAILABLE = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "in", "it", "ja",
-                   "ko", "nl", "pl", "pt", "ru", "sv", "th", "tr", "vi", "zh"];
+                   "ko", "nl", "pl", "pt", "ru", "sv", "th", "tr", "uk", "vi", "zh"];
   var dict = {}, fallback = (window.__I18N_EN || {});
 
   function pick() {

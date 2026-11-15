@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · Русский · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · Русский · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Українська](../uk/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -9,7 +9,7 @@
 
 ## Проект с высоты птичьего полёта
 
-COPG-VD - это **подменщик устройства на Zygisk**: небольшая нативная библиотека, которая внедряется в процессы
+COPG-VD является **подменщиком устройства на Zygisk**: небольшая нативная библиотека, которая внедряется в процессы
 приложений, чтобы переписать отпечаток и build устройства, плюс WebUI на чистом JS для управления им.
 Это форк COPG (автор AlirezaParsi), поддерживаемый VD171 под лицензией Apache-2.0.
 Смотрите [ARCHITECTURE.md](ARCHITECTURE.md) и [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
@@ -21,10 +21,10 @@ COPG-VD - это **подменщик устройства на Zygisk**: неб
 
 AI-ассистенты и агенты здесь полноценные участники, а не что-то второстепенное.
 
-- Проект построен так, чтобы быть читаемым: конфигурация - это единственный JSON-файл
+- Проект построен так, чтобы быть читаемым: конфигурация является единственным JSON-файлом
   (`/data/adb/COPG-VD/COPG-VD.json`, документированный в [CONFIGURATION.md](CONFIGURATION.md)),
   движки маленькие и самодостаточные, а раскладка описана в [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
-- Патчи, созданные с помощью AI, рассматриваются и принимаются на тех же условиях, что и любые другие - по
+- Патчи, созданные с помощью AI, рассматриваются и принимаются на тех же условиях, что и любые другие: по
   корректности, ясности и соглашениям ниже, а не по тому, кто (или что) их написал.
 - Одна планка для всех: настоящая функциональность никогда не ослабляется, подмена остаётся согласованной, и
   ничто секретное или специфичное для устройства не попадает в репозиторий (смотрите [.gitignore](../../.gitignore)).
@@ -32,13 +32,13 @@ AI-ассистенты и агенты здесь полноценные уча
 ## Настройка для разработки
 
 - Для тестирования нужно устройство с root или эмулятор с Zygisk (KernelSU, APatch или Magisk).
-- Соберите нативную библиотеку по ABI с помощью NDK (r29) и CMake - смотрите шаг `Build zygisk
+- Соберите нативную библиотеку по ABI с помощью NDK (r29) и CMake. Смотрите шаг `Build zygisk
   libraries` в [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml) для
   точной команды. CI собирает все три ABI за вас.
 - Соберите прошиваемый zip: скопируйте собранный `libspoof.so` в `module/zygisk/<abi>.so`, затем
   `cd module && zip -r9 ../COPG-VD-dev.zip .` и прошейте его.
-- WebUI - это `module/webroot/` (откройте его из root-менеджера). Логика подмены -
-  `zygisk/spoof_module.cpp`; загрузчик профиля - `module/fingerprint-update.sh`.
+- WebUI: `module/webroot/` (откройте его из root-менеджера). Логика подмены:
+  `zygisk/spoof_module.cpp`; загрузчик профиля: `module/fingerprint-update.sh`.
 
 ## Соглашения
 
@@ -53,22 +53,22 @@ AI-ассистенты и агенты здесь полноценные уча
 
 ## Интернационализация (i18n)
 
-- Строки UI находятся в `module/webroot/lang/`. Английский - это канонический запасной вариант
-  (`en.js` + `en.json`); остальные 20 языков - это `<code>.json`.
+- Строки UI находятся в `module/webroot/lang/`. Английский: канонический запасной вариант
+  (`en.js` + `en.json`); остальные 20 языков: `<code>.json`.
 - Чтобы добавить или изменить строку: отредактируйте `en.js` **и** `en.json`, затем обновите каждый
   `<code>.json`. Правка видимой надписи означает обновление **всех** языковых файлов и
   **всех** `README.<code>.md`.
-- Переводы - это обычный JSON - отличный первый вклад.
+- Переводы: обычный JSON, отличный первый вклад.
 
 ## Коммиты и PR
 
 - Держите PR сфокусированными. Описывайте, что и зачем.
 - Подписывайте свои коммиты (DCO): `git commit -s` (добавляет `Signed-off-by:`).
-- CI должен оставаться зелёным. Будьте добры в рецензиях - смотрите [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+- CI должен оставаться зелёным. Будьте добры в рецензиях. Смотрите [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Хорошие первые задачи
 
 Ищите метки `good first issue` и `help wanted`. Переводы, документация и новые
-профили Pixel - все это отличные точки старта.
+профили Pixel: все это отличные точки старта.
 
-*Эта документация была сгенерирована с Claude (Anthropic) и поддерживается VD171. Исправления и улучшения приветствуются - смотрите [CONTRIBUTING.md](CONTRIBUTING.md).*
+*Эта документация была сгенерирована с Claude (Anthropic) и поддерживается VD171. Исправления и улучшения приветствуются: смотрите [CONTRIBUTING.md](CONTRIBUTING.md).*

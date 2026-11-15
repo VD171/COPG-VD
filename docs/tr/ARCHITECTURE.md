@@ -1,4 +1,4 @@
-> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · Türkçe · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
+> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · Türkçe · [Українська](../uk/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
 
 ---
 
@@ -25,7 +25,7 @@ isteğe bağlı profil getirme dışında ağ yoktur.
 Fork'lar zygote'un copy-on-write bellek kopyasını miras aldığından, her uygulama
 önyüklemede okunan yapılandırmadan başlar. Modül, dosyayı yalnızca gerçekten değiştiğinde
 hedeflenen süreç başına yeniden okur, böylece yeni başlatılan veya yeniden açılan bir
-uygulama düzenlenmiş bir profili alır - ancak kapsam kararının kendisi zygote başlangıcında
+uygulama düzenlenmiş bir profili alır: ancak kapsam kararının kendisi zygote başlangıcında
 verilir, bu yüzden **kapsamı, motorları veya `drm_targets`'ı değiştirmek yeniden başlatma
 gerektirir**.
 
@@ -40,7 +40,7 @@ Her biri bağımsız ve değiştirilebilir.
   alanının temiz-oda, süreç başına yeniden eşlemesi (`prop_virtualizer`) aracılığıyla
   sunar. Bu bir bellek yeniden eşlemesidir, fonksiyon hook'u değil, bu yüzden hook'lanmış
   fonksiyon izi yoktur.
-- **resetprop (cihaz geneli).** Sistem özelliklerini gruplar halinde yazar - identity,
+- **resetprop (cihaz geneli).** Sistem özelliklerini gruplar halinde yazar: identity,
   version, boot state, SELinux, adb/usb, anti-emulator, artı bir temizleme geçişi.
   Önyükleme betikleri onu çalıştırır. Kapsamlı bir modda identity ve version grupları
   dışarıda bırakılır (Zygisk bunları süreç başına iletir); boot, lock ve SELinux grupları
@@ -80,7 +80,7 @@ varsayılan olarak kapalıdır ve `spoof_version`'ın arkasında kapılıdır. M
 olarak sahtelediği şeydir. Tuzak için [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap)
 bölümüne bakın.
 
-*Bu belge Claude (Anthropic) ile oluşturulmuş ve VD171 tarafından sürdürülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır - bkz. [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Bu belge Claude (Anthropic) ile oluşturulmuş ve VD171 tarafından sürdürülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır: bkz. [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

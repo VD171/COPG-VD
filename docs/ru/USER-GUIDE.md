@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · Русский · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · Русский · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -7,7 +7,7 @@
 COPG-VD переписывает отпечаток (fingerprint) и build устройства так, что выбранные вами
 приложения видят Pixel вместо вашего настоящего устройства. Это руководство проведёт вас
 от установки к рабочей конфигурации и через решения, встречающиеся по пути. Описание каждого поля и значения
-смотрите в [CONFIGURATION.md](CONFIGURATION.md); как это работает внутри - смотрите [ARCHITECTURE.md](ARCHITECTURE.md).
+смотрите в [CONFIGURATION.md](CONFIGURATION.md); как это работает внутри: смотрите [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Установка
 
@@ -18,7 +18,7 @@ COPG-VD переписывает отпечаток (fingerprint) и build ус�
    GooglePhotosUnlimited.
 
 Откройте WebUI из вашего root-менеджера, чтобы управлять модулем. Пользователи Magisk открывают его через
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases). Всё
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) или [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases). Всё
 можно также редактировать напрямую в `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Кто видит подмену (область действия)
@@ -41,17 +41,17 @@ COPG-VD переписывает отпечаток (fingerprint) и build ус�
 
 Каждый движок независим и может быть выключен. Все включены по умолчанию, кроме DRM.
 
-- **Поля Build (`motor_jni`)** - переписывает `android.os.Build.*` в целевых
+- **Поля Build (`motor_jni`)**: переписывает `android.os.Build.*` в целевых
   процессах. Это то, что читает большинство приложений.
-- **Хук свойств (`motor_prop_hook`)** - предоставляет подменённые системные свойства
+- **Хук свойств (`motor_prop_hook`)**: предоставляет подменённые системные свойства
   целевым процессам через чистое (clean-room) переотображение области свойств для каждого процесса (без
   хука функции).
-- **resetprop** - переписывает системные свойства на уровне всего устройства, по группам (идентичность,
+- **resetprop**: переписывает системные свойства на уровне всего устройства, по группам (идентичность,
   версия, состояние загрузки, SELinux, adb/usb, анти-эмулятор и проход очистки). В режиме с
   областью действия группы идентичности и версии остаются вне прохода по всему устройству (Zygisk доставляет
   их для каждого процесса); группы boot, lock и SELinux остаются глобальными. Переключается в
   `COPG-VD-Settings.resetprop`.
-- **DRM / Widevine (`motor_drm`, по умолчанию выключен)** - сообщает выбранный уровень безопасности
+- **DRM / Widevine (`motor_drm`, по умолчанию выключен)**: сообщает выбранный уровень безопасности
   Widevine (L1 или L3) приложениям, которые его читают. Смотрите раздел DRM ниже.
 
 ## Поддержание актуальности отпечатка
@@ -67,7 +67,7 @@ COPG-VD переписывает отпечаток (fingerprint) и build ус�
   patch, SDK, UUID, host, user). Всё, что вы настроили, сохраняется, а предыдущее
   содержимое сохраняется как `.bak`.
 - Он никогда не откатывается назад (более старый upstream-build отклоняется), и если ваш профиль подменяет
-  другое устройство, он не применяет ничего - отпечаток Pixel на другом профиле хуже,
+  другое устройство, он не применяет ничего: отпечаток Pixel на другом профиле хуже,
   чем старый.
 - `resetprop` применяется заново сразу после обновления, но `android.os.Build` записывается, когда
   стартует zygote, поэтому **перезагрузитесь**, чтобы новые значения дошли до приложений. Лог:
@@ -84,9 +84,9 @@ COPG-VD переписывает отпечаток (fingerprint) и build ус�
 Этих полей нет в поставляемой конфигурации, и апдейтер их никогда не записывает. **Spoof
 Android version** (`COPG-VD-Settings.spoof_version`) решает, применяются ли они вообще:
 
-- `never` (по умолчанию) - используется собственная версия ROM.
-- `rom` - применяет только то, что не превышает ROM, что на практике означает понижение SDK.
-- `force` - применяет ровно то, что указано в конфигурации. Именно это вызывает softloop; используйте его
+- `never` (по умолчанию): используется собственная версия ROM.
+- `rom`: применяет только то, что не превышает ROM, что на практике означает понижение SDK.
+- `force`: применяет ровно то, что указано в конфигурации. Именно это вызывает softloop; используйте его
   только если знаете, что целевой фреймворк это поддерживает.
 
 Настоящая версия читается из `/system/build.prop`, никогда из `getprop` (который и есть то
@@ -99,7 +99,7 @@ Android version** (`COPG-VD-Settings.spoof_version`) решает, примен�
 `DRM_SECURITY_LEVEL` (`L1` или `L3`), приложениям, которые его читают.
 
 По умолчанию подмена DRM следует за `scope_mode`. Чтобы применить её к конкретному набору приложений
-вместо этого - независимо от основной области действия - перечислите их в `drm_targets`. Тогда модуль
+вместо этого, независимо от основной области действия, перечислите их в `drm_targets`. Тогда модуль
 остаётся загруженным в перечисленном приложении **только** ради хука DRM, даже когда это приложение вне
 основной области действия; пустой или отсутствующий список означает следовать за областью действия. Для этого нужен режим с областью действия (не
 `global`), и вступает в силу при следующей **перезагрузке**.
@@ -122,11 +122,11 @@ Android version** (`COPG-VD-Settings.spoof_version`) решает, примен�
 
 Опционально, но лёгкий способ управлять всем. Пять вкладок:
 
-- **About** - информация о модуле и версии.
-- **Device** - каждое поле build, задаётся по состоянию и сгруппировано по категориям.
-- **Spoofing** - режим области действия и переключатели движков.
-- **System** - группы resetprop.
-- **Tools** - Analyze, Check Update, Update Now, Backup / Restore, автообновление при загрузке
+- **About**: информация о модуле и версии.
+- **Device**: каждое поле build, задаётся по состоянию и сгруппировано по категориям.
+- **Spoofing**: режим области действия и переключатели движков.
+- **System**: группы resetprop.
+- **Tools**: Analyze, Check Update, Update Now, Backup / Restore, автообновление при загрузке
   и отчёт Diagnostics (одна кнопка, чтобы прочитать и экспортировать всё полезное для отчёта об
   ошибке).
 
@@ -136,15 +136,15 @@ Android version** (`COPG-VD-Settings.spoof_version`) решает, примен�
 
 - **Приложение всё ещё видит настоящее устройство.** Проверьте область действия: в `playstore` покрыт только стек
   Play. Убедитесь, что конфигурация парсится (запустите Analyze). После смены движков,
-  `drm_targets` или профиля **перезагрузитесь** - Zygisk читает область действия, когда стартует zygote.
+  `drm_targets` или профиля **перезагрузитесь**: Zygisk читает область действия, когда стартует zygote.
 - **Play Integrity всё ещё не проходит.** Убедитесь, что fingerprint свежий (Check Update) и
   что `SECURITY_PATCH` находится в `global_fields`, чтобы он оставался согласованным на всём устройстве. Убейте
   сервисы Google Play, чтобы они повторно прошли аттестацию.
 - **Телефон уходит в softloop после включения подмены версии.** Это ловушка версии Android,
-  описанная выше - верните `spoof_version` обратно в `never`.
-- **WebUI не открывается на Magisk.** Используйте [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases).
+  описанная выше: верните `spoof_version` обратно в `never`.
+- **WebUI не открывается на Magisk.** Используйте [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) или [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Эта документация была сгенерирована с Claude (Anthropic) и поддерживается VD171. Исправления и улучшения приветствуются - смотрите [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Эта документация была сгенерирована с Claude (Anthropic) и поддерживается VD171. Исправления и улучшения приветствуются: смотрите [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

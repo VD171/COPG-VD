@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · العربية · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
+> **Languages:** [English](../CONFIGURATION.md) · العربية · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Українська](../uk/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
 
 ---
 
@@ -77,13 +77,12 @@
 |---|---|---|
 | `resetprop` | bool | ما إذا كان محرك resetprop على مستوى الجهاز يعمل. |
 | `autoupdate` | bool | ما إذا كان `fingerprint-update.sh` يعمل مرة واحدة لكل إقلاع. مفعّل افتراضياً. |
-| `spoof_manufacturer` | bool | ما إذا كان حقل الشركة المصنّعة يُنتحَل أيضاً. |
 | `spoof_version` | `never` / `rom` / `force` | كيفية تطبيق مجموعة إصدار Android. `never` هو الافتراضي؛ ويُرفض `force` عند استعادة نسخة احتياطية. |
 
 ## `global_fields`
 
 تُطبَّق حقول Build في هذه القائمة على مستوى الجهاز بأكمله حتى في وضع ذي نطاق، لإبقاء قيمة
-متسقة في كل مكان. استخدمها فقط للحقول الآمنة من ناحية الاتساق - security patch هو
+متسقة في كل مكان. استخدمها فقط للحقول الآمنة من ناحية الاتساق: security patch هو
 المعتاد. **لا تضع** الهوية أو مجموعة إصدار Android هنا أبداً.
 
 ```json
@@ -114,7 +113,7 @@
 }
 ```
 
-*تم إنشاء هذه الوثائق باستخدام Claude (Anthropic) وتتم صيانتها بواسطة VD171. التصحيحات والتحسينات مرحّب بها - راجع [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*تم إنشاء هذه الوثائق باستخدام Claude (Anthropic) وتتم صيانتها بواسطة VD171. التصحيحات والتحسينات مرحّب بها: راجع [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

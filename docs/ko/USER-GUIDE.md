@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · 한국어 · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · 한국어 · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -17,7 +17,7 @@ COPG-VD는 디바이스의 fingerprint와 build를 다시 작성하여 선택한
    봅니다. 작동하는 fingerprint가 있으면 PlayIntegrityFix나 GooglePhotosUnlimited가 필요하지 않습니다.
 
 모듈을 조작하려면 root 관리자에서 WebUI를 엽니다. Magisk 사용자는
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases)으로 엽니다. 모든 것은
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) 또는 [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases)으로 엽니다. 모든 것은
 `/data/adb/COPG-VD/COPG-VD.json`에서 직접 편집할 수도 있습니다.
 
 ## 누가 스푸핑을 보는가 (스코프)
@@ -39,15 +39,15 @@ Integrity를 통과하는 옵션입니다.
 
 각 엔진은 독립적이며 끌 수 있습니다. DRM을 제외하고 모두 기본적으로 켜져 있습니다.
 
-- **Build 필드 (`motor_jni`)** - 대상 프로세스에서 `android.os.Build.*`를 다시 작성합니다. 이것이
+- **Build 필드 (`motor_jni`)**: 대상 프로세스에서 `android.os.Build.*`를 다시 작성합니다. 이것이
   대부분의 앱이 읽는 것입니다.
-- **속성 후크 (`motor_prop_hook`)** - 속성 영역의 clean-room 프로세스별 리맵을 통해 대상 프로세스에
+- **속성 후크 (`motor_prop_hook`)**: 속성 영역의 clean-room 프로세스별 리맵을 통해 대상 프로세스에
   스푸핑된 시스템 속성을 제시합니다(함수 후크 없음).
-- **resetprop** - 시스템 속성을 디바이스 전체에서 그룹별(identity, version, boot 상태, SELinux,
+- **resetprop**: 시스템 속성을 디바이스 전체에서 그룹별(identity, version, boot 상태, SELinux,
   adb/usb, anti-emulator 및 정리 패스)로 다시 작성합니다. 스코프 모드에서는 identity와 version 그룹이
   디바이스 전체 패스에서 제외됩니다(Zygisk가 프로세스별로 전달); boot, lock, SELinux 그룹은 전역으로
   유지됩니다. `COPG-VD-Settings.resetprop`에서 전환합니다.
-- **DRM / Widevine (`motor_drm`, 기본적으로 꺼짐)** - 선택한 Widevine 보안 수준(L1 또는 L3)을 그것을
+- **DRM / Widevine (`motor_drm`, 기본적으로 꺼짐)**: 선택한 Widevine 보안 수준(L1 또는 L3)을 그것을
   읽는 앱에 보고합니다. 아래 DRM 섹션을 참조하세요.
 
 ## fingerprint를 최신으로 유지하기
@@ -62,7 +62,7 @@ fingerprint는 낡습니다: Google이 factory image를 교체하고, 오래된 
 - Build 필드(fingerprint, ID, incremental, timestamp, security patch, SDK, UUID, host, user)만
   다시 작성합니다. 당신이 커스터마이징한 모든 것은 유지되며, 이전 내용은 `.bak`로 저장됩니다.
 - 절대 뒤로 가지 않으며(더 오래된 upstream build는 거부됨), 프로파일이 다른 디바이스를 스푸핑하는
-  경우 아무것도 적용하지 않습니다 - 다른 프로파일 위의 Pixel fingerprint는 오래된 것보다 나쁩니다.
+  경우 아무것도 적용하지 않습니다: 다른 프로파일 위의 Pixel fingerprint는 오래된 것보다 나쁩니다.
 - `resetprop`는 업데이트 직후 다시 적용되지만, `android.os.Build`는 zygote가 시작될 때 작성되므로
   새 값이 앱에 도달하려면 **재부팅**하세요. 로그: `/data/adb/COPG-VD/update.log`.
 
@@ -76,9 +76,9 @@ fingerprint는 낡습니다: Google이 factory image를 교체하고, 오래된 
 이 필드들은 제공되는 config에 없으며 updater는 절대 작성하지 않습니다. **Spoof Android version**
 (`COPG-VD-Settings.spoof_version`)이 이것들이 애초에 적용되는지를 결정합니다:
 
-- `never` (기본값) - ROM 자체의 버전이 사용됩니다.
-- `rom` - ROM을 초과하지 않는 것만 적용하며, 실제로는 SDK를 낮추는 것을 의미합니다.
-- `force` - config가 말하는 그대로 정확히 적용합니다. 이것이 softloop을 일으키는 것입니다; 대상
+- `never` (기본값): ROM 자체의 버전이 사용됩니다.
+- `rom`: ROM을 초과하지 않는 것만 적용하며, 실제로는 SDK를 낮추는 것을 의미합니다.
+- `force`: config가 말하는 그대로 정확히 적용합니다. 이것이 softloop을 일으키는 것입니다; 대상
   framework가 그것을 지원한다는 것을 아는 경우에만 사용하세요.
 
 실제 버전은 `/system/build.prop`에서 읽히며, `getprop`에서는 절대 읽히지 않습니다(그것이 바로 이
@@ -90,8 +90,8 @@ fingerprint는 낡습니다: Google이 factory image를 교체하고, 오래된 
 기본적으로 꺼짐 (`motor_drm`). 켜져 있으면 선택한 Widevine 수준인 `DRM_SECURITY_LEVEL`(`L1` 또는
 `L3`)을 그것을 읽는 앱에 보고합니다.
 
-기본적으로 DRM 스푸핑은 `scope_mode`를 따릅니다. 대신 특정 앱 집합에 적용하려면 - 메인 스코프와
-독립적으로 - `drm_targets`에 나열하세요. 그러면 모듈은 나열된 앱이 메인 스코프 밖에 있더라도 DRM
+기본적으로 DRM 스푸핑은 `scope_mode`를 따릅니다. 대신 특정 앱 집합에 적용하려면: 메인 스코프와
+독립적으로: `drm_targets`에 나열하세요. 그러면 모듈은 나열된 앱이 메인 스코프 밖에 있더라도 DRM
 후크를 위해 **오직** 그 앱에 로드된 상태로 유지됩니다; 비어 있거나 없는 리스트는 스코프를 따른다는
 의미입니다. 이것은 스코프 모드(`global`이 아님)가 필요하며, 다음 **재부팅** 시 적용됩니다.
 
@@ -112,11 +112,11 @@ config를 손으로 편집할 때마다 실행하세요.
 
 선택 사항이지만, 모든 것을 조작하는 쉬운 방법입니다. 다섯 개의 탭:
 
-- **About** - 모듈 및 버전 정보.
-- **Device** - 모든 Build 필드, 상태별로 설정되고 카테고리별로 그룹화됨.
-- **Spoofing** - 스코프 모드와 엔진 스위치.
-- **System** - resetprop 그룹.
-- **Tools** - Analyze, Check Update, Update Now, Backup / Restore, 부팅 자동 업데이트, 그리고
+- **About**: 모듈 및 버전 정보.
+- **Device**: 모든 Build 필드, 상태별로 설정되고 카테고리별로 그룹화됨.
+- **Spoofing**: 스코프 모드와 엔진 스위치.
+- **System**: resetprop 그룹.
+- **Tools**: Analyze, Check Update, Update Now, Backup / Restore, 부팅 자동 업데이트, 그리고
   Diagnostics 보고서(버그 보고서에 유용한 모든 것을 읽고 내보내는 하나의 버튼).
 
 네트워크 요청을 하지 않습니다; 필요한 모든 것이 모듈 안에 함께 제공됩니다.
@@ -125,15 +125,15 @@ config를 손으로 편집할 때마다 실행하세요.
 
 - **앱이 여전히 실제 디바이스를 봅니다.** 스코프를 확인하세요: `playstore`에서는 Play 스택만
   커버됩니다. config가 파싱되는지 확인하세요(Analyze 실행). 엔진, `drm_targets` 또는 프로파일을
-  변경한 후에는 **재부팅**하세요 - Zygisk는 zygote가 시작될 때 스코프를 읽습니다.
+  변경한 후에는 **재부팅**하세요: Zygisk는 zygote가 시작될 때 스코프를 읽습니다.
 - **Play Integrity가 여전히 실패합니다.** fingerprint가 최신인지(Check Update) 확인하고,
   `SECURITY_PATCH`가 `global_fields`에 있어 디바이스 전체에서 일관성을 유지하는지 확인하세요. Google
   Play services를 종료하여 다시 인증하도록 하세요.
 - **버전 스푸핑을 활성화한 후 전화기가 softloop합니다.** 그것은 위의 Android 버전 함정입니다 -
   `spoof_version`을 `never`로 다시 설정하세요.
-- **Magisk에서 WebUI가 열리지 않습니다.** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases)을 사용하세요.
+- **Magisk에서 WebUI가 열리지 않습니다.** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) 또는 [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases)을 사용하세요.
 
-*이 문서는 Claude (Anthropic)로 생성되었으며 VD171에 의해 유지 관리됩니다. 수정과 개선을 환영합니다 - [../CONTRIBUTING.md](CONTRIBUTING.md)를 참조하세요.*
+*이 문서는 Claude (Anthropic)로 생성되었으며 VD171에 의해 유지 관리됩니다. 수정과 개선을 환영합니다: [../CONTRIBUTING.md](CONTRIBUTING.md)를 참조하세요.*
 
 <!-- doc-footer -->
 

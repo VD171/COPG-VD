@@ -1,4 +1,4 @@
-> **Languages:** [English](../ARCHITECTURE.md) · العربية · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
+> **Languages:** [English](../ARCHITECTURE.md) · العربية · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Українська](../uk/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
 
 ---
 
@@ -24,7 +24,7 @@ COPG-VD وحدة Zygisk: مكتبة أصلية صغيرة (`libspoof.so`) يحق
 
 ولأن التفريعات ترث نسخة ذاكرة zygote بآلية copy-on-write، يبدأ كل تطبيق من الإعداد
 المقروء عند الإقلاع. تعيد الوحدة قراءة الملف لكل عملية مستهدفة فقط عندما يكون قد تغيّر
-فعلاً، بحيث يلتقط تطبيق بدأ حديثاً أو أُعيد فتحه ملف تعريف محرَّراً - لكن قرار النطاق
+فعلاً، بحيث يلتقط تطبيق بدأ حديثاً أو أُعيد فتحه ملف تعريف محرَّراً: لكن قرار النطاق
 نفسه يُتخذ عند بدء zygote، لذا فإن **تغيير النطاق أو المحركات أو `drm_targets` يتطلب
 إعادة تشغيل**.
 
@@ -37,7 +37,7 @@ COPG-VD وحدة Zygisk: مكتبة أصلية صغيرة (`libspoof.so`) يحق
 - **خطّاف الخصائص‏ (`motor_prop_hook`).** يقدّم للعملية خصائص النظام المنتحَلة
   عبر إعادة تخطيط نظيفة (clean-room) لمنطقة الخصائص لكل عملية على حدة (`prop_virtualizer`).
   إنها إعادة تخطيط للذاكرة، لا خطّاف دالة، لذا لا توجد بصمة لدالة مخطوفة.
-- **resetprop (على مستوى الجهاز بأكمله).** يكتب خصائص النظام حسب المجموعة - الهوية،
+- **resetprop (على مستوى الجهاز بأكمله).** يكتب خصائص النظام حسب المجموعة: الهوية،
   الإصدار، حالة الإقلاع، SELinux، adb/usb، مكافحة المحاكي، بالإضافة إلى تمريرة تنظيف. تشغّله سكربتات
   الإقلاع. في وضع ذي نطاق تُترك مجموعتا الهوية والإصدار (يسلّمها Zygisk لكل عملية)؛
   وتبقى مجموعات الإقلاع والقفل وSELinux عامة كي يكون الجهاز متسقاً.
@@ -73,7 +73,7 @@ softloop. لذلك تكون مجموعة الإصدار معطّلة افترا�
 `getprop` أبداً، لأن `getprop` هو تحديداً ما تزوّره. راجع الفخّ في
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*تم إنشاء هذه الوثائق باستخدام Claude (Anthropic) وتتم صيانتها بواسطة VD171. التصحيحات والتحسينات مرحّب بها - راجع [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*تم إنشاء هذه الوثائق باستخدام Claude (Anthropic) وتتم صيانتها بواسطة VD171. التصحيحات والتحسينات مرحّب بها: راجع [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

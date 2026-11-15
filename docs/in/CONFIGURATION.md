@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · Bahasa Indonesia · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
+> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · Bahasa Indonesia · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Українська](../uk/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
 
 ---
 
@@ -54,7 +54,7 @@ koheren.
 > **Grup version bersifat khusus.** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` dan `CODENAME`
 > menggambarkan ROM Anda, bukan perangkat yang di-spoof. Menaikkannya membuat ponsel softloop.
 > Mereka tidak ada dalam profil yang dikirimkan dan hanya diterapkan ketika
-> `COPG-VD-Settings.spoof_version` mengizinkannya - lihat
+> `COPG-VD-Settings.spoof_version` mengizinkannya: lihat
 > [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
 ### State field
@@ -79,14 +79,13 @@ Pengaturan yang ikut bersama profil, sehingga backup membawa pilihan Anda.
 |---|---|---|
 | `resetprop` | bool | Apakah mesin resetprop seluruh perangkat berjalan. |
 | `autoupdate` | bool | Apakah `fingerprint-update.sh` berjalan sekali per boot. Default aktif. |
-| `spoof_manufacturer` | bool | Apakah field manufacturer ikut di-spoof. |
 | `spoof_version` | `never` / `rom` / `force` | Bagaimana grup version Android diterapkan. `never` adalah default; `force` ditolak saat memulihkan backup. |
 
 ## `global_fields`
 
 Field Build dalam daftar ini diterapkan di seluruh perangkat bahkan dalam mode scoped, untuk
 menjaga sebuah nilai tetap konsisten di mana-mana. Gunakan hanya untuk field yang aman secara
-koherensi - security patch adalah yang biasa. **Jangan pernah** menaruh identity atau grup
+koherensi: security patch adalah yang biasa. **Jangan pernah** menaruh identity atau grup
 version Android di sini.
 
 ```json
@@ -117,7 +116,7 @@ version Android di sini.
 }
 ```
 
-*Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima - lihat [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima: lihat [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

@@ -83,7 +83,7 @@ jobs:
           echo "module build dispatched for $BUILD"
 
       # GitHub disables scheduled workflows after 60 days without a commit, and only commits
-      # count - not tags, not runs, not the schedule firing. The canary cadence alone does not
+      # count: not tags, not runs, not the schedule firing. The canary cadence alone does not
       # cover it: 2026-04-17 -> 2026-06-18 was 62 days. So when nothing changed and the repo is
       # about to go quiet, leave a line saying what was verified and when. It is a real record
       # of the automation being alive, which an empty commit would not be.

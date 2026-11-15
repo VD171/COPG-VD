@@ -1,4 +1,4 @@
-> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · فارسی · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
+> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · فارسی · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Українська](../uk/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
 
 ---
 
@@ -25,7 +25,7 @@ Zygisk آن را به درون zygote و، از آنجا، به درون پرد�
 چون fork ها کپی copy-on-write حافظه zygote را به ارث می‌برند، هر اپ از config خوانده‌شده
 هنگام boot شروع می‌شود. ماژول فایل را به ازای هر پردازه هدف فقط وقتی دوباره می‌خواند که
 واقعاً تغییر کرده باشد، پس یک اپ تازه راه‌اندازی‌شده یا دوباره بازشده یک پروفایل ویرایش‌شده
-را برمی‌دارد - اما خود تصمیم scope هنگام شروع zygote گرفته می‌شود، پس **تغییر scope، موتورها
+را برمی‌دارد: اما خود تصمیم scope هنگام شروع zygote گرفته می‌شود، پس **تغییر scope، موتورها
 یا `drm_targets` به یک ری‌استارت نیاز دارد**.
 
 ## موتورها
@@ -37,7 +37,7 @@ Zygisk آن را به درون zygote و، از آنجا، به درون پرد�
 - **Property hook (`motor_prop_hook`).** property های سیستمی جعلی را به پردازه از طریق یک
   remap تمیز (clean-room) و per-process از ناحیه property (`prop_virtualizer`) ارائه می‌دهد.
   این یک remap حافظه است، نه hook تابع، پس هیچ ردپای تابع hook‌شده‌ای وجود ندارد.
-- **resetprop (سراسری در دستگاه).** property های سیستم را گروه به گروه می‌نویسد - identity،
+- **resetprop (سراسری در دستگاه).** property های سیستم را گروه به گروه می‌نویسد: identity،
   version، boot state، SELinux، adb/usb، anti-emulator، به علاوه یک پاس پاک‌سازی. اسکریپت‌های
   boot آن را اجرا می‌کنند. در یک حالت scoped، گروه‌های identity و version کنار گذاشته می‌شوند
   (Zygisk آن‌ها را per-process تحویل می‌دهد)؛ گروه‌های boot، lock و SELinux سراسری می‌مانند
@@ -75,7 +75,7 @@ WebUI یا یک بار در هر boot. از downloader همراه خود ماژ�
 `getprop`، چون `getprop` دقیقاً همان چیزی است که آن را جعل می‌کند. تله را در
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap) ببینید.
 
-*این مستندات با Claude (Anthropic) تولید شده و توسط VD171 نگهداری می‌شود. اصلاحات و بهبودها خوش‌آمدند - [../CONTRIBUTING.md](CONTRIBUTING.md) را ببینید.*
+*این مستندات با Claude (Anthropic) تولید شده و توسط VD171 نگهداری می‌شود. اصلاحات و بهبودها خوش‌آمدند: [../CONTRIBUTING.md](CONTRIBUTING.md) را ببینید.*
 
 <!-- doc-footer -->
 

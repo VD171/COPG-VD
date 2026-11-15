@@ -1,4 +1,4 @@
-> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · Čeština · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
+> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · Čeština · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · [Русский](../ru/ARCHITECTURE.md) · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Українська](../uk/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
 
 ---
 
@@ -25,7 +25,7 @@ stažení profilu žádná síť.
 Protože forky dědí copy-on-write kopii paměti zygote, každá aplikace startuje z
 konfigurace přečtené při bootu. Modul čte soubor znovu per cílený proces pouze tehdy, když
 se skutečně změnil, takže nově spuštěná nebo znovu otevřená aplikace zachytí upravený
-profil - ale samotné rozhodnutí o rozsahu se dělá při startu zygote, takže **změna
+profil: ale samotné rozhodnutí o rozsahu se dělá při startu zygote, takže **změna
 rozsahu, enginů nebo `drm_targets` vyžaduje restart**.
 
 ## Enginy
@@ -37,7 +37,7 @@ Každý je nezávislý a přepínatelný.
 - **Hook vlastností (`motor_prop_hook`).** Předkládá procesu podvržené systémové vlastnosti
   pomocí clean-room přemapování oblasti vlastností per proces (`prop_virtualizer`). Je to
   přemapování paměti, ne hook funkce, takže neexistuje stopa po hooknuté funkci.
-- **resetprop (napříč zařízením).** Zapisuje systémové vlastnosti po skupinách - identita,
+- **resetprop (napříč zařízením).** Zapisuje systémové vlastnosti po skupinách: identita,
   verze, stav bootu, SELinux, adb/usb, anti-emulátor, plus čisticí průchod. Spouštějí jej
   boot skripty. V rozsahovém režimu jsou skupiny identity a verze vynechány (Zygisk je
   doručuje per proces); skupiny bootu, zámku a SELinuxu zůstávají globální, aby bylo
@@ -73,7 +73,7 @@ softloopu. Skupina verze je proto ve výchozím stavu vypnuta a uzamčena za `sp
 Modul čte skutečnou verzi z `/system/build.prop`, nikdy z `getprop`, protože `getprop` je
 přesně to, co falšuje. Viz past v [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Tato dokumentace byla vygenerována pomocí Claude (Anthropic) a je udržována VD171. Opravy a vylepšení jsou vítány - viz [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Tato dokumentace byla vygenerována pomocí Claude (Anthropic) a je udržována VD171. Opravy a vylepšení jsou vítány: viz [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

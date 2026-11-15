@@ -148,6 +148,19 @@ If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWeb
 
 <!-- /vd-docs -->
 
+## Incremental updates (VDLU)
+
+COPG-VD ships the **VDLU** engine (vendored in `module/vdlu/`): the module updates itself by fetching only
+the files that changed (content-addressed blobs + a signed `manifest.json`), instead of re-downloading the
+whole `.zip`. **Hardened** profile: the ed25519 signature is mandatory and downgrades are blocked; the full
+`.zip` stays valid as a fallback.
+
+- **`vdlu/`** (shipped in the zip): `update.sh` (engine) + `vdlu-verify` + `config.default` + `keyring/` (public key).
+- **State** in `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - outside the module, survives a reflash.
+- **Boot trigger:** `post-fs-data.sh`, pre-zygote - COPG-VD has `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), so the new `.so` is staged and swapped before zygote maps it.
+- **WebUI:** an **Updates** panel (`webroot/vdlu.js`) with a progress toast and cancel.
+- **Release:** see `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, archive the manifest, `vdlu-gc` prunes orphan blobs, batched Pages push).
+
 ## See also
 
 Sibling projects by the same author:

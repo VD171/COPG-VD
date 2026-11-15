@@ -1,11 +1,11 @@
-> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · Русский · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
+> **Languages:** [English](../ARCHITECTURE.md) · [العربية](../ar/ARCHITECTURE.md) · [Čeština](../cs/ARCHITECTURE.md) · [Deutsch](../de/ARCHITECTURE.md) · [Español](../es/ARCHITECTURE.md) · [فارسی](../fa/ARCHITECTURE.md) · [Français](../fr/ARCHITECTURE.md) · [हिन्दी](../hi/ARCHITECTURE.md) · [Bahasa Indonesia](../in/ARCHITECTURE.md) · [Italiano](../it/ARCHITECTURE.md) · [日本語](../ja/ARCHITECTURE.md) · [한국어](../ko/ARCHITECTURE.md) · [Nederlands](../nl/ARCHITECTURE.md) · [Polski](../pl/ARCHITECTURE.md) · [Português](../pt/ARCHITECTURE.md) · Русский · [Svenska](../sv/ARCHITECTURE.md) · [ไทย](../th/ARCHITECTURE.md) · [Türkçe](../tr/ARCHITECTURE.md) · [Українська](../uk/ARCHITECTURE.md) · [Tiếng Việt](../vi/ARCHITECTURE.md) · [中文](../zh/ARCHITECTURE.md)
 
 ---
 
 # Архитектура
 
-COPG-VD - это модуль Zygisk: небольшая нативная библиотека (`libspoof.so`), которую загрузчик Zygisk
-внедряет в zygote, а оттуда - в процессы приложений. Всё, что она делает, - предоставляет
+COPG-VD является модулем Zygisk: небольшая нативная библиотека (`libspoof.so`), которую загрузчик Zygisk
+внедряет в zygote, а оттуда в процессы приложений. Всё, что она делает, предоставляет
 выбранную идентичность устройства процессам, которые вы нацеливаете. Приложения нет, и, помимо
 опциональной загрузки профиля, сети нет.
 
@@ -24,7 +24,7 @@ COPG-VD - это модуль Zygisk: небольшая нативная биб
 
 Поскольку форки наследуют copy-on-write копию памяти zygote, каждое приложение стартует из конфигурации,
 прочитанной при загрузке. Модуль перечитывает файл для каждого целевого процесса, только когда он действительно
-изменился, так что только что запущенное или заново открытое приложение подхватывает отредактированный профиль - но само
+изменился, так что только что запущенное или заново открытое приложение подхватывает отредактированный профиль, но само
 решение об области действия принимается при старте zygote, поэтому **смена области действия, движков или
 `drm_targets` требует перезагрузки**.
 
@@ -37,7 +37,7 @@ COPG-VD - это модуль Zygisk: небольшая нативная биб
 - **Хук свойств (`motor_prop_hook`).** Предоставляет подменённые системные свойства
   процессу через чистое (clean-room), для каждого процесса переотображение области свойств (`prop_virtualizer`).
   Это переотображение памяти, а не хук функции, поэтому нет следа захуканной функции.
-- **resetprop (на уровне всего устройства).** Записывает системные свойства по группам - идентичность, версия,
+- **resetprop (на уровне всего устройства).** Записывает системные свойства по группам: идентичность, версия,
   состояние загрузки, SELinux, adb/usb, анти-эмулятор, плюс проход очистки. Их запускают загрузочные
   скрипты. В режиме с областью действия группы идентичности и версии оставляются в стороне (Zygisk доставляет их
   для каждого процесса); группы boot, lock и SELinux остаются глобальными, чтобы устройство было согласованным.
@@ -70,10 +70,10 @@ COPG-VD - это модуль Zygisk: небольшая нативная биб
 вызывать API, которых не существует, что обрушивает приложения Google и перезагружает телефон в
 softloop. Поэтому группа версии по умолчанию выключена и защищена за
 `spoof_version`. Модуль читает настоящую версию из `/system/build.prop`, никогда из
-`getprop`, потому что `getprop` - это именно то, что он фальсифицирует. Смотрите ловушку в
+`getprop`, потому что `getprop` и есть именно то, что он фальсифицирует. Смотрите ловушку в
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Эта документация была сгенерирована с Claude (Anthropic) и поддерживается VD171. Исправления и улучшения приветствуются - смотрите [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Эта документация была сгенерирована с Claude (Anthropic) и поддерживается VD171. Исправления и улучшения приветствуются: смотрите [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

@@ -17,6 +17,7 @@
  *  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
  *  XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
  *  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+ *  Channel        : @Priv8_VD https://t.me/Priv8_VD
  *  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
  *  E-mail         : vd.priv8@pm.me
  * ======================================================================
@@ -77,6 +78,19 @@ struct Inner { Ctx* ctx; const prop_info* pi; };
 }  // namespace
 
 bool install(const std::map<std::string, std::string>& values) {
+    std::vector<Target> targets;
+    Ctx ctx{&values, &targets};
+    __system_property_foreach([](const prop_info* pi, void* c) {
+        Inner inner{static_cast<Ctx*>(c), pi};
+        __system_property_read_callback(pi, [](void* cc, const char* name, const char*, uint32_t) {
+            Inner* in = static_cast<Inner*>(cc);
+            std::string ov = overrideFor(name, *in->ctx->values);
+            if (!ov.empty() && ov.size() < kValueMax)
+                in->ctx->targets->push_back({in->pi, std::move(ov)});
+        }, &inner);
+    }, &ctx);
+    if (targets.empty()) return false;
+
     std::vector<Region> regions;
     FILE* f = fopen("/proc/self/maps", "r");
     if (!f) return false;
@@ -100,19 +114,6 @@ bool install(const std::map<std::string, std::string>& values) {
     }
     fclose(f);
     if (regions.empty()) return false;
-
-    std::vector<Target> targets;
-    Ctx ctx{&values, &targets};
-    __system_property_foreach([](const prop_info* pi, void* c) {
-        Inner inner{static_cast<Ctx*>(c), pi};
-        __system_property_read_callback(pi, [](void* cc, const char* name, const char*, uint32_t) {
-            Inner* in = static_cast<Inner*>(cc);
-            std::string ov = overrideFor(name, *in->ctx->values);
-            if (!ov.empty() && ov.size() < kValueMax)
-                in->ctx->targets->push_back({in->pi, std::move(ov)});
-        }, &inner);
-    }, &ctx);
-    if (targets.empty()) return false;
 
     for (auto& t : targets) {
         const uintptr_t a = reinterpret_cast<uintptr_t>(t.pi);

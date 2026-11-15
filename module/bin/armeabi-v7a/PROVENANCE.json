@@ -1,0 +1,35 @@
+{
+  "abi": "armeabi-v7a",
+  "generated_utc": "2026-11-15T02:08:47Z",
+  "policy": "All files are fetched at build time from the official upstream listed below, never from a device. Audit: re-fetch the pinned sources, extract, and compare the file sha256 values.",
+  "sources": [
+    {"type": "termux-deb", "package": "zstd", "version": "1.5.7-1", "url": "https://packages.termux.dev/apt/termux-main/pool/main/z/zstd/zstd_1.5.7-1_arm.deb", "deb_sha256": "87031a6369a7fd14108e4612d35e6296f8b933c6bc4d383b8aa18044d26f11f5"},
+    {"type": "termux-deb", "package": "curl", "version": "8.23.0", "url": "https://packages.termux.dev/apt/termux-main/pool/main/c/curl/curl_8.23.0_arm.deb", "deb_sha256": "c94e890d660ebff871e37339fdb003e77687d0a6320cb3304d5b95aa521654e4"},
+    {"type": "termux-deb", "package": "openssl-tool", "version": "1:3.6.5", "url": "https://packages.termux.dev/apt/termux-main/pool/main/o/openssl-tool/openssl-tool_1:3.6.5_arm.deb", "deb_sha256": "f1a388f540547f48f887e13026f1c1cbda8d304fa5f958b5445871dba4743a63"},
+    {"type": "termux-deb", "package": "liblzma", "version": "5.8.4", "url": "https://packages.termux.dev/apt/termux-main/pool/main/libl/liblzma/liblzma_5.8.4_arm.deb", "deb_sha256": "428f2a7b3b6e1ccaa69a87ef60e2748985516b48ee4b7e37c4183b84ae454871"},
+    {"type": "termux-deb", "package": "zlib", "version": "1.4", "url": "https://packages.termux.dev/apt/termux-main/pool/main/z/zlib/zlib_1.4_arm.deb", "deb_sha256": "a04f6ce4f36749b49a7ee0432e6fe3f235bdde95ed53f6b9f86138d58fbdc816"},
+    {"type": "termux-deb", "package": "libcurl", "version": "8.23.0", "url": "https://packages.termux.dev/apt/termux-main/pool/main/libc/libcurl/libcurl_8.23.0_arm.deb", "deb_sha256": "f5263f174fa7d1ef7aa711907c78d491526d688f84b45771e202d2e3b4b653d1"},
+    {"type": "termux-deb", "package": "openssl", "version": "1:3.6.5", "url": "https://packages.termux.dev/apt/termux-main/pool/main/o/openssl/openssl_1:3.6.5_arm.deb", "deb_sha256": "4271df34c1cad73da0143b6d9013df4b80a4f6fc4d8a107f4069ef864606e0a9"},
+    {"type": "termux-deb", "package": "libnghttp2", "version": "1.71.0", "url": "https://packages.termux.dev/apt/termux-main/pool/main/libn/libnghttp2/libnghttp2_1.71.0_arm.deb", "deb_sha256": "4a0bffe9b121fed5711a5a72935289bc9ad12b9d38e2f6897ec8f45b6d550aff"},
+    {"type": "termux-deb", "package": "libnghttp3", "version": "1.19.0", "url": "https://packages.termux.dev/apt/termux-main/pool/main/libn/libnghttp3/libnghttp3_1.19.0_arm.deb", "deb_sha256": "2f72cadeb75f17e9e9ee40ebbe439224b4e94a684f38a9de4263df8f1a2fb973"},
+    {"type": "termux-deb", "package": "libngtcp2", "version": "1.26.0", "url": "https://packages.termux.dev/apt/termux-main/pool/main/libn/libngtcp2/libngtcp2_1.26.0_arm.deb", "deb_sha256": "801c887d652fc22a90a0178d7fbfd4f033e22ea110d22773c42e8b2c4c347bf7"},
+    {"type": "termux-deb", "package": "libssh2", "version": "1.11.1-2", "url": "https://packages.termux.dev/apt/termux-main/pool/main/libs/libssh2/libssh2_1.11.1-2_arm.deb", "deb_sha256": "5c39a041e53288fd763464be5bff2bab72401965c93bb1ab4f85f9574fb77a63"},
+    {"type": "termux-deb", "package": "ca-certificates", "version": "1:2026.11.05-1", "url": "https://packages.termux.dev/apt/termux-main/pool/main/c/ca-certificates/ca-certificates_1:2026.11.05-1_all.deb", "deb_sha256": "12fc350fc5ad638338b06b04835bce897615f8c93f96d30ac396cdb39b850c6b"}
+  ],
+  "files": [
+    {"path": "curl", "bytes": 240928, "sha256": "55b0d3cac45adcad0fd40348cede4f23edcb65bfa7f6f1388618cf8c41b2ed30"},
+    {"path": "openssl", "bytes": 664996, "sha256": "bb9e299ddbf4ba86e61b4bbc2696b7e97ad7622ed8f8ee5e3cd36221536ffcc1"},
+    {"path": "zstd", "bytes": 126056, "sha256": "8702180f913d7ce68fc62d3d6f242eaeeaf153be2deb5ffc807ff564bd44ce75"},
+    {"path": "lib/libcrypto.so.3", "bytes": 2801252, "sha256": "3199814bd5d1eb60d24604352f4e88e3b6741678d367ed059c4eed27b59bfa59"},
+    {"path": "lib/libcurl.so", "bytes": 662364, "sha256": "002e1902440e02432ccd9b8f119cc6f2b3f9d1d7054dc918f231735cb3e60fc1"},
+    {"path": "lib/liblzma.so.5", "bytes": 115512, "sha256": "ae607f4553a7c24ba2fbfb6375ae3f149e3c9fdd19e91de50c1f928efe4c634b"},
+    {"path": "lib/libnghttp2.so", "bytes": 113340, "sha256": "6f716cef110919aabade5d0d4a8f0d4617a79e9e042fda64dd715841611ad7c5"},
+    {"path": "lib/libnghttp3.so", "bytes": 114428, "sha256": "690200bef0d15b9706ab53f7ea9b1f5d98d17978afde072473cad88958282e81"},
+    {"path": "lib/libngtcp2_crypto_ossl.so", "bytes": 29708, "sha256": "23424588a5d0fc28c021db9ec7b1e7d8c85bbc9de44b08252ebdb3a32efdf47e"},
+    {"path": "lib/libngtcp2.so", "bytes": 271796, "sha256": "db3e6b5d0444f9bd36c9ed7ca9f9d9e18d41621dc82c9785d973644acbb606cc"},
+    {"path": "lib/libssh2.so", "bytes": 166812, "sha256": "7f5b4a50fb0e37be5d31d520eb90f6fa7cddd4620702a9402e3b17c9cfcefa5f"},
+    {"path": "lib/libssl.so.3", "bytes": 577544, "sha256": "861cf40e0899f057d60b159f32fdc8ae5e988fe003990df938037458db66814d"},
+    {"path": "lib/libz.so.1", "bytes": 56048, "sha256": "fcf98d0343a3bc6326e08f92ca30f7a456eca87aa3834c05c1042a1c2daedeac"},
+    {"path": "lib/libzstd.so.1", "bytes": 647432, "sha256": "50e5f96b00edac3a6cee3d8ade21b3da15dfd7c540603021b32d5f7474b6c17b"}
+  ]
+}

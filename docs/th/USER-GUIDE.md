@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · ไทย · [Türkçe](../tr/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · ไทย · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -18,7 +18,7 @@ COPG-VD เขียนทับลายนิ้วมือ (fingerprint) แ
    GooglePhotosUnlimited
 
 เปิด WebUI จากตัวจัดการ root ของคุณเพื่อควบคุมโมดูล ผู้ใช้ Magisk เปิดด้วย
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) ทุกอย่าง
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) หรือ [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) ทุกอย่าง
 ยังสามารถแก้ไขได้โดยตรงใน `/data/adb/COPG-VD/COPG-VD.json`
 
 ## ใครเห็นการปลอม (ขอบเขต)
@@ -41,17 +41,17 @@ COPG-VD เขียนทับลายนิ้วมือ (fingerprint) แ
 
 แต่ละเครื่องยนต์เป็นอิสระต่อกันและสามารถปิดได้ ทั้งหมดเปิดอยู่โดยค่าเริ่มต้นยกเว้น DRM
 
-- **ฟิลด์ Build (`motor_jni`)** - เขียน `android.os.Build.*` ใหม่ในโปรเซสเป้าหมาย
+- **ฟิลด์ Build (`motor_jni`)**: เขียน `android.os.Build.*` ใหม่ในโปรเซสเป้าหมาย
   นี่คือสิ่งที่แอปส่วนใหญ่อ่าน
-- **Property hook (`motor_prop_hook`)** - นำเสนอพร็อพเพอร์ตีระบบที่ปลอมขึ้นให้กับ
+- **Property hook (`motor_prop_hook`)**: นำเสนอพร็อพเพอร์ตีระบบที่ปลอมขึ้นให้กับ
   โปรเซสเป้าหมาย ผ่านการรีแมป (remap) พื้นที่พร็อพเพอร์ตีแบบ clean-room รายโปรเซส (ไม่มีการ
   hook ฟังก์ชัน)
-- **resetprop** - เขียนพร็อพเพอร์ตีระบบใหม่ทั้งอุปกรณ์ แบ่งเป็นกลุ่ม (identity,
+- **resetprop**: เขียนพร็อพเพอร์ตีระบบใหม่ทั้งอุปกรณ์ แบ่งเป็นกลุ่ม (identity,
   version, boot state, SELinux, adb/usb, anti-emulator และการเก็บกวาดอีกรอบหนึ่ง) ในโหมด
   ที่มีขอบเขต กลุ่ม identity และ version จะไม่อยู่ในรอบที่ทำทั้งอุปกรณ์ (Zygisk ส่ง
   ให้เป็นรายโปรเซส) กลุ่ม boot, lock และ SELinux ยังคงเป็นส่วนกลาง สลับเปิดปิดได้ที่
   `COPG-VD-Settings.resetprop`
-- **DRM / Widevine (`motor_drm`, ปิดโดยค่าเริ่มต้น)** - รายงานระดับความปลอดภัยของ Widevine ที่เลือก
+- **DRM / Widevine (`motor_drm`, ปิดโดยค่าเริ่มต้น)**: รายงานระดับความปลอดภัยของ Widevine ที่เลือก
   (L1 หรือ L3) ให้กับแอปที่อ่านมัน ดูหัวข้อ DRM ด้านล่าง
 
 ## รักษาลายนิ้วมือให้สดใหม่
@@ -67,7 +67,7 @@ COPG-VD เขียนทับลายนิ้วมือ (fingerprint) แ
   patch, SDK, UUID, host, user) ทุกอย่างที่คุณปรับแต่งเองจะถูกเก็บไว้ และเนื้อหาเดิม
   จะถูกบันทึกไว้เป็น `.bak`
 - มันไม่เคยถอยหลัง (build ของต้นทางที่เก่ากว่าจะถูกปฏิเสธ) และถ้าโปรไฟล์ของคุณปลอม
-  เป็นอุปกรณ์อื่น มันจะไม่ใช้อะไรเลย - ลายนิ้วมือ Pixel บนโปรไฟล์อื่นแย่กว่า
+  เป็นอุปกรณ์อื่น มันจะไม่ใช้อะไรเลย: ลายนิ้วมือ Pixel บนโปรไฟล์อื่นแย่กว่า
   ตัวเก่า
 - `resetprop` จะถูกใช้ซ้ำทันทีหลังการอัปเดต แต่ `android.os.Build` ถูกเขียนตอน
   zygote เริ่ม ดังนั้นให้ **รีบูต** เพื่อให้ค่าใหม่ไปถึงแอป ล็อก:
@@ -84,9 +84,9 @@ COPG-VD เขียนทับลายนิ้วมือ (fingerprint) แ
 ฟิลด์เหล่านี้ไม่ได้อยู่ในคอนฟิกที่มาพร้อมและตัวอัปเดตไม่เคยเขียนมัน **Spoof
 Android version** (`COPG-VD-Settings.spoof_version`) ตัดสินว่าจะใช้มันหรือไม่:
 
-- `never` (ค่าเริ่มต้น) - ใช้เวอร์ชันของ ROM เอง
-- `rom` - ใช้เฉพาะสิ่งที่ไม่เกิน ROM ซึ่งในทางปฏิบัติหมายถึงการลด SDK ลง
-- `force` - ใช้ตามที่คอนฟิกบอกทุกอย่าง นี่คือสิ่งที่ทำให้เกิด softloop ใช้มัน
+- `never` (ค่าเริ่มต้น): ใช้เวอร์ชันของ ROM เอง
+- `rom`: ใช้เฉพาะสิ่งที่ไม่เกิน ROM ซึ่งในทางปฏิบัติหมายถึงการลด SDK ลง
+- `force`: ใช้ตามที่คอนฟิกบอกทุกอย่าง นี่คือสิ่งที่ทำให้เกิด softloop ใช้มัน
   เฉพาะเมื่อคุณรู้ว่า framework เป้าหมายรองรับมัน
 
 เวอร์ชันจริงถูกอ่านจาก `/system/build.prop` ไม่เคยจาก `getprop` (ซึ่งเป็น
@@ -99,7 +99,7 @@ Android version** (`COPG-VD-Settings.spoof_version`) ตัดสินว่า
 `DRM_SECURITY_LEVEL` (`L1` หรือ `L3`) ให้กับแอปที่อ่านมัน
 
 โดยค่าเริ่มต้น การปลอม DRM จะทำตาม `scope_mode` ในการใช้มันกับชุดแอปที่เฉพาะเจาะจง
-แทน - โดยเป็นอิสระจากขอบเขตหลัก - ให้ลงรายการไว้ใน `drm_targets` จากนั้นโมดูลจะ
+แทน, โดยเป็นอิสระจากขอบเขตหลัก, ให้ลงรายการไว้ใน `drm_targets` จากนั้นโมดูลจะ
 ยังคงโหลดอยู่ในแอปที่ลงรายการไว้ **เพียง** เพื่อ DRM hook แม้ว่าแอปนั้นจะอยู่นอก
 ขอบเขตหลัก รายการที่ว่างเปล่าหรือไม่มีอยู่หมายถึงทำตามขอบเขต สิ่งนี้ต้องใช้โหมดที่มีขอบเขต (ไม่ใช่
 `global`) และจะมีผลในการ **รีบูต** ครั้งถัดไป
@@ -122,11 +122,11 @@ Android version** (`COPG-VD-Settings.spoof_version`) ตัดสินว่า
 
 เป็นทางเลือก แต่เป็นวิธีที่ง่ายในการควบคุมทุกอย่าง ห้าแท็บ:
 
-- **About** - ข้อมูลโมดูลและเวอร์ชัน
-- **Device** - ทุกฟิลด์ build ตั้งค่าเป็นรายสถานะและจัดกลุ่มตามหมวดหมู่
-- **Spoofing** - โหมดขอบเขตและสวิตช์เครื่องยนต์
-- **System** - กลุ่ม resetprop
-- **Tools** - Analyze, Check Update, Update Now, Backup / Restore, การอัปเดตอัตโนมัติตอนบูต
+- **About**: ข้อมูลโมดูลและเวอร์ชัน
+- **Device**: ทุกฟิลด์ build ตั้งค่าเป็นรายสถานะและจัดกลุ่มตามหมวดหมู่
+- **Spoofing**: โหมดขอบเขตและสวิตช์เครื่องยนต์
+- **System**: กลุ่ม resetprop
+- **Tools**: Analyze, Check Update, Update Now, Backup / Restore, การอัปเดตอัตโนมัติตอนบูต
   และรายงาน Diagnostics (ปุ่มเดียวเพื่ออ่านและส่งออกทุกอย่างที่มีประโยชน์สำหรับรายงาน
   บั๊ก)
 
@@ -136,15 +136,15 @@ Android version** (`COPG-VD-Settings.spoof_version`) ตัดสินว่า
 
 - **แอปยังเห็นอุปกรณ์จริง** ตรวจสอบขอบเขต: ใน `playstore` มีเพียงสแตก Play
   เท่านั้นที่ถูกครอบคลุม ยืนยันว่าคอนฟิก parse ได้ (เรียกใช้ Analyze) หลังจากเปลี่ยนเครื่องยนต์,
-  `drm_targets` หรือโปรไฟล์ ให้ **รีบูต** - Zygisk อ่านขอบเขตตอน zygote เริ่ม
+  `drm_targets` หรือโปรไฟล์ ให้ **รีบูต**: Zygisk อ่านขอบเขตตอน zygote เริ่ม
 - **Play Integrity ยังล้มเหลว** ตรวจสอบให้แน่ใจว่าลายนิ้วมือสดใหม่ (Check Update) และ
   ว่า `SECURITY_PATCH` อยู่ใน `global_fields` เพื่อให้มันคงความสอดคล้องทั้งอุปกรณ์ ฆ่า
   Google Play services เพื่อให้มัน re-attest
 - **โทรศัพท์ softloop หลังเปิดการปลอมเวอร์ชัน** นั่นคือกับดักเวอร์ชัน Android
-  ด้านบน - ตั้ง `spoof_version` กลับเป็น `never`
-- **WebUI ไม่เปิดบน Magisk** ใช้ [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases)
+  ด้านบน: ตั้ง `spoof_version` กลับเป็น `never`
+- **WebUI ไม่เปิดบน Magisk** ใช้ [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) หรือ [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases)
 
-*เอกสารนี้สร้างด้วย Claude (Anthropic) และดูแลรักษาโดย VD171 ยินดีรับการแก้ไขและการปรับปรุง - ดู [../CONTRIBUTING.md](CONTRIBUTING.md)*
+*เอกสารนี้สร้างด้วย Claude (Anthropic) และดูแลรักษาโดย VD171 ยินดีรับการแก้ไขและการปรับปรุง: ดู [../CONTRIBUTING.md](CONTRIBUTING.md)*
 
 <!-- doc-footer -->
 

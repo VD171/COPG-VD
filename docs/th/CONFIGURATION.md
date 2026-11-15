@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · ไทย · [Türkçe](../tr/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
+> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · ไทย · [Türkçe](../tr/CONFIGURATION.md) · [Українська](../uk/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
 
 ---
 
@@ -78,13 +78,12 @@ attestation รายงานค่าที่ต่างจากค่า�
 |---|---|---|
 | `resetprop` | bool | เครื่องยนต์ resetprop ที่ทำทั้งอุปกรณ์ทำงานหรือไม่ |
 | `autoupdate` | bool | `fingerprint-update.sh` ทำงานหนึ่งครั้งต่อการบูตหรือไม่ ค่าเริ่มต้นเปิด |
-| `spoof_manufacturer` | bool | ฟิลด์ manufacturer ถูกปลอมด้วยหรือไม่ |
 | `spoof_version` | `never` / `rom` / `force` | กลุ่มเวอร์ชัน Android ใช้อย่างไร `never` เป็นค่าเริ่มต้น; `force` ถูกปฏิเสธเมื่อกู้คืนข้อมูลสำรอง |
 
 ## `global_fields`
 
 ฟิลด์ Build ในรายการนี้ถูกใช้ทั้งอุปกรณ์แม้ในโหมดที่มีขอบเขต เพื่อให้ค่า
-สอดคล้องกันทุกที่ ใช้มันเฉพาะกับฟิลด์ที่ปลอดภัยต่อความสอดคล้อง - security patch เป็น
+สอดคล้องกันทุกที่ ใช้มันเฉพาะกับฟิลด์ที่ปลอดภัยต่อความสอดคล้อง: security patch เป็น
 ตัวที่ใช้บ่อย **ห้าม** ใส่ identity หรือกลุ่มเวอร์ชัน Android ไว้ที่นี่
 
 ```json
@@ -115,7 +114,7 @@ attestation รายงานค่าที่ต่างจากค่า�
 }
 ```
 
-*เอกสารนี้สร้างด้วย Claude (Anthropic) และดูแลรักษาโดย VD171 ยินดีรับการแก้ไขและการปรับปรุง - ดู [../CONTRIBUTING.md](CONTRIBUTING.md)*
+*เอกสารนี้สร้างด้วย Claude (Anthropic) และดูแลรักษาโดย VD171 ยินดีรับการแก้ไขและการปรับปรุง: ดู [../CONTRIBUTING.md](CONTRIBUTING.md)*
 
 <!-- doc-footer -->
 

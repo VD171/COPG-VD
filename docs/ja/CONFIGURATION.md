@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · 日本語 · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
+> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · 日本語 · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Українська](../uk/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
 
 ---
 
@@ -77,13 +77,12 @@
 |---|---|---|
 | `resetprop` | bool | デバイス全体の resetprop エンジンを実行するかどうか。 |
 | `autoupdate` | bool | `fingerprint-update.sh` を起動ごとに一度実行するかどうか。デフォルトでオン。 |
-| `spoof_manufacturer` | bool | manufacturer フィールドもスプーフするかどうか。 |
 | `spoof_version` | `never` / `rom` / `force` | Android version グループの適用方法。`never` がデフォルト; `force` はバックアップの復元時に拒否されます。 |
 
 ## `global_fields`
 
 このリスト内の Build フィールドは、スコープ付きモードでもデバイス全体に適用され、値を
-どこでも一貫させます。一貫性に安全なフィールドのみに使用してください - security patch が
+どこでも一貫させます。一貫性に安全なフィールドのみに使用してください: security patch が
 通常のものです。identity や Android version グループをここに **決して** 入れないでください。
 
 ```json
@@ -114,7 +113,7 @@
 }
 ```
 
-*このドキュメントは Claude (Anthropic) で生成され、VD171 によって保守されています。修正と改善を歓迎します - [../CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。*
+*このドキュメントは Claude (Anthropic) で生成され、VD171 によって保守されています。修正と改善を歓迎します: [../CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。*
 
 <!-- doc-footer -->
 

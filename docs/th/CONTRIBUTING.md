@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · ไทย · [Türkçe](../tr/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · ไทย · [Türkçe](../tr/CONTRIBUTING.md) · [Українська](../uk/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -24,7 +24,7 @@ COPG-VD เป็น **ตัวปลอมอุปกรณ์ Zygisk (Zygisk
 - โครงการถูกสร้างมาให้อ่านง่าย: การตั้งค่าเป็นไฟล์ JSON ไฟล์เดียว
   (`/data/adb/COPG-VD/COPG-VD.json` มีเอกสารใน [CONFIGURATION.md](CONFIGURATION.md))
   เครื่องยนต์มีขนาดเล็กและอยู่ในตัวเอง และโครงสร้างอยู่ใน [FILE-STRUCTURE.md](FILE-STRUCTURE.md)
-- แพตช์ที่ช่วยเหลือโดย AI ถูกตรวจสอบและยอมรับในเงื่อนไขเดียวกับตัวอื่น - โดย
+- แพตช์ที่ช่วยเหลือโดย AI ถูกตรวจสอบและยอมรับในเงื่อนไขเดียวกับตัวอื่น: โดย
   ความถูกต้อง ความชัดเจน และธรรมเนียมด้านล่าง ไม่ใช่โดยใคร (หรือสิ่งใด) เขียนมัน
 - มาตรฐานเดียวกันสำหรับทุกคน: ฟีเจอร์จริงไม่เคยถูกทำให้อ่อนลง การปลอมคงความสอดคล้อง และ
   ไม่มีอะไรที่เป็นความลับหรือเฉพาะอุปกรณ์เข้าสู่ repo (ดู [.gitignore](../../.gitignore))
@@ -32,7 +32,7 @@ COPG-VD เป็น **ตัวปลอมอุปกรณ์ Zygisk (Zygisk
 ## การตั้งค่าสำหรับนักพัฒนา
 
 - คุณต้องมีอุปกรณ์ที่ root แล้วหรือ emulator ที่มี Zygisk (KernelSU, APatch หรือ Magisk) เพื่อทดสอบ
-- Build ไลบรารี native ต่อ ABI ด้วย NDK (r29) และ CMake - ดูขั้นตอน `Build zygisk
+- Build ไลบรารี native ต่อ ABI ด้วย NDK (r29) และ CMake: ดูขั้นตอน `Build zygisk
   libraries` ใน [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml) สำหรับ
   คำสั่งที่แน่นอน CI build ทั้งสาม ABI ให้คุณ
 - Build zip ที่แฟลชได้: คัดลอก `libspoof.so` ที่ build แล้วไปยัง `module/zygisk/<abi>.so` จากนั้น
@@ -58,17 +58,17 @@ COPG-VD เป็น **ตัวปลอมอุปกรณ์ Zygisk (Zygisk
 - ในการเพิ่มหรือเปลี่ยนสตริง: แก้ `en.js` **และ** `en.json` จากนั้นอัปเดตทุก
   `<code>.json` การแตะป้ายที่มองเห็นได้หมายถึงการอัปเดตไฟล์ภาษา **ทั้งหมด** และ
   `README.<code>.md` **ทั้งหมด**
-- การแปลเป็น JSON ธรรมดา - เป็นการร่วมพัฒนาครั้งแรกที่ดีเยี่ยม
+- การแปลเป็น JSON ธรรมดา: เป็นการร่วมพัฒนาครั้งแรกที่ดีเยี่ยม
 
 ## Commit และ PR
 
 - เก็บ PR ให้เน้นประเด็น อธิบายว่าอะไรและทำไม
 - Sign off commit ของคุณ (DCO): `git commit -s` (เพิ่ม `Signed-off-by:`)
-- CI ต้องคงเขียว ใจดีในการรีวิว - ดู [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- CI ต้องคงเขียว ใจดีในการรีวิว: ดู [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
 ## Issue แรกที่ดี
 
 มองหาป้าย `good first issue` และ `help wanted` การแปล เอกสาร และ
 โปรไฟล์ Pixel ใหม่ ล้วนเป็นจุดเริ่มต้นที่ดีเยี่ยม
 
-*เอกสารนี้สร้างด้วย Claude (Anthropic) และดูแลรักษาโดย VD171 ยินดีรับการแก้ไขและการปรับปรุง - ดู [CONTRIBUTING.md](CONTRIBUTING.md)*
+*เอกสารนี้สร้างด้วย Claude (Anthropic) และดูแลรักษาโดย VD171 ยินดีรับการแก้ไขและการปรับปรุง: ดู [CONTRIBUTING.md](CONTRIBUTING.md)*

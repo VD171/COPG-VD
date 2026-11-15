@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · Русский · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
+> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · Русский · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Українська](../uk/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · [中文](../zh/CONFIGURATION.md)
 
 ---
 
@@ -6,7 +6,7 @@
 
 Весь модуль управляется одним файлом: `/data/adb/COPG-VD/COPG-VD.json`. WebUI записывает его за
 вас, но вы можете редактировать его вручную. Поставляемый пример находится в `module/COPG-VD.json.example`.
-Это единственный источник истины; копия в каталоге модуля - лишь значение по умолчанию только для чтения.
+Это единственный источник истины; копия в каталоге модуля: лишь значение по умолчанию только для чтения.
 Конфигурация, оставшаяся от более старой версии в `/data/adb/COPG-VD.json`, автоматически переносится в этот каталог.
 Собственные лог и состояние модуля (`update.log`, `update.state`) тоже находятся здесь.
 
@@ -38,7 +38,7 @@
 
 ## Объект профиля `COPG-VD`
 
-Каждая запись - это поле устройства, предоставляемое целевым процессам. Наиболее распространённые:
+Каждая запись: поле устройства, предоставляемое целевым процессам. Наиболее распространённые:
 
 | Группа | Поля |
 |---|---|
@@ -68,7 +68,7 @@
 
 ### DRM
 
-`DRM_SECURITY_LEVEL` (`L1` или `L3`) - это уровень Widevine, сообщаемый, когда `motor_drm` включён.
+`DRM_SECURITY_LEVEL` (`L1` или `L3`): уровень Widevine, сообщаемый, когда `motor_drm` включён.
 
 ## `COPG-VD-Settings`
 
@@ -78,13 +78,12 @@
 |---|---|---|
 | `resetprop` | bool | Запускается ли движок resetprop на уровне всего устройства. |
 | `autoupdate` | bool | Запускается ли `fingerprint-update.sh` один раз за загрузку. По умолчанию включено. |
-| `spoof_manufacturer` | bool | Подменяется ли также поле производителя. |
-| `spoof_version` | `never` / `rom` / `force` | Как применяется группа версии Android. `never` - значение по умолчанию; `force` отклоняется при восстановлении резервной копии. |
+| `spoof_version` | `never` / `rom` / `force` | Как применяется группа версии Android. `never`: значение по умолчанию; `force` отклоняется при восстановлении резервной копии. |
 
 ## `global_fields`
 
 Поля Build в этом списке применяются на уровне всего устройства даже в режиме с областью действия, чтобы сохранить значение
-согласованным везде. Используйте это только для полей, безопасных с точки зрения согласованности - обычно это security patch.
+согласованным везде. Используйте это только для полей, безопасных с точки зрения согласованности: обычно это security patch.
 **Никогда** не помещайте сюда идентичность или группу версии Android.
 
 ```json
@@ -115,7 +114,7 @@
 }
 ```
 
-*Эта документация была сгенерирована с Claude (Anthropic) и поддерживается VD171. Исправления и улучшения приветствуются - смотрите [../CONTRIBUTING.md](CONTRIBUTING.md).*
+*Эта документация была сгенерирована с Claude (Anthropic) и поддерживается VD171. Исправления и улучшения приветствуются: смотрите [../CONTRIBUTING.md](CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

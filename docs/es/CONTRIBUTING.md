@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · Español · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · Español · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Українська](../uk/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -28,7 +28,7 @@ tardía.
   motores son pequeños y autocontenidos, y la disposición está en
   [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 - Los parches asistidos por IA se revisan y aceptan en los mismos términos que cualquier
-  otro - por corrección, claridad y las convenciones de abajo, no por quién (o qué) los
+  otro: por corrección, claridad y las convenciones de abajo, no por quién (o qué) los
   escribió.
 - El mismo listón para todos: una función real nunca se debilita, el spoof se mantiene
   coherente, y nada secreto o específico del dispositivo llega al repo (consulta el
@@ -38,7 +38,7 @@ tardía.
 
 - Necesitas un dispositivo rooteado o un emulador con Zygisk (KernelSU, APatch o Magisk) para
   probar.
-- Compila la biblioteca nativa por ABI con el NDK (r29) y CMake - consulta el paso `Build
+- Compila la biblioteca nativa por ABI con el NDK (r29) y CMake: consulta el paso `Build
   zygisk libraries` en [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml) para
   el comando exacto. CI compila las tres ABIs por ti.
 - Compila un zip flasheable: copia el `libspoof.so` compilado en `module/zygisk/<abi>.so`,
@@ -65,17 +65,17 @@ tardía.
 - Para añadir o cambiar una cadena: edita `en.js` **y** `en.json`, luego actualiza cada
   `<code>.json`. Tocar una etiqueta visible significa actualizar **todos** los archivos de
   idioma y **todos** los `README.<code>.md`.
-- Las traducciones son JSON simple - una gran primera contribución.
+- Las traducciones son JSON simple: una gran primera contribución.
 
 ## Commits y PRs
 
 - Mantén los PRs enfocados. Describe el qué y el porqué.
 - Firma tus commits (DCO): `git commit -s` (añade `Signed-off-by:`).
-- CI debe seguir en verde. Sé amable en las revisiones - consulta [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+- CI debe seguir en verde. Sé amable en las revisiones: consulta [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Buenas primeras incidencias
 
 Busca las etiquetas `good first issue` y `help wanted`. Las traducciones, la documentación y
 los nuevos perfiles de Pixel son todos excelentes puntos de partida.
 
-*Esta documentación fue generada con Claude (Anthropic) y es mantenida por VD171. Las correcciones y mejoras son bienvenidas - consulta [CONTRIBUTING.md](CONTRIBUTING.md).*
+*Esta documentación fue generada con Claude (Anthropic) y es mantenida por VD171. Las correcciones y mejoras son bienvenidas: consulta [CONTRIBUTING.md](CONTRIBUTING.md).*

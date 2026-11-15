@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · Français · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · Français · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Українська](../uk/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -26,7 +26,7 @@ Les assistants et agents IA sont ici des contributeurs de premier plan, pas une 
   (`/data/adb/COPG-VD/COPG-VD.json`, documenté dans [CONFIGURATION.md](CONFIGURATION.md)), les
   moteurs sont petits et autonomes, et l'agencement est dans [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 - Les correctifs assistés par IA sont examinés et acceptés aux mêmes conditions que
-  n'importe quel autre - sur la justesse, la clarté et les conventions ci-dessous, pas sur
+  n'importe quel autre: sur la justesse, la clarté et les conventions ci-dessous, pas sur
   qui (ou quoi) les a écrits.
 - Même exigence pour tout le monde : une vraie fonctionnalité n'est jamais affaiblie, le
   spoof reste cohérent, et rien de secret ni de spécifique à l'appareil n'atterrit dans le
@@ -36,7 +36,7 @@ Les assistants et agents IA sont ici des contributeurs de premier plan, pas une 
 
 - Il vous faut un appareil ou un émulateur rooté avec Zygisk (KernelSU, APatch ou Magisk)
   pour tester.
-- Compilez la bibliothèque native par ABI avec le NDK (r29) et CMake - voir l'étape `Build
+- Compilez la bibliothèque native par ABI avec le NDK (r29) et CMake: voir l'étape `Build
   zygisk libraries` dans [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml)
   pour la commande exacte. La CI compile les trois ABI pour vous.
 - Compilez un zip flashable : copiez le `libspoof.so` compilé dans `module/zygisk/<abi>.so`,
@@ -65,13 +65,13 @@ Les assistants et agents IA sont ici des contributeurs de premier plan, pas une 
 - Pour ajouter ou changer une chaîne : éditez `en.js` **et** `en.json`, puis mettez à jour
   chaque `<code>.json`. Toucher à un libellé visible implique de mettre à jour **tous** les
   fichiers de langue et **tous** les `README.<code>.md`.
-- Les traductions sont du JSON simple - une excellente première contribution.
+- Les traductions sont du JSON simple: une excellente première contribution.
 
 ## Commits et PR
 
 - Gardez les PR ciblées. Décrivez quoi et pourquoi.
 - Signez vos commits (DCO) : `git commit -s` (ajoute `Signed-off-by:`).
-- La CI doit rester verte. Soyez bienveillant dans les revues - voir
+- La CI doit rester verte. Soyez bienveillant dans les revues: voir
   [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Bonnes premières issues
@@ -79,4 +79,4 @@ Les assistants et agents IA sont ici des contributeurs de premier plan, pas une 
 Cherchez les labels `good first issue` et `help wanted`. Les traductions, la documentation
 et les nouveaux profils Pixel sont tous d'excellents points de départ.
 
-*Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues - voir [CONTRIBUTING.md](CONTRIBUTING.md).*
+*Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues: voir [CONTRIBUTING.md](CONTRIBUTING.md).*

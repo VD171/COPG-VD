@@ -1,4 +1,4 @@
-> **Languages:** English · [العربية](ar/CONFIGURATION.md) · [Čeština](cs/CONFIGURATION.md) · [Deutsch](de/CONFIGURATION.md) · [Español](es/CONFIGURATION.md) · [فارسی](fa/CONFIGURATION.md) · [Français](fr/CONFIGURATION.md) · [हिन्दी](hi/CONFIGURATION.md) · [Bahasa Indonesia](in/CONFIGURATION.md) · [Italiano](it/CONFIGURATION.md) · [日本語](ja/CONFIGURATION.md) · [한국어](ko/CONFIGURATION.md) · [Nederlands](nl/CONFIGURATION.md) · [Polski](pl/CONFIGURATION.md) · [Português](pt/CONFIGURATION.md) · [Русский](ru/CONFIGURATION.md) · [Svenska](sv/CONFIGURATION.md) · [ไทย](th/CONFIGURATION.md) · [Türkçe](tr/CONFIGURATION.md) · [Tiếng Việt](vi/CONFIGURATION.md) · [中文](zh/CONFIGURATION.md)
+> **Languages:** English · [العربية](ar/CONFIGURATION.md) · [Čeština](cs/CONFIGURATION.md) · [Deutsch](de/CONFIGURATION.md) · [Español](es/CONFIGURATION.md) · [فارسی](fa/CONFIGURATION.md) · [Français](fr/CONFIGURATION.md) · [हिन्दी](hi/CONFIGURATION.md) · [Bahasa Indonesia](in/CONFIGURATION.md) · [Italiano](it/CONFIGURATION.md) · [日本語](ja/CONFIGURATION.md) · [한국어](ko/CONFIGURATION.md) · [Nederlands](nl/CONFIGURATION.md) · [Polski](pl/CONFIGURATION.md) · [Português](pt/CONFIGURATION.md) · [Русский](ru/CONFIGURATION.md) · [Svenska](sv/CONFIGURATION.md) · [ไทย](th/CONFIGURATION.md) · [Türkçe](tr/CONFIGURATION.md) · [Українська](uk/CONFIGURATION.md) · [Tiếng Việt](vi/CONFIGURATION.md) · [中文](zh/CONFIGURATION.md)
 
 ---
 
@@ -78,13 +78,12 @@ Settings that travel with the profile, so a backup carries your choices.
 |---|---|---|
 | `resetprop` | bool | Whether the device-wide resetprop engine runs. |
 | `autoupdate` | bool | Whether `fingerprint-update.sh` runs once per boot. Default on. |
-| `spoof_manufacturer` | bool | Whether the manufacturer field is spoofed as well. |
 | `spoof_version` | `never` / `rom` / `force` | How the Android version group applies. `never` is the default; `force` is refused when restoring a backup. |
 
 ## `global_fields`
 
 Build fields in this list are applied device-wide even in a scoped mode, to keep a value
-consistent everywhere. Use it only for coherence-safe fields - the security patch is the
+consistent everywhere. Use it only for coherence-safe fields: the security patch is the
 usual one. **Never** put identity or the Android version group here.
 
 ```json
@@ -115,7 +114,7 @@ usual one. **Never** put identity or the Android version group here.
 }
 ```
 
-*This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome - see [../CONTRIBUTING.md](../CONTRIBUTING.md).*
+*This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome: see [../CONTRIBUTING.md](../CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

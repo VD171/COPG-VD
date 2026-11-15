@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · Svenska · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · Svenska · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Українська](../uk/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -24,7 +24,7 @@ AI-assistenter och agenter är förstklassiga bidragsgivare här, inte en eftert
 - Projektet är byggt för att vara läsbart: konfigurationen är en enda JSON-fil
   (`/data/adb/COPG-VD/COPG-VD.json`, dokumenterad i [CONFIGURATION.md](CONFIGURATION.md)),
   motorerna är små och fristående, och layouten finns i [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
-- AI-assisterade patchar granskas och accepteras på samma villkor som alla andra - efter
+- AI-assisterade patchar granskas och accepteras på samma villkor som alla andra: efter
   korrekthet, tydlighet och konventionerna nedan, inte efter vem (eller vad) som skrev dem.
 - Samma ribba för alla: en riktig funktion försvagas aldrig, spoofen förblir koherent, och
   inget hemligt eller enhetsspecifikt hamnar i repot (se [.gitignore](../../.gitignore)).
@@ -32,7 +32,7 @@ AI-assistenter och agenter är förstklassiga bidragsgivare här, inte en eftert
 ## Utvecklingsuppsättning
 
 - Du behöver en rootad enhet eller emulator med Zygisk (KernelSU, APatch eller Magisk) för att testa.
-- Bygg det nativa biblioteket per ABI med NDK (r29) och CMake - se steget `Build zygisk
+- Bygg det nativa biblioteket per ABI med NDK (r29) och CMake: se steget `Build zygisk
   libraries` i [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml) för det
   exakta kommandot. CI bygger alla tre ABI:er åt dig.
 - Bygg en flashbar zip: kopiera det byggda `libspoof.so` till `module/zygisk/<abi>.so`, sedan
@@ -58,17 +58,17 @@ AI-assistenter och agenter är förstklassiga bidragsgivare här, inte en eftert
 - För att lägga till eller ändra en sträng: redigera `en.js` **och** `en.json`, uppdatera sedan varje
   `<code>.json`. Att röra en synlig etikett innebär att uppdatera **alla** språkfiler och
   **alla** `README.<code>.md`.
-- Översättningar är ren JSON - ett utmärkt första bidrag.
+- Översättningar är ren JSON: ett utmärkt första bidrag.
 
 ## Commits och PR:er
 
 - Håll PR:er fokuserade. Beskriv vad och varför.
 - Signera dina commits (DCO): `git commit -s` (lägger till `Signed-off-by:`).
-- CI måste förbli grön. Var vänlig i granskningar - se [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+- CI måste förbli grön. Var vänlig i granskningar: se [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Bra första ärenden
 
 Leta efter etiketterna `good first issue` och `help wanted`. Översättningar, dokumentation och nya
 Pixel-profiler är alla utmärkta startpunkter.
 
-*Den här dokumentationen genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar är välkomna - se [CONTRIBUTING.md](CONTRIBUTING.md).*
+*Den här dokumentationen genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar är välkomna: se [CONTRIBUTING.md](CONTRIBUTING.md).*

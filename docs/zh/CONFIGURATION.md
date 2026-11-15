@@ -1,4 +1,4 @@
-> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · 中文
+> **Languages:** [English](../CONFIGURATION.md) · [العربية](../ar/CONFIGURATION.md) · [Čeština](../cs/CONFIGURATION.md) · [Deutsch](../de/CONFIGURATION.md) · [Español](../es/CONFIGURATION.md) · [فارسی](../fa/CONFIGURATION.md) · [Français](../fr/CONFIGURATION.md) · [हिन्दी](../hi/CONFIGURATION.md) · [Bahasa Indonesia](../in/CONFIGURATION.md) · [Italiano](../it/CONFIGURATION.md) · [日本語](../ja/CONFIGURATION.md) · [한국어](../ko/CONFIGURATION.md) · [Nederlands](../nl/CONFIGURATION.md) · [Polski](../pl/CONFIGURATION.md) · [Português](../pt/CONFIGURATION.md) · [Русский](../ru/CONFIGURATION.md) · [Svenska](../sv/CONFIGURATION.md) · [ไทย](../th/CONFIGURATION.md) · [Türkçe](../tr/CONFIGURATION.md) · [Українська](../uk/CONFIGURATION.md) · [Tiếng Việt](../vi/CONFIGURATION.md) · 中文
 
 ---
 
@@ -75,13 +75,12 @@
 |---|---|---|
 | `resetprop` | bool | 设备范围的 resetprop 引擎是否运行。 |
 | `autoupdate` | bool | `fingerprint-update.sh` 是否每次开机运行一次。默认开启。 |
-| `spoof_manufacturer` | bool | 是否也伪装 manufacturer 字段。 |
 | `spoof_version` | `never` / `rom` / `force` | Android 版本组如何应用。`never` 是默认值；在恢复备份时 `force` 会被拒绝。 |
 
 ## `global_fields`
 
 此列表中的 Build 字段即使在有范围限制的模式下也会在设备范围内应用，以使某个值在各处保持一
-致。只将它用于一致性安全的字段 - security patch 是常用的那一个。**绝不要**把 identity 或
+致。只将它用于一致性安全的字段: security patch 是常用的那一个。**绝不要**把 identity 或
 Android 版本组放在这里。
 
 ```json
@@ -112,7 +111,7 @@ Android 版本组放在这里。
 }
 ```
 
-*本文档由 Claude (Anthropic) 生成，并由 VD171 维护。欢迎提出更正和改进 - 参见 [../CONTRIBUTING.md](CONTRIBUTING.md)。*
+*本文档由 Claude (Anthropic) 生成，并由 VD171 维护。欢迎提出更正和改进: 参见 [../CONTRIBUTING.md](CONTRIBUTING.md)。*
 
 <!-- doc-footer -->
 

@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · 日本語 · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · 日本語 · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · [Українська](../uk/CONTRIBUTING.md) · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -24,7 +24,7 @@ AI アシスタントとエージェントは、ここでは後付けではな�
 - プロジェクトは読みやすいように作られています: 設定は単一の JSON ファイル
   (`/data/adb/COPG-VD/COPG-VD.json`、[CONFIGURATION.md](CONFIGURATION.md) に文書化)、
   エンジンは小さく自己完結的で、レイアウトは [FILE-STRUCTURE.md](FILE-STRUCTURE.md) にあります。
-- AI 支援によるパッチは、他のものと同じ条件でレビューされ受け入れられます - 誰が(または何が)
+- AI 支援によるパッチは、他のものと同じ条件でレビューされ受け入れられます: 誰が(または何が)
   書いたかではなく、正確さ、明瞭さ、そして下記の慣習によって。
 - 全員に同じ基準: 本物の機能は決して弱められず、スプーフは一貫性を保ち、秘密のものや
   デバイス固有のものは何もリポジトリに入りません([.gitignore](../../.gitignore) を参照)。
@@ -32,7 +32,7 @@ AI アシスタントとエージェントは、ここでは後付けではな�
 ## 開発セットアップ
 
 - テストには Zygisk(KernelSU、APatch または Magisk)を備えた root 化されたデバイスまたはエミュレーターが必要です。
-- NDK(r29)と CMake で ABI ごとにネイティブライブラリをビルドします - 正確なコマンドについては
+- NDK(r29)と CMake で ABI ごとにネイティブライブラリをビルドします: 正確なコマンドについては
   [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml) の `Build zygisk
   libraries` ステップを参照してください。CI はあなたのために 3 つの ABI すべてをビルドします。
 - フラッシュ可能な zip をビルドします: ビルドされた `libspoof.so` を `module/zygisk/<abi>.so` にコピーし、
@@ -58,17 +58,17 @@ AI アシスタントとエージェントは、ここでは後付けではな�
 - 文字列を追加または変更するには: `en.js` **と** `en.json` を編集し、次にすべての
   `<code>.json` を更新します。可視ラベルに触れることは、**すべての**言語ファイルと
   **すべての** `README.<code>.md` を更新することを意味します。
-- 翻訳はプレーンな JSON です - 素晴らしい最初の貢献です。
+- 翻訳はプレーンな JSON です: 素晴らしい最初の貢献です。
 
 ## コミットと PR
 
 - PR を集中させてください。何をなぜかを説明してください。
 - コミットにサインオフしてください(DCO): `git commit -s`(`Signed-off-by:` を追加)。
-- CI はグリーンのままである必要があります。レビューでは親切に - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) を参照してください。
+- CI はグリーンのままである必要があります。レビューでは親切に: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) を参照してください。
 
 ## 良い最初の issue
 
 `good first issue` と `help wanted` ラベルを探してください。翻訳、ドキュメント、新しい
 Pixel プロファイルはすべて素晴らしい出発点です。
 
-*このドキュメントは Claude (Anthropic) で生成され、VD171 によって保守されています。修正と改善を歓迎します - [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。*
+*このドキュメントは Claude (Anthropic) で生成され、VD171 によって保守されています。修正と改善を歓迎します: [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。*
