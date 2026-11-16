@@ -15,7 +15,7 @@ die() { echo "VDLU: $*" >&2; exit 1; }
 # Slim (Abordagem B, doc §16): the only on-device tools are the embedded ed25519-mini (verify)
 # and the static curl the WebUI bootstraps into Tier-2 ($VDLU_DIR/tools/<abi>). gzip/sha256sum/
 # base64 come from toybox. The engine may be launched with a bare env (the WebUI's ksu.exec sets
-# no PATH), so put the Tier-2 tools dir (and any legacy module bin/<abi>, e.g. vdantiroot) on
+# no PATH), so put the Tier-2 tools dir (and any legacy module bin/<abi>) on
 # PATH/LD_LIBRARY_PATH. No-op when neither exists (the engine's own test harness).
 bundled_bins_on_path() {
 	local abi bd d ld tt
@@ -31,13 +31,13 @@ bundled_bins_on_path() {
 			[ -d "$tt/lib" ] && case ":${LD_LIBRARY_PATH:-}:" in *":$tt/lib:"*) : ;; *) LD_LIBRARY_PATH="$tt/lib:${LD_LIBRARY_PATH:-}"; export LD_LIBRARY_PATH ;; esac
 		fi
 	fi
-	# Legacy: a module that still bundles its own bin/<abi> (e.g. vdantiroot). Slim modules have none.
+	# Legacy: a module that still bundles its own bin/<abi>. Slim modules have none.
 	[ -n "${MODULE_DIR:-}" ] && [ -d "$MODULE_DIR/bin" ] || return 0
 	bd="$MODULE_DIR/bin/$abi"
 	[ -n "$abi" ] && [ -d "$bd" ] || { bd=""; for d in "$MODULE_DIR"/bin/*/; do [ -d "$d" ] && { bd=${d%/}; abi=${bd##*/}; break; }; done; }
 	[ -n "$bd" ] && [ -d "$bd" ] || return 0
 	case ":$PATH:" in *":$bd:"*) : ;; *) PATH="$bd:$PATH"; export PATH ;; esac
-	# dynamic bins need their .so: public modules keep them in bin/<abi>/lib; vdantiroot in lib/<abi> (+ lib)
+	# dynamic bins need their .so: public modules keep them in bin/<abi>/lib; some legacy modules in lib/<abi> (+ lib)
 	for ld in "$bd/lib" "$MODULE_DIR/lib/$abi" "$MODULE_DIR/lib"; do
 		[ -d "$ld" ] || continue
 		case ":${LD_LIBRARY_PATH:-}:" in *":$ld:"*) : ;; *) LD_LIBRARY_PATH="$ld:${LD_LIBRARY_PATH:-}"; export LD_LIBRARY_PATH ;; esac
