@@ -27,10 +27,7 @@ WIKI="${2:?usage: gen_wiki.sh <docs_dir> <wiki_dir>}"
 [ -d "$SRC" ] || { echo "no docs dir: $SRC" >&2; exit 1; }
 mkdir -p "$WIKI"
 
-# Prune first: the wiki is a generated mirror of docs/, so drop every page before
-# regenerating. Without this, a renamed or removed source (e.g. the in->id locale
-# rename) leaves an orphan page behind that opens stale forever. The full set is
-# rebuilt below; .git and screenshots/ are left untouched.
+# Drop stale pages before rebuild (the wiki is a generated mirror; kills renamed/removed orphans).
 find "$WIKI" -maxdepth 1 -type f -name '*.md' -delete
 
 for f in "$SRC"/*.md; do
@@ -266,9 +263,7 @@ langs = set(os.environ["NAV"].split())
 if not docs:
     sys.exit(0)
 rx = re.compile(r"\]\((?:[^)]*/)?(" + "|".join(re.escape(d) for d in docs) + r")\.md(#[^)]*)?\)")
-# Wiki pages that actually exist, so a translated page that links to an
-# English-only doc (e.g. CHANGELOG, which ships EN-only) falls back to the EN
-# page instead of a dead `<lang>-DOC` link.
+# Fall back to the EN page when a translation is missing (e.g. EN-only CHANGELOG).
 pages = {f[:-3] for f in os.listdir(wiki) if f.endswith(".md")}
 def _rewrite(pref):
     def _sub(mm):
@@ -276,11 +271,7 @@ def _rewrite(pref):
         target = pref + doc if (pref + doc) in pages else doc
         return "](" + target + frag + ")"
     return _sub
-# Links that climb out of the docs tree (../../.gitignore, ../../.github/..., ...)
-# point at repo files/dirs that are not wiki pages, so they die in the flat wiki
-# namespace. Redirect every such relative escape to the repo on GitHub (tree for
-# a directory, blob for a file). DOC/screenshot links are rewritten first, so
-# what reaches here is only the repo-artifact references.
+# Relative links that escape docs/ point at repo files -> rewrite to GitHub (tree=dir, blob=file).
 REPO = "https://github.com/VD171/COPG-VD"
 def _repo(mm):
     path = re.sub(r"^(?:\.\./)+", "", mm.group(1))
@@ -296,9 +287,7 @@ for fn in os.listdir(wiki):
     nt = rx.sub(_rewrite(pref), t)
     nt = re.sub(r"\]\((?:\.\./|docs/)*screenshots/", "](screenshots/", nt)
     nt = re.sub(r"\]\(((?:\.\./)+[^):#]+)\)", _repo, nt)
-    # Bare repo-root artifacts with no ../ prefix that are not wiki pages: the EN
-    # CONTRIBUTING links .gitignore and .github/... by bare path (a wiki page never
-    # starts with a dot), plus the classic [Apache-2.0](LICENSE).
+    # Bare repo-root paths too (.gitignore, .github/..., LICENSE); a wiki page never starts with a dot.
     nt = re.sub(r"\]\((\.[^):#]+)\)", _repo, nt)
     nt = re.sub(r"\]\(LICENSE\)", "](" + REPO + "/blob/main/LICENSE)", nt)
     if nt != t:
