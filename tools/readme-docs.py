@@ -30,11 +30,11 @@ Deterministic and idempotent. Run after adding a doc or a language.
 import os, re, sys
 
 ROOT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.getcwd()
-LANGS = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "in", "it", "ja", "ko",
+LANGS = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "id", "it", "ja", "ko",
          "nl", "pl", "pt", "ru", "sv", "th", "tr", "uk", "vi", "zh"]
 HEAD = {"en": "Documentation", "ar": "التوثيق", "cs": "Dokumentace", "de": "Dokumentation",
         "es": "Documentación", "fa": "مستندات", "fr": "Documentation", "hi": "दस्तावेज़ीकरण",
-        "in": "Dokumentasi", "it": "Documentazione", "ja": "ドキュメント", "ko": "문서",
+        "id": "Dokumentasi", "it": "Documentazione", "ja": "ドキュメント", "ko": "문서",
         "nl": "Documentatie", "pl": "Dokumentacja", "pt": "Documentação", "ru": "Документация",
         "sv": "Dokumentation", "th": "เอกสารประกอบ", "tr": "Belgeler", "uk": "Документація", "vi": "Tài liệu", "zh": "文档"}
 DOCS = ["USER-GUIDE", "CONFIGURATION", "ARCHITECTURE", "FILE-STRUCTURE"]
@@ -86,7 +86,7 @@ DESC = {
            "config": "कॉन्फ़िग फ़ाइल की हर सेटिंग और वह क्या करती है।",
            "archfs": "स्पूफिंग कैसे काम करती है और सब कुछ कहाँ है।",
            "and": "और"},
-    "in": {"wiki": "dokumentasi lengkap, dapat dibaca online.",
+    "id": {"wiki": "dokumentasi lengkap, dapat dibaca online.",
            "user": "cara memasang, WebUI, dan penggunaan sehari-hari.",
            "config": "setiap pengaturan di berkas konfigurasi dan fungsinya.",
            "archfs": "cara kerja spoofing dan lokasi semua berkas.",

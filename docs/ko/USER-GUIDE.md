@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · 한국어 · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · 한국어 · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -17,7 +17,7 @@ COPG-VD는 디바이스의 fingerprint와 build를 다시 작성하여 선택한
    봅니다. 작동하는 fingerprint가 있으면 PlayIntegrityFix나 GooglePhotosUnlimited가 필요하지 않습니다.
 
 모듈을 조작하려면 root 관리자에서 WebUI를 엽니다. Magisk 사용자는
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) 또는 [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases)으로 엽니다. 모든 것은
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) 또는 [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) 또는 [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases)으로 엽니다. 모든 것은
 `/data/adb/COPG-VD/COPG-VD.json`에서 직접 편집할 수도 있습니다.
 
 ## 누가 스푸핑을 보는가 (스코프)
@@ -131,7 +131,7 @@ config를 손으로 편집할 때마다 실행하세요.
   Play services를 종료하여 다시 인증하도록 하세요.
 - **버전 스푸핑을 활성화한 후 전화기가 softloop합니다.** 그것은 위의 Android 버전 함정입니다 -
   `spoof_version`을 `never`로 다시 설정하세요.
-- **Magisk에서 WebUI가 열리지 않습니다.** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) 또는 [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases)을 사용하세요.
+- **Magisk에서 WebUI가 열리지 않습니다.** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) 또는 [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) 또는 [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases)을 사용하세요.
 
 <!-- doc-footer -->
 

@@ -101,21 +101,23 @@ init_paths() {
 # ---- lock -----------------------------------------------------------------
 # mkdir-based lock (portable: toybox `flock` only takes the fd-form and its fd handling is
 # unreliable on Android, so flock is NOT used). mkdir is atomic; stale-lock recovery by PID.
-acquire_lock() {
+acquire_lock_try() {   # non-blocking: 0 = acquired, 1 = busy (NO exit). The patient boot retry backs off on 1.
 	local opid
 	if ! mkdir "$VDLU_DIR/lock.d" 2>/dev/null; then
 		opid=$(cat "$VDLU_DIR/lock.d/pid" 2>/dev/null)
 		if [ -z "$opid" ] || ! kill -0 "$opid" 2>/dev/null; then
 			rm -rf "$VDLU_DIR/lock.d" 2>/dev/null
-			mkdir "$VDLU_DIR/lock.d" 2>/dev/null || { echo "VDLU: busy (another run holds the lock)" >&2; exit 4; }
+			mkdir "$VDLU_DIR/lock.d" 2>/dev/null || return 1
 		else
-			echo "VDLU: busy (another run holds the lock)" >&2; exit 4
+			return 1
 		fi
 	fi
 	echo $$ >"$VDLU_DIR/lock.d/pid" 2>/dev/null
 	LOCKDIR="$VDLU_DIR/lock.d"
 	trap release_lock EXIT INT TERM
+	return 0
 }
+acquire_lock() { acquire_lock_try || { echo "VDLU: busy (another run holds the lock)" >&2; exit 4; } }
 release_lock() {
 	[ -n "$LOCKDIR" ] && rm -rf "$LOCKDIR" 2>/dev/null
 	LOCKDIR=""
@@ -189,17 +191,65 @@ json_flatten() {
 flat_get() { grep -m1 "^$1$TAB" "$WORK/manifest.flat" 2>/dev/null | cut -f2; }
 
 # ---- network --------------------------------------------------------------
-fetch_url() { # url dest
-	local url="$1" dest="$2" src
+fetch_url() { # url dest -> sets FETCH_RC (transport exit code) and returns it
+	local url="$1" dest="$2" src T
+	FETCH_RC=0
 	case "$url" in
-		file://*) src=${url#file://}; cp -f "$src" "$dest" 2>/dev/null ;;
+		file://*) src=${url#file://}; cp -f "$src" "$dest" 2>/dev/null; FETCH_RC=$? ;;
 		http://*|https://*)
 			if [ -n "$CURL" ]; then
-				if [ -n "$CAPATH" ]; then "$CURL" -fsSL --capath "$CAPATH" --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"
-				else "$CURL" -fsSL --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"; fi
-			elif [ -n "$WGET" ]; then "$WGET" -q -O "$dest" "$url"
-			else echo "VDLU: no curl/wget available" >&2; return 1; fi ;;
-		*) echo "VDLU: unsupported source url: $url" >&2; return 1 ;;
+				# Bounded so a dead/stalled transfer can never hang the run: --connect-timeout bounds the
+				# CONNECT (captive portal / dead host); --speed-time/--speed-limit abort a transfer stuck below
+				# 1 byte/s for 60s (mid-stream stall). A slow-but-PROGRESSING blob download is NOT affected (no
+				# --max-time cap). A partial/corrupt download is caught anyway by the blob's sha256.
+				T="--connect-timeout 15 --speed-limit 1 --speed-time 60"
+				if [ -n "$CAPATH" ]; then "$CURL" -fsSL $T --capath "$CAPATH" --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"
+				else "$CURL" -fsSL $T --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"; fi
+				FETCH_RC=$?
+			elif [ -n "$WGET" ]; then "$WGET" -q --connect-timeout=15 --read-timeout=60 -O "$dest" "$url"; FETCH_RC=$?
+			else echo "VDLU: no curl/wget available" >&2; FETCH_RC=1; return 1; fi ;;
+		*) echo "VDLU: unsupported source url: $url" >&2; FETCH_RC=1; return 1 ;;
+	esac
+	return "$FETCH_RC"
+}
+
+# A failed manifest fetch is worth a boot retry ONLY when it is a transport/connectivity failure (offline),
+# never a server that answered with an error or a bad/invalid manifest (deterministic - retry cannot fix it).
+# Classify by the fetcher exit captured in FETCH_RC: curl resolve/connect/timeout/ssl/empty-reply/recv.
+fetch_offline() {
+	case "$FETCH_RC" in
+		6|7|28|35|52|56) return 0 ;;
+		4) [ -n "$WGET" ] && [ -z "$CURL" ] && return 0 ;;
+	esac
+	return 1
+}
+
+# Egress network CLASS for the default route to a public address: wifi | mobile | none. Kernel routing
+# lookup only (`ip route get` respects Android policy routing - per-network default tables, which
+# `route show default` on `main` misses) - NO curl, NO packet, NO radio wake. The iface name classifies:
+# cellular ifaces (rmnet/ccmni/v4-*/pdp) = mobile; anything else with a route (wlan/eth/usb) = wifi/unmetered.
+net_type() {
+	command -v ip >/dev/null 2>&1 || { echo wifi; return 0; }    # can't tell -> assume unmetered
+	local line dev
+	line=$(ip route get 1.1.1.1 2>/dev/null)
+	[ -n "$line" ] || line=$(ip route get 2606:4700:4700::1111 2>/dev/null)
+	[ -n "$line" ] || { echo none; return 0; }
+	dev=$(printf '%s\n' "$line" | sed -n 's/.* dev \([^ ]*\).*/\1/p' | head -1)
+	case "$dev" in
+		rmnet*|ccmni*|ccinet*|v4-*|pdp*|wwan*|clat*) echo mobile ;;
+		*) echo wifi ;;
+	esac
+}
+# Is the current egress allowed by net_policy (any | wifi | mobile)? `none` (no route) is never allowed.
+# Default `any` = Wi-Fi + mobile. Gates the patient boot retry (waits for an ALLOWED network) and the blob
+# download (do_fetch); the manifest check stays ungated (tiny, so the UI can report updates on any network).
+net_allowed() {
+	local t p; t=$(net_type); p=$(cfg net_policy any)
+	[ "$t" = none ] && return 1
+	case "$p" in
+		wifi)   [ "$t" = wifi ] ;;
+		mobile) [ "$t" = mobile ] ;;
+		*)      return 0 ;;
 	esac
 }
 
@@ -213,7 +263,11 @@ dl_manifest() {
 # ---- signature / meta -----------------------------------------------------
 verify_manifest() {
 	local prof keyring v pd
-	prof=$(cfg profile trusted)
+	# fail-CLOSED default: a live config that lost its profile line (corruption / a bad edit / MITM of the
+	# config) must NOT silently downgrade to best-effort verify and accept an unsigned manifest (-> .so swap
+	# under MITM = root RCE). hardened = signature mandatory; `trusted` is opt-in only (private file:// modules
+	# set it in their config on purpose). Audited 2026-11-16.
+	prof=$(cfg profile hardened)
 	pd=$(cfg pubkey_dir keyring); case "$pd" in ''|*/*|*..*) pd=keyring ;; esac
 	keyring="$MODULE_DIR/vdlu/$pd"
 	v="$MODULE_DIR/vdlu/vdlu-verify"
@@ -240,9 +294,9 @@ validate_meta() {
 	isnum "$ver" || { echo "VDLU: manifest version not numeric" >&2; return 1; }
 	wantch=$(cfg channel stable)
 	[ -z "$ch" ] || [ "$ch" = "$wantch" ] || { echo "VDLU: channel mismatch ($ch != $wantch)" >&2; return 1; }
-	prof=$(cfg profile trusted)
+	prof=$(cfg profile hardened)   # fail-closed default (see verify_manifest): absent profile = hardened
 	if [ "$prof" = hardened ] && [ -f "$CURRENT" ] && isnum "$FROMVER"; then
-		[ "$ver" -ge "$FROMVER" ] || { echo "VDLU: downgrade blocked ($ver < $FROMVER)" >&2; return 1; }
+		[ "$ver" -ge "$FROMVER" ] || { echo "VDLU: downgrade blocked ($ver < $FROMVER)" >&2; return 4; }
 	fi
 	return 0
 }
@@ -492,6 +546,12 @@ load_target() {
 }
 
 do_fetch() {
+	# net_policy gate: the blob download (the real data cost) only runs on an ALLOWED network. The manifest
+	# check (do_diff) stays ungated, so the UI still reports updates on any network; only the download waits.
+	# Resumable: the plan/target persist, so the next trigger on an allowed network finishes it.
+	case "$SOURCE" in http://*|https://*)   # only a network source is gated; file:// (local staging) never is
+		net_allowed || { write_journal fetch DEFERRED "waiting for $(cfg net_policy any) network" ""; echo "VDLU: download deferred - net_policy=$(cfg net_policy any), egress=$(net_type)" >&2; return 1; } ;;
+	esac
 	write_journal fetch FETCHING ""
 	local class st mode enc sha size path
 	while IFS="$TAB" read -r class st mode enc sha size path; do
@@ -614,8 +674,8 @@ run_pipeline() { # allow_swap
 }
 
 # ---- diff -----------------------------------------------------------------
-do_diff() { # persist(0|1)
-	local persist="$1"
+do_diff() { # persist(0|1); rc: 2 fetch/parse, 3 verify/meta fail, 4 device AHEAD of feed (benign)
+	local persist="$1" _vr
 	rm -rf "$WORK"; mkdir -p "$WORK"
 	dl_manifest || { echo "VDLU: manifest download failed" >&2; return 2; }
 	json_flatten "$WORK/manifest.json" >"$WORK/manifest.flat" 2>/dev/null || { echo "VDLU: manifest parse failed" >&2; return 2; }
@@ -628,7 +688,7 @@ do_diff() { # persist(0|1)
 		isnum "$FROMVER" || FROMVER=0
 	fi
 	verify_manifest || return 3
-	validate_meta || return 3
+	validate_meta || { _vr=$?; [ "$_vr" = 4 ] && return 4; return 3; }
 	build_plan "$WORK/manifest.flat" >"$WORK/plan.raw"
 	finalize_plan "$WORK/plan.raw" >"$WORK/plan.work"
 	grep "^delete/[0-9]" "$WORK/manifest.flat" 2>/dev/null | cut -f2 >"$WORK/plan.del"
@@ -652,7 +712,7 @@ work_to_do() { # uses $WORK/plan.work + $WORK/plan.del
 
 # ---- commands -------------------------------------------------------------
 cmd_check() {
-	do_diff 0 || exit $?
+	do_diff 0 || { _dr=$?; [ "$_dr" = 4 ] && { printf '{"update":false,"ahead":true,"from":%s,"to":%s}\n' "$FROMVER" "$TGTVER"; exit 0; }; exit "$_dr"; }
 	local pend reb del fetchc upd rb
 	pend=$(awk -F'\t' '$2=="pending"{n++}END{print n+0}' "$WORK/plan.work")
 	reb=$(awk -F'\t' '$2=="pending" && $1=="reboot"{n++}END{print n+0}' "$WORK/plan.work")
@@ -702,10 +762,37 @@ cmd_resume() {
 
 cmd_boot() {
 	acquire_lock
+	local rc interval cap deadline
 	if [ -f "$TARGET" ]; then
-		run_pipeline 1; local rc=$?; release_lock; return $rc
+		run_pipeline 1; rc=$?; release_lock; return "$rc"
 	fi
-	do_diff 1 || { local rc=$?; release_lock; return $rc; }
+	# Patient, NON-HOLDING boot retry (device booted offline). While waiting it HOLDS NOTHING: no lock (a
+	# manual run/check stays unblocked) and no wakelock (the `sleep` freezes during deep-sleep, so ~zero
+	# battery - it just waits for the user to eventually connect; no hurry, no force, nothing pinned). Only
+	# when the network actually appears (cheap route probe `net_up` - reads the routing table, NO curl, NO
+	# radio wake) does it re-acquire the lock briefly and try a real fetch. Never retries a deterministic
+	# failure (bad manifest/sig/downgrade: fetch_offline gates on the transport exit). Bounded by
+	# boot_retry_minutes of AWAKE-time (0 = off = one-shot). service.sh backgrounds this, so boot never stalls.
+	interval=$(cfg boot_retry_interval 30); isnum "$interval" || interval=30
+	[ "$interval" -ge 5 ] || interval=5
+	cap=$(cfg boot_retry_minutes 0); isnum "$cap" || cap=0
+	do_diff 1; rc=$?
+	if [ "$rc" != 0 ] && [ "$cap" -gt 0 ] && fetch_offline; then
+		release_lock                                   # hold NOTHING while we wait
+		deadline=$(( $(date +%s) + cap * 60 )); rc=1
+		while [ "$(date +%s)" -lt "$deadline" ]; do
+			sleep "$interval"                          # no lock, no wakelock; frozen during deep-sleep
+			net_allowed || continue                    # offline or a disallowed net (net_policy): wake nothing, hold nothing
+			acquire_lock_try || continue               # a manual run is working: back off, try later
+			if [ -f "$TARGET" ]; then release_lock; return 0; fi   # a run staged one meanwhile: defer to it
+			do_diff 1; rc=$?
+			[ "$rc" = 0 ] && break                     # got it: keep the lock, fall through to apply
+			release_lock                               # drop the lock before waiting again
+			fetch_offline || return "$rc"              # reachable now but a deterministic failure: stop
+		done
+		if [ "$rc" != 0 ]; then echo "VDLU: still offline, will retry next boot" >&2; return 0; fi
+	fi
+	[ "$rc" = 0 ] || { release_lock; return "$rc"; }
 	if ! work_to_do; then
 		write_current "$WORK/manifest.json"
 		write_journal diff DONE ""
@@ -713,7 +800,7 @@ cmd_boot() {
 		release_lock; return 0
 	fi
 	write_journal diff PLANNED ""
-	run_pipeline 1; local rc=$?; release_lock; return $rc
+	run_pipeline 1; rc=$?; release_lock; return "$rc"
 }
 
 cmd_status() {

@@ -31,7 +31,7 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
   <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
@@ -130,7 +130,7 @@
 
 ### WebUI
 WebUI เป็นตัวเลือก (ทุกอย่างสามารถแก้ไขได้โดยตรงในไฟล์กำหนดค่า JSON) แต่มันเป็นวิธีที่ง่ายในการควบคุมโมดูล มันมีห้าแท็บ: **About**, **Device** (ทุกฟิลด์ ตั้งค่าแยกตามสถานะ จัดกลุ่มตามหมวดหมู่), **Spoofing** (scope และ engines), **System** (กลุ่ม resetprop) และ **Tools** (Analyze, Check Update, Update Now, Backup/Restore และการอัปเดตอัตโนมัติขณะบูต) มันไม่ส่งคำขอเครือข่ายใด ๆ ทุกอย่างที่มันต้องการมาพร้อมภายในโมดูล  
-หากคุณเป็นผู้ใช้ Magisk ให้ใช้ KsuWebUI โดย KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases) คุณยังสามารถใช้ WebUI-X Portable โดย MMRL ได้ (https://github.com/MMRLApp/WebUI-X-Portable/releases)  
+หากคุณเป็นผู้ใช้ Magisk ให้ใช้ KsuWebUI โดย KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases) คุณยังสามารถใช้ WebUI-X Portable โดย MMRL ได้ (https://github.com/MMRLApp/WebUI-X-Portable/releases) หรือ KsuWebUI-SN (https://github.com/dnascorpionofficial/KsuWebUI-SN/releases)  
 
 ### การตั้งค่าภายในการกำหนดค่า
 `COPG-VD.json` เก็บการตั้งค่าของมันไว้ข้าง ๆ โปรไฟล์ เพื่อให้ตัวเลือกของคุณติดไปกับการสำรองข้อมูลและสามารถแก้ไขด้วยมือได้: `scope_mode`, สวิตช์ของ engine, กลุ่ม resetprop, `global_fields` และออบเจกต์ `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_version`) ทุกอย่างอยู่ในไฟล์เดียวนี้: สคริปต์บูตและ WebUI อ่านการตั้งค่าจากมันโดยตรง ดังนั้นตัวเลือกของคุณจะคงอยู่แม้จะอัปเดตโมดูล `"spoof_version": "force"` จะถูกปฏิเสธจากไฟล์และถูกลดระดับลง: การกู้คืนการสำรองข้อมูลเก่าต้องไม่เปิดใช้งานมันอีกครั้งโดยที่คุณไม่รู้ตัว  

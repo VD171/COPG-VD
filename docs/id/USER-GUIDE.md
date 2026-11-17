@@ -19,7 +19,7 @@ di dalam, lihat [ARCHITECTURE.md](ARCHITECTURE.md).
    PlayIntegrityFix atau GooglePhotosUnlimited.
 
 Buka WebUI dari root manager Anda untuk mengendalikan modul. Pengguna Magisk membukanya dengan
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) atau [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases). Semuanya juga
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) atau [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) atau [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases). Semuanya juga
 dapat diedit langsung di `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Siapa yang melihat spoof (scope)
@@ -148,7 +148,7 @@ modul.
   Google Play services agar ia melakukan atestasi ulang.
 - **Ponsel softloop setelah mengaktifkan version spoofing.** Itu adalah jebakan versi Android
   di atas: setel `spoof_version` kembali ke `never`.
-- **WebUI tidak mau terbuka di Magisk.** Gunakan [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) atau [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
+- **WebUI tidak mau terbuka di Magisk.** Gunakan [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) atau [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) atau [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->
 

@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "أول مستوى API",
   "ui_prop_method": "طريقة خطّاف الخصائص",
   "ui_prop_method_off": "إيقاف",
-  "ui_prop_method_mmap": "لكل عملية (mmap)"
+  "ui_prop_method_mmap": "لكل عملية (mmap)",
+  "ui_scope_search": "البحث في التطبيقات والعمليات",
+  "ui_scope_count": "%t عنصر · %s محدد"
 }

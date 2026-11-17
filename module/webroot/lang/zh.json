@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "初始 API 级别",
   "ui_prop_method": "属性钩子方式",
   "ui_prop_method_off": "关闭",
-  "ui_prop_method_mmap": "按进程 (mmap)"
+  "ui_prop_method_mmap": "按进程 (mmap)",
+  "ui_scope_search": "搜索应用和进程",
+  "ui_scope_count": "%t 项 · 已选 %s"
 }

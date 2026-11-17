@@ -31,7 +31,7 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
   <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
@@ -130,7 +130,7 @@ WebUI में **Analyze** (या `fingerprint-update.sh analyze`) कॉन�
 
 ### WebUI
 WebUI वैकल्पिक है (सब कुछ सीधे JSON कॉन्फ़िग में संपादित किया जा सकता है) लेकिन यह मॉड्यूल को चलाने का आसान तरीका है। इसमें पाँच टैब हैं: **About**, **Device** (हर फ़ील्ड, प्रति अवस्था सेट, श्रेणी के अनुसार समूहीकृत), **Spoofing** (scope और engines), **System** (resetprop समूह) और **Tools** (Analyze, Check Update, Update Now, Backup/Restore और बूट ऑटो-अपडेट)। यह कोई नेटवर्क अनुरोध नहीं करता; इसे जो कुछ चाहिए वह सब मॉड्यूल के भीतर शामिल है।  
-यदि आप Magisk उपयोगकर्ता हैं, तो KOW द्वारा KsuWebUI का उपयोग करें (https://github.com/KOWX712/KsuWebUIStandalone/releases)। आप MMRL द्वारा WebUI-X Portable का भी उपयोग कर सकते हैं (https://github.com/MMRLApp/WebUI-X-Portable/releases)।  
+यदि आप Magisk उपयोगकर्ता हैं, तो KOW द्वारा KsuWebUI का उपयोग करें (https://github.com/KOWX712/KsuWebUIStandalone/releases)। आप MMRL द्वारा WebUI-X Portable का भी उपयोग कर सकते हैं (https://github.com/MMRLApp/WebUI-X-Portable/releases) या KsuWebUI-SN (https://github.com/dnascorpionofficial/KsuWebUI-SN/releases)।  
 
 ### कॉन्फ़िग में सेटिंग्स
 `COPG-VD.json` अपनी सेटिंग्स को प्रोफ़ाइल के साथ ही रखता है, ताकि आपकी पसंद बैकअप के साथ यात्रा करें और हाथ से संपादित की जा सकें: `scope_mode`, engine स्विच, resetprop समूह, `global_fields`, और एक `COPG-VD-Settings` ऑब्जेक्ट (`resetprop`, `autoupdate`, `spoof_version`)। सब कुछ इसी एक फ़ाइल में रहता है: बूट स्क्रिप्ट और WebUI सेटिंग्स को सीधे इसी से पढ़ते हैं, इसलिए आपकी पसंद मॉड्यूल अपडेट के बाद भी बनी रहती है। `"spoof_version": "force"` फ़ाइल से अस्वीकार किया जाता है और डाउनग्रेड किया जाता है: एक पुराना बैकअप रीस्टोर करने से इसे आपकी जानकारी के बिना फिर से चालू नहीं किया जाना चाहिए।  

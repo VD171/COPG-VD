@@ -37,9 +37,14 @@
     checkBtn: 'Check for updates', updateNow: 'Update now', automation: 'Automation',
     onOpen: 'On WebUI open', onOpenSub: 'Runs VDLU in the background (applies LIVE, stages the <code>.so</code> for the reboot).',
     onReboot: 'On reboot', onRebootSub: 'In pre-zygote applies everything, including the <code>.so</code>, with no extra reboot.',
+    bootRetryEvery: 'Boot retry every (s)', bootRetryUpTo: 'Boot retry up to (min)', bootRetryHint: 'If the device boots offline, keep retrying the manifest fetch. 0 min = off.',
     source: 'Source', saveSource: 'Save source', savedDot: 'Saved.',
+    netPolicy: 'Network', netAny: 'Wi-Fi + mobile', netWifi: 'Wi-Fi only', netMobile: 'Mobile only',
     savedToast: 'saved', saveFail: 'save failed', sourceSaved: 'source saved',
+    bootstrapping: 'Preparing updater…', bootstrapSub: 'one-time download of the fetcher', bootstrapFail: 'Could not prepare the updater',
     searching: 'Searching…', upToDate: 'Up to date', nothingNew: 'nothing new',
+      ahead: 'Newer than the feed', aheadSub: 'your version is ahead of the published update',
+      deferred: 'Download deferred', deferredSub: 'waiting for the allowed network - resumes at the next check',
     updateAvail: 'Update available', install: 'install', fileOne: 'file', fileMany: 'files',
     requiresReboot: 'requires reboot', checkFail: 'Check failed', ksuUnavailable: 'KSU API unavailable',
     pendingUpdate: 'Pending update', notNow: 'Not now', srcPlaceholder: 'https://…/&lt;module&gt;'
@@ -55,6 +60,7 @@
     vdluDir: '/data/adb/vdlu/vdlu',
     modid: 'vdlu',
     module: 'vdlu',
+    toolsSource: null,
     pollMs: 1000,
     exec: null,
     toast: null,
@@ -64,7 +70,7 @@
 
   var elToast = null, elBanner = null, panelEl = null;
   var pollTimer = null, cancelRequested = false, running = false;
-  var lastJournal = null, emptyTicks = 0, cfgCache = null;
+  var lastJournal = null, emptyTicks = 0, staleTicks = 0, lastSig = null, cfgCache = null;
 
   function ex(cmd) {
     if (typeof C.exec === 'function') return C.exec(cmd);
@@ -107,6 +113,9 @@
   }
   function cancelFilePresent() {
     return ex('[ -e ' + q(C.vdluDir + '/cancel') + ' ] && echo P || echo G').then(function (o) { return o.trim() === 'P'; }, function () { return false; });
+  }
+  function engineRunning() {
+    return ex('[ -d ' + q(C.vdluDir + '/lock.d') + ' ] && echo R || echo G').then(function (o) { return String(o).trim() === 'R'; }, function () { return false; });
   }
 
   // ---- config (key=value, §5): reads all, changes only touched keys, preserves order/unknowns
@@ -265,8 +274,22 @@
       ]
     });
   }
+  // net_policy deferred the download to the allowed network - a benign wait, NOT an error. Gentle toast,
+  // resumes on the next check/boot (or a manual retry) when the device is on the right network.
+  function finishDeferred(j) {
+    stopPoll(); running = false; cancelRequested = false;
+    renderToast(j || {}, {
+      kind: 'info',
+      line: '<b>' + esc(T('deferred')) + '</b> · ' + esc((j && j.current) || T('deferredSub')),
+      buttons: [
+        { label: T('retry'), cls: 'ghost', on: function () { startUpdate(); } },
+        { label: T('close'), cls: 'ghost', on: hideToast }
+      ]
+    });
+    hideBanner();
+  }
 
-  function isTerminal(st) { return st === 'DONE' || st === 'ERROR' || st === 'PENDING_REBOOT'; }
+  function isTerminal(st) { return st === 'DONE' || st === 'ERROR' || st === 'PENDING_REBOOT' || st === 'DEFERRED'; }
 
   function tick() {
     readJournal().then(function (j) {
@@ -280,6 +303,7 @@
       emptyTicks = 0; lastJournal = j;
 
       if (j.state === 'ERROR' || j.error) { finishError(j); return; }
+      if (j.state === 'DEFERRED') { finishDeferred(j); return; }
       if (j.state === 'PENDING_REBOOT' || j.reboot_pending === true) { finishReboot(j); return; }
       if (j.state === 'DONE') { finishDone(j); return; }
       if (j.cancelled === true) { finishCancelled(j); return; }
@@ -291,20 +315,107 @@
         });
         return;
       }
+      // stale-journal guard: a journal frozen on the same values is either a slow single-blob fetch OR an
+      // engine that died mid-run (killed/crashed) without a terminal state. After staleTicks the lock is the
+      // arbiter: alive => keep waiting (reset), dead => surface it instead of polling "updating" forever.
+      var sig = j.state + '|' + (j.phase || '') + '|' + (j.done || 0) + '|' + (j.total || 0) + '|' + (j.current || '');
+      if (sig === lastSig) {
+        staleTicks++;
+        if (staleTicks >= 20) {
+          engineRunning().then(function (alive) {
+            if (alive) { staleTicks = 0; renderToast(j, { buttons: progressButtons() }); return; }
+            stopPoll(); running = false;
+            renderToast(j, { kind: 'err', line: '<b>' + esc(T('error')) + '</b> · ' + esc(T('engineFail')), buttons: [{ label: T('resume'), cls: 'pri', on: function () { resume(); } }, { label: T('close'), cls: 'ghost', on: hideToast }] });
+          });
+          return;
+        }
+      } else { staleTicks = 0; lastSig = sig; }
       renderToast(j, { buttons: progressButtons() });
     }, function () {});
   }
 
   function startPoll() {
-    stopPoll(); emptyTicks = 0;
+    stopPoll(); emptyTicks = 0; staleTicks = 0; lastSig = null;
     pollTimer = setInterval(tick, C.pollMs);
     tick();
+  }
+
+  // ---- fetch-bootstrap of the toolchain (Abordagem B, MODULO_VDLU.md §16) ------------------------
+  // Slim modules ship NO curl. On the first https update, the WebUI (webview TLS) downloads the static
+  // curl + the SIGNED tools-manifest, writes them to $VDLU_DIR/.work, and the engine's `install-tool`
+  // verifies the manifest signature (ed25519-mini) AND the binary hash BEFORE adopting it into Tier-2
+  // ($VDLU_DIR/tools/<abi>). Persisted there, it survives module updates: never re-fetched. A file://
+  // (private/staging) source needs no curl, so this is a no-op there. The webview `fetch()` is just
+  // transport - trust comes from the on-device signature/hash check, never from the download.
+  var _abi = null;
+  function curAbi() {
+    if (_abi != null) return Promise.resolve(_abi);
+    return ex('getprop ro.product.cpu.abi').then(function (o) { _abi = String(o || '').trim(); return _abi; }, function () { return ''; });
+  }
+  function deriveToolsFeed(src) {
+    if (C.toolsSource) return C.toolsSource;
+    if (!src) return '';
+    return String(src).replace(/\/+$/, '').replace(/\/[^/]*$/, '/vdlu-tools');
+  }
+  function b64(u8) { var s = '', i; for (i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]); return btoa(s); }
+  function writeB64Chunked(path, u8) {
+    var CH = 49152, p = ex('rm -f ' + q(path) + ' && mkdir -p ' + q(path.replace(/\/[^/]*$/, '')));
+    for (var off = 0; off < u8.length; off += CH) {
+      (function (slice) { p = p.then(function () { return ex('printf %s ' + q(b64(slice)) + ' | base64 -d >> ' + q(path)); }); })(u8.subarray(off, off + CH));
+    }
+    return p;
+  }
+  function httpGet(url, binary) {
+    if (typeof fetch !== 'function') return Promise.reject(new Error('no fetch() in this webview'));
+    return fetch(url, { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status + ' for ' + url);
+      return binary ? r.arrayBuffer() : r.text();
+    });
+  }
+  function bootstrapTool(abi, cfg) {
+    var feed = deriveToolsFeed((cfg.map || {}).tools_source || (cfg.map || {}).source);
+    if (!feed) return Promise.reject(new Error('no tools_source'));
+    feed = feed.replace(/\/+$/, '');
+    var work = C.vdluDir + '/.work';
+    renderToast({}, { indeterminate: true, line: '<b>' + esc(T('bootstrapping')) + '</b> · ' + esc(T('bootstrapSub')), buttons: [] });
+    return httpGet(feed + '/tools-manifest.json', false).then(function (tm) {
+      return ex('mkdir -p ' + q(work) + ' && printf %s ' + q(btoa(unescape(encodeURIComponent(String(tm))))) + ' | base64 -d > ' + q(work + '/tools-manifest.json'));
+    }).then(function () {
+      return httpGet(feed + '/' + abi + '/curl', true);
+    }).then(function (buf) {
+      return writeB64Chunked(work + '/tool.' + abi, new Uint8Array(buf));
+    }).then(function () {
+      return ex(envPrefix() + engine() + ' install-tool ' + q(abi) + ' 2>&1');
+    });
+  }
+  function ensureToolchain() {
+    return readConfig().then(function (cfg) {
+      var src = (cfg.map || {}).source || '';
+      if (src.indexOf('file://') === 0) return true;      // local staging: no curl needed
+      return curAbi().then(function (abi) {
+        if (!abi) return true;                             // unknown ABI: let the engine try
+        // curl already available? Tier-2 (slim bootstrap), OR the module's own bin/<abi> (a module
+        // like VDBackup bundles curl/restic/rclone for its OWN features - VDLU reuses it), OR system.
+        var probe = '{ [ -x ' + q(C.vdluDir + '/tools/' + abi + '/curl') + ' ] || [ -x ' + q(C.moduleDir + '/bin/' + abi + '/curl') + ' ] || command -v curl >/dev/null 2>&1 ; } && echo Y || echo N';
+        return ex(probe).then(function (o) {
+          if (String(o).trim() === 'Y') return true;       // present (Tier-2 / bundled / system) - no bootstrap
+          return bootstrapTool(abi, cfg);
+        });
+      });
+    });
   }
 
   function startUpdate() {
     if (running) { showToast(); return Promise.resolve(); }
     running = true; cancelRequested = false; lastJournal = null;
     renderToast({ target: null, total: 0, done: 0 }, { indeterminate: true, line: '<b>' + esc(T('starting')) + '</b>', buttons: progressButtons() });
+    return ensureToolchain().then(doStartUpdate, function (err) {
+      running = false;
+      renderToast({}, { kind: 'err', line: '<b>' + esc(T('bootstrapFail')) + '</b> · ' + esc(err && err.message ? err.message : err), buttons: [{ label: T('close'), cls: 'ghost', on: hideToast }] });
+    });
+  }
+
+  function doStartUpdate() {
     var cmd = '(' + envPrefix() + engine() + ' run >/dev/null 2>&1 &) ; echo started';
     return ex(cmd).then(function () { startPoll(); }, function (err) {
       running = false;
@@ -322,15 +433,22 @@
     if (running) { showToast(); return Promise.resolve(); }
     running = true; cancelRequested = false;
     renderToast(lastJournal || {}, { indeterminate: !(lastJournal && lastJournal.total), line: '<b>' + esc(T('resuming')) + '</b>', buttons: progressButtons() });
-    var cmd = '(' + envPrefix() + engine() + ' resume >/dev/null 2>&1 &) ; echo resumed';
-    return ex(cmd).then(function () { startPoll(); }, function (err) {
+    return ensureToolchain().then(function () {
+      var cmd = '(' + envPrefix() + engine() + ' resume >/dev/null 2>&1 &) ; echo resumed';
+      return ex(cmd).then(function () { startPoll(); }, function (err) {
+        running = false;
+        renderToast({}, { kind: 'err', line: '<b>' + esc(T('resumeFail')) + '</b> · ' + esc(err), buttons: [{ label: T('close'), cls: 'ghost', on: hideToast }] });
+      });
+    }, function (err) {
       running = false;
-      renderToast({}, { kind: 'err', line: '<b>' + esc(T('resumeFail')) + '</b> · ' + esc(err), buttons: [{ label: T('close'), cls: 'ghost', on: hideToast }] });
+      renderToast({}, { kind: 'err', line: '<b>' + esc(T('bootstrapFail')) + '</b> · ' + esc(err && err.message ? err.message : err), buttons: [{ label: T('close'), cls: 'ghost', on: hideToast }] });
     });
   }
 
   function check() {
-    return ex(envPrefix() + engine() + ' check 2>&1').then(function (out) {
+    return ensureToolchain().then(function () {
+      return ex(envPrefix() + engine() + ' check 2>&1');
+    }).then(function (out) {
       var line = String(out).trim().split('\n').filter(function (l) { return l.trim(); }).pop() || '';
       var r;
       try { r = JSON.parse(line); } catch (e) { throw new Error(out.trim() || T('checkFail')); }
@@ -357,12 +475,16 @@
       + '    <span class="vdlu-sw" data-cfg="auto_on_webui_open" role="switch" tabindex="0"></span></div>'
       + '  <div class="vdlu-tg"><div class="vdlu-tg-tx"><b>' + esc(T('onReboot')) + '</b><small>' + T('onRebootSub') + '</small></div>'
       + '    <span class="vdlu-sw" data-cfg="auto_on_reboot" role="switch" tabindex="0"></span></div>'
+      + '  <label class="vdlu-fld"><span>' + esc(T('bootRetryEvery')) + '</span><input class="vdlu-num" data-cfg="boot_retry_interval" type="number" min="5" step="5" inputmode="numeric"></label>'
+      + '  <label class="vdlu-fld"><span>' + esc(T('bootRetryUpTo')) + '</span><input class="vdlu-num" data-cfg="boot_retry_minutes" type="number" min="0" step="1" inputmode="numeric"></label>'
+      + '  <div class="vdlu-hint">' + esc(T('bootRetryHint')) + '</div>'
       + '</div>'
       + '<div class="vdlu-sec">'
       + '  <div class="vdlu-sec-ttl">' + esc(T('source')) + '</div>'
       + '  <label class="vdlu-fld"><span>source</span><input class="vdlu-inp" data-cfg="source" type="text" inputmode="url" spellcheck="false" placeholder="' + T('srcPlaceholder') + '"></label>'
       + '  <label class="vdlu-fld"><span>channel</span><select class="vdlu-sel" data-cfg="channel"><option value="stable">stable</option><option value="canary">canary</option></select></label>'
       + '  <label class="vdlu-fld"><span>profile</span><select class="vdlu-sel" data-cfg="profile"><option value="trusted">trusted</option><option value="hardened">hardened</option></select></label>'
+      + '  <label class="vdlu-fld"><span>' + esc(T('netPolicy')) + '</span><select class="vdlu-sel" data-cfg="net_policy"><option value="any">' + esc(T('netAny')) + '</option><option value="wifi">' + esc(T('netWifi')) + '</option><option value="mobile">' + esc(T('netMobile')) + '</option></select></label>'
       + '  <button class="vdlu-btn" type="button" data-a="save" hidden>' + esc(T('saveSource')) + '</button>'
       + '  <div class="vdlu-hint" data-a="saved" hidden>' + esc(T('savedDot')) + '</div>'
       + '</div>';
@@ -381,9 +503,18 @@
       sw.addEventListener('click', function () { swToggle(sw); });
       sw.addEventListener('keydown', function (e) { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); swToggle(sw); } });
     });
-    [].forEach.call(panelEl.querySelectorAll('.vdlu-fld [data-cfg]'), function (f) {
+    [].forEach.call(panelEl.querySelectorAll('.vdlu-fld [data-cfg]:not(.vdlu-num)'), function (f) {
       var markDirty = function () { panelEl.querySelector('[data-a=save]').hidden = false; panelEl.querySelector('[data-a=saved]').hidden = true; };
       f.addEventListener('input', markDirty); f.addEventListener('change', markDirty);
+    });
+    // numeric config fields (boot retry) save immediately on change, like the toggles; revert on bad input.
+    [].forEach.call(panelEl.querySelectorAll('.vdlu-num[data-cfg]'), function (n) {
+      n.addEventListener('change', function () {
+        var k = n.getAttribute('data-cfg'), v = String(n.value).trim();
+        if (!/^\d+$/.test(v)) { n.value = ((cfgCache || { map: {} }).map || {})[k] || ''; return; }
+        var p = {}; p[k] = v;
+        writeConfig(p).then(function () { toastMsg(T('savedToast')); }, function () { n.value = ((cfgCache || { map: {} }).map || {})[k] || ''; toastMsg(T('saveFail')); });
+      });
     });
 
     return readConfig().then(fillPanelFromConfig);
@@ -402,26 +533,44 @@
   }
   function truthy(v) { v = String(v == null ? '' : v).trim().toLowerCase(); return v === '1' || v === 'true' || v === 'on' || v === 'yes'; }
 
+  function renderCheckResult(r, err) {
+    if (!panelEl) return;                               // no panel mounted: stay quiet (auto-open)
+    var box = panelEl.querySelector('[data-a=result]');
+    if (!box) return;
+    box.hidden = false; box.className = 'vdlu-result';
+    if (err) { box.classList.add('err'); box.innerHTML = '<b>' + esc(T('checkFail')) + '</b><br>' + esc(err && err.message ? err.message : err); return; }
+    if (r.ahead) { box.classList.add('ok'); box.innerHTML = '<b>' + esc(T('ahead')) + '</b> · ' + esc(T('aheadSub')) + (r.from != null ? ' (v' + esc(r.from) + (r.to != null ? ' &gt; v' + esc(r.to) : '') + ')' : ''); return; }
+    if (!r.update) { box.classList.add('ok'); box.innerHTML = '<b>' + esc(T('upToDate')) + '</b> · ' + esc(T('nothingNew')) + (r.from != null ? ' (v' + esc(r.from) + ')' : ''); return; }
+    box.classList.add('upd');
+    box.innerHTML = '<b>' + esc(T('updateAvail')) + '</b><br>'
+      + (r.from != null ? 'v' + esc(r.from) + ' → ' : esc(T('install')) + ' → ') + 'v' + esc(r.to)
+      + ' · ' + esc(r.fetch) + ' ' + (Number(r.fetch) === 1 ? esc(T('fileOne')) : esc(T('fileMany')))
+      + (r.reboot ? ' · <span class="vdlu-tag">' + esc(T('requiresReboot')) + '</span>' : '')
+      + '<div class="vdlu-row" style="margin-top:10px"><button class="vdlu-btn pri" type="button" data-a="run2">' + esc(T('updateNow')) + '</button></div>';
+    var b = box.querySelector('[data-a=run2]'); if (b) b.addEventListener('click', function () { startUpdate(); });
+  }
   function doCheck() {
+    if (!panelEl) return;
     var box = panelEl.querySelector('[data-a=result]');
     box.hidden = false; box.className = 'vdlu-result'; box.innerHTML = '<span class="vdlu-spin"></span> ' + esc(T('searching'));
-    check().then(function (r) {
-      if (!r.update) { box.classList.add('ok'); box.innerHTML = '<b>' + esc(T('upToDate')) + '</b> · ' + esc(T('nothingNew')) + (r.from != null ? ' (v' + esc(r.from) + ')' : ''); return; }
-      box.classList.add('upd');
-      box.innerHTML = '<b>' + esc(T('updateAvail')) + '</b><br>'
-        + (r.from != null ? 'v' + esc(r.from) + ' → ' : esc(T('install')) + ' → ') + 'v' + esc(r.to)
-        + ' · ' + esc(r.fetch) + ' ' + (Number(r.fetch) === 1 ? esc(T('fileOne')) : esc(T('fileMany')))
-        + (r.reboot ? ' · <span class="vdlu-tag">' + esc(T('requiresReboot')) + '</span>' : '')
-        + '<div class="vdlu-row" style="margin-top:10px"><button class="vdlu-btn pri" type="button" data-a="run2">' + esc(T('updateNow')) + '</button></div>';
-      var b = box.querySelector('[data-a=run2]'); if (b) b.addEventListener('click', function () { startUpdate(); });
+    check().then(function (r) { renderCheckResult(r); }, function (e) { renderCheckResult(null, e); });
+  }
+  // auto_on_webui_open: quiet check first; the persistent progress toast (and auto-apply) only when a real
+  // download will happen (update && fetch>0). Otherwise the result shows inline in the panel - no toast left.
+  function autoUpdate() {
+    return check().then(function (r) {
+      if (r.update && Number(r.fetch) > 0) { startUpdate(); return; }
+      hideToast();                                      // clear the one-time bootstrap toast, if any
+      renderCheckResult(r);
     }, function (e) {
-      box.classList.add('err'); box.innerHTML = '<b>' + esc(T('checkFail')) + '</b><br>' + esc(e && e.message ? e.message : e);
+      hideToast();
+      renderCheckResult(null, e);
     });
   }
 
   function doSaveSource() {
     var p = {};
-    ['source', 'channel', 'profile'].forEach(function (k) {
+    ['source', 'channel', 'profile', 'net_policy'].forEach(function (k) {
       var f = panelEl.querySelector('.vdlu-fld [data-cfg=' + k + ']'); if (f) p[k] = f.value.trim();
     });
     writeConfig(p).then(function () {
@@ -447,7 +596,7 @@
             buttons: [{ label: T('resume'), cls: 'pri', on: function () { resume(); } }, { label: T('notNow'), cls: 'ghost', on: hideToast }]
           });
         }
-        if (truthy((cfg.map || {}).auto_on_webui_open) && (!j || isTerminal(j.state))) startUpdate();
+        if (truthy((cfg.map || {}).auto_on_webui_open) && (!j || isTerminal(j.state))) autoUpdate();
         return j;
       });
     });

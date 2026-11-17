@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "Początkowy API",
   "ui_prop_method": "Metoda hooka property",
   "ui_prop_method_off": "Wył.",
-  "ui_prop_method_mmap": "Na proces (mmap)"
+  "ui_prop_method_mmap": "Na proces (mmap)",
+  "ui_scope_search": "Szukaj aplikacji i procesów",
+  "ui_scope_count": "%t elementów · wybrano %s"
 }

@@ -31,7 +31,7 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
   <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
@@ -130,7 +130,7 @@ WebUI 中的 **Analyze**（或 `fingerprint-update.sh analyze`）会审查当前
 
 ### WebUI
 WebUI 是可选的 (一切都可以直接在 JSON 配置文件中编辑) 但它是驱动模块的便捷方式。它有五个标签页：**About**、**Device**（每个字段，按状态设置，按类别分组）、**Spoofing**（scope 和 engines）、**System**（resetprop 组）以及 **Tools**（Analyze、Check Update、Update Now、Backup/Restore 以及开机自动更新）。它不发出任何网络请求；它所需的一切都随模块一起打包。  
-如果你是 Magisk 用户，请使用 KOW 的 KsuWebUI（https://github.com/KOWX712/KsuWebUIStandalone/releases）。 你也可以使用 MMRL 的 WebUI-X Portable（https://github.com/MMRLApp/WebUI-X-Portable/releases）。  
+如果你是 Magisk 用户，请使用 KOW 的 KsuWebUI（https://github.com/KOWX712/KsuWebUIStandalone/releases）。 你也可以使用 MMRL 的 WebUI-X Portable（https://github.com/MMRLApp/WebUI-X-Portable/releases）或 KsuWebUI-SN（https://github.com/dnascorpionofficial/KsuWebUI-SN/releases）。  
 
 ### 配置中的设置
 `COPG-VD.json` 将其设置放在配置文件旁边，这样你的选择会随备份一起保存，也可以手动编辑：`scope_mode`、各 engine 开关、resetprop 组、`global_fields`，以及一个 `COPG-VD-Settings` 对象（`resetprop`、`autoupdate`、`spoof_version`）。一切都保存在这一个文件中: 开机脚本和 WebUI 都直接从中读取设置，因此你的选择能在模块更新后保留下来。`"spoof_version": "force"` 会从文件中被拒绝并降级：恢复旧备份不得在你不知情的情况下重新启用它。  

@@ -138,6 +138,8 @@ window.__I18N_EN = {
   "ui_scope_playstore": "Google Play",
   "ui_scope_apps": "Apps in the list",
   "ui_scope_apps_edit": "Choose apps",
+  "ui_scope_search": "Search apps and processes",
+  "ui_scope_count": "%t items · %s selected",
   "ui_motor_jni": "Build fields (JNI)",
   "ui_motor_prop_hook": "Property hook",
   "ui_motor_drm": "DRM / Widevine",

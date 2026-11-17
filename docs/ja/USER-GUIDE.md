@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · 日本語 · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · 日本語 · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -18,7 +18,7 @@ Pixel を見せます。このガイドはインストールから動作する�
    GooglePhotosUnlimited は不要です。
 
 モジュールを操作するには、root マネージャーから WebUI を開きます。Magisk ユーザーは
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) または [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) で開きます。すべては
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) または [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) または [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases) で開きます。すべては
 `/data/adb/COPG-VD/COPG-VD.json` で直接編集することもできます。
 
 ## 誰がスプーフを見るか(スコープ)
@@ -140,7 +140,7 @@ config を手で編集するたびに実行してください。
   Google Play services を kill して再アテステーションさせてください。
 - **バージョンスプーフを有効にした後、電話が softloop する。** それは上の Android バージョン
   の罠です: `spoof_version` を `never` に戻してください。
-- **Magisk で WebUI が開かない。** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) または [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) を使ってください。
+- **Magisk で WebUI が開かない。** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) または [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) または [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases) を使ってください。
 
 <!-- doc-footer -->
 

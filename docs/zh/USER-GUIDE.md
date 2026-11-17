@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · 中文
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · 中文
 
 ---
 
@@ -17,7 +17,7 @@ COPG-VD 会重写设备指纹（fingerprint）和 build 信息，使你选择的
    可用的指纹，你就不需要 PlayIntegrityFix 或 GooglePhotosUnlimited。
 
 从你的 root 管理器打开 WebUI 来驱动该模块。Magisk 用户用
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) 或 [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) 打开它。一切
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) 或 [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) 或 [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases) 打开它。一切
 也都可以直接在 `/data/adb/COPG-VD/COPG-VD.json` 中编辑。
 
 ## 谁看到伪装（作用范围）
@@ -127,7 +127,7 @@ WebUI 中的 **Analyze**（或 `fingerprint-update.sh analyze`）会审查当前
   `global_fields` 中，这样它在设备范围内保持一致。结束 Google Play services 以让它重新认证。
 - **启用版本伪装后手机软循环。** 那就是上面的 Android 版本陷阱: 把 `spoof_version` 改回
   `never`。
-- **WebUI 在 Magisk 上打不开。** 使用 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) 或 [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases)。
+- **WebUI 在 Magisk 上打不开。** 使用 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) 或 [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) 或 [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases)。
 
 <!-- doc-footer -->
 

@@ -1,0 +1,79 @@
+# ======================================================================
+#  COPG-VD  ::  global device spoofer
+#  Spoof your device fingerprint and build: Zygisk, KernelSU/APatch/Magisk.
+#
+#  Copyright (C) 2026  VD171
+#  SPDX-License-Identifier: Apache-2.0
+#  Fork by VD171.
+#
+#  Licensed under the Apache License, Version 2.0; you may obtain a copy at
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Site           : https://vd171.ru
+#  Site           : https://vd.priv8.ru
+#  Source         : https://github.com/VD171/COPG-VD
+#  GitHub         : @VD171 https://github.com/VD171
+#  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+#  XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+#  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+#  Channel        : @Priv8_VD https://t.me/Priv8_VD
+#  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+#  E-mail         : vd.priv8@pm.me
+# ======================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Shell lint
+        run: |
+          sudo apt-get update && sudo apt-get install -y shellcheck
+          shellcheck -s sh module/*.sh module/vdlu/update.sh module/vdlu/vdlu-verify || true
+          shellcheck .github/scripts/*.sh || true
+
+      - name: Validate JSON
+        run: |
+          for f in module/update.json module/webroot/config.json module/webroot/lang/*.json; do
+            python3 -c "import json,sys; json.load(open('$f'))" && echo "ok $f"
+          done
+
+      - name: JS syntax check
+        run: |
+          for f in module/webroot/scripts.js module/webroot/i18n.js module/webroot/lang/en.js; do
+            node --check "$f" && echo "ok $f"
+          done
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: ''
+
+      - name: Install SDK platform + build-tools
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.1"
+
+      - name: Build scope-helper dex (sanity)
+        run: bash dex/build.sh
+
+      - name: Assemble module zip (sanity)
+        run: |
+          cd module && zip -r9 ../COPG-VD-ci.zip . -x '.git*' -x 'vdlu/RELEASE.md' -x 'bin/*/.gitkeep'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: COPG-VD-ci
+          path: COPG-VD-ci.zip

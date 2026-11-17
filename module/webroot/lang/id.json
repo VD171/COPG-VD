@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "API awal",
   "ui_prop_method": "Metode hook properti",
   "ui_prop_method_off": "Mati",
-  "ui_prop_method_mmap": "Per proses (mmap)"
+  "ui_prop_method_mmap": "Per proses (mmap)",
+  "ui_scope_search": "Cari aplikasi dan proses",
+  "ui_scope_count": "%t item · %s dipilih"
 }

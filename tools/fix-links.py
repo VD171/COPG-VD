@@ -30,7 +30,7 @@ repo root at the right depth. Idempotent. External URLs and anchors are preserve
 import os, re, sys
 
 ROOT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.getcwd()
-LANGS = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "in", "it", "ja", "ko",
+LANGS = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "id", "it", "ja", "ko",
          "nl", "pl", "pt", "ru", "sv", "th", "tr", "uk", "vi", "zh"]
 DOCS_BASES = ["USER-GUIDE", "CONFIGURATION", "ARCHITECTURE", "FILE-STRUCTURE"]
 ROOT_BASES = ["CONTRIBUTING", "CODE_OF_CONDUCT", "SECURITY"]

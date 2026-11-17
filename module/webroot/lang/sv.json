@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "Första API-nivå",
   "ui_prop_method": "Property-hookmetod",
   "ui_prop_method_off": "Av",
-  "ui_prop_method_mmap": "Per process (mmap)"
+  "ui_prop_method_mmap": "Per process (mmap)",
+  "ui_scope_search": "Sök appar och processer",
+  "ui_scope_count": "%t objekt · %s valda"
 }

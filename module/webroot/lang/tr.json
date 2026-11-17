@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "İlk API düzeyi",
   "ui_prop_method": "Property hook yöntemi",
   "ui_prop_method_off": "Kapalı",
-  "ui_prop_method_mmap": "İşlem başına (mmap)"
+  "ui_prop_method_mmap": "İşlem başına (mmap)",
+  "ui_scope_search": "Uygulama ve işlemleri ara",
+  "ui_scope_count": "%t öğe · %s seçili"
 }

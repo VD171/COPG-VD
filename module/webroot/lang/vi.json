@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "API ban đầu",
   "ui_prop_method": "Phương thức hook property",
   "ui_prop_method_off": "Tắt",
-  "ui_prop_method_mmap": "Theo tiến trình (mmap)"
+  "ui_prop_method_mmap": "Theo tiến trình (mmap)",
+  "ui_scope_search": "Tìm ứng dụng và tiến trình",
+  "ui_scope_count": "%t mục · %s đã chọn"
 }

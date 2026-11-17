@@ -32,7 +32,7 @@ import os, re, json, sys
 ROOT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.getcwd()
 canon = json.load(open(os.path.join(ROOT, "module/COPG-VD.json.example"), encoding="utf-8"))["COPG-VD"]
 FP, SP = canon["FINGERPRINT"], canon["SECURITY_PATCH"]
-LANGS = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "in", "it", "ja", "ko",
+LANGS = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "id", "it", "ja", "ko",
          "nl", "pl", "pt", "ru", "sv", "th", "tr", "vi", "zh"]
 
 def cfg_path(lang):

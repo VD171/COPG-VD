@@ -96,30 +96,38 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Android's CA store, for curl to validate the server certificate.
+ca_path() {
+    for _d in /system/etc/security/cacerts /apex/com.android.conscrypt/cacerts; do
+        [ -d "$_d" ] && { echo "$_d"; return 0; }
+    done
+}
+# curl validates TLS (with --capath); busybox wget does NOT, so it is a last resort
+# (the feed is unauthenticated there until the dataset itself is signed). Prefer curl.
 find_downloader() {
+    command -v curl >/dev/null 2>&1 && echo curl && return 0
     for bb in /data/adb/ksu/bin/busybox /data/adb/ap/bin/busybox /data/adb/magisk/busybox \
               /data/adb/modules/busybox-ndk/system/bin/busybox; do
         [ -x "$bb" ] && echo "$bb wget" && return 0
     done
     command -v busybox >/dev/null 2>&1 && echo "busybox wget" && return 0
-    for cmd in curl wget; do
-        command -v "$cmd" >/dev/null 2>&1 && echo "$cmd" && return 0
-    done
+    command -v wget >/dev/null 2>&1 && echo wget && return 0
     return 1
 }
 
 download() {
+    _ca=$(ca_path)
     case "$DOWNLOADER" in
-        curl) curl -fsSL --max-time 60 -o "$TMP_FILE" "$REMOTE_URL" 2>/dev/null ;;
+        curl) curl -fsSL --max-time 60 ${_ca:+--capath "$_ca"} -o "$TMP_FILE" "$REMOTE_URL" 2>/dev/null ;;
         wget) wget -q -T 60 -O "$TMP_FILE" "$REMOTE_URL" 2>/dev/null ;;
         *)    $DOWNLOADER -q -T 60 -O "$TMP_FILE" "$REMOTE_URL" 2>/dev/null ;;
     esac
 }
 
 download_to() {
-    _u="$1"; _o="$2"; DL_INFO=""
+    _u="$1"; _o="$2"; DL_INFO=""; _ca=$(ca_path)
     case "$DOWNLOADER" in
-        curl) DL_INFO=$(curl -fsSL --max-time 60 -w 'http=%{http_code}' -o "$_o" "$_u" 2>/dev/null); _rc=$?
+        curl) DL_INFO=$(curl -fsSL --max-time 60 ${_ca:+--capath "$_ca"} -w 'http=%{http_code}' -o "$_o" "$_u" 2>/dev/null); _rc=$?
               [ "$_rc" -ne 0 ] && DL_INFO="${DL_INFO} curl=$_rc" ;;
         wget) wget -q -T 60 -O "$_o" "$_u" 2>/dev/null; _rc=$?
               [ "$_rc" -ne 0 ] && DL_INFO="wget=$_rc" ;;
@@ -127,6 +135,51 @@ download_to() {
               [ "$_rc" -ne 0 ] && DL_INFO="dl=$_rc" ;;
     esac
     [ -s "$_o" ]
+}
+
+# --- feed signature (detached ed25519, same chain as the VDLU module feed) ---------------------------
+# A fetched profile is applied only if it carries a valid signature from the release key. The signature
+# is base64(ed25519_sign(sha256_hex(content))) in "<key_id>:<sig>" form, verified with the embedded
+# ed25519-mini + keyring/<key_id>.pub (raw 32 bytes) - no openssl on-device. See the design doc.
+# REQUIRE_FEED_SIG is 0 until the feeds publish their .sig; the cutover flips it to 1 (fail-closed).
+# FEED_KEY_ID pins the feed to its OWN dedicated key - not the module-release key vd-2026, so a
+# compromise of one key never forges the other (separation of concerns).
+REQUIRE_FEED_SIG="${REQUIRE_FEED_SIG:-0}"
+FEED_KEY_ID="vd-fp-2026"
+
+find_mini() {
+    _h="$MODDIR/vdlu"
+    [ -x "$_h/ed25519-mini" ] && { echo "$_h/ed25519-mini"; return 0; }
+    _a=$(getprop ro.product.cpu.abi 2>/dev/null)
+    [ -n "$_a" ] && [ -x "$_h/verify/$_a/ed25519-mini" ] && { echo "$_h/verify/$_a/ed25519-mini"; return 0; }
+    for _d in "$_h"/verify/*/ed25519-mini; do [ -x "$_d" ] && { echo "$_d"; return 0; }; done
+    return 1
+}
+
+verify_feed_sig() {   # <content_file> <sig_file> -> rc 0 if the detached signature is valid
+    _f="$1"; _s="$2"
+    [ -s "$_s" ] || { log "feed signature missing"; return 1; }
+    _line=$(cat "$_s"); _kid=${_line%%:*}; _sb64=${_line#*:}
+    [ "$_kid" = "$FEED_KEY_ID" ] || { log "feed sig: key_id '$_kid' is not the feed key ($FEED_KEY_ID)"; return 1; }
+    [ -n "$_sb64" ] && [ "$_sb64" != "$_line" ] || { log "feed sig: malformed"; return 1; }
+    _pub="$MODDIR/vdlu/keyring/$_kid.pub"
+    [ -f "$_pub" ] && [ "$(wc -c <"$_pub" 2>/dev/null || echo 0)" -eq 32 ] || { log "feed sig: no 32B keyring for $_kid"; return 1; }
+    _mini=$(find_mini) || { log "feed sig: ed25519-mini not found"; return 1; }
+    _hex=$(sha256sum "$_f" | cut -d' ' -f1)
+    _td=$(mktemp -d "${TMPDIR:-/data/local/tmp}/fpsig.XXXXXX" 2>/dev/null || mktemp -d)
+    printf '%s' "$_hex" > "$_td/msg"
+    printf '%s' "$_sb64" | base64 -d > "$_td/sig" 2>/dev/null
+    if [ "$(wc -c <"$_td/sig" 2>/dev/null || echo 0)" -eq 64 ] && "$_mini" "$_pub" "$_td/msg" "$_td/sig" >/dev/null 2>&1; then
+        rm -rf "$_td"; return 0
+    fi
+    rm -rf "$_td"; log "feed signature REJECTED"; return 1
+}
+
+require_sig() {   # <content_file> <content_url> -> rc 0 if ok or not required; rc 1 if required and bad
+    [ "$REQUIRE_FEED_SIG" = 1 ] || return 0
+    _st="$1.sig.tmp"
+    download_to "$2.sig" "$_st" || { log "feed: signature unavailable for $(basename "$2")"; rm -f "$_st"; return 1; }
+    verify_feed_sig "$1" "$_st"; _vr=$?; rm -f "$_st"; return $_vr
 }
 
 FETCH_BASE_URL="https://raw.githubusercontent.com/VictorGabriel7Dev/build.prop/main"
@@ -249,15 +302,61 @@ normalize_if_minified() {
     rm -f "$TMP_FILE.norm"
 }
 
+# Always rewrite the config into the canonical, string-aware pretty form before a merge. This is what
+# makes the line-based field merge below safe on ANY input: after this, the "<id>": { block opener is on
+# one line and brace depth is balanced, with any "{"/"}" that lives inside a string value left untouched.
+# It replaces the file only when the result still holds the module block; a file that normalize_json
+# cannot round-trip (truly malformed JSON) is left as-is for the merge and its write-guard to reject
+# rather than silently corrupting the user's config.
+canonicalize_config() {
+    [ -f "$1" ] && [ -n "$AWK" ] || return 0
+    normalize_json "$1" > "$TMP_FILE.norm" 2>/dev/null
+    [ -s "$TMP_FILE.norm" ] && grep -q "\"$MODULE_ID\"[[:space:]]*:[[:space:]]*{" "$TMP_FILE.norm" \
+        && cp "$TMP_FILE.norm" "$1"
+    rm -f "$TMP_FILE.norm"
+}
+
+# Robust JSON path: do the config edit with a real parser (org.json) in the bundled dex, run as root
+# via app_process. This replaces the fragile awk field merge for any VALID config layout (the #20 class).
+# It writes a candidate to a temp; this function validates (module block present) + backs up + commits.
+# Returns non-zero if the dex is absent, app_process cannot start, the config does not parse, or the
+# output is bad - the callers then fall through to the proven awk path, so this can only help.
+#   _fp_dex <verb> <target> [extra args...]   (verb: merge-fp | drop-ver)
+_fp_dex() {
+    _verb="$1"; _tgt="$2"; shift 2
+    _D=/data/adb/modules/COPG-VD/etc/copgvd_scope.dex
+    [ -f "$_D" ] || return 1
+    _out="$TMP_FILE.dex"
+    rm -f "$_out"
+    (
+        if [ -z "$BOOTCLASSPATH" ]; then
+            _S=$(pgrep system_server 2>/dev/null | head -1)
+            export $(cat /proc/"$_S"/environ 2>/dev/null | tr '\0' '\n' | grep -E '^(BOOTCLASSPATH|DEX2OATBOOTCLASSPATH|SYSTEMSERVERCLASSPATH|ANDROID_ART_ROOT|ANDROID_I18N_ROOT|ANDROID_TZDATA_ROOT|ANDROID_DATA|ANDROID_ROOT)=')
+        fi
+        LD_LIBRARY_PATH= app_process -Djava.class.path="$_D" /system/bin com.vd171.copgvd.Scope "$_verb" "$_tgt" "$MODULE_ID" "$_out" "$@" >/dev/null 2>&1
+    )
+    [ -s "$_out" ] || return 1
+    tr -d '\n' < "$_out" | grep -q "\"$MODULE_ID\"[[:space:]]*:[[:space:]]*{" || { rm -f "$_out"; return 1; }
+    cp -f "$_tgt" "$_tgt.bak" 2>/dev/null
+    cat "$_out" > "$_tgt" || { rm -f "$_out"; return 1; }
+    chmod 0644 "$_tgt" 2>/dev/null
+    chcon u:object_r:system_file:s0 "$_tgt" 2>/dev/null
+    rm -f "$_out"
+    return 0
+}
+
 write_fields() {
     target="$1"
+    _fp_dex merge-fp "$target" && return 0
     [ -n "$AWK" ] || { log "no awk available"; return 1; }
-    normalize_if_minified "$target"
+    canonicalize_config "$target"
     $AWK -v id="$MODULE_ID" -v keys="$FIELDS" -v src="$COPG_V_SOURCE" '
-        function depth_of(s,   i, ch, d) {
-            d = 0
+        function depth_of(s,   i, ch, d, instr, esc) {
+            d = 0; instr = 0; esc = 0
             for (i = 1; i <= length(s); i++) {
                 ch = substr(s, i, 1)
+                if (instr) { if (esc) esc = 0; else if (ch == "\\") esc = 1; else if (ch == "\"") instr = 0; continue }
+                if (ch == "\"") { instr = 1; continue }
                 if (ch == "{") d++
                 else if (ch == "}") d--
             }
@@ -321,12 +420,17 @@ write_fields() {
 
 drop_version_fields() {
     target="$1"
+    # shellcheck disable=SC2086
+    _fp_dex drop-ver "$target" $VERSION_FIELDS && return 0
     [ -n "$AWK" ] || return 1
+    canonicalize_config "$target"
     $AWK -v id="$MODULE_ID" -v keys="$VERSION_FIELDS" '
-        function depth_of(s,   i, ch, d) {
-            d = 0
+        function depth_of(s,   i, ch, d, instr, esc) {
+            d = 0; instr = 0; esc = 0
             for (i = 1; i <= length(s); i++) {
                 ch = substr(s, i, 1)
+                if (instr) { if (esc) esc = 0; else if (ch == "\\") esc = 1; else if (ch == "\"") instr = 0; continue }
+                if (ch == "\"") { instr = 1; continue }
                 if (ch == "{") d++; else if (ch == "}") d--
             }
             return d
@@ -604,6 +708,7 @@ existing_targets() {
 fetch_remote() {
     DOWNLOADER=$(find_downloader) || { log "no curl/wget/busybox available"; return 1; }
     download || { log "download failed ($REMOTE_URL)"; return 1; }
+    require_sig "$TMP_FILE" "$REMOTE_URL" || return 1
     validate_remote || return 1
     return 0
 }
@@ -738,6 +843,7 @@ fetched_device_update() {
     DOWNLOADER="${DOWNLOADER:-$(find_downloader)}"; [ -n "$DOWNLOADER" ] || return 3
     _idx="$TMP_FILE.idx"
     download_to "$FETCH_BASE_URL/index.json" "$_idx" || { rm -f "$_idx"; return 3; }
+    require_sig "$_idx" "$FETCH_BASE_URL/index.json" || { rm -f "$_idx"; return 3; }
     DEV_LATEST=$(index_field "$_idx" "$_dev" "$_chan" latest)
     DEV_RINCR=$(index_field "$_idx" "$_dev" "$_chan" incremental)
     rm -f "$_idx"
@@ -855,6 +961,7 @@ case "$MODE" in
         [ -n "$DOWNLOADER" ] || { echo "status: no-downloader"; exit 1; }
         IDX_TMP="$TMP_FILE.idx"
         download_to "$FETCH_BASE_URL/index.json" "$IDX_TMP" || { echo "status: download-failed${DL_INFO:+ $DL_INFO}"; exit 1; }
+        require_sig "$IDX_TMP" "$FETCH_BASE_URL/index.json" || { rm -f "$IDX_TMP"; echo "status: sig-failed"; exit 1; }
         grep -q '"devices"' "$IDX_TMP" 2>/dev/null || { rm -f "$IDX_TMP"; echo "status: bad-index"; exit 1; }
         cat "$IDX_TMP"
         rm -f "$IDX_TMP"
@@ -875,6 +982,7 @@ case "$MODE" in
         [ -n "$DOWNLOADER" ] || { echo "status: no-downloader"; exit 1; }
         PROP_TMP="$TMP_FILE.prop"
         download_to "$FETCH_BASE_URL/$relpath" "$PROP_TMP" || { echo "status: download-failed${DL_INFO:+ $DL_INFO}"; exit 1; }
+        require_sig "$PROP_TMP" "$FETCH_BASE_URL/$relpath" || { rm -f "$PROP_TMP"; echo "status: sig-failed"; exit 1; }
         grep -q '^ro\.build\.' "$PROP_TMP" 2>/dev/null || { rm -f "$PROP_TMP"; echo "status: bad-prop"; exit 1; }
         echo "$FETCH_MAP" | while IFS= read -r pair; do
             key=${pair%%:*}; cands=${pair#*:}
@@ -884,7 +992,7 @@ case "$MODE" in
                 [ -n "$v" ] && { val="$v"; break; }
             done
             IFS=$old_ifs
-            [ -n "$val" ] && printf '%s\n' "COPG_V_$key=$val"
+            [ -n "$val" ] && sane_value "$key" "$val" && printf '%s\n' "COPG_V_$key=$val"
         done > "$TMP_FILE.env"
         while IFS='=' read -r k v; do [ -n "$k" ] && export "$k=$v"; done < "$TMP_FILE.env"
         rm -f "$PROP_TMP" "$TMP_FILE.env"

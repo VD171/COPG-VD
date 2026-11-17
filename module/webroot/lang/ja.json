@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "初期APIレベル",
   "ui_prop_method": "プロパティフック方式",
   "ui_prop_method_off": "オフ",
-  "ui_prop_method_mmap": "プロセス単位 (mmap)"
+  "ui_prop_method_mmap": "プロセス単位 (mmap)",
+  "ui_scope_search": "アプリとプロセスを検索",
+  "ui_scope_count": "%t 件 · %s 件選択"
 }

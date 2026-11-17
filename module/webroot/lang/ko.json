@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "초기 API 레벨",
   "ui_prop_method": "속성 후크 방식",
   "ui_prop_method_off": "끔",
-  "ui_prop_method_mmap": "프로세스별 (mmap)"
+  "ui_prop_method_mmap": "프로세스별 (mmap)",
+  "ui_scope_search": "앱 및 프로세스 검색",
+  "ui_scope_count": "%t개 · %s개 선택됨"
 }

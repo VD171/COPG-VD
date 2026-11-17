@@ -29,10 +29,10 @@ location. Idempotent. Run after adding a translation or a new language.
 import os, sys
 
 ROOT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.getcwd()
-LANGS = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "in", "it", "ja", "ko",
+LANGS = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "id", "it", "ja", "ko",
          "nl", "pl", "pt", "ru", "sv", "th", "tr", "uk", "vi", "zh"]
 ENDO = {"en": "English", "ar": "العربية", "cs": "Čeština", "de": "Deutsch", "es": "Español",
-        "fa": "فارسی", "fr": "Français", "hi": "हिन्दी", "in": "Bahasa Indonesia", "it": "Italiano",
+        "fa": "فارسی", "fr": "Français", "hi": "हिन्दी", "id": "Bahasa Indonesia", "it": "Italiano",
         "ja": "日本語", "ko": "한국어", "nl": "Nederlands", "pl": "Polski", "pt": "Português",
         "ru": "Русский", "sv": "Svenska", "th": "ไทย", "tr": "Türkçe", "uk": "Українська", "vi": "Tiếng Việt", "zh": "中文"}
 DOCS_BASES = ["USER-GUIDE", "CONFIGURATION", "ARCHITECTURE", "FILE-STRUCTURE"]

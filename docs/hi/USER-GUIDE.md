@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · हिन्दी · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · हिन्दी · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -19,7 +19,7 @@ COPG-VD डिवाइस fingerprint और build को फिर से ल�
    GooglePhotosUnlimited की आवश्यकता नहीं है।
 
 मॉड्यूल को चलाने के लिए अपने root मैनेजर से WebUI खोलें। Magisk उपयोगकर्ता इसे
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) या [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) के साथ खोलते हैं।
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) या [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) या [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases) के साथ खोलते हैं।
 सब कुछ `/data/adb/COPG-VD/COPG-VD.json` में सीधे भी संपादित किया जा सकता है।
 
 ## spoof को कौन देखता है (scope)
@@ -142,7 +142,7 @@ WebUI में **Analyze** (या `fingerprint-update.sh analyze`) config क�
   services को kill करें ताकि यह फिर से attest करे।
 - **संस्करण spoofing सक्षम करने के बाद फ़ोन softloop करता है।** यह ऊपर वाला Android संस्करण जाल
   है: `spoof_version` को वापस `never` पर सेट करें।
-- **Magisk पर WebUI नहीं खुलती।** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) या [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) का उपयोग करें।
+- **Magisk पर WebUI नहीं खुलती।** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) या [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) या [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases) का उपयोग करें।
 
 <!-- doc-footer -->
 

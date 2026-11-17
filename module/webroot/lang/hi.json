@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "प्रारंभिक API",
   "ui_prop_method": "प्रॉपर्टी हुक विधि",
   "ui_prop_method_off": "बंद",
-  "ui_prop_method_mmap": "प्रति-प्रक्रिया (mmap)"
+  "ui_prop_method_mmap": "प्रति-प्रक्रिया (mmap)",
+  "ui_scope_search": "ऐप्स और प्रोसेस खोजें",
+  "ui_scope_count": "%t आइटम · %s चयनित"
 }

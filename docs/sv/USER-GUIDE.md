@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · Svenska · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · Svenska · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -18,7 +18,7 @@ för hur det fungerar inuti, se [ARCHITECTURE.md](ARCHITECTURE.md).
    GooglePhotosUnlimited.
 
 Öppna WebUI från din root-hanterare för att styra modulen. Magisk-användare öppnar det med
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) eller [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases). Allt
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) eller [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) eller [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases). Allt
 kan också redigeras direkt i `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Vem ser spoofen (omfattning)
@@ -142,7 +142,7 @@ Det gör ingen nätverksbegäran; allt det behöver levereras inuti modulen.
   Google Play services så att det attesterar om.
 - **Telefonen softloopar efter att versionsspoofing aktiverats.** Det är Android-versionsfällan
   ovan: ställ tillbaka `spoof_version` till `never`.
-- **WebUI öppnas inte på Magisk.** Använd [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) eller [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
+- **WebUI öppnas inte på Magisk.** Använd [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) eller [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) eller [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->
 

@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "API inicial",
   "ui_prop_method": "Método del hook de prop",
   "ui_prop_method_off": "Desactivado",
-  "ui_prop_method_mmap": "Por proceso (mmap)"
+  "ui_prop_method_mmap": "Por proceso (mmap)",
+  "ui_scope_search": "Buscar apps y procesos",
+  "ui_scope_count": "%t elementos · %s seleccionados"
 }

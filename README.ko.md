@@ -31,7 +31,7 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
   <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
@@ -133,7 +133,7 @@ WebUI의 **Analyze**(또는 `fingerprint-update.sh analyze`)는 현재 상태의
 
 ### WebUI
 WebUI는 선택 사항입니다 (모든 것은 JSON 설정에서 직접 편집할 수 있습니다) 하지만 모듈을 다루는 쉬운 방법입니다. 다섯 개의 탭이 있습니다: **About**, **Device**(모든 필드를 상태별로 설정하고 카테고리별로 그룹화), **Spoofing**(범위와 엔진), **System**(resetprop 그룹), 그리고 **Tools**(Analyze, Check Update, Update Now, Backup/Restore, 그리고 부팅 시 자동 업데이트). 네트워크 요청을 전혀 하지 않습니다; 필요한 모든 것이 모듈 안에 포함되어 있습니다.  
-Magisk 사용자라면 KOW의 KsuWebUI를 사용하세요(https://github.com/KOWX712/KsuWebUIStandalone/releases). MMRL의 WebUI-X Portable을 사용할 수도 있습니다(https://github.com/MMRLApp/WebUI-X-Portable/releases).  
+Magisk 사용자라면 KOW의 KsuWebUI를 사용하세요(https://github.com/KOWX712/KsuWebUIStandalone/releases). MMRL의 WebUI-X Portable을 사용할 수도 있습니다(https://github.com/MMRLApp/WebUI-X-Portable/releases) 또는 KsuWebUI-SN (https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).  
 
 ### 설정 안의 설정
 `COPG-VD.json`은 설정을 프로필 옆에 담으므로, 사용자의 선택이 백업과 함께 이동하고 손으로 편집할 수 있습니다: `scope_mode`, 엔진 스위치, resetprop 그룹, `global_fields`, 그리고 `COPG-VD-Settings` 객체(`resetprop`, `autoupdate`, `spoof_version`). 모든 것은 이 하나의 파일에 담겨 있습니다: 부팅 스크립트와 WebUI는 설정을 거기에서 바로 읽으므로, 사용자의 선택은 모듈 업데이트 후에도 유지됩니다. `"spoof_version": "force"`는 파일에서 읽을 때 거부되고 강등됩니다: 오래된 백업을 복원하는 것이 몰래 그것을 다시 작동시켜서는 안 됩니다.  

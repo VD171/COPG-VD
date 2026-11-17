@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "API เริ่มต้น",
   "ui_prop_method": "วิธี hook พร็อพเพอร์ตี้",
   "ui_prop_method_off": "ปิด",
-  "ui_prop_method_mmap": "ต่อโปรเซส (mmap)"
+  "ui_prop_method_mmap": "ต่อโปรเซส (mmap)",
+  "ui_scope_search": "ค้นหาแอปและโปรเซส",
+  "ui_scope_count": "%t รายการ · เลือก %s"
 }

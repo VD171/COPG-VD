@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "Початковий рівень API",
   "ui_prop_method": "Метод хука властивостей",
   "ui_prop_method_off": "Вимк",
-  "ui_prop_method_mmap": "На процес (mmap)"
+  "ui_prop_method_mmap": "На процес (mmap)",
+  "ui_scope_search": "Пошук застосунків і процесів",
+  "ui_scope_count": "%t елементів · вибрано %s"
 }

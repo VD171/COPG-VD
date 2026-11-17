@@ -1729,14 +1729,92 @@ async function setGroup(name, value) {
     await saveConfig();
 }
 
+// Every real target the scope engine can match by process (nice_name): installed packages PLUS the
+// actual process names, including the hidden sub-processes like com.google.android.gms.unstable
+// (DroidGuard) or an app's ":remote"/":rcs" child. No special presets or modes - if it exists on the
+// device, it is listed and selectable, so whitelist/blacklist can target exactly what Google Play can.
+//
+// Primary source is the bundled framework helper (etc/copgvd_scope.dex, run as root via app_process): it
+// reads every component's static android:process straight from PackageManager, so a hidden process is
+// listed even when it is NOT running - which dumpsys cannot do - and it carries the real app label. The
+// pure-shell enumeration is the fallback AND a union, to also catch runtime-only process names, used
+// when the dex is absent or the manager's exec environment cannot start app_process.
+// Shared prefix for every dex call: locate the helper and, only if a manager stripped the exec
+// environment (ksu.exec normally inherits it from init, like VDBackup), recover the complete set
+// app_process needs from system_server in one shot.
+const DEX_ENV_PREFIX =
+    'D=/data/adb/modules/COPG-VD/etc/copgvd_scope.dex; [ -f "$D" ] || exit 0; ' +
+    'if [ -z "$BOOTCLASSPATH" ]; then S=$(pgrep system_server 2>/dev/null | head -1); ' +
+    'export $(cat /proc/$S/environ 2>/dev/null | tr "\\0" "\\n" | grep -E "^(BOOTCLASSPATH|DEX2OATBOOTCLASSPATH|SYSTEMSERVERCLASSPATH|ANDROID_ART_ROOT|ANDROID_I18N_ROOT|ANDROID_TZDATA_ROOT|ANDROID_DATA|ANDROID_ROOT)="); fi; ';
+const DEX_RUN = 'LD_LIBRARY_PATH= app_process -Djava.class.path="$D" /system/bin com.vd171.copgvd.Scope ';
+const SCOPE_DEX_CMD = DEX_ENV_PREFIX + DEX_RUN + 'list-scope 2>/dev/null';
+function scopeIconsCmd(pkgs) {
+    return DEX_ENV_PREFIX + DEX_RUN + 'icons 0 ' + pkgs.map(shq).join(' ') + ' 2>/dev/null';
+}
+
+// Scope-picker icon cache (localStorage), keyed by package + versionCode so it self-invalidates on update.
+function scopeIconKey(pkg, vc) { return 'copgvd_ic:' + pkg + ':' + (vc || '0'); }
+function scopeIconCached(pkg, vc) { try { return localStorage.getItem(scopeIconKey(pkg, vc)); } catch (e) { return null; } }
+function scopeIconCache(pkg, vc, b64) {
+    try {
+        const prefix = 'copgvd_ic:' + pkg + ':', key = prefix + (vc || '0');
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const k = localStorage.key(i);
+            if (k && k.indexOf(prefix) === 0 && k !== key) localStorage.removeItem(k);
+        }
+        localStorage.setItem(key, b64);
+    } catch (e) {}
+}
+
+const SCOPE_ENUM_CMD =
+    "{ pm list packages 2>/dev/null | sed 's/^package://'; " +
+    "dumpsys activity processes 2>/dev/null | grep -oE 'ProcessRecord\\{[^ ]+ [0-9]+:[^/ ]+' | sed -E 's/.* [0-9]+://'; " +
+    "ps -A -o NAME 2>/dev/null; } | grep -E '^[a-zA-Z][a-zA-Z0-9_]*\\.[a-zA-Z0-9_.:]+$' | sort -u";
+
+// Returns [{name, label, pkg, vc}] for every selectable target: the dex (rich labels + static hidden
+// processes) unioned with the shell enumeration (runtime-only names). pkg/vc point at the installed
+// package whose icon represents the row (a package itself, or the owner of a hidden process); null for
+// a bare process with no owning package. label === name for a bare process.
+async function enumerateScopeTargets() {
+    const map = new Map();
+    const add = (name, label, pkg, vc) => {
+        if (!name) return;
+        const prev = map.get(name);
+        if (!prev) { map.set(name, { name, label: label || name, pkg: pkg || null, vc: (vc != null ? vc : null) }); return; }
+        if (prev.label === prev.name && label && label !== name) prev.label = label;
+        if (!prev.pkg && pkg) { prev.pkg = pkg; prev.vc = (vc != null ? vc : null); }
+    };
+    try {
+        const raw = (await execCommand(SCOPE_DEX_CMD)).trim();
+        if (raw && raw.charAt(0) === '{') {
+            const d = JSON.parse(raw);
+            if (d && d.ok) {
+                const pkgs = d.packages || [];
+                pkgs.forEach((p) => add(p.p, p.l, p.p, p.v));
+                // the dex already names the package that declared each hidden process (authoritative,
+                // covers the global-named ones a prefix guess would miss); use its icon. Tolerate the
+                // old flat-string shape too.
+                const pkgVc = new Map(pkgs.map((p) => [p.p, p.v]));
+                (d.processes || []).forEach((proc) => {
+                    const n = (typeof proc === 'string') ? proc : proc.n;
+                    const owner = (typeof proc === 'string') ? null : (proc.p || null);
+                    add(n, n, owner, owner != null ? pkgVc.get(owner) : null);
+                });
+            }
+        }
+    } catch (e) {}
+    try {
+        const out = await execCommand(SCOPE_ENUM_CMD);
+        out.split('\n').map((s) => s.trim()).filter(Boolean).forEach((n) => add(n, n));
+    } catch (e) {}
+    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
 async function openAppPicker(key, title) {
     const current = Array.isArray(currentConfig[key]) ? currentConfig[key] : [];
-    let pkgs = [];
-    try {
-        const out = await execCommand("pm list packages 2>/dev/null | sed 's/^package://' | sort");
-        pkgs = out.split('\n').map((s) => s.trim()).filter(Boolean);
-    } catch (e) {}
-    current.forEach((p) => { if (!pkgs.includes(p)) pkgs.unshift(p); });
+    let items = await enumerateScopeTargets();
+    const names = new Set(items.map((i) => i.name));
+    current.forEach((p) => { if (!names.has(p)) { items.unshift({ name: p, label: p }); names.add(p); } });
     const sel = new Set(current);
 
     const overlay = document.createElement('div');
@@ -1745,7 +1823,8 @@ async function openAppPicker(key, title) {
     overlay.innerHTML =
         '<div class="popup-content">' +
           '<div class="modal-header"><h3></h3></div>' +
-          '<input type="text" class="scope-app-filter" placeholder="filter">' +
+          '<div class="scope-app-search"><input type="text" class="scope-app-filter"></div>' +
+          '<div class="scope-app-count"></div>' +
           '<div class="popup-body scope-app-list"></div>' +
           '<div class="popup-footer">' +
             '<button class="action-btn scope-apps-save"></button>' +
@@ -1755,29 +1834,111 @@ async function openAppPicker(key, title) {
     overlay.querySelector('h3').textContent = title;
     overlay.querySelector('.scope-apps-save').textContent = t('ui_029');
     overlay.querySelector('.scope-apps-cancel').textContent = t('ui_006');
+    const filter = overlay.querySelector('.scope-app-filter');
+    filter.placeholder = t('ui_scope_search') || 'Search apps and processes';
     const list = overlay.querySelector('.scope-app-list');
-    pkgs.forEach((p) => {
+    const count = overlay.querySelector('.scope-app-count');
+
+    // Lazy app icons (mirrors VDBackup): a row shows a letter placeholder, the real icon loads when it
+    // scrolls into view, batched one app_process per 40, cached in localStorage. Rows that are bare
+    // processes (no owning package) keep the letter.
+    let iconQ = [], iconTimer = null;
+    const setIcon = (elm, b64) => {
+        elm.style.backgroundImage = 'url(data:image/png;base64,' + b64 + ')';
+        elm.style.backgroundSize = 'cover';
+        elm.textContent = '';
+    };
+    const flushIcons = async () => {
+        if (iconTimer) { clearTimeout(iconTimer); iconTimer = null; }
+        if (!iconQ.length) return;
+        const batch = iconQ.splice(0, 40);
+        const uniq = [...new Set(batch.map((e) => e.pkg))];
+        try {
+            const raw = (await execCommand(scopeIconsCmd(uniq))).trim();
+            const r = (raw && raw.charAt(0) === '{') ? JSON.parse(raw) : null;
+            const m = (r && r.icons) ? r.icons : {};
+            batch.forEach((e) => { const b64 = m[e.pkg]; if (b64) { scopeIconCache(e.pkg, e.vc, b64); setIcon(e.elm, b64); } });
+        } catch (e) {}
+        if (iconQ.length) iconTimer = setTimeout(flushIcons, 0);
+    };
+    const loadIcon = (elm) => {
+        const pkg = elm.dataset.pkg; if (!pkg) return;
+        const vc = elm.dataset.vc || '0';
+        const cached = scopeIconCached(pkg, vc);
+        if (cached) { setIcon(elm, cached); return; }
+        iconQ.push({ elm, pkg, vc });
+        if (iconQ.length >= 40) flushIcons();
+        else if (!iconTimer) iconTimer = setTimeout(flushIcons, 120);
+    };
+    const iconObserver = ('IntersectionObserver' in window) ? new IntersectionObserver((entries, obs) => {
+        entries.forEach((e) => { if (e.isIntersecting) { obs.unobserve(e.target); loadIcon(e.target); } });
+    }, { root: list, rootMargin: '200px' }) : null;
+
+    const updateCount = () => {
+        const chosen = list.querySelectorAll('input[data-pkg]:checked').length;
+        const tpl = t('ui_scope_count') || '%t items · %s selected';
+        count.textContent = tpl.replace('%t', items.length).replace('%s', chosen);
+    };
+    items.forEach((it) => {
         const row = document.createElement('label');
         row.className = 'scope-app-row';
         const cb = document.createElement('input');
         cb.type = 'checkbox';
-        cb.dataset.pkg = p;
-        cb.checked = sel.has(p);
+        cb.dataset.pkg = it.name;
+        cb.checked = sel.has(it.name);
+        if (cb.checked) row.classList.add('sel');
+        cb.addEventListener('change', () => {
+            row.classList.toggle('sel', cb.checked);
+            updateCount();
+        });
+        const icon = document.createElement('span');
+        icon.className = 'scope-app-icon';
+        icon.textContent = (it.label || it.name).charAt(0).toUpperCase();
+        if (it.pkg) {
+            icon.dataset.pkg = it.pkg;
+            icon.dataset.vc = (it.vc != null) ? String(it.vc) : '0';
+            if (iconObserver) iconObserver.observe(icon); else loadIcon(icon);
+        }
+        const text = document.createElement('span');
+        text.className = 'scope-app-text';
+        if (it.label && it.label !== it.name) {
+            const lab = document.createElement('span');
+            lab.className = 'scope-app-label';
+            lab.textContent = it.label;
+            const nm = document.createElement('span');
+            nm.className = 'scope-app-name';
+            nm.textContent = it.name;
+            text.appendChild(lab);
+            text.appendChild(nm);
+        } else {
+            const nm = document.createElement('span');
+            nm.className = 'scope-app-name';
+            nm.textContent = it.name;
+            text.appendChild(nm);
+        }
         row.appendChild(cb);
-        row.appendChild(document.createTextNode(' ' + p));
+        row.appendChild(icon);
+        row.appendChild(text);
         list.appendChild(row);
     });
-    overlay.querySelector('.scope-app-filter').addEventListener('input', (e) => {
+    updateCount();
+
+    let ft;
+    filter.addEventListener('input', (e) => {
+        clearTimeout(ft);
         const q = e.target.value.toLowerCase();
-        list.querySelectorAll('.scope-app-row').forEach((r) => {
-            r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
-        });
+        ft = setTimeout(() => {
+            list.querySelectorAll('.scope-app-row').forEach((r) => {
+                r.style.display = r.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+            });
+        }, 60);
     });
-    overlay.querySelector('.scope-apps-cancel').addEventListener('click', () => overlay.remove());
+    const teardown = () => { if (iconObserver) iconObserver.disconnect(); if (iconTimer) clearTimeout(iconTimer); iconQ = []; overlay.remove(); };
+    overlay.querySelector('.scope-apps-cancel').addEventListener('click', teardown);
     overlay.querySelector('.scope-apps-save').addEventListener('click', async () => {
         currentConfig[key] = [...list.querySelectorAll('input[data-pkg]:checked')].map((c) => c.dataset.pkg);
         await saveConfig();
-        overlay.remove();
+        teardown();
     });
     document.body.appendChild(overlay);
 }
@@ -1966,15 +2127,34 @@ function setupBackNav() {
 }
 
 let vdluPanelMounted = false;
-function setupVdlu() {
+// VDLU panel translations, vendored from the VDLU single-source into webroot/vdlu-i18n/ (whole dir,
+// shared filenames). Only the ACTIVE language's dict is loaded, on demand: each file sets a global
+// window.VDLU_I18N_<UPPER> (hyphen->underscore), passed to VDLU.init({i18n}); English is the widget's
+// built-in default (no file). A missing/failed file just falls back to English (partial merge is fine).
+function loadVdluI18n(lang) {
+    return new Promise((resolve) => {
+        if (!lang || lang === 'en') return resolve(null);
+        const g = (lang === 'pt') ? 'VDLU_I18N_PT_BR' : 'VDLU_I18N_' + lang.toUpperCase();
+        if (typeof window[g] !== 'undefined') return resolve(window[g]);
+        const s = document.createElement('script');
+        s.src = 'vdlu-i18n/' + (lang === 'pt' ? 'pt-BR' : lang) + '.js';
+        s.onload = () => resolve((typeof window[g] !== 'undefined') ? window[g] : null);
+        s.onerror = () => resolve(null);
+        document.head.appendChild(s);
+    });
+}
+async function setupVdlu() {
     if (typeof VDLU === 'undefined') return;
-    VDLU.init({
+    const opts = {
         moduleDir: '/data/adb/modules/COPG-VD',
         vdluDir: '/data/adb/COPG-VD/vdlu',
         modid: 'COPG-VD',
         module: 'COPG-VD',
         exec: execCommand
-    });
+    };
+    const dict = await loadVdluI18n(window.I18N && window.I18N.current);
+    if (dict) opts.i18n = dict;
+    VDLU.init(opts);
     VDLU.onWebUIOpen();
 }
 function mountVdluPanel() {
@@ -2187,7 +2367,7 @@ window.addEventListener('resize', () => {
 const LANG_NAMES = {
     en: "English", ar: "\u0627\u0644\u0639\u0631\u0628\u064a\u0629", cs: "\u010ce\u0161tina",
     de: "Deutsch", es: "Espa\u00f1ol", fa: "\u0641\u0627\u0631\u0633\u06cc", fr: "Fran\u00e7ais",
-    hi: "\u0939\u093f\u0928\u094d\u0926\u0940", in: "Bahasa Indonesia", it: "Italiano",
+    hi: "\u0939\u093f\u0928\u094d\u0926\u0940", id: "Bahasa Indonesia", it: "Italiano",
     ja: "\u65e5\u672c\u8a9e", ko: "\ud55c\uad6d\uc5b4", nl: "Nederlands", pl: "Polski",
     pt: "Portugu\u00eas", ru: "\u0420\u0443\u0441\u0441\u043a\u0438\u0439", sv: "Svenska",
     th: "\u0e44\u0e17\u0e22", tr: "T\u00fcrk\u00e7e", uk: "\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430", vi: "Ti\u1ebfng Vi\u1ec7t", zh: "\u4e2d\u6587"

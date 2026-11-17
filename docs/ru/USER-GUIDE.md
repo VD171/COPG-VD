@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · Русский · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · Русский · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -18,7 +18,7 @@ COPG-VD переписывает отпечаток (fingerprint) и build ус�
    GooglePhotosUnlimited.
 
 Откройте WebUI из вашего root-менеджера, чтобы управлять модулем. Пользователи Magisk открывают его через
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) или [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases). Всё
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) или [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) или [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases). Всё
 можно также редактировать напрямую в `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Кто видит подмену (область действия)
@@ -142,7 +142,7 @@ Android version** (`COPG-VD-Settings.spoof_version`) решает, примен�
   сервисы Google Play, чтобы они повторно прошли аттестацию.
 - **Телефон уходит в softloop после включения подмены версии.** Это ловушка версии Android,
   описанная выше: верните `spoof_version` обратно в `never`.
-- **WebUI не открывается на Magisk.** Используйте [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) или [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
+- **WebUI не открывается на Magisk.** Используйте [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) или [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) или [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->
 

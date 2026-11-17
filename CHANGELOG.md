@@ -1,5 +1,16 @@
 # Changelog
 
+## v6.14-vd
+
+- The scope picker (whitelist and blacklist) now lists every target on the device: the installed apps with their icon and real name, plus the actual process names, including an app's hidden sub-processes that are not listed while they are not running. There is a search box to find any of them fast, so a scoped list can target exactly what the Google Play mode targets. Thanks to wfire06100 for the request (#26).
+- The in-app Updates panel is now translated into every language the WebUI supports, instead of staying in English.
+- Profile updates are more reliable: the step that merges a fetched profile into your local config now uses a real JSON parser, so an unusual but valid config layout can no longer make an update fail. The full flashable zip and your own settings are untouched.
+- The in-app Updates panel now works out of the box on a device that never fetched the updater downloader before: it downloads and verifies the downloader on first use, so the incremental self-update no longer needs the toolchain to be present already (v6.13 shipped a WebUI that assumed it was). The full flashable zip was never affected.
+- The Updates panel recovers if an update is interrupted: a run that dies midway no longer leaves the panel stuck on "updating" - it detects the stalled state and offers Resume.
+- When your device is already newer than what the feed offers, the panel now says so plainly instead of showing an error.
+- COPG keeps itself current without getting in your way: it checks quietly when you open its page in the manager (a progress toast only shows up if there is an actual download), and if you booted with no network it waits patiently and fetches once you are back online.
+- That boot-time wait is battery-safe by design: it sleeps instead of holding a wakelock, never wakes the radio just to look, and only makes a real request once the network has actually returned.
+
 ## v6.13-vd
 
 - The flashable zip is a fraction of its former size (about 2 MB, down from ~13 MB). COPG-VD no longer bundles the update toolchain inside the module: the signature check is a tiny embedded verifier, and the downloader is fetched once over HTTPS, checked against a signed and pinned hash before it is ever run, and kept outside the module so it is never fetched again unless you fully reinstall. Updates are gzip-based now, so no compressor ships either.
@@ -131,3 +142,9 @@ _No change to the spoofing itself. Coming from v5.0.0-vd is optional; coming fro
 - The WebUI content security policy went from default-src * to default-src 'none', declared both in config.json and in the page itself, so it also applies under KsuWebUIStandalone (Magisk), which does not read config.json.
 
 _The new build only reaches android.os.Build after a reboot: resetprop is re-applied right away, but zygisk reads the config when zygote starts._
+
+<!-- doc-footer -->
+
+---
+
+> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md)._

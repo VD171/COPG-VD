@@ -24,7 +24,7 @@
  */
 (function () {
   "use strict";
-  var AVAILABLE = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "in", "it", "ja",
+  var AVAILABLE = ["en", "ar", "cs", "de", "es", "fa", "fr", "hi", "id", "it", "ja",
                    "ko", "nl", "pl", "pt", "ru", "sv", "th", "tr", "uk", "vi", "zh"];
   var dict = {}, fallback = (window.__I18N_EN || {});
 
@@ -33,7 +33,7 @@
     var n = (navigator.language || "en").toLowerCase();
     if (AVAILABLE.indexOf(n) >= 0) return n;
     var base = n.split("-")[0];
-    if (base === "id") return "in";
+    if (base === "in") return "id";
     if (base === "iw") return "he";
     if (AVAILABLE.indexOf(base) >= 0) return base;
     return "en";

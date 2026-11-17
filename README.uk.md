@@ -31,7 +31,7 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
   <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
@@ -134,7 +134,7 @@
 
 ### WebUI
 WebUI необов'язковий (усе можна редагувати безпосередньо в конфігурації JSON), але це простий спосіб керувати модулем. Він має п'ять вкладок: **About**, **Device** (кожне поле, задане за станом, згруповане за категорією), **Spoofing** (scope та engines), **System** (групи resetprop) і **Tools** (Analyze, Check Update, Update Now, Backup/Restore та автооновлення під час завантаження). Він не робить жодного мережевого запиту; усе, що йому потрібно, постачається всередині модуля.  
-Якщо ви користувач Magisk, скористайтеся KsuWebUI від KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases). Також можна скористатися WebUI-X Portable від MMRL (https://github.com/MMRLApp/WebUI-X-Portable/releases).  
+Якщо ви користувач Magisk, скористайтеся KsuWebUI від KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases). Також можна скористатися WebUI-X Portable від MMRL (https://github.com/MMRLApp/WebUI-X-Portable/releases) або KsuWebUI-SN (https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).  
 
 ### Налаштування в конфігурації
 `COPG-VD.json` несе свої налаштування поруч із профілем, тож ваші вибори подорожують із резервною копією і можуть редагуватися вручну: `scope_mode`, перемикачі engine, групи resetprop, `global_fields` та об'єкт `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_version`). Усе живе в цьому одному файлі: скрипти завантаження та WebUI читають налаштування просто з нього, тож ваші вибори переживають оновлення модуля. `"spoof_version": "force"` відхиляється з файлу й знижується: відновлення старої резервної копії не повинно переозброювати його за вашою спиною.  

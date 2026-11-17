@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · العربية · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · العربية · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -18,7 +18,7 @@
    GooglePhotosUnlimited.
 
 افتح الـ WebUI من مدير الـ root لديك للتحكم في الوحدة. يفتحها مستخدمو Magisk عبر
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) أو [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases). كما يمكن
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) أو [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) أو [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases). كما يمكن
 تحرير كل شيء مباشرة في `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## من يرى الانتحال (النطاق)
@@ -142,7 +142,7 @@ Android version**‏ (`COPG-VD-Settings.spoof_version`) ما إذا كانت س�
   Google Play services كي يعيد الإثبات (attest).
 - **يدخل الهاتف في softloop بعد تفعيل انتحال الإصدار.** هذا هو فخّ إصدار Android
   أعلاه: أعد ضبط `spoof_version` إلى `never`.
-- **لا يفتح الـ WebUI على Magisk.** استخدم [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) أو [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
+- **لا يفتح الـ WebUI على Magisk.** استخدم [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) أو [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) أو [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->
 

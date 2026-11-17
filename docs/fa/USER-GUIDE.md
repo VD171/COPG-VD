@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · فارسی · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · فارسی · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -18,7 +18,7 @@ COPG-VD شناسه دستگاه (fingerprint) و build را بازنویسی م�
    GooglePhotosUnlimited ندارید.
 
 WebUI را از مدیر روت خود باز کنید تا ماژول را هدایت کنید. کاربران Magisk آن را با
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) یا [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) باز می‌کنند. همه چیز
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) یا [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) یا [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases) باز می‌کنند. همه چیز
 همچنین مستقیماً در `/data/adb/COPG-VD/COPG-VD.json` قابل ویرایش است.
 
 ## چه کسی spoof را می‌بیند (scope)
@@ -143,7 +143,7 @@ Android version** (`COPG-VD-Settings.spoof_version`) تعیین می‌کند ک
   Google Play services را kill کنید تا دوباره attest کند.
 - **تلفن پس از فعال کردن version spoofing دچار softloop می‌شود.** این همان تله نسخه اندروید
   بالاست: `spoof_version` را به `never` برگردانید.
-- **WebUI روی Magisk باز نمی‌شود.** از [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) یا [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) استفاده کنید.
+- **WebUI روی Magisk باز نمی‌شود.** از [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) یا [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) یا [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases) استفاده کنید.
 
 <!-- doc-footer -->
 

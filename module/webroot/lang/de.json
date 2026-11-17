@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "Erste API-Ebene",
   "ui_prop_method": "Property-Hook-Methode",
   "ui_prop_method_off": "Aus",
-  "ui_prop_method_mmap": "Pro Prozess (mmap)"
+  "ui_prop_method_mmap": "Pro Prozess (mmap)",
+  "ui_scope_search": "Apps und Prozesse suchen",
+  "ui_scope_count": "%t Einträge · %s ausgewählt"
 }

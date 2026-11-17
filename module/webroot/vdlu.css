@@ -43,6 +43,9 @@
 .vdlu-toast.ok { border-color: var(--green, #22c55e); }
 .vdlu-toast.err { border-color: var(--red, #ef4444); }
 .vdlu-toast.warn { border-color: var(--orange, #f59e0b); }
+.vdlu-toast.info { border-color: var(--blue, #3b82f6); }
+.vdlu-toast.info .vdlu-bar i { background: var(--blue, #3b82f6); }
+.vdlu-toast.info .vdlu-toast-ln b { color: var(--blue, #3b82f6); }
 
 .vdlu-toast-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
 .vdlu-toast-ttl { font-size: 0.84rem; font-weight: 700; min-width: 0; overflow-wrap: anywhere; }

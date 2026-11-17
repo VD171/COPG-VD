@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · Tiếng Việt · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · Tiếng Việt · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -20,7 +20,7 @@ trị, xem [CONFIGURATION.md](CONFIGURATION.md); để biết cách nó hoạt �
    GooglePhotosUnlimited.
 
 Mở WebUI từ trình quản lý root của bạn để điều khiển mô-đun. Người dùng Magisk mở nó bằng
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) hoặc [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases). Mọi thứ cũng
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) hoặc [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) hoặc [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases). Mọi thứ cũng
 có thể được chỉnh sửa trực tiếp trong `/data/adb/COPG-VD/COPG-VD.json`.
 
 ## Ai thấy sự giả mạo (phạm vi)
@@ -147,7 +147,7 @@ Nó không thực hiện yêu cầu mạng nào; mọi thứ nó cần đều đ
   Kết thúc Google Play services để nó chứng thực lại.
 - **Điện thoại softloop sau khi bật giả mạo phiên bản.** Đó là cái bẫy phiên bản Android ở
   trên: đặt `spoof_version` trở lại `never`.
-- **WebUI không mở trên Magisk.** Dùng [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) hoặc [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
+- **WebUI không mở trên Magisk.** Dùng [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) hoặc [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) hoặc [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->
 

@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · Türkçe · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · Türkçe · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -20,7 +20,7 @@ değer için [CONFIGURATION.md](CONFIGURATION.md) bölümüne, iç işleyişi i�
    GooglePhotosUnlimited'e ihtiyacınız yoktur.
 
 Modülü yönetmek için root yöneticinizden WebUI'yi açın. Magisk kullanıcıları onu
-[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) veya [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) ile açar. Her
+[KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) veya [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) veya [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases) ile açar. Her
 şey ayrıca doğrudan `/data/adb/COPG-VD/COPG-VD.json` içinde de düzenlenebilir.
 
 ## Sahteleme kimi etkiler (kapsam)
@@ -148,7 +148,7 @@ Hiçbir ağ isteği yapmaz; ihtiyacı olan her şey modülün içinde gelir.
   olduğundan emin olun. Yeniden doğrulama yapması için Google Play services'i sonlandırın.
 - **Sürüm sahtelemesini etkinleştirdikten sonra telefon softloop yapıyor.** Bu, yukarıdaki
   Android sürümü tuzağıdır: `spoof_version`'ı tekrar `never` yapın.
-- **WebUI Magisk'te açılmıyor.** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) veya [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases)'u kullanın.
+- **WebUI Magisk'te açılmıyor.** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) veya [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) veya [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases)'u kullanın.
 
 <!-- doc-footer -->
 

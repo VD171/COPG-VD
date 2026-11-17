@@ -7,6 +7,9 @@ zygisk/build/
 /module/zygisk/
 /module/webroot/LICENSE
 /module/webroot/README.md
+# scope-helper dex (javac+d8), rebuilt from dex/src by CI before packaging
+/module/etc/copgvd_scope.dex
+/dex/out/
 # release-notes drafts (the final text goes to the GitHub Release, not the repo)
 /RELEASE-NOTES-v*.md
 /RELEASE-BODY-v*.md

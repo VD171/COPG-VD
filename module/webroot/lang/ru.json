@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "Начальный API",
   "ui_prop_method": "Метод хука свойств",
   "ui_prop_method_off": "Выкл",
-  "ui_prop_method_mmap": "На процесс (mmap)"
+  "ui_prop_method_mmap": "На процесс (mmap)",
+  "ui_scope_search": "Поиск приложений и процессов",
+  "ui_scope_count": "%t элементов · выбрано %s"
 }

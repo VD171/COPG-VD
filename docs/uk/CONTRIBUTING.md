@@ -1,4 +1,4 @@
-> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../in/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · Українська · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
+> **Languages:** [English](../../CONTRIBUTING.md) · [العربية](../ar/CONTRIBUTING.md) · [Čeština](../cs/CONTRIBUTING.md) · [Deutsch](../de/CONTRIBUTING.md) · [Español](../es/CONTRIBUTING.md) · [فارسی](../fa/CONTRIBUTING.md) · [Français](../fr/CONTRIBUTING.md) · [हिन्दी](../hi/CONTRIBUTING.md) · [Bahasa Indonesia](../id/CONTRIBUTING.md) · [Italiano](../it/CONTRIBUTING.md) · [日本語](../ja/CONTRIBUTING.md) · [한국어](../ko/CONTRIBUTING.md) · [Nederlands](../nl/CONTRIBUTING.md) · [Polski](../pl/CONTRIBUTING.md) · [Português](../pt/CONTRIBUTING.md) · [Русский](../ru/CONTRIBUTING.md) · [Svenska](../sv/CONTRIBUTING.md) · [ไทย](../th/CONTRIBUTING.md) · [Türkçe](../tr/CONTRIBUTING.md) · Українська · [Tiếng Việt](../vi/CONTRIBUTING.md) · [中文](../zh/CONTRIBUTING.md)
 
 ---
 
@@ -12,8 +12,8 @@
 COPG-VD це **підмінник пристрою на Zygisk**: невелика нативна бібліотека, яка
 впроваджується в процеси застосунків, щоб переписати відбиток пристрою та build,
 плюс WebUI на чистому JS для керування ним. Це форк COPG (від AlirezaParsi), який
-супроводжує VD171 за ліцензією Apache-2.0. Див. [ARCHITECTURE.md](docs/ARCHITECTURE.md)
-та [FILE-STRUCTURE.md](docs/FILE-STRUCTURE.md).
+супроводжує VD171 за ліцензією Apache-2.0. Див. [ARCHITECTURE.md](ARCHITECTURE.md)
+та [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 
 Типово він обмежує підміну стеком Google Play через Zygisk, тож це легша та
 надійніша альтернатива PlayIntegrityFix.
@@ -23,21 +23,21 @@ COPG-VD це **підмінник пристрою на Zygisk**: невелик
 Асистенти та агенти на основі ШІ тут повноправні контриб'ютори, а не щось другорядне.
 
 - Проєкт зроблено читабельним: конфігурація це єдиний файл JSON
-  (`/data/adb/COPG-VD.json`, задокументований у [CONFIGURATION.md](docs/CONFIGURATION.md)),
-  рушії малі й самодостатні, а розкладку описано в [FILE-STRUCTURE.md](docs/FILE-STRUCTURE.md).
+  (`/data/adb/COPG-VD.json`, задокументований у [CONFIGURATION.md](CONFIGURATION.md)),
+  рушії малі й самодостатні, а розкладку описано в [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 - Патчі, створені за допомогою ШІ, переглядаються та приймаються на тих самих умовах,
   що й будь-які інші, за коректністю, ясністю та домовленостями нижче, а не за тим,
   хто (чи що) їх написав.
 - Однакова планка для всіх: справжня функція ніколи не послаблюється, підміна
   лишається узгодженою, і нічого таємного чи специфічного для пристрою не потрапляє
-  в репозиторій (див. [.gitignore](.gitignore)).
+  в репозиторій (див. [.gitignore](../../.gitignore)).
 
 ## Налаштування для розробки
 
 - Вам потрібен пристрій або емулятор з root та Zygisk (KernelSU, APatch чи Magisk)
   для тестування.
 - Зберіть нативну бібліотеку для кожного ABI за допомогою NDK (r29) та CMake, див.
-  крок `Build zygisk libraries` у [`.github/workflows/COPG-VD.yml`](.github/workflows/COPG-VD.yml)
+  крок `Build zygisk libraries` у [`.github/workflows/COPG-VD.yml`](../../.github/workflows/COPG-VD.yml)
   щодо точної команди. CI збирає всі три ABI за вас.
 - Зберіть прошиваний zip: скопіюйте зібраний `libspoof.so` у `module/zygisk/<abi>.so`,
   потім `cd module && zip -r9 ../COPG-VD-dev.zip .` і прошийте його.

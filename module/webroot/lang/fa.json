@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "API اولیه",
   "ui_prop_method": "روش هوک پراپرتی",
   "ui_prop_method_off": "خاموش",
-  "ui_prop_method_mmap": "هر پردازه (mmap)"
+  "ui_prop_method_mmap": "هر پردازه (mmap)",
+  "ui_scope_search": "جستجوی برنامه‌ها و فرایندها",
+  "ui_scope_count": "%t مورد · %s انتخاب‌شده"
 }

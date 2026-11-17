@@ -259,5 +259,7 @@
   "ui_fld_first_api_level": "Počáteční API",
   "ui_prop_method": "Metoda hooku property",
   "ui_prop_method_off": "Vypnuto",
-  "ui_prop_method_mmap": "Na proces (mmap)"
+  "ui_prop_method_mmap": "Na proces (mmap)",
+  "ui_scope_search": "Hledat aplikace a procesy",
+  "ui_scope_count": "%t položek · vybráno %s"
 }
