@@ -1,4 +1,6 @@
 #!/system/bin/sh
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (C) 2026 VD171
 # VDLU engine - flashless incremental module updater (DIFF->FETCH->APPLY->COMMIT).
 # POSIX sh (mksh/busybox/toybox). Env in: VDLU_DIR, MODULE_DIR, MODID.
 # Contract: INTERFACES.md (CLI/layout/JSON keys = immutable) + MODULO_VDLU.md.
@@ -227,7 +229,9 @@ fetch_offline() {
 # Egress network CLASS for the default route to a public address: wifi | mobile | none. Kernel routing
 # lookup only (`ip route get` respects Android policy routing - per-network default tables, which
 # `route show default` on `main` misses) - NO curl, NO packet, NO radio wake. The iface name classifies:
-# cellular ifaces (rmnet/ccmni/v4-*/pdp) = mobile; anything else with a route (wlan/eth/usb) = wifi/unmetered.
+# cellular base ifaces (rmnet/ccmni/ccinet/pdp/wwan) = mobile; anything else with a route (wlan/eth/usb) =
+# wifi/unmetered. The 464XLAT clat iface is "v4-<base>", so we strip "v4-" and classify by the BASE: this is
+# the fix for IPv6-only Wi-Fi, where IPv4 egress is "v4-wlan0" (wifi), NOT a cellular link.
 net_type() {
 	command -v ip >/dev/null 2>&1 || { echo wifi; return 0; }    # can't tell -> assume unmetered
 	local line dev
@@ -235,8 +239,9 @@ net_type() {
 	[ -n "$line" ] || line=$(ip route get 2606:4700:4700::1111 2>/dev/null)
 	[ -n "$line" ] || { echo none; return 0; }
 	dev=$(printf '%s\n' "$line" | sed -n 's/.* dev \([^ ]*\).*/\1/p' | head -1)
+	dev=${dev#v4-}    # 464XLAT clat virtual iface "v4-<base>" -> classify by the underlying <base>
 	case "$dev" in
-		rmnet*|ccmni*|ccinet*|v4-*|pdp*|wwan*|clat*) echo mobile ;;
+		rmnet*|ccmni*|ccinet*|pdp*|wwan*) echo mobile ;;
 		*) echo wifi ;;
 	esac
 }
@@ -263,23 +268,25 @@ dl_manifest() {
 # ---- signature / meta -----------------------------------------------------
 verify_manifest() {
 	local prof keyring v pd
-	# fail-CLOSED default: a live config that lost its profile line (corruption / a bad edit / MITM of the
-	# config) must NOT silently downgrade to best-effort verify and accept an unsigned manifest (-> .so swap
-	# under MITM = root RCE). hardened = signature mandatory; `trusted` is opt-in only (private file:// modules
-	# set it in their config on purpose). Audited 2026-11-16.
-	prof=$(cfg profile hardened)
+	# fail-CLOSED by INVERSION: `trusted` is the ONLY opt-in open value (best-effort verify). ANY other
+	# profile - the hardened default, a lost line, a typo (`hardend`), a trailing space/CR, a MITM-mangled
+	# value - is hardened = signature MANDATORY. A corrupted VALUE must fail closed exactly like a lost line,
+	# else an unsigned/MITM manifest is accepted -> .so swap under MITM = root RCE. `tr -d space` normalizes
+	# trailing CR/space so a legit `trusted` config with sloppy whitespace is not wrongly rejected.
+	# Audited 2026-11-16; corrupted-value fail-open closed 2026-11-17.
+	prof=$(cfg profile hardened | tr -d '[:space:]')
 	pd=$(cfg pubkey_dir keyring); case "$pd" in ''|*/*|*..*) pd=keyring ;; esac
 	keyring="$MODULE_DIR/vdlu/$pd"
 	v="$MODULE_DIR/vdlu/vdlu-verify"
 	if [ -f "$v" ]; then
 		sh "$v" "$WORK/manifest.json" "$keyring"
 		if [ $? = 0 ]; then return 0; fi
-		if [ "$prof" = hardened ]; then
-			echo "VDLU: manifest signature rejected (hardened)" >&2; return 1
+		if [ "$prof" != trusted ]; then
+			echo "VDLU: manifest signature rejected (profile!=trusted)" >&2; return 1
 		fi
 		echo "VDLU: signature not verified (trusted, continuing on hash-trust)" >&2; return 0
 	fi
-	[ "$prof" = hardened ] && { echo "VDLU: vdlu-verify missing but profile=hardened" >&2; return 1; }
+	[ "$prof" != trusted ] && { echo "VDLU: vdlu-verify missing and profile!=trusted" >&2; return 1; }
 	return 0
 }
 
@@ -287,6 +294,10 @@ validate_meta() {
 	local sc em ver ch wantch prof
 	sc=$(flat_get schema); em=$(flat_get engine_min); ver=$(flat_get version); ch=$(flat_get channel)
 	[ "$sc" = 1 ] || { echo "VDLU: unsupported manifest schema '$sc'" >&2; return 1; }
+	# Bind the manifest to THIS module: the release key (vd-2026) signs ~every public module, so a validly
+	# signed manifest for module B, served to module A (feed misconfig / MITM / source swap), would otherwise
+	# pass sig+schema+channel and write B's files into A's MODULE_DIR. The signed `module` field is the bind.
+	[ "$(flat_get module)" = "$MODID" ] || { echo "VDLU: manifest module '$(flat_get module)' != MODID '$MODID' (cross-module feed)" >&2; return 1; }
 	if [ -n "$em" ]; then
 		isnum "$em" || { echo "VDLU: invalid engine_min '$em'" >&2; return 1; }
 		[ "$em" -le "$ENGINE_VERSION" ] || { echo "VDLU: manifest needs engine>=$em (have $ENGINE_VERSION); use the full .zip" >&2; return 1; }
@@ -294,8 +305,8 @@ validate_meta() {
 	isnum "$ver" || { echo "VDLU: manifest version not numeric" >&2; return 1; }
 	wantch=$(cfg channel stable)
 	[ -z "$ch" ] || [ "$ch" = "$wantch" ] || { echo "VDLU: channel mismatch ($ch != $wantch)" >&2; return 1; }
-	prof=$(cfg profile hardened)   # fail-closed default (see verify_manifest): absent profile = hardened
-	if [ "$prof" = hardened ] && [ -f "$CURRENT" ] && isnum "$FROMVER"; then
+	prof=$(cfg profile hardened | tr -d '[:space:]')   # fail-closed (see verify_manifest): anything != trusted = hardened
+	if [ "$prof" != trusted ] && [ -f "$CURRENT" ] && isnum "$FROMVER"; then
 		[ "$ver" -ge "$FROMVER" ] || { echo "VDLU: downgrade blocked ($ver < $FROMVER)" >&2; return 4; }
 	fi
 	return 0
@@ -407,7 +418,7 @@ write_journal() { # phase state current [error]
 	{ total++; st=$2; cls=$1
 		if(st=="fetched"||st=="applied"||st=="staged"||st=="skipped") done++
 		if(st=="fetched"||st=="applied"||st=="staged") bytes+=$6
-		if(cls=="reboot" && st!="applied" && st!="skipped") rp=1
+		if(cls=="reboot" && st=="staged") rp=1
 		items=items sep "{\"path\":\"" js($7) "\",\"sha256\":\"" js($5) "\",\"class\":\"" js(cls) "\",\"st\":\"" js(st) "\"}"
 		sep=","
 	}
@@ -472,10 +483,17 @@ dl_blob() { # sha enc size
 # must not proceed on a path we cannot verify. The lexical path_unsafe() already ran as first defense.
 contained() { # target base
 	local rp mp
-	command -v realpath >/dev/null 2>&1 || return 1
-	mp=$(realpath -m "$2" 2>/dev/null) || return 1
-	rp=$(realpath -m "$1" 2>/dev/null) || return 1
-	case "$rp/" in "$mp"/*) return 0 ;; *) return 1 ;; esac
+	if command -v realpath >/dev/null 2>&1 && realpath -m / >/dev/null 2>&1; then
+		mp=$(realpath -m "$2" 2>/dev/null) || return 1
+		rp=$(realpath -m "$1" 2>/dev/null) || return 1
+		case "$rp/" in "$mp"/*) return 0 ;; *) return 1 ;; esac
+	fi
+	# Fallback for a toybox without `realpath -m`: WITHOUT it, failing closed (return 1) would refuse EVERY
+	# apply on that device. path_unsafe already rejected absolute paths and any `..` component before here, so
+	# `$base/$path` cannot lexically escape `$base`; confirm it literally. Loses only SYMLINK resolution - but
+	# the signed manifest carries no symlink type and vdlu-pack skips symlinks, so an escape would need a
+	# pre-existing malicious symlink under MODULE_DIR (root-only to plant = already game over).
+	case "$1/" in "$2"/*) return 0 ;; *) return 1 ;; esac
 }
 
 backup_live() { # path
@@ -645,11 +663,18 @@ do_commit() { # allow_swap
 	sync 2>/dev/null
 	while IFS="$TAB" read -r class st mode enc sha size path; do
 		[ "$class" = reboot ] && continue
-		case "$st" in applied|skipped) ;; *) continue ;; esac
 		live="$MODULE_DIR/$path"
-		if [ ! -f "$live" ] || [ "$(sha256f "$live")" != "$sha" ]; then
-			rollback_tx; write_journal commit ERROR "$path" "commit verify failed: $path (rolled back)"; return 1
-		fi
+		case "$st" in
+			applied)   # a LIVE write: must be present with the target sha
+				if [ ! -f "$live" ] || [ "$(sha256f "$live")" != "$sha" ]; then
+					rollback_tx; write_journal commit ERROR "$path" "commit verify failed: $path (rolled back)"; return 1
+				fi ;;
+			skipped)   # unchanged: present-with-target-sha OK, OR absent-by-design (installer-pruned / per-device
+				# content that finalize_plan marks skipped). Only a PRESENT file with the WRONG sha is an error.
+				if [ -f "$live" ] && [ "$(sha256f "$live")" != "$sha" ]; then
+					rollback_tx; write_journal commit ERROR "$path" "commit verify failed: $path (rolled back)"; return 1
+				fi ;;
+		esac
 	done <"$PLAN"
 	if has_staged; then
 		if [ "$allow_swap" = 1 ]; then
@@ -678,6 +703,7 @@ do_diff() { # persist(0|1); rc: 2 fetch/parse, 3 verify/meta fail, 4 device AHEA
 	local persist="$1" _vr
 	rm -rf "$WORK"; mkdir -p "$WORK"
 	dl_manifest || { echo "VDLU: manifest download failed" >&2; return 2; }
+	verify_manifest || return 3   # SIGNATURE first, before the O(n²) json_flatten: a hostile/unsigned manifest (e.g. 4 MiB of newlines = quadratic flatten) is rejected by one cheap linear sha256, never flattened
 	json_flatten "$WORK/manifest.json" >"$WORK/manifest.flat" 2>/dev/null || { echo "VDLU: manifest parse failed" >&2; return 2; }
 	grep -q "^schema$TAB" "$WORK/manifest.flat" || { echo "VDLU: not a valid manifest" >&2; return 2; }
 	TGTVER=$(flat_get version); isnum "$TGTVER" || TGTVER=0
@@ -687,7 +713,6 @@ do_diff() { # persist(0|1); rc: 2 fetch/parse, 3 verify/meta fail, 4 device AHEA
 		FROMVER=$(grep -m1 "^version$TAB" "$WORK/current.flat" | cut -f2)
 		isnum "$FROMVER" || FROMVER=0
 	fi
-	verify_manifest || return 3
 	validate_meta || { _vr=$?; [ "$_vr" = 4 ] && return 4; return 3; }
 	build_plan "$WORK/manifest.flat" >"$WORK/plan.raw"
 	finalize_plan "$WORK/plan.raw" >"$WORK/plan.work"
@@ -762,14 +787,14 @@ cmd_resume() {
 
 cmd_boot() {
 	acquire_lock
-	local rc interval cap deadline
+	local rc interval cap tries
 	if [ -f "$TARGET" ]; then
 		run_pipeline 1; rc=$?; release_lock; return "$rc"
 	fi
 	# Patient, NON-HOLDING boot retry (device booted offline). While waiting it HOLDS NOTHING: no lock (a
 	# manual run/check stays unblocked) and no wakelock (the `sleep` freezes during deep-sleep, so ~zero
 	# battery - it just waits for the user to eventually connect; no hurry, no force, nothing pinned). Only
-	# when the network actually appears (cheap route probe `net_up` - reads the routing table, NO curl, NO
+	# when the network actually appears (cheap route probe `net_allowed` - reads the routing table, NO curl, NO
 	# radio wake) does it re-acquire the lock briefly and try a real fetch. Never retries a deterministic
 	# failure (bad manifest/sig/downgrade: fetch_offline gates on the transport exit). Bounded by
 	# boot_retry_minutes of AWAKE-time (0 = off = one-shot). service.sh backgrounds this, so boot never stalls.
@@ -779,8 +804,12 @@ cmd_boot() {
 	do_diff 1; rc=$?
 	if [ "$rc" != 0 ] && [ "$cap" -gt 0 ] && fetch_offline; then
 		release_lock                                   # hold NOTHING while we wait
-		deadline=$(( $(date +%s) + cap * 60 )); rc=1
-		while [ "$(date +%s)" -lt "$deadline" ]; do
+		# AWAKE-time budget: count attempts (cap*60/interval), NOT wall-clock. Each `sleep` freezes during
+		# deep-sleep (CLOCK_MONOTONIC), so N sleeps = N*interval of AWAKE time regardless of how long the
+		# device slept - the window is spent retrying, not burned down while suspended.
+		tries=$(( cap * 60 / interval )); [ "$tries" -ge 1 ] || tries=1; rc=1
+		while [ "$tries" -gt 0 ]; do
+			tries=$(( tries - 1 ))
 			sleep "$interval"                          # no lock, no wakelock; frozen during deep-sleep
 			net_allowed || continue                    # offline or a disallowed net (net_policy): wake nothing, hold nothing
 			acquire_lock_try || continue               # a manual run is working: back off, try later

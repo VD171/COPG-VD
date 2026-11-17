@@ -24,5 +24,12 @@ window.VDLU_I18N_PT_BR = {
   searching: 'Procurando…', upToDate: 'Atualizado', nothingNew: 'nada novo',
   updateAvail: 'Atualização disponível', install: 'instalar', fileOne: 'arquivo', fileMany: 'arquivos',
   requiresReboot: 'requer reboot', checkFail: 'Falha no check', ksuUnavailable: 'KSU API indisponível',
-  pendingUpdate: 'Atualização pendente', notNow: 'Agora não', srcPlaceholder: 'https://…/&lt;módulo&gt;'
+  pendingUpdate: 'Atualização pendente', notNow: 'Agora não', srcPlaceholder: 'https://…/&lt;módulo&gt;',
+  ahead: 'Mais novo que o feed', aheadSub: 'sua versão está à frente da atualização publicada',
+  bootRetryEvery: 'Repetir no boot a cada (s)', bootRetryUpTo: 'Repetir no boot até (min)',
+  bootRetryHint: 'Se o aparelho inicia offline, continua tentando buscar o manifesto. 0 min = desligado.',
+  bootstrapping: 'Preparando o atualizador…', bootstrapSub: 'download único do buscador',
+  bootstrapFail: 'Não foi possível preparar o atualizador',
+  deferred: 'Download adiado', deferredSub: 'aguardando a rede permitida - retoma no próximo check',
+  netPolicy: 'Rede', netAny: 'Wi-Fi + móvel', netWifi: 'Só Wi-Fi', netMobile: 'Só móvel'
 };

@@ -49,7 +49,7 @@ MODULE_TREE=module               # the packaged tree (zygisk/<abi>.so already bu
 OUT=../COPG-VD-vdlu-feed         # staging dir for manifest.json + blobs/
 VERSION=61200                    # module.prop versionCode (monotonic; the manifest version)
 
-# 1. pack: per-file sha256/size/mode, enc (zst when it pays), class (reboot/soft/live), blobs/ + manifest.json
+# 1. pack: per-file sha256/size/mode, enc (gz when it pays), class (reboot/soft/live), blobs/ + manifest.json
 "$VDLU/producer/vdlu-pack" "$MODULE_TREE" "$OUT" COPG-VD "$VERSION"
 
 # 2. sign: ed25519 over the canonical manifest; key_id must match the embedded pubkey (vd-2026)

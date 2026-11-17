@@ -23,11 +23,11 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases">Releases</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/in-Home">Wiki</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/in-USER-GUIDE">Panduan Pengguna</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/in-CONFIGURATION">Referensi konfigurasi</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/in-ARCHITECTURE">Arsitektur</a> ·
-  <a href="https://github.com/VD171/COPG-VD/wiki/in-FILE-STRUCTURE">Struktur file</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/id-Home">Wiki</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/id-USER-GUIDE">Panduan Pengguna</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/id-CONFIGURATION">Referensi konfigurasi</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/id-ARCHITECTURE">Arsitektur</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/id-FILE-STRUCTURE">Struktur file</a> ·
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
@@ -138,10 +138,10 @@ Jika Anda pengguna Magisk, gunakan KsuWebUI oleh KOW (https://github.com/KOWX712
 <!-- vd-docs -->
 ## Dokumentasi
 
-- **[Wiki](https://github.com/VD171/COPG-VD/wiki/in-Home)**: dokumentasi lengkap, dapat dibaca online.
-- **[Panduan Pengguna](https://github.com/VD171/COPG-VD/wiki/in-USER-GUIDE)**: cara memasang, WebUI, dan penggunaan sehari-hari.
-- **[Referensi konfigurasi](https://github.com/VD171/COPG-VD/wiki/in-CONFIGURATION)**: setiap pengaturan di berkas konfigurasi dan fungsinya.
-- **[Arsitektur](https://github.com/VD171/COPG-VD/wiki/in-ARCHITECTURE)** dan **[Struktur file](https://github.com/VD171/COPG-VD/wiki/in-FILE-STRUCTURE)**: cara kerja spoofing dan lokasi semua berkas.
+- **[Wiki](https://github.com/VD171/COPG-VD/wiki/id-Home)**: dokumentasi lengkap, dapat dibaca online.
+- **[Panduan Pengguna](https://github.com/VD171/COPG-VD/wiki/id-USER-GUIDE)**: cara memasang, WebUI, dan penggunaan sehari-hari.
+- **[Referensi konfigurasi](https://github.com/VD171/COPG-VD/wiki/id-CONFIGURATION)**: setiap pengaturan di berkas konfigurasi dan fungsinya.
+- **[Arsitektur](https://github.com/VD171/COPG-VD/wiki/id-ARCHITECTURE)** dan **[Struktur file](https://github.com/VD171/COPG-VD/wiki/id-FILE-STRUCTURE)**: cara kerja spoofing dan lokasi semua berkas.
 
 <!-- /vd-docs -->
 

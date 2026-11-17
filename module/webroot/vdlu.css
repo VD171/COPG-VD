@@ -1,4 +1,7 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (C) 2026 VD171
+ *
  * VDLU widget - estilos do toast de progresso, banner de reboot e aba "Updates".
  * Tema escuro. Reaproveita as variáveis do index.html hospedeiro quando existem
  * (var(--surface, fallback)); os fallbacks mantêm o widget correto standalone (demo).
@@ -148,13 +151,13 @@
 
 .vdlu-fld { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
 .vdlu-fld > span { flex: 0 0 64px; font-size: 0.7rem; color: var(--fg3, #64748b); font-family: monospace; }
-.vdlu-inp, .vdlu-sel {
+.vdlu-inp, .vdlu-sel, .vdlu-num {
   flex: 1 1 auto; min-width: 0; width: 100%; padding: 8px 10px;
   border: 1px solid var(--border, #2a3240); border-radius: var(--vdlu-radius-sm);
   background: var(--bg, #0f1318); color: var(--fg, #e2e8f0); font-size: 0.78rem; outline: none;
 }
 .vdlu-inp { font-family: monospace; }
-.vdlu-inp:focus, .vdlu-sel:focus { border-color: var(--vdlu-accent); }
+.vdlu-inp:focus, .vdlu-sel:focus, .vdlu-num:focus { border-color: var(--vdlu-accent); }
 .vdlu-hint { font-size: 0.72rem; color: var(--green, #22c55e); margin-top: 4px; }
 .vdlu-hint[hidden], .vdlu-btn[hidden] { display: none; }
 

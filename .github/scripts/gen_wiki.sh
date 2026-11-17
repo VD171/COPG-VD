@@ -27,6 +27,12 @@ WIKI="${2:?usage: gen_wiki.sh <docs_dir> <wiki_dir>}"
 [ -d "$SRC" ] || { echo "no docs dir: $SRC" >&2; exit 1; }
 mkdir -p "$WIKI"
 
+# Prune first: the wiki is a generated mirror of docs/, so drop every page before
+# regenerating. Without this, a renamed or removed source (e.g. the in->id locale
+# rename) leaves an orphan page behind that opens stale forever. The full set is
+# rebuilt below; .git and screenshots/ are left untouched.
+find "$WIKI" -maxdepth 1 -type f -name '*.md' -delete
+
 for f in "$SRC"/*.md; do
   [ -f "$f" ] || continue
   cp "$f" "$WIKI/$(basename "$f")"
@@ -260,6 +266,26 @@ langs = set(os.environ["NAV"].split())
 if not docs:
     sys.exit(0)
 rx = re.compile(r"\]\((?:[^)]*/)?(" + "|".join(re.escape(d) for d in docs) + r")\.md(#[^)]*)?\)")
+# Wiki pages that actually exist, so a translated page that links to an
+# English-only doc (e.g. CHANGELOG, which ships EN-only) falls back to the EN
+# page instead of a dead `<lang>-DOC` link.
+pages = {f[:-3] for f in os.listdir(wiki) if f.endswith(".md")}
+def _rewrite(pref):
+    def _sub(mm):
+        doc, frag = mm.group(1), (mm.group(2) or "")
+        target = pref + doc if (pref + doc) in pages else doc
+        return "](" + target + frag + ")"
+    return _sub
+# Links that climb out of the docs tree (../../.gitignore, ../../.github/..., ...)
+# point at repo files/dirs that are not wiki pages, so they die in the flat wiki
+# namespace. Redirect every such relative escape to the repo on GitHub (tree for
+# a directory, blob for a file). DOC/screenshot links are rewritten first, so
+# what reaches here is only the repo-artifact references.
+REPO = "https://github.com/VD171/COPG-VD"
+def _repo(mm):
+    path = re.sub(r"^(?:\.\./)+", "", mm.group(1))
+    kind = "tree" if path.endswith("/") else "blob"
+    return "](" + REPO + "/" + kind + "/main/" + path + ")"
 for fn in os.listdir(wiki):
     if not fn.endswith(".md"):
         continue
@@ -267,8 +293,14 @@ for fn in os.listdir(wiki):
     pref = m.group(1) + "-" if (m and m.group(1) in langs) else ""
     p = os.path.join(wiki, fn)
     t = open(p, encoding="utf-8").read()
-    nt = rx.sub(lambda mm: "](" + pref + mm.group(1) + (mm.group(2) or "") + ")", t)
+    nt = rx.sub(_rewrite(pref), t)
     nt = re.sub(r"\]\((?:\.\./|docs/)*screenshots/", "](screenshots/", nt)
+    nt = re.sub(r"\]\(((?:\.\./)+[^):#]+)\)", _repo, nt)
+    # Bare repo-root artifacts with no ../ prefix that are not wiki pages: the EN
+    # CONTRIBUTING links .gitignore and .github/... by bare path (a wiki page never
+    # starts with a dot), plus the classic [Apache-2.0](LICENSE).
+    nt = re.sub(r"\]\((\.[^):#]+)\)", _repo, nt)
+    nt = re.sub(r"\]\(LICENSE\)", "](" + REPO + "/blob/main/LICENSE)", nt)
     if nt != t:
         open(p, "w", encoding="utf-8").write(nt)
 PY

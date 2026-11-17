@@ -1,5 +1,10 @@
 # Changelog
 
+## v6.15-vd
+
+- Security hardening of the self-updater: if the setting that controls signature verification is ever garbled (a typo, stray whitespace or odd casing), the updater now refuses the update instead of quietly trusting it. The default install was always safe; this closes the door on a hand-edited config being tricked into accepting a tampered update.
+- The in-app Updates panel is more polished: the Portuguese translation is complete, the boot-retry input fields are readable again, and a pending reboot no longer interrupts a download that is already running.
+
 ## v6.14-vd
 
 - The scope picker (whitelist and blacklist) now lists every target on the device: the installed apps with their icon and real name, plus the actual process names, including an app's hidden sub-processes that are not listed while they are not running. There is a search box to find any of them fast, so a scoped list can target exactly what the Google Play mode targets. Thanks to wfire06100 for the request (#26).
