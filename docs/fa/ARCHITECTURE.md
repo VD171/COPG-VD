@@ -75,8 +75,6 @@ WebUI یا یک بار در هر boot. از downloader همراه خود ماژ�
 `getprop`، چون `getprop` دقیقاً همان چیزی است که آن را جعل می‌کند. تله را در
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap) ببینید.
 
-*این مستندات با Claude (Anthropic) تولید شده و توسط VD171 نگهداری می‌شود. اصلاحات و بهبودها خوش‌آمدند: [../CONTRIBUTING.md](CONTRIBUTING.md) را ببینید.*
-
 <!-- doc-footer -->
 
 ---

@@ -145,8 +145,6 @@ Android version** (`COPG-VD-Settings.spoof_version`) تعیین می‌کند ک
   بالاست: `spoof_version` را به `never` برگردانید.
 - **WebUI روی Magisk باز نمی‌شود.** از [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) یا [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) استفاده کنید.
 
-*این مستندات با Claude (Anthropic) تولید شده و توسط VD171 نگهداری می‌شود. اصلاحات و بهبودها خوش‌آمدند: [../CONTRIBUTING.md](CONTRIBUTING.md) را ببینید.*
-
 <!-- doc-footer -->
 
 ---

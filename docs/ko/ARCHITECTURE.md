@@ -70,8 +70,6 @@ fork는 zygote의 메모리를 copy-on-write로 상속하므로, 각 앱은 부�
 위조하는 것이기 때문입니다. [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap)의 함정을
 참조하세요.
 
-*이 문서는 Claude (Anthropic)로 생성되었으며 VD171에 의해 유지 관리됩니다. 수정과 개선을 환영합니다: [../CONTRIBUTING.md](CONTRIBUTING.md)를 참조하세요.*
-
 <!-- doc-footer -->
 
 ---

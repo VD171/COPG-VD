@@ -20,6 +20,7 @@ COPG-VD/
 │   ├── module.prop             # id, name, version, versionCode, updateJson
 │   ├── customize.sh            # install-time setup
 │   ├── service.sh              # boot: applies the device-wide resetprop groups
+│   ├── post-fs-data.sh         # pre-zygote: VDLU boot trigger + staged .so swap
 │   ├── uninstall.sh            # removes the module and its transient state
 │   ├── fingerprint-update.sh   # profile fetcher + Analyze
 │   ├── sepolicy.rule           # lets the injected process read the config
@@ -28,6 +29,11 @@ COPG-VD/
 │   ├── zygisk/<abi>.so         # built library (added by CI at package time)
 │   ├── META-INF/               # installer stub
 │   ├── system/                 # files mounted into the system
+│   ├── vdlu/                   # VDLU self-updater (flashless incremental)
+│   │   ├── update.sh  vdlu-verify     # engine + ed25519-mini signature check
+│   │   ├── config.default  baseline.json   # profile + signed install seed
+│   │   ├── keyring/vd-2026.pub         # release pubkey (raw 32 bytes)
+│   │   └── verify/<abi>/ed25519-mini   # embedded verifier (device ABI kept on install)
 │   └── webroot/                # the WebUI
 │       ├── index.html  scripts.js  i18n.js  styles.css  fonts.css  config.json
 │       ├── marked.min.js  icon.png
@@ -65,8 +71,6 @@ COPG-VD/
 `/data/adb/COPG-VD/` on the device is the module's own directory: `COPG-VD.json` holds the profile
 and settings (see [CONFIGURATION.md](CONFIGURATION.md)), alongside `update.log`, `update.state` and
 `update.status`. The config is never committed; `module/COPG-VD.json.example` is the template.
-
-*This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome: see [../CONTRIBUTING.md](../CONTRIBUTING.md).*
 
 <!-- doc-footer -->
 

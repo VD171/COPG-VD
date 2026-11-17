@@ -144,8 +144,6 @@ Non effettua alcuna richiesta di rete; tutto ciò di cui ha bisogno è incluso n
   Android qui sopra: rimetti `spoof_version` su `never`.
 - **La WebUI non si apre su Magisk.** Usa [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) o [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Questa documentazione è stata generata con Claude (Anthropic) ed è mantenuta da VD171. Correzioni e miglioramenti sono benvenuti: vedi [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

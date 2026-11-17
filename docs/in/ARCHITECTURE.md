@@ -75,8 +75,6 @@ ke dalam softloop. Oleh karena itu grup version nonaktif secara default dan diku
 `getprop`, karena `getprop` justru hal yang dipalsukannya. Lihat jebakannya di
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima: lihat [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

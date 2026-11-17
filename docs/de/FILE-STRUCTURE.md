@@ -67,8 +67,6 @@ Profil und die Einstellungen (siehe [CONFIGURATION.md](CONFIGURATION.md)), neben
 `update.state` und `update.status`. Die Konfiguration wird nie committet;
 `module/COPG-VD.json.example` ist die Vorlage.
 
-*Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen: siehe [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

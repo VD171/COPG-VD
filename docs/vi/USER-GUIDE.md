@@ -149,8 +149,6 @@ Nó không thực hiện yêu cầu mạng nào; mọi thứ nó cần đều đ
   trên: đặt `spoof_version` trở lại `never`.
 - **WebUI không mở trên Magisk.** Dùng [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) hoặc [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Các chỉnh sửa và cải tiến đều được hoan nghênh: xem [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

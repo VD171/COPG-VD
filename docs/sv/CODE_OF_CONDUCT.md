@@ -18,4 +18,8 @@ bryter mot den här koden, och kan banna återfallsförbrytare.
 Detta är en komprimerad, projektanpassad bearbetning av andan i Contributor
 Covenant.
 
-*Den här dokumentationen genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar är välkomna: se [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Denna dokumentation genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar välkomnas; se [CONTRIBUTING.md](CONTRIBUTING.md)._

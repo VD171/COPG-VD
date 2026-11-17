@@ -78,4 +78,8 @@ tardía.
 Busca las etiquetas `good first issue` y `help wanted`. Las traducciones, la documentación y
 los nuevos perfiles de Pixel son todos excelentes puntos de partida.
 
-*Esta documentación fue generada con Claude (Anthropic) y es mantenida por VD171. Las correcciones y mejoras son bienvenidas: consulta [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Esta documentación se generó con Claude (Anthropic) y la mantiene VD171. Las correcciones y mejoras son bienvenidas; consulta [CONTRIBUTING.md](CONTRIBUTING.md)._

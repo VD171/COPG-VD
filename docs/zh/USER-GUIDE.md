@@ -129,8 +129,6 @@ WebUI 中的 **Analyze**（或 `fingerprint-update.sh analyze`）会审查当前
   `never`。
 - **WebUI 在 Magisk 上打不开。** 使用 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) 或 [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases)。
 
-*本文档由 Claude (Anthropic) 生成，并由 VD171 维护。欢迎提出更正和改进: 参见 [../CONTRIBUTING.md](CONTRIBUTING.md)。*
-
 <!-- doc-footer -->
 
 ---

@@ -37,4 +37,8 @@ possibile e ti accrediteremo se lo desideri.
 - Ogni binario e libreria precompilati sono tracciabili a un upstream pubblico fissato ed è compilato
   in CI da sorgente che puoi ispezionare.
 
-*Questa documentazione è stata generata con Claude (Anthropic) ed è mantenuta da VD171. Correzioni e miglioramenti sono benvenuti: vedi [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Questa documentazione è stata generata con Claude (Anthropic) ed è gestita da VD171. Correzioni e miglioramenti sono benvenuti; vedi [CONTRIBUTING.md](CONTRIBUTING.md)._

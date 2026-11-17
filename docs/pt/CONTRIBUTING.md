@@ -71,4 +71,8 @@ Assistentes e agentes de IA são contribuidores de primeira classe aqui, não um
 Procure as labels `good first issue` e `help wanted`. Traduções, docs e novos
 perfis Pixel são ótimos pontos de partida.
 
-*Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas: veja [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas; veja [CONTRIBUTING.md](CONTRIBUTING.md)._

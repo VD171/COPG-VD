@@ -67,8 +67,6 @@ profilo e le impostazioni (vedi [CONFIGURATION.md](CONFIGURATION.md)), insieme a
 `update.state` e `update.status`. La configurazione non viene mai committata; `module/COPG-VD.json.example`
 è il template.
 
-*Questa documentazione è stata generata con Claude (Anthropic) ed è mantenuta da VD171. Correzioni e miglioramenti sono benvenuti: vedi [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

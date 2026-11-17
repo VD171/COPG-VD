@@ -71,8 +71,6 @@ parse किया जाता है; एक फ़ाइल जो parse न�
 असली संस्करण `/system/build.prop` से पढ़ता है, कभी `getprop` से नहीं, क्योंकि `getprop` ठीक वही है
 जिसे यह झुठलाता है। जाल को [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap) में देखें।
 
-*यह दस्तावेज़ीकरण Claude (Anthropic) के साथ तैयार किया गया था और इसका रखरखाव VD171 द्वारा किया जाता है। सुधार और बेहतरी का स्वागत है: [../CONTRIBUTING.md](CONTRIBUTING.md) देखें।*
-
 <!-- doc-footer -->
 
 ---

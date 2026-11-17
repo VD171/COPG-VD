@@ -66,8 +66,6 @@ API，这会使 Google 的应用崩溃并把手机重启进一个软循环。因
 为 `getprop` 正是它所伪造的东西。参见 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap)
 中的陷阱。
 
-*本文档由 Claude (Anthropic) 生成，并由 VD171 维护。欢迎提出更正和改进: 参见 [../CONTRIBUTING.md](CONTRIBUTING.md)。*
-
 <!-- doc-footer -->
 
 ---

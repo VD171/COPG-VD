@@ -72,4 +72,8 @@ COPG-VD یک **spoofer دستگاه مبتنی بر Zygisk** است: یک کتا
 به دنبال برچسب‌های `good first issue` و `help wanted` بگردید. ترجمه‌ها، مستندات، و پروفایل‌های
 جدید Pixel همگی نقاط شروع عالی هستند.
 
-*این مستندات با Claude (Anthropic) تولید شده و توسط VD171 نگهداری می‌شود. اصلاحات و بهبودها خوش‌آمدند: [CONTRIBUTING.md](CONTRIBUTING.md) را ببینید.*
+<!-- doc-footer -->
+
+---
+
+> _این مستندات با Claude (Anthropic) تولید شده و توسط VD171 نگهداری می‌شود. اصلاحات و بهبودها خوش‌آمد است؛ به [CONTRIBUTING.md](CONTRIBUTING.md) مراجعه کنید._

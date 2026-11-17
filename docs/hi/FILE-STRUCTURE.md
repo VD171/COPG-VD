@@ -66,8 +66,6 @@ COPG-VD/
 (देखें [CONFIGURATION.md](CONFIGURATION.md)), साथ ही `update.log`, `update.state` और `update.status` भी।
 यह config कभी commit नहीं की जाती; `module/COPG-VD.json.example` टेम्पलेट है।
 
-*यह दस्तावेज़ीकरण Claude (Anthropic) के साथ तैयार किया गया था और इसका रखरखाव VD171 द्वारा किया जाता है। सुधार और बेहतरी का स्वागत है: [../CONTRIBUTING.md](CONTRIBUTING.md) देखें।*
-
 <!-- doc-footer -->
 
 ---

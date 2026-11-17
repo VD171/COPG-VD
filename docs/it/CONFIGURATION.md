@@ -115,8 +115,6 @@ abituale. **Mai** mettere qui l'identità o il gruppo versione Android.
 }
 ```
 
-*Questa documentazione è stata generata con Claude (Anthropic) ed è mantenuta da VD171. Correzioni e miglioramenti sono benvenuti: vedi [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

@@ -76,4 +76,8 @@ Asisten dan agen AI di sini adalah kontributor kelas satu, bukan sekadar pelengk
 Cari label `good first issue` dan `help wanted`. Terjemahan, dokumentasi, dan profil Pixel
 baru semuanya merupakan titik awal yang bagus.
 
-*Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima: lihat [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan; lihat [CONTRIBUTING.md](CONTRIBUTING.md)._

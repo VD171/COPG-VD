@@ -37,4 +37,8 @@ dès que possible et vous créditerons si vous le souhaitez.
 - Chaque binaire et bibliothèque pré-compilé est traçable jusqu'à un upstream public épinglé
   et est compilé en CI depuis des sources que vous pouvez inspecter.
 
-*Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues: voir [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues ; voir [CONTRIBUTING.md](CONTRIBUTING.md)._

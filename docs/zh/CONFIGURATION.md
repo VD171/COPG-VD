@@ -111,8 +111,6 @@ Android 版本组放在这里。
 }
 ```
 
-*本文档由 Claude (Anthropic) 生成，并由 VD171 维护。欢迎提出更正和改进: 参见 [../CONTRIBUTING.md](CONTRIBUTING.md)。*
-
 <!-- doc-footer -->
 
 ---

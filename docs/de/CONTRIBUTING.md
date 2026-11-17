@@ -71,4 +71,8 @@ KI-Assistenten und -Agenten sind hier erstklassige Beitragende, kein nachträgli
 Halten Sie Ausschau nach den Labels `good first issue` und `help wanted`. Übersetzungen, Dokumentation und neue
 Pixel-Profile sind allesamt großartige Ausgangspunkte.
 
-*Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen: siehe [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen; siehe [CONTRIBUTING.md](CONTRIBUTING.md)._

@@ -112,8 +112,6 @@ security patch مورد معمول است. **هرگز** identity یا گروه v
 }
 ```
 
-*این مستندات با Claude (Anthropic) تولید شده و توسط VD171 نگهداری می‌شود. اصلاحات و بهبودها خوش‌آمدند: [../CONTRIBUTING.md](CONTRIBUTING.md) را ببینید.*
-
 <!-- doc-footer -->
 
 ---

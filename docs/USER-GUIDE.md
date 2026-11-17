@@ -144,8 +144,6 @@ It makes no network request; everything it needs ships inside the module.
   trap above: set `spoof_version` back to `never`.
 - **The WebUI will not open on Magisk.** Use [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) or [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome: see [../CONTRIBUTING.md](../CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

@@ -66,8 +66,6 @@ COPG-VD/
 och inställningarna (se [CONFIGURATION.md](CONFIGURATION.md)), tillsammans med `update.log`, `update.state` och
 `update.status`. Konfigurationen committas aldrig; `module/COPG-VD.json.example` är mallen.
 
-*Den här dokumentationen genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar är välkomna: se [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

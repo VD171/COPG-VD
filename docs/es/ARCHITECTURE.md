@@ -77,8 +77,6 @@ predeterminada y protegido tras `spoof_version`. El módulo lee la versión real
 `/system/build.prop`, nunca de `getprop`, porque `getprop` es justo lo que falsifica.
 Consulta la trampa en [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Esta documentación fue generada con Claude (Anthropic) y es mantenida por VD171. Las correcciones y mejoras son bienvenidas: consulta [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

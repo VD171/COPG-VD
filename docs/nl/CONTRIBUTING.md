@@ -71,4 +71,8 @@ AI-assistenten en -agents zijn hier eersteklas bijdragers, geen bijzaak.
 Zoek naar de labels `good first issue` en `help wanted`. Vertalingen, docs en nieuwe
 Pixel-profielen zijn allemaal geweldige startpunten.
 
-*Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom: zie [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom; zie [CONTRIBUTING.md](CONTRIBUTING.md)._

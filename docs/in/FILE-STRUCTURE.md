@@ -67,8 +67,6 @@ profil dan pengaturan (lihat [CONFIGURATION.md](CONFIGURATION.md)), bersama `upd
 `update.state`, dan `update.status`. Config ini tidak pernah di-commit; `module/COPG-VD.json.example`
 adalah templatnya.
 
-*Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima: lihat [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

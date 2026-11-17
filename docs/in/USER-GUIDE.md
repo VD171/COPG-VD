@@ -150,8 +150,6 @@ modul.
   di atas: setel `spoof_version` kembali ke `never`.
 - **WebUI tidak mau terbuka di Magisk.** Gunakan [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) atau [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima: lihat [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

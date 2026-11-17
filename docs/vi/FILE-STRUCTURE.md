@@ -66,8 +66,6 @@ COPG-VD/
 (xem [CONFIGURATION.md](CONFIGURATION.md)), cùng với `update.log`, `update.state` và `update.status`.
 Cấu hình không bao giờ được commit; `module/COPG-VD.json.example` là mẫu.
 
-*Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Các chỉnh sửa và cải tiến đều được hoan nghênh: xem [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

@@ -71,4 +71,8 @@ Gli assistenti e agenti AI qui sono contributori di prima classe, non un ripensa
 Cerca le label `good first issue` e `help wanted`. Traduzioni, documentazione e nuovi
 profili Pixel sono tutti ottimi punti di partenza.
 
-*Questa documentazione è stata generata con Claude (Anthropic) ed è mantenuta da VD171. Correzioni e miglioramenti sono benvenuti: vedi [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Questa documentazione è stata generata con Claude (Anthropic) ed è gestita da VD171. Correzioni e miglioramenti sono benvenuti; vedi [CONTRIBUTING.md](CONTRIBUTING.md)._

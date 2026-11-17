@@ -37,4 +37,8 @@ wir können und nennen Sie als Finder, wenn Sie das wünschen.
 - Jede vorkompilierte Binärdatei und Bibliothek ist auf einen gepinnten öffentlichen Upstream zurückverfolgbar und wird
   in CI aus Quellcode gebaut, den Sie inspizieren können.
 
-*Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen: siehe [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen; siehe [CONTRIBUTING.md](CONTRIBUTING.md)._

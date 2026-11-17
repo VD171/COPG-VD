@@ -144,8 +144,6 @@ Nie wykonuje żadnego żądania sieciowego; wszystko, czego potrzebuje, jest dos
   powyżej: ustaw `spoof_version` z powrotem na `never`.
 - **WebUI nie otwiera się na Magisk.** Użyj [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) lub [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Ta dokumentacja została wygenerowana z Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane: zobacz [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

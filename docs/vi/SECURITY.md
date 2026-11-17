@@ -37,4 +37,8 @@ sớm nhất có thể và ghi nhận công lao của bạn nếu bạn muốn.
 - Mọi tệp nhị phân và thư viện được biên dịch sẵn đều có thể truy nguyên về một thượng nguồn
   (upstream) công khai được ghim, và được build trong CI từ mã nguồn mà bạn có thể kiểm tra.
 
-*Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Các chỉnh sửa và cải tiến đều được hoan nghênh: xem [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Chúng tôi hoan nghênh các chỉnh sửa và cải tiến; xem [CONTRIBUTING.md](CONTRIBUTING.md)._

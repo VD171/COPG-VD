@@ -72,4 +72,8 @@ AI asistenti a agenti jsou zde prvotřídní přispěvatelé, ne dodatečný ná
 Hledejte štítky `good first issue` a `help wanted`. Překlady, dokumentace a nové profily
 Pixelů jsou skvělé výchozí body.
 
-*Tato dokumentace byla vygenerována pomocí Claude (Anthropic) a je udržována VD171. Opravy a vylepšení jsou vítány: viz [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány; viz [CONTRIBUTING.md](CONTRIBUTING.md)._

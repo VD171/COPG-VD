@@ -66,8 +66,6 @@ COPG-VD/
 (viz [CONFIGURATION.md](CONFIGURATION.md)), vedle `update.log`, `update.state` a `update.status`.
 Konfigurace se nikdy necommituje; `module/COPG-VD.json.example` je šablona.
 
-*Tato dokumentace byla vygenerována pomocí Claude (Anthropic) a je udržována VD171. Opravy a vylepšení jsou vítány: viz [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

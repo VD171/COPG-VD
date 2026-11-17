@@ -114,8 +114,6 @@ attestation รายงานค่าที่ต่างจากค่า�
 }
 ```
 
-*เอกสารนี้สร้างด้วย Claude (Anthropic) และดูแลรักษาโดย VD171 ยินดีรับการแก้ไขและการปรับปรุง: ดู [../CONTRIBUTING.md](CONTRIBUTING.md)*
-
 <!-- doc-footer -->
 
 ---

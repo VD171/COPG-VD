@@ -71,4 +71,8 @@ AI アシスタントとエージェントは、ここでは後付けではな�
 `good first issue` と `help wanted` ラベルを探してください。翻訳、ドキュメント、新しい
 Pixel プロファイルはすべて素晴らしい出発点です。
 
-*このドキュメントは Claude (Anthropic) で生成され、VD171 によって保守されています。修正と改善を歓迎します: [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。*
+<!-- doc-footer -->
+
+---
+
+> _このドキュメントは Claude (Anthropic) で生成され、VD171 によって保守されています。修正や改善を歓迎します。[CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。_

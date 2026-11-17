@@ -37,4 +37,8 @@ akan merespons secepat mungkin dan memberi Anda kredit jika Anda mau.
 - Setiap biner dan library prebuilt dapat ditelusuri ke upstream publik yang dipin dan
   dibangun di CI dari sumber yang dapat Anda periksa.
 
-*Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima: lihat [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan; lihat [CONTRIBUTING.md](CONTRIBUTING.md)._

@@ -73,8 +73,6 @@ softloop. Поэтому группа версии по умолчанию вы�
 `getprop`, потому что `getprop` и есть именно то, что он фальсифицирует. Смотрите ловушку в
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Эта документация была сгенерирована с Claude (Anthropic) и поддерживается VD171. Исправления и улучшения приветствуются: смотрите [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

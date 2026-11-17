@@ -73,8 +73,6 @@ softloop. O grupo de versão é, portanto, desligado por padrão e protegido por
 `getprop`, porque o `getprop` é exatamente o que ele falsifica. Veja a armadilha em
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas: veja [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

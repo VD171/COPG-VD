@@ -71,8 +71,6 @@ API を呼ばせ、Google のアプリをクラッシュさせ、電話を softl
 バージョンを `/system/build.prop` から読み、決して `getprop` からは読みません。`getprop` こそが
 それが偽装するものだからです。[USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap) の罠を参照してください。
 
-*このドキュメントは Claude (Anthropic) で生成され、VD171 によって保守されています。修正と改善を歓迎します: [../CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。*
-
 <!-- doc-footer -->
 
 ---

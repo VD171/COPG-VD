@@ -73,8 +73,6 @@ softloopu. Skupina verze je proto ve výchozím stavu vypnuta a uzamčena za `sp
 Modul čte skutečnou verzi z `/system/build.prop`, nikdy z `getprop`, protože `getprop` je
 přesně to, co falšuje. Viz past v [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Tato dokumentace byla vygenerována pomocí Claude (Anthropic) a je udržována VD171. Opravy a vylepšení jsou vítány: viz [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

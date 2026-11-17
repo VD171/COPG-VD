@@ -144,8 +144,6 @@ WebUI में **Analyze** (या `fingerprint-update.sh analyze`) config क�
   है: `spoof_version` को वापस `never` पर सेट करें।
 - **Magisk पर WebUI नहीं खुलती।** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) या [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) का उपयोग करें।
 
-*यह दस्तावेज़ीकरण Claude (Anthropic) के साथ तैयार किया गया था और इसका रखरखाव VD171 द्वारा किया जाता है। सुधार और बेहतरी का स्वागत है: [../CONTRIBUTING.md](CONTRIBUTING.md) देखें।*
-
 <!-- doc-footer -->
 
 ---

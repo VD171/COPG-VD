@@ -144,8 +144,6 @@ Fingerprint старіє: Google ротує заводські образи, і 
   вище: поверніть `spoof_version` на `never`.
 - **WebUI не відкривається на Magisk.** Використайте [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) або [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Цю документацію згенеровано за допомогою Claude (Anthropic), і її підтримує VD171. Виправлення та покращення вітаються: див. [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

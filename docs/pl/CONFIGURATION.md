@@ -114,8 +114,6 @@ spójną wszędzie. Używaj tego tylko dla pól bezpiecznych pod względem spój
 }
 ```
 
-*Ta dokumentacja została wygenerowana z Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane: zobacz [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

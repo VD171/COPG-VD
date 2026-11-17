@@ -37,4 +37,8 @@ Açık bir açıklama ve mümkünse yeniden üretme adımlarını ekleyin. Elimi
 - Önceden derlenmiş her ikili ve kütüphane, sabitlenmiş genel bir yukarı akışa (upstream)
   kadar izlenebilir ve CI'da inceleyebileceğiniz kaynaktan derlenir.
 
-*Bu belge Claude (Anthropic) ile oluşturulmuş ve VD171 tarafından sürdürülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır: bkz. [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır; bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._

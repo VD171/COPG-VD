@@ -112,8 +112,6 @@ identity या Android version समूह को यहाँ **कभी** �
 }
 ```
 
-*यह दस्तावेज़ीकरण Claude (Anthropic) के साथ तैयार किया गया था और इसका रखरखाव VD171 द्वारा किया जाता है। सुधार और बेहतरी का स्वागत है: [../CONTRIBUTING.md](CONTRIBUTING.md) देखें।*
-
 <!-- doc-footer -->
 
 ---

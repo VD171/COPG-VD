@@ -67,8 +67,6 @@ en de instellingen (zie [CONFIGURATION.md](CONFIGURATION.md)), naast `update.log
 `update.status`. De config wordt nooit gecommit; `module/COPG-VD.json.example`
 is het sjabloon.
 
-*Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom: zie [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

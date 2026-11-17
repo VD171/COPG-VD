@@ -79,4 +79,8 @@ Les assistants et agents IA sont ici des contributeurs de premier plan, pas une 
 Cherchez les labels `good first issue` et `help wanted`. Les traductions, la documentation
 et les nouveaux profils Pixel sont tous d'excellents points de départ.
 
-*Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues: voir [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues ; voir [CONTRIBUTING.md](CONTRIBUTING.md)._

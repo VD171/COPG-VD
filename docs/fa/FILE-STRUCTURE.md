@@ -66,8 +66,6 @@ COPG-VD/
 نگه می‌دارد (ببینید [CONFIGURATION.md](CONFIGURATION.md))، در کنار `update.log`، `update.state`
 و `update.status`. این config هرگز commit نمی‌شود؛ `module/COPG-VD.json.example` الگوی آن است.
 
-*این مستندات با Claude (Anthropic) تولید شده و توسط VD171 نگهداری می‌شود. اصلاحات و بهبودها خوش‌آمدند: [../CONTRIBUTING.md](CONTRIBUTING.md) را ببینید.*
-
 <!-- doc-footer -->
 
 ---

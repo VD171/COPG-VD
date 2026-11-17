@@ -37,4 +37,8 @@ jak zdołamy, i podamy Ci kredyt, jeśli sobie tego życzysz.
 - Każdy prekompilowany binarny plik i biblioteka są śledzalne do przypiętego publicznego upstreamu i są budowane
   w CI ze źródła, które możesz sprawdzić.
 
-*Ta dokumentacja została wygenerowana z Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane: zobacz [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Ta dokumentacja została wygenerowana za pomocą Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane; zobacz [CONTRIBUTING.md](CONTRIBUTING.md)._

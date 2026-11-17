@@ -144,8 +144,6 @@ Det gör ingen nätverksbegäran; allt det behöver levereras inuti modulen.
   ovan: ställ tillbaka `spoof_version` till `never`.
 - **WebUI öppnas inte på Magisk.** Använd [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) eller [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Den här dokumentationen genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar är välkomna: se [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

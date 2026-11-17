@@ -73,8 +73,6 @@ softloop. Versionsgruppen är därför av som standard och grindad bakom
 `getprop`, eftersom `getprop` är precis det som den förfalskar. Se fällan i
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Den här dokumentationen genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar är välkomna: se [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

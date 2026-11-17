@@ -73,8 +73,6 @@ softloop. Тому група версії вимкнена за замовчу�
 `getprop`, бо `getprop` і є саме те, що він фальсифікує. Див. пастку у
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Цю документацію згенеровано за допомогою Claude (Anthropic), і її підтримує VD171. Виправлення та покращення вітаються: див. [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

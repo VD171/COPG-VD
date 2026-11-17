@@ -18,4 +18,8 @@ gegen diesen Kodex verstoßen, und dürfen Wiederholungstäter sperren.
 Dies ist eine verdichtete, projektgerechte Anpassung des Geistes des Contributor
 Covenant.
 
-*Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen: siehe [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen; siehe [CONTRIBUTING.md](CONTRIBUTING.md)._

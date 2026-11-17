@@ -76,4 +76,8 @@ Các trợ lý và tác nhân AI là những người đóng góp hạng nhất 
 Tìm các nhãn `good first issue` và `help wanted`. Dịch thuật, tài liệu và các hồ sơ Pixel
 mới đều là những điểm khởi đầu tuyệt vời.
 
-*Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Các chỉnh sửa và cải tiến đều được hoan nghênh: xem [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Chúng tôi hoan nghênh các chỉnh sửa và cải tiến; xem [CONTRIBUTING.md](CONTRIBUTING.md)._

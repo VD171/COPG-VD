@@ -73,8 +73,6 @@ herstarten. De versiegroep is daarom standaard uit en afgeschermd achter
 `getprop`, omdat `getprop` precies is wat het vervalst. Zie de valkuil in
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom: zie [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

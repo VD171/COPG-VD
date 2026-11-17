@@ -37,4 +37,8 @@ als we kunnen en vermelden je als je dat wilt.
 - Elk voorgebouwd binary en elke library is traceerbaar naar een vastgepinde publieke upstream en wordt
   in CI gebouwd vanuit bron die je kunt inspecteren.
 
-*Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom: zie [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom; zie [CONTRIBUTING.md](CONTRIBUTING.md)._

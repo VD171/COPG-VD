@@ -115,8 +115,6 @@ ist der übliche. Lege **niemals** Identität oder die Android-Versionsgruppe hi
 }
 ```
 
-*Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen: siehe [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

@@ -73,8 +73,6 @@ Softloop neu startet. Die Versionsgruppe ist daher standardmäßig aus und hinte
 `getprop`, weil `getprop` genau das ist, was es fälscht. Siehe die Falle in
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
-*Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen: siehe [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

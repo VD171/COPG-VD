@@ -67,8 +67,6 @@ COPG-VD/
 함께 있습니다. config는 절대 커밋되지 않습니다; `module/COPG-VD.json.example`이
 템플릿입니다.
 
-*이 문서는 Claude (Anthropic)로 생성되었으며 VD171에 의해 유지 관리됩니다. 수정과 개선을 환영합니다: [../CONTRIBUTING.md](CONTRIBUTING.md)를 참조하세요.*
-
 <!-- doc-footer -->
 
 ---

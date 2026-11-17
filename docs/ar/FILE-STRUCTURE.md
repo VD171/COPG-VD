@@ -66,8 +66,6 @@ COPG-VD/
 والإعدادات (راجع [CONFIGURATION.md](CONFIGURATION.md))، إلى جانب `update.log` و`update.state`
 و`update.status`. لا يُرفع الإعداد (commit) أبداً؛ و`module/COPG-VD.json.example` هو القالب.
 
-*تم إنشاء هذه الوثائق باستخدام Claude (Anthropic) وتتم صيانتها بواسطة VD171. التصحيحات والتحسينات مرحّب بها: راجع [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

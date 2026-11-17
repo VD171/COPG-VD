@@ -37,4 +37,8 @@ pudermos e daremos crédito a você se desejar.
 - Todo binário e biblioteca pré-compilados são rastreáveis até um upstream público fixado e são compilados
   no CI a partir de um código-fonte que você pode inspecionar.
 
-*Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas: veja [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas; veja [CONTRIBUTING.md](CONTRIBUTING.md)._

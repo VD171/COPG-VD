@@ -71,4 +71,8 @@ Asystenci i agenci AI są tu pełnoprawnymi współtwórcami, a nie dodatkiem.
 Szukaj etykiet `good first issue` i `help wanted`. Tłumaczenia, dokumentacja i nowe
 profile Pixela to świetne punkty startowe.
 
-*Ta dokumentacja została wygenerowana z Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane: zobacz [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Ta dokumentacja została wygenerowana za pomocą Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane; zobacz [CONTRIBUTING.md](CONTRIBUTING.md)._

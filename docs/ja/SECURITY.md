@@ -37,4 +37,8 @@ COPG-VD は root として実行され、Zygisk を通じてアプリプロセ�
 - すべてのビルド済みバイナリとライブラリは、固定された公開 upstream まで追跡可能で、あなたが
   検査できるソースから CI でビルドされます。
 
-*このドキュメントは Claude (Anthropic) で生成され、VD171 によって保守されています。修正と改善を歓迎します: [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。*
+<!-- doc-footer -->
+
+---
+
+> _このドキュメントは Claude (Anthropic) で生成され、VD171 によって保守されています。修正や改善を歓迎します。[CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。_

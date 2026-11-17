@@ -144,8 +144,6 @@ Es stellt keine Netzwerkanfrage; alles, was es braucht, wird im Modul mitgeliefe
   Android-Versions-Falle oben: setze `spoof_version` zurück auf `never`.
 - **Die WebUI öffnet sich auf Magisk nicht.** Nutze [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) oder [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen: siehe [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

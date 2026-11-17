@@ -71,4 +71,8 @@ AI 어시스턴트와 에이전트는 여기서 나중에 생각난 것이 아�
 `good first issue`와 `help wanted` 라벨을 찾으세요. 번역, 문서, 새 Pixel 프로파일은 모두 훌륭한
 출발점입니다.
 
-*이 문서는 Claude (Anthropic)로 생성되었으며 VD171에 의해 유지 관리됩니다. 수정과 개선을 환영합니다: [CONTRIBUTING.md](CONTRIBUTING.md)를 참조하세요.*
+<!-- doc-footer -->
+
+---
+
+> _이 문서는 Claude (Anthropic)로 생성되었으며 VD171이 유지 관리합니다. 수정 및 개선을 환영합니다. [CONTRIBUTING.md](CONTRIBUTING.md)를 참조하세요._

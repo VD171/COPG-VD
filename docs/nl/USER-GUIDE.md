@@ -144,8 +144,6 @@ Het doet geen enkel netwerkverzoek; alles wat het nodig heeft wordt in de module
   valkuil hierboven: zet `spoof_version` terug op `never`.
 - **De WebUI wil niet openen op Magisk.** Gebruik [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) of [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom: zie [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

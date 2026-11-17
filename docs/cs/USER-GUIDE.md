@@ -143,8 +143,6 @@ Nedělá žádný síťový požadavek; vše, co potřebuje, přichází uvnitř
   Androidu výše: nastavte `spoof_version` zpět na `never`.
 - **WebUI se na Magisku neotevře.** Použijte [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) nebo [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Tato dokumentace byla vygenerována pomocí Claude (Anthropic) a je udržována VD171. Opravy a vylepšení jsou vítány: viz [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

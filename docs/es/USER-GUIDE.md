@@ -152,8 +152,6 @@ No hace ninguna petición de red; todo lo que necesita viene dentro del módulo.
   versión de Android de arriba: vuelve a poner `spoof_version` en `never`.
 - **La WebUI no se abre en Magisk.** Usa [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) o [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases).
 
-*Esta documentación fue generada con Claude (Anthropic) y es mantenida por VD171. Las correcciones y mejoras son bienvenidas: consulta [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

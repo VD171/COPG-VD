@@ -80,8 +80,6 @@ varsayılan olarak kapalıdır ve `spoof_version`'ın arkasında kapılıdır. M
 olarak sahtelediği şeydir. Tuzak için [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap)
 bölümüne bakın.
 
-*Bu belge Claude (Anthropic) ile oluşturulmuş ve VD171 tarafından sürdürülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır: bkz. [../CONTRIBUTING.md](CONTRIBUTING.md).*
-
 <!-- doc-footer -->
 
 ---

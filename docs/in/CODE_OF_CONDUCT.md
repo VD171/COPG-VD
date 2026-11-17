@@ -17,4 +17,8 @@ dan kontribusi yang melanggar kode ini, dan dapat mem-ban pelanggar berulang.
 
 Ini adalah adaptasi ringkas yang sesuai untuk proyek dari semangat Contributor Covenant.
 
-*Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan sangat diterima: lihat [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan; lihat [CONTRIBUTING.md](CONTRIBUTING.md)._

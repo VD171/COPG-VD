@@ -71,4 +71,8 @@ COPG-VD هو **منتحِل جهاز بتقنية Zygisk**: مكتبة أصلي�
 ابحث عن الوسمين `good first issue` و`help wanted`. الترجمات والوثائق وملفات تعريف Pixel
 الجديدة كلها نقاط انطلاق رائعة.
 
-*تم إنشاء هذه الوثائق باستخدام Claude (Anthropic) وتتم صيانتها بواسطة VD171. التصحيحات والتحسينات مرحّب بها: راجع [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _تم إنشاء هذا التوثيق باستخدام Claude (Anthropic) ويتولى صيانته VD171. التصحيحات والتحسينات مرحّب بها؛ راجع [CONTRIBUTING.md](CONTRIBUTING.md)._
