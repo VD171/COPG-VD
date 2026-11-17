@@ -919,7 +919,7 @@ body.dark-theme .version-select {
 .about-row.link .about-val { color: var(--accent); }
 .about-trademarks { margin: 18px 4px 4px; font-size: 0.72rem; line-height: 1.5; color: var(--muted); }
 
-/* VDLU widget theme bridge: expose the widget's expected variable names from COPG's
+/* VDLU widget theme bridge: expose the widget's expected variable names from COPG-VD's
    tokens. Declared on body so var() resolves against the active theme (body.dark-theme). */
 body {
     --fg: var(--ink);

@@ -8,7 +8,7 @@
 - The in-app Updates panel now works out of the box on a device that never fetched the updater downloader before: it downloads and verifies the downloader on first use, so the incremental self-update no longer needs the toolchain to be present already (v6.13 shipped a WebUI that assumed it was). The full flashable zip was never affected.
 - The Updates panel recovers if an update is interrupted: a run that dies midway no longer leaves the panel stuck on "updating" - it detects the stalled state and offers Resume.
 - When your device is already newer than what the feed offers, the panel now says so plainly instead of showing an error.
-- COPG keeps itself current without getting in your way: it checks quietly when you open its page in the manager (a progress toast only shows up if there is an actual download), and if you booted with no network it waits patiently and fetches once you are back online.
+- COPG-VD keeps itself current without getting in your way: it checks quietly when you open its page in the manager (a progress toast only shows up if there is an actual download), and if you booted with no network it waits patiently and fetches once you are back online.
 - That boot-time wait is battery-safe by design: it sleeps instead of holding a wakelock, never wakes the radio just to look, and only makes a real request once the network has actually returned.
 
 ## v6.13-vd
