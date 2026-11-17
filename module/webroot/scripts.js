@@ -659,7 +659,8 @@ async function backupFile(filename) {
             }
         }
         
-        await execCommand(`cp ${shq(`/data/adb/${filename}`)} ${shq(`/sdcard/Download/COPG-VD/${finalFilename}`)}`);
+        // Config lives in the dedicated dir since v6.11; fall back to the legacy root path.
+        await execCommand(`S=${shq(`/data/adb/COPG-VD/${filename}`)}; [ -f "$S" ] || S=${shq(`/data/adb/${filename}`)}; cp "$S" ${shq(`/sdcard/Download/COPG-VD/${finalFilename}`)}`);
         appendToOutput(t('msg_049', {"finalFilename": finalFilename}), 'success');
         return true;
     } catch (error) {
@@ -2493,15 +2494,18 @@ async function restoreFile(sourcePath, targetFile) {
             throw new Error(`Invalid source or target path: source=${sourcePath}, target=${targetFile}`);
         }
 
-        const cpOutput = await execCommand(`cp ${shq(sourcePath)} ${shq(`/data/adb/${targetFile}`)} || echo "ERROR: cp_failed"`);
+        // Restore into the dedicated dir (where the module reads), not the legacy root path.
+        const destPath = `/data/adb/COPG-VD/${targetFile}`;
+        await execCommand(`mkdir -p /data/adb/COPG-VD`);
+        const cpOutput = await execCommand(`cp ${shq(sourcePath)} ${shq(destPath)} || echo "ERROR: cp_failed"`);
         if (cpOutput.includes('ERROR: cp_failed')) {
             throw new Error(`Copy command failed: ${cpOutput}`);
         }
 
-        await execCommand(`chmod 644 ${shq(`/data/adb/${targetFile}`)}`);
-        
+        await execCommand(`chmod 644 ${shq(destPath)}`);
+
         try {
-            await execCommand(`chcon u:object_r:system_file:s0 ${shq(`/data/adb/${targetFile}`)}`);
+            await execCommand(`chcon u:object_r:system_file:s0 ${shq(destPath)}`);
         } catch (selinuxError) {
             console.warn('Could not set SELinux context:', selinuxError);
         }

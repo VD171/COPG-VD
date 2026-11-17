@@ -1,5 +1,9 @@
 # Changelog
 
+## v6.16-vd
+
+- Backup and Restore work again. The configuration moved into its own folder a few versions back, but the Backup/Restore tool was still looking for it in the old location, so both failed. It now reads from and writes to the current location (with a fallback to the old one). Thanks to tahsinahmed2 for the report (#29).
+
 ## v6.15-vd
 
 - Security hardening of the self-updater: if the setting that controls signature verification is ever garbled (a typo, stray whitespace or odd casing), the updater now refuses the update instead of quietly trusting it. The default install was always safe; this closes the door on a hand-edited config being tricked into accepting a tampered update.
