@@ -145,14 +145,26 @@ WebUI เป็นตัวเลือก (ทุกอย่างสามา
 
 <!-- /vd-docs -->
 
+## การอัปเดตแบบเพิ่มทีละส่วน (VDLU)
+
+COPG-VD มาพร้อมกับเอนจิน **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (ฝังไว้ใน `module/vdlu/`): โมดูลจะอัปเดตตัวเองโดยดึงเฉพาะไฟล์ที่เปลี่ยนแปลง (blob แบบระบุที่อยู่ด้วยเนื้อหา + `manifest.json` ที่เซ็นชื่อ) แทนที่จะดาวน์โหลด `.zip` ทั้งก้อนใหม่ โปรไฟล์ **Hardened**: ลายเซ็น ed25519 เป็นสิ่งจำเป็นและการดาวน์เกรดถูกบล็อก; ไฟล์ `.zip` แบบเต็มยังคงใช้งานได้เป็นตัวสำรอง
+
+- **`vdlu/`** (รวมอยู่ใน zip): `update.sh` (เอนจิน) + `vdlu-verify` + `config.default` + `keyring/` (กุญแจสาธารณะ)
+- **สถานะ** ใน `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - อยู่นอกโมดูล และคงอยู่หลังการแฟลชใหม่
+- **ตัวกระตุ้นตอนบูต:** `post-fs-data.sh`, ก่อน zygote - COPG-VD มี `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard) ดังนั้นไฟล์ `.so` ใหม่จะถูกจัดเตรียมและสลับก่อนที่ zygote จะแมปมัน
+- **WebUI:** แผง **Updates** (`webroot/vdlu.js`) พร้อมการแจ้งเตือนความคืบหน้าและการยกเลิก
+- **การเผยแพร่:** ดู `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, เก็บถาวร manifest, `vdlu-gc` ลบ blob ที่กำพร้า, push ไปยัง Pages แบบเป็นชุด)
+
 ## ดูเพิ่มเติม
 
 โปรเจกต์ในเครือโดยผู้พัฒนาคนเดียวกัน:
 
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: ตัวดีบักเมธอดของอุปกรณ์ที่อ่านแต่ละรายการผ่านทุกเมธอดที่สามารถอ่านได้ และนำมาเปรียบเทียบกันเคียงข้างกัน
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: บริการ Google ของคุณ (RCS, Wallet, การรับรอง Play Integrity) อ่านบนอุปกรณ์ของคุณโดยไม่ใช้อินเทอร์เน็ต
-- **[VDBackup](https://github.com/VD171/VD-Backup)**: สำรองและกู้คืนแอปและข้อมูลแบบเต็มรูปแบบในฐานะ root ควบคุมทั้งหมดจาก WebUI
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: SSH daemon แบบสแตนด์อโลนที่ทำงานด้วยสิทธิ์ root (Dropbear)
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: สำรองและกู้คืนแอปและข้อมูลแบบเต็มรูปแบบในฐานะ root ควบคุมทั้งหมดจาก WebUI
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: เอนจินอัปเดตตัวเองแบบเพิ่มทีละส่วนโดยไม่ต้องแฟลช ฝังอยู่ในโมดูล KernelSU/APatch/Magisk
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: ตัวติดตั้งแบบ sideload ด้วยสิทธิ์ root ที่ไร้แรงเสียดทาน สำหรับ APK เดี่ยว แบบชุด และแบบแยก พร้อมสวิตช์ตัวตรวจสอบ Play Protect และการปลอมแหล่งที่มาของการติดตั้ง
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 

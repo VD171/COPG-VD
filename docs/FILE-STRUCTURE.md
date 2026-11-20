@@ -20,7 +20,7 @@ COPG-VD/
 │   ├── module.prop             # id, name, version, versionCode, updateJson
 │   ├── customize.sh            # install-time setup
 │   ├── service.sh              # boot: applies the device-wide resetprop groups
-│   ├── post-fs-data.sh         # pre-zygote: VDLU boot trigger + staged .so swap
+│   ├── post-fs-data.sh         # pre-zygote: VDLiveUpdate (VDLU) boot trigger + staged .so swap
 │   ├── uninstall.sh            # removes the module and its transient state
 │   ├── fingerprint-update.sh   # profile fetcher + Analyze
 │   ├── sepolicy.rule           # lets the injected process read the config

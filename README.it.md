@@ -145,14 +145,26 @@ Se sei un utente Magisk, usa KsuWebUI di KOW (https://github.com/KOWX712/KsuWebU
 
 <!-- /vd-docs -->
 
+## Aggiornamenti incrementali (VDLU)
+
+COPG-VD include il motore **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (incorporato in `module/vdlu/`): il modulo si aggiorna da solo scaricando solo i file che sono cambiati (blob indirizzati per contenuto + un `manifest.json` firmato), invece di riscaricare l'intero `.zip`. Profilo **Hardened**: la firma ed25519 è obbligatoria e i downgrade sono bloccati; il `.zip` completo resta valido come fallback.
+
+- **`vdlu/`** (incluso nello zip): `update.sh` (motore) + `vdlu-verify` + `config.default` + `keyring/` (chiave pubblica).
+- **Stato** in `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - fuori dal modulo, sopravvive a un riflash.
+- **Trigger all'avvio:** `post-fs-data.sh`, prima di zygote - COPG-VD ha `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), quindi la nuova `.so` viene preparata e scambiata prima che zygote la mappi.
+- **WebUI:** un pannello **Updates** (`webroot/vdlu.js`) con un toast di avanzamento e annullamento.
+- **Rilascio:** vedi `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, archivia il manifest, `vdlu-gc` rimuove i blob orfani, push su Pages in batch).
+
 ## Vedi anche
 
 Progetti affini dello stesso autore:
 
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: un debugger di metodi del dispositivo che legge ogni elemento attraverso ogni metodo in grado di leggerlo e li confronta affiancati.
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: i tuoi servizi Google (RCS, Wallet, attestazioni Play Integrity), letti sul tuo dispositivo senza internet.
-- **[VDBackup](https://github.com/VD171/VD-Backup)**: backup e ripristino completi di app e dati come root, gestiti interamente da una WebUI.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: un daemon SSH autonomo con privilegi di root (Dropbear).
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: backup e ripristino completi di app e dati come root, gestiti interamente da una WebUI.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: un motore di autoaggiornamento incrementale e senza flash, integrato nei moduli KernelSU/APatch/Magisk.
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: un installer sideload con root e senza attriti per APK singoli, in batch e split, con un interruttore per il verificatore Play Protect e lo spoofing della sorgente di installazione.
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 

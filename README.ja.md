@@ -148,14 +148,26 @@ Magisk ユーザーの場合は、KOW による KsuWebUI を使用してくだ�
 
 <!-- /vd-docs -->
 
+## 増分アップデート (VDLU)
+
+COPG-VD は **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** エンジンを同梱しています（`module/vdlu/` にベンダーリング）。モジュールは `.zip` 全体を再ダウンロードする代わりに、変更されたファイルのみを取得して自分自身を更新します（コンテンツアドレス方式の blob + 署名付き `manifest.json`）。**Hardened** プロファイル: ed25519 署名は必須でダウングレードはブロックされます。完全な `.zip` はフォールバックとして引き続き有効です。
+
+- **`vdlu/`**（zip に同梱）: `update.sh`（エンジン）+ `vdlu-verify` + `config.default` + `keyring/`（公開鍵）。
+- **状態** は `/data/adb/COPG-VD/vdlu/`（config/journal/blobs/staged/rollback）- モジュールの外にあり、再フラッシュ後も残ります。
+- **ブートトリガー:** `post-fs-data.sh`、zygote より前 - COPG-VD には `zygisk/*.so` + `sepolicy.rule`（REBOOT-hard）があるため、新しい `.so` は zygote がマップする前にステージングされて入れ替えられます。
+- **WebUI:** 進捗トーストとキャンセルを備えた **Updates** パネル（`webroot/vdlu.js`）。
+- **リリース:** `module/vdlu/RELEASE.md` を参照（`vdlu-pack` + `vdlu-sign`、manifest をアーカイブ、`vdlu-gc` が孤立した blob を削除、Pages へのバッチプッシュ）。
+
 ## 関連アプリ
 
 同じ作者による姉妹プロジェクト:
 
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: 各項目を、それを読み取れるあらゆるメソッドを通して読み取り、並べて比較するデバイスメソッドデバッガーです。
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: あなたの Google サービス (RCS、Wallet、Play Integrity の認証) を、インターネットなしで端末上で読み取ります。
-- **[VDBackup](https://github.com/VD171/VD-Backup)**: アプリとデータの完全なバックアップと復元を root として行い、すべて WebUI から操作します。
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: root として動作するスタンドアロンの SSH デーモン (Dropbear)。
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: アプリとデータの完全なバックアップと復元を root として行い、すべて WebUI から操作します。
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: フラッシュ不要の増分セルフアップデートエンジンで、KernelSU/APatch/Magisk モジュールに組み込まれます。
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: 単一・バッチ・分割 APK に対応した、摩擦のない root サイドロードインストーラーで、Play Protect 検証のトグルとインストール元の偽装を備えます。
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 

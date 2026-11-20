@@ -147,20 +147,32 @@ WebUI اختیاری است (همه چیز را می‌توان مستقیما �
 
 <!-- /vd-docs -->
 
+## به‌روزرسانی‌های افزایشی (VDLU)
+
+COPG-VD موتور **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** را به همراه دارد (جاسازی‌شده در `module/vdlu/`): ماژول با دریافت تنها فایل‌هایی که تغییر کرده‌اند (بلاب‌های آدرس‌دهی‌شده با محتوا + یک `manifest.json` امضاشده) خود را به‌روز می‌کند، به جای دانلود دوبارهٔ کل `.zip`. نمایهٔ **Hardened**: امضای ed25519 اجباری است و بازگشت به نسخهٔ قدیمی مسدود شده است؛ فایل کامل `.zip` به عنوان جایگزین معتبر باقی می‌ماند.
+
+- **`vdlu/`** (همراه در زیپ): `update.sh` (موتور) + `vdlu-verify` + `config.default` + `keyring/` (کلید عمومی).
+- **وضعیت** در `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - بیرون از ماژول، پس از فلش دوباره باقی می‌ماند.
+- **محرک بوت:** `post-fs-data.sh`، پیش از zygote - COPG-VD دارای `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard) است، بنابراین فایل `.so` جدید پیش از آنکه zygote آن را نگاشت کند آماده و جایگزین می‌شود.
+- **رابط وب:** یک پنل **Updates** (`webroot/vdlu.js`) با اعلان پیشرفت و لغو.
+- **انتشار:** به `module/vdlu/RELEASE.md` مراجعه کنید (`vdlu-pack` + `vdlu-sign`، آرشیو manifest، `vdlu-gc` بلاب‌های یتیم را حذف می‌کند، و ارسال دسته‌ای به Pages).
+
 ## همچنین ببینید
 
 پروژه‌های خواهر از همان نویسنده:
 
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: یک اشکال‌زدای روش‌های دستگاه که هر مورد را از طریق همه روش‌هایی که می‌توانند آن را بخوانند می‌خواند و آن‌ها را کنار هم مقایسه می‌کند.
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: سرویس‌های Google شما (RCS، Wallet، گواهی‌های Play Integrity)، خوانده‌شده روی دستگاه شما بدون اینترنت.
-- **[VDBackup](https://github.com/VD171/VD-Backup)**: پشتیبان‌گیری و بازیابی کامل اپ‌ها و داده‌ها به‌صورت root، که به‌طور کامل از یک WebUI هدایت می‌شود.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: یک دیمن SSH مستقل با روت (Dropbear).
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: پشتیبان‌گیری و بازیابی کامل اپ‌ها و داده‌ها به‌صورت root، که به‌طور کامل از یک WebUI هدایت می‌شود.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: یک موتور خودبه‌روزرسانی افزایشی و بدون فلش، تعبیه‌شده در ماژول‌های KernelSU/APatch/Magisk.
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: یک نصب‌کنندهٔ ساید‌لود روت‌شدهٔ بدون‌اصطکاک برای APKهای تکی، دسته‌ای و تقسیم‌شده، همراه با کلید تأییدکنندهٔ Play Protect و جعل منبع نصب.
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
 </div>
 
-## Contacts
+## اطلاعات تماس
 
 - https://vd171.ru
 - https://vd.priv8.ru

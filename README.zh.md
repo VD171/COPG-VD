@@ -145,18 +145,30 @@ WebUI 是可选的 (一切都可以直接在 JSON 配置文件中编辑) 但它�
 
 <!-- /vd-docs -->
 
-## See also
+## 增量更新 (VDLU)
+
+COPG-VD 内置 **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** 引擎（随附于 `module/vdlu/`）：模块只获取发生变化的文件（内容寻址的 blob + 已签名的 `manifest.json`）来自我更新，而不是重新下载整个 `.zip`。**Hardened** 配置：ed25519 签名是强制的，且降级被阻止；完整的 `.zip` 仍作为回退保持有效。
+
+- **`vdlu/`**（随 zip 一起提供）：`update.sh`（引擎）+ `vdlu-verify` + `config.default` + `keyring/`（公钥）。
+- **状态** 位于 `/data/adb/COPG-VD/vdlu/`（config/journal/blobs/staged/rollback）- 在模块之外，重新刷入后仍然保留。
+- **启动触发器：** `post-fs-data.sh`，在 zygote 之前 - COPG-VD 带有 `zygisk/*.so` + `sepolicy.rule`（REBOOT-hard），因此新的 `.so` 会在 zygote 映射它之前被暂存并替换。
+- **WebUI：** 一个带有进度提示和取消功能的 **Updates** 面板（`webroot/vdlu.js`）。
+- **发布：** 参见 `module/vdlu/RELEASE.md`（`vdlu-pack` + `vdlu-sign`，归档 manifest，`vdlu-gc` 清理孤立的 blob，批量推送到 Pages）。
+
+## 另请参阅
 
 同一作者的姊妹项目：
 
 - **[VDInfos](https://github.com/VD171/VD-Infos)**：一个设备方法调试器，通过每一种能读取某项的方法来读取它，并将它们并排比较。
 - **[VDGoogle](https://github.com/VD171/VD-Google)**：你的 Google 服务（RCS、Wallet、Play Integrity 证明），在你的设备上读取，无需联网。
-- **[VDBackup](https://github.com/VD171/VD-Backup)**：以 root 权限完整备份和恢复应用与数据，完全从 WebUI 驱动。
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**：一个以 root 权限运行的独立 SSH 守护进程（Dropbear）。
+- **[VDBackup](https://github.com/VD171/VD-Backup)**：以 root 权限完整备份和恢复应用与数据，完全从 WebUI 驱动。
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: 一个无需刷入的增量自更新引擎，嵌入到 KernelSU/APatch/Magisk 模块中。
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: 一个面向单个、批量和拆分 APK 的无摩擦 root 侧载安装器，带有 Play Protect 验证器开关和安装来源伪装。
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
-## Contacts
+## 联系方式
 
 - https://vd171.ru
 - https://vd.priv8.ru

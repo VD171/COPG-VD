@@ -148,14 +148,26 @@ Pokud jsi uživatel Magisku, použij KsuWebUI od KOW (https://github.com/KOWX712
 
 <!-- /vd-docs -->
 
+## Přírůstkové aktualizace (VDLU)
+
+COPG-VD obsahuje engine **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (vendorovaný v `module/vdlu/`): modul se aktualizuje sám tím, že stahuje pouze soubory, které se změnily (obsahově adresované bloby + podepsaný `manifest.json`), místo opětovného stažení celého `.zip`. Profil **Hardened**: podpis ed25519 je povinný a downgrady jsou blokovány; celý `.zip` zůstává platný jako záloha.
+
+- **`vdlu/`** (přibalený v zipu): `update.sh` (engine) + `vdlu-verify` + `config.default` + `keyring/` (veřejný klíč).
+- **Stav** v `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - mimo modul, přežije přeflashnutí.
+- **Spouštěč při bootu:** `post-fs-data.sh`, před zygote - COPG-VD má `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), takže nová `.so` je připravena a vyměněna dříve, než ji zygote namapuje.
+- **WebUI:** panel **Updates** (`webroot/vdlu.js`) s ukazatelem průběhu a zrušením.
+- **Vydání:** viz `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, archivace manifestu, `vdlu-gc` čistí osiřelé bloby, dávkový push na Pages).
+
 ## Viz také
 
 Sourozenecké projekty od stejného autora:
 
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: debugger metod zařízení, který čte každou položku přes každou metodu, která ji umí přečíst, a porovnává je vedle sebe.
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: tvé služby Google (RCS, Wallet, atestace Play Integrity), čtené na tvém zařízení bez internetu.
-- **[VDBackup](https://github.com/VD171/VD-Backup)**: kompletní záloha a obnova aplikací a dat jako root, ovládaná výhradně z WebUI.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: samostatný rootovaný SSH démon (Dropbear).
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: kompletní záloha a obnova aplikací a dat jako root, ovládaná výhradně z WebUI.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: bezflashový, inkrementální engine pro samoaktualizaci, vestavěný do modulů KernelSU/APatch/Magisk.
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: bezproblémový rootový sideload instalátor pro jednotlivé, dávkové a rozdělené APK, s přepínačem ověřování Play Protect a podvržením zdroje instalace.
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork od @T3SL4).
 

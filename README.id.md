@@ -145,14 +145,26 @@ Jika Anda pengguna Magisk, gunakan KsuWebUI oleh KOW (https://github.com/KOWX712
 
 <!-- /vd-docs -->
 
+## Pembaruan inkremental (VDLU)
+
+COPG-VD menyertakan mesin **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (di-vendor di `module/vdlu/`): modul memperbarui dirinya sendiri dengan hanya mengambil berkas yang berubah (blob beralamat konten + `manifest.json` yang ditandatangani), alih-alih mengunduh ulang seluruh `.zip`. Profil **Hardened**: tanda tangan ed25519 wajib dan downgrade diblokir; `.zip` lengkap tetap valid sebagai cadangan.
+
+- **`vdlu/`** (disertakan dalam zip): `update.sh` (mesin) + `vdlu-verify` + `config.default` + `keyring/` (kunci publik).
+- **Status** di `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - di luar modul, bertahan setelah flash ulang.
+- **Pemicu boot:** `post-fs-data.sh`, sebelum zygote - COPG-VD memiliki `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), sehingga `.so` baru disiapkan dan ditukar sebelum zygote memetakannya.
+- **WebUI:** panel **Updates** (`webroot/vdlu.js`) dengan toast progres dan pembatalan.
+- **Rilis:** lihat `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, arsipkan manifest, `vdlu-gc` memangkas blob yatim, push Pages secara batch).
+
 ## Lihat juga
 
 Proyek saudara dari penulis yang sama:
 
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: sebuah debugger metode perangkat yang membaca setiap item melalui setiap metode yang dapat membacanya dan membandingkannya secara berdampingan.
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: layanan Google Anda (RCS, Wallet, atestasi Play Integrity), dibaca di perangkat Anda tanpa internet.
-- **[VDBackup](https://github.com/VD171/VD-Backup)**: backup dan pemulihan penuh aplikasi dan data sebagai root, dikendalikan sepenuhnya dari sebuah WebUI.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: daemon SSH mandiri dengan akses root (Dropbear).
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: backup dan pemulihan penuh aplikasi dan data sebagai root, dikendalikan sepenuhnya dari sebuah WebUI.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: sebuah mesin pembaruan-mandiri inkremental tanpa flash, tertanam di dalam modul KernelSU/APatch/Magisk.
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: sebuah pemasang sideload ber-root tanpa hambatan untuk APK tunggal, batch, dan split, dengan sakelar verifier Play Protect dan pemalsuan sumber pemasangan.
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 

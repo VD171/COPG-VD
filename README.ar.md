@@ -148,14 +148,26 @@ WebUI اختياري (يمكن تعديل كل شيء في إعداد JSON مب�
 
 <!-- /vd-docs -->
 
+## التحديثات التزايدية (VDLU)
+
+يأتي COPG-VD مع محرك **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (مُضمَّن في `module/vdlu/`): يحدّث الموديول نفسه بجلب الملفات التي تغيّرت فقط (كتل معنونة بالمحتوى + ملف `manifest.json` موقّع)، بدلاً من إعادة تنزيل ملف `.zip` بالكامل. الوضع **المُحصَّن** (Hardened): توقيع ed25519 إلزامي والرجوع لإصدار أقدم محظور؛ ويبقى ملف `.zip` الكامل صالحاً كحل احتياطي.
+
+- **`vdlu/`** (المُرفق في ملف الـ zip): `update.sh` (المحرك) + `vdlu-verify` + `config.default` + `keyring/` (المفتاح العام).
+- **الحالة** في `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - خارج الموديول، وتبقى بعد إعادة التثبيت.
+- **مُشغِّل الإقلاع:** `post-fs-data.sh`، قبل zygote - يحتوي COPG-VD على `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard)، لذا يتم تجهيز ملف `.so` الجديد وتبديله قبل أن يربطه zygote.
+- **واجهة الويب:** لوحة **Updates** (`webroot/vdlu.js`) مع إشعار تقدّم وزر إلغاء.
+- **الإصدار:** راجع `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`، أرشفة الـ manifest، و`vdlu-gc` يحذف الكتل اليتيمة، ودفع Pages على دفعات).
+
 ## انظر أيضًا
 
 مشاريع شقيقة من المؤلف نفسه:
 
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: مُنقّح طرق الجهاز يقرأ كل عنصر عبر كل طريقة يمكنها قراءته ويقارنها جنباً إلى جنب.
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: خدمات Google الخاصة بك (RCS، Wallet، شهادات Play Integrity)، تُقرأ على جهازك دون إنترنت.
-- **[VDBackup](https://github.com/VD171/VD-Backup)**: نسخ احتياطي واستعادة كاملة للتطبيقات والبيانات بصلاحية root، تُدار بالكامل من WebUI.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: خادم SSH مستقل يعمل بصلاحيات الجذر (Dropbear).
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: نسخ احتياطي واستعادة كاملة للتطبيقات والبيانات بصلاحية root، تُدار بالكامل من WebUI.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: محرك تحديث ذاتي تزايدي بلا فلاش، مدمج في وحدات KernelSU/APatch/Magisk.
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: مثبّت تحميل جانبي بصلاحيات الجذر وبلا احتكاك لحزم APK المفردة والمجمّعة والمقسّمة، مع مفتاح لمدقّق Play Protect وانتحال مصدر التثبيت.
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (مشتق من @T3SL4).
 

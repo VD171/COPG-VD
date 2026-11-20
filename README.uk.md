@@ -149,18 +149,30 @@ WebUI необов'язковий (усе можна редагувати без
 
 <!-- /vd-docs -->
 
-## See also
+## Інкрементні оновлення (VDLU)
+
+COPG-VD постачається з рушієм **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (вбудований у `module/vdlu/`): модуль оновлює себе сам, завантажуючи лише змінені файли (блоби з адресацією за вмістом + підписаний `manifest.json`), замість повторного завантаження всього `.zip`. Профіль **Hardened**: підпис ed25519 обовʼязковий, а зниження версії заблоковані; повний `.zip` залишається дійсним як запасний варіант.
+
+- **`vdlu/`** (входить до zip): `update.sh` (рушій) + `vdlu-verify` + `config.default` + `keyring/` (відкритий ключ).
+- **Стан** у `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - поза модулем, переживає повторну прошивку.
+- **Тригер завантаження:** `post-fs-data.sh`, до zygote - COPG-VD має `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), тож нова `.so` готується та підмінюється, перш ніж zygote її відобразить.
+- **WebUI:** панель **Updates** (`webroot/vdlu.js`) з індикатором прогресу та скасуванням.
+- **Реліз:** див. `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, архівує manifest, `vdlu-gc` видаляє осиротілі блоби, пакетний push на Pages).
+
+## Дивіться також
 
 Споріднені проєкти того самого автора:
 
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: налагоджувач методів пристрою, що читає кожен елемент через кожен метод, який може його прочитати, і порівнює їх пліч-о-пліч.
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: ваші сервіси Google (RCS, Wallet, атестації Play Integrity), прочитані на вашому пристрої без інтернету.
-- **[VDBackup](https://github.com/VD171/VD-Backup)**: повне резервне копіювання та відновлення застосунків і даних з правами root, кероване повністю з WebUI.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: автономний SSH-демон із правами root (Dropbear).
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: повне резервне копіювання та відновлення застосунків і даних з правами root, кероване повністю з WebUI.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: безфлешевий інкрементальний рушій самооновлення, вбудований у модулі KernelSU/APatch/Magisk.
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: безперешкодний root-інсталятор sideload для одиночних, пакетних і розділених APK, з перемикачем верифікатора Play Protect та підробкою джерела встановлення.
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
-## Contacts
+## Контакти
 
 - https://vd171.ru
 - https://vd.priv8.ru

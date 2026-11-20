@@ -145,14 +145,26 @@ WebUI वैकल्पिक है (सब कुछ सीधे JSON कॉ
 
 <!-- /vd-docs -->
 
+## इंक्रीमेंटल अपडेट (VDLU)
+
+COPG-VD के साथ **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** इंजन आता है (`module/vdlu/` में वेंडर किया गया): मॉड्यूल पूरा `.zip` दोबारा डाउनलोड करने के बजाय केवल बदली हुई फ़ाइलों को लाकर खुद को अपडेट करता है (कंटेंट-एड्रेस्ड ब्लॉब्स + एक हस्ताक्षरित `manifest.json`)। **Hardened** प्रोफ़ाइल: ed25519 हस्ताक्षर अनिवार्य है और डाउनग्रेड अवरुद्ध हैं; पूरा `.zip` फ़ॉलबैक के रूप में मान्य रहता है।
+
+- **`vdlu/`** (zip में शामिल): `update.sh` (इंजन) + `vdlu-verify` + `config.default` + `keyring/` (सार्वजनिक कुंजी)।
+- **स्थिति** `/data/adb/COPG-VD/vdlu/` में (config/journal/blobs/staged/rollback) - मॉड्यूल के बाहर, रीफ़्लैश के बाद भी बनी रहती है।
+- **बूट ट्रिगर:** `post-fs-data.sh`, zygote से पहले - COPG-VD में `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard) है, इसलिए नई `.so` को zygote द्वारा मैप करने से पहले तैयार और बदल दिया जाता है।
+- **WebUI:** एक **Updates** पैनल (`webroot/vdlu.js`) जिसमें प्रोग्रेस टोस्ट और रद्द करने का विकल्प है।
+- **रिलीज़:** `module/vdlu/RELEASE.md` देखें (`vdlu-pack` + `vdlu-sign`, manifest को संग्रहित करता है, `vdlu-gc` अनाथ ब्लॉब्स हटाता है, बैच में Pages पुश)।
+
 ## यह भी देखें
 
 इसी लेखक की सहोदर परियोजनाएँ:
 
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: एक डिवाइस मेथड डिबगर जो हर आइटम को उसे पढ़ सकने वाले हर मेथड के ज़रिए पढ़ता है और उन्हें साथ-साथ तुलना करता है।
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: आपकी Google सेवाएँ (RCS, Wallet, Play Integrity प्रमाणन), आपके डिवाइस पर बिना इंटरनेट के पढ़ी गईं।
-- **[VDBackup](https://github.com/VD171/VD-Backup)**: रूट के रूप में ऐप और डेटा का पूर्ण बैकअप और रीस्टोर, पूरी तरह एक WebUI से संचालित।
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: रूट के रूप में चलने वाला एक स्वतंत्र SSH डेमॉन (Dropbear)।
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: रूट के रूप में ऐप और डेटा का पूर्ण बैकअप और रीस्टोर, पूरी तरह एक WebUI से संचालित।
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: KernelSU/APatch/Magisk मॉड्यूल में एम्बेडेड एक फ्लैशलेस, इंक्रीमेंटल सेल्फ-अपडेट इंजन।
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: एकल, बैच और स्प्लिट APK के लिए एक घर्षण-रहित रूट साइडलोड इंस्टॉलर, जिसमें Play Protect वेरिफायर टॉगल और इंस्टॉल-सोर्स स्पूफिंग शामिल है।
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 

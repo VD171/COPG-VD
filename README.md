@@ -150,7 +150,7 @@ If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWeb
 
 ## Incremental updates (VDLU)
 
-COPG-VD ships the **VDLU** engine (vendored in `module/vdlu/`): the module updates itself by fetching only
+COPG-VD ships the **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** engine (vendored in `module/vdlu/`): the module updates itself by fetching only
 the files that changed (content-addressed blobs + a signed `manifest.json`), instead of re-downloading the
 whole `.zip`. **Hardened** profile: the ed25519 signature is mandatory and downgrades are blocked; the full
 `.zip` stays valid as a fallback.
@@ -167,8 +167,10 @@ Sibling projects by the same author:
 
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: a device method debugger that reads each item through every method that can read it and compares them side by side.
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: your Google services (RCS, Wallet, Play Integrity attestations), read on your device with no internet.
-- **[VDBackup](https://github.com/VD171/VD-Backup)**: full app and data backup and restore as root, driven entirely from a WebUI.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: a standalone rooted SSH daemon (Dropbear).
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: full app and data backup and restore as root, driven entirely from a WebUI.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: a flashless, incremental self-update engine embedded into KernelSU/APatch/Magisk modules.
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: a frictionless root sideload installer for single, batch and split APKs, with a Play Protect verifier toggle and install-source spoofing.
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
@@ -186,7 +188,7 @@ Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorG
 
 ## License
 
-**Apache-2.0**: see [LICENSE](LICENSE). COPG-VD is a fork by VD171 of the original COPG by AlirezaParsi, continued under the same license.
+**Apache-2.0**: see [LICENSE](LICENSE). COPG-VD is a fork by VD171 of the original COPG by AlirezaParsi, continued under the same license. Third-party components are credited in [NOTICE](NOTICE.md).
 
 ## Trademarks
 

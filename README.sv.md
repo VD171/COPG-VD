@@ -145,14 +145,26 @@ Om du är Magisk-användare, använd KsuWebUI av KOW (https://github.com/KOWX712
 
 <!-- /vd-docs -->
 
+## Inkrementella uppdateringar (VDLU)
+
+COPG-VD levereras med motorn **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (inbäddad i `module/vdlu/`): modulen uppdaterar sig själv genom att bara hämta de filer som ändrats (innehållsadresserade blobbar + en signerad `manifest.json`), istället för att ladda ner hela `.zip` igen. Profilen **Hardened**: ed25519-signaturen är obligatorisk och nedgraderingar blockeras; den fullständiga `.zip` förblir giltig som reserv.
+
+- **`vdlu/`** (medföljer i zip-filen): `update.sh` (motor) + `vdlu-verify` + `config.default` + `keyring/` (publik nyckel).
+- **Tillstånd** i `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - utanför modulen, överlever en omflashning.
+- **Starttrigger:** `post-fs-data.sh`, före zygote - COPG-VD har `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), så den nya `.so` förbereds och byts ut innan zygote mappar den.
+- **WebUI:** en **Updates**-panel (`webroot/vdlu.js`) med en förloppsavisering och avbryt.
+- **Release:** se `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, arkiverar manifestet, `vdlu-gc` rensar föräldralösa blobbar, batchad Pages-push).
+
 ## Se även
 
 Systerprojekt av samma skapare:
 
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: en enhetsmetod-debugger som läser varje objekt genom varje metod som kan läsa det och jämför dem sida vid sida.
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: dina Google-tjänster (RCS, Wallet, Play Integrity-attesteringar), lästa på din enhet utan internet.
-- **[VDBackup](https://github.com/VD171/VD-Backup)**: fullständig säkerhetskopiering och återställning av appar och data som root, helt styrd från ett WebUI.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: en fristående SSH-daemon som körs som root (Dropbear).
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: fullständig säkerhetskopiering och återställning av appar och data som root, helt styrd från ett WebUI.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: en flashfri, inkrementell självuppdateringsmotor, inbäddad i KernelSU/APatch/Magisk-moduler.
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: en friktionsfri root-sideload-installerare för enskilda, batch- och split-APK:er, med en växel för Play Protect-verifieraren och förfalskning av installationskällan.
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 

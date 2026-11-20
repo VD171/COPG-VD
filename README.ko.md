@@ -148,14 +148,26 @@ Magisk 사용자라면 KOW의 KsuWebUI를 사용하세요(https://github.com/KOW
 
 <!-- /vd-docs -->
 
+## 증분 업데이트 (VDLU)
+
+COPG-VD는 **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** 엔진을 포함합니다(`module/vdlu/`에 벤더링). 모듈은 전체 `.zip`을 다시 내려받는 대신 변경된 파일만 가져와 스스로 업데이트합니다(콘텐츠 주소 지정 blob + 서명된 `manifest.json`). **Hardened** 프로파일: ed25519 서명이 필수이며 다운그레이드는 차단됩니다. 전체 `.zip`은 폴백으로 계속 유효합니다.
+
+- **`vdlu/`**(zip에 포함): `update.sh`(엔진) + `vdlu-verify` + `config.default` + `keyring/`(공개 키).
+- **상태**는 `/data/adb/COPG-VD/vdlu/`(config/journal/blobs/staged/rollback) - 모듈 외부에 있으며 재플래시 후에도 유지됩니다.
+- **부팅 트리거:** `post-fs-data.sh`, zygote 이전 - COPG-VD에는 `zygisk/*.so` + `sepolicy.rule`(REBOOT-hard)가 있어 새 `.so`는 zygote가 매핑하기 전에 준비되어 교체됩니다.
+- **WebUI:** 진행 토스트와 취소가 있는 **Updates** 패널(`webroot/vdlu.js`).
+- **릴리스:** `module/vdlu/RELEASE.md` 참조(`vdlu-pack` + `vdlu-sign`, manifest 보관, `vdlu-gc`가 고아 blob 정리, 일괄 Pages 푸시).
+
 ## 관련 앱
 
 같은 작성자의 자매 프로젝트:
 
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: 각 항목을 그것을 읽을 수 있는 모든 메서드를 통해 읽고 나란히 비교하는 기기 메서드 디버거입니다.
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: 당신의 Google 서비스(RCS, Wallet, Play Integrity 증명)를 인터넷 없이 기기에서 읽습니다.
-- **[VDBackup](https://github.com/VD171/VD-Backup)**: 앱과 데이터의 전체 백업과 복원을 root로 수행하며, 전적으로 WebUI에서 제어합니다.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: root로 동작하는 독립 실행형 SSH 데몬 (Dropbear).
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: 앱과 데이터의 전체 백업과 복원을 root로 수행하며, 전적으로 WebUI에서 제어합니다.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: KernelSU/APatch/Magisk 모듈에 내장된, 플래시가 필요 없는 증분 자가 업데이트 엔진.
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: 단일, 배치, 분할 APK 를 위한 마찰 없는 root 사이드로드 설치기로, Play Protect 검사기 토글과 설치 출처 위장을 갖추고 있습니다.
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 

@@ -145,14 +145,26 @@ Magisk kullanıcısıysanız, KOW tarafından geliştirilen KsuWebUI'yi kullanı
 
 <!-- /vd-docs -->
 
+## Artımlı güncellemeler (VDLU)
+
+COPG-VD, **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** motorunu içerir (`module/vdlu/` içine gömülü): modül, tüm `.zip` dosyasını yeniden indirmek yerine yalnızca değişen dosyaları getirerek kendini günceller (içerik adresli bloblar + imzalı bir `manifest.json`). **Hardened** profili: ed25519 imzası zorunludur ve sürüm düşürmeler engellenir; tam `.zip` yedek olarak geçerli kalır.
+
+- **`vdlu/`** (zip içinde gelir): `update.sh` (motor) + `vdlu-verify` + `config.default` + `keyring/` (genel anahtar).
+- **Durum** `/data/adb/COPG-VD/vdlu/` içinde (config/journal/blobs/staged/rollback) - modülün dışında, yeniden flashlamadan sonra da kalır.
+- **Önyükleme tetikleyicisi:** `post-fs-data.sh`, zygote öncesi - COPG-VD'de `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard) bulunur, bu yüzden yeni `.so`, zygote onu eşlemeden önce hazırlanıp değiştirilir.
+- **WebUI:** ilerleme bildirimi ve iptal içeren bir **Updates** paneli (`webroot/vdlu.js`).
+- **Yayın:** `module/vdlu/RELEASE.md` dosyasına bakın (`vdlu-pack` + `vdlu-sign`, manifest'i arşivler, `vdlu-gc` yetim blobları temizler, toplu Pages push).
+
 ## Ayrıca bakınız
 
 Aynı geliştiriciye ait kardeş projeler:
 
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: her bir ögeyi onu okuyabilen her yöntemle okuyup yan yana karşılaştıran bir cihaz yöntemi hata ayıklayıcısı.
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: Google hizmetleriniz (RCS, Wallet, Play Integrity doğrulamaları), internet olmadan cihazınızda okunur.
-- **[VDBackup](https://github.com/VD171/VD-Backup)**: root olarak tam uygulama ve veri yedekleme ve geri yükleme, tamamen bir WebUI'den yönetilir.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: root olarak çalışan bağımsız bir SSH arka plan hizmeti (Dropbear).
+- **[VDBackup](https://github.com/VD171/VD-Backup)**: root olarak tam uygulama ve veri yedekleme ve geri yükleme, tamamen bir WebUI'den yönetilir.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: KernelSU/APatch/Magisk modüllerine gömülü, flash'sız, artımlı bir kendini güncelleme motoru.
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: tekli, toplu ve bölünmüş APK'lar için sürtünmesiz bir root sideload yükleyicisi; Play Protect doğrulayıcı anahtarı ve kurulum kaynağı sahteciliği ile birlikte.
 
 Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
 
