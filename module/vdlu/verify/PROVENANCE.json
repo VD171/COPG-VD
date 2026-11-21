@@ -24,6 +24,7 @@
   "binaries": {
     "arm64-v8a":   { "sha256": "a05deda8f50671b899f9ae4adaf64e28be5a7242c76e0a3273852f415180e0f7",   "bytes": 18152 },
     "armeabi-v7a": { "sha256": "868a7cdc934ecdd6d502522c8c21f5fb0b1f0e2d0aabf0f59b6bad4552bf795f", "bytes": 25336 },
+    "x86":         { "sha256": "db77349009438f8b936fd2797c6e9939c1588cdcd7421653e0683e9da0991828", "bytes": 25864 },
     "x86_64":      { "sha256": "0c8304fee06ce65d3a109318de63cd44ffa21708837c8b3d6bdea4eff33928e4",      "bytes": 25312 }
   },
   "tested_on_device": "merlin1 (aarch64): valid=rc0, tampered=rc1, wrong-size=rc2, usage=rc2"

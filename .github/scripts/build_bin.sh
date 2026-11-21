@@ -33,7 +33,7 @@ termux_arch() { case "$1" in
   arm64-v8a) echo aarch64 ;; armeabi-v7a) echo arm ;; x86) echo i686 ;; x86_64) echo x86_64 ;;
 esac; }
 
-ABIS="${ABIS:-arm64-v8a armeabi-v7a x86_64}"
+ABIS="${ABIS:-arm64-v8a armeabi-v7a x86 x86_64}"
 TOOL_PKGS="zstd curl openssl-tool"
 WANT_BINS="zstd curl openssl"
 # libs always provided by Android (never bundle these)

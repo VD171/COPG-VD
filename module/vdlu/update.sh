@@ -1,11 +1,26 @@
 #!/system/bin/sh
-# SPDX-License-Identifier: Apache-2.0
-# Copyright (C) 2026 VD171
+# ======================================================================
+#  VDLiveUpdate (VDLU)  ::  flashless, incremental module updates
+#  A self-update engine for KernelSU/APatch/Magisk modules.
+#
+#  Copyright (C) 2026  VD171
+#  SPDX-License-Identifier: Apache-2.0
+#
+#  Site           : https://vd171.ru
+#  Site           : https://vd.priv8.ru
+#  Source         : https://github.com/VD171/VDLiveUpdate
+#  GitHub         : @VD171 https://github.com/VD171
+#  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+#  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+#  Channel        : @Priv8_VD https://t.me/Priv8_VD
+#  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+#  E-mail         : vd.priv8@pm.me
+# ======================================================================
 # VDLU engine - flashless incremental module updater (DIFF->FETCH->APPLY->COMMIT).
 # POSIX sh (mksh/busybox/toybox). Env in: VDLU_DIR, MODULE_DIR, MODID.
-# Contract: INTERFACES.md (CLI/layout/JSON keys = immutable) + MODULO_VDLU.md.
+# Contract: docs/INTERFACES.md (CLI/layout/JSON keys = immutable).
 
-ENGINE_VERSION=3
+ENGINE_VERSION=4             # ANY engine logic change (verify/apply/path rules) bumps this - keep engine_min honest
 MAX_FILE_BYTES=268435456     # 256 MiB per-file ceiling: anti decompression-bomb / disk DoS
 MAX_MANIFEST_BYTES=4194304   # 4 MiB manifest ceiling: anti OOM
 TAB=$(printf '\t')
@@ -14,7 +29,7 @@ LOCKDIR=""
 die() { echo "VDLU: $*" >&2; exit 1; }
 
 # ---- tool discovery -------------------------------------------------------
-# Slim (Abordagem B, doc §16): the only on-device tools are the embedded ed25519-mini (verify)
+# Slim distribution: the only on-device tools are the embedded ed25519-mini (verify)
 # and the static curl the WebUI bootstraps into Tier-2 ($VDLU_DIR/tools/<abi>). gzip/sha256sum/
 # base64 come from toybox. The engine may be launched with a bare env (the WebUI's ksu.exec sets
 # no PATH), so put the Tier-2 tools dir (and any legacy module bin/<abi>) on
@@ -54,14 +69,23 @@ init_tools() {
 	CURL=$(command -v curl 2>/dev/null) || CURL=""
 	WGET=$(command -v wget 2>/dev/null) || WGET=""
 	GZIP=$(command -v gzip 2>/dev/null) || GZIP=""
-	# The static curl uses mbedTLS with NO built-in CA bundle, so https cert validation needs the
-	# Android trust store (--capath). Config `ca_path` overrides; else auto-detect. The ed25519
-	# signature stays the integrity root - the cert check is defense-in-depth on the transport.
+	# https cert validation uses the Android trust store (--capath). Some static curl builds also bake
+	# in a default CA bundle FILE that is absent on real devices, making curl fail (rc 77) before
+	# --capath is read, so build a bundle from the store and pass --cacert too, which overrides it.
+	# Config `ca_path`/`ca_cert` override. The ed25519 signature stays the integrity root.
 	CAPATH=$(cfg ca_path "")
 	if [ -z "$CAPATH" ]; then
 		for _p in /system/etc/security/cacerts /apex/com.android.conscrypt/cacerts /etc/security/cacerts; do
 			[ -d "$_p" ] && { CAPATH="$_p"; break; }
 		done
+	fi
+	CACERT=$(cfg ca_cert "")
+	if [ -z "$CACERT" ]; then
+		_cab="$VDLU_DIR/.ca-bundle.pem"
+		for _d in /apex/com.android.conscrypt/cacerts /system/etc/security/cacerts /etc/security/cacerts; do
+			[ -d "$_d" ] && cat "$_d"/* 2>/dev/null
+		done > "$_cab" 2>/dev/null
+		if [ -s "$_cab" ]; then CACERT="$_cab"; else rm -f "$_cab"; fi
 	fi
 }
 
@@ -205,10 +229,18 @@ fetch_url() { # url dest -> sets FETCH_RC (transport exit code) and returns it
 				# 1 byte/s for 60s (mid-stream stall). A slow-but-PROGRESSING blob download is NOT affected (no
 				# --max-time cap). A partial/corrupt download is caught anyway by the blob's sha256.
 				T="--connect-timeout 15 --speed-limit 1 --speed-time 60"
-				if [ -n "$CAPATH" ]; then "$CURL" -fsSL $T --capath "$CAPATH" --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"
-				else "$CURL" -fsSL $T --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"; fi
+				_ca=""; [ -n "$CACERT" ] && _ca="--cacert $CACERT"; [ -n "$CAPATH" ] && _ca="$_ca --capath $CAPATH"
+				"$CURL" -fsSL $T $_ca --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"
 				FETCH_RC=$?
-			elif [ -n "$WGET" ]; then "$WGET" -q --connect-timeout=15 --read-timeout=60 -O "$dest" "$url"; FETCH_RC=$?
+			elif [ -n "$WGET" ]; then
+					# (busybox) wget has no --max-filesize, so bound the bytes WRITTEN with `head -c` (the curl
+					# branch's cap equivalent): a hostile/oversized body can never disk-fill a curl-less device.
+					# wget's OWN exit (for fetch_offline classification) is preserved via a side rc file, which is
+					# NOT in the pipe, so `head` closing the pipe early on an oversized body cannot clobber it.
+					_wrc="$dest.wrc"; rm -f "$_wrc" 2>/dev/null
+					( "$WGET" -q --connect-timeout=15 --read-timeout=60 -O - "$url" 2>/dev/null; echo $? >"$_wrc" ) | head -c "$MAX_FILE_BYTES" >"$dest"
+					FETCH_RC=$(cat "$_wrc" 2>/dev/null); rm -f "$_wrc" 2>/dev/null
+					case "$FETCH_RC" in ''|*[!0-9]*) FETCH_RC=1 ;; esac
 			else echo "VDLU: no curl/wget available" >&2; FETCH_RC=1; return 1; fi ;;
 		*) echo "VDLU: unsupported source url: $url" >&2; FETCH_RC=1; return 1 ;;
 	esac
@@ -265,9 +297,52 @@ dl_manifest() {
 	[ "${sz:-0}" -le "$MAX_MANIFEST_BYTES" ] || { echo "VDLU: manifest too large ($sz)" >&2; return 1; }
 }
 
+# ---- module-update signing-key allowlist (VDLU#1 trust root) --------------
+# The keyring may ALSO carry a LOWER-trust key (e.g. a fingerprint-feed key - automated, different
+# account). Without an allowlist, a module-update manifest signed by that key (key_id=vd-fp-2026) would
+# verify against its pubkey and apply a FULL flashless root update = a root-RCE path if the lower-trust
+# key leaks. Fail CLOSED: the manifest's key_id must be an accepted MODULE-UPDATE key BEFORE a pubkey is
+# selected. Source of the allowlist = config `key_id` (comma-separated, for rotation); UNSET is
+# default-safe: a single-key keyring accepts only that one key's id, a MULTI-key keyring is rejected
+# (config must pin `key_id`). This forces a multi-key module (one that also ships a fingerprint-feed key)
+# to declare its module key; single-key modules keep working unchanged. The fingerprint-feed trust root
+# is a SEPARATE path (its own pinned key) and is untouched by this.
+keyring_dir() {
+	local pd
+	pd=$(cfg pubkey_dir keyring); case "$pd" in ''|*/*|*..*) pd=keyring ;; esac
+	printf '%s' "$MODULE_DIR/vdlu/$pd"
+}
+# Resolve the allowlist into KEYID_ALLOW (comma/space separated). rc 1 = ambiguous/misconfigured -> the
+# caller fails closed. Also passed to vdlu-verify via VDLU_KEYID_ALLOW so the standalone verifier agrees.
+resolve_keyid_allow() {
+	local kr cfgv n id f
+	kr=$(keyring_dir)
+	cfgv=$(cfg key_id "")
+	if [ -n "$cfgv" ]; then
+		KEYID_ALLOW=$(printf '%s' "$cfgv" | tr -d ' \t\r')     # keep commas; drop whitespace/CR
+		[ -n "$(printf '%s' "$KEYID_ALLOW" | tr -d ',')" ] || { echo "VDLU: config key_id is set but empty" >&2; return 1; }
+		return 0
+	fi
+	n=0; id=""
+	for f in "$kr"/*.pub; do
+		[ -f "$f" ] || continue
+		n=$((n+1)); id=${f##*/}; id=${id%.pub}
+	done
+	[ "$n" -ne 0 ] || { echo "VDLU: no *.pub in keyring ($kr); cannot resolve module-update key" >&2; return 1; }
+	[ "$n" -le 1 ] || { echo "VDLU: multiple keys in keyring; config must pin key_id" >&2; return 1; }
+	KEYID_ALLOW="$id"
+	return 0
+}
+keyid_allowed() { # id ; membership in $KEYID_ALLOW (comma/space separated)
+	local want="$1" k oldifs
+	oldifs=$IFS; IFS=', '
+	for k in $KEYID_ALLOW; do [ "$k" = "$want" ] && { IFS=$oldifs; return 0; }; done
+	IFS=$oldifs; return 1
+}
+
 # ---- signature / meta -----------------------------------------------------
 verify_manifest() {
-	local prof keyring v pd
+	local prof keyring v pd mkid
 	# fail-CLOSED by INVERSION: `trusted` is the ONLY opt-in open value (best-effort verify). ANY other
 	# profile - the hardened default, a lost line, a typo (`hardend`), a trailing space/CR, a MITM-mangled
 	# value - is hardened = signature MANDATORY. A corrupted VALUE must fail closed exactly like a lost line,
@@ -279,7 +354,14 @@ verify_manifest() {
 	keyring="$MODULE_DIR/vdlu/$pd"
 	v="$MODULE_DIR/vdlu/vdlu-verify"
 	if [ -f "$v" ]; then
-		sh "$v" "$WORK/manifest.json" "$keyring"
+		# VDLU#1 trust-root allowlist: restrict WHICH key_id may sign a MODULE-UPDATE, BEFORE vdlu-verify
+		# selects the pubkey. A lower-trust key that merely sits in the keyring can never sign an update.
+		mkid=$(grep -o '"key_id":"[^"]*"' "$WORK/manifest.json" 2>/dev/null | head -n1 | cut -d'"' -f4)
+		resolve_keyid_allow || return 1
+		if [ -n "$mkid" ]; then
+			keyid_allowed "$mkid" || { echo "VDLU: manifest key_id '$mkid' not in allowed module-update key set ($KEYID_ALLOW)" >&2; return 1; }
+		fi
+		VDLU_KEYID_ALLOW="$KEYID_ALLOW" sh "$v" "$WORK/manifest.json" "$keyring"
 		if [ $? = 0 ]; then return 0; fi
 		if [ "$prof" != trusted ]; then
 			echo "VDLU: manifest signature rejected (profile!=trusted)" >&2; return 1
@@ -294,7 +376,7 @@ validate_meta() {
 	local sc em ver ch wantch prof
 	sc=$(flat_get schema); em=$(flat_get engine_min); ver=$(flat_get version); ch=$(flat_get channel)
 	[ "$sc" = 1 ] || { echo "VDLU: unsupported manifest schema '$sc'" >&2; return 1; }
-	# Bind the manifest to THIS module: the release key (vd-2026) signs ~every public module, so a validly
+	# Bind the manifest to THIS module: a shared release key may sign many modules, so a validly
 	# signed manifest for module B, served to module A (feed misconfig / MITM / source swap), would otherwise
 	# pass sig+schema+channel and write B's files into A's MODULE_DIR. The signed `module` field is the bind.
 	[ "$(flat_get module)" = "$MODID" ] || { echo "VDLU: manifest module '$(flat_get module)' != MODID '$MODID' (cross-module feed)" >&2; return 1; }
@@ -313,11 +395,13 @@ validate_meta() {
 }
 
 # ---- manifest structure validation (SECURITY: paths/shas are untrusted input) ----
-# A path must stay inside MODULE_DIR: no absolute, no '..' component, no empty, no control char.
+# A path must stay inside MODULE_DIR: no absolute, no '..' component, no empty, no control char, no '.'
+# component (dot-only, leading './', embedded '/./', trailing '/.') and no trailing slash.
 path_unsafe() { # returns 0 (true) if the path is UNSAFE
 	case "$1" in
 		''|/*) return 0 ;;
 		..|../*|*/..|*/../*) return 0 ;;
+		.|./*|*/./*|*/.|*/) return 0 ;;
 	esac
 	case "$1" in *"$TAB"*|*'
 '*) return 0 ;; esac
@@ -519,6 +603,9 @@ apply_live() { # path sha mode
 
 stage_file() { # path sha mode
 	local sf="$STAGED/$1.vdlu-new"
+	# containment parity with apply_live/do_delete/swap_staged: a pre-existing symlink under STAGED must
+	# not redirect the write outside it (path_unsafe already blocked '..'/absolute lexically; fail closed).
+	contained "$sf" "$STAGED" || { echo "VDLU: staged path escapes staged dir: $1" >&2; return 1; }
 	if [ -f "$sf" ] && [ "$(sha256f "$sf")" = "$2" ]; then return 0; fi
 	mkdir -p "$(dirname "$sf")" 2>/dev/null
 	cp -f "$BLOBS/$2" "$sf.tmp" 2>/dev/null || { echo "VDLU: stage write failed: $1" >&2; return 1; }
@@ -702,6 +789,12 @@ run_pipeline() { # allow_swap
 do_diff() { # persist(0|1); rc: 2 fetch/parse, 3 verify/meta fail, 4 device AHEAD of feed (benign)
 	local persist="$1" _vr
 	rm -rf "$WORK"; mkdir -p "$WORK"
+	# Early liveness journal (real runs only, persist=1 - NOT a read-only `check`): the WebUI poller would
+	# otherwise see NO journal through the whole pre-plan window (manifest fetch + finalize_plan re-hashing
+	# every target on a large module / slow link) and after ~8 empty ticks declare a false "No response".
+	# Writing a `diff` phase here feeds the poller liveness (and the stale-but-alive lock arbiter) at once;
+	# it is transient - do_fetch/do_apply/commit overwrite it, so the state machine is unchanged.
+	[ "$persist" = 1 ] && write_journal diff DIFFING ""
 	dl_manifest || { echo "VDLU: manifest download failed" >&2; return 2; }
 	verify_manifest || return 3   # SIGNATURE first, before the O(n²) json_flatten: a hostile/unsigned manifest (e.g. 4 MiB of newlines = quadratic flatten) is rejected by one cheap linear sha256, never flattened
 	json_flatten "$WORK/manifest.json" >"$WORK/manifest.flat" 2>/dev/null || { echo "VDLU: manifest parse failed" >&2; return 2; }
@@ -737,6 +830,9 @@ work_to_do() { # uses $WORK/plan.work + $WORK/plan.del
 
 # ---- commands -------------------------------------------------------------
 cmd_check() {
+	# do_diff wipes+rebuilds $WORK; take the lock so a concurrent locked run can't have $WORK pulled out
+	# from under it (acquire_lock arms an EXIT trap -> release_lock fires on every exit path below).
+	acquire_lock
 	do_diff 0 || { _dr=$?; [ "$_dr" = 4 ] && { printf '{"update":false,"ahead":true,"from":%s,"to":%s}\n' "$FROMVER" "$TGTVER"; exit 0; }; exit "$_dr"; }
 	local pend reb del fetchc upd rb
 	pend=$(awk -F'\t' '$2=="pending"{n++}END{print n+0}' "$WORK/plan.work")
@@ -750,6 +846,7 @@ cmd_check() {
 	upd=false; { [ "$pend" -gt 0 ] || [ "$del" -gt 0 ]; } && upd=true
 	rb=false; [ "$reb" -gt 0 ] && rb=true
 	printf '{"update":%s,"from":%s,"to":%s,"fetch":%s,"reboot":%s}\n' "$upd" "$FROMVER" "$TGTVER" "$fetchc" "$rb"
+	release_lock
 }
 
 cmd_run() {
@@ -797,7 +894,10 @@ cmd_boot() {
 	# when the network actually appears (cheap route probe `net_allowed` - reads the routing table, NO curl, NO
 	# radio wake) does it re-acquire the lock briefly and try a real fetch. Never retries a deterministic
 	# failure (bad manifest/sig/downgrade: fetch_offline gates on the transport exit). Bounded by
-	# boot_retry_minutes of AWAKE-time (0 = off = one-shot). service.sh backgrounds this, so boot never stalls.
+	# boot_retry_minutes of AWAKE-time (0 = off = one-shot). NOTE: `boot` runs SYNCHRONOUSLY in post-fs-data
+	# (pre-zygote - required so the .so swap lands before any process maps it). This patient retry-loop only
+	# engages when fetch_offline is true (a non-file/http source hitting a transport error) AND
+	# boot_retry_minutes>0, so a latent boot stall exists ONLY in that config.
 	interval=$(cfg boot_retry_interval 30); isnum "$interval" || interval=30
 	[ "$interval" -ge 5 ] || interval=5
 	cap=$(cfg boot_retry_minutes 0); isnum "$cap" || cap=0
@@ -863,7 +963,14 @@ cmd_install_tool() { # <abi>
 	[ -f "$tm" ] && [ -f "$toolf" ] || { echo "VDLU: install-tool: fetch $tm and $toolf first" >&2; exit 2; }
 	pd=$(cfg pubkey_dir keyring); case "$pd" in ''|*/*|*..*) pd=keyring ;; esac
 	keyring="$MODULE_DIR/vdlu/$pd"
-	sh "$MODULE_DIR/vdlu/vdlu-verify" "$tm" "$keyring" || { echo "VDLU: tools-manifest signature rejected" >&2; exit 1; }
+	# Cap the tools-manifest before reading it (anti-OOM): a MITM'd tools feed could serve a huge body
+	# before the signature check runs. Same ceiling dl_manifest enforces on the module manifest.
+	tmsz=$(wc -c <"$tm" 2>/dev/null)
+	[ "${tmsz:-0}" -le "$MAX_MANIFEST_BYTES" ] || { echo "VDLU: tools-manifest too large ($tmsz)" >&2; exit 1; }
+	# VDLU#1 allowlist (same trust root as the module update): the tools-manifest is signed by the module
+	# key, so pin its key_id too. vdlu-verify enforces it via VDLU_KEYID_ALLOW.
+	resolve_keyid_allow || exit 1
+	VDLU_KEYID_ALLOW="$KEYID_ALLOW" sh "$MODULE_DIR/vdlu/vdlu-verify" "$tm" "$keyring" || { echo "VDLU: tools-manifest signature rejected" >&2; exit 1; }
 	c=$(cat "$tm")
 	sha=$(tool_sha "$c" "$abi/curl") || { echo "VDLU: no curl entry for $abi in tools-manifest" >&2; exit 1; }
 	sha_ok "$sha" || { echo "VDLU: malformed curl sha in tools-manifest" >&2; exit 1; }

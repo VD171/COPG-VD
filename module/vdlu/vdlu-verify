@@ -1,7 +1,24 @@
 #!/system/bin/sh
+# ======================================================================
+#  VDLiveUpdate (VDLU)  ::  flashless, incremental module updates
+#  A self-update engine for KernelSU/APatch/Magisk modules.
+#
+#  Copyright (C) 2026  VD171
+#  SPDX-License-Identifier: Apache-2.0
+#
+#  Site           : https://vd171.ru
+#  Site           : https://vd.priv8.ru
+#  Source         : https://github.com/VD171/VDLiveUpdate
+#  GitHub         : @VD171 https://github.com/VD171
+#  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+#  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+#  Channel        : @Priv8_VD https://t.me/Priv8_VD
+#  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+#  E-mail         : vd.priv8@pm.me
+# ======================================================================
 # vdlu-verify <manifest.json> <keyring_dir> - verify a VDLU manifest signature on-device.
 # rc 0 = signature valid against the keyring pubkey whose id matches key_id; rc != 0 = reject.
-# SLIM (Abordagem B, MODULO_VDLU.md §16): toybox sha256sum/base64 + the embedded ed25519-mini,
+# SLIM: toybox sha256sum/base64 + the embedded ed25519-mini,
 # NO openssl. The keyring pubkey is RAW 32 bytes. Same CLI/rc as the openssl version it replaces,
 # so the engine's verify_manifest is unchanged. INTERFACES.md §6.
 set -eu
@@ -28,6 +45,7 @@ if [ ! -x "$mini" ]; then
 				aarch64) abi=arm64-v8a ;;
 				armv7l|armv7*|armv8l) abi=armeabi-v7a ;;
 				x86_64) abi=x86_64 ;;
+				i686|i386) abi=x86 ;;
 			esac ;;
 	esac
 	mini="$here/verify/$abi/ed25519-mini"
@@ -56,6 +74,12 @@ field() {
 	printf '%s' "${_r%%\"*}"
 }
 
+# Cap the manifest before reading it (anti-OOM): a MITM'd feed could serve a huge body before any check.
+# Same 4 MiB ceiling the engine's dl_manifest enforces (vdlu-verify ships no shared const, so it is inline).
+MAX_MANIFEST_BYTES=4194304
+msz=$(wc -c <"$manifest" 2>/dev/null || echo 0)
+[ "${msz:-0}" -le "$MAX_MANIFEST_BYTES" ] || { echo "vdlu-verify: manifest too large ($msz)" >&2; exit 1; }
+
 c=$(cat "$manifest")
 
 key_id=$(field "$c" key_id) || { echo "vdlu-verify: no key_id in manifest" >&2; exit 1; }
@@ -64,6 +88,28 @@ sig=$(field "$c" sig) || { echo "vdlu-verify: no sig in manifest" >&2; exit 1; }
 [ -n "$sig" ] || { echo "vdlu-verify: empty sig (unsigned manifest)" >&2; exit 1; }
 
 case "$key_id" in */*|..|.|*'"'*) echo "vdlu-verify: unsafe key_id: $key_id" >&2; exit 1;; esac
+
+# VDLU#1 trust-root allowlist (mirror of the engine's verify_manifest): the key_id must be an ACCEPTED
+# module-update key BEFORE a pubkey is selected, so a lower-trust key that merely sits in the keyring
+# (e.g. a fingerprint-feed key) can never sign a module/tools update. Allowlist = VDLU_KEYID_ALLOW
+# (comma/space/newline separated, passed by the engine from config `key_id`); when unset, default-safe =
+# the single *.pub in the keyring, and a MULTI-key keyring with no explicit allowlist is rejected.
+allow=${VDLU_KEYID_ALLOW:-}
+if [ -z "$allow" ]; then
+	n=0; only=""
+	for f in "$keyring"/*.pub; do
+		[ -f "$f" ] || continue
+		n=$((n+1)); only=${f##*/}; only=${only%.pub}
+	done
+	[ "$n" -ne 0 ] || { echo "vdlu-verify: no *.pub in keyring $keyring" >&2; exit 1; }
+	[ "$n" -le 1 ] || { echo "vdlu-verify: multiple keys in keyring; set VDLU_KEYID_ALLOW (config key_id)" >&2; exit 1; }
+	allow="$only"
+fi
+allow=$(printf '%s' "$allow" | tr ',\r\n' '   ')   # normalize to space-separated
+_ok=0
+for k in $allow; do [ "$k" = "$key_id" ] && _ok=1; done
+[ "$_ok" = 1 ] || { echo "vdlu-verify: key_id '$key_id' not in allowed module-update key set" >&2; exit 1; }
+
 pub="$keyring/$key_id.pub"
 [ -f "$pub" ] || { echo "vdlu-verify: no pubkey for key_id=$key_id in $keyring" >&2; exit 1; }
 pubsz=$(wc -c <"$pub" 2>/dev/null || echo 0)

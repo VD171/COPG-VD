@@ -102,7 +102,7 @@ jobs:
       # produces a library loaded into zygote.
       - name: Build zygisk libraries
         env:
-          ABIS: arm64-v8a armeabi-v7a x86_64
+          ABIS: arm64-v8a armeabi-v7a x86 x86_64
         run: |
           for abi in $ABIS; do
             echo "::group::$abi"
@@ -125,6 +125,8 @@ jobs:
 
       - name: Resolve version
         id: version
+        env:
+          SUFFIX: -vd   # fork-tag: version.sh round-trips the -vd versionName (versionCode unchanged)
         run: .github/scripts/version.sh "${{ inputs.bump == 'none' && 'read' || inputs.bump }}"
 
       # The automatic fingerprint release has no hand-written CHANGELOG section, so it brings
@@ -147,7 +149,7 @@ jobs:
       - name: Prepare module structure
         run: |
           mkdir -p module/zygisk
-          for abi in arm64-v8a armeabi-v7a x86_64; do
+          for abi in arm64-v8a armeabi-v7a x86 x86_64; do
             cp "zygisk/build/$abi/libspoof.so" "module/zygisk/$abi.so"
           done
           chmod 755 module/zygisk/*.so
@@ -176,19 +178,26 @@ jobs:
           bash dex/build.sh
           [ -f module/etc/copgvd_scope.dex ] || { echo "::error::copgvd_scope.dex not built"; exit 1; }
 
+      # Per-file sha256 companions (STANDARDS 8): a flash-time, human-checkable fail-safe
+      # (sha256sum -c) next to every shipped file. Runs on the final tree right before zipping.
+      # Build artifact (gitignored, not in the VDLU feed); the signed baseline stays the integrity root.
+      # Prune-before-hash (STANDARDS 8): remove everything the zip excludes BEFORE gen-sha256, so no
+      # orphan <file>.sha256 ships (a companion whose target is absent ABORTS the on-device flash gate).
+      - name: Prune non-shipped files before hashing
+        run: rm -f module/bin/*/.gitkeep module/vdlu/RELEASE.md
+
+      - name: Per-file sha256 companions
+        run: bash .github/scripts/gen-sha256.sh module/
+
       - name: Package module
         run: |
-          cd module && zip -r9 "../${{ steps.version.outputs.zip_name }}" . -x '.git*' -x 'vdlu/RELEASE.md' -x 'bin/*/.gitkeep'
+          cd module && zip -r9 "../${{ steps.version.outputs.zip_name }}" . -x '.git*' -x 'vdlu/RELEASE.md' -x 'vdlu/RELEASE.md.sha256' -x 'bin/*/.gitkeep'
           cd .. && unzip -l "${{ steps.version.outputs.zip_name }}" | tail -n 1
 
-      - name: Commit the bump
-        if: steps.version.outputs.bumped == 'true'
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add module/module.prop module/update.json CHANGELOG.md
-          git commit -m "Release ${{ steps.version.outputs.version }} (versionCode ${{ steps.version.outputs.version_code }})"
-          git push
+      # Orphan .sha256 guard (STANDARDS 8): fail the build if the shipped zip carries an orphan
+      # <file>.sha256 (companion present, target absent = unflashable), catching a prune/exclude slip.
+      - name: Zip orphan .sha256 guard
+        run: sh .github/scripts/zip-orphan-check.sh "${{ steps.version.outputs.zip_name }}"
 
       - name: Upload module artifact
         uses: actions/upload-artifact@v4
@@ -197,11 +206,17 @@ jobs:
           path: ${{ steps.version.outputs.zip_name }}
 
       - name: Publish release
+        # Do NOT gate on `bumped`: the manual ritual pre-bumps and dispatches bump=none, so
+        # bumped is false there yet a publish IS wanted. Instead be idempotent - skip if this
+        # version is already released, so a re-dispatch never hard-fails on an existing tag.
         if: inputs.release
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+              echo "::notice::release $VERSION already exists; skipping create"; exit 0
+          fi
           # Release notes come from this version's section of the CHANGELOG when it has one.
           notes=$(awk -v v="## $VERSION" '
               $0 ~ "^"v { found = 1; next }
@@ -230,6 +245,18 @@ jobs:
             --title "$VERSION" --notes-file release-notes.md
           # module/update.json already points at this asset, so the in-app updater works
           # the moment the release exists.
+
+      - name: Commit the bump
+        # AFTER a successful publish, and only on a real release: record the bump on main. Gated on
+        # inputs.release so the auto-fingerprint preview (release=false) never bot-commits a bump;
+        # placed after Publish so a failed publish never leaves main bumped with a 404 zipUrl (CI#5).
+        if: inputs.release && steps.version.outputs.bumped == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add module/module.prop module/update.json CHANGELOG.md
+          git commit -m "Release ${{ steps.version.outputs.version }} (versionCode ${{ steps.version.outputs.version_code }})"
+          git push
 
       - name: Summary
         if: always()

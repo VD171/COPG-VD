@@ -1,5 +1,11 @@
 # Changelog
 
+## v6.17-vd
+
+- The About page no longer opens a web browser on its own. On some manager/WebView setups, opening the module's documentation (or tapping a link inside it) could launch the browser and start opening GitHub pages by itself. Links in the docs now open only on a deliberate tap, and never automatically.
+- The installer now checks the flashable zip before it installs anything: every shipped file carries a checksum, and if the download arrived corrupted or truncated the install stops with a clear message instead of flashing a broken module. On an installer that has no checksum tool it simply skips the check, so a normal install is never blocked.
+- COPG-VD is now built for 32-bit x86 too: the module and its self-updater cover all four ABIs (arm64-v8a, armeabi-v7a, x86, x86_64), including x86 emulators.
+
 ## v6.16-vd
 
 - Backup and Restore work again. The configuration moved into its own folder a few versions back, but the Backup/Restore tool was still looking for it in the old location, so both failed. It now reads from and writes to the current location (with a fallback to the old one). Thanks to tahsinahmed2 for the report (#29).

@@ -52,7 +52,7 @@ migrate_data_dir() {
                 "/data/adb/COPG-VD.update.state|$STATE_FILE" \
                 "/data/adb/COPG-VD.update.log|$LOG_FILE"; do
         old=${pair%%|*}; new=${pair##*|}
-        [ -f "$old" ] && { [ -e "$new" ] || mv -f "$old" "$new" 2>/dev/null; rm -f "$old" 2>/dev/null; }
+        [ -f "$old" ] && { [ -e "$new" ] || mv -f "$old" "$new" 2>/dev/null; [ -e "$new" ] && rm -f "$old" 2>/dev/null; }
     done
     rm -f /data/adb/.COPG-VD.update.* 2>/dev/null
     [ -f "$LOG_FILE" ] || : > "$LOG_FILE" 2>/dev/null
@@ -338,7 +338,7 @@ _fp_dex() {
     [ -s "$_out" ] || return 1
     tr -d '\n' < "$_out" | grep -q "\"$MODULE_ID\"[[:space:]]*:[[:space:]]*{" || { rm -f "$_out"; return 1; }
     cp -f "$_tgt" "$_tgt.bak" 2>/dev/null
-    cat "$_out" > "$_tgt" || { rm -f "$_out"; return 1; }
+    mv -f "$_out" "$_tgt" || { rm -f "$_out"; return 1; }
     chmod 0644 "$_tgt" 2>/dev/null
     chcon u:object_r:system_file:s0 "$_tgt" 2>/dev/null
     rm -f "$_out"
@@ -412,7 +412,7 @@ write_fields() {
         { log "refusing to write a broken file over $target"; return 1; }
 
     cp -f "$target" "$target.bak" 2>/dev/null
-    cat "$TMP_FILE.new" > "$target" || return 1
+    mv -f "$TMP_FILE.new" "$target" || return 1
     chmod 0644 "$target" 2>/dev/null
     chcon u:object_r:system_file:s0 "$target" 2>/dev/null
     return 0
@@ -447,7 +447,7 @@ drop_version_fields() {
     [ -s "$TMP_FILE.new" ] || return 1
     grep -q "\"$MODULE_ID\"[[:space:]]*:[[:space:]]*{" "$TMP_FILE.new" || return 1
     cp -f "$target" "$target.bak" 2>/dev/null
-    cat "$TMP_FILE.new" > "$target" || return 1
+    mv -f "$TMP_FILE.new" "$target" || return 1
     chmod 0644 "$target" 2>/dev/null
     chcon u:object_r:system_file:s0 "$target" 2>/dev/null
     return 0

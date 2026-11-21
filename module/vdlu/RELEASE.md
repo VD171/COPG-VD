@@ -23,7 +23,7 @@ full source->dest map is therefore pinned here so nothing is missed again.
 |---|---|---|
 | `engine/update.sh` | `vdlu/update.sh` | ENGINE_VERSION=3; mode 0755 |
 | `engine/vdlu-verify` | `vdlu/vdlu-verify` | mode 0755 |
-| `verify/ed25519-mini/<abi>/ed25519-mini` | `vdlu/verify/<abi>/ed25519-mini` | **COPG-VD ABIs only: arm64-v8a, armeabi-v7a, x86_64** (matches `zygisk/<abi>.so`; COPG-VD ships no x86). `customize.sh` keeps only the device ABI |
+| `verify/ed25519-mini/<abi>/ed25519-mini` | `vdlu/verify/<abi>/ed25519-mini` | **COPG-VD ABIs: arm64-v8a, armeabi-v7a, x86, x86_64** (4-ABI, matches `zygisk/<abi>.so`). `customize.sh` keeps all ABIs so the on-device tree matches the manifest |
 | `webui/vdlu.js` | `webroot/vdlu.js` | **the one the v6.13 lapse dropped** |
 | `webui/vdlu.css` | `webroot/vdlu.css` | |
 | `webui/i18n/*.js` | `webroot/vdlu-i18n/` | Updates-panel translations (whole dir, shared filenames). `scripts.js` `loadVdluI18n()` loads only the active language's file on demand (global `window.VDLU_I18N_<UPPER>`); English is the widget default. New shared langs need no code change - just re-copy the dir |

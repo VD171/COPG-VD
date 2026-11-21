@@ -384,10 +384,15 @@ async function loadMarkdownContent() {
             });
             
             container.querySelectorAll('a').forEach(link => {
+                // Mago bug: some WebView hosts auto-navigate/synth-click rendered links and kick to
+                // the browser. Stash the target, neutralize href, follow only a genuine user click.
+                link.dataset.href = link.href;
+                link.setAttribute('href', '#');
                 link.style.cursor = 'pointer';
                 link.onclick = (e) => {
                     e.preventDefault();
-                    openLink(link.href);
+                    if (!e.isTrusted || !link.dataset.href) return;
+                    openLink(link.dataset.href);
                 };
             });
         } catch (err) {
@@ -525,10 +530,10 @@ echo "manager: $(for m in ksu ap magisk; do [ -d "$D/$m" ] && echo -n "$m "; don
 echo; echo "[device]"
 echo "fingerprint: $(getprop ro.build.fingerprint)"
 echo "model: $(getprop ro.product.model) | android $(getprop ro.build.version.release) sdk $(getprop ro.build.version.sdk)"
-echo; echo "[config] $D/COPG-VD.json"
-cat "$D/COPG-VD.json" 2>/dev/null || echo "(no config)"
+echo; echo "[config] /data/adb/COPG-VD/COPG-VD.json"
+cat /data/adb/COPG-VD/COPG-VD.json 2>/dev/null || cat "$D/COPG-VD.json" 2>/dev/null || echo "(no config)"
 echo; echo "[update log - last 60]"
-tail -n 60 "$D/COPG-VD.update.log" 2>/dev/null || echo "(none)"
+tail -n 60 /data/adb/COPG-VD/update.log 2>/dev/null || tail -n 60 "$D/COPG-VD.update.log" 2>/dev/null || echo "(none)"
 echo; echo "[module logcat - last 120]"
 logcat -d -s COPG-VD 2>/dev/null | tail -n 120 || echo "(unavailable)"
 echo; echo "===== end ====="`;
@@ -689,7 +694,7 @@ async function startLogcat(e) {
         document.getElementById('start-logcat').style.display = 'none';
         document.getElementById('stop-logcat').style.display = '';
 
-        await execCommand("su -c 'logcat -c'");
+        await execCommand("logcat -c");
         readLogcat();
     } catch (error) {
         appendToOutput(t('msg_080', {"error": error}), 'error', logcatOutput);
@@ -701,7 +706,7 @@ async function readLogcat() {
     if (!logcatRunning) return;
 
     try {
-        const logs = await execCommand("su -c 'logcat -d -s COPG-VD'");
+        const logs = await execCommand("logcat -d -s COPG-VD");
         if (logs && logs.trim()) {
             const lines = logs.split('\n');
             lines.forEach(line => {
@@ -714,7 +719,7 @@ async function readLogcat() {
             });
         }
 
-        await execCommand("su -c 'logcat -c'");
+        await execCommand("logcat -c");
         if (logcatRunning) {
             setTimeout(readLogcat, 10);
         }
@@ -730,7 +735,7 @@ function stopLogcat(e) {
 
     logcatRunning = false;
     try {
-        execCommand("su -c 'logcat -c'").catch(() => {});
+        execCommand("logcat -c").catch(() => {});
         appendToOutput(t('msg_090'), 'info', logcatOutput);
     } catch (error) {
         appendToOutput(t('msg_062', {"error": error}), 'error', logcatOutput);
@@ -1418,7 +1423,7 @@ async function saveConfig() {
         await execCommand(`echo ${shq(configStr)} > ${shq(CONFIG_FILE)}`);
         await execCommand(`chmod 644 ${shq(CONFIG_FILE)}`);
 
-        await execCommand(`kill -9 $(pidof com.android.vending com.google.android.gsf com.google.android.gms) 2>/dev/null`);
+        await execCommand(`kill -9 $(pidof com.android.vending com.google.android.gsf com.google.android.gms) 2>/dev/null || true`);
         
         try {
             await execCommand(`chcon u:object_r:system_file:s0 ${shq(CONFIG_FILE)}`);
@@ -2621,7 +2626,11 @@ async function showFilePicker(targetFile, startPath = null) {
             fileList.appendChild(fragment);
         }
 
-        searchInput.addEventListener('input', async (e) => {
+        // .oninput (single handler) instead of addEventListener: showFilePicker re-runs on every
+        // directory navigation, so addEventListener would stack a new listener each time (N find
+        // execs per keystroke after N folders). Assigning oninput replaces the one handler, and
+        // re-binding per call keeps the current dir's data fresh.
+        searchInput.oninput = async (e) => {
             const searchTerm = e.target.value.trim();
             if (!searchTerm) {
                 fileList.innerHTML = '<div class="loader" style="width: 100%; height: 40px; margin: 16px 0;"></div>';
@@ -2707,7 +2716,7 @@ async function showFilePicker(targetFile, startPath = null) {
                 });
                 fileList.appendChild(searchFragment);
             }
-        });
+        };
 
         showPopup('file-picker-popup');
         appendToOutput(t('msg_084', {"currentPath": currentPath}), 'success');

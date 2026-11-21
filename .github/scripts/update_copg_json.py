@@ -100,7 +100,8 @@ def http(url, headers=None, retries=4):
         except Exception as exc:
             last = exc
             time.sleep(2 * (attempt + 1))
-    raise RuntimeError(f"GET {url}: {last}")
+    safe_url = re.sub(r"([?&]key=)[^&]+", r"\1REDACTED", url)  # the flashstation URL carries &key=<apiKey>; job logs are public
+    raise RuntimeError(f"GET {safe_url}: {last}")
 
 def get_bytes(url, start=None, end=None, headers=None):
     headers = dict(headers or {})
@@ -386,7 +387,9 @@ def main():
 
     props = collect_props(build["url"])
     body, values = apply_props(body, props, static)
-    missing = [f for f in PROP_MAP if f not in values]
+    # PREVIEW_SDK / SDK_FINGERPRINT exist only on preview/beta builds; absent on stable, and
+    # the header already declares every field optional, so they must not hard-fail the run.
+    missing = [f for f in PROP_MAP if f not in values and f not in ("PREVIEW_SDK", "SDK_FINGERPRINT")]
     if missing:
         fail(f"fields not found in the build.prop: {', '.join(missing)}")
 

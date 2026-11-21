@@ -1,10 +1,26 @@
 /*
- * SPDX-License-Identifier: Apache-2.0
- * Copyright (C) 2026 VD171
+ * ======================================================================
+ *  VDLiveUpdate (VDLU)  ::  flashless, incremental module updates
+ *  A self-update engine for KernelSU/APatch/Magisk modules.
  *
- * VDLU widget - estilos do toast de progresso, banner de reboot e aba "Updates".
- * Tema escuro. Reaproveita as variáveis do index.html hospedeiro quando existem
- * (var(--surface, fallback)); os fallbacks mantêm o widget correto standalone (demo).
+ *  Copyright (C) 2026  VD171
+ *  SPDX-License-Identifier: Apache-2.0
+ *
+ *  Site           : https://vd171.ru
+ *  Site           : https://vd.priv8.ru
+ *  Source         : https://github.com/VD171/VDLiveUpdate
+ *  GitHub         : @VD171 https://github.com/VD171
+ *  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+ *  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+ *  Channel        : @Priv8_VD https://t.me/Priv8_VD
+ *  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+ *  E-mail         : vd.priv8@pm.me
+ * ======================================================================
+ */
+/*
+ * VDLU widget - styles for the progress toast, reboot banner and "Updates" tab.
+ * Dark theme. Reuses the host index.html variables when present
+ * (var(--surface, fallback)); the fallbacks keep the widget correct standalone (demo).
  */
 :root {
   --vdlu-accent: #38bdf8;
@@ -12,7 +28,7 @@
   --vdlu-radius-sm: 8px;
 }
 
-/* ---- banner persistente (reboot pendente) ------------------------------------------------------ */
+/* ---- persistent banner (pending reboot) -------------------------------------------------------- */
 .vdlu-banner {
   position: sticky; top: 0; z-index: 90;
   display: flex; align-items: center; gap: 10px;
@@ -28,7 +44,7 @@
 .vdlu-banner-tx { min-width: 0; overflow-wrap: anywhere; }
 .vdlu-banner code { color: var(--fg, #e2e8f0); background: rgba(0, 0, 0, 0.25); padding: 1px 5px; border-radius: 5px; }
 
-/* ---- toast de progresso (overlay não-bloqueante, canto) ---------------------------------------- */
+/* ---- progress toast (non-blocking corner overlay) ---------------------------------------------- */
 .vdlu-toast {
   position: fixed; z-index: 100;
   right: 16px; left: 16px;
@@ -85,7 +101,7 @@
 .vdlu-toast-ft { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; }
 .vdlu-toast-ft:empty { display: none; }
 
-/* ---- botões (reutilizados no toast e no painel) ------------------------------------------------ */
+/* ---- buttons (reused in the toast and the panel) ----------------------------------------------- */
 .vdlu-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 5px;
   padding: 8px 15px; border-radius: 20px; font-size: 0.76rem; font-weight: 600;
@@ -97,7 +113,7 @@
 .vdlu-btn.pri { background: var(--vdlu-accent); color: #05121b; border-color: var(--vdlu-accent); }
 .vdlu-btn.ghost { background: transparent; }
 
-/* ---- aba "Updates" ----------------------------------------------------------------------------- */
+/* ---- "Updates" tab ----------------------------------------------------------------------------- */
 .vdlu-panel { color: var(--fg, #e2e8f0); }
 .vdlu-sec {
   background: var(--surface, #181d24); border: 1px solid var(--border, #2a3240);
@@ -168,7 +184,7 @@
 }
 @keyframes vdlu-sp { to { transform: rotate(360deg); } }
 
-/* ---- minitoast fallback (quando o host não injeta toast próprio) ------------------------------- */
+/* ---- minitoast fallback (when the host injects no toast of its own) ----------------------------- */
 .vdlu-minitoast {
   position: fixed; left: 50%; transform: translateX(-50%);
   bottom: calc(var(--window-inset-bottom, env(safe-area-inset-bottom, 0px)) + 24px);

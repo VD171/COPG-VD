@@ -97,6 +97,9 @@ prompt_gphoto_spoof() {
   if $CLI_MODE; then
     [ -n "$COPGVD_GPHOTO" ] && ENABLE_GPHOTO_SPOOF="$COPGVD_GPHOTO"
     [ -f /data/local/tmp/.copgvd_gphoto ] && ENABLE_GPHOTO_SPOOF="$(cat /data/local/tmp/.copgvd_gphoto 2>/dev/null || echo false)"
+    # normalize to exactly true/false: the value is later used as `if $ENABLE_GPHOTO_SPOOF`,
+    # so an arbitrary token (e.g. "yes") would run as a command and hang the installer.
+    case "$ENABLE_GPHOTO_SPOOF" in true) ENABLE_GPHOTO_SPOOF=true ;; *) ENABLE_GPHOTO_SPOOF=false ;; esac
     ui_print " ⌨ CLI mode: Google Photos spoof = $ENABLE_GPHOTO_SPOOF"
     return
   fi
@@ -206,7 +209,7 @@ check_config_file() {
               "/data/adb/COPG-VD.update.state|$DATA_DIR/update.state" \
               "/data/adb/COPG-VD.update.log|$DATA_DIR/update.log"; do
       old=${pair%%|*}; new=${pair##*|}
-      [ -f "$old" ] && { [ -e "$new" ] || mv -f "$old" "$new"; rm -f "$old"; }
+      [ -f "$old" ] && { [ -e "$new" ] || mv -f "$old" "$new"; [ -e "$new" ] && rm -f "$old"; }
   done
   rm -f /data/adb/COPG-VD.json.bak /data/adb/.COPG-VD.update.* 2>/dev/null
   [ -f "$CONFIG_FILE" ] || cp "$MODPATH/COPG-VD.json.example" "$CONFIG_FILE"
@@ -332,6 +335,15 @@ if [ "$API" -lt 28 ]; then
   ui_print " ➤ Requires Android 9.0+         "
   print_failure_and_exit
 fi
+
+# Flash-time integrity gate (STANDARDS 8): verify each shipped file against its .sha256
+# companion and ABORT on mismatch (owner decision 19/11); safe-skips without `sha256sum -c`.
+# Runs on the pristine payload, before any setup touches it.
+. "$MODPATH/.vd/sha256-gate.sh"
+# .vd/ and the .sha256 companions are flash-time only and out of the VDLU baseline; drop them
+# so the on-device tree matches the manifest.
+rm -rf "${MODPATH:?}/.vd" 2>/dev/null
+find "${MODPATH:?}" -type f -name '*.sha256' -delete 2>/dev/null
 
 check_conflict_modules
 check_config_file

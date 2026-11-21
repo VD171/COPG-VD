@@ -13,3 +13,5 @@ zygisk/build/
 # release-notes drafts (the final text goes to the GitHub Release, not the repo)
 /RELEASE-NOTES-v*.md
 /RELEASE-BODY-v*.md
+# per-file sha256 companions (STANDARDS 8): CI build artifact, generated before zipping, zip-only
+*.sha256

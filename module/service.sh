@@ -45,7 +45,7 @@ migrate_data_dir() {
                 "/data/adb/COPG-VD.update.state|$DATA_DIR/update.state" \
                 "/data/adb/COPG-VD.update.log|$DATA_DIR/update.log"; do
         old=${pair%%|*}; new=${pair##*|}
-        [ -f "$old" ] && { [ -e "$new" ] || mv -f "$old" "$new" 2>/dev/null; rm -f "$old" 2>/dev/null; }
+        [ -f "$old" ] && { [ -e "$new" ] || mv -f "$old" "$new" 2>/dev/null; [ -e "$new" ] && rm -f "$old" 2>/dev/null; }
     done
     rm -f /data/adb/.COPG-VD.update.* 2>/dev/null
 }
@@ -358,6 +358,9 @@ migrate_data_dir
 
 if [ "$1" = "--props-only" ]; then
     apply_props
+    # consume the one-shot force marker here too, else a WebUI-set force survives a
+    # --props-only re-apply and keeps forcing (possibly version-mismatched) spoofing.
+    rm -f "$FORCE_MARKER" 2>/dev/null
     exit 0
 fi
 

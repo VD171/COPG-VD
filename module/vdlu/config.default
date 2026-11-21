@@ -6,3 +6,4 @@ auto_on_webui_open=1
 net_policy=any
 boot_retry_minutes=1440
 pubkey_dir=keyring
+key_id=vd-2026

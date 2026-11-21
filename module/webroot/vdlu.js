@@ -1,10 +1,26 @@
 /*
- * SPDX-License-Identifier: Apache-2.0
- * Copyright (C) 2026 VD171
+ * ======================================================================
+ *  VDLiveUpdate (VDLU)  ::  flashless, incremental module updates
+ *  A self-update engine for KernelSU/APatch/Magisk modules.
  *
+ *  Copyright (C) 2026  VD171
+ *  SPDX-License-Identifier: Apache-2.0
+ *
+ *  Site           : https://vd171.ru
+ *  Site           : https://vd.priv8.ru
+ *  Source         : https://github.com/VD171/VDLiveUpdate
+ *  GitHub         : @VD171 https://github.com/VD171
+ *  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+ *  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+ *  Channel        : @Priv8_VD https://t.me/Priv8_VD
+ *  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+ *  E-mail         : vd.priv8@pm.me
+ * ======================================================================
+ */
+/*
  * VDLU - flashless update widget for a root-manager WebUI (KernelSU/APatch).
  * Vanilla JS, no framework, no build, no CDN. Drop-in into a host index.html.
- * Contract: VDLiveUpdate/INTERFACES.md §4 (journal.json), §5 (config), §9 (WEBUI<->ENGINE).
+ * Contract: VDLiveUpdate/docs/INTERFACES.md §4 (journal.json), §5 (config), §9 (WEBUI<->ENGINE).
  *
  * Public API (window.VDLU):
  *   init(opts)             configure the widget (see defaults + i18n below).
@@ -194,7 +210,7 @@
   function renderToast(j, opts) {
     ensureToast(); opts = opts || {};
     var total = Number(j && j.total) || 0, done = Number(j && j.done) || 0;
-    var pct = total > 0 ? Math.max(0, Math.min(100, Math.round(done / total * 100))) : (opts.indeterminate ? 0 : 0);
+    var pct = total > 0 ? Math.max(0, Math.min(100, Math.round(done / total * 100))) : 0;
     tr('ttl').textContent = T('updating') + ' ' + (C.module || C.modid) + (j && j.target != null ? ' → v' + j.target : '');
     var bar = tr('bar');
     bar.style.width = pct + '%';
@@ -343,7 +359,7 @@
     tick();
   }
 
-  // ---- fetch-bootstrap of the toolchain (Abordagem B, MODULO_VDLU.md §16) ------------------------
+  // ---- fetch-bootstrap of the toolchain (webview-TLS approach for slim modules) ------------------
   // Slim modules ship NO curl. On the first https update, the WebUI (webview TLS) downloads the static
   // curl + the SIGNED tools-manifest, writes them to $VDLU_DIR/.work, and the engine's `install-tool`
   // verifies the manifest signature (ed25519-mini) AND the binary hash BEFORE adopting it into Tier-2
@@ -397,8 +413,8 @@
       if (src.indexOf('file://') === 0) return true;      // local staging: no curl needed
       return curAbi().then(function (abi) {
         if (!abi) return true;                             // unknown ABI: let the engine try
-        // curl already available? Tier-2 (slim bootstrap), OR the module's own bin/<abi> (a module
-        // like VDBackup bundles curl/restic/rclone for its OWN features - VDLU reuses it), OR system.
+        // curl already available? Tier-2 (slim bootstrap), OR the host module's own bin/<abi> (a host
+        // module may bundle curl/restic/rclone for its OWN features - VDLU reuses it), OR system.
         var probe = '{ [ -x ' + q(C.vdluDir + '/tools/' + abi + '/curl') + ' ] || [ -x ' + q(C.moduleDir + '/bin/' + abi + '/curl') + ' ] || command -v curl >/dev/null 2>&1 ; } && echo Y || echo N';
         return ex(probe).then(function (o) {
           if (String(o).trim() === 'Y') return true;       // present (Tier-2 / bundled / system) - no bootstrap
@@ -590,7 +606,6 @@
       return readJournal().then(function (j) {
         lastJournal = j || null;
         if (j && j.state === 'PENDING_REBOOT') { showBanner(j.target); }
-        else if (j && j.state === 'ERROR') { lastJournal = j; }
         else if (j && !isTerminal(j.state)) {
           // non-terminal transaction left by a previous session/boot: offer to resume
           renderToast(j, {

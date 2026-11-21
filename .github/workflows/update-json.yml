@@ -93,7 +93,11 @@ jobs:
       # A new fingerprint is data, not code: it ships as a new module version on its own, so a
       # fresh install gets it inside the zip instead of waiting for the updater's first boot.
       # workflow_dispatch is one of the two events a GITHUB_TOKEN is allowed to trigger.
-      - name: Release the new fingerprint
+      - name: Build a preview for the new fingerprint (NOT a release)
+        # HARD rule: the on-device triade must pass before EVERY release, and main holds curated
+        # snapshots (not bot-bump commits). So the auto-fingerprint only STAGES the new profile
+        # (committed above) and builds a preview artifact; a human then validates + runs the triade
+        # + publishes. Never release=true here (that would auto-publish unvalidated + bot-bump main).
         if: steps.gen.outputs.changed == 'true' && inputs.dry_run != true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -101,9 +105,9 @@ jobs:
           PATCH: ${{ steps.gen.outputs.security_patch }}
         run: |
           gh workflow run COPG-VD.yml --ref main \
-            -f bump=patch -f release=true \
+            -f bump=patch -f release=false \
             -f notes="- Updated FINGERPRINT and Build info to: $BUILD (security patch $PATCH)."
-          echo "module build dispatched for $BUILD"
+          echo "preview build dispatched for $BUILD (release=false; a human validates + triade + publishes)"
 
       # GitHub disables scheduled workflows after 60 days without a commit, and only commits
       # count: not tags, not runs, not the schedule firing. The canary cadence alone does not
