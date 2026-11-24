@@ -75,8 +75,8 @@ field() {
 }
 
 # Cap the manifest before reading it (anti-OOM): a MITM'd feed could serve a huge body before any check.
-# Same 4 MiB ceiling the engine's dl_manifest enforces (vdlu-verify ships no shared const, so it is inline).
-MAX_MANIFEST_BYTES=4194304
+# Same 2 MiB ceiling the engine's dl_manifest enforces (vdlu-verify ships no shared const, so it is inline).
+MAX_MANIFEST_BYTES=2097152
 msz=$(wc -c <"$manifest" 2>/dev/null || echo 0)
 [ "${msz:-0}" -le "$MAX_MANIFEST_BYTES" ] || { echo "vdlu-verify: manifest too large ($msz)" >&2; exit 1; }
 

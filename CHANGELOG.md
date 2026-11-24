@@ -1,5 +1,10 @@
 # Changelog
 
+## v6.18-vd
+
+- A malformed or very deeply nested configuration file can no longer crash the module. The config reader now caps how deep it will parse and rejects pathological input safely, instead of overflowing the stack.
+- The in-place self-updater is more reliable: it no longer trips over its own trust anchor, waits cleanly instead of colliding when an update is already running, and reports a network problem more clearly.
+
 ## v6.17-vd
 
 - The About page no longer opens a web browser on its own. On some manager/WebView setups, opening the module's documentation (or tapping a link inside it) could launch the browser and start opening GitHub pages by itself. Links in the docs now open only on a deliberate tap, and never automatically.

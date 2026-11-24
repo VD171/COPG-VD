@@ -20,9 +20,9 @@
 # POSIX sh (mksh/busybox/toybox). Env in: VDLU_DIR, MODULE_DIR, MODID.
 # Contract: docs/INTERFACES.md (CLI/layout/JSON keys = immutable).
 
-ENGINE_VERSION=4             # ANY engine logic change (verify/apply/path rules) bumps this - keep engine_min honest
-MAX_FILE_BYTES=268435456     # 256 MiB per-file ceiling: anti decompression-bomb / disk DoS
-MAX_MANIFEST_BYTES=4194304   # 4 MiB manifest ceiling: anti OOM
+ENGINE_VERSION=5             # bumped 4->5 (VDLU#2 trust-anchor exclusion + the 128/2 MiB ceilings); ANY engine logic change (verify/apply/path rules) bumps this - keep engine_min honest
+MAX_FILE_BYTES=134217728     # 128 MiB per-file ceiling: anti decompression-bomb / disk DoS
+MAX_MANIFEST_BYTES=2097152   # 2 MiB manifest ceiling: anti OOM
 TAB=$(printf '\t')
 LOCKDIR=""
 
@@ -87,6 +87,20 @@ init_tools() {
 		done > "$_cab" 2>/dev/null
 		if [ -s "$_cab" ]; then CACERT="$_cab"; else rm -f "$_cab"; fi
 	fi
+	# Diagnostic (VD-Modules#1): log the resolved TLS trust + cert count, so a boot-time curl rc 77
+	# (empty store -> curl falls back to a baked-in CA path) is self-explaining in boot.log instead of a
+	# mystery. certs=0 at boot means the store was not populated yet when the fetch ran.
+	_cn=0; _csz=0; _crd=no
+	if [ -n "$CACERT" ]; then
+		[ -r "$CACERT" ] && _crd=yes
+		_cn=$(grep -c 'BEGIN CERT' "$CACERT" 2>/dev/null); _cn=${_cn:-0}
+		_csz=$(wc -c <"$CACERT" 2>/dev/null); _csz=${_csz:-0}
+	fi
+	# readable=no on a non-empty store points at the boot-time SELinux-context hypothesis: a context that
+	# cannot read system_security_cacerts_file leaves an empty/unreadable bundle, so curl falls back to its
+	# baked-in CA path and fails (rc 77). curl already runs with -S, so its own error reaches boot.log too.
+	_cprd=no; [ -n "$CAPATH" ] && [ -r "$CAPATH" ] && _cprd=yes
+	echo "VDLU: tls capath=${CAPATH:-none}(readable=$_cprd) cacert=${CACERT:-none}(readable=$_crd size=$_csz certs=$_cn)" >&2
 }
 
 sha256f() { $SHA "$1" 2>/dev/null | cut -d' ' -f1; }
@@ -776,10 +790,17 @@ do_commit() { # allow_swap
 	return 0
 }
 
+# VDLU: defer APPLY while the module signals it is busy (e.g. a backup in flight), so an update never swaps
+# module files mid-operation (VD-Modules#1). Opt-in: the module sets `apply_busy_file` (an absolute path) in
+# config and touches it for the duration of its own operations. Absent config = never held (no behavior
+# change). The blobs are already fetched, so the next trigger (boot / WebUI open) applies without a re-download.
+apply_held() { local f; f=$(cfg apply_busy_file ""); [ -n "$f" ] && [ -e "$f" ]; }
+
 run_pipeline() { # allow_swap
 	local allow_swap="$1"
 	load_target
 	do_fetch || return 1
+	if apply_held; then echo "VDLU: module busy (apply_busy_file present); deferring apply to the next trigger" >&2; return 0; fi
 	do_apply || return 1
 	do_commit "$allow_swap" || return 1
 	return 0
@@ -810,6 +831,14 @@ do_diff() { # persist(0|1); rc: 2 fetch/parse, 3 verify/meta fail, 4 device AHEA
 	build_plan "$WORK/manifest.flat" >"$WORK/plan.raw"
 	finalize_plan "$WORK/plan.raw" >"$WORK/plan.work"
 	grep "^delete/[0-9]" "$WORK/manifest.flat" 2>/dev/null | cut -f2 >"$WORK/plan.del"
+	# VDLU#2: the trust anchor - the engine's own vdlu/ dir (update.sh, vdlu-verify, verify/*, keyring/*,
+	# config) - is RE-FLASH ONLY. A published feed carries the WHOLE module tree, vdlu/ included, so
+	# EXCLUDE those paths from the plan: never fetch, apply or delete them over the feed. The module still
+	# updates; the trust anchor changes only by a full signed re-flash; a feed that tries to swap it is
+	# silently ignored (not a whole-manifest rejection, so a legit feed carrying vdlu/ is never blocked).
+	# path is the last tab field of plan.work and the whole line of plan.del.
+	awk -F'\t' '$NF !~ /^vdlu\// && $NF != "vdlu"' "$WORK/plan.work" >"$WORK/plan.work.f" 2>/dev/null && mv -f "$WORK/plan.work.f" "$WORK/plan.work"
+	awk '$0 !~ /^vdlu\// && $0 != "vdlu"' "$WORK/plan.del" >"$WORK/plan.del.f" 2>/dev/null && mv -f "$WORK/plan.del.f" "$WORK/plan.del"
 	validate_plan || return 3
 	if [ "$persist" = 1 ]; then
 		cp -f "$WORK/manifest.json" "$TARGET"

@@ -232,7 +232,13 @@ static bool gapHas(const std::string& text, int a, int b, char c) {
     return false;
 }
 
-static bool validTree(const std::string& text, const std::vector<jsmntok_t>& t, int i, int& next) {
+// Bound the recursion depth: a maliciously deep (root-only) config must be REJECTED,
+// not overflow the stack. Real configs nest 2-3 levels; 64 is far above any legit file.
+// validTree() gates readConfig(), so capping it here also bounds skipToken() below (it
+// only ever runs on a tree that already passed this check).
+static constexpr int kMaxJsonDepth = 64;
+static bool validTree(const std::string& text, const std::vector<jsmntok_t>& t, int i, int& next, int depth = 0) {
+    if (depth > kMaxJsonDepth) return false;
     const jsmntok_t& tok = t[i];
     if ((tok.type == JSMN_OBJECT || tok.type == JSMN_ARRAY) && tok.size > 0 && trailingComma(text, tok))
         return false;
@@ -243,7 +249,7 @@ static bool validTree(const std::string& text, const std::vector<jsmntok_t>& t, 
             if (prevEnd >= 0 && !gapHas(text, prevEnd, t[j].start, ',')) return false;
             if (!gapHas(text, t[j].end, t[j + 1].start, ':')) return false;
             int after;
-            if (!validTree(text, t, j + 1, after)) return false;
+            if (!validTree(text, t, j + 1, after, depth + 1)) return false;
             prevEnd = t[j + 1].end;
             j = after;
         }
@@ -256,7 +262,7 @@ static bool validTree(const std::string& text, const std::vector<jsmntok_t>& t, 
             if (j >= static_cast<int>(t.size())) return false;
             if (prevEnd >= 0 && !gapHas(text, prevEnd, t[j].start, ',')) return false;
             int after;
-            if (!validTree(text, t, j, after)) return false;
+            if (!validTree(text, t, j, after, depth + 1)) return false;
             prevEnd = t[j].end;
             j = after;
         }
