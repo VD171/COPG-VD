@@ -32,13 +32,13 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v7
 
       - name: Shell lint
         run: |
           sudo apt-get update && sudo apt-get install -y shellcheck
-          shellcheck -s sh module/*.sh module/vdlu/update.sh module/vdlu/vdlu-verify || true
-          shellcheck .github/scripts/*.sh || true
+          shellcheck -S error -s sh module/*.sh module/vdlu/update.sh module/vdlu/vdlu-verify
+          shellcheck -S error .github/scripts/*.sh
 
       - name: Validate JSON
         run: |
@@ -52,14 +52,23 @@ jobs:
             node --check "$f" && echo "ok $f"
           done
 
+      - name: Kit guards (release-workflow-lint)
+        run: |
+          # Self-contained release-model lint - gates HERE (checks only this repo's workflows).
+          # vendor-parity (vs the private kit) and engine-parity (vs VDLiveUpdate) compare against
+          # separate canonical repos not fetched in CI, so they are enforced in the local pre-push
+          # ritual, not here (no CI secret for the private kit, by design).
+          sh .github/scripts/release-workflow-lint.sh .
+          echo "vendor-parity + engine-parity: enforced in the local pre-push ritual"
+
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
         with:
           packages: ''
 
@@ -73,7 +82,7 @@ jobs:
         run: |
           cd module && zip -r9 ../COPG-VD-ci.zip . -x '.git*' -x 'vdlu/RELEASE.md' -x 'bin/*/.gitkeep'
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: COPG-VD-ci
           path: COPG-VD-ci.zip
