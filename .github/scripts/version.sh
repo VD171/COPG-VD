@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # ======================================================================
-#  COPG-VD  ::  global device spoofer
-#  Spoof your device fingerprint and build: Zygisk, KernelSU/APatch/Magisk.
+#  VD-ModuleKit  ::  version.sh
+#  Canonical version bumper for VD root modules: rewrites module/module.prop +
+#  module/update.json, preserving the module's own zipUrl + changelog and
+#  substituting only the version token (generic across modules).
 #
 #  Copyright (C) 2026  VD171
 #  SPDX-License-Identifier: Apache-2.0
-#  Fork by VD171.
 #
 #  Licensed under the Apache License, Version 2.0; you may obtain a copy at
 #  http://www.apache.org/licenses/LICENSE-2.0
@@ -20,16 +21,8 @@
 #  Channel        : @Priv8_VD https://t.me/Priv8_VD
 #  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
 #  E-mail         : vd.priv8@pm.me
-# ======================================================================
-# ======================================================================
-#  version.sh  ::  canonical version bumper for VD root modules (VD-ModuleKit)
-#  Rewrites module/module.prop + module/update.json, preserving the module's own
-#  zipUrl + changelog and substituting only the version token (generic across modules).
-#
-#  Copyright (C) 2026  VD171
-#  SPDX-License-Identifier: Apache-2.0
-#  Vendored into each module's .github/scripts/; the vendoring module keeps its own
-#  license and product banner.
+#  Vendored from VD-ModuleKit; the host module fills the contact chain and keeps
+#  its own license and product banner.
 # ======================================================================
 #
 #  Version scheme (owner-defined): fleet (default) or per-module via the SCHEME env var.
