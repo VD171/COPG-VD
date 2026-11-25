@@ -86,8 +86,9 @@ Android version** (`COPG-VD-Settings.spoof_version`) avgör om de tillämpas all
 
 - `never` (standard): ROM:ens egen version används.
 - `rom`: tillämpar endast det som inte överskrider ROM:en, vilket i praktiken innebär att sänka SDK.
-- `force`: tillämpar exakt det konfigurationen säger. Det är detta som orsakar softloopen; använd det
-  endast om du vet att målramverket stödjer det.
+- `force`: tvingar fram versionsfälten som konfigurationen begär. SDK:n begränsas fortfarande till ROM:ens
+  värde även här (sedan v6.19), eftersom att höja SDK:n över det riktiga ramverket bara orsakar en softloop
+  och är meningslöst, så `force` softloopar inte längre; den tvingar fram strängfälten (release, codename).
 
 Den riktiga versionen läses från `/system/build.prop`, aldrig från `getprop` (vilket är precis
 det som den här modulen förfalskar). `force` nekas också vid återställning av en säkerhetskopia, så en
@@ -140,8 +141,9 @@ Det gör ingen nätverksbegäran; allt det behöver levereras inuti modulen.
 - **Play Integrity misslyckas fortfarande.** Se till att fingerprintet är färskt (Check Update) och
   att `SECURITY_PATCH` finns i `global_fields` så att det förblir koherent över hela enheten. Döda
   Google Play services så att det attesterar om.
-- **Telefonen softloopar efter att versionsspoofing aktiverats.** Det är Android-versionsfällan
-  ovan: ställ tillbaka `spoof_version` till `never`.
+- **Telefonen softloopar efter att versionsspoofing aktiverats (på versioner före v6.19).** Det är Android-versionsfällan
+  ovan: ställ tillbaka `spoof_version` till `never`, eller uppdatera till v6.19+, som begränsar
+  SDK:n till det riktiga ramverkets värde under varje policy (Force inkluderat) så att detta inte kan hända.
 - **WebUI öppnas inte på Magisk.** Använd [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) eller [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) eller [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->

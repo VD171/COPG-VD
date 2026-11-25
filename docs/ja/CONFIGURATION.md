@@ -52,7 +52,7 @@
 パスがプレーンなものとは異なる値を報告できるようにし、keystore が一貫性を保つようにします。
 
 > **version グループは特別です。** `ANDROID_VERSION`、`SDK_INT`、`SDK_FULL`、`CODENAME` は
-> スプーフするデバイスではなく、あなたの ROM を記述します。これらを上げると電話が softloop します。これらは
+> スプーフするデバイスではなく、あなたの ROM を記述します。SDK を ROM より上げると電話が softloop するため、v6.19 以降、SDK はすべてのポリシー(Force を含む)で ROM の値に制限されます。これらは
 > 同梱のプロファイルにはなく、`COPG-VD-Settings.spoof_version` が許可するときにのみ適用されます -
 > [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap) を参照してください。
 
@@ -77,7 +77,7 @@
 |---|---|---|
 | `resetprop` | bool | デバイス全体の resetprop エンジンを実行するかどうか。 |
 | `autoupdate` | bool | `fingerprint-update.sh` を起動ごとに一度実行するかどうか。デフォルトでオン。 |
-| `spoof_version` | `never` / `rom` / `force` | Android version グループの適用方法。`never` がデフォルト; `force` はバックアップの復元時に拒否されます。 |
+| `spoof_version` | `never` / `rom` / `force` | Android version グループの適用方法。`never` がデフォルト。v6.19 以降、SDK はすべてのポリシーで ROM の値に制限されるため、`force` は文字列フィールドを強制しますが SDK を上げることはできません; `force` はバックアップの復元時に拒否されます。 |
 
 ## `global_fields`
 

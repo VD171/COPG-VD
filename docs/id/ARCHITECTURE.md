@@ -71,7 +71,7 @@ untuk sisi pengguna dan [CONFIGURATION.md](CONFIGURATION.md) untuk field-field-n
 Menaikkan `SDK_INT` / `ANDROID_VERSION` di atas versi framework ROM yang sebenarnya membuat
 aplikasi memanggil API yang tidak ada, yang membuat aplikasi Google crash dan mereboot ponsel
 ke dalam softloop. Oleh karena itu grup version nonaktif secara default dan dikunci di balik
-`spoof_version`. Modul membaca versi sebenarnya dari `/system/build.prop`, tidak pernah dari
+`spoof_version`; dan sejak v6.19 SDK juga dibatasi pada nilai framework sebenarnya di bawah **setiap** kebijakan (termasuk Force), sehingga bahkan profil dengan SDK lebih tinggi yang dipaksakan pun tidak dapat softloop (Force tetap memaksa field versi string). Modul membaca versi sebenarnya dari `/system/build.prop`, tidak pernah dari
 `getprop`, karena `getprop` justru hal yang dipalsukannya. Lihat jebakannya di
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 

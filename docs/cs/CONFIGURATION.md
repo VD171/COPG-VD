@@ -52,8 +52,8 @@ Varianty `*_FOR_ATTESTATION` (`BRAND_FOR_ATTESTATION`, `DEVICE_FOR_ATTESTATION`,
 atestační cestě hlásit jinou hodnotu než prostou, takže keystore zůstává koherentní.
 
 > **Skupina verze je speciální.** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` a `CODENAME`
-> popisují vaši ROM, ne podvržené zařízení. Jejich zvýšení dostane telefon do softloopu.
-> Nejsou v dodávaném profilu a aplikují se pouze, když to `COPG-VD-Settings.spoof_version`
+> popisují vaši ROM, ne podvržené zařízení. Zvýšení SDK nad ROM dostane telefon do softloopu, takže
+> od v6.19 je SDK omezeno na hodnotu ROM pod každou politikou (včetně Force). Nejsou v dodávaném profilu a aplikují se pouze, když to `COPG-VD-Settings.spoof_version`
 > dovolí: viz [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
 ### Stavy pole
@@ -78,7 +78,7 @@ Nastavení, která cestují s profilem, takže záloha nese vaše volby.
 |---|---|---|
 | `resetprop` | bool | Zda běží engine resetprop napříč zařízením. |
 | `autoupdate` | bool | Zda `fingerprint-update.sh` běží jednou za boot. Výchozí zapnuto. |
-| `spoof_version` | `never` / `rom` / `force` | Jak se aplikuje skupina verze Androidu. `never` je výchozí; `force` je odmítnut při obnově zálohy. |
+| `spoof_version` | `never` / `rom` / `force` | Jak se aplikuje skupina verze Androidu. `never` je výchozí. Od v6.19 je SDK omezeno na hodnotu ROM pod každou politikou, takže `force` vynutí řetězcová pole, ale nemůže zvýšit SDK; `force` je odmítnut při obnově zálohy. |
 
 ## `global_fields`
 

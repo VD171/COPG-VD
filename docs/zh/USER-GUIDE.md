@@ -77,8 +77,9 @@ API：Google 的应用崩溃，手机重启，然后又从头开始。开机本�
 
 - `never`（默认）: 使用 ROM 自己的版本。
 - `rom`: 只应用不超过 ROM 的部分，这在实践中意味着降低 SDK。
-- `force`: 完全按照配置所说的应用。这正是导致软循环的原因；只有在你知道目标框架支持它时才
-  使用。
+- `force`: 强制应用配置所要求的版本字段。即使在这里，SDK 仍会被限制在 ROM 的值（自 v6.19 起），
+  因为把 SDK 提到高于真实框架只会导致软循环且毫无用处，所以 `force` 不再导致软循环；它只强制字符串
+  字段（release、codename）。
 
 真实版本是从 `/system/build.prop` 读取的，绝不会从 `getprop` 读取（而 `getprop` 正是本模块所
 伪造的东西）。在恢复备份时 `force` 也会被拒绝，因此一个旧备份无法在你背后重新把它激活。
@@ -125,8 +126,9 @@ WebUI 中的 **Analyze**（或 `fingerprint-update.sh analyze`）会审查当前
   启动时读取作用范围。
 - **Play Integrity 仍然失败。** 确保指纹是新鲜的（Check Update），并且 `SECURITY_PATCH` 在
   `global_fields` 中，这样它在设备范围内保持一致。结束 Google Play services 以让它重新认证。
-- **启用版本伪装后手机软循环。** 那就是上面的 Android 版本陷阱: 把 `spoof_version` 改回
-  `never`。
+- **启用版本伪装后手机软循环（在 v6.19 之前的版本上）。** 那就是上面的 Android 版本陷阱: 把
+  `spoof_version` 改回 `never`，或更新到 v6.19+，该版本在所有策略下（包括 Force）都把 SDK 限制在真实
+  框架的值，因此这不会再发生。
 - **WebUI 在 Magisk 上打不开。** 使用 [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) 或 [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) 或 [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases)。
 
 <!-- doc-footer -->

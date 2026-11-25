@@ -90,8 +90,9 @@ uygulanmayacağına karar verir:
 
 - `never` (varsayılan): ROM'un kendi sürümü kullanılır.
 - `rom`: yalnızca ROM'u aşmayanı uygula; bu pratikte SDK'yı düşürmek anlamına gelir.
-- `force`: yapılandırmanın söylediğini tam olarak uygula. Softloop'a neden olan budur;
-  yalnızca hedef framework'ün bunu desteklediğini biliyorsanız kullanın.
+- `force`: yapılandırmanın istediği sürüm alanlarını zorla. SDK burada bile hâlâ ROM'un
+  değerinde sınırlanır (v6.19'dan beri), çünkü SDK'yı gerçek framework'ün üzerine çıkarmak yalnızca
+  softloop'a yol açar ve işe yaramaz, bu yüzden `force` artık softloop yapmaz; dize alanlarını (release, codename) zorlar.
 
 Gerçek sürüm `/system/build.prop` dosyasından okunur, asla `getprop` üzerinden değil (ki
 bu modülün sahtelediği şeyin ta kendisidir). `force` ayrıca bir yedek geri yüklenirken de
@@ -146,8 +147,9 @@ Hiçbir ağ isteği yapmaz; ihtiyacı olan her şey modülün içinde gelir.
 - **Play Integrity hâlâ başarısız oluyor.** Parmak izinin güncel olduğundan (Check Update)
   ve `SECURITY_PATCH`'in cihaz genelinde tutarlı kalması için `global_fields` içinde
   olduğundan emin olun. Yeniden doğrulama yapması için Google Play services'i sonlandırın.
-- **Sürüm sahtelemesini etkinleştirdikten sonra telefon softloop yapıyor.** Bu, yukarıdaki
-  Android sürümü tuzağıdır: `spoof_version`'ı tekrar `never` yapın.
+- **Sürüm sahtelemesini etkinleştirdikten sonra telefon softloop yapıyor (v6.19 öncesi sürümlerde).** Bu, yukarıdaki
+  Android sürümü tuzağıdır: `spoof_version`'ı tekrar `never` yapın veya SDK'yı her politika altında (Force dahil)
+  gerçek framework değerinde sınırlayan v6.19+'a güncelleyin, böylece bu yaşanamaz.
 - **WebUI Magisk'te açılmıyor.** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) veya [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) veya [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases)'u kullanın.
 
 <!-- doc-footer -->

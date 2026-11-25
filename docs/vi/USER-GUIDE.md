@@ -90,8 +90,9 @@ Các trường này không có trong cấu hình đi kèm và trình cập nhậ
 
 - `never` (mặc định): phiên bản của chính ROM được sử dụng.
 - `rom`: chỉ áp dụng những gì không vượt quá ROM, trong thực tế có nghĩa là hạ thấp SDK.
-- `force`: áp dụng chính xác những gì cấu hình nói. Đây là thứ gây ra softloop; chỉ sử
-  dụng nó nếu bạn biết framework mục tiêu hỗ trợ nó.
+- `force`: buộc các trường phiên bản mà cấu hình yêu cầu. SDK ngay cả ở đây vẫn bị giới hạn ở giá trị
+  ROM (kể từ v6.19), bởi vì nâng SDK cao hơn framework thực tế chỉ gây ra softloop và không có công dụng,
+  nên `force` không còn gây softloop nữa; nó buộc các trường chuỗi (release, codename).
 
 Phiên bản thật được đọc từ `/system/build.prop`, không bao giờ từ `getprop` (chính là thứ
 mà mô-đun này làm giả). `force` cũng bị từ chối khi khôi phục một bản sao lưu, nên một bản
@@ -145,8 +146,9 @@ Nó không thực hiện yêu cầu mạng nào; mọi thứ nó cần đều đ
 - **Play Integrity vẫn thất bại.** Đảm bảo dấu vân tay còn mới (Check Update) và rằng
   `SECURITY_PATCH` nằm trong `global_fields` để nó duy trì nhất quán trên toàn thiết bị.
   Kết thúc Google Play services để nó chứng thực lại.
-- **Điện thoại softloop sau khi bật giả mạo phiên bản.** Đó là cái bẫy phiên bản Android ở
-  trên: đặt `spoof_version` trở lại `never`.
+- **Điện thoại softloop sau khi bật giả mạo phiên bản (trên các phiên bản trước v6.19).** Đó là cái bẫy
+  phiên bản Android ở trên: đặt `spoof_version` trở lại `never`, hoặc cập nhật lên v6.19+, bản này giới
+  hạn SDK ở giá trị framework thực tế dưới mọi chính sách (bao gồm cả Force) nên điều này không thể xảy ra.
 - **WebUI không mở trên Magisk.** Dùng [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) hoặc [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) hoặc [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->

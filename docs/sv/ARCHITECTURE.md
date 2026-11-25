@@ -69,7 +69,7 @@ och [CONFIGURATION.md](CONFIGURATION.md) för fälten.
 Att höja `SDK_INT` / `ANDROID_VERSION` över vad ROM:ens ramverk verkligen är får appar att
 anropa API:er som inte finns, vilket kraschar Googles appar och startar om telefonen i en
 softloop. Versionsgruppen är därför av som standard och grindad bakom
-`spoof_version`. Modulen läser den riktiga versionen från `/system/build.prop`, aldrig från
+`spoof_version`; och sedan v6.19 begränsas SDK:n dessutom till det riktiga ramverkets värde under **varje** policy (Force inkluderat), så att inte ens en profil med framtvingad högre SDK kan softloopa (Force tvingar fortfarande fram strängversionsfälten). Modulen läser den riktiga versionen från `/system/build.prop`, aldrig från
 `getprop`, eftersom `getprop` är precis det som den förfalskar. Se fällan i
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 

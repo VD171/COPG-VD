@@ -69,7 +69,7 @@ COPG-VD وحدة Zygisk: مكتبة أصلية صغيرة (`libspoof.so`) يحق
 رفع `SDK_INT` / `ANDROID_VERSION` فوق ما هو عليه الـ framework في الـ ROM فعلياً يجعل التطبيقات
 تستدعي واجهات برمجية (APIs) غير موجودة، مما يعطّل تطبيقات Google ويعيد تشغيل الهاتف في
 softloop. لذلك تكون مجموعة الإصدار معطّلة افتراضياً ومحمية خلف
-`spoof_version`. تقرأ الوحدة الإصدار الحقيقي من `/system/build.prop`، لا من
+`spoof_version`؛ ومنذ v6.19 يُحَدّ الـ SDK إضافياً عند قيمة الـ framework الحقيقي تحت **كل** سياسة (بما في ذلك Force)، بحيث لا يمكن حتى لملف تعريف مفروض بـ SDK أعلى أن يسبب softloop (لا يزال Force يفرض حقول الإصدار النصية). تقرأ الوحدة الإصدار الحقيقي من `/system/build.prop`، لا من
 `getprop` أبداً، لأن `getprop` هو تحديداً ما تزوّره. راجع الفخّ في
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 

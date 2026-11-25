@@ -51,7 +51,7 @@
 경로가 일반 값과 다른 값을 보고할 수 있게 하여 keystore가 일관성을 유지하도록 합니다.
 
 > **version 그룹은 특별합니다.** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL`, `CODENAME`은 스푸핑하는
-> 디바이스가 아니라 당신의 ROM을 설명합니다. 이것들을 올리면 전화기가 softloop합니다. 이것들은
+> 디바이스가 아니라 당신의 ROM을 설명합니다. SDK를 ROM보다 올리면 전화기가 softloop하므로, v6.19부터 SDK는 모든 정책(Force 포함)에서 ROM 값으로 제한됩니다. 이것들은
 > 제공되는 프로파일에 없으며 `COPG-VD-Settings.spoof_version`이 허용할 때만 적용됩니다 -
 > [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap)를 참조하세요.
 
@@ -76,7 +76,7 @@
 |---|---|---|
 | `resetprop` | bool | 디바이스 전체 resetprop 엔진이 실행되는지 여부. |
 | `autoupdate` | bool | `fingerprint-update.sh`가 부팅마다 한 번 실행되는지 여부. 기본적으로 켜짐. |
-| `spoof_version` | `never` / `rom` / `force` | Android version 그룹이 적용되는 방식. `never`가 기본값; `force`는 백업을 복원할 때 거부됩니다. |
+| `spoof_version` | `never` / `rom` / `force` | Android version 그룹이 적용되는 방식. `never`가 기본값. v6.19부터 SDK는 모든 정책에서 ROM 값으로 제한되므로, `force`는 문자열 필드를 강제하지만 SDK를 올릴 수는 없습니다; `force`는 백업을 복원할 때 거부됩니다. |
 
 ## `global_fields`
 

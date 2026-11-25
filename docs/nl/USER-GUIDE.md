@@ -86,8 +86,9 @@ Android version** (`COPG-VD-Settings.spoof_version`) bepaalt of ze überhaupt va
 
 - `never` (standaard): de eigen versie van de ROM wordt gebruikt.
 - `rom`: past alleen toe wat de ROM niet overschrijdt, wat in de praktijk betekent de SDK verlagen.
-- `force`: past precies toe wat de config zegt. Dit is wat de softloop veroorzaakt; gebruik het
-  alleen als je weet dat het doelframework het ondersteunt.
+- `force`: forceert de versievelden die de config vraagt. De SDK wordt ook hier nog steeds afgetopt op de
+  waarde van de ROM (sinds v6.19), omdat de SDK boven het echte framework tillen alleen softloopt en geen
+  nut heeft, dus `force` softloopt niet meer; het forceert de stringvelden (release, codename).
 
 De echte versie wordt gelezen uit `/system/build.prop`, nooit uit `getprop` (wat precies het ding
 is dat deze module vervalst). `force` wordt ook geweigerd bij het herstellen van een back-up, zodat een
@@ -140,8 +141,9 @@ Het doet geen enkel netwerkverzoek; alles wat het nodig heeft wordt in de module
 - **Play Integrity faalt nog steeds.** Zorg dat de fingerprint vers is (Check Update) en
   dat de `SECURITY_PATCH` in `global_fields` staat zodat die apparaatbreed coherent blijft. Beëindig
   Google Play services zodat het opnieuw attesteert.
-- **De telefoon softloopt na het inschakelen van versie-spoofing.** Dat is de Android-versie-
-  valkuil hierboven: zet `spoof_version` terug op `never`.
+- **De telefoon softloopt na het inschakelen van versie-spoofing (op versies vóór v6.19).** Dat is de
+  Android-versie-valkuil hierboven: zet `spoof_version` terug op `never`, of werk bij naar v6.19+, dat de
+  SDK aftopt op de waarde van het echte framework onder elk beleid (Force inbegrepen) zodat dit niet kan.
 - **De WebUI wil niet openen op Magisk.** Gebruik [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) of [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) of [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->

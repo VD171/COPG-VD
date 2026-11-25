@@ -78,8 +78,9 @@ fingerprint는 낡습니다: Google이 factory image를 교체하고, 오래된 
 
 - `never` (기본값): ROM 자체의 버전이 사용됩니다.
 - `rom`: ROM을 초과하지 않는 것만 적용하며, 실제로는 SDK를 낮추는 것을 의미합니다.
-- `force`: config가 말하는 그대로 정확히 적용합니다. 이것이 softloop을 일으키는 것입니다; 대상
-  framework가 그것을 지원한다는 것을 아는 경우에만 사용하세요.
+- `force`: config가 요청하는 버전 필드를 강제합니다. 여기서도 SDK는 여전히 ROM 값으로 제한됩니다
+  (v6.19부터). SDK를 실제 framework보다 높게 올리는 것은 softloop만 일으킬 뿐 용도가 없기 때문입니다.
+  그래서 `force`는 더 이상 softloop하지 않습니다; 문자열 필드(release, codename)를 강제합니다.
 
 실제 버전은 `/system/build.prop`에서 읽히며, `getprop`에서는 절대 읽히지 않습니다(그것이 바로 이
 모듈이 위조하는 것입니다). `force`는 백업을 복원할 때도 거부되므로, 오래된 백업이 당신 모르게 그것을
@@ -129,8 +130,9 @@ config를 손으로 편집할 때마다 실행하세요.
 - **Play Integrity가 여전히 실패합니다.** fingerprint가 최신인지(Check Update) 확인하고,
   `SECURITY_PATCH`가 `global_fields`에 있어 디바이스 전체에서 일관성을 유지하는지 확인하세요. Google
   Play services를 종료하여 다시 인증하도록 하세요.
-- **버전 스푸핑을 활성화한 후 전화기가 softloop합니다.** 그것은 위의 Android 버전 함정입니다 -
-  `spoof_version`을 `never`로 다시 설정하세요.
+- **버전 스푸핑을 활성화한 후 전화기가 softloop합니다(v6.19 이전 버전에서).** 그것은 위의 Android 버전
+  함정입니다 - `spoof_version`을 `never`로 다시 설정하거나, v6.19 이상으로 업데이트하세요. v6.19 이상은
+  모든 정책(Force 포함)에서 SDK를 실제 framework 값으로 제한하므로 이런 일이 발생할 수 없습니다.
 - **Magisk에서 WebUI가 열리지 않습니다.** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) 또는 [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) 또는 [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases)을 사용하세요.
 
 <!-- doc-footer -->

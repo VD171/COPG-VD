@@ -50,7 +50,7 @@
 （attestation）路径报告一个与普通值不同的值，从而使 keystore 保持一致。
 
 > **version 组是特殊的。** `ANDROID_VERSION`、`SDK_INT`、`SDK_FULL` 和 `CODENAME` 描述的是你
-> 的 ROM，而不是被伪装的设备。提高它们会使手机软循环。它们不在随附的配置文件中，只有在
+> 的 ROM，而不是被伪装的设备。把 SDK 提到高于 ROM 会使手机软循环，因此自 v6.19 起 SDK 在所有策略下（包括 Force）都被限制在 ROM 的值。它们不在随附的配置文件中，只有在
 > `COPG-VD-Settings.spoof_version` 允许时才会应用 -
 > 参见 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap)。
 
@@ -75,7 +75,7 @@
 |---|---|---|
 | `resetprop` | bool | 设备范围的 resetprop 引擎是否运行。 |
 | `autoupdate` | bool | `fingerprint-update.sh` 是否每次开机运行一次。默认开启。 |
-| `spoof_version` | `never` / `rom` / `force` | Android 版本组如何应用。`never` 是默认值；在恢复备份时 `force` 会被拒绝。 |
+| `spoof_version` | `never` / `rom` / `force` | Android 版本组如何应用。`never` 是默认值。自 v6.19 起 SDK 在所有策略下都被限制在 ROM 的值，因此 `force` 会强制字符串字段但无法提高 SDK；在恢复备份时 `force` 会被拒绝。 |
 
 ## `global_fields`
 

@@ -74,7 +74,7 @@ prochain redémarrage. Voir [USER-GUIDE.md](USER-GUIDE.md) pour le côté utilis
 Augmenter `SDK_INT` / `ANDROID_VERSION` au-delà de ce que le framework de la ROM est
 réellement amène les applications à appeler des API qui n'existent pas, ce qui plante les
 applications de Google et redémarre le téléphone en softloop. Le groupe version est donc
-désactivé par défaut et verrouillé derrière `spoof_version`. Le module lit la version réelle
+désactivé par défaut et verrouillé derrière `spoof_version` ; et depuis v6.19 le SDK est en plus plafonné à la valeur du framework réel sous **toutes** les politiques (Force inclus), de sorte que même un profil forcé avec un SDK plus élevé ne peut pas provoquer de softloop (Force force toujours les champs de version texte). Le module lit la version réelle
 depuis `/system/build.prop`, jamais depuis `getprop`, parce que `getprop` est exactement ce
 qu'il falsifie. Voir le piège dans [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 

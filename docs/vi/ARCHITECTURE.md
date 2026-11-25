@@ -73,7 +73,7 @@ cho các trường.
 Nâng `SDK_INT` / `ANDROID_VERSION` lên cao hơn framework thực tế của ROM khiến các ứng dụng
 gọi các API không tồn tại, điều này làm sập các ứng dụng của Google và khởi động lại điện
 thoại vào một softloop. Nhóm version do đó tắt theo mặc định và bị kiểm soát sau
-`spoof_version`. Mô-đun đọc phiên bản thật từ `/system/build.prop`, không bao giờ từ
+`spoof_version`; và kể từ v6.19 SDK còn được giới hạn thêm ở giá trị framework thực tế dưới **mọi** chính sách (bao gồm cả Force), nên ngay cả một hồ sơ có SDK bị buộc cao hơn cũng không thể softloop (Force vẫn buộc các trường chuỗi của phiên bản). Mô-đun đọc phiên bản thật từ `/system/build.prop`, không bao giờ từ
 `getprop`, bởi vì `getprop` chính là thứ nó làm giả. Xem cái bẫy trong
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 

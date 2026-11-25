@@ -86,8 +86,9 @@ Android version** (`COPG-VD-Settings.spoof_version`) decides whether they apply 
 
 - `never` (default): the ROM's own version is used.
 - `rom`: apply only what does not exceed the ROM, which in practice means lowering the SDK.
-- `force`: apply exactly what the config says. This is what causes the softloop; use it
-  only if you know the target framework supports it.
+- `force`: force the version fields the config asks for. The SDK is still capped at the ROM's
+  value even here (since v6.19), because raising the SDK above the real framework only softloops
+  and has no use, so `force` no longer softloops; it forces the string fields (release, codename).
 
 The real version is read from `/system/build.prop`, never from `getprop` (which is the
 very thing this module falsifies). `force` is also refused when restoring a backup, so an
@@ -140,8 +141,9 @@ It makes no network request; everything it needs ships inside the module.
 - **Play Integrity still fails.** Make sure the fingerprint is fresh (Check Update) and
   that the `SECURITY_PATCH` is in `global_fields` so it stays coherent device-wide. Kill
   Google Play services so it re-attests.
-- **The phone softloops after enabling version spoofing.** That is the Android version
-  trap above: set `spoof_version` back to `never`.
+- **The phone softloops after enabling version spoofing (on versions before v6.19).** That is the
+  Android version trap above: set `spoof_version` back to `never`, or update to v6.19+, which caps
+  the SDK at the real framework value under every policy (Force included) so this cannot happen.
 - **The WebUI will not open on Magisk.** Use [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) or [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) or [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->

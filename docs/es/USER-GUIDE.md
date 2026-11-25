@@ -92,8 +92,10 @@ Estos campos no están en la configuración incluida y el actualizador nunca los
 
 - `never` (predeterminado): se usa la propia versión de la ROM.
 - `rom`: aplica solo lo que no excede la ROM, lo que en la práctica significa bajar el SDK.
-- `force`: aplica exactamente lo que dice la configuración. Esto es lo que causa el
-  softloop; úsalo solo si sabes que el framework objetivo lo soporta.
+- `force`: fuerza los campos de versión que pide la configuración. El SDK se sigue limitando al
+  valor de la ROM incluso aquí (desde v6.19), porque subir el SDK por encima del framework real
+  solo causa un softloop y no tiene uso, así que `force` ya no causa softloop; fuerza los campos
+  de texto (release, codename).
 
 La versión real se lee de `/system/build.prop`, nunca de `getprop` (que es justo lo que este
 módulo falsifica). `force` también se rechaza al restaurar una copia de seguridad, de modo
@@ -148,8 +150,9 @@ No hace ninguna petición de red; todo lo que necesita viene dentro del módulo.
 - **Play Integrity sigue fallando.** Asegúrate de que la huella está fresca (Check Update) y
   de que el `SECURITY_PATCH` está en `global_fields` para que se mantenga coherente en todo
   el dispositivo. Mata Google Play services para que vuelva a atestiguar.
-- **El teléfono entra en softloop tras activar el spoof de versión.** Esa es la trampa de la
-  versión de Android de arriba: vuelve a poner `spoof_version` en `never`.
+- **El teléfono entra en softloop tras activar el spoof de versión (en versiones anteriores a v6.19).** Esa es la trampa de la
+  versión de Android de arriba: vuelve a poner `spoof_version` en `never`, o actualiza a v6.19+, que limita
+  el SDK al valor del framework real en todas las políticas (Force incluido), de modo que esto no puede pasar.
 - **La WebUI no se abre en Magisk.** Usa [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) o [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) o [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->

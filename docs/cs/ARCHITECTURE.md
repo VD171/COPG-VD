@@ -69,7 +69,7 @@ uživatelskou stranu a [CONFIGURATION.md](CONFIGURATION.md) pro pole.
 
 Zvýšení `SDK_INT` / `ANDROID_VERSION` nad to, co framework ROM ve skutečnosti je, přiměje
 aplikace volat API, která neexistují, což shodí aplikace Google a restartuje telefon do
-softloopu. Skupina verze je proto ve výchozím stavu vypnuta a uzamčena za `spoof_version`.
+softloopu. Skupina verze je proto ve výchozím stavu vypnuta a uzamčena za `spoof_version`; a od v6.19 je SDK navíc omezeno na hodnotu skutečného frameworku pod **každou** politikou (včetně Force), takže ani vynucený profil s vyšším SDK nemůže způsobit softloop (Force stále vynucuje řetězcová pole verze).
 Modul čte skutečnou verzi z `/system/build.prop`, nikdy z `getprop`, protože `getprop` je
 přesně to, co falšuje. Viz past v [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 

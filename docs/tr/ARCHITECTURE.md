@@ -75,7 +75,7 @@ ulaşır. Kullanıcı tarafı için [USER-GUIDE.md](USER-GUIDE.md) bölümüne v
 `SDK_INT` / `ANDROID_VERSION` değerini ROM'un framework'ünün gerçekte olduğundan daha
 yükseğe çıkarmak, uygulamaların var olmayan API'leri çağırmasına neden olur; bu da
 Google'ın uygulamalarını çökertir ve telefonu bir softloop'a sokar. Bu nedenle sürüm grubu
-varsayılan olarak kapalıdır ve `spoof_version`'ın arkasında kapılıdır. Modül gerçek sürümü
+varsayılan olarak kapalıdır ve `spoof_version`'ın arkasında kapılıdır; ayrıca v6.19'dan beri SDK, **her** politika altında (Force dahil) gerçek framework değerinde ek olarak sınırlanır, bu yüzden zorlanmış daha yüksek SDK'lı bir profil bile softloop yapamaz (Force yine de dize sürüm alanlarını zorlar). Modül gerçek sürümü
 `/system/build.prop` dosyasından okur, asla `getprop` üzerinden değil, çünkü `getprop` tam
 olarak sahtelediği şeydir. Tuzak için [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap)
 bölümüne bakın.

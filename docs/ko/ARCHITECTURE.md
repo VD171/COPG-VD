@@ -65,7 +65,7 @@ fork는 zygote의 메모리를 copy-on-write로 상속하므로, 각 앱은 부�
 
 `SDK_INT` / `ANDROID_VERSION`을 ROM의 framework의 실제보다 높게 올리면 앱이 존재하지 않는 API를
 호출하게 되어, Google의 앱이 충돌하고 전화기가 softloop로 재부팅됩니다. 따라서 version 그룹은
-기본적으로 꺼져 있고 `spoof_version` 뒤에서 게이트됩니다. 모듈은 실제 버전을
+기본적으로 꺼져 있고 `spoof_version` 뒤에서 게이트됩니다. 그리고 v6.19부터 SDK는 추가로 **모든** 정책(Force 포함)에서 실제 framework 값으로 제한되므로, SDK를 강제로 높인 프로파일이라도 softloop할 수 없습니다(Force는 여전히 문자열 버전 필드를 강제합니다). 모듈은 실제 버전을
 `/system/build.prop`에서 읽으며, `getprop`에서는 절대 읽지 않습니다. `getprop`이 바로 그것이
 위조하는 것이기 때문입니다. [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap)의 함정을
 참조하세요.

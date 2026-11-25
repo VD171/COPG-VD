@@ -86,8 +86,9 @@ Android version** (`COPG-VD-Settings.spoof_version`) decide se eles são aplicad
 
 - `never` (padrão): a própria versão da ROM é usada.
 - `rom`: aplica apenas o que não excede a ROM, o que na prática significa abaixar o SDK.
-- `force`: aplica exatamente o que a configuração diz. É isso que causa o softloop; use-o
-  somente se você souber que o framework alvo o suporta.
+- `force`: força os campos de versão que a configuração pede. O SDK ainda é limitado ao valor da ROM
+  mesmo aqui (desde a v6.19), porque elevar o SDK acima do framework real só causa softloop e não tem
+  utilidade, então `force` não causa mais softloop; ele força os campos de texto (release, codename).
 
 A versão real é lida de `/system/build.prop`, nunca do `getprop` (que é justamente
 aquilo que este módulo falsifica). `force` também é recusado ao restaurar um backup, de modo que um
@@ -140,8 +141,9 @@ Ela não faz nenhuma requisição de rede; tudo de que precisa vem dentro do mó
 - **O Play Integrity ainda falha.** Garanta que o fingerprint esteja atualizado (Check Update) e
   que o `SECURITY_PATCH` esteja em `global_fields` para que ele fique coerente em todo o dispositivo. Mate os
   Google Play services para que ele refaça a atestação.
-- **O telefone entra em softloop depois de ativar o spoofing de versão.** Essa é a armadilha da versão do Android
-  acima: volte o `spoof_version` para `never`.
+- **O telefone entra em softloop depois de ativar o spoofing de versão (em versões anteriores à v6.19).** Essa é a armadilha da versão do Android
+  acima: volte o `spoof_version` para `never`, ou atualize para a v6.19+, que limita o SDK ao valor real
+  do framework sob todas as políticas (Force incluído), então isso não pode acontecer.
 - **A WebUI não abre no Magisk.** Use o [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) ou [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) ou [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->

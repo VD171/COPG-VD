@@ -69,7 +69,7 @@ usuário e [CONFIGURATION.md](CONFIGURATION.md) para os campos.
 Elevar `SDK_INT` / `ANDROID_VERSION` acima do que o framework da ROM realmente é faz com que os apps
 chamem APIs que não existem, o que trava os apps do Google e reinicia o telefone em um
 softloop. O grupo de versão é, portanto, desligado por padrão e protegido por trás do
-`spoof_version`. O módulo lê a versão real de `/system/build.prop`, nunca do
+`spoof_version`; e desde a v6.19 o SDK é adicionalmente limitado ao valor real do framework sob **todas** as políticas (Force incluído), então nem mesmo um perfil forçado com SDK mais alto pode causar softloop (o Force ainda força os campos de texto da versão). O módulo lê a versão real de `/system/build.prop`, nunca do
 `getprop`, porque o `getprop` é exatamente o que ele falsifica. Veja a armadilha em
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 

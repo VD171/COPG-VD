@@ -85,8 +85,9 @@ Android version**(`COPG-VD-Settings.spoof_version`)が、これらがそもそ�
 
 - `never`(デフォルト): ROM 自身のバージョンが使われます。
 - `rom`: ROM を超えないものだけを適用します。実際には SDK を下げることを意味します。
-- `force`: config が言う通り正確に適用します。これが softloop を引き起こすものです; 対象の
-  framework がそれをサポートしていると分かっている場合にのみ使用してください。
+- `force`: config が求めるバージョンフィールドを強制します。ここでも SDK は依然として ROM の
+  値に制限されます(v6.19 以降)。SDK を実際の framework より上げることは softloop するだけで
+  用途がないためです。そのため `force` はもう softloop しません; 文字列フィールド(release、codename)を強制します。
 
 実際のバージョンは `/system/build.prop` から読まれ、決して `getprop` からは読まれません
 (それこそがこのモジュールが偽装するものです)。`force` はバックアップの復元時にも拒否されるため、
@@ -138,8 +139,9 @@ config を手で編集するたびに実行してください。
 - **Play Integrity がまだ失敗する。** fingerprint が新鮮であること(Check Update)、そして
   `SECURITY_PATCH` が `global_fields` にあってデバイス全体で一貫性を保つことを確認してください。
   Google Play services を kill して再アテステーションさせてください。
-- **バージョンスプーフを有効にした後、電話が softloop する。** それは上の Android バージョン
-  の罠です: `spoof_version` を `never` に戻してください。
+- **バージョンスプーフを有効にした後、電話が softloop する(v6.19 より前のバージョンで)。** それは上の Android
+  バージョンの罠です: `spoof_version` を `never` に戻すか、v6.19 以降に更新してください。v6.19 以降は
+  すべてのポリシー(Force を含む)で SDK が実際の framework の値に制限されるため、これは起こりません。
 - **Magisk で WebUI が開かない。** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) または [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) または [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases) を使ってください。
 
 <!-- doc-footer -->

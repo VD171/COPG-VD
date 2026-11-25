@@ -86,8 +86,9 @@ Android version**‏ (`COPG-VD-Settings.spoof_version`) ما إذا كانت س�
 
 - `never` (الافتراضي): يُستخدم إصدار الـ ROM الخاص به.
 - `rom`: يطبّق فقط ما لا يتجاوز الـ ROM، وهو ما يعني عملياً خفض الـ SDK.
-- `force`: يطبّق بالضبط ما يقوله الإعداد. هذا ما يسبب الـ softloop؛ استخدمه
-  فقط إذا كنت تعرف أن الـ framework المستهدف يدعمه.
+- `force`: يفرض حقول الإصدار التي يطلبها الإعداد. يظل الـ SDK محدوداً بقيمة الـ ROM
+  حتى هنا (منذ v6.19)، لأن رفع الـ SDK فوق الـ framework الحقيقي يسبب softloop فقط ولا فائدة له،
+  لذا لم يعد `force` يسبب softloop؛ فهو يفرض الحقول النصية (release، codename).
 
 يُقرأ الإصدار الحقيقي من `/system/build.prop`، لا من `getprop` أبداً (وهو تحديداً ما
 تزوّره هذه الوحدة). كما يُرفض `force` عند استعادة نسخة احتياطية، بحيث لا تستطيع نسخة
@@ -140,8 +141,9 @@ Android version**‏ (`COPG-VD-Settings.spoof_version`) ما إذا كانت س�
 - **لا يزال Play Integrity يفشل.** تأكد من أن البصمة حديثة (Check Update) وأن
   `SECURITY_PATCH` موجود في `global_fields` كي يبقى متسقاً على مستوى الجهاز بأكمله. أوقف
   Google Play services كي يعيد الإثبات (attest).
-- **يدخل الهاتف في softloop بعد تفعيل انتحال الإصدار.** هذا هو فخّ إصدار Android
-  أعلاه: أعد ضبط `spoof_version` إلى `never`.
+- **يدخل الهاتف في softloop بعد تفعيل انتحال الإصدار (في الإصدارات قبل v6.19).** هذا هو فخّ إصدار Android
+  أعلاه: أعد ضبط `spoof_version` إلى `never`، أو حدّث إلى v6.19+ التي تحدّ الـ SDK عند قيمة الـ framework
+  الحقيقي تحت كل سياسة (بما في ذلك Force) بحيث لا يمكن أن يحدث هذا.
 - **لا يفتح الـ WebUI على Magisk.** استخدم [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) أو [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) أو [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->

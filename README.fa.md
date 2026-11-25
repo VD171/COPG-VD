@@ -28,6 +28,7 @@
   <a href="https://github.com/VD171/COPG-VD/wiki/fa-CONFIGURATION">مرجع پیکربندی</a> ·
   <a href="https://github.com/VD171/COPG-VD/wiki/fa-ARCHITECTURE">معماری</a> ·
   <a href="https://github.com/VD171/COPG-VD/wiki/fa-FILE-STRUCTURE">ساختار فایل</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/fa-AI-AGENTS">عامل‌های هوش مصنوعی</a> ·
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
@@ -40,6 +41,37 @@
 ---
 
 <div dir="rtl">
+
+## چرا
+
+شمار فزاینده‌ای از اپ‌ها وقتی دستگاهی که می‌بینند یک تلفن تمیز و دارای گواهی نباشد، از اجرا سر باز می‌زنند یا بی‌سروصدا کیفیت خود را پایین می‌آورند: Play Integrity، سطوح DRM و بررسی‌های دستگاهِ مخصوص هر اپ، همگی fingerprint مربوط به build و propertyهای سیستم را می‌خوانند. COPG-VD این هویت را بازنویسی می‌کند تا اپ‌ها به‌جای دستگاه واقعی شما یک Pixel منسجم (یا هر دستگاهی که پیکربندی کنید) ببینند. با یک fingerprint سالم معمولا نیازی به PlayIntegrityFix یا GooglePhotosUnlimited ندارید: این یک جایگزین سبک‌تر و مقاوم‌تر است و به‌طور پیش‌فرض دامنه جعل را به استک Google Play محدود می‌کند تا بقیه سیستم شما دست‌نخورده بماند.
+
+## ویژگی‌ها
+
+- **کنترل دامنه (Scope):** هویت جعلی را فقط به استک Google Play (پیش‌فرض)، به کل دستگاه، به یک whitelist، یا به همه چیز به‌جز یک blacklist تحویل دهید. در حالت با دامنه محدود، Zygisk هویت را پر-پروسه تحویل می‌دهد، پس هرگز از طریق propertyهای سراسری نشت نمی‌کند.
+- **موتورهای مستقل:** فیلدهای Build (یک بازنویسی `android.os.Build.*` از طریق JNI)، یک property hook پر-پروسه به‌شیوه clean-room (بدون hook تابعی)، `resetprop` گروه‌بندی‌شده، و یک سطح اختیاری DRM / Widevine (L1 یا L3) با فهرست اهداف خودش. هر کدام را می‌توان خاموش کرد.
+- **کنترل پر-فیلد:** هر فیلد Build را می‌توان تنظیم، خالی، حذف یا رد کرد، همراه با یک فهرست `global_fields` برای مقادیری که باید در سراسر دستگاه یکدست بمانند.
+- **fingerprint همیشه تازه:** یک پروفایل Pixel درون جعبه ارائه می‌شود و یک بار در هر بوت خود را از جدیدترین ایمیج کارخانه‌ای Google تازه می‌کند؛ می‌توانید از طریق WebUI یک پروفایل Pixel دیگر هم بگیرید. هرگز به نسخه قدیمی‌تر برنمی‌گردد و پروفایلِ مربوط به دستگاهی دیگر را رد می‌کند.
+- **سیاست امن نسخه Android:** SDK تحت هیچ سیاستی بالاتر از framework واقعی شما برده نمی‌شود (بالا بردن آن فقط تلفن را softloop می‌کند).
+- **Analyze:** پیکربندی را در برابر رام و propهای شما بررسی می‌کند و هر ناسازگاری را پیش از رسیدن به اپ‌ها گزارش می‌دهد.
+- **WebUI:** پنج تب برای راندن همه چیز، بدون هیچ درخواست شبکه‌ای؛ فایل پیکربندی همه تنظیمات را در خود دارد تا پس از به‌روزرسانی ماژول حفظ شوند.
+- **خودبه‌روزرسانی افزایشی (VDLU)** و یک کتابخانه بومی با **چهار ABI** (arm64-v8a، armeabi-v7a، x86، x86_64).
+
+## عامل‌های هوش مصنوعی
+
+COPG-VD را می‌توان به‌صورت headless اسکریپت‌نویسی کرد: کل ماژول با یک فایل JSON (`/data/adb/COPG-VD/COPG-VD.json`) و یک نقطه ورود shell یگانه، `fingerprint-update.sh`، با افعال پایدار (`check`، `apply`، `analyze`، `fetch-index`، `fetch <path>` و بیشتر) هدایت می‌شود. یک عامل که با دسترسی root اجرا می‌شود می‌تواند پیکربندی را بخواند و بنویسد و هر کاری را که WebUI می‌تواند انجام دهد، بدون scrape کردن WebUI، اجرا کند. به [docs/AI-AGENTS.md](docs/fa/AI-AGENTS.md) مراجعه کنید. وصله‌های هوش مصنوعی به همان میزان بازبینی هر وصله دیگری سنجیده می‌شوند.
+
+## نصب
+
+فایل zip را در KernelSU، APatch یا Magisk فلش کنید و ریبوت کنید. پروفایل Pixel ارائه‌شده بی‌درنگ برای اپ‌های هدف جعل می‌شود. نصب‌کننده یک gate یکپارچگی `.sha256` را اجرا می‌کند و در صورت وجود zip خراب یا بریده‌شده عملیات را لغو می‌کند (و در جایی که هیچ ابزار checksum موجود نیست به‌سلامت از آن می‌گذرد). به Zygisk، از طریق KernelSU، APatch یا Magisk، و دسترسی root نیاز دارد.
+
+## امنیت
+
+جعل تنها در سمت کاربر انجام می‌شود: COPG-VD هرگز SDK را بالاتر از framework واقعی شما نمی‌برد، سازنده را با بقیه پروفایل منسجم نگه می‌دارد، و نسخه واقعی را از `/system/build.prop` می‌خواند، هرگز از propertyهایی که جعل می‌کند. خودبه‌روزرسان به یک امضای معتبر ed25519 نیاز دارد و downgrade را رد می‌کند؛ WebUI هیچ درخواست شبکه‌ای نمی‌فرستد. مشکلات را مطابق [SECURITY.md](docs/fa/SECURITY.md) گزارش دهید.
+
+## ساخت
+
+همیشه release، هرگز debug. کتابخانه بومی و کمک‌کننده scope در CI برای هر چهار ABI ساخته می‌شوند؛ workflow انتشار، zip قابل فلش را مونتاژ می‌کند، همراه‌های `.sha256` پر-فایل را می‌نویسد، خط پایه (baseline) امضاشده VDLU را دوباره تولید می‌کند و با نام `github-actions[bot]` منتشر می‌کند. به [CONTRIBUTING.md](docs/fa/CONTRIBUTING.md) مراجعه کنید.
 
 ## چگونه استفاده کنیم؟
 ماژول را نصب کنید، ریبوت کنید، و پروفایل ارائه‌شده (یک Pixel) برای اپ‌های هدف جعل می‌شود. با یک fingerprint سالم نیازی به PlayIntegrityFix یا GooglePhotosUnlimited ندارید.  
@@ -124,7 +156,7 @@
 * **Spoof Android version** در WebUI تصمیم می‌گیرد که آیا اصلا اعمال شوند یا نه:  
   * **Never** (پیش‌فرض): از نسخه خودِ رام استفاده می‌شود.  
   * **Up to this ROM**: فقط آنچه از آن فراتر نمی‌رود، که در عمل یعنی پایین آوردن SDK.  
-  * **Force**: دقیقا همان چیزی که پیکربندی می‌گوید. همین است که باعث softloop می‌شود.  
+  * **Force**: فیلدهای دیگر نسخه را دقیقا همان‌طور که پیکربندی می‌خواهد اعمال می‌کند، اما SDK حتی در اینجا هم همچنان به مقدار رام شما محدود می‌ماند (بالا بردن SDK فراتر از framework واقعی فقط softloop می‌کند و هیچ کاربرد مشروعی ندارد)، پس از v6.19 دیگر **Force باعث softloop نمی‌شود**.  
 * نسخه واقعی از `/system/build.prop` خوانده می‌شود، هرگز از `getprop`: چون این دقیقا همان چیزی است که این ماژول جعل می‌کند.  
 
 ### Analyze
@@ -144,6 +176,7 @@ WebUI اختیاری است (همه چیز را می‌توان مستقیما �
 - **[راهنمای کاربر](https://github.com/VD171/COPG-VD/wiki/fa-USER-GUIDE)**: نصب، WebUI و استفاده روزمره.
 - **[مرجع پیکربندی](https://github.com/VD171/COPG-VD/wiki/fa-CONFIGURATION)**: هر تنظیم در فایل پیکربندی و کاری که انجام می‌دهد.
 - **[معماری](https://github.com/VD171/COPG-VD/wiki/fa-ARCHITECTURE)** و **[ساختار فایل](https://github.com/VD171/COPG-VD/wiki/fa-FILE-STRUCTURE)**: نحوه کار جعل و محل قرارگیری همه چیز.
+- **[عامل‌های هوش مصنوعی](https://github.com/VD171/COPG-VD/wiki/fa-AI-AGENTS)**: پیکربندی و به‌روزرسان را به‌صورت headless هدایت کنید.
 
 <!-- /vd-docs -->
 
@@ -159,30 +192,28 @@ COPG-VD موتور **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU
 
 ## همچنین ببینید
 
-پروژه‌های خواهر از همان نویسنده:
-
-- **[VDInfos](https://github.com/VD171/VD-Infos)**: یک اشکال‌زدای روش‌های دستگاه که هر مورد را از طریق همه روش‌هایی که می‌توانند آن را بخوانند می‌خواند و آن‌ها را کنار هم مقایسه می‌کند.
-- **[VDGoogle](https://github.com/VD171/VD-Google)**: سرویس‌های Google شما (RCS، Wallet، گواهی‌های Play Integrity)، خوانده‌شده روی دستگاه شما بدون اینترنت.
-- **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: یک دیمن SSH مستقل با روت (Dropbear).
 - **[VDBackup](https://github.com/VD171/VD-Backup)**: پشتیبان‌گیری و بازیابی کامل اپ‌ها و داده‌ها به‌صورت root، که به‌طور کامل از یک WebUI هدایت می‌شود.
-- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: یک موتور خودبه‌روزرسانی افزایشی و بدون فلش، تعبیه‌شده در ماژول‌های KernelSU/APatch/Magisk.
+- **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: یک دیمن SSH مستقل با روت (Dropbear).
+- **[VDGoogle](https://github.com/VD171/VD-Google)**: سرویس‌های Google شما (RCS، Wallet، گواهی‌های Play Integrity)، خوانده‌شده روی دستگاه شما بدون اینترنت.
 - **[VDInstaller](https://github.com/VD171/VD-Installer)**: یک نصب‌کنندهٔ ساید‌لود روت‌شدهٔ بدون‌اصطکاک برای APKهای تکی، دسته‌ای و تقسیم‌شده، همراه با کلید تأییدکنندهٔ Play Protect و جعل منبع نصب.
-
-Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
-
-</div>
+- **[VDInfos](https://github.com/VD171/VD-Infos)**: یک اشکال‌زدای روش‌های دستگاه که هر مورد را از طریق همه روش‌هایی که می‌توانند آن را بخوانند می‌خواند و آن‌ها را کنار هم مقایسه می‌کند.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: یک موتور خودبه‌روزرسانی افزایشی و بدون فلش، تعبیه‌شده در ماژول‌های KernelSU/APatch/Magisk.
+- **[VD-Modules](https://github.com/VD171/VD-Modules)**: مخزن ماژول‌های ما برای MMRL/WebUI-X (همهٔ این‌ها را از مدیر روت خود نصب کنید).
+- **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)**: یک مجموعه‌داده از اثرهای `build.prop` دستگاه‌های Pixel (فورک از @T3SL4).
+- **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**: از Telegram به عنوان یک فضای ذخیره‌سازی شیء از طریق یک CLI کوچک Go استفاده کنید.
 
 ## اطلاعات تماس
 
-- https://vd171.ru
-- https://vd.priv8.ru
-- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
-- **Channel:** @Priv8_VD https://t.me/Priv8_VD
-- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
-- **E-mail:** vd.priv8@pm.me
-- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
-- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
-- **GitHub:** @VD171 https://github.com/VD171
+- Site           : https://vd171.ru
+- Site           : https://vd.priv8.ru
+- Source         : https://github.com/VD171/COPG-VD
+- GitHub         : [@VD171](https://github.com/VD171)
+- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
+- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
+- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
+- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
+- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
+- E-mail         : vd.priv8@pm.me
 
 <div dir="rtl">
 

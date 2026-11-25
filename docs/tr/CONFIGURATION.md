@@ -54,7 +54,7 @@ attestation yolunun düz olandan farklı bir değer bildirmesini sağlar, böyle
 tutarlı kalır.
 
 > **Sürüm grubu özeldir.** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` ve `CODENAME`
-> ROM'unuzu tanımlar, sahtelenen cihazı değil. Onları yükseltmek telefonu softloop yapar.
+> ROM'unuzu tanımlar, sahtelenen cihazı değil. SDK'yı ROM'un üzerine çıkarmak telefonu softloop yapar, bu yüzden v6.19'dan beri SDK her politika altında (Force dahil) ROM'un değerinde sınırlanır.
 > Birlikte gelen profilde yoktur ve yalnızca `COPG-VD-Settings.spoof_version` izin
 > verdiğinde uygulanır: bkz. [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
@@ -80,7 +80,7 @@ Profille birlikte seyahat eden ayarlar, böylece bir yedek seçimlerinizi taşı
 |---|---|---|
 | `resetprop` | bool | Cihaz geneli resetprop motorunun çalışıp çalışmayacağı. |
 | `autoupdate` | bool | `fingerprint-update.sh`'nin önyükleme başına bir kez çalışıp çalışmayacağı. Varsayılan açık. |
-| `spoof_version` | `never` / `rom` / `force` | Android sürüm grubunun nasıl uygulanacağı. `never` varsayılandır; `force` bir yedek geri yüklenirken reddedilir. |
+| `spoof_version` | `never` / `rom` / `force` | Android sürüm grubunun nasıl uygulanacağı. `never` varsayılandır. v6.19'dan beri SDK her politika altında ROM'un değerinde sınırlanır, bu yüzden `force` dize alanlarını zorlar ama SDK'yı yükseltemez; `force` bir yedek geri yüklenirken reddedilir. |
 
 ## `global_fields`
 

@@ -54,7 +54,8 @@ Các biến thể `*_FOR_ATTESTATION` (`BRAND_FOR_ATTESTATION`, `DEVICE_FOR_ATTE
 nhất quán.
 
 > **Nhóm version là đặc biệt.** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` và `CODENAME` mô tả
-> ROM của bạn, không phải thiết bị được giả mạo. Nâng chúng lên sẽ làm điện thoại softloop.
+> ROM của bạn, không phải thiết bị được giả mạo. Nâng SDK cao hơn ROM sẽ làm điện thoại softloop, nên
+> kể từ v6.19 SDK bị giới hạn ở giá trị của ROM dưới mọi chính sách (bao gồm cả Force).
 > Chúng không có trong hồ sơ đi kèm và chỉ áp dụng khi `COPG-VD-Settings.spoof_version` cho
 > phép: xem [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
@@ -79,7 +80,7 @@ Các thiết lập đi cùng với hồ sơ, nên một bản sao lưu mang theo
 |---|---|---|
 | `resetprop` | bool | Liệu động cơ resetprop toàn thiết bị có chạy không. |
 | `autoupdate` | bool | Liệu `fingerprint-update.sh` có chạy một lần mỗi lần khởi động không. Mặc định bật. |
-| `spoof_version` | `never` / `rom` / `force` | Cách nhóm phiên bản Android được áp dụng. `never` là mặc định; `force` bị từ chối khi khôi phục một bản sao lưu. |
+| `spoof_version` | `never` / `rom` / `force` | Cách nhóm phiên bản Android được áp dụng. `never` là mặc định. Kể từ v6.19 SDK bị giới hạn ở giá trị của ROM dưới mọi chính sách, nên `force` buộc các trường chuỗi nhưng không thể nâng SDK; `force` bị từ chối khi khôi phục một bản sao lưu. |
 
 ## `global_fields`
 

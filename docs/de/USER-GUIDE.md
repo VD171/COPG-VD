@@ -86,8 +86,10 @@ Diese Felder sind nicht in der mitgelieferten Konfiguration, und der Updater sch
 
 - `never` (Standard): die eigene Version der ROM wird verwendet.
 - `rom`: wendet nur an, was die ROM nicht überschreitet, was in der Praxis ein Absenken des SDK bedeutet.
-- `force`: wendet genau das an, was die Konfiguration sagt. Das ist, was den Softloop auslöst;
-  nutze es nur, wenn du weißt, dass das Ziel-Framework es unterstützt.
+- `force`: erzwingt die Versionsfelder, die die Konfiguration verlangt. Das SDK wird auch hier auf den
+  Wert der ROM begrenzt (seit v6.19), denn das SDK über das echte Framework anzuheben, löst nur einen
+  Softloop aus und hat keinen Nutzen, sodass `force` keinen Softloop mehr auslöst; es erzwingt die
+  String-Felder (Release, Codename).
 
 Die echte Version wird aus `/system/build.prop` gelesen, nie aus `getprop` (genau das, was
 dieses Modul fälscht). `force` wird außerdem beim Wiederherstellen eines Backups abgelehnt, sodass
@@ -140,8 +142,9 @@ Es stellt keine Netzwerkanfrage; alles, was es braucht, wird im Modul mitgeliefe
 - **Play Integrity schlägt weiterhin fehl.** Stelle sicher, dass der Fingerprint frisch ist
   (Check Update) und dass `SECURITY_PATCH` in `global_fields` steht, damit er geräteweit
   kohärent bleibt. Beende die Google Play services, damit er sich neu attestiert.
-- **Das Telefon geht nach dem Aktivieren des Versions-Spoofings in einen Softloop.** Das ist die
-  Android-Versions-Falle oben: setze `spoof_version` zurück auf `never`.
+- **Das Telefon geht nach dem Aktivieren des Versions-Spoofings in einen Softloop (auf Versionen vor v6.19).** Das ist die
+  Android-Versions-Falle oben: setze `spoof_version` zurück auf `never`, oder aktualisiere auf v6.19+, das
+  das SDK unter jeder Policy (Force inbegriffen) auf den Wert des echten Frameworks begrenzt, sodass das nicht passieren kann.
 - **Die WebUI öffnet sich auf Magisk nicht.** Nutze [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) oder [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) oder [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->

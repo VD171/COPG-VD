@@ -28,6 +28,7 @@
   <a href="https://github.com/VD171/COPG-VD/wiki/cs-CONFIGURATION">Referenční příručka konfigurace</a> ·
   <a href="https://github.com/VD171/COPG-VD/wiki/cs-ARCHITECTURE">Architektura</a> ·
   <a href="https://github.com/VD171/COPG-VD/wiki/cs-FILE-STRUCTURE">Struktura souborů</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/cs-AI-AGENTS">AI agenti</a> ·
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
@@ -38,6 +39,37 @@
 </p>
 
 ---
+
+## Proč
+
+Stále více aplikací odmítá běžet, nebo se tiše přepne do omezeného režimu, když zařízení, které vidí, není čistý, certifikovaný telefon: Play Integrity, úrovně DRM i kontroly zařízení specifické pro aplikaci čtou všechny fingerprint buildu a systémové properties. COPG-VD tuto identitu přepíše, takže aplikace vidí koherentní Pixel (nebo jakékoli zařízení, které nakonfiguruješ) místo toho tvého skutečného. S funkčním fingerprintem obvykle nepotřebuješ PlayIntegrityFix ani GooglePhotosUnlimited: je to lehčí a robustnější alternativa a ve výchozím nastavení omezuje spoofing na stack Google Play, takže zbytek systému zůstane nedotčen.
+
+## Funkce
+
+- **Řízení rozsahu:** doruč spoofovanou identitu jen stacku Google Play (výchozí), celému zařízení, whitelistu, nebo všemu kromě blacklistu. V omezeném režimu doručuje Zygisk identitu pro každý proces zvlášť, takže nikdy neunikne přes globální properties.
+- **Nezávislé engines:** pole Build (přepis `android.os.Build.*` přes JNI), property hook pro každý proces typu clean-room (bez hooku funkce), seskupené `resetprop` a volitelná úroveň DRM / Widevine (L1 nebo L3) s vlastním seznamem cílů. Každý lze vypnout.
+- **Řízení po polích:** každé pole Build lze nastavit, vyprázdnit, smazat nebo přeskočit, se seznamem `global_fields` pro hodnoty, které musí zůstat konzistentní na celém zařízení.
+- **Vždy čerstvý fingerprint:** profil Pixelu je součástí balení a jednou za boot se sám aktualizuje z nejnovějšího továrního image Google; přes WebUI si můžeš stáhnout i jiný profil Pixelu. Nikdy nejde zpět a odmítne profil pro jiné zařízení.
+- **Bezpečná politika verze Androidu:** SDK se pod žádnou politikou nezvyšuje nad tvůj skutečný framework (jeho zvýšení telefon jen softloopuje).
+- **Analyze:** prověří konfiguraci proti tvé ROM a props a označí jakoukoli nekoherenci dřív, než se dostane k aplikacím.
+- **WebUI:** pět záložek k ovládání všeho, bez jediného síťového požadavku; konfigurační soubor nese všechna nastavení, takže přežijí aktualizaci modulu.
+- **Přírůstková samoaktualizace (VDLU)** a nativní knihovna se **čtyřmi ABI** (arm64-v8a, armeabi-v7a, x86, x86_64).
+
+## AI agenti
+
+COPG-VD lze skriptovat headless: celý modul je řízen jedním souborem JSON (`/data/adb/COPG-VD/COPG-VD.json`) a jediným shell vstupním bodem, `fingerprint-update.sh`, se stabilními slovesy (`check`, `apply`, `analyze`, `fetch-index`, `fetch <path>` a dalšími). Agent běžící jako root umí číst a zapisovat konfiguraci a provést každou akci, kterou zvládne WebUI, aniž by WebUI scrapoval. Viz [docs/AI-AGENTS.md](docs/cs/AI-AGENTS.md). Patche od AI podléhají stejné laťce revize jako kterékoli jiné.
+
+## Instalace
+
+Flashni zip v KernelSU, APatch nebo Magisku a restartuj. Dodávaný profil Pixelu se cílovým aplikacím spoofuje okamžitě. Instalátor spustí integritní gate `.sha256` a při poškozeném nebo useknutém zipu flash přeruší (a bezpečně jej přeskočí tam, kde není žádný nástroj na kontrolní součty). Vyžaduje Zygisk, přes KernelSU, APatch nebo Magisk, a root.
+
+## Zabezpečení
+
+Spoofing je čistě na straně uživatele: COPG-VD nikdy nezvedne SDK nad tvůj skutečný framework, udržuje výrobce koherentní se zbytkem profilu a čte skutečnou verzi z `/system/build.prop`, nikdy z properties, které falšuje. Samoaktualizátor vyžaduje platný podpis ed25519 a odmítá downgrady; WebUI nedělá žádný síťový požadavek. Problémy nahlas podle [SECURITY.md](docs/cs/SECURITY.md).
+
+## Sestavení
+
+Vždy release, nikdy debug. Nativní knihovna a scope helper se v CI sestavují pro všechny čtyři ABI; release workflow sestaví flashovatelný zip, zapíše doprovodné soubory `.sha256` pro každý soubor, znovu vygeneruje podepsanou baseline VDLU a publikuje jako `github-actions[bot]`. Viz [CONTRIBUTING.md](docs/cs/CONTRIBUTING.md).
 
 ## Jak se používá?
 Nainstaluj modul, restartuj, a dodávaný profil (Pixel) se spoofuje cílovým aplikacím. S funkčním fingerprintem nepotřebuješ PlayIntegrityFix ani GooglePhotosUnlimited.  
@@ -125,7 +157,7 @@ Blok výše a `module/COPG-VD.json.example` jsou denně aktualizovány workflow 
 * **Spoof Android version** ve WebUI rozhoduje, zda se vůbec aplikují:  
   * **Never** (výchozí): použije se vlastní verze ROM.  
   * **Up to this ROM**: jen to, co ji nepřekročí, což v praxi znamená snížení SDK.  
-  * **Force**: přesně to, co říká konfigurace. To je to, co způsobuje softloop.  
+  * **Force**: vynutí ostatní pole verze přesně tak, jak žádá konfigurace, ale SDK je i zde omezeno na hodnotu tvé ROM (zvýšení SDK nad skutečný framework jen způsobí softloop a nemá žádné legitimní využití), takže od v6.19 **Force už nezpůsobuje softloop**.  
 * Skutečná verze se čte z `/system/build.prop`, nikdy z `getprop`: což je právě to, co tento modul falšuje.  
 
 ### Analyze
@@ -145,6 +177,7 @@ Pokud jsi uživatel Magisku, použij KsuWebUI od KOW (https://github.com/KOWX712
 - **[Uživatelská příručka](https://github.com/VD171/COPG-VD/wiki/cs-USER-GUIDE)**: instalace, WebUI a každodenní používání.
 - **[Referenční příručka konfigurace](https://github.com/VD171/COPG-VD/wiki/cs-CONFIGURATION)**: každé nastavení v konfiguračním souboru a co dělá.
 - **[Architektura](https://github.com/VD171/COPG-VD/wiki/cs-ARCHITECTURE)** a **[Struktura souborů](https://github.com/VD171/COPG-VD/wiki/cs-FILE-STRUCTURE)**: jak spoofing funguje a kde všechno najdete.
+- **[AI agenti](https://github.com/VD171/COPG-VD/wiki/cs-AI-AGENTS)**: ovládej konfiguraci a aktualizátor headless.
 
 <!-- /vd-docs -->
 
@@ -160,28 +193,28 @@ COPG-VD obsahuje engine **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) 
 
 ## Viz také
 
-Sourozenecké projekty od stejného autora:
-
-- **[VDInfos](https://github.com/VD171/VD-Infos)**: debugger metod zařízení, který čte každou položku přes každou metodu, která ji umí přečíst, a porovnává je vedle sebe.
-- **[VDGoogle](https://github.com/VD171/VD-Google)**: tvé služby Google (RCS, Wallet, atestace Play Integrity), čtené na tvém zařízení bez internetu.
-- **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: samostatný rootovaný SSH démon (Dropbear).
 - **[VDBackup](https://github.com/VD171/VD-Backup)**: kompletní záloha a obnova aplikací a dat jako root, ovládaná výhradně z WebUI.
-- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: bezflashový, inkrementální engine pro samoaktualizaci, vestavěný do modulů KernelSU/APatch/Magisk.
+- **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: samostatný rootovaný SSH démon (Dropbear).
+- **[VDGoogle](https://github.com/VD171/VD-Google)**: tvé služby Google (RCS, Wallet, atestace Play Integrity), čtené na tvém zařízení bez internetu.
 - **[VDInstaller](https://github.com/VD171/VD-Installer)**: bezproblémový rootový sideload instalátor pro jednotlivé, dávkové a rozdělené APK, s přepínačem ověřování Play Protect a podvržením zdroje instalace.
-
-Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork od @T3SL4).
+- **[VDInfos](https://github.com/VD171/VD-Infos)**: debugger metod zařízení, který čte každou položku přes každou metodu, která ji umí přečíst, a porovnává je vedle sebe.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: bezflashový, inkrementální engine pro samoaktualizaci, vestavěný do modulů KernelSU/APatch/Magisk.
+- **[VD-Modules](https://github.com/VD171/VD-Modules)**: naše úložiště modulů pro MMRL/WebUI-X (nainstalujte všechny z vašeho správce rootu).
+- **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)**: datová sada otisků `build.prop` zařízení Pixel (fork @T3SL4).
+- **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**: používejte Telegram jako objektové úložiště z malého CLI v Go.
 
 ## Kontakty
 
-- https://vd171.ru
-- https://vd.priv8.ru
-- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
-- **Channel:** @Priv8_VD https://t.me/Priv8_VD
-- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
-- **E-mail:** vd.priv8@pm.me
-- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
-- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
-- **GitHub:** @VD171 https://github.com/VD171
+- Site           : https://vd171.ru
+- Site           : https://vd.priv8.ru
+- Source         : https://github.com/VD171/COPG-VD
+- GitHub         : [@VD171](https://github.com/VD171)
+- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
+- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
+- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
+- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
+- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
+- E-mail         : vd.priv8@pm.me
 
 ## Licence
 

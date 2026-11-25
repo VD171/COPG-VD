@@ -54,8 +54,8 @@ Die `*_FOR_ATTESTATION`-Varianten (`BRAND_FOR_ATTESTATION`, `DEVICE_FOR_ATTESTAT
 Attestierungspfad einen anderen Wert als den einfachen melden, sodass der Keystore kohärent bleibt.
 
 > **Die Versionsgruppe ist speziell.** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` und `CODENAME`
-> beschreiben deine ROM, nicht das vorgetäuschte Gerät. Sie anzuheben, bringt das Telefon in
-> einen Softloop. Sie sind nicht im mitgelieferten Profil und greifen nur, wenn
+> beschreiben deine ROM, nicht das vorgetäuschte Gerät. Das SDK über die ROM anzuheben, bringt das Telefon in
+> einen Softloop, daher wird das SDK seit v6.19 unter jeder Policy (Force inbegriffen) auf den Wert der ROM begrenzt. Sie sind nicht im mitgelieferten Profil und greifen nur, wenn
 > `COPG-VD-Settings.spoof_version` es erlaubt: siehe [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
 ### Feldzustände
@@ -79,7 +79,7 @@ Einstellungen, die mit dem Profil reisen, sodass ein Backup deine Entscheidungen
 |---|---|---|
 | `resetprop` | bool | Ob die geräteweite resetprop-Engine läuft. |
 | `autoupdate` | bool | Ob `fingerprint-update.sh` einmal pro Boot läuft. Standardmäßig an. |
-| `spoof_version` | `never` / `rom` / `force` | Wie die Android-Versionsgruppe greift. `never` ist der Standard; `force` wird beim Wiederherstellen eines Backups abgelehnt. |
+| `spoof_version` | `never` / `rom` / `force` | Wie die Android-Versionsgruppe greift. `never` ist der Standard. Seit v6.19 wird das SDK unter jeder Policy auf den Wert der ROM begrenzt, sodass `force` die String-Felder erzwingt, aber das SDK nicht anheben kann; `force` wird beim Wiederherstellen eines Backups abgelehnt. |
 
 ## `global_fields`
 

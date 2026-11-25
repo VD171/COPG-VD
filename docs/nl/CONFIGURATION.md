@@ -52,7 +52,7 @@ De `*_FOR_ATTESTATION`-varianten (`BRAND_FOR_ATTESTATION`, `DEVICE_FOR_ATTESTATI
 attestatiepad een andere waarde rapporteren dan de gewone, zodat de keystore coherent blijft.
 
 > **De versiegroep is speciaal.** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` en `CODENAME`
-> beschrijven jouw ROM, niet het gespoofte apparaat. Ze verhogen softloopt de telefoon. Ze zitten niet
+> beschrijven jouw ROM, niet het gespoofte apparaat. De SDK boven de ROM tillen softloopt de telefoon, dus sinds v6.19 wordt de SDK afgetopt op de waarde van de ROM onder elk beleid (Force inbegrepen). Ze zitten niet
 > in het meegeleverde profiel en zijn alleen van toepassing wanneer `COPG-VD-Settings.spoof_version` het
 > toestaat: zie [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
@@ -77,7 +77,7 @@ Instellingen die met het profiel meereizen, zodat een back-up je keuzes meedraag
 |---|---|---|
 | `resetprop` | bool | Of de apparaatbrede resetprop-engine draait. |
 | `autoupdate` | bool | Of `fingerprint-update.sh` eenmaal per boot draait. Standaard aan. |
-| `spoof_version` | `never` / `rom` / `force` | Hoe de Android-versiegroep wordt toegepast. `never` is de standaard; `force` wordt geweigerd bij het herstellen van een back-up. |
+| `spoof_version` | `never` / `rom` / `force` | Hoe de Android-versiegroep wordt toegepast. `never` is de standaard. Sinds v6.19 wordt de SDK afgetopt op de waarde van de ROM onder elk beleid, dus `force` forceert de stringvelden maar kan de SDK niet verhogen; `force` wordt geweigerd bij het herstellen van een back-up. |
 
 ## `global_fields`
 

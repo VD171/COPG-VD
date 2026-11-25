@@ -86,8 +86,9 @@ Android version** (`COPG-VD-Settings.spoof_version`) decide se vengono applicati
 
 - `never` (predefinito): viene usata la versione stessa della ROM.
 - `rom`: applica solo ciò che non supera la ROM, che in pratica significa abbassare l'SDK.
-- `force`: applica esattamente ciò che dice la config. È questo che causa il softloop; usalo
-  solo se sai che il framework di destinazione lo supporta.
+- `force`: forza i campi di versione che la config chiede. L'SDK resta comunque limitato al valore
+  della ROM anche qui (da v6.19), perché alzare l'SDK oltre il framework reale provoca solo il softloop
+  e non ha alcun uso, quindi `force` non provoca più il softloop; forza i campi stringa (release, codename).
 
 La versione reale viene letta da `/system/build.prop`, mai da `getprop` (che è proprio
 la cosa che questo modulo falsifica). `force` viene anche rifiutato durante il ripristino di un backup, così un
@@ -140,8 +141,8 @@ Non effettua alcuna richiesta di rete; tutto ciò di cui ha bisogno è incluso n
 - **Play Integrity fallisce ancora.** Assicurati che il fingerprint sia aggiornato (Check Update) e
   che il `SECURITY_PATCH` sia in `global_fields` così da restare coerente a livello dell'intero dispositivo. Termina
   Google Play services così da fargli rifare l'attestazione.
-- **Il telefono va in softloop dopo aver abilitato lo spoof della versione.** È la trappola della versione
-  Android qui sopra: rimetti `spoof_version` su `never`.
+- **Il telefono va in softloop dopo aver abilitato lo spoof della versione (su versioni precedenti alla v6.19).** È la trappola della versione
+  Android qui sopra: rimetti `spoof_version` su `never`, oppure aggiorna alla v6.19+, che limita l'SDK al valore reale del framework sotto ogni policy (Force incluso) così che questo non possa accadere.
 - **La WebUI non si apre su Magisk.** Usa [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) o [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) o [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->

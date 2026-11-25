@@ -51,7 +51,8 @@
 attestation اجازه می‌دهند مقداری متفاوت از مقدار ساده گزارش دهد، تا keystore همخوان بماند.
 
 > **گروه version خاص است.** `ANDROID_VERSION`، `SDK_INT`، `SDK_FULL` و `CODENAME`
-> رام شما را توصیف می‌کنند، نه دستگاه spoof‌شده را. بالا بردن آن‌ها تلفن را softloop می‌کند.
+> رام شما را توصیف می‌کنند، نه دستگاه spoof‌شده را. بالا بردن SDK فراتر از رام تلفن را softloop می‌کند، پس
+> از v6.19 ‏SDK در هر policy (از جمله Force) به مقدار رام محدود می‌شود.
 > آن‌ها در پروفایل عرضه‌شده نیستند و فقط وقتی `COPG-VD-Settings.spoof_version` اجازه دهد
 > اعمال می‌شوند: [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap) را ببینید.
 
@@ -76,7 +77,7 @@ attestation اجازه می‌دهند مقداری متفاوت از مقدار
 |---|---|---|
 | `resetprop` | bool | اینکه آیا موتور سراسری resetprop اجرا شود. |
 | `autoupdate` | bool | اینکه آیا `fingerprint-update.sh` یک بار در هر boot اجرا شود. پیش‌فرض روشن. |
-| `spoof_version` | `never` / `rom` / `force` | چگونه گروه version اندروید اعمال شود. `never` پیش‌فرض است؛ `force` هنگام بازگردانی یک backup رد می‌شود. |
+| `spoof_version` | `never` / `rom` / `force` | چگونه گروه version اندروید اعمال شود. `never` پیش‌فرض است. از v6.19 ‏SDK در هر policy به مقدار رام محدود می‌شود، پس `force` فیلدهای متنی را اعمال می‌کند اما نمی‌تواند SDK را بالا ببرد؛ `force` هنگام بازگردانی یک backup رد می‌شود. |
 
 ## `global_fields`
 

@@ -86,8 +86,9 @@ Android version** (`COPG-VD-Settings.spoof_version`) ตัดสินว่า
 
 - `never` (ค่าเริ่มต้น): ใช้เวอร์ชันของ ROM เอง
 - `rom`: ใช้เฉพาะสิ่งที่ไม่เกิน ROM ซึ่งในทางปฏิบัติหมายถึงการลด SDK ลง
-- `force`: ใช้ตามที่คอนฟิกบอกทุกอย่าง นี่คือสิ่งที่ทำให้เกิด softloop ใช้มัน
-  เฉพาะเมื่อคุณรู้ว่า framework เป้าหมายรองรับมัน
+- `force`: บังคับใช้ฟิลด์เวอร์ชันตามที่คอนฟิกร้องขอ SDK ยังคงถูกจำกัดไว้ที่ค่าของ ROM
+  แม้ในกรณีนี้ (ตั้งแต่ v6.19) เพราะการเพิ่ม SDK ให้สูงกว่าเฟรมเวิร์กจริงมีแต่ทำให้เกิด softloop
+  และไม่มีประโยชน์ ดังนั้น `force` จึงไม่ทำให้เกิด softloop อีกต่อไป มันบังคับใช้ฟิลด์สตริง (release, codename)
 
 เวอร์ชันจริงถูกอ่านจาก `/system/build.prop` ไม่เคยจาก `getprop` (ซึ่งเป็น
 สิ่งที่โมดูลนี้ปลอม) `force` ยังถูกปฏิเสธเมื่อกู้คืนข้อมูลสำรอง ดังนั้น
@@ -140,8 +141,9 @@ Android version** (`COPG-VD-Settings.spoof_version`) ตัดสินว่า
 - **Play Integrity ยังล้มเหลว** ตรวจสอบให้แน่ใจว่าลายนิ้วมือสดใหม่ (Check Update) และ
   ว่า `SECURITY_PATCH` อยู่ใน `global_fields` เพื่อให้มันคงความสอดคล้องทั้งอุปกรณ์ ฆ่า
   Google Play services เพื่อให้มัน re-attest
-- **โทรศัพท์ softloop หลังเปิดการปลอมเวอร์ชัน** นั่นคือกับดักเวอร์ชัน Android
-  ด้านบน: ตั้ง `spoof_version` กลับเป็น `never`
+- **โทรศัพท์ softloop หลังเปิดการปลอมเวอร์ชัน (บนเวอร์ชันก่อน v6.19)** นั่นคือกับดักเวอร์ชัน Android
+  ด้านบน: ตั้ง `spoof_version` กลับเป็น `never` หรืออัปเดตเป็น v6.19+ ซึ่งจำกัด SDK
+  ไว้ที่ค่าเฟรมเวิร์กจริงภายใต้ทุกนโยบาย (รวมถึง Force) เพื่อไม่ให้สิ่งนี้เกิดขึ้น
 - **WebUI ไม่เปิดบน Magisk** ใช้ [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) หรือ [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) หรือ [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases)
 
 <!-- doc-footer -->

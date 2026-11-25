@@ -50,7 +50,7 @@
 पथ को सादे मान से एक भिन्न मान रिपोर्ट करने देते हैं, ताकि keystore सुसंगत रहे।
 
 > **version समूह विशेष है।** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` और `CODENAME` आपके ROM का
-> वर्णन करते हैं, spoof किए गए डिवाइस का नहीं। इन्हें बढ़ाने से फ़ोन softloop करता है। ये भेजी गई
+> वर्णन करते हैं, spoof किए गए डिवाइस का नहीं। SDK को ROM से ऊपर बढ़ाने से फ़ोन softloop करता है, इसलिए v6.19 के बाद से हर नीति (Force सहित) के अंतर्गत SDK को ROM के मान पर सीमित कर दिया जाता है। ये भेजी गई
 > प्रोफ़ाइल में नहीं हैं और केवल तभी लागू होते हैं जब `COPG-VD-Settings.spoof_version` इसकी अनुमति
 > देता है: [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap) देखें।
 
@@ -76,7 +76,7 @@
 |---|---|---|
 | `resetprop` | bool | क्या डिवाइस-भर resetprop इंजन चलता है। |
 | `autoupdate` | bool | क्या `fingerprint-update.sh` प्रति boot एक बार चलता है। डिफ़ॉल्ट चालू। |
-| `spoof_version` | `never` / `rom` / `force` | Android version समूह कैसे लागू होता है। `never` डिफ़ॉल्ट है; `force` को backup बहाल करते समय अस्वीकार किया जाता है। |
+| `spoof_version` | `never` / `rom` / `force` | Android version समूह कैसे लागू होता है। `never` डिफ़ॉल्ट है। v6.19 के बाद से हर नीति के अंतर्गत SDK को ROM के मान पर सीमित कर दिया जाता है, इसलिए `force` string फ़ील्ड्स को बाध्य करता है लेकिन SDK नहीं बढ़ा सकता; `force` को backup बहाल करते समय अस्वीकार किया जाता है। |
 
 ## `global_fields`
 

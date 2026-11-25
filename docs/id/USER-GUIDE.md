@@ -89,8 +89,9 @@ diterapkan sama sekali:
 - `never` (default): versi ROM itu sendiri yang digunakan.
 - `rom`: hanya menerapkan apa yang tidak melebihi ROM, yang dalam praktiknya berarti
   menurunkan SDK.
-- `force`: menerapkan persis apa yang dikatakan config. Inilah yang menyebabkan softloop;
-  gunakan hanya jika Anda tahu framework target mendukungnya.
+- `force`: memaksa field versi yang diminta config. SDK tetap dibatasi pada nilai ROM bahkan
+  di sini (sejak v6.19), karena menaikkan SDK di atas framework sebenarnya hanya menyebabkan softloop
+  dan tidak ada gunanya, jadi `force` tidak lagi menyebabkan softloop; ia memaksa field string (release, codename).
 
 Versi sebenarnya dibaca dari `/system/build.prop`, tidak pernah dari `getprop` (yang justru
 hal yang dipalsukan modul ini). `force` juga ditolak saat memulihkan backup, sehingga backup
@@ -146,8 +147,8 @@ modul.
 - **Play Integrity masih gagal.** Pastikan fingerprint segar (Check Update) dan bahwa
   `SECURITY_PATCH` ada di `global_fields` sehingga tetap koheren di seluruh perangkat. Kill
   Google Play services agar ia melakukan atestasi ulang.
-- **Ponsel softloop setelah mengaktifkan version spoofing.** Itu adalah jebakan versi Android
-  di atas: setel `spoof_version` kembali ke `never`.
+- **Ponsel softloop setelah mengaktifkan version spoofing (pada versi sebelum v6.19).** Itu adalah jebakan versi Android
+  di atas: setel `spoof_version` kembali ke `never`, atau perbarui ke v6.19+, yang membatasi SDK pada nilai framework sebenarnya di bawah setiap kebijakan (termasuk Force) sehingga ini tidak dapat terjadi.
 - **WebUI tidak mau terbuka di Magisk.** Gunakan [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) atau [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) atau [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->

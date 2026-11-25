@@ -71,7 +71,7 @@ WebUI یا یک بار در هر boot. از downloader همراه خود ماژ�
 بالا بردن `SDK_INT` / `ANDROID_VERSION` فراتر از آنچه framework رام واقعاً هست باعث می‌شود
 اپ‌ها API هایی را فراخوانی کنند که وجود ندارند، که اپ‌های Google را کرش می‌کند و تلفن را به
 یک softloop ری‌استارت می‌کند. بنابراین گروه version به صورت پیش‌فرض خاموش است و پشت
-`spoof_version` محصور شده. ماژول نسخه واقعی را از `/system/build.prop` می‌خواند، هرگز از
+`spoof_version` محصور شده؛ و از v6.19 علاوه بر این SDK در **هر** policy (از جمله Force) به مقدار framework واقعی محدود می‌شود، پس حتی یک پروفایل اجباری با SDK بالاتر هم نمی‌تواند softloop کند (Force همچنان فیلدهای متنی نسخه را اعمال می‌کند). ماژول نسخه واقعی را از `/system/build.prop` می‌خواند، هرگز از
 `getprop`، چون `getprop` دقیقاً همان چیزی است که آن را جعل می‌کند. تله را در
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap) ببینید.
 

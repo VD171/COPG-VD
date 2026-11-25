@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The spoofed Android version can no longer raise the SDK above your device's real framework version, even when the version policy is set to Force. Claiming a higher SDK than the framework actually is makes apps call APIs that do not exist and softloops the device, so the module now caps the SDK at the real value under every policy (the other version fields, such as the release name, are still forced). If forcing the version left you stuck in a softloop, this removes the cause.
+
 ## v6.18-vd
 
 - A malformed or very deeply nested configuration file can no longer crash the module. The config reader now caps how deep it will parse and rejects pathological input safely, instead of overflowing the stack.

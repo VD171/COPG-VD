@@ -28,6 +28,7 @@
   <a href="https://github.com/VD171/COPG-VD/wiki/pl-CONFIGURATION">Dokumentacja konfiguracji</a> ·
   <a href="https://github.com/VD171/COPG-VD/wiki/pl-ARCHITECTURE">Architektura</a> ·
   <a href="https://github.com/VD171/COPG-VD/wiki/pl-FILE-STRUCTURE">Struktura plików</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/pl-AI-AGENTS">Agenci AI</a> ·
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
@@ -38,6 +39,37 @@
 </p>
 
 ---
+
+## Dlaczego
+
+Coraz więcej aplikacji odmawia uruchomienia lub po cichu obniża jakość działania, gdy urządzenie, które widzą, nie jest czystym, certyfikowanym telefonem: Play Integrity, poziomy DRM i kontrole urządzenia specyficzne dla aplikacji - wszystkie czytają fingerprint builda oraz właściwości systemowe. COPG-VD przepisuje tę tożsamość, aby aplikacje widziały spójnego Pixela (lub dowolne urządzenie, które skonfigurujesz) zamiast twojego prawdziwego. Z działającym fingerprint zwykle nie potrzebujesz PlayIntegrityFix ani GooglePhotosUnlimited: to lżejsza, solidniejsza alternatywa, a domyślnie ogranicza spoofing do stosu Google Play, pozostawiając resztę systemu w spokoju.
+
+## Funkcje
+
+- **Kontrola zakresu:** dostarcz spoofowaną tożsamość tylko do stosu Google Play (domyślnie), do całego urządzenia, do whitelisty albo do wszystkiego z wyjątkiem blacklisty. W trybie z zakresem Zygisk dostarcza tożsamość per proces, więc nigdy nie wycieka ona przez globalne właściwości.
+- **Niezależne silniki:** pola Build (przepisanie `android.os.Build.*` w JNI), hook właściwości per proces w stylu clean-room (bez hooka funkcji), zgrupowany `resetprop` oraz opcjonalny poziom DRM / Widevine (L1 lub L3) z własną listą celów. Każdy można wyłączyć.
+- **Kontrola per pole:** każde pole Build można ustawić, opróżnić, usunąć lub pominąć, a lista `global_fields` służy wartościom, które muszą pozostać spójne w całym urządzeniu.
+- **Zawsze świeży fingerprint:** profil Pixela jest dołączony w pudełku i raz na boot odświeża się z najnowszego obrazu fabrycznego Google; możesz też pobrać inny profil Pixela z WebUI. Nigdy nie cofa się i odrzuca profil innego urządzenia.
+- **Bezpieczna polityka wersji Androida:** przy żadnej polityce SDK nie jest podnoszone powyżej twojego prawdziwego frameworku (podniesienie go tylko wprowadza telefon w softloop).
+- **Analyze:** audytuje konfigurację względem twojego ROM-u i props oraz oznacza wszystko, co niespójne, zanim dotrze to do aplikacji.
+- **WebUI:** pięć kart do sterowania wszystkim, bez żadnego żądania sieciowego; plik konfiguracyjny niesie wszystkie ustawienia, więc przetrwają one aktualizację modułu.
+- **Przyrostowa samoaktualizacja (VDLU)** oraz natywna biblioteka w **czterech ABI** (arm64-v8a, armeabi-v7a, x86, x86_64).
+
+## Agenci AI
+
+COPG-VD można skryptować bezgłowo: cały moduł jest sterowany jednym plikiem JSON (`/data/adb/COPG-VD/COPG-VD.json`) oraz pojedynczym punktem wejścia powłoki, `fingerprint-update.sh`, ze stabilnymi czasownikami (`check`, `apply`, `analyze`, `fetch-index`, `fetch <path>` i więcej). Agent działający jako root może czytać i zapisywać konfigurację oraz wykonać każdą akcję, którą potrafi WebUI, bez scrapowania WebUI. Zobacz [docs/AI-AGENTS.md](docs/pl/AI-AGENTS.md). Łatki od AI podlegają temu samemu progowi recenzji co wszystkie inne.
+
+## Instalacja
+
+Zflashuj zip w KernelSU, APatch lub Magisk i zrestartuj. Dołączony profil Pixela jest natychmiast spoofowany dla docelowych aplikacji. Instalator uruchamia bramkę integralności `.sha256` i przerywa przy uszkodzonym lub obciętym zipie (a bezpiecznie pomija tam, gdzie brak narzędzia do sum kontrolnych). Wymaga Zygisk, przez KernelSU, APatch lub Magisk, oraz roota.
+
+## Bezpieczeństwo
+
+Spoofing odbywa się wyłącznie po stronie użytkownika: COPG-VD nigdy nie podnosi SDK powyżej twojego prawdziwego frameworku, utrzymuje manufacturer spójny z resztą profilu i czyta prawdziwą wersję z `/system/build.prop`, nigdy z właściwości, które fałszuje. Samoaktualizator wymaga ważnego podpisu ed25519 i odrzuca downgrade'y; WebUI nie wykonuje żadnego żądania sieciowego. Zgłaszaj problemy zgodnie z [SECURITY.md](docs/pl/SECURITY.md).
+
+## Budowanie
+
+Zawsze release, nigdy debug. Biblioteka natywna i pomocnik zakresu są budowane w CI dla wszystkich czterech ABI; workflow wydania składa flashowalny zip, zapisuje towarzyszące pliki `.sha256` per plik, regeneruje podpisaną bazę VDLU i publikuje jako `github-actions[bot]`. Zobacz [CONTRIBUTING.md](docs/pl/CONTRIBUTING.md).
 
 ## Jak używać?
 Zainstaluj moduł, zrestartuj, a dostarczony profil (Pixel) jest spoofowany dla docelowych aplikacji. Z działającym fingerprint nie potrzebujesz PlayIntegrityFix ani GooglePhotosUnlimited.  
@@ -122,7 +154,7 @@ Blok powyżej oraz `module/COPG-VD.json.example` są codziennie odświeżane prz
 * **Spoof Android version** w WebUI decyduje, czy są one w ogóle stosowane:  
   * **Never** (domyślnie): używana jest własna wersja ROM.  
   * **Up to this ROM**: tylko to, co jej nie przekracza, co w praktyce oznacza obniżenie SDK.  
-  * **Force**: dokładnie to, co mówi konfiguracja. To właśnie powoduje softloop.  
+  * **Force**: wymusza pozostałe pola wersji dokładnie tak, jak prosi konfiguracja, ale SDK i tak jest ograniczone do wartości twojej ROM nawet tutaj (podniesienie SDK powyżej prawdziwego frameworku tylko powoduje softloop i nie ma żadnego uzasadnionego zastosowania), więc od v6.19 **Force już nie powoduje softloopa**.  
 * Prawdziwa wersja jest odczytywana z `/system/build.prop`, nigdy z `getprop`: bo to właśnie jego ten moduł fałszuje.  
 
 ### Analyze
@@ -142,6 +174,7 @@ Jeśli jesteś użytkownikiem Magisk, użyj KsuWebUI autorstwa KOW (https://gith
 - **[Przewodnik użytkownika](https://github.com/VD171/COPG-VD/wiki/pl-USER-GUIDE)**: instalacja, WebUI i codzienne użytkowanie.
 - **[Dokumentacja konfiguracji](https://github.com/VD171/COPG-VD/wiki/pl-CONFIGURATION)**: każde ustawienie w pliku konfiguracyjnym i jego działanie.
 - **[Architektura](https://github.com/VD171/COPG-VD/wiki/pl-ARCHITECTURE)** i **[Struktura plików](https://github.com/VD171/COPG-VD/wiki/pl-FILE-STRUCTURE)**: jak działa spoofing i gdzie wszystko się znajduje.
+- **[Agenci AI](https://github.com/VD171/COPG-VD/wiki/pl-AI-AGENTS)**: steruj konfiguracją i aktualizatorem bez interfejsu.
 
 <!-- /vd-docs -->
 
@@ -157,28 +190,28 @@ COPG-VD zawiera silnik **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (
 
 ## Zobacz także
 
-Projekty siostrzane tego samego autora:
-
-- **[VDInfos](https://github.com/VD171/VD-Infos)**: debuger metod urządzenia, który odczytuje każdy element wszystkimi metodami zdolnymi go odczytać i porównuje je obok siebie.
-- **[VDGoogle](https://github.com/VD171/VD-Google)**: twoje usługi Google (RCS, Wallet, atestacje Play Integrity), odczytane na twoim urządzeniu bez internetu.
-- **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: samodzielny demon SSH działający z uprawnieniami roota (Dropbear).
 - **[VDBackup](https://github.com/VD171/VD-Backup)**: pełny backup i przywracanie aplikacji oraz danych jako root, obsługiwane w całości z WebUI.
-- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: bezflashowy, przyrostowy silnik samoaktualizacji, wbudowany w moduły KernelSU/APatch/Magisk.
+- **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: samodzielny demon SSH działający z uprawnieniami roota (Dropbear).
+- **[VDGoogle](https://github.com/VD171/VD-Google)**: twoje usługi Google (RCS, Wallet, atestacje Play Integrity), odczytane na twoim urządzeniu bez internetu.
 - **[VDInstaller](https://github.com/VD171/VD-Installer)**: bezproblemowy rootowy instalator sideload dla pojedynczych, wsadowych i podzielonych APK, z przełącznikiem weryfikatora Play Protect i podszywaniem źródła instalacji.
-
-Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
+- **[VDInfos](https://github.com/VD171/VD-Infos)**: debuger metod urządzenia, który odczytuje każdy element wszystkimi metodami zdolnymi go odczytać i porównuje je obok siebie.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: bezflashowy, przyrostowy silnik samoaktualizacji, wbudowany w moduły KernelSU/APatch/Magisk.
+- **[VD-Modules](https://github.com/VD171/VD-Modules)**: nasze repozytorium modułów dla MMRL/WebUI-X (zainstaluj je wszystkie z menedżera roota).
+- **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)**: zbiór danych odcisków `build.prop` urządzeń Pixel (fork @T3SL4).
+- **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**: używaj Telegrama jako magazynu obiektów z małego CLI w Go.
 
 ## Kontakty
 
-- https://vd171.ru
-- https://vd.priv8.ru
-- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
-- **Channel:** @Priv8_VD https://t.me/Priv8_VD
-- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
-- **E-mail:** vd.priv8@pm.me
-- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
-- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
-- **GitHub:** @VD171 https://github.com/VD171
+- Site           : https://vd171.ru
+- Site           : https://vd.priv8.ru
+- Source         : https://github.com/VD171/COPG-VD
+- GitHub         : [@VD171](https://github.com/VD171)
+- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
+- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
+- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
+- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
+- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
+- E-mail         : vd.priv8@pm.me
 
 ## Licencja
 

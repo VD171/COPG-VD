@@ -53,7 +53,7 @@ atestação reporte um valor diferente do valor comum, para que o keystore perma
 coerente.
 
 > **O grupo de versão é especial.** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` e `CODENAME`
-> descrevem a sua ROM, não o dispositivo falsificado. Elevá-los causa softloop no telefone. Eles não estão
+> descrevem a sua ROM, não o dispositivo falsificado. Elevar o SDK acima da ROM causa softloop no telefone, então desde a v6.19 o SDK é limitado ao valor da ROM sob todas as políticas (Force incluído). Eles não estão
 > no perfil enviado e só se aplicam quando `COPG-VD-Settings.spoof_version` permite -
 > veja [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
@@ -78,7 +78,7 @@ Configurações que viajam com o perfil, para que um backup carregue as suas esc
 |---|---|---|
 | `resetprop` | bool | Se o motor resetprop de todo o dispositivo roda. |
 | `autoupdate` | bool | Se o `fingerprint-update.sh` roda uma vez por boot. Padrão ligado. |
-| `spoof_version` | `never` / `rom` / `force` | Como o grupo de versão do Android se aplica. `never` é o padrão; `force` é recusado ao restaurar um backup. |
+| `spoof_version` | `never` / `rom` / `force` | Como o grupo de versão do Android se aplica. `never` é o padrão. Desde a v6.19 o SDK é limitado ao valor da ROM sob todas as políticas, então `force` força os campos de texto mas não pode elevar o SDK; `force` é recusado ao restaurar um backup. |
 
 ## `global_fields`
 

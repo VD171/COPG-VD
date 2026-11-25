@@ -87,8 +87,9 @@ Zygisk द्वारा प्रति-प्रोसेस वितरि�
 
 - `never` (डिफ़ॉल्ट): ROM के अपने संस्करण का उपयोग होता है।
 - `rom`: केवल वही लागू करता है जो ROM से अधिक नहीं होता, जिसका व्यवहार में अर्थ है SDK को कम करना।
-- `force`: ठीक वही लागू करता है जो config कहती है। यही softloop का कारण बनता है; इसका उपयोग तभी
-  करें जब आप जानते हों कि लक्ष्य framework इसका समर्थन करता है।
+- `force`: config जो संस्करण फ़ील्ड्स माँगती है उन्हें बाध्य करता है। SDK यहाँ भी ROM के मान पर ही
+  सीमित रहता है (v6.19 के बाद से), क्योंकि वास्तविक framework से ऊपर SDK बढ़ाना केवल softloop करता है
+  और इसका कोई उपयोग नहीं है, इसलिए `force` अब softloop नहीं करता; यह string फ़ील्ड्स (release, codename) को बाध्य करता है।
 
 असली संस्करण `/system/build.prop` से पढ़ा जाता है, कभी `getprop` से नहीं (जो ठीक वही चीज़ है
 जिसे यह मॉड्यूल झुठलाता है)। `force` को backup बहाल करते समय भी अस्वीकार कर दिया जाता है, ताकि एक
@@ -140,8 +141,8 @@ WebUI में **Analyze** (या `fingerprint-update.sh analyze`) config क�
 - **Play Integrity अभी भी विफल होता है।** सुनिश्चित करें कि fingerprint ताज़ा है (Check Update)
   और कि `SECURITY_PATCH` `global_fields` में है ताकि यह डिवाइस-भर में सुसंगत रहे। Google Play
   services को kill करें ताकि यह फिर से attest करे।
-- **संस्करण spoofing सक्षम करने के बाद फ़ोन softloop करता है।** यह ऊपर वाला Android संस्करण जाल
-  है: `spoof_version` को वापस `never` पर सेट करें।
+- **संस्करण spoofing सक्षम करने के बाद फ़ोन softloop करता है (v6.19 से पहले के संस्करणों पर)।** यह ऊपर वाला Android संस्करण जाल
+  है: `spoof_version` को वापस `never` पर सेट करें, या v6.19+ पर अपडेट करें, जो हर नीति (Force सहित) के अंतर्गत SDK को वास्तविक framework मान पर सीमित कर देता है ताकि ऐसा न हो सके।
 - **Magisk पर WebUI नहीं खुलती।** [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) या [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) या [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases) का उपयोग करें।
 
 <!-- doc-footer -->

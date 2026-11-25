@@ -28,6 +28,7 @@
   <a href="https://github.com/VD171/COPG-VD/wiki/ar-CONFIGURATION">مرجع الإعداد</a> ·
   <a href="https://github.com/VD171/COPG-VD/wiki/ar-ARCHITECTURE">البنية المعمارية</a> ·
   <a href="https://github.com/VD171/COPG-VD/wiki/ar-FILE-STRUCTURE">بنية الملفات</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ar-AI-AGENTS">وكلاء الذكاء الاصطناعي</a> ·
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
@@ -38,6 +39,37 @@
 </p>
 
 ---
+
+## لماذا
+
+يرفض عدد متزايد من التطبيقات العمل، أو يخفّض خدماته بصمت، عندما لا يكون الجهاز الذي تراه هاتفاً نظيفاً ومعتمَداً: فـ Play Integrity ومستويات DRM وفحوص الجهاز الخاصة بكل تطبيق تقرأ جميعها بصمة الـ build (fingerprint) وproperties النظام. يعيد COPG-VD كتابة تلك الهوية بحيث ترى التطبيقات جهاز Pixel متماسكاً (أو أي جهاز تضبطه) بدلاً من جهازك الحقيقي. مع بصمة تعمل بشكل صحيح لا تحتاج عادةً إلى PlayIntegrityFix أو GooglePhotosUnlimited: فهو بديل أخف وأكثر متانة، ويقصر الانتحال افتراضياً على حزمة Google Play بحيث يبقى بقية نظامك دون مساس.
+
+## الميزات
+
+- **التحكم في النطاق (Scope):** سلّم الهوية المنتحلة إلى حزمة Google Play وحدها (الافتراضي)، أو إلى الجهاز بالكامل، أو إلى whitelist، أو إلى كل شيء ما عدا blacklist. في الوضع المحدود يسلّم Zygisk الهوية لكل عملية على حدة، فلا تتسرّب أبداً عبر الـ properties العامة.
+- **محرّكات مستقلة:** حقول Build (إعادة كتابة لـ `android.os.Build.*` عبر JNI)، وproperty hook لكل عملية بأسلوب clean-room (دون hook للدالة)، و`resetprop` مُدار بالمجموعات، ومستوى DRM / Widevine اختياري (L1 أو L3) بقائمة أهداف خاصة به. ويمكن إيقاف كل واحد منها.
+- **التحكم لكل حقل:** يمكن ضبط كل حقل Build، أو تفريغه، أو حذفه، أو تخطيه، مع قائمة `global_fields` للقيم التي يجب أن تبقى متسقة على مستوى الجهاز بالكامل.
+- **بصمة محدّثة دائماً:** يأتي ملف Pixel شخصي ضمن الحزمة ويحدّث نفسه مرة واحدة لكل إقلاع من أحدث صورة مصنع (factory image) من Google؛ ويمكنك أيضاً جلب ملف Pixel شخصي آخر من WebUI. وهو لا يرجع إلى الوراء أبداً ويرفض ملفاً شخصياً لجهاز مختلف.
+- **سياسة آمنة لإصدار Android:** لا يُرفع الـ SDK فوق الـ framework الحقيقي لديك تحت أي سياسة (رفعه يسبّب softloop للهاتف فقط).
+- **Analyze:** يدقّق الإعداد في مواجهة الـ ROM والـ props لديك ويبلّغ عن أي تنافر قبل أن يصل إلى التطبيقات.
+- **WebUI:** خمس علامات تبويب لإدارة كل شيء، دون أي طلب شبكي؛ ويحمل ملف الإعداد جميع الإعدادات بحيث تبقى بعد تحديث الموديول.
+- **تحديث ذاتي تزايدي (VDLU)** ومكتبة أصلية بـ **أربع ABIs** (arm64-v8a، armeabi-v7a، x86، x86_64).
+
+## وكلاء الذكاء الاصطناعي
+
+يمكن برمجة COPG-VD بلا واجهة (headless): فالموديول بأكمله يُدار عبر ملف JSON واحد (`/data/adb/COPG-VD/COPG-VD.json`) ونقطة دخول shell واحدة، `fingerprint-update.sh`، بأفعال مستقرة (`check`، `apply`، `analyze`، `fetch-index`، `fetch <path>` وغيرها). يستطيع وكيل يعمل بصلاحية root قراءة الإعداد والكتابة إليه وتنفيذ كل إجراء تستطيعه WebUI، دون كشط (scraping) الـ WebUI. انظر [docs/AI-AGENTS.md](docs/ar/AI-AGENTS.md). وتخضع تصحيحات الذكاء الاصطناعي لنفس معايير المراجعة التي يخضع لها أي تصحيح آخر.
+
+## التثبيت
+
+افلش ملف الـ zip في KernelSU أو APatch أو Magisk وأعد التشغيل. يُنتحل ملف Pixel الشخصي المرفق للتطبيقات المستهدفة على الفور. يشغّل المثبّت بوابة سلامة `.sha256` ويُحبِط العملية عند وجود zip تالف أو مبتور (ويتخطاها بأمان حيث لا تتوفر أداة checksum). يتطلّب Zygisk، عبر KernelSU أو APatch أو Magisk، وصلاحية root.
+
+## الأمان
+
+الانتحال يجري على جانب المستخدم فقط: لا يرفع COPG-VD الـ SDK أبداً فوق الـ framework الحقيقي لديك، ويُبقي الشركة المصنّعة متسقة مع بقية الملف الشخصي، ويقرأ الإصدار الحقيقي من `/system/build.prop`، لا من الـ properties التي يزوّرها. ويتطلّب المحدِّث الذاتي توقيع ed25519 صالحاً ويرفض الـ downgrades؛ ولا ترسل WebUI أي طلب شبكي. أبلغ عن المشكلات وفق [SECURITY.md](docs/ar/SECURITY.md).
+
+## البناء
+
+دائماً release، وليس debug أبداً. تُبنى المكتبة الأصلية ومساعد الـ scope في الـ CI لجميع الـ ABIs الأربع؛ ويجمّع workflow الإصدار ملف الـ zip القابل للفلاش، ويكتب مرافِقات `.sha256` لكل ملف، ويعيد توليد خط أساس (baseline) VDLU الموقّع، وينشر باسم `github-actions[bot]`. انظر [CONTRIBUTING.md](docs/ar/CONTRIBUTING.md).
 
 ## كيفية الاستخدام؟
 ثبّت الموديول، أعد التشغيل، ويتم انتحال الملف الشخصي المرفق (جهاز Pixel) للتطبيقات المستهدفة. مع بصمة تعمل بشكل صحيح لا تحتاج إلى PlayIntegrityFix أو GooglePhotosUnlimited.  
@@ -125,7 +157,7 @@
 * **Spoof Android version** في WebUI يقرر ما إذا كانت ستُطبَّق أصلاً:  
   * **Never** (الافتراضي): يُستخدم إصدار الـ ROM نفسه.  
   * **Up to this ROM**: فقط ما لا يتجاوزه، وهو ما يعني عملياً خفض الـ SDK.  
-  * **Force**: بالضبط ما تقوله الإعدادات. هذا هو ما يسبب الـ softloop.  
+  * **Force**: يفرض حقول الإصدار الأخرى بالضبط كما تطلب الإعدادات، لكن الـ SDK يظل محدوداً بقيمة الـ ROM الخاصة بك حتى هنا (رفع الـ SDK فوق الـ framework الحقيقي يسبب softloop فقط ولا فائدة مشروعة له)، لذا منذ v6.19 **لم يعد Force يسبب softloop**.  
 * يُقرأ الإصدار الحقيقي من `/system/build.prop`، وليس أبداً من `getprop`: فهو بالضبط ما يزوّره هذا الموديول.  
 
 ### Analyze
@@ -145,6 +177,7 @@ WebUI اختياري (يمكن تعديل كل شيء في إعداد JSON مب�
 - **[دليل المستخدم](https://github.com/VD171/COPG-VD/wiki/ar-USER-GUIDE)**: التثبيت وواجهة WebUI والاستخدام اليومي.
 - **[مرجع الإعداد](https://github.com/VD171/COPG-VD/wiki/ar-CONFIGURATION)**: كل إعداد في ملف الإعدادات وما يفعله.
 - **[البنية المعمارية](https://github.com/VD171/COPG-VD/wiki/ar-ARCHITECTURE)** و **[بنية الملفات](https://github.com/VD171/COPG-VD/wiki/ar-FILE-STRUCTURE)**: كيف يعمل التزييف وأين يوجد كل شيء.
+- **[وكلاء الذكاء الاصطناعي](https://github.com/VD171/COPG-VD/wiki/ar-AI-AGENTS)**: قُد الإعداد والمحدِّث بلا واجهة.
 
 <!-- /vd-docs -->
 
@@ -160,28 +193,28 @@ WebUI اختياري (يمكن تعديل كل شيء في إعداد JSON مب�
 
 ## انظر أيضًا
 
-مشاريع شقيقة من المؤلف نفسه:
-
-- **[VDInfos](https://github.com/VD171/VD-Infos)**: مُنقّح طرق الجهاز يقرأ كل عنصر عبر كل طريقة يمكنها قراءته ويقارنها جنباً إلى جنب.
-- **[VDGoogle](https://github.com/VD171/VD-Google)**: خدمات Google الخاصة بك (RCS، Wallet، شهادات Play Integrity)، تُقرأ على جهازك دون إنترنت.
-- **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: خادم SSH مستقل يعمل بصلاحيات الجذر (Dropbear).
 - **[VDBackup](https://github.com/VD171/VD-Backup)**: نسخ احتياطي واستعادة كاملة للتطبيقات والبيانات بصلاحية root، تُدار بالكامل من WebUI.
-- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: محرك تحديث ذاتي تزايدي بلا فلاش، مدمج في وحدات KernelSU/APatch/Magisk.
+- **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: خادم SSH مستقل يعمل بصلاحيات الجذر (Dropbear).
+- **[VDGoogle](https://github.com/VD171/VD-Google)**: خدمات Google الخاصة بك (RCS، Wallet، شهادات Play Integrity)، تُقرأ على جهازك دون إنترنت.
 - **[VDInstaller](https://github.com/VD171/VD-Installer)**: مثبّت تحميل جانبي بصلاحيات الجذر وبلا احتكاك لحزم APK المفردة والمجمّعة والمقسّمة، مع مفتاح لمدقّق Play Protect وانتحال مصدر التثبيت.
-
-Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (مشتق من @T3SL4).
+- **[VDInfos](https://github.com/VD171/VD-Infos)**: مُنقّح طرق الجهاز يقرأ كل عنصر عبر كل طريقة يمكنها قراءته ويقارنها جنباً إلى جنب.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: محرك تحديث ذاتي تزايدي بلا فلاش، مدمج في وحدات KernelSU/APatch/Magisk.
+- **[VD-Modules](https://github.com/VD171/VD-Modules)**: مستودع وحداتنا على MMRL/WebUI-X (ثبّت كل هذه من مدير الجذر لديك).
+- **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)**: مجموعة بيانات من بصمات `build.prop` لأجهزة Pixel (فورك من @T3SL4).
+- **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**: استخدم Telegram كمخزن كائنات من خلال أداة CLI صغيرة بلغة Go.
 
 ## جهات الاتصال
 
-- https://vd171.ru
-- https://vd.priv8.ru
-- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
-- **Channel:** @Priv8_VD https://t.me/Priv8_VD
-- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
-- **E-mail:** vd.priv8@pm.me
-- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
-- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
-- **GitHub:** @VD171 https://github.com/VD171
+- Site           : https://vd171.ru
+- Site           : https://vd.priv8.ru
+- Source         : https://github.com/VD171/COPG-VD
+- GitHub         : [@VD171](https://github.com/VD171)
+- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
+- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
+- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
+- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
+- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
+- E-mail         : vd.priv8@pm.me
 
 ## الترخيص
 

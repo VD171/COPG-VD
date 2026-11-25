@@ -67,7 +67,7 @@ Build フィールドを更新します。モジュール自身の同梱ダウ�
 
 `SDK_INT` / `ANDROID_VERSION` を ROM の framework の実際より上に上げると、アプリに存在しない
 API を呼ばせ、Google のアプリをクラッシュさせ、電話を softloop に再起動させます。したがって version
-グループはデフォルトでオフで、`spoof_version` の背後でゲートされています。モジュールは実際の
+グループはデフォルトでオフで、`spoof_version` の背後でゲートされています。そして v6.19 以降、SDK はさらに**すべて**のポリシー(Force を含む)で実際の framework の値に制限されるため、強制的に SDK を上げたプロファイルでも softloop できません(Force は依然として文字列のバージョンフィールドを強制します)。モジュールは実際の
 バージョンを `/system/build.prop` から読み、決して `getprop` からは読みません。`getprop` こそが
 それが偽装するものだからです。[USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap) の罠を参照してください。
 

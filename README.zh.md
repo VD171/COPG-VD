@@ -28,6 +28,7 @@
   <a href="https://github.com/VD171/COPG-VD/wiki/zh-CONFIGURATION">配置参考</a> ·
   <a href="https://github.com/VD171/COPG-VD/wiki/zh-ARCHITECTURE">架构</a> ·
   <a href="https://github.com/VD171/COPG-VD/wiki/zh-FILE-STRUCTURE">文件结构</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/zh-AI-AGENTS">AI 智能体</a> ·
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
@@ -38,6 +39,37 @@
 </p>
 
 ---
+
+## 为什么
+
+当应用看到的设备不是一台干净、经过认证的手机时，它们越来越多地拒绝运行，或悄悄降级：Play Integrity、DRM 等级以及应用特定的设备检查都会读取 build fingerprint 和系统属性。COPG-VD 重写这一身份，让应用看到一台一致的 Pixel（或你配置的任意设备），而不是你真实的设备。有了可用的 fingerprint，你通常不需要 PlayIntegrityFix 或 GooglePhotosUnlimited：它是一个更轻量、更稳健的替代方案，并且默认将伪装范围限定在 Google Play 栈内，从而不影响系统的其余部分。
+
+## 功能
+
+- **范围控制：** 将伪装的身份仅投送到 Google Play 栈（默认）、整台设备、一个 whitelist，或除 blacklist 之外的所有内容。在限定范围的模式下，Zygisk 按进程投送身份，因此它绝不会通过全局属性泄露。
+- **独立引擎：** Build 字段（用 JNI 重写 `android.os.Build.*`）、按进程的 clean-room 属性 hook（无 function hook）、分组的 `resetprop`，以及一个可选的 DRM / Widevine 等级（L1 或 L3），带有自己的目标列表。每一项都可以关闭。
+- **逐字段控制：** 每个 Build 字段都可以设置、清空、删除或跳过，并通过 `global_fields` 列表处理那些必须在全设备范围内保持一致的值。
+- **始终最新的 fingerprint：** 包内自带一个 Pixel 配置文件，并在每次启动时从最新的 Google 出厂镜像自我刷新一次；你也可以从 WebUI 获取另一个 Pixel 配置文件。它绝不降级，并会拒绝用于其他设备的配置文件。
+- **安全的 Android 版本策略：** 在任何策略下，SDK 都绝不会被提升到高于你真实的 framework（提升它只会让手机 softloop）。
+- **Analyze：** 将配置与你的 ROM 和 props 进行核对，并在任何不一致的内容到达应用之前将其标记出来。
+- **WebUI：** 五个标签页用于驱动一切，且没有任何网络请求；配置文件承载所有设置，因此它们能在模块更新后保留下来。
+- **增量自我更新（VDLU）** 以及一个**四 ABI** 的原生库（arm64-v8a, armeabi-v7a, x86, x86_64）。
+
+## AI 智能体
+
+COPG-VD 可以无界面脚本化驱动：整个模块由一个 JSON 文件（`/data/adb/COPG-VD/COPG-VD.json`）和单一的 shell 入口点 `fingerprint-update.sh` 驱动，带有稳定的动词（`check`、`apply`、`analyze`、`fetch-index`、`fetch <path>` 等）。以 root 身份运行的智能体可以读写配置，并驱动 WebUI 能做的每一个操作，而无需 scrape WebUI。参见 [docs/AI-AGENTS.md](docs/zh/AI-AGENTS.md)。来自 AI 的补丁与其他任何补丁一样，接受同样的审查标准。
+
+## 安装
+
+在 KernelSU、APatch 或 Magisk 中刷入 zip 并重启。随附的 Pixel 配置文件会立即对目标应用进行伪装。安装程序会运行一个 `.sha256` 完整性门禁，并在 zip 损坏或被截断时中止（在没有校验和工具的环境中会安全跳过）。需要通过 KernelSU、APatch 或 Magisk 提供的 Zygisk，以及 root。
+
+## 安全
+
+伪装仅在用户侧进行：COPG-VD 绝不会把 SDK 提升到高于你真实的 framework，保持制造商与配置文件其余部分一致，并从 `/system/build.prop` 读取真实版本，而绝不从它所伪造的属性中读取。自我更新程序需要有效的 ed25519 签名并拒绝降级；WebUI 不发出任何网络请求。请按照 [SECURITY.md](docs/zh/SECURITY.md) 报告问题。
+
+## 构建
+
+始终是 release，绝不是 debug。原生库和范围辅助程序在 CI 中为全部四个 ABI 构建；release 工作流组装可刷入的 zip，为每个文件写入 `.sha256` 伴随文件，重新生成已签名的 VDLU 基线，并以 `github-actions[bot]` 身份发布。参见 [CONTRIBUTING.md](docs/zh/CONTRIBUTING.md)。
 
 ## 如何使用？
 安装模块，重启，随附的配置文件（一台 Pixel）就会对目标应用进行伪装。有了可用的 fingerprint，你就不需要 PlayIntegrityFix 或 GooglePhotosUnlimited。  
@@ -122,7 +154,7 @@
 * WebUI 中的 **Spoof Android version** 决定它们是否会被应用：  
   * **Never**（默认）: 使用 ROM 自身的版本。  
   * **Up to this ROM**: 仅应用不超过它的部分，实际上意味着降低 SDK。  
-  * **Force**: 完全按照配置所写。这正是导致 softloop 的原因。  
+  * **Force**: 完全按照配置的要求强制设置其他版本字段，但即使在这里 SDK 仍会被限制在你 ROM 的值（把 SDK 提到高于真实框架只会导致 softloop，没有任何正当用途），因此自 v6.19 起 **Force 不再导致 softloop**。  
 * 真实版本是从 `/system/build.prop` 读取的，绝不从 `getprop` 读取: 因为那正是本模块所伪造的东西。  
 
 ### Analyze
@@ -142,6 +174,7 @@ WebUI 是可选的 (一切都可以直接在 JSON 配置文件中编辑) 但它�
 - **[用户指南](https://github.com/VD171/COPG-VD/wiki/zh-USER-GUIDE)**: 安装、WebUI 以及日常使用。
 - **[配置参考](https://github.com/VD171/COPG-VD/wiki/zh-CONFIGURATION)**: 配置文件中的每一项设置及其作用。
 - **[架构](https://github.com/VD171/COPG-VD/wiki/zh-ARCHITECTURE)** 和 **[文件结构](https://github.com/VD171/COPG-VD/wiki/zh-FILE-STRUCTURE)**: 欺骗如何工作以及各文件的位置。
+- **[AI 智能体](https://github.com/VD171/COPG-VD/wiki/zh-AI-AGENTS)**：无界面地驱动配置和更新程序。
 
 <!-- /vd-docs -->
 
@@ -157,28 +190,28 @@ COPG-VD 内置 **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** 
 
 ## 另请参阅
 
-同一作者的姊妹项目：
-
-- **[VDInfos](https://github.com/VD171/VD-Infos)**：一个设备方法调试器，通过每一种能读取某项的方法来读取它，并将它们并排比较。
-- **[VDGoogle](https://github.com/VD171/VD-Google)**：你的 Google 服务（RCS、Wallet、Play Integrity 证明），在你的设备上读取，无需联网。
-- **[VD-dropbear](https://github.com/VD171/VD-dropbear)**：一个以 root 权限运行的独立 SSH 守护进程（Dropbear）。
 - **[VDBackup](https://github.com/VD171/VD-Backup)**：以 root 权限完整备份和恢复应用与数据，完全从 WebUI 驱动。
-- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: 一个无需刷入的增量自更新引擎，嵌入到 KernelSU/APatch/Magisk 模块中。
+- **[VD-dropbear](https://github.com/VD171/VD-dropbear)**：一个以 root 权限运行的独立 SSH 守护进程（Dropbear）。
+- **[VDGoogle](https://github.com/VD171/VD-Google)**：你的 Google 服务（RCS、Wallet、Play Integrity 证明），在你的设备上读取，无需联网。
 - **[VDInstaller](https://github.com/VD171/VD-Installer)**: 一个面向单个、批量和拆分 APK 的无摩擦 root 侧载安装器，带有 Play Protect 验证器开关和安装来源伪装。
-
-Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
+- **[VDInfos](https://github.com/VD171/VD-Infos)**：一个设备方法调试器，通过每一种能读取某项的方法来读取它，并将它们并排比较。
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: 一个无需刷入的增量自更新引擎，嵌入到 KernelSU/APatch/Magisk 模块中。
+- **[VD-Modules](https://github.com/VD171/VD-Modules)**：我们面向 MMRL/WebUI-X 的模块仓库（从你的 root 管理器安装全部这些）。
+- **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)**：一个 Pixel `build.prop` 指纹数据集（@T3SL4 的分支）。
+- **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**：通过一个小巧的 Go CLI 把 Telegram 当作对象存储。
 
 ## 联系方式
 
-- https://vd171.ru
-- https://vd.priv8.ru
-- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
-- **Channel:** @Priv8_VD https://t.me/Priv8_VD
-- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
-- **E-mail:** vd.priv8@pm.me
-- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
-- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
-- **GitHub:** @VD171 https://github.com/VD171
+- Site           : https://vd171.ru
+- Site           : https://vd.priv8.ru
+- Source         : https://github.com/VD171/COPG-VD
+- GitHub         : [@VD171](https://github.com/VD171)
+- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
+- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
+- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
+- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
+- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
+- E-mail         : vd.priv8@pm.me
 
 ## License
 

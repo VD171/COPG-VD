@@ -62,7 +62,7 @@ COPG-VD 是一个 Zygisk 模块：一个很小的原生库（`libspoof.so`），
 
 把 `SDK_INT` / `ANDROID_VERSION` 提高到超过 ROM 框架实际的版本，会使应用去调用并不存在的
 API，这会使 Google 的应用崩溃并把手机重启进一个软循环。因此 version 组默认关闭，并受
-`spoof_version` 的把关。模块从 `/system/build.prop` 读取真实版本，绝不会从 `getprop` 读取，因
+`spoof_version` 的把关。而且自 v6.19 起，SDK 在**所有**策略下（包括 Force）还会被额外限制在真实框架的值，因此即使是被强制调高 SDK 的配置文件也无法软循环（Force 仍会强制字符串版本字段）。模块从 `/system/build.prop` 读取真实版本，绝不会从 `getprop` 读取，因
 为 `getprop` 正是它所伪造的东西。参见 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap)
 中的陷阱。
 

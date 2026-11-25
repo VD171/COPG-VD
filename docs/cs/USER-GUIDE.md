@@ -85,8 +85,9 @@ version** (`COPG-VD-Settings.spoof_version`) rozhoduje, zda se vůbec aplikují:
 
 - `never` (výchozí): použije se vlastní verze ROM.
 - `rom`: aplikuj pouze to, co nepřekračuje ROM, což v praxi znamená snížení SDK.
-- `force`: aplikuj přesně to, co říká konfigurace. To je to, co způsobuje softloop;
-  použijte jej pouze, pokud víte, že cílový framework jej podporuje.
+- `force`: vynuť pole verze, která žádá konfigurace. SDK je i zde omezeno na hodnotu
+  ROM (od v6.19), protože zvýšení SDK nad skutečný framework jen způsobí softloop a nemá
+  využití, takže `force` už nezpůsobuje softloop; vynutí řetězcová pole (release, codename).
 
 Skutečná verze se čte z `/system/build.prop`, nikdy z `getprop` (což je právě to, co
 tento modul falšuje). `force` je také odmítnut při obnově zálohy, takže stará záloha jej
@@ -139,8 +140,9 @@ Nedělá žádný síťový požadavek; vše, co potřebuje, přichází uvnitř
 - **Play Integrity stále selhává.** Ujistěte se, že otisk je čerstvý (Check Update) a že
   `SECURITY_PATCH` je v `global_fields`, aby zůstal koherentní napříč zařízením. Ukončete
   Google Play services, aby znovu provedly atestaci.
-- **Telefon se po zapnutí spoofu verze dostane do softloopu.** To je past na verzi
-  Androidu výše: nastavte `spoof_version` zpět na `never`.
+- **Telefon se po zapnutí spoofu verze dostane do softloopu (na verzích před v6.19).** To je past na verzi
+  Androidu výše: nastavte `spoof_version` zpět na `never`, nebo aktualizujte na v6.19+, které omezuje
+  SDK na hodnotu skutečného frameworku pod každou politikou (včetně Force), takže k tomu nemůže dojít.
 - **WebUI se na Magisku neotevře.** Použijte [KsuWebUIStandalone](https://github.com/KOWX712/KsuWebUIStandalone/releases) nebo [WebUI-X Portable](https://github.com/MMRLApp/WebUI-X-Portable/releases) nebo [KsuWebUI-SN](https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).
 
 <!-- doc-footer -->

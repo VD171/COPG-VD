@@ -53,7 +53,7 @@ attesteringsvägen rapportera ett annat värde än det vanliga, så att keystore
 koherent.
 
 > **Versionsgruppen är särskild.** `ANDROID_VERSION`, `SDK_INT`, `SDK_FULL` och `CODENAME`
-> beskriver din ROM, inte den spoofade enheten. Att höja dem softloopar telefonen. De finns inte
+> beskriver din ROM, inte den spoofade enheten. Att höja SDK:n över ROM:en softloopar telefonen, så sedan v6.19 begränsas SDK:n till ROM:ens värde under varje policy (Force inkluderat). De finns inte
 > i den levererade profilen och tillämpas endast när `COPG-VD-Settings.spoof_version` tillåter det -
 > se [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
@@ -78,7 +78,7 @@ Inställningar som följer med profilen, så att en säkerhetskopia bär dina va
 |---|---|---|
 | `resetprop` | bool | Om resetprop-motorn över hela enheten körs. |
 | `autoupdate` | bool | Om `fingerprint-update.sh` körs en gång per boot. Standard på. |
-| `spoof_version` | `never` / `rom` / `force` | Hur Android-versionsgruppen tillämpas. `never` är standard; `force` nekas vid återställning av en säkerhetskopia. |
+| `spoof_version` | `never` / `rom` / `force` | Hur Android-versionsgruppen tillämpas. `never` är standard. Sedan v6.19 begränsas SDK:n till ROM:ens värde under varje policy, så `force` tvingar fram strängfälten men kan inte höja SDK:n; `force` nekas vid återställning av en säkerhetskopia. |
 
 ## `global_fields`
 

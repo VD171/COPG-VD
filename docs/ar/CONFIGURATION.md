@@ -52,7 +52,7 @@
 متسقاً.
 
 > **مجموعة الإصدار خاصة.** تصف `ANDROID_VERSION` و`SDK_INT` و`SDK_FULL` و`CODENAME`
-> نظام الـ ROM لديك، لا الجهاز المنتحَل. رفعها يُدخل الهاتف في softloop. وهي ليست
+> نظام الـ ROM لديك، لا الجهاز المنتحَل. رفع الـ SDK فوق الـ ROM يُدخل الهاتف في softloop، لذا منذ v6.19 يُحَدّ الـ SDK عند قيمة الـ ROM تحت كل سياسة (بما في ذلك Force). وهي ليست
 > في ملف التعريف المرفق ولا تُطبَّق إلا عندما يسمح بها `COPG-VD-Settings.spoof_version` -
 > راجع [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
@@ -77,7 +77,7 @@
 |---|---|---|
 | `resetprop` | bool | ما إذا كان محرك resetprop على مستوى الجهاز يعمل. |
 | `autoupdate` | bool | ما إذا كان `fingerprint-update.sh` يعمل مرة واحدة لكل إقلاع. مفعّل افتراضياً. |
-| `spoof_version` | `never` / `rom` / `force` | كيفية تطبيق مجموعة إصدار Android. `never` هو الافتراضي؛ ويُرفض `force` عند استعادة نسخة احتياطية. |
+| `spoof_version` | `never` / `rom` / `force` | كيفية تطبيق مجموعة إصدار Android. `never` هو الافتراضي. منذ v6.19 يُحَدّ الـ SDK عند قيمة الـ ROM تحت كل سياسة، لذا يفرض `force` الحقول النصية لكنه لا يستطيع رفع الـ SDK؛ ويُرفض `force` عند استعادة نسخة احتياطية. |
 
 ## `global_fields`
 

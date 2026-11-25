@@ -28,6 +28,7 @@
   <a href="https://github.com/VD171/COPG-VD/wiki/ko-CONFIGURATION">설정 레퍼런스</a> ·
   <a href="https://github.com/VD171/COPG-VD/wiki/ko-ARCHITECTURE">아키텍처</a> ·
   <a href="https://github.com/VD171/COPG-VD/wiki/ko-FILE-STRUCTURE">파일 구조</a> ·
+  <a href="https://github.com/VD171/COPG-VD/wiki/ko-AI-AGENTS">AI 에이전트</a> ·
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
@@ -38,6 +39,37 @@
 </p>
 
 ---
+
+## 왜
+
+점점 더 많은 앱이, 자신이 보는 기기가 깨끗하고 인증된 폰이 아니면 실행을 거부하거나 조용히 기능을 낮춥니다: Play Integrity, DRM 레벨, 앱별 기기 검사는 모두 빌드 fingerprint와 시스템 속성을 읽습니다. COPG-VD는 그 신원을 다시 써서 앱이 실제 기기 대신 일관된 Pixel(또는 당신이 구성한 어떤 기기든)을 보게 합니다. 작동하는 fingerprint가 있으면 보통 PlayIntegrityFix나 GooglePhotosUnlimited가 필요 없습니다: 더 가볍고 더 견고한 대안이며, 기본적으로 스푸프를 Google Play 스택으로 한정해 시스템의 나머지는 건드리지 않습니다.
+
+## 기능
+
+- **범위 제어:** 스푸핑된 신원을 Google Play 스택에만(기본값), 기기 전체에, whitelist에, 또는 blacklist를 제외한 전부에 전달합니다. 범위가 지정된 모드에서는 Zygisk가 신원을 프로세스별로 전달하므로, 전역 속성을 통해 결코 새어 나가지 않습니다.
+- **독립적인 엔진:** 빌드 필드(`android.os.Build.*`의 JNI 재작성), 프로세스별 clean-room 속성 후크(함수 후크 없음), 그룹화된 `resetprop`, 그리고 자체 대상 목록을 가진 선택적 DRM / Widevine 레벨(L1 또는 L3). 각각 끌 수 있습니다.
+- **필드별 제어:** 모든 빌드 필드는 설정, 비우기, 삭제 또는 건너뛰기가 가능하며, 기기 전체에서 일관되게 유지되어야 하는 값을 위한 `global_fields` 목록이 있습니다.
+- **항상 최신인 fingerprint:** Pixel 프로필이 기본 포함되어 있으며 부팅마다 한 번씩 Google의 최신 공장 이미지로부터 스스로 갱신됩니다; WebUI에서 다른 Pixel 프로필을 가져올 수도 있습니다. 절대 되돌아가지 않으며 다른 기기의 프로필은 거부합니다.
+- **안전한 Android 버전 정책:** 어떤 정책에서도 SDK는 실제 프레임워크 위로 절대 올라가지 않습니다(올리면 폰이 softloop에 빠질 뿐입니다).
+- **Analyze:** 구성이 당신의 ROM 및 props와 맞는지 감사하고, 앱에 도달하기 전에 일관되지 않은 부분을 표시합니다.
+- **WebUI:** 모든 것을 조작하는 다섯 개의 탭, 네트워크 요청 없음; 구성 파일이 모든 설정을 담으므로 모듈 업데이트에도 살아남습니다.
+- **증분 자체 업데이트(VDLU)** 및 **4-ABI** 네이티브 라이브러리(arm64-v8a, armeabi-v7a, x86, x86_64).
+
+## AI 에이전트
+
+COPG-VD는 헤드리스로 스크립트할 수 있습니다: 모듈 전체가 하나의 JSON 파일(`/data/adb/COPG-VD/COPG-VD.json`)과 단일 shell 진입점 `fingerprint-update.sh`로, 안정적인 동사(`check`, `apply`, `analyze`, `fetch-index`, `fetch <path>` 등)를 통해 구동됩니다. root로 실행되는 에이전트는 구성을 읽고 쓸 수 있으며, WebUI를 스크래핑하지 않고도 WebUI가 할 수 있는 모든 동작을 수행할 수 있습니다. [docs/AI-AGENTS.md](docs/ko/AI-AGENTS.md)를 참고하세요. AI의 패치도 다른 모든 것과 동일한 리뷰 기준을 적용받습니다.
+
+## 설치
+
+KernelSU, APatch 또는 Magisk에서 zip을 플래시하고 재부팅하세요. 포함된 Pixel 프로필이 즉시 대상 앱에 대해 스푸핑됩니다. 설치 프로그램은 `.sha256` 무결성 게이트를 실행하며 손상되거나 잘린 zip에서는 중단합니다(체크섬 도구가 없는 곳에서는 안전하게 건너뜁니다). Zygisk(KernelSU, APatch 또는 Magisk를 통해)와 root가 필요합니다.
+
+## 보안
+
+스푸프는 사용자 측에서만 이루어집니다: COPG-VD는 SDK를 실제 프레임워크 위로 절대 올리지 않고, manufacturer를 프로필의 나머지와 일관되게 유지하며, 실제 버전을 자신이 위조하는 속성이 아니라 `/system/build.prop`에서 읽습니다. 자체 업데이터는 유효한 ed25519 서명을 요구하고 다운그레이드를 거부합니다; WebUI는 어떤 네트워크 요청도 하지 않습니다. 문제는 [SECURITY.md](docs/ko/SECURITY.md)에 따라 보고하세요.
+
+## 빌드
+
+언제나 release, 절대 debug 아님. 네이티브 라이브러리와 범위 헬퍼는 네 개의 ABI 모두에 대해 CI에서 빌드됩니다; 릴리스 워크플로는 플래시 가능한 zip을 조립하고, 파일별 `.sha256` 동반 파일을 쓰고, 서명된 VDLU 베이스라인을 재생성하여 `github-actions[bot]`으로 게시합니다. [CONTRIBUTING.md](docs/ko/CONTRIBUTING.md)를 참고하세요.
 
 ## 사용 방법
 모듈을 설치하고 재부팅하면, 동봉된 프로필(Pixel)이 대상 앱에 대해 스푸핑됩니다. 작동하는 fingerprint가 있으면 PlayIntegrityFix나 GooglePhotosUnlimited가 필요 없습니다.  
@@ -125,7 +157,7 @@
 * WebUI의 **Spoof Android version**이 이들을 적용할지 여부를 결정합니다:  
   * **Never**(기본값): ROM 자체의 버전이 사용됩니다.  
   * **Up to this ROM**: 그것을 초과하지 않는 것만 적용되며, 실제로는 SDK를 낮추는 것을 의미합니다.  
-  * **Force**: 설정에 적힌 그대로입니다. 이것이 softloop를 유발합니다.  
+  * **Force**: 설정이 요청하는 대로 다른 버전 필드를 강제하지만, 여기서도 SDK는 여전히 당신의 ROM 값으로 제한됩니다(SDK를 실제 framework보다 높게 올리는 것은 softloop만 유발할 뿐 정당한 용도가 없습니다). 따라서 v6.19부터 **Force는 더 이상 softloop하지 않습니다**.  
 * 실제 버전은 `/system/build.prop`에서 읽으며, 절대 `getprop`에서 읽지 않습니다: 그것이야말로 이 모듈이 조작하는 대상입니다.  
 
 ### Analyze
@@ -145,6 +177,7 @@ Magisk 사용자라면 KOW의 KsuWebUI를 사용하세요(https://github.com/KOW
 - **[사용자 가이드](https://github.com/VD171/COPG-VD/wiki/ko-USER-GUIDE)**: 설치, WebUI, 그리고 일상적인 사용법.
 - **[설정 레퍼런스](https://github.com/VD171/COPG-VD/wiki/ko-CONFIGURATION)**: 설정 파일의 모든 항목과 그 역할.
 - **[아키텍처](https://github.com/VD171/COPG-VD/wiki/ko-ARCHITECTURE)** 및 **[파일 구조](https://github.com/VD171/COPG-VD/wiki/ko-FILE-STRUCTURE)**: 스푸핑 작동 방식과 모든 파일의 위치.
+- **[AI 에이전트](https://github.com/VD171/COPG-VD/wiki/ko-AI-AGENTS)**: 구성과 업데이터를 헤드리스로 제어하기.
 
 <!-- /vd-docs -->
 
@@ -160,28 +193,28 @@ COPG-VD는 **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** 엔�
 
 ## 관련 앱
 
-같은 작성자의 자매 프로젝트:
-
-- **[VDInfos](https://github.com/VD171/VD-Infos)**: 각 항목을 그것을 읽을 수 있는 모든 메서드를 통해 읽고 나란히 비교하는 기기 메서드 디버거입니다.
-- **[VDGoogle](https://github.com/VD171/VD-Google)**: 당신의 Google 서비스(RCS, Wallet, Play Integrity 증명)를 인터넷 없이 기기에서 읽습니다.
-- **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: root로 동작하는 독립 실행형 SSH 데몬 (Dropbear).
 - **[VDBackup](https://github.com/VD171/VD-Backup)**: 앱과 데이터의 전체 백업과 복원을 root로 수행하며, 전적으로 WebUI에서 제어합니다.
-- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: KernelSU/APatch/Magisk 모듈에 내장된, 플래시가 필요 없는 증분 자가 업데이트 엔진.
+- **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: root로 동작하는 독립 실행형 SSH 데몬 (Dropbear).
+- **[VDGoogle](https://github.com/VD171/VD-Google)**: 당신의 Google 서비스(RCS, Wallet, Play Integrity 증명)를 인터넷 없이 기기에서 읽습니다.
 - **[VDInstaller](https://github.com/VD171/VD-Installer)**: 단일, 배치, 분할 APK 를 위한 마찰 없는 root 사이드로드 설치기로, Play Protect 검사기 토글과 설치 출처 위장을 갖추고 있습니다.
-
-Pixel `build.prop`: **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)** (fork of @T3SL4).
+- **[VDInfos](https://github.com/VD171/VD-Infos)**: 각 항목을 그것을 읽을 수 있는 모든 메서드를 통해 읽고 나란히 비교하는 기기 메서드 디버거입니다.
+- **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: KernelSU/APatch/Magisk 모듈에 내장된, 플래시가 필요 없는 증분 자가 업데이트 엔진.
+- **[VD-Modules](https://github.com/VD171/VD-Modules)**: MMRL/WebUI-X 용 우리의 모듈 저장소 (이 모든 것을 당신의 root 관리자에서 설치하세요).
+- **[@VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)**: Pixel `build.prop` 핑거프린트 데이터셋 (@T3SL4 의 포크).
+- **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**: 작은 Go CLI 로 Telegram 을 오브젝트 스토리지로 활용.
 
 ## 연락처
 
-- https://vd171.ru
-- https://vd.priv8.ru
-- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
-- **Channel:** @Priv8_VD https://t.me/Priv8_VD
-- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
-- **E-mail:** vd.priv8@pm.me
-- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
-- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
-- **GitHub:** @VD171 https://github.com/VD171
+- Site           : https://vd171.ru
+- Site           : https://vd.priv8.ru
+- Source         : https://github.com/VD171/COPG-VD
+- GitHub         : [@VD171](https://github.com/VD171)
+- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
+- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
+- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
+- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
+- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
+- E-mail         : vd.priv8@pm.me
 
 ## 라이선스
 
