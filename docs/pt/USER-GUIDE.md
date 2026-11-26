@@ -49,7 +49,7 @@ Cada motor é independente e pode ser desligado. Todos vêm ligados por padrão,
 - **resetprop**: reescreve as propriedades de sistema em todo o dispositivo, por grupo (identidade,
   versão, estado de boot, SELinux, adb/usb, anti-emulador e uma passada de limpeza). Em um modo com
   escopo, os grupos de identidade e versão ficam de fora da passada em todo o dispositivo (o Zygisk os entrega
-  por processo); os grupos boot, lock e SELinux permanecem globais. Alterne em
+  por processo), os grupos boot, lock e SELinux permanecem globais. Alterne em
   `COPG-VD-Settings.resetprop`.
 - **DRM / Widevine (`motor_drm`, desligado por padrão)**: reporta um nível de segurança Widevine
   escolhido (L1 ou L3) aos apps que o leem. Veja a seção DRM abaixo.
@@ -88,7 +88,7 @@ Android version** (`COPG-VD-Settings.spoof_version`) decide se eles são aplicad
 - `rom`: aplica apenas o que não excede a ROM, o que na prática significa abaixar o SDK.
 - `force`: força os campos de versão que a configuração pede. O SDK ainda é limitado ao valor da ROM
   mesmo aqui (desde a v6.19), porque elevar o SDK acima do framework real só causa softloop e não tem
-  utilidade, então `force` não causa mais softloop; ele força os campos de texto (release, codename).
+  utilidade, então `force` não causa mais softloop, ele força os campos de texto (release, codename).
 
 A versão real é lida de `/system/build.prop`, nunca do `getprop` (que é justamente
 aquilo que este módulo falsifica). `force` também é recusado ao restaurar um backup, de modo que um
@@ -102,7 +102,7 @@ Desligado por padrão (`motor_drm`). Quando ligado, reporta um nível Widevine e
 Por padrão, o spoof de DRM segue o `scope_mode`. Para aplicá-lo a um conjunto específico de apps
 em vez disso, independentemente do escopo principal, liste-os em `drm_targets`. O módulo então
 permanece carregado em um app listado **apenas** para o hook de DRM, mesmo quando esse app está fora do
-escopo principal; uma lista vazia ou ausente significa seguir o escopo. Isso requer um modo com escopo (não
+escopo principal, uma lista vazia ou ausente significa seguir o escopo. Isso requer um modo com escopo (não
 `global`), e passa a valer na próxima **reinicialização**.
 
 ## Analyze: verifique sua configuração
@@ -131,7 +131,7 @@ Opcional, mas a forma fácil de controlar tudo. Cinco abas:
   e o relatório de Diagnostics (um botão para ler e exportar tudo que é útil para um report de
   bug).
 
-Ela não faz nenhuma requisição de rede; tudo de que precisa vem dentro do módulo.
+Ela não faz nenhuma requisição de rede, tudo de que precisa vem dentro do módulo.
 
 ## Solução de problemas
 
@@ -150,4 +150,4 @@ Ela não faz nenhuma requisição de rede; tudo de que precisa vem dentro do mó
 
 ---
 
-> _Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas; veja [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas, veja [CONTRIBUTING.md](CONTRIBUTING.md)._

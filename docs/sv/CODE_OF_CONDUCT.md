@@ -9,7 +9,7 @@ diskussionerna tekniska och konstruktiva.
 
 - Var vänlig. Ingen trakasserier, personangrepp eller diskriminering.
 - Kritisera idéer och kod, inte människor.
-- Hjälp nykomlingar; alla var nya en gång.
+- Hjälp nykomlingar, alla var nya en gång.
 
 Oacceptabelt beteende kan rapporteras privat till underhållaren (se [SECURITY.md](SECURITY.md)
 för kontakt). Underhållare kan ta bort kommentarer, commits, ärenden och bidrag som
@@ -22,4 +22,4 @@ Covenant.
 
 ---
 
-> _Denna dokumentation genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar välkomnas; se [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Denna dokumentation genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar välkomnas, se [CONTRIBUTING.md](CONTRIBUTING.md)._

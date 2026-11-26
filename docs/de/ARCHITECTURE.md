@@ -40,7 +40,7 @@ Jede ist unabhängig und schaltbar.
 - **resetprop (geräteweit).** Schreibt Systemeigenschaften nach Gruppe: Identität,
   Version, Boot-State, SELinux, adb/usb, Anti-Emulator, plus ein Bereinigungsdurchlauf. Die Boot-Skripte führen
   es aus. In einem bereichsbezogenen Modus werden die Gruppen Identität und Version weggelassen (Zygisk liefert sie
-  prozessweise); die Gruppen Boot, Lock und SELinux bleiben global, damit das Gerät kohärent ist.
+  prozessweise), die Gruppen Boot, Lock und SELinux bleiben global, damit das Gerät kohärent ist.
 - **DRM / Widevine (`motor_drm`).** Hookt die `MediaDrm`-Methoden, die die Widevine-Sicherheitsstufe
   melden (`getSecurityLevel`, `getPropertyString`), und gibt die konfigurierte
   Stufe zurück. Die Hooks sind null-geprüft, sodass ein fehlerhaftes Profil anmutig degradiert, statt die App
@@ -53,7 +53,7 @@ Der injizierte Prozess läuft in der SELinux-Domäne von Zygote, die standardmä
 `/data/adb` zugreifen kann. Das Modul liefert seine eigene `sepolicy.rule` mit, um das zu erlauben, und kann als
 Fallback die Konfiguration über sein offenes Modulverzeichnis (`getModuleDir`) lesen, sodass es weiter
 funktioniert, selbst wenn ein Zygisk-Build den Pfad nicht mehr gewährt. Die Datei wird mit einem kleinen
-eingebetteten JSON-Parser (`jsmn`) geparst; eine Datei, die nicht parst, bedeutet, dass das Modul nichts spooft.
+eingebetteten JSON-Parser (`jsmn`) geparst, eine Datei, die nicht parst, bedeutet, dass das Modul nichts spooft.
 
 ## Das Profil aktuell halten
 
@@ -69,7 +69,7 @@ und [CONFIGURATION.md](CONFIGURATION.md) für die Felder.
 `SDK_INT` / `ANDROID_VERSION` über das anzuheben, was das Framework der ROM wirklich ist, bringt Apps dazu,
 APIs aufzurufen, die nicht existieren, was Googles Apps abstürzen lässt und das Telefon in einen
 Softloop neu startet. Die Versionsgruppe ist daher standardmäßig aus und hinter
-`spoof_version` abgesichert; und seit v6.19 wird das SDK zusätzlich unter **jeder** Policy (Force inbegriffen) auf den Wert des echten Frameworks begrenzt, sodass selbst ein erzwungenes Profil mit höherem SDK keinen Softloop auslösen kann (Force erzwingt weiterhin die String-Versionsfelder). Das Modul liest die echte Version aus `/system/build.prop`, nie aus
+`spoof_version` abgesichert, und seit v6.19 wird das SDK zusätzlich unter **jeder** Policy (Force inbegriffen) auf den Wert des echten Frameworks begrenzt, sodass selbst ein erzwungenes Profil mit höherem SDK keinen Softloop auslösen kann (Force erzwingt weiterhin die String-Versionsfelder). Das Modul liest die echte Version aus `/system/build.prop`, nie aus
 `getprop`, weil `getprop` genau das ist, was es fälscht. Siehe die Falle in
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
@@ -77,4 +77,4 @@ Softloop neu startet. Die Versionsgruppe ist daher standardmäßig aus und hinte
 
 ---
 
-> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen; siehe [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen, siehe [CONTRIBUTING.md](CONTRIBUTING.md)._

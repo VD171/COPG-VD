@@ -9,7 +9,7 @@ Diskussionen technisch und konstruktiv.
 
 - Seien Sie freundlich. Keine Belästigung, keine persönlichen Angriffe, keine Diskriminierung.
 - Kritisieren Sie Ideen und Code, nicht Menschen.
-- Helfen Sie Neulingen; jeder war einmal neu.
+- Helfen Sie Neulingen, jeder war einmal neu.
 
 Inakzeptables Verhalten kann privat an den Maintainer gemeldet werden (Kontakt siehe [SECURITY.md](SECURITY.md)).
 Maintainer dürfen Kommentare, Commits, Issues und Beiträge entfernen, die
@@ -22,4 +22,4 @@ Covenant.
 
 ---
 
-> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen; siehe [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen, siehe [CONTRIBUTING.md](CONTRIBUTING.md)._

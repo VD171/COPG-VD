@@ -1,6 +1,25 @@
 <!--
-  COPG-VD: global device spoofer: spoof your device fingerprint and build.
-  Copyright (C) 2026  AlirezaParsi & VD171. SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+  ======================================================================
+   COPG-VD  ::  global device spoofer
+   Spoof your device fingerprint and build.
+
+   Copyright (C) 2026  AlirezaParsi & VD171 (Fork by VD171)
+   SPDX-License-Identifier: AGPL-3.0-or-later
+
+   Licensed under the GNU AGPL v3.0 or later. You may obtain a copy at
+   https://www.gnu.org/licenses/agpl-3.0.html
+
+   Site           : https://vd171.ru
+   Site           : https://vd.priv8.ru
+   Source         : https://github.com/VD171/COPG-VD
+   GitHub         : @VD171 https://github.com/VD171
+   XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+   XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+   Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+   Channel        : @Priv8_VD https://t.me/Priv8_VD
+   Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+   E-mail         : vd.priv8@pm.me
+  ======================================================================
 -->
 
 # COPG-VD
@@ -11,7 +30,7 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases/latest"><img src="https://img.shields.io/github/v/release/VD171/COPG-VD?label=release&color=2ee89d" alt="Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1a7f37" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-1a7f37" alt="License"></a>
   <a href="https://github.com/VD171/COPG-VD/releases"><img src="https://img.shields.io/github/downloads/VD171/COPG-VD/total?label=downloads&color=8250df" alt="Downloads"></a>
   <a href="https://github.com/VD171/COPG-VD/stargazers"><img src="https://img.shields.io/github/stars/VD171/COPG-VD?color=d29922" alt="Stars"></a>
 </p>
@@ -32,10 +51,10 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · 한국어 · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
-  <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
+  <img src="docs/screenshots/ko/device.png" width="24%" alt="Device"> <img src="docs/screenshots/ko/spoofing.png" width="24%" alt="Spoofing"> <img src="docs/screenshots/ko/system.png" width="24%" alt="System"> <img src="docs/screenshots/ko/tools.png" width="24%" alt="Tools">
 </p>
 
 ---
@@ -49,10 +68,10 @@
 - **범위 제어:** 스푸핑된 신원을 Google Play 스택에만(기본값), 기기 전체에, whitelist에, 또는 blacklist를 제외한 전부에 전달합니다. 범위가 지정된 모드에서는 Zygisk가 신원을 프로세스별로 전달하므로, 전역 속성을 통해 결코 새어 나가지 않습니다.
 - **독립적인 엔진:** 빌드 필드(`android.os.Build.*`의 JNI 재작성), 프로세스별 clean-room 속성 후크(함수 후크 없음), 그룹화된 `resetprop`, 그리고 자체 대상 목록을 가진 선택적 DRM / Widevine 레벨(L1 또는 L3). 각각 끌 수 있습니다.
 - **필드별 제어:** 모든 빌드 필드는 설정, 비우기, 삭제 또는 건너뛰기가 가능하며, 기기 전체에서 일관되게 유지되어야 하는 값을 위한 `global_fields` 목록이 있습니다.
-- **항상 최신인 fingerprint:** Pixel 프로필이 기본 포함되어 있으며 부팅마다 한 번씩 Google의 최신 공장 이미지로부터 스스로 갱신됩니다; WebUI에서 다른 Pixel 프로필을 가져올 수도 있습니다. 절대 되돌아가지 않으며 다른 기기의 프로필은 거부합니다.
+- **항상 최신인 fingerprint:** Pixel 프로필이 기본 포함되어 있으며 부팅마다 한 번씩 Google의 최신 공장 이미지로부터 스스로 갱신됩니다, WebUI에서 다른 Pixel 프로필을 가져올 수도 있습니다. 절대 되돌아가지 않으며 다른 기기의 프로필은 거부합니다.
 - **안전한 Android 버전 정책:** 어떤 정책에서도 SDK는 실제 프레임워크 위로 절대 올라가지 않습니다(올리면 폰이 softloop에 빠질 뿐입니다).
 - **Analyze:** 구성이 당신의 ROM 및 props와 맞는지 감사하고, 앱에 도달하기 전에 일관되지 않은 부분을 표시합니다.
-- **WebUI:** 모든 것을 조작하는 다섯 개의 탭, 네트워크 요청 없음; 구성 파일이 모든 설정을 담으므로 모듈 업데이트에도 살아남습니다.
+- **WebUI:** 모든 것을 조작하는 다섯 개의 탭, 네트워크 요청 없음, 구성 파일이 모든 설정을 담으므로 모듈 업데이트에도 살아남습니다.
 - **증분 자체 업데이트(VDLU)** 및 **4-ABI** 네이티브 라이브러리(arm64-v8a, armeabi-v7a, x86, x86_64).
 
 ## AI 에이전트
@@ -65,11 +84,11 @@ KernelSU, APatch 또는 Magisk에서 zip을 플래시하고 재부팅하세요. 
 
 ## 보안
 
-스푸프는 사용자 측에서만 이루어집니다: COPG-VD는 SDK를 실제 프레임워크 위로 절대 올리지 않고, manufacturer를 프로필의 나머지와 일관되게 유지하며, 실제 버전을 자신이 위조하는 속성이 아니라 `/system/build.prop`에서 읽습니다. 자체 업데이터는 유효한 ed25519 서명을 요구하고 다운그레이드를 거부합니다; WebUI는 어떤 네트워크 요청도 하지 않습니다. 문제는 [SECURITY.md](docs/ko/SECURITY.md)에 따라 보고하세요.
+스푸프는 사용자 측에서만 이루어집니다: COPG-VD는 SDK를 실제 프레임워크 위로 절대 올리지 않고, manufacturer를 프로필의 나머지와 일관되게 유지하며, 실제 버전을 자신이 위조하는 속성이 아니라 `/system/build.prop`에서 읽습니다. 자체 업데이터는 유효한 ed25519 서명을 요구하고 다운그레이드를 거부합니다, WebUI는 어떤 네트워크 요청도 하지 않습니다. 문제는 [SECURITY.md](docs/ko/SECURITY.md)에 따라 보고하세요.
 
 ## 빌드
 
-언제나 release, 절대 debug 아님. 네이티브 라이브러리와 범위 헬퍼는 네 개의 ABI 모두에 대해 CI에서 빌드됩니다; 릴리스 워크플로는 플래시 가능한 zip을 조립하고, 파일별 `.sha256` 동반 파일을 쓰고, 서명된 VDLU 베이스라인을 재생성하여 `github-actions[bot]`으로 게시합니다. [CONTRIBUTING.md](docs/ko/CONTRIBUTING.md)를 참고하세요.
+언제나 release, 절대 debug 아님. 네이티브 라이브러리와 범위 헬퍼는 네 개의 ABI 모두에 대해 CI에서 빌드됩니다, 릴리스 워크플로는 플래시 가능한 zip을 조립하고, 파일별 `.sha256` 동반 파일을 쓰고, 서명된 VDLU 베이스라인을 재생성하여 `github-actions[bot]`으로 게시합니다. [CONTRIBUTING.md](docs/ko/CONTRIBUTING.md)를 참고하세요.
 
 ## 사용 방법
 모듈을 설치하고 재부팅하면, 동봉된 프로필(Pixel)이 대상 앱에 대해 스푸핑됩니다. 작동하는 fingerprint가 있으면 PlayIntegrityFix나 GooglePhotosUnlimited가 필요 없습니다.  
@@ -78,7 +97,7 @@ KernelSU, APatch 또는 Magisk에서 zip을 플래시하고 재부팅하세요. 
 ### Scope: 누가 스푸프를 보는가
 `scope_mode`는 어떤 프로세스가 스푸핑된 식별 정보를 받을지 결정합니다. 범위가 지정된 모드에서는 식별 정보가 Zygisk에 의해 프로세스별로 전달되며, 전역 속성을 통해 시스템의 나머지 부분으로 유출되지 않습니다.  
 * **Google Play** (`playstore`, 기본값): Play 스택만 (Google Play services, 그 unstable 프로세스, 그리고 Play Store).  
-* **Global**: 기기 전체; 모든 프로세스가 봅니다.  
+* **Global**: 기기 전체, 모든 프로세스가 봅니다.  
 * **Whitelist**: `scope_whitelist`에 있는 앱만.  
 * **Blacklist**: `scope_blacklist`에 있는 것을 제외한 모든 앱.  
 
@@ -94,7 +113,7 @@ KernelSU, APatch 또는 Magisk에서 zip을 플래시하고 재부팅하세요. 
 * **Set**: `"KEY": "value"`는 값을 씁니다.  
 * **Empty**: `"KEY": ""`는 빈 값을 씁니다.  
 * **Delete**: 키를 제거하려면 최상위 `"COPG-VD-Delete": [ ... ]`에 해당 키를 나열합니다 (Build 필드는 null이 되고, 속성은 `resetprop --delete`로 제거됩니다).  
-* **Skip**: 키를 완전히 생략합니다; ROM 자체의 값이 유지됩니다.  
+* **Skip**: 키를 완전히 생략합니다, ROM 자체의 값이 유지됩니다.  
 
 `"global_fields": [ ... ]` 목록은 범위가 지정된 모드에서도 지정된 Build 필드를 기기 전체에 적용하여 값을 어디서나 일관되게 유지합니다: 일관성 측면에서 안전한 필드(예: security patch)에만 해당하며, 식별 정보는 절대 안 되고 Android 버전 그룹도 절대 안 됩니다.  
 
@@ -164,11 +183,21 @@ KernelSU, APatch 또는 Magisk에서 zip을 플래시하고 재부팅하세요. 
 WebUI의 **Analyze**(또는 `fingerprint-update.sh analyze`)는 현재 상태의 설정을 감사합니다: ROM 대비 버전, 파일이 여전히 파싱되는지(깨진 파일은 모듈이 **아무것도** 스푸핑하지 못하게 하며, logcat만 알려줍니다), fingerprint가 주변 필드와 일치하는지, 모듈이 읽지 않는 키, 날짜, 그리고 props가 이미 설정이 요구하는 것을 담고 있는지.  
 
 ### WebUI
-WebUI는 선택 사항입니다 (모든 것은 JSON 설정에서 직접 편집할 수 있습니다) 하지만 모듈을 다루는 쉬운 방법입니다. 다섯 개의 탭이 있습니다: **About**, **Device**(모든 필드를 상태별로 설정하고 카테고리별로 그룹화), **Spoofing**(범위와 엔진), **System**(resetprop 그룹), 그리고 **Tools**(Analyze, Check Update, Update Now, Backup/Restore, 그리고 부팅 시 자동 업데이트). 네트워크 요청을 전혀 하지 않습니다; 필요한 모든 것이 모듈 안에 포함되어 있습니다.  
+WebUI는 선택 사항입니다 (모든 것은 JSON 설정에서 직접 편집할 수 있습니다) 하지만 모듈을 다루는 쉬운 방법입니다. 다섯 개의 탭이 있습니다: **About**, **Device**(모든 필드를 상태별로 설정하고 카테고리별로 그룹화), **Spoofing**(범위와 엔진), **System**(resetprop 그룹), 그리고 **Tools**(Analyze, Check Update, Update Now, Backup/Restore, 그리고 부팅 시 자동 업데이트). 네트워크 요청을 전혀 하지 않습니다, 필요한 모든 것이 모듈 안에 포함되어 있습니다.  
 Magisk 사용자라면 KOW의 KsuWebUI를 사용하세요(https://github.com/KOWX712/KsuWebUIStandalone/releases). MMRL의 WebUI-X Portable을 사용할 수도 있습니다(https://github.com/MMRLApp/WebUI-X-Portable/releases) 또는 KsuWebUI-SN (https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).  
 
 ### 설정 안의 설정
 `COPG-VD.json`은 설정을 프로필 옆에 담으므로, 사용자의 선택이 백업과 함께 이동하고 손으로 편집할 수 있습니다: `scope_mode`, 엔진 스위치, resetprop 그룹, `global_fields`, 그리고 `COPG-VD-Settings` 객체(`resetprop`, `autoupdate`, `spoof_version`). 모든 것은 이 하나의 파일에 담겨 있습니다: 부팅 스크립트와 WebUI는 설정을 거기에서 바로 읽으므로, 사용자의 선택은 모듈 업데이트 후에도 유지됩니다. `"spoof_version": "force"`는 파일에서 읽을 때 거부되고 강등됩니다: 오래된 백업을 복원하는 것이 몰래 그것을 다시 작동시켜서는 안 됩니다.  
+
+## 증분 업데이트 (VDLU)
+
+COPG-VD는 **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** 엔진을 포함합니다(`module/vdlu/`에 벤더링). 모듈은 전체 `.zip`을 다시 내려받는 대신 변경된 파일만 가져와 스스로 업데이트합니다(콘텐츠 주소 지정 blob + 서명된 `manifest.json`). **Hardened** 프로파일: ed25519 서명이 필수이며 다운그레이드는 차단됩니다. 전체 `.zip`은 폴백으로 계속 유효합니다.
+
+- **`vdlu/`**(zip에 포함): `update.sh`(엔진) + `vdlu-verify` + `config.default` + `keyring/`(공개 키).
+- **상태**는 `/data/adb/COPG-VD/vdlu/`(config/journal/blobs/staged/rollback), 모듈 외부에 있으며 재플래시 후에도 유지됩니다.
+- **부팅 트리거:** `post-fs-data.sh`, zygote 이전, COPG-VD에는 `zygisk/*.so` + `sepolicy.rule`(REBOOT-hard)가 있어 새 `.so`는 zygote가 매핑하기 전에 준비되어 교체됩니다.
+- **WebUI:** 진행 토스트와 취소가 있는 **Updates** 패널(`webroot/vdlu.js`).
+- **릴리스:** `module/vdlu/RELEASE.md` 참조(`vdlu-pack` + `vdlu-sign`, manifest 보관, `vdlu-gc`가 고아 blob 정리, 일괄 Pages 푸시).
 
 <!-- vd-docs -->
 ## 문서
@@ -180,16 +209,6 @@ Magisk 사용자라면 KOW의 KsuWebUI를 사용하세요(https://github.com/KOW
 - **[AI 에이전트](https://github.com/VD171/COPG-VD/wiki/ko-AI-AGENTS)**: 구성과 업데이터를 헤드리스로 제어하기.
 
 <!-- /vd-docs -->
-
-## 증분 업데이트 (VDLU)
-
-COPG-VD는 **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** 엔진을 포함합니다(`module/vdlu/`에 벤더링). 모듈은 전체 `.zip`을 다시 내려받는 대신 변경된 파일만 가져와 스스로 업데이트합니다(콘텐츠 주소 지정 blob + 서명된 `manifest.json`). **Hardened** 프로파일: ed25519 서명이 필수이며 다운그레이드는 차단됩니다. 전체 `.zip`은 폴백으로 계속 유효합니다.
-
-- **`vdlu/`**(zip에 포함): `update.sh`(엔진) + `vdlu-verify` + `config.default` + `keyring/`(공개 키).
-- **상태**는 `/data/adb/COPG-VD/vdlu/`(config/journal/blobs/staged/rollback) - 모듈 외부에 있으며 재플래시 후에도 유지됩니다.
-- **부팅 트리거:** `post-fs-data.sh`, zygote 이전 - COPG-VD에는 `zygisk/*.so` + `sepolicy.rule`(REBOOT-hard)가 있어 새 `.so`는 zygote가 매핑하기 전에 준비되어 교체됩니다.
-- **WebUI:** 진행 토스트와 취소가 있는 **Updates** 패널(`webroot/vdlu.js`).
-- **릴리스:** `module/vdlu/RELEASE.md` 참조(`vdlu-pack` + `vdlu-sign`, manifest 보관, `vdlu-gc`가 고아 blob 정리, 일괄 Pages 푸시).
 
 ## 관련 앱
 
@@ -205,20 +224,19 @@ COPG-VD는 **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** 엔�
 
 ## 연락처
 
-- Site           : https://vd171.ru
-- Site           : https://vd.priv8.ru
-- Source         : https://github.com/VD171/COPG-VD
-- GitHub         : [@VD171](https://github.com/VD171)
-- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
-- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
-- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
-- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
-- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
-- E-mail         : vd.priv8@pm.me
+- https://vd171.ru
+- https://vd.priv8.ru
+- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+- **Channel:** @Priv8_VD https://t.me/Priv8_VD
+- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
+- **E-mail:** vd.priv8@pm.me
+- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
+- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
+- **GitHub:** @VD171 https://github.com/VD171
 
 ## 라이선스
 
-**Apache-2.0**: [LICENSE](LICENSE)를 참조하세요. COPG-VD는 AlirezaParsi의 원본 COPG를 VD171이 포크한 것으로, 동일한 라이선스로 계속됩니다.
+**AGPL-3.0-or-later**: [LICENSE](LICENSE)를 참조하세요. COPG-VD는 AlirezaParsi의 원본 COPG를 VD171이 포크한 것으로 (Apache-2.0), GNU AGPL-3.0-or-later로 재라이선스되었습니다. 네트워크 카피레프트: 수정된 버전을 서비스로라도 실행한다면 그 소스 코드를 제공해야 합니다.
 
 ## 상표
 
@@ -227,3 +245,7 @@ COPG-VD는 독립적인 비공식 프로젝트입니다. Google LLC와 제휴하
 ## Tags
 
 `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG-VD`
+
+---
+
+📣 **업데이트를 받으려면 채널에 참여하세요:** @Priv8_VD https://t.me/Priv8_VD

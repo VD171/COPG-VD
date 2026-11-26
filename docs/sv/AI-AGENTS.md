@@ -9,7 +9,7 @@ utan att skrapa WebUI. Det finns två ytor, och en agent som körs som root (som
 båda:
 
 1. **Konfigurationsfilen** `/data/adb/COPG-VD/COPG-VD.json` - den enda källan till sanning. Varje
-   profilfält och varje inställning finns här; att läsa och skriva denna fil är hur du ändrar vad
+   profilfält och varje inställning finns här, att läsa och skriva denna fil är hur du ändrar vad
    modulen spoofar.
 2. **Shell-ingångspunkten** `fingerprint-update.sh` - ett skript med stabila verb för att kontrollera,
    tillämpa och hämta profiler.
@@ -17,7 +17,7 @@ båda:
 ## Konfigurationsfilen
 
 `/data/adb/COPG-VD/COPG-VD.json` är ett vanligt JSON-objekt. Modulen läser den från de injicerade
-processerna via en dedikerad SELinux-regel som den själv levererar; den innehåller inga
+processerna via en dedikerad SELinux-regel som den själv levererar, den innehåller inga
 autentiseringsuppgifter. Ett medföljande exempel finns i `module/COPG-VD.json.example`, uppdaterat
 dagligen från den nyaste Google-factory-avbildningen.
 
@@ -45,19 +45,19 @@ av Zygisk-biblioteket när zygote startar, så **en omstart krävs** för att de
 sh /data/adb/modules/COPG-VD/fingerprint-update.sh <verb> [arg]
 ```
 
-Skriptet skriver ut läsbara rader; maskinläsbara börjar med `status:`. Dess slutkod är `0` vid
+Skriptet skriver ut läsbara rader, maskinläsbara börjar med `status:`. Dess slutkod är `0` vid
 framgång och icke-noll vid fel.
 
 | Verb | Vad det gör | Typisk utdata |
 |---|---|---|
 | `check` | Jämför den installerade profilen mot den nyaste upstream-builden, skriver ingenting. | `status: update-available` \| `status: up-to-date` \| `status: local-newer` \| `status: no-config` |
-| `apply` | Hämtar den nyaste profilen och slår samman den i konfigurationen (endast build-fält; dina andra nycklar bevaras). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
-| `analyze` | Granskar konfigurationen som den är (parsning, version mot ROM, fingerprint-koherens, okända nycklar, datum, props). Skriver ut en rapport; slutkoden återspeglar fynd av typen red/warn. | en textrapport |
+| `apply` | Hämtar den nyaste profilen och slår samman den i konfigurationen (endast build-fält, dina andra nycklar bevaras). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
+| `analyze` | Granskar konfigurationen som den är (parsning, version mot ROM, fingerprint-koherens, okända nycklar, datum, props). Skriver ut en rapport, slutkoden återspeglar fynd av typen red/warn. | en textrapport |
 | `fetch-index` | Laddar ner och verifierar det signerade enhetsindexet och skriver ut det (`index.json`). | index-JSON \| `status: sig-failed` \| `status: download-failed` |
 | `fetch <path>` | Laddar ner en enhets `build.prop` (sökväg från indexet, t.ex. `pixel-9a/latest.prop`) och skriver dess build-fält till konfigurationen. | `status: fetched` \| `status: bad-path` \| `status: map-failed` \| `status: write-failed` |
 | `sync-settings` | Migrerar tillstånd/konfiguration från den gamla platta layouten till `/data/adb/COPG-VD/`. | - |
 | `migrate` | Engångsmigrering av konfiguration mellan modulversioner. | `status: migrated` \| `status: nothing-to-migrate` |
-| `boot` | Den automatiska uppdateringen en gång per boot; avsedd för `service.sh`, inte interaktiv användning. | skriver `update.status` |
+| `boot` | Den automatiska uppdateringen en gång per boot, avsedd för `service.sh`, inte interaktiv användning. | skriver `update.status` |
 
 Varje nedladdning valideras före användning (den enda nedladdaren på enheten är busybox `wget`, som
 inte kan validera TLS), och profiluppdateraren går aldrig bakåt: en upstream-build som är äldre än den
@@ -76,7 +76,7 @@ innan innehållet läses.
 
 ## Säkerhetsspärrar
 
-- Att ändra konfigurationen eller tillämpa en profil ändrar vad varje målapp ser; bekräfta avsikten
+- Att ändra konfigurationen eller tillämpa en profil ändrar vad varje målapp ser, bekräfta avsikten
   innan du skriver, som WebUI gör.
 - Lossa aldrig en verklig koherensspärr: SDK:n är begränsad till det verkliga framework:et under varje
   policy, tillverkaren hålls i takt med resten av profilen, och en profil för en annan enhet avvisas.
@@ -87,4 +87,4 @@ innan innehållet läses.
 
 ---
 
-> _Denna dokumentation genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar välkomnas; se [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Denna dokumentation genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar välkomnas, se [CONTRIBUTING.md](CONTRIBUTING.md)._

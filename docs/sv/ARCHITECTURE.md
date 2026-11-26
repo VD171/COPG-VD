@@ -40,7 +40,7 @@ Var och en är oberoende och omkopplingsbar.
 - **resetprop (över hela enheten).** Skriver systemproperties per grupp: identitet, version,
   boot-tillstånd, SELinux, adb/usb, anti-emulator, plus ett upprensningspass. Boot-skripten kör
   det. I ett läge med omfattning lämnas identitets- och versionsgrupperna utanför (Zygisk levererar dem
-  per process); grupperna boot, lock och SELinux förblir globala så att enheten är koherent.
+  per process), grupperna boot, lock och SELinux förblir globala så att enheten är koherent.
 - **DRM / Widevine (`motor_drm`).** Hookar `MediaDrm`-metoderna som rapporterar Widevine-
   säkerhetsnivån (`getSecurityLevel`, `getPropertyString`) och returnerar den konfigurerade
   nivån. Hookarna är null-kontrollerade, så en felaktig profil degraderar graciöst istället för att
@@ -53,7 +53,7 @@ Den injicerade processen körs i zygotes SELinux-domän, som som standard inte k
 `/data/adb`. Modulen levererar sin egen `sepolicy.rule` för att tillåta det, och, som reserv,
 kan läsa konfigurationen genom sin öppna modulkatalog (`getModuleDir`), så att den fortsätter
 fungera även om en Zygisk-build slutar bevilja sökvägen. Filen parsas med en liten
-inbäddad JSON-parser (`jsmn`); en fil som inte parsas betyder att modulen spoofar ingenting.
+inbäddad JSON-parser (`jsmn`), en fil som inte parsas betyder att modulen spoofar ingenting.
 
 ## Att hålla profilen färsk
 
@@ -69,7 +69,7 @@ och [CONFIGURATION.md](CONFIGURATION.md) för fälten.
 Att höja `SDK_INT` / `ANDROID_VERSION` över vad ROM:ens ramverk verkligen är får appar att
 anropa API:er som inte finns, vilket kraschar Googles appar och startar om telefonen i en
 softloop. Versionsgruppen är därför av som standard och grindad bakom
-`spoof_version`; och sedan v6.19 begränsas SDK:n dessutom till det riktiga ramverkets värde under **varje** policy (Force inkluderat), så att inte ens en profil med framtvingad högre SDK kan softloopa (Force tvingar fortfarande fram strängversionsfälten). Modulen läser den riktiga versionen från `/system/build.prop`, aldrig från
+`spoof_version`, och sedan v6.19 begränsas SDK:n dessutom till det riktiga ramverkets värde under **varje** policy (Force inkluderat), så att inte ens en profil med framtvingad högre SDK kan softloopa (Force tvingar fortfarande fram strängversionsfälten). Modulen läser den riktiga versionen från `/system/build.prop`, aldrig från
 `getprop`, eftersom `getprop` är precis det som den förfalskar. Se fällan i
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
@@ -77,4 +77,4 @@ softloop. Versionsgruppen är därför av som standard och grindad bakom
 
 ---
 
-> _Denna dokumentation genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar välkomnas; se [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Denna dokumentation genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar välkomnas, se [CONTRIBUTING.md](CONTRIBUTING.md)._

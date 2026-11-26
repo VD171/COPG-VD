@@ -25,7 +25,8 @@ window.VDLU_I18N_ZH = {
   savedToast: '已保存', saveFail: '保存失败', sourceSaved: '来源已保存',
   bootstrapping: '正在准备更新程序…', bootstrapSub: '一次性下载提取器', bootstrapFail: '无法准备更新程序',
   searching: '正在搜索…', upToDate: '已是最新', nothingNew: '没有新内容',
-  ahead: '比订阅源更新', aheadSub: '你的版本比已发布的更新更新', deferred: '已推迟下载', deferredSub: '正在等待允许的网络 - 将在下次检查时恢复',
+  ahead: '比订阅源更新', aheadSub: '你的版本比已发布的更新更新', silentUpdate: '静默更新', silentUpdateSub: '在后台应用更新，不显示重启栏。',
+  deferred: '已推迟下载', deferredSub: '正在等待允许的网络，将在下次检查时恢复',
   updateAvail: '有可用更新', install: '安装', fileOne: '个文件', fileMany: '个文件',
   requiresReboot: '需要重启', checkFail: '检查失败', ksuUnavailable: 'KSU API 不可用',
   pendingUpdate: '待处理的更新', notNow: '暂不', srcPlaceholder: 'https://…/&lt;模块&gt;'

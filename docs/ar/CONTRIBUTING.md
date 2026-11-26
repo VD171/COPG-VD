@@ -12,7 +12,7 @@
 COPG-VD هو **منتحِل جهاز بتقنية Zygisk**: مكتبة أصلية صغيرة تُحقن في عمليات
 التطبيقات لإعادة كتابة بصمة الجهاز (fingerprint) والـ build، بالإضافة إلى WebUI بلغة JavaScript خام
 (vanilla-JS) للتحكم فيه. وهو fork من COPG (من AlirezaParsi)، تتم صيانته بواسطة VD171 تحت
-رخصة Apache-2.0. راجع [ARCHITECTURE.md](ARCHITECTURE.md) و[FILE-STRUCTURE.md](FILE-STRUCTURE.md).
+رخصة GNU AGPL-3.0-or-later. راجع [ARCHITECTURE.md](ARCHITECTURE.md) و[FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 
 افتراضياً يحصر الانتحال في مكدس Google Play عبر Zygisk، لذا فهو بديل
 أخف وأكثر متانة لـ PlayIntegrityFix.

@@ -40,7 +40,7 @@ Každý je nezávislý a přepínatelný.
 - **resetprop (napříč zařízením).** Zapisuje systémové vlastnosti po skupinách: identita,
   verze, stav bootu, SELinux, adb/usb, anti-emulátor, plus čisticí průchod. Spouštějí jej
   boot skripty. V rozsahovém režimu jsou skupiny identity a verze vynechány (Zygisk je
-  doručuje per proces); skupiny bootu, zámku a SELinuxu zůstávají globální, aby bylo
+  doručuje per proces), skupiny bootu, zámku a SELinuxu zůstávají globální, aby bylo
   zařízení koherentní.
 - **DRM / Widevine (`motor_drm`).** Hookuje metody `MediaDrm`, které hlásí bezpečnostní
   úroveň Widevine (`getSecurityLevel`, `getPropertyString`), a vrací nakonfigurovanou
@@ -54,7 +54,7 @@ Injektovaný proces běží v SELinux doméně zygote, která ve výchozím stav
 na `/data/adb`. Modul přichází s vlastním `sepolicy.rule`, aby to umožnil, a jako záloha
 může číst konfiguraci přes svůj otevřený adresář modulu (`getModuleDir`), takže funguje
 dál, i kdyby build Zygisku přestal udělovat cestu. Soubor je parsován malým vestavěným JSON
-parserem (`jsmn`); soubor, který se neparsuje, znamená, že modul nic nepodvrhuje.
+parserem (`jsmn`), soubor, který se neparsuje, znamená, že modul nic nepodvrhuje.
 
 ## Udržování profilu čerstvého
 
@@ -69,7 +69,7 @@ uživatelskou stranu a [CONFIGURATION.md](CONFIGURATION.md) pro pole.
 
 Zvýšení `SDK_INT` / `ANDROID_VERSION` nad to, co framework ROM ve skutečnosti je, přiměje
 aplikace volat API, která neexistují, což shodí aplikace Google a restartuje telefon do
-softloopu. Skupina verze je proto ve výchozím stavu vypnuta a uzamčena za `spoof_version`; a od v6.19 je SDK navíc omezeno na hodnotu skutečného frameworku pod **každou** politikou (včetně Force), takže ani vynucený profil s vyšším SDK nemůže způsobit softloop (Force stále vynucuje řetězcová pole verze).
+softloopu. Skupina verze je proto ve výchozím stavu vypnuta a uzamčena za `spoof_version`, a od v6.19 je SDK navíc omezeno na hodnotu skutečného frameworku pod **každou** politikou (včetně Force), takže ani vynucený profil s vyšším SDK nemůže způsobit softloop (Force stále vynucuje řetězcová pole verze).
 Modul čte skutečnou verzi z `/system/build.prop`, nikdy z `getprop`, protože `getprop` je
 přesně to, co falšuje. Viz past v [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
@@ -77,4 +77,4 @@ přesně to, co falšuje. Viz past v [USER-GUIDE.md](USER-GUIDE.md#the-android-v
 
 ---
 
-> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány; viz [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány, viz [CONTRIBUTING.md](CONTRIBUTING.md)._

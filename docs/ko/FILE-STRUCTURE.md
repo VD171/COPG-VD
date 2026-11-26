@@ -56,7 +56,7 @@ COPG-VD/
 ├── README.md + README.<code>.md   # 21개 언어
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md  CODE_OF_CONDUCT.md  SECURITY.md
-├── LICENSE                     # Apache-2.0
+├── LICENSE                     # AGPL-3.0-or-later
 └── screenshots/                # README가 사용하는 이미지
 ```
 
@@ -64,7 +64,7 @@ COPG-VD/
 
 디바이스의 `/data/adb/COPG-VD/`는 모듈 자신의 디렉터리입니다: `COPG-VD.json`이 프로파일과 설정을
 담고 있으며([CONFIGURATION.md](CONFIGURATION.md) 참조), `update.log`, `update.state`, `update.status`가
-함께 있습니다. config는 절대 커밋되지 않습니다; `module/COPG-VD.json.example`이
+함께 있습니다. config는 절대 커밋되지 않습니다, `module/COPG-VD.json.example`이
 템플릿입니다.
 
 <!-- doc-footer -->

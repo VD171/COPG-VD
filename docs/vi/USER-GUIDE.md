@@ -7,7 +7,7 @@
 COPG-VD viết lại dấu vân tay (fingerprint) và build của thiết bị để các ứng dụng bạn chọn
 thấy một chiếc Pixel thay vì thiết bị thật của bạn. Hướng dẫn này đưa bạn từ lúc cài đặt
 đến một cấu hình hoạt động và qua các lựa chọn trên đường đi. Để biết mọi trường và giá
-trị, xem [CONFIGURATION.md](CONFIGURATION.md); để biết cách nó hoạt động bên trong, xem
+trị, xem [CONFIGURATION.md](CONFIGURATION.md), để biết cách nó hoạt động bên trong, xem
 [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Cài đặt
@@ -51,7 +51,7 @@ Mỗi động cơ đều độc lập và có thể tắt. Tất cả đều b�
 - **resetprop**: viết lại các thuộc tính hệ thống trên toàn thiết bị, theo nhóm (identity,
   version, boot state, SELinux, adb/usb, anti-emulator, và một lượt dọn dẹp). Trong một chế
   độ có phạm vi, các nhóm identity và version nằm ngoài lượt áp dụng toàn thiết bị (Zygisk
-  chuyển giao chúng theo từng tiến trình); các nhóm boot, lock và SELinux vẫn ở mức toàn
+  chuyển giao chúng theo từng tiến trình), các nhóm boot, lock và SELinux vẫn ở mức toàn
   cục. Bật/tắt nó trong `COPG-VD-Settings.resetprop`.
 - **DRM / Widevine (`motor_drm`, tắt theo mặc định)**: báo cáo một mức bảo mật Widevine
   được chọn (L1 hoặc L3) cho các ứng dụng đọc nó. Xem phần DRM bên dưới.
@@ -92,7 +92,7 @@ Các trường này không có trong cấu hình đi kèm và trình cập nhậ
 - `rom`: chỉ áp dụng những gì không vượt quá ROM, trong thực tế có nghĩa là hạ thấp SDK.
 - `force`: buộc các trường phiên bản mà cấu hình yêu cầu. SDK ngay cả ở đây vẫn bị giới hạn ở giá trị
   ROM (kể từ v6.19), bởi vì nâng SDK cao hơn framework thực tế chỉ gây ra softloop và không có công dụng,
-  nên `force` không còn gây softloop nữa; nó buộc các trường chuỗi (release, codename).
+  nên `force` không còn gây softloop nữa, nó buộc các trường chuỗi (release, codename).
 
 Phiên bản thật được đọc từ `/system/build.prop`, không bao giờ từ `getprop` (chính là thứ
 mà mô-đun này làm giả). `force` cũng bị từ chối khi khôi phục một bản sao lưu, nên một bản
@@ -106,7 +106,7 @@ Tắt theo mặc định (`motor_drm`). Khi bật, nó báo cáo một mức Wid
 Theo mặc định, sự giả mạo DRM tuân theo `scope_mode`. Để áp dụng nó cho một tập hợp ứng
 dụng cụ thể thay vào đó, độc lập với phạm vi chính, hãy liệt kê chúng trong `drm_targets`.
 Khi đó mô-đun vẫn được nạp trong một ứng dụng đã liệt kê **chỉ** cho hook DRM, ngay cả khi
-ứng dụng đó nằm ngoài phạm vi chính; một danh sách trống hoặc không có nghĩa là tuân theo
+ứng dụng đó nằm ngoài phạm vi chính, một danh sách trống hoặc không có nghĩa là tuân theo
 phạm vi. Điều này cần một chế độ có phạm vi (không phải `global`), và có hiệu lực vào lần
 **khởi động lại** tiếp theo.
 
@@ -135,7 +135,7 @@ Tùy chọn, nhưng là cách dễ dàng để điều khiển mọi thứ. Năm
 - **Tools**: Analyze, Check Update, Update Now, Backup / Restore, tự động cập nhật khi khởi
   động, và báo cáo Diagnostics (một nút để đọc và xuất mọi thứ hữu ích cho một báo cáo lỗi).
 
-Nó không thực hiện yêu cầu mạng nào; mọi thứ nó cần đều đi kèm bên trong mô-đun.
+Nó không thực hiện yêu cầu mạng nào, mọi thứ nó cần đều đi kèm bên trong mô-đun.
 
 ## Khắc phục sự cố
 
@@ -155,4 +155,4 @@ Nó không thực hiện yêu cầu mạng nào; mọi thứ nó cần đều đ
 
 ---
 
-> _Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Chúng tôi hoan nghênh các chỉnh sửa và cải tiến; xem [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Chúng tôi hoan nghênh các chỉnh sửa và cải tiến, xem [CONTRIBUTING.md](CONTRIBUTING.md)._

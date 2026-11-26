@@ -7,7 +7,7 @@
 Tüm modül tek bir dosya tarafından yönetilir: `/data/adb/COPG-VD/COPG-VD.json`. WebUI onu sizin
 için yazar, ancak elle de düzenleyebilirsiniz. Birlikte gelen bir örnek
 `module/COPG-VD.json.example` konumundadır.
-Bu, tek doğruluk kaynağıdır; modül dizinindeki kopya yalnızca salt okunur bir varsayılandır.
+Bu, tek doğruluk kaynağıdır, modül dizinindeki kopya yalnızca salt okunur bir varsayılandır.
 `/data/adb/COPG-VD.json` konumundaki daha eski bir sürümden kalan bir yapılandırma otomatik olarak bu
 dizine taşınır. Modülün kendi günlüğü ve durumu (`update.log`, `update.state`) da burada bulunur.
 
@@ -27,7 +27,7 @@ Kurallar:
 | `scope_whitelist` | array | `scope_mode` `whitelist` iken sahtelemeyi alan paketler. |
 | `scope_blacklist` | array | `scope_mode` `blacklist` iken hariç tutulan paketler. |
 | `COPG-VD` | object | Profil: sunulacak Build alanları (aşağıya bakın). |
-| `COPG-VD-Delete` | array | Ayarlamak yerine kaldırılacak alan adları (Build alanı null olur; bir özellik `resetprop --delete` ile kaldırılır). |
+| `COPG-VD-Delete` | array | Ayarlamak yerine kaldırılacak alan adları (Build alanı null olur, bir özellik `resetprop --delete` ile kaldırılır). |
 | `COPG-VD-Settings` | object | Profille birlikte seyahat eden modül ayarları (aşağıya bakın). |
 | `motor_jni` | bool | Build alanları motoru (`android.os.Build.*` değerlerini yeniden yazar). Varsayılan `true`. |
 | `motor_prop_hook` | bool | Süreç başına özellik motoru (temiz-oda özellik yeniden eşlemesi). Varsayılan `true`. |
@@ -80,7 +80,7 @@ Profille birlikte seyahat eden ayarlar, böylece bir yedek seçimlerinizi taşı
 |---|---|---|
 | `resetprop` | bool | Cihaz geneli resetprop motorunun çalışıp çalışmayacağı. |
 | `autoupdate` | bool | `fingerprint-update.sh`'nin önyükleme başına bir kez çalışıp çalışmayacağı. Varsayılan açık. |
-| `spoof_version` | `never` / `rom` / `force` | Android sürüm grubunun nasıl uygulanacağı. `never` varsayılandır. v6.19'dan beri SDK her politika altında ROM'un değerinde sınırlanır, bu yüzden `force` dize alanlarını zorlar ama SDK'yı yükseltemez; `force` bir yedek geri yüklenirken reddedilir. |
+| `spoof_version` | `never` / `rom` / `force` | Android sürüm grubunun nasıl uygulanacağı. `never` varsayılandır. v6.19'dan beri SDK her politika altında ROM'un değerinde sınırlanır, bu yüzden `force` dize alanlarını zorlar ama SDK'yı yükseltemez, `force` bir yedek geri yüklenirken reddedilir. |
 
 ## `global_fields`
 
@@ -121,4 +121,4 @@ kullanın: security patch olağan olanıdır. Buraya identity veya Android sür�
 
 ---
 
-> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır; bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır, bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._

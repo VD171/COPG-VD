@@ -56,7 +56,7 @@ COPG-VD/
 ├── README.md + README.<code>.md   # 21 languages
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md  CODE_OF_CONDUCT.md  SECURITY.md
-├── LICENSE                     # Apache-2.0
+├── LICENSE                     # AGPL-3.0-or-later
 └── screenshots/                # images used by the README
 ```
 
@@ -64,11 +64,11 @@ COPG-VD/
 
 `/data/adb/COPG-VD/` di perangkat adalah direktori milik modul sendiri: `COPG-VD.json` menyimpan
 profil dan pengaturan (lihat [CONFIGURATION.md](CONFIGURATION.md)), bersama `update.log`,
-`update.state`, dan `update.status`. Config ini tidak pernah di-commit; `module/COPG-VD.json.example`
+`update.state`, dan `update.status`. Config ini tidak pernah di-commit, `module/COPG-VD.json.example`
 adalah templatnya.
 
 <!-- doc-footer -->
 
 ---
 
-> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan; lihat [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan, lihat [CONTRIBUTING.md](CONTRIBUTING.md)._

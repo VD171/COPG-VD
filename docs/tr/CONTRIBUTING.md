@@ -12,7 +12,7 @@ tasarlandı. Bu kılavuz size şeylerin nerede olduğunu ve izlediğimiz birkaç
 COPG-VD bir **Zygisk cihaz sahteleyicisidir (Zygisk device spoofer)**: cihaz parmak izini
 ve build bilgisini yeniden yazmak için uygulama süreçlerine enjekte edilen küçük bir native
 kütüphane, artı onu yönetmek için saf-JS (vanilla-JS) bir WebUI. COPG'nin (AlirezaParsi
-tarafından) bir fork'udur, Apache-2.0 lisansı altında VD171 tarafından sürdürülür. Bkz.
+tarafından) bir fork'udur, GNU AGPL-3.0-or-later lisansı altında VD171 tarafından sürdürülür. Bkz.
 [ARCHITECTURE.md](ARCHITECTURE.md) ve [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 
 Varsayılan olarak sahtelemeyi Zygisk aracılığıyla Google Play yığınına kapsar, bu yüzden
@@ -42,7 +42,7 @@ bir şey değil.
 - Flash edilebilir bir zip derleyin: derlenen `libspoof.so` dosyasını `module/zygisk/<abi>.so`
   içine kopyalayın, ardından `cd module && zip -r9 ../COPG-VD-dev.zip .` yapın ve flash edin.
 - WebUI `module/webroot/` içindedir (root yöneticisinden açın). Sahteleme mantığı
-  `zygisk/spoof_module.cpp`'dir; profil getirici `module/fingerprint-update.sh`'dir.
+  `zygisk/spoof_module.cpp`'dir, profil getirici `module/fingerprint-update.sh`'dir.
 
 ## Kurallar
 
@@ -50,15 +50,15 @@ bir şey değil.
   (banner header) ile başlar (herhangi bir mevcut dosyadan kopyalayın). `.github/`
   altındaki araçlar bunun yerine kısa bir yorum kullanır.
 - **Kod ve yorumlar İngilizce.** Yorumları minimumda ve yalnızca gerektiğinde tutun.
-- **em-dash veya en-dash yok**; her zaman düz bir tire `-` kullanın.
-- WebUI **saf JS**'dir (tek bir `scripts.js`); framework yok.
+- **em-dash veya en-dash yok**, her zaman düz bir tire `-` kullanın.
+- WebUI **saf JS**'dir (tek bir `scripts.js`), framework yok.
 - Gerçek bir özelliği **asla zayıflatmayın**: sahtelemeyi tutarlı tutun ve hook'ların bağlı
   oldukları bir uygulamayı çökertmesine izin vermeyin (bilerek null kontrolünden geçerler).
 
 ## Uluslararasılaştırma (i18n)
 
 - UI dizeleri `module/webroot/lang/` içinde yaşar. İngilizce, kanonik yedektir (`en.js` +
-  `en.json`); diğer 20 dil `<code>.json`'dur.
+  `en.json`), diğer 20 dil `<code>.json`'dur.
 - Bir dize eklemek veya değiştirmek için: `en.js` **ve** `en.json` dosyalarını düzenleyin,
   ardından her `<code>.json` dosyasını güncelleyin. Görünür bir etikete dokunmak, **tüm**
   dil dosyalarını ve **tüm** `README.<code>.md` dosyalarını güncellemek anlamına gelir.
@@ -79,4 +79,4 @@ profilleri harika başlangıç noktalarıdır.
 
 ---
 
-> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır; bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır, bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._

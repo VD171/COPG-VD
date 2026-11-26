@@ -26,7 +26,7 @@ wir können und nennen Sie als Finder, wenn Sie das wünschen.
 ## Hinweise zum Geltungsbereich
 
 - Die Konfiguration liegt unter `/data/adb/COPG-VD/COPG-VD.json`, nur von root lesbar. Das Modul
-  liest sie aus dem injizierten Prozess über eine dedizierte SELinux-Regel, die es selbst mitliefert; es
+  liest sie aus dem injizierten Prozess über eine dedizierte SELinux-Regel, die es selbst mitliefert, es
   hält keine Zugangsdaten oder Passphrasen.
 - Die Spoofing-Hooks sind an laufende Apps angehängt und null-geprüft, sodass ein fehlerhaftes Profil
   anmutig degradiert, statt die App zum Absturz zu bringen.
@@ -41,4 +41,4 @@ wir können und nennen Sie als Finder, wenn Sie das wünschen.
 
 ---
 
-> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen; siehe [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen, siehe [CONTRIBUTING.md](CONTRIBUTING.md)._

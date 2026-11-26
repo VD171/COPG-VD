@@ -9,16 +9,17 @@ seriously.
 
 ## Reporting a vulnerability
 
-- **Site:** https://vd171.ru
-- **Site:** https://vd.priv8.ru
-- **Issues:** https://github.com/VD171/COPG-VD/issues
-- **GitHub:** [@VD171](https://github.com/VD171)
-- **XDA-Developers:** [@VD171](https://xdaforums.com/m/vd171.4699873/)
-- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
-- **Telegram:** [@VD_Priv8](https://t.me/VD_Priv8)
-- **Channel:** [@Priv8_VD](https://t.me/Priv8_VD)
-- **Discord:** [@VD.Priv8](https://discord.com/users/1296831918989639721)
-- **E-mail:** vd.priv8@pm.me
+- Site           : https://vd171.ru
+- Site           : https://vd.priv8.ru
+- Source         : https://github.com/VD171/COPG-VD
+- Issues         : https://github.com/VD171/COPG-VD/issues
+- GitHub         : [@VD171](https://github.com/VD171)
+- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
+- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
+- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
+- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
+- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
+- E-mail         : vd.priv8@pm.me
 
 Include a clear description and, if possible, steps to reproduce. We will respond as soon
 as we can and credit you if you wish.
@@ -26,7 +27,7 @@ as we can and credit you if you wish.
 ## Scope notes
 
 - The configuration lives at `/data/adb/COPG-VD.json`, readable only by root. The module
-  reads it from the injected process through a dedicated SELinux rule it ships itself; it
+  reads it from the injected process through a dedicated SELinux rule it ships itself, it
   holds no credentials or passphrases.
 - The spoofing hooks are attached to live apps and are null-checked so a malformed profile
   degrades gracefully instead of crashing the app.
@@ -41,4 +42,4 @@ as we can and credit you if you wish.
 
 ---
 
-> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md)._

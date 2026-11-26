@@ -9,7 +9,7 @@ tartışmaları teknik ve yapıcı tutun.
 
 - Nazik olun. Taciz, kişisel saldırı veya ayrımcılık yok.
 - İnsanları değil, fikirleri ve kodu eleştirin.
-- Yeni gelenlere yardım edin; herkes bir zamanlar yeniydi.
+- Yeni gelenlere yardım edin, herkes bir zamanlar yeniydi.
 
 Kabul edilemez davranışlar, yöneticiye özel olarak bildirilebilir (iletişim için bkz.
 [SECURITY.md](SECURITY.md)). Yöneticiler bu kuralları ihlal eden yorumları, commit'leri,
@@ -21,4 +21,4 @@ Bu, Contributor Covenant'ın ruhunun özlü, projeye uygun bir uyarlamasıdır.
 
 ---
 
-> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır; bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır, bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._

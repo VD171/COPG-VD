@@ -4,11 +4,11 @@
  *  Spoof your device fingerprint and build: Zygisk, KernelSU/APatch/Magisk.
  *
  *  Copyright (C) 2026  AlirezaParsi & VD171
- *  SPDX-License-Identifier: Apache-2.0
+ *  SPDX-License-Identifier: AGPL-3.0-or-later
  *  Fork by VD171.
  *
- *  Licensed under the Apache License, Version 2.0; you may obtain a copy at
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *  Free software under the GNU AGPL v3 or later. NETWORK COPYLEFT: run a
+ *  modified version, even as a service, and you MUST offer its source.
  *
  *  Site           : https://vd171.ru
  *  Site           : https://vd.priv8.ru
@@ -546,9 +546,13 @@ private:
                 const RomVersion rom = readRomVersion();
                 const VersionPolicy policy = readVersionPolicy();
                 auto allowed = [&rom, policy](const char* field, const std::string& value) {
-                    if (policy == VersionPolicy::Force) return true;
                     if (policy == VersionPolicy::Never) return false;
                     const std::string f(field);
+                    // The numeric SDK is NEVER raised above the real framework SDK, under any
+                    // policy INCLUDING Force: claiming a higher SDK makes apps call APIs the real
+                    // framework lacks and softloops the device, and it has no legitimate use (Play
+                    // Integrity wants the SDK to match the real device). The cap applies even under
+                    // Force; Force still forces the string version fields (release/codename) below.
                     if (f == "SDK_INT" || f == "SDK_FULL") {
                         if (rom.sdk == 0) return false;
                         long long v;
@@ -556,6 +560,7 @@ private:
                         return parseInt(dot == std::string::npos ? value : value.substr(0, dot), v)
                                && v <= rom.sdk;
                     }
+                    if (policy == VersionPolicy::Force) return true;
                     if (f == "ANDROID_VERSION") return !rom.release.empty() && value == rom.release;
                     if (f == "CODENAME") return !rom.codename.empty() && value == rom.codename;
                     return false;

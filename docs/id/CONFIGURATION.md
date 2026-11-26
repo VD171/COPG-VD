@@ -7,7 +7,7 @@
 Seluruh modul dikendalikan oleh satu file: `/data/adb/COPG-VD/COPG-VD.json`. WebUI menuliskannya
 untuk Anda, tetapi Anda dapat mengeditnya secara manual. Contoh yang disertakan ada di
 `module/COPG-VD.json.example`.
-Inilah satu-satunya sumber kebenaran; salinan di bawah direktori modul hanyalah default yang hanya-baca. Konfigurasi yang tersisa dari versi lama di `/data/adb/COPG-VD.json` dipindahkan ke direktori ini secara otomatis. Log dan keadaan milik modul sendiri (`update.log`, `update.state`) juga berada di sini.
+Inilah satu-satunya sumber kebenaran, salinan di bawah direktori modul hanyalah default yang hanya-baca. Konfigurasi yang tersisa dari versi lama di `/data/adb/COPG-VD.json` dipindahkan ke direktori ini secara otomatis. Log dan keadaan milik modul sendiri (`update.log`, `update.state`) juga berada di sini.
 
 Aturan:
 
@@ -25,7 +25,7 @@ Aturan:
 | `scope_whitelist` | array | Paket yang mendapat spoof ketika `scope_mode` adalah `whitelist`. |
 | `scope_blacklist` | array | Paket yang dikecualikan ketika `scope_mode` adalah `blacklist`. |
 | `COPG-VD` | object | Profil: field Build yang akan disajikan (lihat di bawah). |
-| `COPG-VD-Delete` | array | Nama field yang akan dihapus alih-alih diatur (field Build menjadi null; sebuah properti dihapus dengan `resetprop --delete`). |
+| `COPG-VD-Delete` | array | Nama field yang akan dihapus alih-alih diatur (field Build menjadi null, sebuah properti dihapus dengan `resetprop --delete`). |
 | `COPG-VD-Settings` | object | Pengaturan modul yang ikut bersama profil (lihat di bawah). |
 | `motor_jni` | bool | Mesin field Build (menulis ulang `android.os.Build.*`). Default `true`. |
 | `motor_prop_hook` | bool | Mesin properti per proses (remap properti clean-room). Default `true`. |
@@ -79,7 +79,7 @@ Pengaturan yang ikut bersama profil, sehingga backup membawa pilihan Anda.
 |---|---|---|
 | `resetprop` | bool | Apakah mesin resetprop seluruh perangkat berjalan. |
 | `autoupdate` | bool | Apakah `fingerprint-update.sh` berjalan sekali per boot. Default aktif. |
-| `spoof_version` | `never` / `rom` / `force` | Bagaimana grup version Android diterapkan. `never` adalah default. Sejak v6.19 SDK dibatasi pada nilai ROM di bawah setiap kebijakan, jadi `force` memaksa field string tetapi tidak dapat menaikkan SDK; `force` ditolak saat memulihkan backup. |
+| `spoof_version` | `never` / `rom` / `force` | Bagaimana grup version Android diterapkan. `never` adalah default. Sejak v6.19 SDK dibatasi pada nilai ROM di bawah setiap kebijakan, jadi `force` memaksa field string tetapi tidak dapat menaikkan SDK, `force` ditolak saat memulihkan backup. |
 
 ## `global_fields`
 
@@ -120,4 +120,4 @@ version Android di sini.
 
 ---
 
-> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan; lihat [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan, lihat [CONTRIBUTING.md](CONTRIBUTING.md)._

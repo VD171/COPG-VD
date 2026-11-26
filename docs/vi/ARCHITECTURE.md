@@ -41,7 +41,7 @@ Mỗi động cơ đều độc lập và có thể bật/tắt.
 - **resetprop (toàn thiết bị).** Ghi các thuộc tính hệ thống theo nhóm: identity, version,
   boot state, SELinux, adb/usb, anti-emulator, cộng với một lượt dọn dẹp. Các script khởi
   động chạy nó. Trong một chế độ có phạm vi, các nhóm identity và version được bỏ ra (Zygisk
-  chuyển giao chúng theo từng tiến trình); các nhóm boot, lock và SELinux vẫn ở mức toàn cục
+  chuyển giao chúng theo từng tiến trình), các nhóm boot, lock và SELinux vẫn ở mức toàn cục
   để thiết bị nhất quán.
 - **DRM / Widevine (`motor_drm`).** Hook các phương thức `MediaDrm` báo cáo mức bảo mật
   Widevine (`getSecurityLevel`, `getPropertyString`) và trả về mức đã cấu hình. Các hook
@@ -55,7 +55,7 @@ Tiến trình được tiêm chạy trong miền SELinux của zygote, mà theo 
 cập `/data/adb`. Mô-đun đi kèm `sepolicy.rule` của riêng nó để cho phép điều đó, và, như một
 phương án dự phòng, có thể đọc cấu hình thông qua thư mục mô-đun đang mở của nó
 (`getModuleDir`), nên nó vẫn hoạt động ngay cả khi một bản build Zygisk ngừng cấp quyền cho
-đường dẫn. Tệp được phân tích cú pháp bằng một trình phân tích JSON nhúng nhỏ (`jsmn`); một
+đường dẫn. Tệp được phân tích cú pháp bằng một trình phân tích JSON nhúng nhỏ (`jsmn`), một
 tệp không phân tích cú pháp được nghĩa là mô-đun giả mạo không gì cả.
 
 ## Giữ hồ sơ luôn mới
@@ -73,7 +73,7 @@ cho các trường.
 Nâng `SDK_INT` / `ANDROID_VERSION` lên cao hơn framework thực tế của ROM khiến các ứng dụng
 gọi các API không tồn tại, điều này làm sập các ứng dụng của Google và khởi động lại điện
 thoại vào một softloop. Nhóm version do đó tắt theo mặc định và bị kiểm soát sau
-`spoof_version`; và kể từ v6.19 SDK còn được giới hạn thêm ở giá trị framework thực tế dưới **mọi** chính sách (bao gồm cả Force), nên ngay cả một hồ sơ có SDK bị buộc cao hơn cũng không thể softloop (Force vẫn buộc các trường chuỗi của phiên bản). Mô-đun đọc phiên bản thật từ `/system/build.prop`, không bao giờ từ
+`spoof_version`, và kể từ v6.19 SDK còn được giới hạn thêm ở giá trị framework thực tế dưới **mọi** chính sách (bao gồm cả Force), nên ngay cả một hồ sơ có SDK bị buộc cao hơn cũng không thể softloop (Force vẫn buộc các trường chuỗi của phiên bản). Mô-đun đọc phiên bản thật từ `/system/build.prop`, không bao giờ từ
 `getprop`, bởi vì `getprop` chính là thứ nó làm giả. Xem cái bẫy trong
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
@@ -81,4 +81,4 @@ thoại vào một softloop. Nhóm version do đó tắt theo mặc định và 
 
 ---
 
-> _Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Chúng tôi hoan nghênh các chỉnh sửa và cải tiến; xem [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Chúng tôi hoan nghênh các chỉnh sửa và cải tiến, xem [CONTRIBUTING.md](CONTRIBUTING.md)._

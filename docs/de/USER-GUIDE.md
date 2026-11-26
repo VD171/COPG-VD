@@ -7,7 +7,7 @@
 COPG-VD schreibt den Geräte-Fingerprint und den Build so um, dass die von dir gewählten Apps
 ein Pixel statt deines echten Geräts sehen. Dieses Handbuch führt dich von der Installation zu
 einer funktionierenden Einrichtung und durch die Entscheidungen unterwegs. Zu jedem Feld und
-Wert siehe [CONFIGURATION.md](CONFIGURATION.md); wie es intern funktioniert, siehe [ARCHITECTURE.md](ARCHITECTURE.md).
+Wert siehe [CONFIGURATION.md](CONFIGURATION.md), wie es intern funktioniert, siehe [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Installation
 
@@ -49,7 +49,7 @@ Jede Engine ist unabhängig und kann abgeschaltet werden. Alle sind standardmä�
 - **resetprop**: schreibt die System-Properties geräteweit um, gruppenweise (Identität,
   Version, Boot-State, SELinux, adb/usb, Anti-Emulator und ein Aufräumdurchlauf). In einem
   Scope-Modus bleiben die Gruppen Identität und Version aus dem geräteweiten Durchlauf heraus
-  (Zygisk liefert sie pro Prozess); die Gruppen Boot, Lock und SELinux bleiben global. Schalte
+  (Zygisk liefert sie pro Prozess), die Gruppen Boot, Lock und SELinux bleiben global. Schalte
   es in `COPG-VD-Settings.resetprop` um.
 - **DRM / Widevine (`motor_drm`, standardmäßig aus)**: meldet Apps, die es lesen, eine
   gewählte Widevine-Sicherheitsstufe (L1 oder L3). Siehe Abschnitt DRM unten.
@@ -88,7 +88,7 @@ Diese Felder sind nicht in der mitgelieferten Konfiguration, und der Updater sch
 - `rom`: wendet nur an, was die ROM nicht überschreitet, was in der Praxis ein Absenken des SDK bedeutet.
 - `force`: erzwingt die Versionsfelder, die die Konfiguration verlangt. Das SDK wird auch hier auf den
   Wert der ROM begrenzt (seit v6.19), denn das SDK über das echte Framework anzuheben, löst nur einen
-  Softloop aus und hat keinen Nutzen, sodass `force` keinen Softloop mehr auslöst; es erzwingt die
+  Softloop aus und hat keinen Nutzen, sodass `force` keinen Softloop mehr auslöst, es erzwingt die
   String-Felder (Release, Codename).
 
 Die echte Version wird aus `/system/build.prop` gelesen, nie aus `getprop` (genau das, was
@@ -103,7 +103,7 @@ Widevine-Stufe, `DRM_SECURITY_LEVEL` (`L1` oder `L3`).
 Standardmäßig folgt die DRM-Täuschung dem `scope_mode`. Um sie stattdessen auf eine bestimmte
 App-Menge anzuwenden, unabhängig vom Haupt-Scope, liste sie in `drm_targets`. Das Modul bleibt
 dann in einer aufgeführten App **nur** für den DRM-Hook geladen, selbst wenn diese App außerhalb
-des Haupt-Scopes liegt; eine leere oder fehlende Liste bedeutet, dem Scope zu folgen. Dies
+des Haupt-Scopes liegt, eine leere oder fehlende Liste bedeutet, dem Scope zu folgen. Dies
 erfordert einen Scope-Modus (nicht `global`) und greift beim nächsten **Neustart**.
 
 ## Analyze: prüfe deine Konfiguration
@@ -131,7 +131,7 @@ Optional, aber der einfache Weg, alles zu steuern. Fünf Tabs:
 - **Tools**: Analyze, Check Update, Update Now, Backup / Restore, das Auto-Update beim Boot
   und der Diagnostics-Bericht (ein Knopf, um alles für einen Fehlerbericht Nützliche zu lesen und zu exportieren).
 
-Es stellt keine Netzwerkanfrage; alles, was es braucht, wird im Modul mitgeliefert.
+Es stellt keine Netzwerkanfrage, alles, was es braucht, wird im Modul mitgeliefert.
 
 ## Fehlerbehebung
 
@@ -151,4 +151,4 @@ Es stellt keine Netzwerkanfrage; alles, was es braucht, wird im Modul mitgeliefe
 
 ---
 
-> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen; siehe [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen, siehe [CONTRIBUTING.md](CONTRIBUTING.md)._

@@ -9,7 +9,7 @@ discusiones técnicas y constructivas.
 
 - Sé amable. Sin acoso, ataques personales ni discriminación.
 - Critica las ideas y el código, no a las personas.
-- Ayuda a los recién llegados; todos fuimos nuevos alguna vez.
+- Ayuda a los recién llegados, todos fuimos nuevos alguna vez.
 
 El comportamiento inaceptable puede reportarse en privado al maintainer (consulta
 [SECURITY.md](SECURITY.md) para el contacto). Los maintainers pueden eliminar comentarios,
@@ -23,4 +23,4 @@ Covenant.
 
 ---
 
-> _Esta documentación se generó con Claude (Anthropic) y la mantiene VD171. Las correcciones y mejoras son bienvenidas; consulta [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Esta documentación se generó con Claude (Anthropic) y la mantiene VD171. Las correcciones y mejoras son bienvenidas, consulta [CONTRIBUTING.md](CONTRIBUTING.md)._

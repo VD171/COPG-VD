@@ -9,7 +9,7 @@ udržujte diskuse technické a konstruktivní.
 
 - Buďte laskaví. Žádné obtěžování, osobní útoky ani diskriminace.
 - Kritizujte nápady a kód, ne lidi.
-- Pomáhejte nováčkům; každý byl jednou nový.
+- Pomáhejte nováčkům, každý byl jednou nový.
 
 Nepřijatelné chování lze soukromě nahlásit správci (kontakt viz [SECURITY.md](SECURITY.md)).
 Správci mohou odstranit komentáře, commity, issues a příspěvky, které porušují tento kodex,
@@ -21,4 +21,4 @@ Toto je zhuštěná, projektu přiměřená adaptace ducha Contributor Covenant.
 
 ---
 
-> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány; viz [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány, viz [CONTRIBUTING.md](CONTRIBUTING.md)._

@@ -1,7 +1,7 @@
 # VDLU feed - COPG-VD release step (hardened profile)
 
 COPG-VD ships the VDLU engine (`vdlu/update.sh` + `vdlu/vdlu-verify`) and the public keyring
-(`vdlu/keyring/vd-2026.pub`). The `.zip` install is unchanged; VDLU is additive (flashless incremental
+(`vdlu/keyring/vd-2026.pub`). The `.zip` install is unchanged, VDLU is additive (flashless incremental
 updates between releases). This file documents the producer step that turns a release tree into a signed
 feed. The engine, packer and signer are canonical and live in `VD/Sources/VDLiveUpdate`.
 
@@ -15,8 +15,8 @@ blobs whose sha256 changed.
 ## Step 0 - re-vendor the canonical engine/webui/verifier FIRST (anti-lapse)
 
 Before packing, copy the CURRENT canonical VDLU files from `VD/Sources/VDLiveUpdate` into the module tree.
-Copy the files at the canonical HEAD at release time - NEVER a remembered sha. The v6.13 release shipped a
-STALE `webroot/vdlu.js` (the fetch-bootstrap never ran on a clean device) because this list omitted it; the
+Copy the files at the canonical HEAD at release time, NEVER a remembered sha. The v6.13 release shipped a
+STALE `webroot/vdlu.js` (the fetch-bootstrap never ran on a clean device) because this list omitted it, the
 full source->dest map is therefore pinned here so nothing is missed again.
 
 | canonical source (`VDLiveUpdate/`) | module dest | notes |
@@ -26,16 +26,16 @@ full source->dest map is therefore pinned here so nothing is missed again.
 | `verify/ed25519-mini/<abi>/ed25519-mini` | `vdlu/verify/<abi>/ed25519-mini` | **COPG-VD ABIs: arm64-v8a, armeabi-v7a, x86, x86_64** (4-ABI, matches `zygisk/<abi>.so`). `customize.sh` keeps all ABIs so the on-device tree matches the manifest |
 | `webui/vdlu.js` | `webroot/vdlu.js` | **the one the v6.13 lapse dropped** |
 | `webui/vdlu.css` | `webroot/vdlu.css` | |
-| `webui/i18n/*.js` | `webroot/vdlu-i18n/` | Updates-panel translations (whole dir, shared filenames). `scripts.js` `loadVdluI18n()` loads only the active language's file on demand (global `window.VDLU_I18N_<UPPER>`); English is the widget default. New shared langs need no code change - just re-copy the dir |
+| `webui/i18n/*.js` | `webroot/vdlu-i18n/` | Updates-panel translations (whole dir, shared filenames). `scripts.js` `loadVdluI18n()` loads only the active language's file on demand (global `window.VDLU_I18N_<UPPER>`), English is the widget default. New shared langs need no code change - just re-copy the dir |
 
-⚠️ **The keyring is NOT a copy of `keys/vd-2026.pub`.** `keys/vd-2026.pub` is a 113-byte **PEM** (the PC-side pubkey `vdlu-sign`/openssl use). The module's `vdlu/keyring/vd-2026.pub` is the **RAW 32-byte** ed25519 key the on-device `ed25519-mini` needs - a different encoding. Copying the PEM over it BREAKS on-device verification. The raw keyring is STABLE (same key until rotation) and already correct in the tree: **do NOT touch it** during re-vendor. (Verify, don't copy: its sha256 is `2c63383990ca...`; the signed baseline must verify against it.) Only on a key **rotation** is it re-copied - and then from `keys/vd-2026.pub.raw` (the RAW 32 bytes that `vdlu-keygen` emits alongside the PEM via `openssl pkey -pubout -outform DER | tail -c 32`), NEVER from the `.pub` PEM.
+⚠️ **The keyring is NOT a copy of `keys/vd-2026.pub`.** `keys/vd-2026.pub` is a 113-byte **PEM** (the PC-side pubkey `vdlu-sign`/openssl use). The module's `vdlu/keyring/vd-2026.pub` is the **RAW 32-byte** ed25519 key the on-device `ed25519-mini` needs, a different encoding. Copying the PEM over it BREAKS on-device verification. The raw keyring is STABLE (same key until rotation) and already correct in the tree: **do NOT touch it** during re-vendor. (Verify, don't copy: its sha256 is `2c63383990ca...`, the signed baseline must verify against it.) Only on a key **rotation** is it re-copied, and then from `keys/vd-2026.pub.raw` (the RAW 32 bytes that `vdlu-keygen` emits alongside the PEM via `openssl pkey -pubout -outform DER | tail -c 32`), NEVER from the `.pub` PEM.
 
 NOT vendored (fetched at runtime, served from the shared tools-feed, never in the `.zip`):
 `tools/curl/<abi>/curl` + the signed `tools-manifest.json`. The tools-feed is packed separately with
 `vdlu-pack ... --raw` (served raw at a fixed path, so `enc=raw`, not `gz`) and shares
 `https://vd171.github.io/VD-Modules/vdlu-tools/` across every slim module.
 
-Re-check the canonical HEAD on the release day; copy only the files that actually differ (compare with
+Re-check the canonical HEAD on the release day, copy only the files that actually differ (compare with
 `cmp`), not any sha pinned here. Only after this re-vendor is the tree ready to pack.
 
 ## Producing a release (public = hardened, signature MANDATORY)
@@ -58,7 +58,7 @@ VERSION=61200                    # module.prop versionCode (monotonic; the manif
 
 - `vd-2026.pem` is the PRIVATE key. It stays with the release/owner, NEVER in the module tree or the repo.
   Only `vdlu/keyring/vd-2026.pub` ships.
-- `channel=stable` is the seeded channel; a canary feed is a separate `manifest.json` under a `canary` path.
+- `channel=stable` is the seeded channel, a canary feed is a separate `manifest.json` under a `canary` path.
 - `version` is the `versionCode` from `module.prop` (monotonic). Hardened blocks downgrades: a manifest
   whose version is below the installed one is refused (anti-replay).
 - The zygisk `.so` is class `reboot`: VDLU stages it and the pre-zygote `post-fs-data.sh` swaps it on the
@@ -67,23 +67,23 @@ VERSION=61200                    # module.prop versionCode (monotonic; the manif
 ## On-device tools (slim - Abordagem B, v6.13+)
 
 The `.zip` ships ONLY the `ed25519-mini` verifier (per ABI under `vdlu/verify/<abi>/`) plus the raw
-keyring - no `openssl`, `curl` or `zstd`. The old `module/bin/<abi>/` bundle (openssl + curl + zstd +
-their `.so` closures) is GONE; the zip dropped from ~13.5 MB to ~660 KB. Blob decompression uses toybox
-`gzip` (manifest `enc=gz`, already on-device); the signature check is the embedded `ed25519-mini` against
+keyring, no `openssl`, `curl` or `zstd`. The old `module/bin/<abi>/` bundle (openssl + curl + zstd +
+their `.so` closures) is GONE, the zip dropped from ~13.5 MB to ~660 KB. Blob decompression uses toybox
+`gzip` (manifest `enc=gz`, already on-device), the signature check is the embedded `ed25519-mini` against
 the raw keyring (`vdlu/keyring/vd-2026.pub`, 32 bytes).
 
-The one tool Android lacks - a static `curl` for the https blob fetch - is NOT bundled. On the first
-https update the WebUI (webview TLS) downloads it from the shared tools-feed; the engine's `install-tool`
+The one tool Android lacks (a static `curl` for the https blob fetch) is NOT bundled. On the first
+https update the WebUI (webview TLS) downloads it from the shared tools-feed, the engine's `install-tool`
 verifies the signed `tools-manifest.json` (ed25519-mini) AND the binary's sha256 BEFORE adopting it, then
-it persists in Tier-2 (`/data/adb/<mod>/vdlu/tools/<abi>/curl`) - fetched once, never again unless the
-module is fully uninstalled. The webview `fetch()` is only transport; trust is the on-device
+it persists in Tier-2 (`/data/adb/<mod>/vdlu/tools/<abi>/curl`), fetched once, never again unless the
+module is fully uninstalled. The webview `fetch()` is only transport, trust is the on-device
 signature/hash check, never the download.
 
 The static curl + ed25519-mini are built reproducibly (NDK, bionic-dynamic = zero closure) in
 `VD/Sources/VDLiveUpdate/{tools/curl,verify/ed25519-mini}/<abi>/`, each with `PROVENANCE.json` +
 `build.sh`. The tools-feed is SHARED across every slim module at
 `https://vd171.github.io/VD-Modules/vdlu-tools/<abi>/curl` (+ signed `tools-manifest.json`), derived from
-the module's `source` by replacing its last path segment with `vdlu-tools` - so all modules reuse one
+the module's `source` by replacing its last path segment with `vdlu-tools`, so all modules reuse one
 curl, signed with the same `vd-2026` key. `customize.sh` keeps only the device ABI's
 `vdlu/verify/<abi>/ed25519-mini` on install.
 
@@ -103,20 +103,32 @@ cp "$OUT/manifest.json" "$OUT/manifests/$VERSION.json"     # archive the SIGNED 
 
 Retention is by REFERENCE, not age: GC keeps the union of sha256 over the current manifest plus the last 3
 archived versions, and never removes a blob a retained release still needs (fail-safe: it refuses to run
-with no retained manifest). Deleting a blob frees the Pages site but not git history - keep the public feed
-on a dedicated, squashable/orphan branch; blobs are reproducible from the tagged commit by `vdlu-pack`, so
+with no retained manifest). Deleting a blob frees the Pages site but not git history, keep the public feed
+on a dedicated, squashable/orphan branch, blobs are reproducible from the tagged commit by `vdlu-pack`, so
 resetting the feed branch loses nothing.
 
 ## Publish (batch, spaced - GitHub is hostile/suspended)
 
 Push `manifest.json` + `blobs/` to `vd171.github.io/VD-Modules/COPG-VD/` in a spaced batch (never a write
-burst). The owner pushes; this repo's commits stay local.
+burst). The owner pushes, this repo's commits stay local.
+
+**MANDATORY after the push (HARD, STANDARDS 7.2):** verify the LIVE feed head actually advanced, else a
+stale feed downgrades devices on boot. Run:
+
+```
+.github/scripts/verify-live-feed.sh COPG-VD <versionCode>
+```
+
+`verify-live-feed` curls the live `manifest.json` and FAILS if its head != the released `versionCode`. The
+feed-name is the VD-Modules DIR name `COPG-VD` (for COPG-VD it equals the module id, across the fleet it is
+the repo name, NOT the id). A 0 exit is the only proof the feed moved, do not declare the release done
+until it passes.
 
 ## Provenance
 
 The release already publishes `SHA256SUMS.txt` (the `.zip` + each `.so`). The VDLU feed derives from the
 same packaged tree, so anyone can re-pack the published tree and reproduce `manifest.json`'s per-file
-sha256 - the manifest IS the provenance of the incremental payload, and its signature is the root of trust.
+sha256, the manifest IS the provenance of the incremental payload, and its signature is the root of trust.
 
 ---
 

@@ -1,6 +1,25 @@
 <!--
-  COPG-VD: global device spoofer: spoof your device fingerprint and build.
-  Copyright (C) 2026  AlirezaParsi & VD171. SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+  ======================================================================
+   COPG-VD  ::  global device spoofer
+   Spoof your device fingerprint and build.
+
+   Copyright (C) 2026  AlirezaParsi & VD171 (Fork by VD171)
+   SPDX-License-Identifier: AGPL-3.0-or-later
+
+   Licensed under the GNU AGPL v3.0 or later. You may obtain a copy at
+   https://www.gnu.org/licenses/agpl-3.0.html
+
+   Site           : https://vd171.ru
+   Site           : https://vd.priv8.ru
+   Source         : https://github.com/VD171/COPG-VD
+   GitHub         : @VD171 https://github.com/VD171
+   XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+   XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+   Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+   Channel        : @Priv8_VD https://t.me/Priv8_VD
+   Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+   E-mail         : vd.priv8@pm.me
+  ======================================================================
 -->
 
 # COPG-VD
@@ -11,7 +30,7 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases/latest"><img src="https://img.shields.io/github/v/release/VD171/COPG-VD?label=release&color=2ee89d" alt="Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1a7f37" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-1a7f37" alt="License"></a>
   <a href="https://github.com/VD171/COPG-VD/releases"><img src="https://img.shields.io/github/downloads/VD171/COPG-VD/total?label=downloads&color=8250df" alt="Downloads"></a>
   <a href="https://github.com/VD171/COPG-VD/stargazers"><img src="https://img.shields.io/github/stars/VD171/COPG-VD?color=d29922" alt="Stars"></a>
 </p>
@@ -32,10 +51,10 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** English · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
-  <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
+  <img src="docs/screenshots/en/device.png" width="24%" alt="Device"> <img src="docs/screenshots/en/spoofing.png" width="24%" alt="Spoofing"> <img src="docs/screenshots/en/system.png" width="24%" alt="System"> <img src="docs/screenshots/en/tools.png" width="24%" alt="Tools">
 </p>
 
 ---
@@ -49,10 +68,10 @@ Apps increasingly refuse to run, or quietly downgrade, when the device they see 
 - **Scope control:** deliver the spoofed identity to the Google Play stack only (the default), the whole device, a whitelist, or everything except a blacklist. In a scoped mode Zygisk delivers the identity per process, so it never leaks through the global properties.
 - **Independent engines:** Build fields (a JNI rewrite of `android.os.Build.*`), a clean-room per-process property hook (no function hook), grouped `resetprop`, and an optional DRM / Widevine level (L1 or L3) with its own target list. Each can be turned off.
 - **Per-field control:** every Build field can be set, emptied, deleted or skipped, with a `global_fields` list for values that must stay consistent device-wide.
-- **Always-fresh fingerprint:** a Pixel profile ships in the box and refreshes itself once per boot from the newest Google factory image; you can also fetch another Pixel profile from the WebUI. It never downgrades and refuses a profile for a different device.
+- **Always-fresh fingerprint:** a Pixel profile ships in the box and refreshes itself once per boot from the newest Google factory image, you can also fetch another Pixel profile from the WebUI. It never downgrades and refuses a profile for a different device.
 - **Safe Android-version policy:** the SDK is never raised above your real framework (raising it only softloops the phone), under every policy.
 - **Analyze:** audits the config against your ROM and props and flags anything incoherent before it reaches apps.
-- **WebUI:** five tabs to drive everything, with no network request; the config file carries all settings so they survive a module update.
+- **WebUI:** five tabs to drive everything, with no network request, the config file carries all settings so they survive a module update.
 - **Incremental self-update (VDLU)** and a **four-ABI** native library (arm64-v8a, armeabi-v7a, x86, x86_64).
 
 ## AI agents
@@ -65,11 +84,11 @@ Flash the zip in KernelSU, APatch or Magisk and reboot. The shipped Pixel profil
 
 ## Security
 
-The spoof is user-side only: COPG-VD never raises the SDK above your real framework, keeps the manufacturer coherent with the rest of the profile, and reads the real version from `/system/build.prop`, never from the properties it falsifies. The self-updater requires a valid ed25519 signature and refuses downgrades; the WebUI makes no network request. Report issues per [SECURITY.md](SECURITY.md).
+The spoof is user-side only: COPG-VD never raises the SDK above your real framework, keeps the manufacturer coherent with the rest of the profile, and reads the real version from `/system/build.prop`, never from the properties it falsifies. The self-updater requires a valid ed25519 signature and refuses downgrades, the WebUI makes no network request. Report issues per [SECURITY.md](SECURITY.md).
 
 ## Build
 
-Always release, never debug. The native library and the scope helper are built in CI for all four ABIs; the release workflow assembles the flashable zip, writes the per-file `.sha256` companions, regenerates the signed VDLU baseline and publishes as `github-actions[bot]`. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Always release, never debug. The native library and the scope helper are built in CI for all four ABIs, the release workflow assembles the flashable zip, writes the per-file `.sha256` companions, regenerates the signed VDLU baseline and publishes as `github-actions[bot]`. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## How to use?
 Install the module, reboot, and the shipped profile (a Pixel) is spoofed to the targeted apps. With a working fingerprint you do not need PlayIntegrityFix or GooglePhotosUnlimited.  
@@ -78,7 +97,7 @@ Everything is configured in `/data/adb/COPG-VD/COPG-VD.json`, or from the WebUI.
 ### Scope: who sees the spoof
 `scope_mode` decides which processes get the spoofed identity. In a scoped mode the identity is delivered per process by Zygisk and is not leaked to the rest of the system through the global properties.  
 * **Google Play** (`playstore`, the default): only the Play stack (Google Play services, its unstable process and the Play Store).  
-* **Global**: the whole device; every process sees it.  
+* **Global**: the whole device, every process sees it.  
 * **Whitelist**: only the apps in `scope_whitelist`.  
 * **Blacklist**: every app except the ones in `scope_blacklist`.  
 
@@ -86,15 +105,15 @@ Everything is configured in `/data/adb/COPG-VD/COPG-VD.json`, or from the WebUI.
 Each one is independent and can be turned off:  
 * **Build fields (JNI)**: rewrites `android.os.Build.*` in the targeted processes.  
 * **Property hook**: presents the spoofed system properties to the targeted processes (a clean-room per-process remap of the property area, no function hook).  
-* **resetprop**: rewrites the system properties, managed by group: identity, version, boot state, SELinux, adb/usb, anti-emulator and a cleanup pass. In a scoped mode the identity and version groups stay out of the device-wide resetprop (Zygisk delivers them per process); the boot/lock/SELinux groups stay global.  
-* **DRM / Widevine** (off by default): reports a chosen Widevine security level, L1 or L3, to the apps that read it. By default it follows the scope above; set `drm_targets` (a list of apps) to apply the DRM spoof **only** to those apps, independently of `scope_mode`: the module stays loaded in a listed app just for the DRM hook, even when that app is outside the main scope. Empty or absent means follow the scope. (Requires a scoped mode, not Global.)  
+* **resetprop**: rewrites the system properties, managed by group: identity, version, boot state, SELinux, adb/usb, anti-emulator and a cleanup pass. In a scoped mode the identity and version groups stay out of the device-wide resetprop (Zygisk delivers them per process), the boot/lock/SELinux groups stay global.  
+* **DRM / Widevine** (off by default): reports a chosen Widevine security level, L1 or L3, to the apps that read it. By default it follows the scope above, set `drm_targets` (a list of apps) to apply the DRM spoof **only** to those apps, independently of `scope_mode`: the module stays loaded in a listed app just for the DRM hook, even when that app is outside the main scope. Empty or absent means follow the scope. (Requires a scoped mode, not Global.)  
 
 ### Fields: set, empty, delete or skip
 Inside the `COPG-VD` object each Build field has four states:  
 * **Set**: `"KEY": "value"` writes the value.  
 * **Empty**: `"KEY": ""` writes an empty value.  
 * **Delete**: list the key in a top-level `"COPG-VD-Delete": [ ... ]` to remove it (a Build field becomes null, a property is removed with `resetprop --delete`).  
-* **Skip**: leave the key out entirely; the ROM's own value is kept.  
+* **Skip**: leave the key out entirely, the ROM's own value is kept.  
 
 A `"global_fields": [ ... ]` list applies the named Build fields device-wide even in a scoped mode, to keep a value consistent everywhere: for coherence-safe fields only (the security patch, for example), never identity and never the Android version group.  
 
@@ -164,11 +183,24 @@ The block above and `module/COPG-VD.json.example` are refreshed daily by the [Up
 **Analyze** in the WebUI (or `fingerprint-update.sh analyze`) audits the config as it stands: version against the ROM, whether the file still parses at all (a broken one makes the module spoof **nothing**, and only logcat says so), whether the fingerprint agrees with the fields around it, keys the module does not read, dates, and whether the props already carry what the config asks for.  
 
 ### WebUI
-The WebUI is optional (everything can be edited in the JSON config directly) but it is the easy way to drive the module. It has five tabs: **About**, **Device** (every field, set per state, grouped by category), **Spoofing** (scope and engines), **System** (the resetprop groups) and **Tools** (Analyze, Check Update, Update Now, Backup/Restore and the boot auto-update). It makes no network request; everything it needs ships inside the module.  
+The WebUI is optional (everything can be edited in the JSON config directly) but it is the easy way to drive the module. It has five tabs: **About**, **Device** (every field, set per state, grouped by category), **Spoofing** (scope and engines), **System** (the resetprop groups) and **Tools** (Analyze, Check Update, Update Now, Backup/Restore and the boot auto-update). It makes no network request, everything it needs ships inside the module.  
 If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases). You can also use WebUI-X Portable by MMRL (https://github.com/MMRLApp/WebUI-X-Portable/releases) or KsuWebUI-SN (https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).  
 
 ### Settings in the config
 `COPG-VD.json` carries its settings next to the profile, so your choices travel with a backup and can be edited by hand: `scope_mode`, the engine switches, the resetprop groups, `global_fields`, and a `COPG-VD-Settings` object (`resetprop`, `autoupdate`, `spoof_version`). Everything lives in this one file: the boot scripts and the WebUI read the settings straight from it, so your choices survive a module update. `"spoof_version": "force"` is refused from the file and downgraded: restoring an old backup must not re-arm it behind your back.  
+
+## Incremental updates (VDLU)
+
+COPG-VD ships the **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** engine (vendored in `module/vdlu/`): the module updates itself by fetching only
+the files that changed (content-addressed blobs + a signed `manifest.json`), instead of re-downloading the
+whole `.zip`. **Hardened** profile: the ed25519 signature is mandatory and downgrades are blocked, the full
+`.zip` stays valid as a fallback.
+
+- **`vdlu/`** (shipped in the zip): `update.sh` (engine) + `vdlu-verify` + `config.default` + `keyring/` (public key).
+- **State** in `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback), outside the module, survives a reflash.
+- **Boot trigger:** `post-fs-data.sh`, pre-zygote, COPG-VD has `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), so the new `.so` is staged and swapped before zygote maps it.
+- **WebUI:** an **Updates** panel (`webroot/vdlu.js`) with a progress toast and cancel.
+- **Release:** see `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, archive the manifest, `vdlu-gc` prunes orphan blobs, batched Pages push).
 
 <!-- vd-docs -->
 ## Documentation
@@ -180,19 +212,6 @@ If you are a Magisk user, use KsuWebUI by KOW (https://github.com/KOWX712/KsuWeb
 - **[AI agents](https://github.com/VD171/COPG-VD/wiki/AI-AGENTS)**: drive the config and the updater headlessly.
 
 <!-- /vd-docs -->
-
-## Incremental updates (VDLU)
-
-COPG-VD ships the **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** engine (vendored in `module/vdlu/`): the module updates itself by fetching only
-the files that changed (content-addressed blobs + a signed `manifest.json`), instead of re-downloading the
-whole `.zip`. **Hardened** profile: the ed25519 signature is mandatory and downgrades are blocked; the full
-`.zip` stays valid as a fallback.
-
-- **`vdlu/`** (shipped in the zip): `update.sh` (engine) + `vdlu-verify` + `config.default` + `keyring/` (public key).
-- **State** in `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - outside the module, survives a reflash.
-- **Boot trigger:** `post-fs-data.sh`, pre-zygote - COPG-VD has `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), so the new `.so` is staged and swapped before zygote maps it.
-- **WebUI:** an **Updates** panel (`webroot/vdlu.js`) with a progress toast and cancel.
-- **Release:** see `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, archive the manifest, `vdlu-gc` prunes orphan blobs, batched Pages push).
 
 ## See also
 
@@ -208,20 +227,19 @@ whole `.zip`. **Hardened** profile: the ed25519 signature is mandatory and downg
 
 ## Contacts
 
-- Site           : https://vd171.ru
-- Site           : https://vd.priv8.ru
-- Source         : https://github.com/VD171/COPG-VD
-- GitHub         : [@VD171](https://github.com/VD171)
-- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
-- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
-- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
-- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
-- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
-- E-mail         : vd.priv8@pm.me
+- https://vd171.ru
+- https://vd.priv8.ru
+- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+- **Channel:** @Priv8_VD https://t.me/Priv8_VD
+- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
+- **E-mail:** vd.priv8@pm.me
+- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
+- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
+- **GitHub:** @VD171 https://github.com/VD171
 
 ## License
 
-**Apache-2.0**: see [LICENSE](LICENSE). COPG-VD is a fork by VD171 of the original COPG by AlirezaParsi, continued under the same license. Third-party components are credited in [NOTICE](NOTICE.md).
+**AGPL-3.0-or-later**: see [LICENSE](LICENSE). COPG-VD is a fork by VD171 of the original COPG by AlirezaParsi (Apache-2.0), relicensed under the GNU AGPL-3.0-or-later. NETWORK COPYLEFT: run a modified version, even as a service, and you must offer its source. Third-party components are credited in [NOTICE](NOTICE.md).
 
 ## Trademarks
 
@@ -230,3 +248,7 @@ COPG-VD is an independent, unofficial project. It is not affiliated with, endors
 ## Tags
 
 `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG-VD`
+
+---
+
+📣 **Join the channel for updates:** @Priv8_VD https://t.me/Priv8_VD

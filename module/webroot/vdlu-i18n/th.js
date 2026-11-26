@@ -25,7 +25,8 @@ window.VDLU_I18N_TH = {
   savedToast: 'บันทึกแล้ว', saveFail: 'บันทึกไม่สำเร็จ', sourceSaved: 'บันทึกแหล่งที่มาแล้ว',
   bootstrapping: 'กำลังเตรียมตัวอัปเดต…', bootstrapSub: 'ดาวน์โหลดตัวดึงข้อมูลครั้งเดียว', bootstrapFail: 'ไม่สามารถเตรียมตัวอัปเดตได้',
   searching: 'กำลังค้นหา…', upToDate: 'เป็นเวอร์ชันล่าสุด', nothingNew: 'ไม่มีอะไรใหม่',
-  ahead: 'ใหม่กว่าฟีด', aheadSub: 'เวอร์ชันของคุณใหม่กว่าการอัปเดตที่เผยแพร่', deferred: 'เลื่อนการดาวน์โหลด', deferredSub: 'กำลังรอเครือข่ายที่อนุญาต - จะทำต่อเมื่อตรวจครั้งถัดไป',
+  ahead: 'ใหม่กว่าฟีด', aheadSub: 'เวอร์ชันของคุณใหม่กว่าการอัปเดตที่เผยแพร่', silentUpdate: 'อัปเดตแบบเงียบ', silentUpdateSub: 'ใช้การอัปเดตในพื้นหลังโดยไม่แสดงแถบรีบูต',
+  deferred: 'เลื่อนการดาวน์โหลด', deferredSub: 'กำลังรอเครือข่ายที่อนุญาต จะทำต่อเมื่อตรวจครั้งถัดไป',
   updateAvail: 'มีการอัปเดต', install: 'ติดตั้ง', fileOne: 'ไฟล์', fileMany: 'ไฟล์',
   requiresReboot: 'ต้องรีบูต', checkFail: 'ตรวจสอบไม่สำเร็จ', ksuUnavailable: 'ไม่สามารถใช้ KSU API ได้',
   pendingUpdate: 'การอัปเดตที่รอดำเนินการ', notNow: 'ยังไม่ใช่ตอนนี้', srcPlaceholder: 'https://…/&lt;โมดูล&gt;'

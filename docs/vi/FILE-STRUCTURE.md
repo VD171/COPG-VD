@@ -56,7 +56,7 @@ COPG-VD/
 ├── README.md + README.<code>.md   # 21 ngôn ngữ
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md  CODE_OF_CONDUCT.md  SECURITY.md
-├── LICENSE                     # Apache-2.0
+├── LICENSE                     # AGPL-3.0-or-later
 └── screenshots/                # các hình ảnh được README sử dụng
 ```
 
@@ -64,10 +64,10 @@ COPG-VD/
 
 `/data/adb/COPG-VD/` trên thiết bị là thư mục riêng của module: `COPG-VD.json` giữ hồ sơ và các thiết lập
 (xem [CONFIGURATION.md](CONFIGURATION.md)), cùng với `update.log`, `update.state` và `update.status`.
-Cấu hình không bao giờ được commit; `module/COPG-VD.json.example` là mẫu.
+Cấu hình không bao giờ được commit, `module/COPG-VD.json.example` là mẫu.
 
 <!-- doc-footer -->
 
 ---
 
-> _Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Chúng tôi hoan nghênh các chỉnh sửa và cải tiến; xem [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Chúng tôi hoan nghênh các chỉnh sửa và cải tiến, xem [CONTRIBUTING.md](CONTRIBUTING.md)._

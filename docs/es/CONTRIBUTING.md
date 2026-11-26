@@ -12,7 +12,7 @@ dónde vive cada cosa y las pocas convenciones que seguimos.
 COPG-VD es un **spoofer de dispositivo con Zygisk**: una pequeña biblioteca nativa que se
 inyecta en los procesos de las apps para reescribir la huella del dispositivo y el build, más
 una WebUI en vanilla JS para controlarlo. Es un fork de COPG (de AlirezaParsi), mantenido por
-VD171 bajo la licencia Apache-2.0. Consulta [ARCHITECTURE.md](ARCHITECTURE.md) y
+VD171 bajo la licencia GNU AGPL-3.0-or-later. Consulta [ARCHITECTURE.md](ARCHITECTURE.md) y
 [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 
 De forma predeterminada acota el spoof al stack de Google Play mediante Zygisk, así que es
@@ -44,7 +44,7 @@ tardía.
 - Compila un zip flasheable: copia el `libspoof.so` compilado en `module/zygisk/<abi>.so`,
   luego `cd module && zip -r9 ../COPG-VD-dev.zip .` y flashéalo.
 - La WebUI es `module/webroot/` (ábrela desde el gestor de root). La lógica de spoofing es
-  `zygisk/spoof_module.cpp`; el obtentor del perfil es `module/fingerprint-update.sh`.
+  `zygisk/spoof_module.cpp`, el obtentor del perfil es `module/fingerprint-update.sh`.
 
 ## Convenciones
 
@@ -53,15 +53,15 @@ tardía.
   bajo `.github/` usan en su lugar un comentario corto.
 - **Código y comentarios en inglés.** Mantén los comentarios al mínimo y solo donde haga
   falta.
-- **Sin em-dash ni en-dash**; usa siempre un guion simple `-`.
-- La WebUI es **vanilla JS** (un solo `scripts.js`); sin frameworks.
+- **Sin em-dash ni en-dash**, usa siempre un guion simple `-`.
+- La WebUI es **vanilla JS** (un solo `scripts.js`), sin frameworks.
 - **Nunca debilites** una función real: mantén el spoof coherente, y no hagas que los hooks
   hagan caer una app a la que están adjuntos (tienen comprobación de null a propósito).
 
 ## Internacionalización (i18n)
 
 - Las cadenas de la UI viven en `module/webroot/lang/`. El inglés es el fallback canónico
-  (`en.js` + `en.json`); los otros 20 idiomas son `<code>.json`.
+  (`en.js` + `en.json`), los otros 20 idiomas son `<code>.json`.
 - Para añadir o cambiar una cadena: edita `en.js` **y** `en.json`, luego actualiza cada
   `<code>.json`. Tocar una etiqueta visible significa actualizar **todos** los archivos de
   idioma y **todos** los `README.<code>.md`.
@@ -82,4 +82,4 @@ los nuevos perfiles de Pixel son todos excelentes puntos de partida.
 
 ---
 
-> _Esta documentación se generó con Claude (Anthropic) y la mantiene VD171. Las correcciones y mejoras son bienvenidas; consulta [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Esta documentación se generó con Claude (Anthropic) y la mantiene VD171. Las correcciones y mejoras son bienvenidas, consulta [CONTRIBUTING.md](CONTRIBUTING.md)._

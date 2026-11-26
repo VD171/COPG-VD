@@ -6,7 +6,7 @@
 
 The whole module is driven by one file: `/data/adb/COPG-VD/COPG-VD.json`. The WebUI writes it for
 you, but you can edit it by hand. A shipped example lives at `module/COPG-VD.json.example`.
-This is the single source of truth; the copy under the module directory is only a read-only default.
+This is the single source of truth, the copy under the module directory is only a read-only default.
 A config left over from an older version at `/data/adb/COPG-VD.json` is moved into this directory
 automatically. The module's own log and state (`update.log`, `update.state`) live here too.
 
@@ -26,7 +26,7 @@ Rules:
 | `scope_whitelist` | array | Packages that get the spoof when `scope_mode` is `whitelist`. |
 | `scope_blacklist` | array | Packages excluded when `scope_mode` is `blacklist`. |
 | `COPG-VD` | object | The profile: the Build fields to present (see below). |
-| `COPG-VD-Delete` | array | Field names to remove instead of set (Build field becomes null; a property is removed with `resetprop --delete`). |
+| `COPG-VD-Delete` | array | Field names to remove instead of set (Build field becomes null, a property is removed with `resetprop --delete`). |
 | `COPG-VD-Settings` | object | Module settings that travel with the profile (see below). |
 | `motor_jni` | bool | Build-fields engine (rewrites `android.os.Build.*`). Default `true`. |
 | `motor_prop_hook` | bool | Per-process property engine (clean-room property remap). Default `true`. |
@@ -79,7 +79,7 @@ Settings that travel with the profile, so a backup carries your choices.
 |---|---|---|
 | `resetprop` | bool | Whether the device-wide resetprop engine runs. |
 | `autoupdate` | bool | Whether `fingerprint-update.sh` runs once per boot. Default on. |
-| `spoof_version` | `never` / `rom` / `force` | How the Android version group applies. `never` is the default. Since v6.19 the SDK is capped at the ROM's value under every policy, so `force` forces the string fields but cannot raise the SDK; `force` is refused when restoring a backup. |
+| `spoof_version` | `never` / `rom` / `force` | How the Android version group applies. `never` is the default. Since v6.19 the SDK is capped at the ROM's value under every policy, so `force` forces the string fields but cannot raise the SDK, `force` is refused when restoring a backup. |
 
 ## `global_fields`
 
@@ -119,4 +119,4 @@ usual one. **Never** put identity or the Android version group here.
 
 ---
 
-> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome; see [CONTRIBUTING.md](../CONTRIBUTING.md)._
+> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome, see [CONTRIBUTING.md](../CONTRIBUTING.md)._

@@ -9,7 +9,7 @@ jaga diskusi tetap teknis dan konstruktif.
 
 - Bersikaplah baik. Tidak ada pelecehan, serangan pribadi, atau diskriminasi.
 - Kritiklah ide dan kode, bukan orangnya.
-- Bantu pendatang baru; semua orang pernah menjadi baru.
+- Bantu pendatang baru, semua orang pernah menjadi baru.
 
 Perilaku yang tidak dapat diterima dapat dilaporkan secara pribadi kepada pengelola (lihat
 [SECURITY.md](SECURITY.md) untuk kontak). Pengelola dapat menghapus komentar, commit, issue,
@@ -21,4 +21,4 @@ Ini adalah adaptasi ringkas yang sesuai untuk proyek dari semangat Contributor C
 
 ---
 
-> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan; lihat [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan, lihat [CONTRIBUTING.md](CONTRIBUTING.md)._

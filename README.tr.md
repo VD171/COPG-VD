@@ -1,6 +1,25 @@
 <!--
-  COPG-VD: global device spoofer: spoof your device fingerprint and build.
-  Copyright (C) 2026  AlirezaParsi & VD171. SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+  ======================================================================
+   COPG-VD  ::  global device spoofer
+   Spoof your device fingerprint and build.
+
+   Copyright (C) 2026  AlirezaParsi & VD171 (Fork by VD171)
+   SPDX-License-Identifier: AGPL-3.0-or-later
+
+   Licensed under the GNU AGPL v3.0 or later. You may obtain a copy at
+   https://www.gnu.org/licenses/agpl-3.0.html
+
+   Site           : https://vd171.ru
+   Site           : https://vd.priv8.ru
+   Source         : https://github.com/VD171/COPG-VD
+   GitHub         : @VD171 https://github.com/VD171
+   XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+   XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+   Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+   Channel        : @Priv8_VD https://t.me/Priv8_VD
+   Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+   E-mail         : vd.priv8@pm.me
+  ======================================================================
 -->
 
 # COPG-VD
@@ -11,7 +30,7 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases/latest"><img src="https://img.shields.io/github/v/release/VD171/COPG-VD?label=release&color=2ee89d" alt="Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1a7f37" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-1a7f37" alt="License"></a>
   <a href="https://github.com/VD171/COPG-VD/releases"><img src="https://img.shields.io/github/downloads/VD171/COPG-VD/total?label=downloads&color=8250df" alt="Downloads"></a>
   <a href="https://github.com/VD171/COPG-VD/stargazers"><img src="https://img.shields.io/github/stars/VD171/COPG-VD?color=d29922" alt="Stars"></a>
 </p>
@@ -32,10 +51,10 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · Türkçe · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
-  <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
+  <img src="docs/screenshots/tr/device.png" width="24%" alt="Device"> <img src="docs/screenshots/tr/spoofing.png" width="24%" alt="Spoofing"> <img src="docs/screenshots/tr/system.png" width="24%" alt="System"> <img src="docs/screenshots/tr/tools.png" width="24%" alt="Tools">
 </p>
 
 ---
@@ -48,11 +67,11 @@ Uygulamalar, gördükleri cihaz temiz ve sertifikalı bir telefon olmadığında
 
 - **Kapsam denetimi:** sahte kimliği yalnızca Google Play yığınına (varsayılan), tüm cihaza, bir whitelist'e veya bir blacklist dışındaki her şeye iletir. Kapsamlı bir modda Zygisk kimliği her işlem için iletir, böylece asla global özellikler üzerinden sızmaz.
 - **Bağımsız motorlar:** Build alanları (`android.os.Build.*` öğesinin JNI ile yeniden yazılması), işlem başına temiz oda yöntemiyle bir property hook (function hook yok), gruplanmış `resetprop` ve kendi hedef listesine sahip isteğe bağlı bir DRM / Widevine seviyesi (L1 veya L3). Her biri kapatılabilir.
-- **Alan başına denetim:** her Build alanı ayarlanabilir, boşaltılabilir, silinebilir veya atlanabilir; cihaz genelinde tutarlı kalması gereken değerler için bir `global_fields` listesiyle birlikte.
-- **Her zaman taze fingerprint:** bir Pixel profili paketle birlikte gelir ve her önyüklemede bir kez en yeni Google fabrika imajından kendini yeniler; WebUI'den başka bir Pixel profili de getirebilirsiniz. Asla sürüm düşürmez ve farklı bir cihaza ait profili reddeder.
+- **Alan başına denetim:** her Build alanı ayarlanabilir, boşaltılabilir, silinebilir veya atlanabilir, cihaz genelinde tutarlı kalması gereken değerler için bir `global_fields` listesiyle birlikte.
+- **Her zaman taze fingerprint:** bir Pixel profili paketle birlikte gelir ve her önyüklemede bir kez en yeni Google fabrika imajından kendini yeniler, WebUI'den başka bir Pixel profili de getirebilirsiniz. Asla sürüm düşürmez ve farklı bir cihaza ait profili reddeder.
 - **Güvenli Android sürüm politikası:** SDK, her politika altında gerçek framework'ünüzün üzerine asla yükseltilmez (yükseltmek telefonu yalnızca softloop'a sokar).
 - **Analyze:** yapılandırmayı ROM'unuza ve props'larınıza karşı denetler ve uygulamalara ulaşmadan önce tutarsız olan her şeyi işaretler.
-- **WebUI:** hiçbir ağ isteği olmadan her şeyi yönetmek için beş sekme; yapılandırma dosyası tüm ayarları taşır, böylece bunlar bir modül güncellemesinden sağ çıkar.
+- **WebUI:** hiçbir ağ isteği olmadan her şeyi yönetmek için beş sekme, yapılandırma dosyası tüm ayarları taşır, böylece bunlar bir modül güncellemesinden sağ çıkar.
 - **Artımlı kendi kendini güncelleme (VDLU)** ve **dört ABI'li** bir native kütüphane (arm64-v8a, armeabi-v7a, x86, x86_64).
 
 ## AI ajanları
@@ -65,20 +84,20 @@ zip'i KernelSU, APatch veya Magisk'te flaşlayın ve yeniden başlatın. Birlikt
 
 ## Güvenlik
 
-Sahteleme yalnızca kullanıcı tarafındadır: COPG-VD, SDK'yı asla gerçek framework'ünüzün üzerine yükseltmez, üreticiyi profilin geri kalanıyla tutarlı tutar ve gerçek sürümü, sahtelediği özelliklerden değil `/system/build.prop` dosyasından okur. Kendi kendini güncelleyen bileşen geçerli bir ed25519 imzası gerektirir ve sürüm düşürmeyi reddeder; WebUI hiçbir ağ isteği yapmaz. Sorunları [SECURITY.md](docs/tr/SECURITY.md) uyarınca bildirin.
+Sahteleme yalnızca kullanıcı tarafındadır: COPG-VD, SDK'yı asla gerçek framework'ünüzün üzerine yükseltmez, üreticiyi profilin geri kalanıyla tutarlı tutar ve gerçek sürümü, sahtelediği özelliklerden değil `/system/build.prop` dosyasından okur. Kendi kendini güncelleyen bileşen geçerli bir ed25519 imzası gerektirir ve sürüm düşürmeyi reddeder, WebUI hiçbir ağ isteği yapmaz. Sorunları [SECURITY.md](docs/tr/SECURITY.md) uyarınca bildirin.
 
 ## Derleme
 
-Her zaman release, asla debug değil. Native kütüphane ve kapsam yardımcısı, dört ABI'nin tümü için CI'da derlenir; release iş akışı flaşlanabilir zip'i bir araya getirir, dosya başına `.sha256` eşlerini yazar, imzalı VDLU taban çizgisini yeniden oluşturur ve `github-actions[bot]` olarak yayımlar. Bkz. [CONTRIBUTING.md](docs/tr/CONTRIBUTING.md).
+Her zaman release, asla debug değil. Native kütüphane ve kapsam yardımcısı, dört ABI'nin tümü için CI'da derlenir, release iş akışı flaşlanabilir zip'i bir araya getirir, dosya başına `.sha256` eşlerini yazar, imzalı VDLU taban çizgisini yeniden oluşturur ve `github-actions[bot]` olarak yayımlar. Bkz. [CONTRIBUTING.md](docs/tr/CONTRIBUTING.md).
 
 ## Nasıl kullanılır?
-Modülü kurun, yeniden başlatın; böylece birlikte gelen profil (bir Pixel) hedeflenen uygulamalara sahtelenir. Çalışan bir fingerprint ile PlayIntegrityFix veya GooglePhotosUnlimited'e ihtiyacınız olmaz.  
+Modülü kurun, yeniden başlatın, böylece birlikte gelen profil (bir Pixel) hedeflenen uygulamalara sahtelenir. Çalışan bir fingerprint ile PlayIntegrityFix veya GooglePhotosUnlimited'e ihtiyacınız olmaz.  
 Her şey `/data/adb/COPG-VD/COPG-VD.json` içinde ya da WebUI'den yapılandırılır. Tüm alanlar İSTEĞE BAĞLIDIR: sağlanmayan bir alan atlanır.  
 
 ### Scope: sahteciliği kim görür
 `scope_mode`, sahtelenen kimliği hangi süreçlerin alacağına karar verir. Kapsamı daraltılmış bir modda kimlik, Zygisk tarafından süreç başına teslim edilir ve global özellikler aracılığıyla sistemin geri kalanına sızmaz.  
 * **Google Play** (`playstore`, varsayılan): yalnızca Play yığını (Google Play services, onun kararsız (unstable) süreci ve Play Store).  
-* **Global**: tüm cihaz; her süreç onu görür.  
+* **Global**: tüm cihaz, her süreç onu görür.  
 * **Whitelist**: yalnızca `scope_whitelist` içindeki uygulamalar.  
 * **Blacklist**: `scope_blacklist` içindekiler dışındaki her uygulama.  
 
@@ -86,15 +105,15 @@ Her şey `/data/adb/COPG-VD/COPG-VD.json` içinde ya da WebUI'den yapılandırı
 Her biri bağımsızdır ve kapatılabilir:  
 * **Build fields (JNI)**: hedeflenen süreçlerde `android.os.Build.*` ögesini yeniden yazar.  
 * **Property hook**: sahtelenen sistem özelliklerini hedeflenen süreçlere sunar (özellik alanının süreç başına clean-room yeniden eşlemesi, işlev hook'u yok).  
-* **resetprop**: sistem özelliklerini yeniden yazar, grup halinde yönetilir: identity, version, boot state, SELinux, adb/usb, anti-emulator ve bir temizlik geçişi. Kapsamı daraltılmış bir modda identity ve version grupları cihaz genelindeki resetprop'un dışında kalır (Zygisk bunları süreç başına teslim eder); boot/lock/SELinux grupları global kalır.  
-* **DRM / Widevine** (varsayılan olarak kapalı): seçilen bir Widevine güvenlik seviyesini, L1 veya L3, onu okuyan uygulamalara bildirir. Varsayılan olarak yukarıdaki kapsamı izler; DRM spoof'unu yalnızca belirli uygulamalara uygulamak için `drm_targets` (bir uygulama listesi) ayarlayın, `scope_mode`'dan bağımsız olarak: modül, listelenen bir uygulamada yalnızca DRM hook için yüklü kalır, o uygulama ana kapsamın dışında olsa bile. Boş veya yok, kapsamı izlemek anlamına gelir. (Kapsamlı bir mod gerektirir, Global değil.)  
+* **resetprop**: sistem özelliklerini yeniden yazar, grup halinde yönetilir: identity, version, boot state, SELinux, adb/usb, anti-emulator ve bir temizlik geçişi. Kapsamı daraltılmış bir modda identity ve version grupları cihaz genelindeki resetprop'un dışında kalır (Zygisk bunları süreç başına teslim eder), boot/lock/SELinux grupları global kalır.  
+* **DRM / Widevine** (varsayılan olarak kapalı): seçilen bir Widevine güvenlik seviyesini, L1 veya L3, onu okuyan uygulamalara bildirir. Varsayılan olarak yukarıdaki kapsamı izler, DRM spoof'unu yalnızca belirli uygulamalara uygulamak için `drm_targets` (bir uygulama listesi) ayarlayın, `scope_mode`'dan bağımsız olarak: modül, listelenen bir uygulamada yalnızca DRM hook için yüklü kalır, o uygulama ana kapsamın dışında olsa bile. Boş veya yok, kapsamı izlemek anlamına gelir. (Kapsamlı bir mod gerektirir, Global değil.)  
 
 ### Fields: set, empty, delete veya skip
 `COPG-VD` nesnesinin içinde her Build alanının dört durumu vardır:  
 * **Set**: `"KEY": "value"` değeri yazar.  
 * **Empty**: `"KEY": ""` boş bir değer yazar.  
 * **Delete**: kaldırmak için anahtarı üst seviyedeki `"COPG-VD-Delete": [ ... ]` içinde listeleyin (bir Build alanı null olur, bir özellik `resetprop --delete` ile kaldırılır).  
-* **Skip**: anahtarı tamamen dışarıda bırakın; ROM'un kendi değeri korunur.  
+* **Skip**: anahtarı tamamen dışarıda bırakın, ROM'un kendi değeri korunur.  
 
 Bir `"global_fields": [ ... ]` listesi, bir değeri her yerde tutarlı tutmak için, kapsamı daraltılmış bir modda bile adı verilen Build alanlarını cihaz genelinde uygular: yalnızca tutarlılık açısından güvenli alanlar için (örneğin güvenlik yaması), asla identity için ve asla Android sürüm grubu için değil.  
 
@@ -139,12 +158,12 @@ Dizeleri yalnızca çift tırnak içinde kullandığınızdan emin olun.
 Yukarıdaki blok ve `module/COPG-VD.json.example`, en yeni Google fabrika imajından doğrudan alınarak [Update COPG-VD.json](.github/workflows/update-json.yml) iş akışı tarafından her gün yenilenir.  
 
 ### Fingerprint'i güncel tutmak
-`fingerprint-update.sh` o dosyayı çeker ve yapılandırmanızı günceller; bunu ya WebUI'den (**Check Update** / **Update Now**) ya da kendi kendine **her açılışta bir kez** (**Auto-update JSON on boot**, varsayılan olarak açık) yapar.  
+`fingerprint-update.sh` o dosyayı çeker ve yapılandırmanızı günceller, bunu ya WebUI'den (**Check Update** / **Update Now**) ya da kendi kendine **her açılışta bir kez** (**Auto-update JSON on boot**, varsayılan olarak açık) yapar.  
 * `/data/adb/COPG-VD/COPG-VD.json` yerinde güncellenir ve önceki içerik yanında `COPG-VD.json.bak` olarak saklanır.  
 * Yalnızca build alanları yeniden yazılır (fingerprint, ID, incremental, timestamp, güvenlik yaması, SDK, UUID, host, user). Özelleştirdiğiniz diğer her şey korunur: ek anahtarlar, `scope_mode`, `BOOTLOADER`/`BOARD`/`HARDWARE`, diğer nesneler, anahtar sırası ve biçimlendirme.  
-* Asla geriye gitmez: yüklü olandan daha eski bir üst kaynak (upstream) build reddedilir. Bu olağandır (repo, elle güncellediğiniz bir yapılandırmanın gerisinde kalabilir) ve ayrıca Android'de en çok önem taşıyan korumadır; çünkü Android'de mevcut tek indirici busybox `wget`'tir ve bu da TLS sertifikalarını doğrulayamaz: aynı nedenle her değer kullanılmadan önce doğrulanır.  
+* Asla geriye gitmez: yüklü olandan daha eski bir üst kaynak (upstream) build reddedilir. Bu olağandır (repo, elle güncellediğiniz bir yapılandırmanın gerisinde kalabilir) ve ayrıca Android'de en çok önem taşıyan korumadır, çünkü Android'de mevcut tek indirici busybox `wget`'tir ve bu da TLS sertifikalarını doğrulayamaz: aynı nedenle her değer kullanılmadan önce doğrulanır.  
 * Profiliniz **başka bir cihazı** sahteliyorsa (farklı `BRAND`/`DEVICE`/`MANUFACTURER`/`MODEL`/`PRODUCT`), hiçbir şey uygulanmaz: başka bir profildeki bir Pixel fingerprint'i, eski bir fingerprint'ten daha kötüdür.  
-* Açılışta arka planda çalışır ve yaklaşık 10 dakika boyunca tekrar denemeyi sürdürür; çünkü açılış tamamlandığında genellikle wifi henüz hazır değildir. Açılışı asla geciktirmez.  
+* Açılışta arka planda çalışır ve yaklaşık 10 dakika boyunca tekrar denemeyi sürdürür, çünkü açılış tamamlandığında genellikle wifi henüz hazır değildir. Açılışı asla geciktirmez.  
 * `resetprop`, bir güncellemeden hemen sonra yeniden uygulanır, ancak `android.os.Build`, zygote başladığında zygisk modülü tarafından yazılır: yeni değerlerin uygulamalara ulaşması için **yeniden başlatın**.  
 * Günlük `/data/adb/COPG-VD/update.log` konumundadır.  
 
@@ -161,11 +180,21 @@ Yukarıdaki blok ve `module/COPG-VD.json.example`, en yeni Google fabrika imajı
 WebUI'deki **Analyze** (veya `fingerprint-update.sh analyze`), yapılandırmayı olduğu haliyle denetler: sürümü ROM'a karşı, dosyanın hâlâ ayrıştırılabilir olup olmadığını (bozuk bir dosya modülün **hiçbir şeyi** sahtelememesine yol açar ve bunu yalnızca logcat söyler), fingerprint'in çevresindeki alanlarla uyuşup uyuşmadığını, modülün okumadığı anahtarları, tarihleri ve propların yapılandırmanın istediği değerleri zaten taşıyıp taşımadığını kontrol eder.  
 
 ### WebUI
-WebUI isteğe bağlıdır (her şey doğrudan JSON yapılandırmasında düzenlenebilir) ancak modülü sürmenin kolay yolu odur. Beş sekmesi vardır: **About**, **Device** (her alan, duruma göre ayarlanır, kategoriye göre gruplanır), **Spoofing** (scope ve engines), **System** (resetprop grupları) ve **Tools** (Analyze, Check Update, Update Now, Backup/Restore ve açılışta otomatik güncelleme). Hiçbir ağ isteği yapmaz; ihtiyaç duyduğu her şey modülün içinde gelir.  
+WebUI isteğe bağlıdır (her şey doğrudan JSON yapılandırmasında düzenlenebilir) ancak modülü sürmenin kolay yolu odur. Beş sekmesi vardır: **About**, **Device** (her alan, duruma göre ayarlanır, kategoriye göre gruplanır), **Spoofing** (scope ve engines), **System** (resetprop grupları) ve **Tools** (Analyze, Check Update, Update Now, Backup/Restore ve açılışta otomatik güncelleme). Hiçbir ağ isteği yapmaz, ihtiyaç duyduğu her şey modülün içinde gelir.  
 Magisk kullanıcısıysanız, KOW tarafından geliştirilen KsuWebUI'yi kullanın (https://github.com/KOWX712/KsuWebUIStandalone/releases). Ayrıca MMRL tarafından geliştirilen WebUI-X Portable'ı da kullanabilirsiniz (https://github.com/MMRLApp/WebUI-X-Portable/releases) veya KsuWebUI-SN (https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).  
 
 ### Yapılandırmadaki ayarlar
 `COPG-VD.json` ayarlarını profilin yanında taşır, böylece seçimleriniz bir yedekle birlikte taşınır ve elle düzenlenebilir: `scope_mode`, engine anahtarları, resetprop grupları, `global_fields` ve bir `COPG-VD-Settings` nesnesi (`resetprop`, `autoupdate`, `spoof_version`). Her şey bu tek dosyada bulunur: açılış betikleri ve WebUI ayarları doğrudan oradan okur, böylece seçimleriniz bir modül güncellemesinden sağ çıkar. `"spoof_version": "force"` dosyadan reddedilir ve düşürülür: eski bir yedeği geri yüklemek, onu arkanızdan yeniden etkinleştirmemelidir.  
+
+## Artımlı güncellemeler (VDLU)
+
+COPG-VD, **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** motorunu içerir (`module/vdlu/` içine gömülü): modül, tüm `.zip` dosyasını yeniden indirmek yerine yalnızca değişen dosyaları getirerek kendini günceller (içerik adresli bloblar + imzalı bir `manifest.json`). **Hardened** profili: ed25519 imzası zorunludur ve sürüm düşürmeler engellenir, tam `.zip` yedek olarak geçerli kalır.
+
+- **`vdlu/`** (zip içinde gelir): `update.sh` (motor) + `vdlu-verify` + `config.default` + `keyring/` (genel anahtar).
+- **Durum** `/data/adb/COPG-VD/vdlu/` içinde (config/journal/blobs/staged/rollback), modülün dışında, yeniden flashlamadan sonra da kalır.
+- **Önyükleme tetikleyicisi:** `post-fs-data.sh`, zygote öncesi, COPG-VD'de `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard) bulunur, bu yüzden yeni `.so`, zygote onu eşlemeden önce hazırlanıp değiştirilir.
+- **WebUI:** ilerleme bildirimi ve iptal içeren bir **Updates** paneli (`webroot/vdlu.js`).
+- **Yayın:** `module/vdlu/RELEASE.md` dosyasına bakın (`vdlu-pack` + `vdlu-sign`, manifest'i arşivler, `vdlu-gc` yetim blobları temizler, toplu Pages push).
 
 <!-- vd-docs -->
 ## Belgeler
@@ -178,22 +207,12 @@ Magisk kullanıcısıysanız, KOW tarafından geliştirilen KsuWebUI'yi kullanı
 
 <!-- /vd-docs -->
 
-## Artımlı güncellemeler (VDLU)
-
-COPG-VD, **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** motorunu içerir (`module/vdlu/` içine gömülü): modül, tüm `.zip` dosyasını yeniden indirmek yerine yalnızca değişen dosyaları getirerek kendini günceller (içerik adresli bloblar + imzalı bir `manifest.json`). **Hardened** profili: ed25519 imzası zorunludur ve sürüm düşürmeler engellenir; tam `.zip` yedek olarak geçerli kalır.
-
-- **`vdlu/`** (zip içinde gelir): `update.sh` (motor) + `vdlu-verify` + `config.default` + `keyring/` (genel anahtar).
-- **Durum** `/data/adb/COPG-VD/vdlu/` içinde (config/journal/blobs/staged/rollback) - modülün dışında, yeniden flashlamadan sonra da kalır.
-- **Önyükleme tetikleyicisi:** `post-fs-data.sh`, zygote öncesi - COPG-VD'de `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard) bulunur, bu yüzden yeni `.so`, zygote onu eşlemeden önce hazırlanıp değiştirilir.
-- **WebUI:** ilerleme bildirimi ve iptal içeren bir **Updates** paneli (`webroot/vdlu.js`).
-- **Yayın:** `module/vdlu/RELEASE.md` dosyasına bakın (`vdlu-pack` + `vdlu-sign`, manifest'i arşivler, `vdlu-gc` yetim blobları temizler, toplu Pages push).
-
 ## Ayrıca bakınız
 
 - **[VDBackup](https://github.com/VD171/VD-Backup)**: root olarak tam uygulama ve veri yedekleme ve geri yükleme, tamamen bir WebUI'den yönetilir.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: root olarak çalışan bağımsız bir SSH arka plan hizmeti (Dropbear).
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: Google hizmetleriniz (RCS, Wallet, Play Integrity doğrulamaları), internet olmadan cihazınızda okunur.
-- **[VDInstaller](https://github.com/VD171/VD-Installer)**: tekli, toplu ve bölünmüş APK'lar için sürtünmesiz bir root sideload yükleyicisi; Play Protect doğrulayıcı anahtarı ve kurulum kaynağı sahteciliği ile birlikte.
+- **[VDInstaller](https://github.com/VD171/VD-Installer)**: tekli, toplu ve bölünmüş APK'lar için sürtünmesiz bir root sideload yükleyicisi, Play Protect doğrulayıcı anahtarı ve kurulum kaynağı sahteciliği ile birlikte.
 - **[VDInfos](https://github.com/VD171/VD-Infos)**: her bir ögeyi onu okuyabilen her yöntemle okuyup yan yana karşılaştıran bir cihaz yöntemi hata ayıklayıcısı.
 - **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)**: KernelSU/APatch/Magisk modüllerine gömülü, flash'sız, artımlı bir kendini güncelleme motoru.
 - **[VD-Modules](https://github.com/VD171/VD-Modules)**: MMRL/WebUI-X için modül deposu (bunların hepsini root yöneticinizden yükleyin).
@@ -202,20 +221,19 @@ COPG-VD, **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** motoru
 
 ## İletişim
 
-- Site           : https://vd171.ru
-- Site           : https://vd.priv8.ru
-- Source         : https://github.com/VD171/COPG-VD
-- GitHub         : [@VD171](https://github.com/VD171)
-- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
-- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
-- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
-- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
-- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
-- E-mail         : vd.priv8@pm.me
+- https://vd171.ru
+- https://vd.priv8.ru
+- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+- **Channel:** @Priv8_VD https://t.me/Priv8_VD
+- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
+- **E-mail:** vd.priv8@pm.me
+- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
+- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
+- **GitHub:** @VD171 https://github.com/VD171
 
 ## Lisans
 
-**Apache-2.0**: bkz. [LICENSE](LICENSE). COPG-VD, AlirezaParsi tarafından geliştirilen özgün COPG'nin VD171 tarafından yapılmış bir fork'udur ve aynı lisans altında sürdürülmektedir.
+**AGPL-3.0-or-later**: bkz. [LICENSE](LICENSE). COPG-VD, AlirezaParsi tarafından geliştirilen özgün COPG'nin (Apache-2.0) VD171 tarafından yapılmış bir fork'udur ve GNU AGPL-3.0-or-later altında yeniden lisanslanmıştır. AĞ COPYLEFT: değiştirilmiş bir sürümü, hizmet olarak bile çalıştırıyorsanız, kaynak kodunu sunmalısınız.
 
 ## Ticari markalar
 
@@ -224,3 +242,7 @@ COPG-VD bağımsız, resmi olmayan bir projedir. Google LLC ile bağlantılı de
 ## Tags
 
 `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG-VD`
+
+---
+
+📣 **Güncellemeler için kanala katılın:** @Priv8_VD https://t.me/Priv8_VD

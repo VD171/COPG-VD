@@ -12,7 +12,7 @@
 COPG-VD یک **spoofer دستگاه مبتنی بر Zygisk** است: یک کتابخانه native کوچک که به درون
 پردازه‌های اپ تزریق می‌شود تا fingerprint دستگاه و build را بازنویسی کند، به علاوه یک WebUI
 با JS خالص برای هدایت آن. این یک fork از COPG (نوشته AlirezaParsi) است، که توسط VD171 تحت
-مجوز Apache-2.0 نگهداری می‌شود. [ARCHITECTURE.md](ARCHITECTURE.md) و
+مجوز GNU AGPL-3.0-or-later نگهداری می‌شود. [ARCHITECTURE.md](ARCHITECTURE.md) و
 [FILE-STRUCTURE.md](FILE-STRUCTURE.md) را ببینید.
 
 به صورت پیش‌فرض spoof را از طریق Zygisk به استک Google Play محدود می‌کند، پس یک جایگزین

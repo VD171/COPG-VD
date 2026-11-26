@@ -26,7 +26,7 @@ cuanto podamos y te daremos crédito si lo deseas.
 ## Notas de alcance
 
 - La configuración vive en `/data/adb/COPG-VD/COPG-VD.json`, legible solo por root. El módulo la lee
-  desde el proceso inyectado mediante una regla SELinux dedicada que él mismo incluye; no
+  desde el proceso inyectado mediante una regla SELinux dedicada que él mismo incluye, no
   contiene credenciales ni frases de contraseña.
 - Los hooks de spoofing están adjuntos a apps vivas y tienen comprobación de null, de modo
   que un perfil malformado se degrada con elegancia en lugar de hacer caer la app.
@@ -41,4 +41,4 @@ cuanto podamos y te daremos crédito si lo deseas.
 
 ---
 
-> _Esta documentación se generó con Claude (Anthropic) y la mantiene VD171. Las correcciones y mejoras son bienvenidas; consulta [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Esta documentación se generó con Claude (Anthropic) y la mantiene VD171. Las correcciones y mejoras son bienvenidas, consulta [CONTRIBUTING.md](CONTRIBUTING.md)._

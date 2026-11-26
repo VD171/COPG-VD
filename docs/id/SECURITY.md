@@ -27,7 +27,7 @@ akan merespons secepat mungkin dan memberi Anda kredit jika Anda mau.
 
 - Konfigurasi berada di `/data/adb/COPG-VD/COPG-VD.json`, hanya dapat dibaca oleh root. Modul
   membacanya dari proses yang disuntikkan melalui aturan SELinux khusus yang disertakannya
-  sendiri; ia tidak menyimpan kredensial atau frasa sandi.
+  sendiri, ia tidak menyimpan kredensial atau frasa sandi.
 - Hook spoofing ditempelkan ke aplikasi yang aktif dan null-checked sehingga profil yang
   salah bentuk menurun dengan anggun alih-alih membuat aplikasi crash.
 - Tidak ada **telemetri dan tidak ada jaringan** kecuali pengambilan profil opsional, yang
@@ -41,4 +41,4 @@ akan merespons secepat mungkin dan memberi Anda kredit jika Anda mau.
 
 ---
 
-> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan; lihat [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan, lihat [CONTRIBUTING.md](CONTRIBUTING.md)._

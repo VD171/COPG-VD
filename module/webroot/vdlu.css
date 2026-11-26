@@ -43,6 +43,12 @@
 .vdlu-banner-ic { font-size: 1rem; flex: 0 0 auto; }
 .vdlu-banner-tx { min-width: 0; overflow-wrap: anywhere; }
 .vdlu-banner code { color: var(--fg, #e2e8f0); background: rgba(0, 0, 0, 0.25); padding: 1px 5px; border-radius: 5px; }
+.vdlu-banner-x {
+  margin-left: auto; flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%;
+  border: none; background: transparent; color: inherit;
+  font-size: 1.1rem; line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vdlu-banner-x:active { transform: scale(0.9); }
 
 /* ---- progress toast (non-blocking corner overlay) ---------------------------------------------- */
 .vdlu-toast {

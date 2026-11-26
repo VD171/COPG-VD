@@ -11,7 +11,7 @@ dove si trovano le cose e le poche convenzioni che seguiamo.
 
 COPG-VD è uno **spoofer di dispositivo Zygisk**: una piccola libreria nativa che viene iniettata nei processi
 delle app per riscrivere il fingerprint e la build del dispositivo, più una WebUI in vanilla-JS per pilotarlo.
-È un fork di COPG (di AlirezaParsi), mantenuto da VD171 sotto la licenza Apache-2.0.
+È un fork di COPG (di AlirezaParsi), mantenuto da VD171 sotto la licenza GNU AGPL-3.0-or-later.
 Vedi [ARCHITECTURE.md](ARCHITECTURE.md) e [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 
 Di default limita lo spoof allo stack di Google Play tramite Zygisk, quindi è un'alternativa
@@ -38,7 +38,7 @@ Gli assistenti e agenti AI qui sono contributori di prima classe, non un ripensa
 - Costruisci uno zip flashabile: copia la `libspoof.so` compilata in `module/zygisk/<abi>.so`, poi
   `cd module && zip -r9 ../COPG-VD-dev.zip .` e flashalo.
 - La WebUI è `module/webroot/` (aprila dal root manager). La logica di spoofing è
-  `zygisk/spoof_module.cpp`; il fetcher del profilo è `module/fingerprint-update.sh`.
+  `zygisk/spoof_module.cpp`, il fetcher del profilo è `module/fingerprint-update.sh`.
 
 ## Convenzioni
 
@@ -46,15 +46,15 @@ Gli assistenti e agenti AI qui sono contributori di prima classe, non un ripensa
   del banner del progetto (copialo da qualsiasi file esistente). Il tooling sotto `.github/` usa
   invece un commento breve.
 - **Codice e commenti in inglese.** Mantieni i commenti minimi e solo dove servono.
-- **Nessun em-dash o en-dash**; usa sempre un semplice trattino `-`.
-- La WebUI è **vanilla JS** (un unico `scripts.js`); nessun framework.
+- **Nessun em-dash o en-dash**, usa sempre un semplice trattino `-`.
+- La WebUI è **vanilla JS** (un unico `scripts.js`), nessun framework.
 - **Non indebolire mai** una vera funzionalità: mantieni lo spoof coerente, e non far
   crashare un'app a cui gli hook sono attaccati (sono null-checked di proposito).
 
 ## Internazionalizzazione (i18n)
 
 - Le stringhe della UI si trovano in `module/webroot/lang/`. L'inglese è il fallback canonico
-  (`en.js` + `en.json`); le altre 20 lingue sono `<code>.json`.
+  (`en.js` + `en.json`), le altre 20 lingue sono `<code>.json`.
 - Per aggiungere o cambiare una stringa: modifica `en.js` **e** `en.json`, poi aggiorna ogni
   `<code>.json`. Toccare un'etichetta visibile significa aggiornare **tutti** i file di lingua e
   **tutti** i `README.<code>.md`.
@@ -75,4 +75,4 @@ profili Pixel sono tutti ottimi punti di partenza.
 
 ---
 
-> _Questa documentazione è stata generata con Claude (Anthropic) ed è gestita da VD171. Correzioni e miglioramenti sono benvenuti; vedi [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Questa documentazione è stata generata con Claude (Anthropic) ed è gestita da VD171. Correzioni e miglioramenti sono benvenuti, vedi [CONTRIBUTING.md](CONTRIBUTING.md)._

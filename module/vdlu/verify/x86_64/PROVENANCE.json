@@ -1,0 +1,18 @@
+{
+  "_comment": "Provenance for the bundled pre-compiled binary in this ABI dir (STANDARDS.md 8, HARD). tooling/provenance-check.sh verifies the binary's name appears under binaries[].file. Vendored from the VDLiveUpdate canonical.",
+  "module": "COPG-VD",
+  "abi": "x86_64",
+  "binaries": [
+    {
+      "file": "ed25519-mini",
+      "source": "https://tweetnacl.cr.yp.to/20140427/tweetnacl.c",
+      "version": "TweetNaCl 20140427 (VDLU verify-only wrapper main.c)",
+      "commit": "n/a (dated upstream release, not a git repo)",
+      "license": "public-domain (TweetNaCl)",
+      "sha256": "0c8304fee06ce65d3a109318de63cd44ffa21708837c8b3d6bdea4eff33928e4",
+      "build_flags": "-O2 -ffunction-sections -fdata-sections -Wl,--gc-sections; then llvm-strip",
+      "toolchain": "Android NDK r29 clang, api 28",
+      "reproduce": "vendored from VDLiveUpdate verify/ed25519-mini (byte-identical); rebuild via that repo's build.sh"
+    }
+  ]
+}

@@ -56,7 +56,7 @@ COPG-VD/
 ├── README.md + README.<code>.md   # 21 ภาษา
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md  CODE_OF_CONDUCT.md  SECURITY.md
-├── LICENSE                     # Apache-2.0
+├── LICENSE                     # AGPL-3.0-or-later
 └── screenshots/                # รูปภาพที่ใช้โดย README
 ```
 
@@ -64,7 +64,7 @@ COPG-VD/
 
 `/data/adb/COPG-VD/` บนอุปกรณ์คือไดเรกทอรีของโมดูลเอง: `COPG-VD.json` เก็บโปรไฟล์
 และการตั้งค่า (ดู [CONFIGURATION.md](CONFIGURATION.md)) พร้อมกับ `update.log`, `update.state` และ
-`update.status` การกำหนดค่าไม่เคยถูก commit; `module/COPG-VD.json.example` คือแม่แบบ
+`update.status` การกำหนดค่าไม่เคยถูก commit, `module/COPG-VD.json.example` คือแม่แบบ
 
 <!-- doc-footer -->
 

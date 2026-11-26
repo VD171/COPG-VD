@@ -25,7 +25,8 @@ window.VDLU_I18N_IT = {
   savedToast: 'salvato', saveFail: 'salvataggio non riuscito', sourceSaved: 'sorgente salvata',
   bootstrapping: 'Preparazione dell\'updater…', bootstrapSub: 'download una tantum del fetcher', bootstrapFail: 'Impossibile preparare l\'updater',
   searching: 'Ricerca…', upToDate: 'Aggiornato', nothingNew: 'niente di nuovo',
-  ahead: 'Più recente del feed', aheadSub: 'la tua versione è più recente dell\'aggiornamento pubblicato', deferred: 'Download rimandato', deferredSub: 'in attesa della rete consentita - riprende al prossimo controllo',
+  ahead: 'Più recente del feed', aheadSub: 'la tua versione è più recente dell\'aggiornamento pubblicato', silentUpdate: 'Aggiornamento silenzioso', silentUpdateSub: 'Applica gli aggiornamenti in background senza mostrare la barra di riavvio.',
+  deferred: 'Download rimandato', deferredSub: 'in attesa della rete consentita, riprende al prossimo controllo',
   updateAvail: 'Aggiornamento disponibile', install: 'installa', fileOne: 'file', fileMany: 'file',
   requiresReboot: 'richiede riavvio', checkFail: 'Controllo non riuscito', ksuUnavailable: 'API KSU non disponibile',
   pendingUpdate: 'Aggiornamento in sospeso', notNow: 'Non ora', srcPlaceholder: 'https://…/&lt;modulo&gt;'

@@ -4,11 +4,11 @@
 #  Spoof your device fingerprint and build: Zygisk, KernelSU/APatch/Magisk.
 #
 #  Copyright (C) 2026  AlirezaParsi & VD171
-#  SPDX-License-Identifier: Apache-2.0
+#  SPDX-License-Identifier: AGPL-3.0-or-later
 #  Fork by VD171.
 #
-#  Licensed under the Apache License, Version 2.0; you may obtain a copy at
-#  http://www.apache.org/licenses/LICENSE-2.0
+#  Free software under the GNU AGPL v3 or later. NETWORK COPYLEFT: run a
+#  modified version, even as a service, and you MUST offer its source.
 #
 #  Site           : https://vd171.ru
 #  Site           : https://vd.priv8.ru
@@ -67,21 +67,25 @@ spoof_version_policy() {
 }
 
 version_allowed() {
-    case "$POLICY_VERSION" in
-        force) return 0 ;;
-        never) return 1 ;;
-    esac
+    [ "$POLICY_VERSION" = never ] && return 1
+    # The numeric SDK is never raised above the real framework SDK, even under Force
+    # (claiming a higher SDK only softloops the device); Force still forces the other
+    # version fields below. Keep this in step with the JNI `allowed` lambda in spoof_module.cpp.
     case "$1" in
         SDK_INT)
             rom=$(rom_prop ro.build.version.sdk)
             case "$2$rom" in *[!0-9]*) return 1 ;; esac
             [ "$2" -le "$rom" ] ;;
-        ANDROID_VERSION) [ "$2" = "$(rom_prop ro.build.version.release)" ] ;;
-        CODENAME)        [ "$2" = "$(rom_prop ro.build.version.codename)" ] ;;
         SDK_FULL)
             rom=$(rom_prop ro.build.version.sdk)
             case "$2" in "$rom"|"$rom".*) return 0 ;; *) return 1 ;; esac ;;
-        *) return 1 ;;
+        *)
+            [ "$POLICY_VERSION" = force ] && return 0
+            case "$1" in
+                ANDROID_VERSION) [ "$2" = "$(rom_prop ro.build.version.release)" ] ;;
+                CODENAME)        [ "$2" = "$(rom_prop ro.build.version.codename)" ] ;;
+                *) return 1 ;;
+            esac ;;
     esac
 }
 

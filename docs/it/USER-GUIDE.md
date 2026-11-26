@@ -49,7 +49,7 @@ Ogni motore è indipendente e può essere disattivato. Tutti sono attivi di defa
 - **resetprop**: riscrive le proprietà di sistema a livello dell'intero dispositivo, per gruppo (identità,
   versione, stato di boot, SELinux, adb/usb, anti-emulatore e una passata di pulizia). In una modalità
   scoped i gruppi identità e versione restano fuori dalla passata device-wide (Zygisk li consegna
-  per processo); i gruppi boot, lock e SELinux restano globali. Attivalo in
+  per processo), i gruppi boot, lock e SELinux restano globali. Attivalo in
   `COPG-VD-Settings.resetprop`.
 - **DRM / Widevine (`motor_drm`, disattivato di default)**: riporta un livello di sicurezza Widevine
   scelto (L1 o L3) alle app che lo leggono. Vedi la sezione DRM più sotto.
@@ -88,7 +88,7 @@ Android version** (`COPG-VD-Settings.spoof_version`) decide se vengono applicati
 - `rom`: applica solo ciò che non supera la ROM, che in pratica significa abbassare l'SDK.
 - `force`: forza i campi di versione che la config chiede. L'SDK resta comunque limitato al valore
   della ROM anche qui (da v6.19), perché alzare l'SDK oltre il framework reale provoca solo il softloop
-  e non ha alcun uso, quindi `force` non provoca più il softloop; forza i campi stringa (release, codename).
+  e non ha alcun uso, quindi `force` non provoca più il softloop, forza i campi stringa (release, codename).
 
 La versione reale viene letta da `/system/build.prop`, mai da `getprop` (che è proprio
 la cosa che questo modulo falsifica). `force` viene anche rifiutato durante il ripristino di un backup, così un
@@ -102,7 +102,7 @@ Disattivato di default (`motor_drm`). Quando attivo, riporta un livello Widevine
 Di default lo spoof DRM segue `scope_mode`. Per applicarlo a un insieme specifico di app
 invece, indipendentemente dallo scope principale, elencale in `drm_targets`. Il modulo allora
 resta caricato in un'app elencata **solo** per l'hook DRM, anche quando quell'app è fuori dallo
-scope principale; una lista vuota o assente significa seguire lo scope. Questo richiede una modalità scoped (non
+scope principale, una lista vuota o assente significa seguire lo scope. Questo richiede una modalità scoped (non
 `global`), e ha effetto al prossimo **riavvio**.
 
 ## Analyze: controlla la tua config
@@ -131,7 +131,7 @@ Opzionale, ma il modo semplice per pilotare tutto. Cinque schede:
   e il report Diagnostics (un pulsante per leggere ed esportare tutto ciò che è utile per un bug
   report).
 
-Non effettua alcuna richiesta di rete; tutto ciò di cui ha bisogno è incluso nel modulo.
+Non effettua alcuna richiesta di rete, tutto ciò di cui ha bisogno è incluso nel modulo.
 
 ## Risoluzione dei problemi
 
@@ -149,4 +149,4 @@ Non effettua alcuna richiesta di rete; tutto ciò di cui ha bisogno è incluso n
 
 ---
 
-> _Questa documentazione è stata generata con Claude (Anthropic) ed è gestita da VD171. Correzioni e miglioramenti sono benvenuti; vedi [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Questa documentazione è stata generata con Claude (Anthropic) ed è gestita da VD171. Correzioni e miglioramenti sono benvenuti, vedi [CONTRIBUTING.md](CONTRIBUTING.md)._

@@ -1,6 +1,25 @@
 <!--
-  COPG-VD: global device spoofer: spoof your device fingerprint and build.
-  Copyright (C) 2026  AlirezaParsi & VD171. SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+  ======================================================================
+   COPG-VD  ::  global device spoofer
+   Spoof your device fingerprint and build.
+
+   Copyright (C) 2026  AlirezaParsi & VD171 (Fork by VD171)
+   SPDX-License-Identifier: AGPL-3.0-or-later
+
+   Licensed under the GNU AGPL v3.0 or later. You may obtain a copy at
+   https://www.gnu.org/licenses/agpl-3.0.html
+
+   Site           : https://vd171.ru
+   Site           : https://vd.priv8.ru
+   Source         : https://github.com/VD171/COPG-VD
+   GitHub         : @VD171 https://github.com/VD171
+   XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+   XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+   Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+   Channel        : @Priv8_VD https://t.me/Priv8_VD
+   Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+   E-mail         : vd.priv8@pm.me
+  ======================================================================
 -->
 
 # COPG-VD
@@ -11,7 +30,7 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases/latest"><img src="https://img.shields.io/github/v/release/VD171/COPG-VD?label=release&color=2ee89d" alt="Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1a7f37" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-1a7f37" alt="License"></a>
   <a href="https://github.com/VD171/COPG-VD/releases"><img src="https://img.shields.io/github/downloads/VD171/COPG-VD/total?label=downloads&color=8250df" alt="Downloads"></a>
   <a href="https://github.com/VD171/COPG-VD/stargazers"><img src="https://img.shields.io/github/stars/VD171/COPG-VD?color=d29922" alt="Stars"></a>
 </p>
@@ -32,10 +51,10 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · Bahasa Indonesia · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
-  <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
+  <img src="docs/screenshots/id/device.png" width="24%" alt="Device"> <img src="docs/screenshots/id/spoofing.png" width="24%" alt="Spoofing"> <img src="docs/screenshots/id/system.png" width="24%" alt="System"> <img src="docs/screenshots/id/tools.png" width="24%" alt="Tools">
 </p>
 
 ---
@@ -49,10 +68,10 @@ Semakin banyak aplikasi menolak berjalan, atau diam-diam menurunkan kualitas, ke
 - **Kontrol cakupan:** kirimkan identitas palsu hanya ke stack Google Play (bawaan), ke seluruh perangkat, ke whitelist, atau ke semua kecuali blacklist. Dalam mode bercakupan, Zygisk mengirimkan identitas per proses, jadi tidak pernah bocor melalui properti global.
 - **Engine independen:** field Build (penulisan ulang JNI dari `android.os.Build.*`), property hook clean-room per proses (tanpa function hook), `resetprop` berkelompok, dan tingkat DRM / Widevine opsional (L1 atau L3) dengan daftar targetnya sendiri. Masing-masing dapat dimatikan.
 - **Kontrol per field:** setiap field Build dapat diatur, dikosongkan, dihapus, atau dilewati, dengan daftar `global_fields` untuk nilai yang harus tetap konsisten di seluruh perangkat.
-- **Fingerprint selalu segar:** profil Pixel disertakan dalam paket dan menyegarkan dirinya sendiri sekali per boot dari citra pabrik Google terbaru; Anda juga dapat mengambil profil Pixel lain dari WebUI. Ia tidak pernah menurunkan versi dan menolak profil untuk perangkat yang berbeda.
+- **Fingerprint selalu segar:** profil Pixel disertakan dalam paket dan menyegarkan dirinya sendiri sekali per boot dari citra pabrik Google terbaru, Anda juga dapat mengambil profil Pixel lain dari WebUI. Ia tidak pernah menurunkan versi dan menolak profil untuk perangkat yang berbeda.
 - **Kebijakan versi Android yang aman:** SDK tidak pernah dinaikkan di atas framework asli Anda (menaikkannya hanya membuat ponsel softloop), di bawah setiap kebijakan.
 - **Analyze:** mengaudit config terhadap ROM dan props Anda serta menandai apa pun yang tidak koheren sebelum mencapai aplikasi.
-- **WebUI:** lima tab untuk mengendalikan semuanya, tanpa permintaan jaringan; file konfigurasi membawa semua pengaturan sehingga bertahan melewati pembaruan modul.
+- **WebUI:** lima tab untuk mengendalikan semuanya, tanpa permintaan jaringan, file konfigurasi membawa semua pengaturan sehingga bertahan melewati pembaruan modul.
 - **Pembaruan mandiri inkremental (VDLU)** dan pustaka native **empat ABI** (arm64-v8a, armeabi-v7a, x86, x86_64).
 
 ## Agen AI
@@ -65,11 +84,11 @@ Flash zip di KernelSU, APatch, atau Magisk lalu reboot. Profil Pixel yang disert
 
 ## Keamanan
 
-Spoofing hanya di sisi pengguna: COPG-VD tidak pernah menaikkan SDK di atas framework asli Anda, menjaga pabrikan tetap koheren dengan sisa profil, dan membaca versi asli dari `/system/build.prop`, tidak pernah dari properti yang dipalsukannya. Pembaru mandiri memerlukan tanda tangan ed25519 yang valid dan menolak downgrade; WebUI tidak membuat permintaan jaringan. Laporkan masalah sesuai [SECURITY.md](docs/id/SECURITY.md).
+Spoofing hanya di sisi pengguna: COPG-VD tidak pernah menaikkan SDK di atas framework asli Anda, menjaga pabrikan tetap koheren dengan sisa profil, dan membaca versi asli dari `/system/build.prop`, tidak pernah dari properti yang dipalsukannya. Pembaru mandiri memerlukan tanda tangan ed25519 yang valid dan menolak downgrade, WebUI tidak membuat permintaan jaringan. Laporkan masalah sesuai [SECURITY.md](docs/id/SECURITY.md).
 
 ## Build
 
-Selalu release, tidak pernah debug. Pustaka native dan helper cakupan dibangun di CI untuk keempat ABI; alur kerja release merakit zip yang dapat di-flash, menulis pendamping `.sha256` per file, meregenerasi baseline VDLU yang ditandatangani, dan menerbitkan sebagai `github-actions[bot]`. Lihat [CONTRIBUTING.md](docs/id/CONTRIBUTING.md).
+Selalu release, tidak pernah debug. Pustaka native dan helper cakupan dibangun di CI untuk keempat ABI, alur kerja release merakit zip yang dapat di-flash, menulis pendamping `.sha256` per file, meregenerasi baseline VDLU yang ditandatangani, dan menerbitkan sebagai `github-actions[bot]`. Lihat [CONTRIBUTING.md](docs/id/CONTRIBUTING.md).
 
 ## Cara menggunakannya?
 Pasang modul, reboot, dan profil yang disertakan (sebuah Pixel) di-spoof ke aplikasi yang ditargetkan. Dengan fingerprint yang berfungsi, Anda tidak memerlukan PlayIntegrityFix atau GooglePhotosUnlimited.  
@@ -78,7 +97,7 @@ Semuanya dikonfigurasi di `/data/adb/COPG-VD/COPG-VD.json`, atau dari WebUI. Sem
 ### Scope: siapa yang melihat spoofing
 `scope_mode` menentukan proses mana yang mendapatkan identitas yang di-spoof. Dalam mode bercakupan terbatas, identitas dikirimkan per proses oleh Zygisk dan tidak bocor ke seluruh sistem lainnya melalui properti global.  
 * **Google Play** (`playstore`, default): hanya tumpukan Play (Google Play services, proses unstable-nya, dan Play Store).  
-* **Global**: seluruh perangkat; setiap proses melihatnya.  
+* **Global**: seluruh perangkat, setiap proses melihatnya.  
 * **Whitelist**: hanya aplikasi dalam `scope_whitelist`.  
 * **Blacklist**: setiap aplikasi kecuali yang ada dalam `scope_blacklist`.  
 
@@ -86,15 +105,15 @@ Semuanya dikonfigurasi di `/data/adb/COPG-VD/COPG-VD.json`, atau dari WebUI. Sem
 Masing-masing bersifat independen dan dapat dimatikan:  
 * **Build fields (JNI)**: menulis ulang `android.os.Build.*` di proses yang ditargetkan.  
 * **Property hook**: menyajikan properti sistem yang di-spoof ke proses yang ditargetkan (pemetaan ulang area properti per proses secara clean-room, tanpa hook fungsi).  
-* **resetprop**: menulis ulang properti sistem, dikelola per grup: identitas, versi, keadaan boot, SELinux, adb/usb, anti-emulator, dan sebuah lintasan pembersihan. Dalam mode bercakupan terbatas, grup identitas dan versi tetap di luar resetprop yang berlaku untuk seluruh perangkat (Zygisk mengirimkannya per proses); grup boot/lock/SELinux tetap global.  
-* **DRM / Widevine** (nonaktif secara default): melaporkan tingkat keamanan Widevine yang dipilih, L1 atau L3, ke aplikasi yang membacanya. Secara default ia mengikuti cakupan di atas; atur `drm_targets` (daftar aplikasi) untuk menerapkan spoof DRM **hanya** ke aplikasi tersebut, terlepas dari `scope_mode`: modul tetap dimuat dalam aplikasi yang terdaftar hanya untuk hook DRM, bahkan ketika aplikasi itu berada di luar cakupan utama. Kosong atau tidak ada berarti mengikuti cakupan. (Membutuhkan mode bercakupan terbatas, bukan Global.)  
+* **resetprop**: menulis ulang properti sistem, dikelola per grup: identitas, versi, keadaan boot, SELinux, adb/usb, anti-emulator, dan sebuah lintasan pembersihan. Dalam mode bercakupan terbatas, grup identitas dan versi tetap di luar resetprop yang berlaku untuk seluruh perangkat (Zygisk mengirimkannya per proses), grup boot/lock/SELinux tetap global.  
+* **DRM / Widevine** (nonaktif secara default): melaporkan tingkat keamanan Widevine yang dipilih, L1 atau L3, ke aplikasi yang membacanya. Secara default ia mengikuti cakupan di atas, atur `drm_targets` (daftar aplikasi) untuk menerapkan spoof DRM **hanya** ke aplikasi tersebut, terlepas dari `scope_mode`: modul tetap dimuat dalam aplikasi yang terdaftar hanya untuk hook DRM, bahkan ketika aplikasi itu berada di luar cakupan utama. Kosong atau tidak ada berarti mengikuti cakupan. (Membutuhkan mode bercakupan terbatas, bukan Global.)  
 
 ### Fields: set, kosongkan, hapus, atau lewati
 Di dalam objek `COPG-VD`, setiap field Build memiliki empat keadaan:  
 * **Set**: `"KEY": "value"` menulis nilainya.  
 * **Empty**: `"KEY": ""` menulis nilai kosong.  
 * **Delete**: cantumkan kunci di dalam `"COPG-VD-Delete": [ ... ]` tingkat atas untuk menghapusnya (field Build menjadi null, properti dihapus dengan `resetprop --delete`).  
-* **Skip**: biarkan kunci itu sepenuhnya tidak dicantumkan; nilai milik ROM sendiri yang dipertahankan.  
+* **Skip**: biarkan kunci itu sepenuhnya tidak dicantumkan, nilai milik ROM sendiri yang dipertahankan.  
 
 Daftar `"global_fields": [ ... ]` menerapkan field Build yang disebutkan ke seluruh perangkat bahkan dalam mode bercakupan terbatas, untuk menjaga sebuah nilai tetap konsisten di mana saja: hanya untuk field yang aman terhadap koherensi (security patch, misalnya), tidak pernah identitas dan tidak pernah grup versi Android.  
 
@@ -161,11 +180,21 @@ Blok di atas dan `module/COPG-VD.json.example` disegarkan setiap hari oleh workf
 **Analyze** di WebUI (atau `fingerprint-update.sh analyze`) mengaudit konfigurasi apa adanya: versi terhadap ROM, apakah file masih dapat diurai sama sekali (file yang rusak membuat modul tidak spoofing **apa pun**, dan hanya logcat yang mengatakannya), apakah fingerprint sesuai dengan field di sekitarnya, kunci-kunci yang tidak dibaca modul, tanggal, dan apakah props sudah membawa apa yang diminta konfigurasi.  
 
 ### WebUI
-WebUI bersifat opsional (semuanya dapat diedit langsung di konfigurasi JSON) tetapi inilah cara mudah untuk mengendalikan modul. Ia memiliki lima tab: **About**, **Device** (setiap field, diatur per keadaan, dikelompokkan berdasarkan kategori), **Spoofing** (scope dan engines), **System** (grup-grup resetprop), dan **Tools** (Analyze, Check Update, Update Now, Backup/Restore, dan auto-update saat boot). Ia tidak membuat permintaan jaringan sama sekali; semua yang dibutuhkannya disertakan di dalam modul.  
+WebUI bersifat opsional (semuanya dapat diedit langsung di konfigurasi JSON) tetapi inilah cara mudah untuk mengendalikan modul. Ia memiliki lima tab: **About**, **Device** (setiap field, diatur per keadaan, dikelompokkan berdasarkan kategori), **Spoofing** (scope dan engines), **System** (grup-grup resetprop), dan **Tools** (Analyze, Check Update, Update Now, Backup/Restore, dan auto-update saat boot). Ia tidak membuat permintaan jaringan sama sekali, semua yang dibutuhkannya disertakan di dalam modul.  
 Jika Anda pengguna Magisk, gunakan KsuWebUI oleh KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases). Anda juga dapat menggunakan WebUI-X Portable oleh MMRL (https://github.com/MMRLApp/WebUI-X-Portable/releases) atau KsuWebUI-SN (https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).  
 
 ### Pengaturan dalam konfigurasi
 `COPG-VD.json` membawa pengaturannya di samping profil, sehingga pilihan Anda ikut bersama cadangan dan dapat diedit secara manual: `scope_mode`, sakelar-sakelar engine, grup-grup resetprop, `global_fields`, dan sebuah objek `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_version`). Semuanya berada di satu file ini: skrip boot dan WebUI membaca pengaturan langsung darinya, sehingga pilihan Anda bertahan melewati pembaruan modul. `"spoof_version": "force"` ditolak dari file dan diturunkan: memulihkan cadangan lama tidak boleh mengaktifkannya kembali tanpa sepengetahuan Anda.  
+
+## Pembaruan inkremental (VDLU)
+
+COPG-VD menyertakan mesin **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (di-vendor di `module/vdlu/`): modul memperbarui dirinya sendiri dengan hanya mengambil berkas yang berubah (blob beralamat konten + `manifest.json` yang ditandatangani), alih-alih mengunduh ulang seluruh `.zip`. Profil **Hardened**: tanda tangan ed25519 wajib dan downgrade diblokir, `.zip` lengkap tetap valid sebagai cadangan.
+
+- **`vdlu/`** (disertakan dalam zip): `update.sh` (mesin) + `vdlu-verify` + `config.default` + `keyring/` (kunci publik).
+- **Status** di `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback), di luar modul, bertahan setelah flash ulang.
+- **Pemicu boot:** `post-fs-data.sh`, sebelum zygote, COPG-VD memiliki `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), sehingga `.so` baru disiapkan dan ditukar sebelum zygote memetakannya.
+- **WebUI:** panel **Updates** (`webroot/vdlu.js`) dengan toast progres dan pembatalan.
+- **Rilis:** lihat `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, arsipkan manifest, `vdlu-gc` memangkas blob yatim, push Pages secara batch).
 
 <!-- vd-docs -->
 ## Dokumentasi
@@ -177,16 +206,6 @@ Jika Anda pengguna Magisk, gunakan KsuWebUI oleh KOW (https://github.com/KOWX712
 - **[Agen AI](https://github.com/VD171/COPG-VD/wiki/id-AI-AGENTS)**: kendalikan config dan updater tanpa antarmuka.
 
 <!-- /vd-docs -->
-
-## Pembaruan inkremental (VDLU)
-
-COPG-VD menyertakan mesin **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (di-vendor di `module/vdlu/`): modul memperbarui dirinya sendiri dengan hanya mengambil berkas yang berubah (blob beralamat konten + `manifest.json` yang ditandatangani), alih-alih mengunduh ulang seluruh `.zip`. Profil **Hardened**: tanda tangan ed25519 wajib dan downgrade diblokir; `.zip` lengkap tetap valid sebagai cadangan.
-
-- **`vdlu/`** (disertakan dalam zip): `update.sh` (mesin) + `vdlu-verify` + `config.default` + `keyring/` (kunci publik).
-- **Status** di `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - di luar modul, bertahan setelah flash ulang.
-- **Pemicu boot:** `post-fs-data.sh`, sebelum zygote - COPG-VD memiliki `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), sehingga `.so` baru disiapkan dan ditukar sebelum zygote memetakannya.
-- **WebUI:** panel **Updates** (`webroot/vdlu.js`) dengan toast progres dan pembatalan.
-- **Rilis:** lihat `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, arsipkan manifest, `vdlu-gc` memangkas blob yatim, push Pages secara batch).
 
 ## Lihat juga
 
@@ -202,20 +221,19 @@ COPG-VD menyertakan mesin **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate
 
 ## Kontak
 
-- Site           : https://vd171.ru
-- Site           : https://vd.priv8.ru
-- Source         : https://github.com/VD171/COPG-VD
-- GitHub         : [@VD171](https://github.com/VD171)
-- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
-- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
-- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
-- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
-- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
-- E-mail         : vd.priv8@pm.me
+- https://vd171.ru
+- https://vd.priv8.ru
+- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+- **Channel:** @Priv8_VD https://t.me/Priv8_VD
+- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
+- **E-mail:** vd.priv8@pm.me
+- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
+- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
+- **GitHub:** @VD171 https://github.com/VD171
 
 ## Lisensi
 
-**Apache-2.0**: lihat [LICENSE](LICENSE). COPG-VD adalah fork oleh VD171 dari COPG asli karya AlirezaParsi, dilanjutkan di bawah lisensi yang sama.
+**AGPL-3.0-or-later**: lihat [LICENSE](LICENSE). COPG-VD adalah fork oleh VD171 dari COPG asli karya AlirezaParsi (Apache-2.0), dilisensikan ulang di bawah GNU AGPL-3.0-or-later. COPYLEFT JARINGAN: jika Anda menjalankan versi yang dimodifikasi, bahkan sebagai layanan, Anda harus menyediakan kode sumbernya.
 
 ## Merek Dagang
 
@@ -224,3 +242,7 @@ COPG-VD adalah proyek independen dan tidak resmi. Proyek ini tidak berafiliasi d
 ## Tags
 
 `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG-VD`
+
+---
+
+📣 **Gabung ke channel untuk pembaruan:** @Priv8_VD https://t.me/Priv8_VD

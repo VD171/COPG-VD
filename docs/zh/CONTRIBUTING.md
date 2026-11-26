@@ -11,7 +11,7 @@
 
 COPG-VD 是一个 **Zygisk 设备伪装器（Zygisk device spoofer）**：一个被注入到应用进程中以重写
 设备指纹和 build 信息的小型原生库，外加一个用于驱动它的纯 JS（vanilla-JS）WebUI。它是 COPG
-（作者 AlirezaParsi）的一个分支，由 VD171 在 Apache-2.0 许可证下维护。参见
+（作者 AlirezaParsi）的一个分支，由 VD171 在 GNU AGPL-3.0-or-later 许可证下维护。参见
 [ARCHITECTURE.md](ARCHITECTURE.md) 和 [FILE-STRUCTURE.md](FILE-STRUCTURE.md)。
 
 默认情况下，它通过 Zygisk 将伪装限定在 Google Play 栈，因此它是比 PlayIntegrityFix 更轻量、

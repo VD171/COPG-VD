@@ -8,7 +8,7 @@ COPG-VD wita współtwórców AI i agentów, a cały moduł zbudowano tak, by da
 scrapowania WebUI. Są dwie powierzchnie, a agent działający jako root (jak robi to WebUI) używa obu:
 
 1. **Plik konfiguracyjny** `/data/adb/COPG-VD/COPG-VD.json` - jedyne źródło prawdy. Każde pole profilu i
-   każde ustawienie żyje tutaj; czytanie i zapisywanie tego pliku to sposób, w jaki zmieniasz to, co moduł
+   każde ustawienie żyje tutaj, czytanie i zapisywanie tego pliku to sposób, w jaki zmieniasz to, co moduł
    fałszuje.
 2. **Punkt wejścia powłoki** `fingerprint-update.sh` - jeden skrypt ze stabilnymi czasownikami do
    sprawdzania, stosowania i pobierania profili.
@@ -16,7 +16,7 @@ scrapowania WebUI. Są dwie powierzchnie, a agent działający jako root (jak ro
 ## Plik konfiguracyjny
 
 `/data/adb/COPG-VD/COPG-VD.json` to zwykły obiekt JSON. Moduł czyta go z wstrzykniętych procesów dzięki
-dedykowanej regule SELinux, którą sam dostarcza; nie przechowuje żadnych poświadczeń. Dołączony przykład
+dedykowanej regule SELinux, którą sam dostarcza, nie przechowuje żadnych poświadczeń. Dołączony przykład
 znajduje się w `module/COPG-VD.json.example`, odświeżany codziennie z najnowszego obrazu fabrycznego Google.
 
 Zasady, których agent musi przestrzegać:
@@ -45,19 +45,19 @@ reboot**.
 sh /data/adb/modules/COPG-VD/fingerprint-update.sh <verb> [arg]
 ```
 
-Skrypt wypisuje wiersze czytelne dla człowieka; te czytelne dla maszyny zaczynają się od `status:`. Jego kod
+Skrypt wypisuje wiersze czytelne dla człowieka, te czytelne dla maszyny zaczynają się od `status:`. Jego kod
 wyjścia to `0` przy sukcesie i różny od zera przy niepowodzeniu.
 
 | Czasownik | Co robi | Typowe wyjście |
 |---|---|---|
 | `check` | Porównuje zainstalowany profil z najnowszym buildem upstream, nic nie zapisuje. | `status: update-available` \| `status: up-to-date` \| `status: local-newer` \| `status: no-config` |
-| `apply` | Pobiera najnowszy profil i scala go z konfiguracją (tylko pola Build; twoje pozostałe klucze są zachowane). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
-| `analyze` | Audytuje konfigurację w obecnym stanie (parse, wersja vs ROM, spójność fingerprint, nieznane klucze, daty, props). Wypisuje raport; kod wyjścia odzwierciedla ustalenia red/warn. | raport tekstowy |
+| `apply` | Pobiera najnowszy profil i scala go z konfiguracją (tylko pola Build, twoje pozostałe klucze są zachowane). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
+| `analyze` | Audytuje konfigurację w obecnym stanie (parse, wersja vs ROM, spójność fingerprint, nieznane klucze, daty, props). Wypisuje raport, kod wyjścia odzwierciedla ustalenia red/warn. | raport tekstowy |
 | `fetch-index` | Pobiera i weryfikuje podpisany indeks urządzeń oraz go wypisuje (`index.json`). | JSON indeksu \| `status: sig-failed` \| `status: download-failed` |
 | `fetch <path>` | Pobiera `build.prop` jednego urządzenia (ścieżka z indeksu, np. `pixel-9a/latest.prop`) i zapisuje jego pola Build do konfiguracji. | `status: fetched` \| `status: bad-path` \| `status: map-failed` \| `status: write-failed` |
 | `sync-settings` | Migruje stan/konfigurację ze starego płaskiego układu do `/data/adb/COPG-VD/`. | - |
 | `migrate` | Jednorazowa migracja konfiguracji między wersjami modułu. | `status: migrated` \| `status: nothing-to-migrate` |
-| `boot` | Automatyczna aktualizacja raz na boot; przeznaczona dla `service.sh`, nie do użytku interaktywnego. | zapisuje `update.status` |
+| `boot` | Automatyczna aktualizacja raz na boot, przeznaczona dla `service.sh`, nie do użytku interaktywnego. | zapisuje `update.status` |
 
 Każde pobranie jest walidowane przed użyciem (jedynym pobieraczem na urządzeniu jest busybox `wget`, który nie
 potrafi walidować TLS), a aktualizator profilu nigdy nie cofa się: build upstream starszy niż zainstalowany
@@ -76,7 +76,7 @@ treść zostanie odczytana.
 
 ## Bariery bezpieczeństwa
 
-- Zmiana konfiguracji lub zastosowanie profilu zmienia to, co widzi każda docelowa aplikacja; potwierdź intencję
+- Zmiana konfiguracji lub zastosowanie profilu zmienia to, co widzi każda docelowa aplikacja, potwierdź intencję
   przed zapisem, tak jak robi to WebUI.
 - Nigdy nie poluzowuj prawdziwej ochrony spójności: SDK jest ograniczone do prawdziwego frameworku przy każdej
   polityce, manufacturer pozostaje w zgodzie z resztą profilu, a profil innego urządzenia jest odrzucany. To
@@ -87,4 +87,4 @@ treść zostanie odczytana.
 
 ---
 
-> _Ta dokumentacja została wygenerowana za pomocą Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane; zobacz [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Ta dokumentacja została wygenerowana za pomocą Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane, zobacz [CONTRIBUTING.md](CONTRIBUTING.md)._

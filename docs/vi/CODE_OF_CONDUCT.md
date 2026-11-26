@@ -9,7 +9,7 @@ các thảo luận mang tính kỹ thuật và xây dựng.
 
 - Hãy tử tế. Không quấy rối, công kích cá nhân hay phân biệt đối xử.
 - Phê bình ý tưởng và mã, không phải con người.
-- Giúp đỡ người mới; ai cũng từng là người mới.
+- Giúp đỡ người mới, ai cũng từng là người mới.
 
 Hành vi không thể chấp nhận có thể được báo cáo riêng cho người bảo trì (xem
 [SECURITY.md](SECURITY.md) để biết thông tin liên hệ). Những người bảo trì có thể xóa các
@@ -23,4 +23,4 @@ Covenant.
 
 ---
 
-> _Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Chúng tôi hoan nghênh các chỉnh sửa và cải tiến; xem [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Chúng tôi hoan nghênh các chỉnh sửa và cải tiến, xem [CONTRIBUTING.md](CONTRIBUTING.md)._

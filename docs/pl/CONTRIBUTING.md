@@ -11,7 +11,7 @@ wszystko się znajduje i jakich kilku konwencji przestrzegamy.
 
 COPG-VD to **spoofer urządzenia Zygisk**: mała natywna biblioteka wstrzykiwana do procesów
 aplikacji w celu przepisania odcisku urządzenia i buildu, plus WebUI w czystym JS do sterowania
-nim. To fork COPG (autorstwa AlirezaParsi), utrzymywany przez VD171 na licencji Apache-2.0.
+nim. To fork COPG (autorstwa AlirezaParsi), utrzymywany przez VD171 na licencji GNU AGPL-3.0-or-later.
 Zobacz [ARCHITECTURE.md](ARCHITECTURE.md) i [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 
 Domyślnie ogranicza spoof do stosu Google Play poprzez Zygisk, więc jest lżejszą,
@@ -38,7 +38,7 @@ Asystenci i agenci AI są tu pełnoprawnymi współtwórcami, a nie dodatkiem.
 - Zbuduj zip do flashowania: skopiuj zbudowany `libspoof.so` do `module/zygisk/<abi>.so`, następnie
   `cd module && zip -r9 ../COPG-VD-dev.zip .` i zainstaluj go (flash).
 - WebUI to `module/webroot/` (otwórz je z menedżera roota). Logika spoofowania to
-  `zygisk/spoof_module.cpp`; pobieranie profilu to `module/fingerprint-update.sh`.
+  `zygisk/spoof_module.cpp`, pobieranie profilu to `module/fingerprint-update.sh`.
 
 ## Konwencje
 
@@ -46,15 +46,15 @@ Asystenci i agenci AI są tu pełnoprawnymi współtwórcami, a nie dodatkiem.
   nagłówka bannera projektu (skopiuj go z dowolnego istniejącego pliku). Narzędzia w `.github/` używają
   zamiast tego krótkiego komentarza.
 - **Kod i komentarze po angielsku.** Utrzymuj komentarze minimalne i tylko tam, gdzie potrzebne.
-- **Bez em-dash ani en-dash**; zawsze używaj zwykłego myślnika `-`.
-- WebUI to **czysty JS** (jeden `scripts.js`); bez frameworków.
+- **Bez em-dash ani en-dash**, zawsze używaj zwykłego myślnika `-`.
+- WebUI to **czysty JS** (jeden `scripts.js`), bez frameworków.
 - **Nigdy nie osłabiaj** prawdziwej funkcji: utrzymuj spoof spójnym i nie doprowadzaj do tego, aby haki
   zawieszały aplikację, do której są dołączone (mają celowe sprawdzanie null).
 
 ## Internacjonalizacja (i18n)
 
 - Ciągi interfejsu znajdują się w `module/webroot/lang/`. Angielski jest kanonicznym fallbackiem
-  (`en.js` + `en.json`); pozostałe 20 języków to `<code>.json`.
+  (`en.js` + `en.json`), pozostałe 20 języków to `<code>.json`.
 - Aby dodać lub zmienić ciąg: edytuj `en.js` **oraz** `en.json`, następnie zaktualizuj każdy
   `<code>.json`. Dotknięcie widocznej etykiety oznacza aktualizację **wszystkich** plików językowych oraz
   **wszystkich** `README.<code>.md`.
@@ -75,4 +75,4 @@ profile Pixela to świetne punkty startowe.
 
 ---
 
-> _Ta dokumentacja została wygenerowana za pomocą Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane; zobacz [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Ta dokumentacja została wygenerowana za pomocą Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane, zobacz [CONTRIBUTING.md](CONTRIBUTING.md)._

@@ -1,6 +1,25 @@
 <!--
-  COPG-VD: global device spoofer: spoof your device fingerprint and build.
-  Copyright (C) 2026  AlirezaParsi & VD171. SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+  ======================================================================
+   COPG-VD  ::  global device spoofer
+   Spoof your device fingerprint and build.
+
+   Copyright (C) 2026  AlirezaParsi & VD171 (Fork by VD171)
+   SPDX-License-Identifier: AGPL-3.0-or-later
+
+   Licensed under the GNU AGPL v3.0 or later. You may obtain a copy at
+   https://www.gnu.org/licenses/agpl-3.0.html
+
+   Site           : https://vd171.ru
+   Site           : https://vd.priv8.ru
+   Source         : https://github.com/VD171/COPG-VD
+   GitHub         : @VD171 https://github.com/VD171
+   XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+   XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+   Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+   Channel        : @Priv8_VD https://t.me/Priv8_VD
+   Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+   E-mail         : vd.priv8@pm.me
+  ======================================================================
 -->
 
 # COPG-VD
@@ -11,7 +30,7 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases/latest"><img src="https://img.shields.io/github/v/release/VD171/COPG-VD?label=release&color=2ee89d" alt="Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1a7f37" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-1a7f37" alt="License"></a>
   <a href="https://github.com/VD171/COPG-VD/releases"><img src="https://img.shields.io/github/downloads/VD171/COPG-VD/total?label=downloads&color=8250df" alt="Downloads"></a>
   <a href="https://github.com/VD171/COPG-VD/stargazers"><img src="https://img.shields.io/github/stars/VD171/COPG-VD?color=d29922" alt="Stars"></a>
 </p>
@@ -32,10 +51,10 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · Čeština · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
-  <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
+  <img src="docs/screenshots/cs/device.png" width="24%" alt="Device"> <img src="docs/screenshots/cs/spoofing.png" width="24%" alt="Spoofing"> <img src="docs/screenshots/cs/system.png" width="24%" alt="System"> <img src="docs/screenshots/cs/tools.png" width="24%" alt="Tools">
 </p>
 
 ---
@@ -49,10 +68,10 @@ Stále více aplikací odmítá běžet, nebo se tiše přepne do omezeného re�
 - **Řízení rozsahu:** doruč spoofovanou identitu jen stacku Google Play (výchozí), celému zařízení, whitelistu, nebo všemu kromě blacklistu. V omezeném režimu doručuje Zygisk identitu pro každý proces zvlášť, takže nikdy neunikne přes globální properties.
 - **Nezávislé engines:** pole Build (přepis `android.os.Build.*` přes JNI), property hook pro každý proces typu clean-room (bez hooku funkce), seskupené `resetprop` a volitelná úroveň DRM / Widevine (L1 nebo L3) s vlastním seznamem cílů. Každý lze vypnout.
 - **Řízení po polích:** každé pole Build lze nastavit, vyprázdnit, smazat nebo přeskočit, se seznamem `global_fields` pro hodnoty, které musí zůstat konzistentní na celém zařízení.
-- **Vždy čerstvý fingerprint:** profil Pixelu je součástí balení a jednou za boot se sám aktualizuje z nejnovějšího továrního image Google; přes WebUI si můžeš stáhnout i jiný profil Pixelu. Nikdy nejde zpět a odmítne profil pro jiné zařízení.
+- **Vždy čerstvý fingerprint:** profil Pixelu je součástí balení a jednou za boot se sám aktualizuje z nejnovějšího továrního image Google, přes WebUI si můžeš stáhnout i jiný profil Pixelu. Nikdy nejde zpět a odmítne profil pro jiné zařízení.
 - **Bezpečná politika verze Androidu:** SDK se pod žádnou politikou nezvyšuje nad tvůj skutečný framework (jeho zvýšení telefon jen softloopuje).
 - **Analyze:** prověří konfiguraci proti tvé ROM a props a označí jakoukoli nekoherenci dřív, než se dostane k aplikacím.
-- **WebUI:** pět záložek k ovládání všeho, bez jediného síťového požadavku; konfigurační soubor nese všechna nastavení, takže přežijí aktualizaci modulu.
+- **WebUI:** pět záložek k ovládání všeho, bez jediného síťového požadavku, konfigurační soubor nese všechna nastavení, takže přežijí aktualizaci modulu.
 - **Přírůstková samoaktualizace (VDLU)** a nativní knihovna se **čtyřmi ABI** (arm64-v8a, armeabi-v7a, x86, x86_64).
 
 ## AI agenti
@@ -65,11 +84,11 @@ Flashni zip v KernelSU, APatch nebo Magisku a restartuj. Dodávaný profil Pixel
 
 ## Zabezpečení
 
-Spoofing je čistě na straně uživatele: COPG-VD nikdy nezvedne SDK nad tvůj skutečný framework, udržuje výrobce koherentní se zbytkem profilu a čte skutečnou verzi z `/system/build.prop`, nikdy z properties, které falšuje. Samoaktualizátor vyžaduje platný podpis ed25519 a odmítá downgrady; WebUI nedělá žádný síťový požadavek. Problémy nahlas podle [SECURITY.md](docs/cs/SECURITY.md).
+Spoofing je čistě na straně uživatele: COPG-VD nikdy nezvedne SDK nad tvůj skutečný framework, udržuje výrobce koherentní se zbytkem profilu a čte skutečnou verzi z `/system/build.prop`, nikdy z properties, které falšuje. Samoaktualizátor vyžaduje platný podpis ed25519 a odmítá downgrady, WebUI nedělá žádný síťový požadavek. Problémy nahlas podle [SECURITY.md](docs/cs/SECURITY.md).
 
 ## Sestavení
 
-Vždy release, nikdy debug. Nativní knihovna a scope helper se v CI sestavují pro všechny čtyři ABI; release workflow sestaví flashovatelný zip, zapíše doprovodné soubory `.sha256` pro každý soubor, znovu vygeneruje podepsanou baseline VDLU a publikuje jako `github-actions[bot]`. Viz [CONTRIBUTING.md](docs/cs/CONTRIBUTING.md).
+Vždy release, nikdy debug. Nativní knihovna a scope helper se v CI sestavují pro všechny čtyři ABI, release workflow sestaví flashovatelný zip, zapíše doprovodné soubory `.sha256` pro každý soubor, znovu vygeneruje podepsanou baseline VDLU a publikuje jako `github-actions[bot]`. Viz [CONTRIBUTING.md](docs/cs/CONTRIBUTING.md).
 
 ## Jak se používá?
 Nainstaluj modul, restartuj, a dodávaný profil (Pixel) se spoofuje cílovým aplikacím. S funkčním fingerprintem nepotřebuješ PlayIntegrityFix ani GooglePhotosUnlimited.  
@@ -78,7 +97,7 @@ Vše se konfiguruje v `/data/adb/COPG-VD/COPG-VD.json` nebo z WebUI. Všechna po
 ### Scope: kdo spoofing vidí
 `scope_mode` rozhoduje, které procesy dostanou spoofovanou identitu. V omezeném režimu dodává identitu Zygisk pro každý proces zvlášť a neuniká do zbytku systému přes globální properties.  
 * **Google Play** (`playstore`, výchozí): pouze stack Play (Google Play services, jeho unstable proces a Play Store).  
-* **Global**: celé zařízení; vidí ji každý proces.  
+* **Global**: celé zařízení, vidí ji každý proces.  
 * **Whitelist**: pouze aplikace v `scope_whitelist`.  
 * **Blacklist**: každá aplikace kromě těch v `scope_blacklist`.  
 
@@ -86,15 +105,15 @@ Vše se konfiguruje v `/data/adb/COPG-VD/COPG-VD.json` nebo z WebUI. Všechna po
 Každý je nezávislý a lze jej vypnout:  
 * **Build fields (JNI)**: přepisuje `android.os.Build.*` v cílových procesech.  
 * **Property hook**: předkládá cílovým procesům spoofované systémové properties (čisté přemapování oblasti properties pro každý proces zvlášť, bez hooku funkce).  
-* **resetprop**: přepisuje systémové properties, spravované po skupinách: identita, verze, stav bootu, SELinux, adb/usb, anti-emulátor a úklidový průchod. V omezeném režimu zůstávají skupiny identity a verze mimo celozařízový resetprop (Zygisk je dodává pro každý proces); skupiny boot/lock/SELinux zůstávají globální.  
-* **DRM / Widevine** (ve výchozím nastavení vypnuto): hlásí aplikacím, které jej čtou, zvolenou úroveň zabezpečení Widevine, L1 nebo L3. Ve výchozím nastavení následuje rozsah výše; nastav `drm_targets` (seznam aplikací), aby se DRM spoofing použil pouze na tyto aplikace, nezávisle na `scope_mode`: modul zůstává načtený v uvedené aplikaci jen kvůli DRM hooku, i když je ta aplikace mimo hlavní rozsah. Prázdné nebo chybějící znamená následovat rozsah. (Vyžaduje režim s rozsahem, ne Global.)  
+* **resetprop**: přepisuje systémové properties, spravované po skupinách: identita, verze, stav bootu, SELinux, adb/usb, anti-emulátor a úklidový průchod. V omezeném režimu zůstávají skupiny identity a verze mimo celozařízový resetprop (Zygisk je dodává pro každý proces), skupiny boot/lock/SELinux zůstávají globální.  
+* **DRM / Widevine** (ve výchozím nastavení vypnuto): hlásí aplikacím, které jej čtou, zvolenou úroveň zabezpečení Widevine, L1 nebo L3. Ve výchozím nastavení následuje rozsah výše, nastav `drm_targets` (seznam aplikací), aby se DRM spoofing použil pouze na tyto aplikace, nezávisle na `scope_mode`: modul zůstává načtený v uvedené aplikaci jen kvůli DRM hooku, i když je ta aplikace mimo hlavní rozsah. Prázdné nebo chybějící znamená následovat rozsah. (Vyžaduje režim s rozsahem, ne Global.)  
 
 ### Fields: nastavit, vyprázdnit, smazat nebo přeskočit
 Uvnitř objektu `COPG-VD` má každé pole Build čtyři stavy:  
 * **Set**: `"KEY": "value"` zapíše hodnotu.  
 * **Empty**: `"KEY": ""` zapíše prázdnou hodnotu.  
 * **Delete**: uveď klíč v `"COPG-VD-Delete": [ ... ]` na nejvyšší úrovni, aby se odstranil (pole Build se změní na null, property se odstraní pomocí `resetprop --delete`).  
-* **Skip**: klíč zcela vynech; zachová se vlastní hodnota ROM.  
+* **Skip**: klíč zcela vynech, zachová se vlastní hodnota ROM.  
 
 Seznam `"global_fields": [ ... ]` aplikuje uvedená pole Build na celé zařízení i v omezeném režimu, aby hodnota byla všude konzistentní: pouze pro pole bezpečná z hlediska koherence (například security patch), nikdy identitu a nikdy skupinu verze Androidu.  
 
@@ -164,11 +183,21 @@ Blok výše a `module/COPG-VD.json.example` jsou denně aktualizovány workflow 
 **Analyze** ve WebUI (nebo `fingerprint-update.sh analyze`) prověří konfiguraci v aktuálním stavu: verzi proti ROM, zda se soubor vůbec ještě dá naparsovat (poškozený způsobí, že modul nespoofuje **nic**, a řekne to jen logcat), zda fingerprint souhlasí s poli kolem něj, klíče, které modul nečte, data, a zda props už nesou to, co konfigurace požaduje.  
 
 ### WebUI
-WebUI je volitelné (vše lze upravovat přímo v JSON konfiguraci) ale je to snadný způsob, jak modul ovládat. Má pět záložek: **About**, **Device** (každé pole, nastavené po stavech, seskupené podle kategorie), **Spoofing** (scope a engines), **System** (skupiny resetprop) a **Tools** (Analyze, Check Update, Update Now, Backup/Restore a auto-update při bootu). Neposílá žádný síťový požadavek; vše, co potřebuje, je součástí modulu.  
+WebUI je volitelné (vše lze upravovat přímo v JSON konfiguraci) ale je to snadný způsob, jak modul ovládat. Má pět záložek: **About**, **Device** (každé pole, nastavené po stavech, seskupené podle kategorie), **Spoofing** (scope a engines), **System** (skupiny resetprop) a **Tools** (Analyze, Check Update, Update Now, Backup/Restore a auto-update při bootu). Neposílá žádný síťový požadavek, vše, co potřebuje, je součástí modulu.  
 Pokud jsi uživatel Magisku, použij KsuWebUI od KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases). Můžeš také použít WebUI-X Portable od MMRL (https://github.com/MMRLApp/WebUI-X-Portable/releases) nebo KsuWebUI-SN (https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).  
 
 ### Nastavení v konfiguraci
 `COPG-VD.json` nese svá nastavení hned vedle profilu, takže tvá rozhodnutí cestují se zálohou a dají se upravovat ručně: `scope_mode`, přepínače engines, skupiny resetprop, `global_fields` a objekt `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_version`). Vše je v tomto jediném souboru: boot skripty i WebUI čtou nastavení přímo z něj, takže tvá rozhodnutí přežijí aktualizaci modulu. `"spoof_version": "force"` je ze souboru odmítnut a snížen: obnovení staré zálohy ho nesmí za tvými zády znovu aktivovat.  
+
+## Přírůstkové aktualizace (VDLU)
+
+COPG-VD obsahuje engine **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (vendorovaný v `module/vdlu/`): modul se aktualizuje sám tím, že stahuje pouze soubory, které se změnily (obsahově adresované bloby + podepsaný `manifest.json`), místo opětovného stažení celého `.zip`. Profil **Hardened**: podpis ed25519 je povinný a downgrady jsou blokovány, celý `.zip` zůstává platný jako záloha.
+
+- **`vdlu/`** (přibalený v zipu): `update.sh` (engine) + `vdlu-verify` + `config.default` + `keyring/` (veřejný klíč).
+- **Stav** v `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback), mimo modul, přežije přeflashnutí.
+- **Spouštěč při bootu:** `post-fs-data.sh`, před zygote, COPG-VD má `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), takže nová `.so` je připravena a vyměněna dříve, než ji zygote namapuje.
+- **WebUI:** panel **Updates** (`webroot/vdlu.js`) s ukazatelem průběhu a zrušením.
+- **Vydání:** viz `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, archivace manifestu, `vdlu-gc` čistí osiřelé bloby, dávkový push na Pages).
 
 <!-- vd-docs -->
 ## Dokumentace
@@ -180,16 +209,6 @@ Pokud jsi uživatel Magisku, použij KsuWebUI od KOW (https://github.com/KOWX712
 - **[AI agenti](https://github.com/VD171/COPG-VD/wiki/cs-AI-AGENTS)**: ovládej konfiguraci a aktualizátor headless.
 
 <!-- /vd-docs -->
-
-## Přírůstkové aktualizace (VDLU)
-
-COPG-VD obsahuje engine **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (vendorovaný v `module/vdlu/`): modul se aktualizuje sám tím, že stahuje pouze soubory, které se změnily (obsahově adresované bloby + podepsaný `manifest.json`), místo opětovného stažení celého `.zip`. Profil **Hardened**: podpis ed25519 je povinný a downgrady jsou blokovány; celý `.zip` zůstává platný jako záloha.
-
-- **`vdlu/`** (přibalený v zipu): `update.sh` (engine) + `vdlu-verify` + `config.default` + `keyring/` (veřejný klíč).
-- **Stav** v `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - mimo modul, přežije přeflashnutí.
-- **Spouštěč při bootu:** `post-fs-data.sh`, před zygote - COPG-VD má `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), takže nová `.so` je připravena a vyměněna dříve, než ji zygote namapuje.
-- **WebUI:** panel **Updates** (`webroot/vdlu.js`) s ukazatelem průběhu a zrušením.
-- **Vydání:** viz `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, archivace manifestu, `vdlu-gc` čistí osiřelé bloby, dávkový push na Pages).
 
 ## Viz také
 
@@ -205,20 +224,19 @@ COPG-VD obsahuje engine **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) 
 
 ## Kontakty
 
-- Site           : https://vd171.ru
-- Site           : https://vd.priv8.ru
-- Source         : https://github.com/VD171/COPG-VD
-- GitHub         : [@VD171](https://github.com/VD171)
-- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
-- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
-- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
-- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
-- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
-- E-mail         : vd.priv8@pm.me
+- https://vd171.ru
+- https://vd.priv8.ru
+- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+- **Channel:** @Priv8_VD https://t.me/Priv8_VD
+- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
+- **E-mail:** vd.priv8@pm.me
+- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
+- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
+- **GitHub:** @VD171 https://github.com/VD171
 
 ## Licence
 
-**Apache-2.0**: viz [LICENSE](LICENSE). COPG-VD je fork od VD171 původního COPG od AlirezaParsi, pokračující pod stejnou licencí.
+**AGPL-3.0-or-later**: viz [LICENSE](LICENSE). COPG-VD je fork od VD171 původního COPG od AlirezaParsi (Apache-2.0), přelicencovaný pod GNU AGPL-3.0-or-later. SÍŤOVÝ COPYLEFT: pokud provozujete upravenou verzi, i jako službu, musíte nabídnout její zdrojový kód.
 
 ## Ochranné známky
 
@@ -227,3 +245,7 @@ COPG-VD je nezávislý, neoficiální projekt. Není spojen s Google LLC, ani j�
 ## Štítky
 
 `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG-VD`
+
+---
+
+📣 **Připojte se ke kanálu pro aktualizace:** @Priv8_VD https://t.me/Priv8_VD

@@ -56,7 +56,7 @@ COPG-VD/
 ├── README.md + README.<code>.md   # 21 言語
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md  CODE_OF_CONDUCT.md  SECURITY.md
-├── LICENSE                     # Apache-2.0
+├── LICENSE                     # AGPL-3.0-or-later
 └── screenshots/                # README が使う画像
 ```
 
@@ -64,7 +64,7 @@ COPG-VD/
 
 デバイス上の `/data/adb/COPG-VD/` はモジュール自身のディレクトリです: `COPG-VD.json` がプロファイルと
 設定を保持し([CONFIGURATION.md](CONFIGURATION.md) を参照)、`update.log`、`update.state`、`update.status`
-が隣にあります。設定は決してコミットされません; `module/COPG-VD.json.example`
+が隣にあります。設定は決してコミットされません、`module/COPG-VD.json.example`
 がテンプレートです。
 
 <!-- doc-footer -->

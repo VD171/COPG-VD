@@ -25,7 +25,8 @@ window.VDLU_I18N_VI = {
   savedToast: 'đã lưu', saveFail: 'lưu thất bại', sourceSaved: 'đã lưu nguồn',
   bootstrapping: 'Đang chuẩn bị trình cập nhật…', bootstrapSub: 'tải xuống một lần trình tìm nạp', bootstrapFail: 'Không thể chuẩn bị trình cập nhật',
   searching: 'Đang tìm…', upToDate: 'Đã mới nhất', nothingNew: 'không có gì mới',
-  ahead: 'Mới hơn nguồn cấp', aheadSub: 'phiên bản của bạn mới hơn bản cập nhật đã phát hành', deferred: 'Đã hoãn tải xuống', deferredSub: 'đang chờ mạng được phép - tiếp tục ở lần kiểm tra sau',
+  ahead: 'Mới hơn nguồn cấp', aheadSub: 'phiên bản của bạn mới hơn bản cập nhật đã phát hành', silentUpdate: 'Cập nhật im lặng', silentUpdateSub: 'Áp dụng bản cập nhật ở chế độ nền mà không hiển thị thanh khởi động lại.',
+  deferred: 'Đã hoãn tải xuống', deferredSub: 'đang chờ mạng được phép, tiếp tục ở lần kiểm tra sau',
   updateAvail: 'Có bản cập nhật', install: 'cài đặt', fileOne: 'tệp', fileMany: 'tệp',
   requiresReboot: 'cần khởi động lại', checkFail: 'Kiểm tra thất bại', ksuUnavailable: 'API KSU không khả dụng',
   pendingUpdate: 'Cập nhật đang chờ', notNow: 'Để sau', srcPlaceholder: 'https://…/&lt;mô-đun&gt;'

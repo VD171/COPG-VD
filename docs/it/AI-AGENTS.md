@@ -9,7 +9,7 @@ interfaccia, senza scrapare la WebUI. Ci sono due superfici, e un agente in esec
 WebUI) le usa entrambe :
 
 1. **Il file di configurazione** `/data/adb/COPG-VD/COPG-VD.json` - l'unica fonte di verità. Ogni campo di
-   profilo e ogni impostazione risiede qui ; leggere e scrivere questo file è il modo per cambiare ciò che
+   profilo e ogni impostazione risiede qui, leggere e scrivere questo file è il modo per cambiare ciò che
    il modulo contraffà.
 2. **Il punto di ingresso shell** `fingerprint-update.sh` - un solo script con verbi stabili per
    verificare, applicare e recuperare profili.
@@ -17,7 +17,7 @@ WebUI) le usa entrambe :
 ## Il file di configurazione
 
 `/data/adb/COPG-VD/COPG-VD.json` è un semplice oggetto JSON. Il modulo lo legge dai processi iniettati
-attraverso una regola SELinux dedicata che fornisce esso stesso ; non contiene alcuna credenziale. Un
+attraverso una regola SELinux dedicata che fornisce esso stesso, non contiene alcuna credenziale. Un
 esempio incluso si trova in `module/COPG-VD.json.example`, aggiornato quotidianamente dalla più recente
 immagine di fabbrica Google.
 
@@ -47,19 +47,19 @@ riavvio** perché questi raggiungano le applicazioni.
 sh /data/adb/modules/COPG-VD/fingerprint-update.sh <verb> [arg]
 ```
 
-Lo script stampa righe leggibili da un umano ; quelle leggibili da una macchina iniziano con `status:`. Il
+Lo script stampa righe leggibili da un umano, quelle leggibili da una macchina iniziano con `status:`. Il
 suo codice di uscita è `0` in caso di successo e diverso da zero in caso di fallimento.
 
 | Verbo | Cosa fa | Output tipico |
 |---|---|---|
 | `check` | Confronta il profilo installato con il più recente build a monte, non scrive niente. | `status: update-available` \| `status: up-to-date` \| `status: local-newer` \| `status: no-config` |
-| `apply` | Recupera il profilo più recente e lo fonde nella config (solo campi Build ; le altre tue chiavi sono preservate). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
-| `analyze` | Verifica la config così com'è (parse, versione vs ROM, coerenza del fingerprint, chiavi sconosciute, date, props). Stampa un rapporto ; il codice di uscita riflette i riscontri red/warn. | un rapporto testuale |
+| `apply` | Recupera il profilo più recente e lo fonde nella config (solo campi Build, le altre tue chiavi sono preservate). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
+| `analyze` | Verifica la config così com'è (parse, versione vs ROM, coerenza del fingerprint, chiavi sconosciute, date, props). Stampa un rapporto, il codice di uscita riflette i riscontri red/warn. | un rapporto testuale |
 | `fetch-index` | Scarica e verifica l'indice dei dispositivi firmato e lo stampa (`index.json`). | il JSON dell'indice \| `status: sig-failed` \| `status: download-failed` |
 | `fetch <path>` | Scarica il `build.prop` di un dispositivo (percorso dall'indice, per es. `pixel-9a/latest.prop`) e scrive i suoi campi Build nella config. | `status: fetched` \| `status: bad-path` \| `status: map-failed` \| `status: write-failed` |
 | `sync-settings` | Migra lo stato/la config dal vecchio layout piatto a `/data/adb/COPG-VD/`. | - |
 | `migrate` | Migrazione una tantum della config tra versioni del modulo. | `status: migrated` \| `status: nothing-to-migrate` |
-| `boot` | L'auto-aggiornamento una volta per avvio ; destinato a `service.sh`, non all'uso interattivo. | scrive `update.status` |
+| `boot` | L'auto-aggiornamento una volta per avvio, destinato a `service.sh`, non all'uso interattivo. | scrive `update.status` |
 
 Ogni download è validato prima dell'uso (l'unico downloader sul dispositivo è il `wget` di busybox, che non
 può validare il TLS), e l'aggiornatore di profilo non torna mai indietro : un build a monte più vecchio di
@@ -68,7 +68,7 @@ verificata prima che il contenuto sia letto.
 
 ## Flussi di agente tipici
 
-- **Mantenere il profilo aggiornato :** `check` ; se `status: update-available`, `apply` ; poi riavvia
+- **Mantenere il profilo aggiornato :** `check`; se `status: update-available`, `apply`; poi riavvia
   perché i nuovi `Build.*` raggiungano le applicazioni.
 - **Passare a un altro profilo Pixel :** `fetch-index`, scegli un percorso di dispositivo dall'indice,
   `fetch <path>`, esegui `analyze` per confermare che la config sia coerente, poi riavvia.
@@ -78,7 +78,7 @@ verificata prima che il contenuto sia letto.
 
 ## Protezioni di sicurezza
 
-- Cambiare la config o applicare un profilo cambia ciò che vede ogni applicazione bersaglio ; conferma
+- Cambiare la config o applicare un profilo cambia ciò che vede ogni applicazione bersaglio, conferma
   l'intento prima di scrivere, come fa la WebUI.
 - Non allentare mai una protezione di coerenza reale : il SDK è limitato al framework reale sotto ogni
   politica, il produttore resta in accordo con il resto del profilo, e un profilo destinato a un altro
@@ -89,4 +89,4 @@ verificata prima che il contenuto sia letto.
 
 ---
 
-> _Questa documentazione è stata generata con Claude (Anthropic) ed è gestita da VD171. Correzioni e miglioramenti sono benvenuti; vedi [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Questa documentazione è stata generata con Claude (Anthropic) ed è gestita da VD171. Correzioni e miglioramenti sono benvenuti, vedi [CONTRIBUTING.md](CONTRIBUTING.md)._

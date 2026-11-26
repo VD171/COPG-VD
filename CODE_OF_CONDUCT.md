@@ -9,7 +9,7 @@ discussions technical and constructive.
 
 - Be kind. No harassment, personal attacks, or discrimination.
 - Critique ideas and code, not people.
-- Help newcomers; everyone was new once.
+- Help newcomers, everyone was new once.
 
 Unacceptable behavior can be reported privately to the maintainer (see [SECURITY.md](SECURITY.md)
 for contact). Maintainers may remove comments, commits, issues and contributions that
@@ -22,4 +22,4 @@ Covenant.
 
 ---
 
-> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md)._

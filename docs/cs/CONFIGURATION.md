@@ -6,7 +6,7 @@
 
 Celý modul je řízen jedním souborem: `/data/adb/COPG-VD/COPG-VD.json`. WebUI jej zapisuje za vás,
 ale můžete jej upravovat ručně. Dodávaný příklad leží v `module/COPG-VD.json.example`.
-Toto je jediný zdroj pravdy; kopie v adresáři modulu je jen výchozí hodnota pouze pro čtení.
+Toto je jediný zdroj pravdy, kopie v adresáři modulu je jen výchozí hodnota pouze pro čtení.
 Konfigurace zbylá ze starší verze v `/data/adb/COPG-VD.json` se automaticky přesune do
 tohoto adresáře. Vlastní log a stav modulu (`update.log`, `update.state`) jsou také zde.
 
@@ -26,7 +26,7 @@ Pravidla:
 | `scope_whitelist` | array | Balíčky, které dostanou spoof, když je `scope_mode` `whitelist`. |
 | `scope_blacklist` | array | Balíčky vyloučené, když je `scope_mode` `blacklist`. |
 | `COPG-VD` | object | Profil: pole Build k předložení (viz níže). |
-| `COPG-VD-Delete` | array | Názvy polí k odebrání místo nastavení (pole Build se stane null; vlastnost je odebrána pomocí `resetprop --delete`). |
+| `COPG-VD-Delete` | array | Názvy polí k odebrání místo nastavení (pole Build se stane null, vlastnost je odebrána pomocí `resetprop --delete`). |
 | `COPG-VD-Settings` | object | Nastavení modulu, která cestují s profilem (viz níže). |
 | `motor_jni` | bool | Engine polí Build (přepisuje `android.os.Build.*`). Výchozí `true`. |
 | `motor_prop_hook` | bool | Engine vlastností per proces (clean-room přemapování vlastností). Výchozí `true`. |
@@ -78,7 +78,7 @@ Nastavení, která cestují s profilem, takže záloha nese vaše volby.
 |---|---|---|
 | `resetprop` | bool | Zda běží engine resetprop napříč zařízením. |
 | `autoupdate` | bool | Zda `fingerprint-update.sh` běží jednou za boot. Výchozí zapnuto. |
-| `spoof_version` | `never` / `rom` / `force` | Jak se aplikuje skupina verze Androidu. `never` je výchozí. Od v6.19 je SDK omezeno na hodnotu ROM pod každou politikou, takže `force` vynutí řetězcová pole, ale nemůže zvýšit SDK; `force` je odmítnut při obnově zálohy. |
+| `spoof_version` | `never` / `rom` / `force` | Jak se aplikuje skupina verze Androidu. `never` je výchozí. Od v6.19 je SDK omezeno na hodnotu ROM pod každou politikou, takže `force` vynutí řetězcová pole, ale nemůže zvýšit SDK, `force` je odmítnut při obnově zálohy. |
 
 ## `global_fields`
 
@@ -119,4 +119,4 @@ Androidu.
 
 ---
 
-> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány; viz [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány, viz [CONTRIBUTING.md](CONTRIBUTING.md)._

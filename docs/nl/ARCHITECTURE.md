@@ -40,7 +40,7 @@ Elk is onafhankelijk en schakelbaar.
 - **resetprop (apparaatbreed).** Schrijft systeemproperties per groep: identiteit, versie,
   boot-status, SELinux, adb/usb, anti-emulator, plus een opschoonronde. De boot-scripts draaien
   het. In een scoped modus worden de identiteit- en versiegroepen weggelaten (Zygisk levert ze
-  per proces); de boot-, lock- en SELinux-groepen blijven globaal zodat het apparaat coherent is.
+  per proces), de boot-, lock- en SELinux-groepen blijven globaal zodat het apparaat coherent is.
 - **DRM / Widevine (`motor_drm`).** Hookt de `MediaDrm`-methoden die het Widevine-
   beveiligingsniveau rapporteren (`getSecurityLevel`, `getPropertyString`) en geeft het geconfigureerde
   niveau terug. De hooks zijn null-gecheckt, zodat een misvormd profiel netjes degradeert in plaats van
@@ -53,7 +53,7 @@ Het geïnjecteerde proces draait in het zygote SELinux-domein, dat standaard `/d
 bereiken. De module levert zijn eigen `sepolicy.rule` mee om het toe te staan, en kan, als fallback,
 de config lezen via zijn geopende moduledirectory (`getModuleDir`), zodat het blijft
 werken, zelfs als een Zygisk-build het pad niet langer verleent. Het bestand wordt geparseerd met een kleine
-ingebedde JSON-parser (`jsmn`); een bestand dat niet parseert betekent dat de module niets spooft.
+ingebedde JSON-parser (`jsmn`), een bestand dat niet parseert betekent dat de module niets spooft.
 
 ## Het profiel vers houden
 
@@ -69,7 +69,7 @@ kant en [CONFIGURATION.md](CONFIGURATION.md) voor de velden.
 `SDK_INT` / `ANDROID_VERSION` verhogen boven wat het framework van de ROM werkelijk is, laat apps
 API's aanroepen die niet bestaan, wat Google's apps laat crashen en de telefoon in een softloop laat
 herstarten. De versiegroep is daarom standaard uit en afgeschermd achter
-`spoof_version`; en sinds v6.19 wordt de SDK bovendien afgetopt op de waarde van het echte framework onder **elk** beleid (Force inbegrepen), zodat zelfs een profiel met een geforceerd hogere SDK niet kan softloopen (Force forceert nog steeds de stringversievelden). De module leest de echte versie uit `/system/build.prop`, nooit uit
+`spoof_version`, en sinds v6.19 wordt de SDK bovendien afgetopt op de waarde van het echte framework onder **elk** beleid (Force inbegrepen), zodat zelfs een profiel met een geforceerd hogere SDK niet kan softloopen (Force forceert nog steeds de stringversievelden). De module leest de echte versie uit `/system/build.prop`, nooit uit
 `getprop`, omdat `getprop` precies is wat het vervalst. Zie de valkuil in
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
@@ -77,4 +77,4 @@ herstarten. De versiegroep is daarom standaard uit en afgeschermd achter
 
 ---
 
-> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom; zie [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom, zie [CONTRIBUTING.md](CONTRIBUTING.md)._

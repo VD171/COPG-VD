@@ -37,7 +37,7 @@ fork는 zygote의 메모리를 copy-on-write로 상속하므로, 각 앱은 부�
   후크된 함수 흔적이 없습니다.
 - **resetprop (디바이스 전체).** 시스템 속성을 그룹별로 작성합니다: identity, version, boot 상태,
   SELinux, adb/usb, anti-emulator, 그리고 정리 패스. boot 스크립트가 그것을 실행합니다. 스코프
-  모드에서는 identity와 version 그룹이 제외됩니다(Zygisk가 프로세스별로 전달); boot, lock, SELinux
+  모드에서는 identity와 version 그룹이 제외됩니다(Zygisk가 프로세스별로 전달), boot, lock, SELinux
   그룹은 전역으로 유지되어 디바이스가 일관됩니다.
 - **DRM / Widevine (`motor_drm`).** Widevine 보안 수준을 보고하는 `MediaDrm` 메서드
   (`getSecurityLevel`, `getPropertyString`)를 후크하고 구성된 수준을 반환합니다. 후크는 null
@@ -49,7 +49,7 @@ fork는 zygote의 메모리를 copy-on-write로 상속하므로, 각 앱은 부�
 주입된 프로세스는 zygote SELinux 도메인에서 실행되며, 기본적으로 `/data/adb`에 도달할 수 없습니다.
 모듈은 그것을 허용하는 자체 `sepolicy.rule`을 함께 제공하며, 폴백으로 열린 모듈 디렉터리
 (`getModuleDir`)를 통해 config를 읽을 수 있어, Zygisk 빌드가 그 경로 부여를 중단하더라도 계속
-작동합니다. 파일은 작은 임베디드 JSON 파서(`jsmn`)로 파싱됩니다; 파싱되지 않는 파일은 모듈이
+작동합니다. 파일은 작은 임베디드 JSON 파서(`jsmn`)로 파싱됩니다, 파싱되지 않는 파일은 모듈이
 아무것도 스푸핑하지 않음을 의미합니다.
 
 ## 프로파일을 최신으로 유지하기

@@ -25,7 +25,8 @@ window.VDLU_I18N_ID = {
   savedToast: 'tersimpan', saveFail: 'gagal menyimpan', sourceSaved: 'sumber tersimpan',
   bootstrapping: 'Menyiapkan pembaru…', bootstrapSub: 'unduhan sekali untuk pengambil', bootstrapFail: 'Tidak dapat menyiapkan pembaru',
   searching: 'Mencari…', upToDate: 'Terbaru', nothingNew: 'tidak ada yang baru',
-  ahead: 'Lebih baru dari feed', aheadSub: 'versi Anda lebih baru dari pembaruan yang dipublikasikan', deferred: 'Unduhan ditunda', deferredSub: 'menunggu jaringan yang diizinkan - dilanjutkan pada pemeriksaan berikutnya',
+  ahead: 'Lebih baru dari feed', aheadSub: 'versi Anda lebih baru dari pembaruan yang dipublikasikan', silentUpdate: 'Pembaruan senyap', silentUpdateSub: 'Menerapkan pembaruan di latar belakang tanpa menampilkan bilah reboot.',
+  deferred: 'Unduhan ditunda', deferredSub: 'menunggu jaringan yang diizinkan, dilanjutkan pada pemeriksaan berikutnya',
   updateAvail: 'Pembaruan tersedia', install: 'pasang', fileOne: 'berkas', fileMany: 'berkas',
   requiresReboot: 'perlu mulai ulang', checkFail: 'Pemeriksaan gagal', ksuUnavailable: 'API KSU tidak tersedia',
   pendingUpdate: 'Pembaruan tertunda', notNow: 'Nanti saja', srcPlaceholder: 'https://…/&lt;modul&gt;'

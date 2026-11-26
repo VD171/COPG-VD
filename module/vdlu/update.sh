@@ -20,7 +20,7 @@
 # POSIX sh (mksh/busybox/toybox). Env in: VDLU_DIR, MODULE_DIR, MODID.
 # Contract: docs/INTERFACES.md (CLI/layout/JSON keys = immutable).
 
-ENGINE_VERSION=5             # bumped 4->5 (VDLU#2 trust-anchor exclusion + the 128/2 MiB ceilings); ANY engine logic change (verify/apply/path rules) bumps this - keep engine_min honest
+ENGINE_VERSION=8             # bumped 7->8 (ABI-aware plan reduction: a pruned/per-ABI install drops other-ABI adds instead of re-fetching the universal-full tree; pure REDUCTION, runs AFTER validate_plan, fail-safe when the ABI is unknown); 6->7 was: never revert a module ahead of the feed (installed versionCode floors FROMVER; boot self-heal of a stale downgrade plan); ANY engine logic change (verify/apply/path rules) bumps this - keep engine_min honest
 MAX_FILE_BYTES=134217728     # 128 MiB per-file ceiling: anti decompression-bomb / disk DoS
 MAX_MANIFEST_BYTES=2097152   # 2 MiB manifest ceiling: anti OOM
 TAB=$(printf '\t')
@@ -113,6 +113,24 @@ cfg() { # key default
 	[ -n "$v" ] && printf '%s' "$v" || printf '%s' "$2"
 }
 
+# LIVE installed versionCode from the module's own module.prop. This is LOCAL trusted device state (NOT
+# hostile feed input), so it is read directly - never routed through manifest validation. Prints the numeric
+# versionCode, else 0. The manifest `version` is the same numeric scale (the release passes module.prop's
+# versionCode to vdlu-pack as the feed version), so it is directly comparable to FROMVER.
+installed_ver() {
+	local v
+	v=$(sed -n 's/^versionCode=//p' "$MODULE_DIR/module.prop" 2>/dev/null | head -n1)
+	isnum "$v" && printf '%s' "$v" || printf '0'
+}
+# FROMVER floor: the live installed versionCode is a FLOOR under FROMVER, so a module the manager already
+# updated past a stale feed reads as AHEAD (validate_meta returns 4, benign) and is never reverted. Forward
+# updates (feed > installed) are unaffected.
+fromver_floor() {
+	local iv; iv=$(installed_ver)
+	isnum "$iv" || return 0
+	{ isnum "$FROMVER" && [ "$FROMVER" -ge "$iv" ]; } || FROMVER=$iv
+}
+
 # ---- paths ----------------------------------------------------------------
 init_paths() {
 	: "${VDLU_DIR:?VDLU_DIR not set}"
@@ -136,6 +154,7 @@ init_paths() {
 	SOURCE=$(cfg source "")
 	TGTVER=0
 	FROMVER=0
+	fromver_floor
 }
 
 # ---- lock -----------------------------------------------------------------
@@ -528,6 +547,36 @@ write_journal() { # phase state current [error]
 }
 
 journal_state() { grep -o '"state":"[^"]*"' "$JOURNAL" 2>/dev/null | head -n1 | cut -d'"' -f4; }
+journal_target() { grep -o '"target":-\{0,1\}[0-9]\{1,\}' "$JOURNAL" 2>/dev/null | head -n1 | cut -d: -f2; }
+
+# Boot self-heal. Two leftover states are cleared before any resume/diff:
+#  (a) a journal whose target is <=0 is a stale placeholder (e.g. the baseline 0 a removed stub left behind),
+#      never a real resumable update (real targets are >=1);
+#  (b) a persisted plan whose TARGET version is BELOW the live installed module would DOWNGRADE it - the
+#      stale-feed + manager-updated-module case: its resume must not run. Clear it so the install self-heals.
+# A real forward in-flight transaction (target>=1 and >= installed) is left untouched.
+clear_stale_journal() {
+	local t tv iv
+	if [ -f "$JOURNAL" ]; then
+		t=$(journal_target)
+		case "$t" in ''|-|*[!0-9-]*) : ;; *)
+			if [ "$t" -le 0 ]; then
+				rm -f "$JOURNAL" "$PLAN" "$PLANDEL" "$TARGET" 2>/dev/null
+				echo "VDLU: cleared stale journal (target=$t)" >&2
+				return 0
+			fi ;;
+		esac
+	fi
+	if [ -f "$TARGET" ]; then
+		iv=$(installed_ver)
+		tv=$(json_flatten "$TARGET" 2>/dev/null | grep -m1 "^version$TAB" | cut -f2)
+		if isnum "$tv" && isnum "$iv" && [ "$tv" -lt "$iv" ]; then
+			rm -f "$JOURNAL" "$PLAN" "$PLANDEL" "$TARGET" 2>/dev/null
+			echo "VDLU: cleared stale downgrade plan (target=$tv < installed=$iv)" >&2
+		fi
+	fi
+	return 0
+}
 
 set_st() { # path newst
 	awk -F'\t' -v p="$1" -v ns="$2" 'BEGIN{OFS="\t"} { if($7==p)$2=ns; print }' "$PLAN" >"$PLAN.n" 2>/dev/null && mv -f "$PLAN.n" "$PLAN"
@@ -662,6 +711,7 @@ load_target() {
 		FROMVER=$(grep -m1 "^version$TAB" "$WORK/current.flat" | cut -f2)
 	fi
 	isnum "$FROMVER" || FROMVER=0
+	fromver_floor
 }
 
 do_fetch() {
@@ -806,6 +856,60 @@ run_pipeline() { # allow_swap
 	return 0
 }
 
+# ---- per-ABI plan reduction (install-parity, VDLU#3) ----------------------
+# The feed is packed from the universal-full zip (all 4 ABIs). customize.sh prunes every install to the
+# device's SINGLE in-use ABI, so a per-ABI/pruned device holds only one ABI's files on disk; the diff would
+# otherwise see the other 3 ABIs' files as missing->add and keep re-fetching them (~255 MiB), re-bloating the
+# install. Detect the device's single on-device ABI and DROP other-ABI paths from the plan, mirroring what
+# customize.sh does at install time. The feed stays universal-full-packed (no producer/vdlu-pack change).
+#
+# HARD invariant: this is a plan REDUCTION only - it can never ADD or alter a path - and it runs AFTER
+# validate_plan, so every security check (path containment, sha-hex, mode/class/enc, downgrade, signature) has
+# already seen the FULL manifest. It therefore cannot be abused to hide a malicious update of the device's OWN
+# files (own-ABI and non-ABI paths are never dropped). Fail-SAFE: if the ABI cannot be detected it drops
+# nothing (behaves exactly as today).
+VDLU_KNOWN_ABIS='arm64-v8a armeabi-v7a x86_64 x86'
+
+# device_abi: the one ABI customize.sh kept on disk - the single bin/<abi>, vdlu/verify/<abi>, verify/<abi>,
+# lib/<abi> or zygisk/<abi>.so present under MODULE_DIR. Exactly one distinct on-disk ABI -> that ABI; zero or
+# more-than-one (ambiguous, e.g. an un-pruned universal install) -> getprop ro.product.cpu.abi; neither known
+# -> empty (the caller then filters nothing). Prints the ABI or nothing; never fails the run.
+device_abi() {
+	local a d found n g
+	found=''; n=0
+	for a in $VDLU_KNOWN_ABIS; do
+		for d in "$MODULE_DIR/bin/$a" "$MODULE_DIR/vdlu/verify/$a" "$MODULE_DIR/verify/$a" "$MODULE_DIR/lib/$a" "$MODULE_DIR/zygisk/$a.so"; do
+			[ -e "$d" ] || continue
+			found="$found $a"; n=$((n+1)); break
+		done
+	done
+	if [ "$n" -eq 1 ]; then printf '%s' "${found# }"; return 0; fi
+	g=$(getprop ro.product.cpu.abi 2>/dev/null)
+	case " $VDLU_KNOWN_ABIS " in *" $g "*) printf '%s' "$g"; return 0 ;; esac
+	return 1
+}
+
+# filter_abi_plan <device-abi>: drop from plan.work/plan.del any path carrying a known-ABI token that is NOT
+# the device's. A path with no ABI token, or one bearing only the device's own ABI, is kept untouched. The
+# ABI token is bounded by '/', '.' or a string end, so "x86" never matches inside "x86_64" (and vice versa).
+# Empty arg (ABI unknown) = no-op. Mirrors the vdlu/ trust-anchor exclusion's awk-filter style just below.
+filter_abi_plan() {
+	local dev="$1"
+	[ -n "$dev" ] || return 0
+	awk -F'\t' -v dev="$dev" -v abis="$VDLU_KNOWN_ABIS" '
+		BEGIN{ n=split(abis,A," ") }
+		{ for(i=1;i<=n;i++){ a=A[i]; if(a==dev) continue
+		    if($NF ~ ("(^|/)" a "(/|\\.|$)")) next }
+		  print }' "$WORK/plan.work" >"$WORK/plan.work.abi" 2>/dev/null && mv -f "$WORK/plan.work.abi" "$WORK/plan.work"
+	if [ -s "$WORK/plan.del" ]; then
+		awk -v dev="$dev" -v abis="$VDLU_KNOWN_ABIS" '
+			BEGIN{ n=split(abis,A," ") }
+			{ for(i=1;i<=n;i++){ a=A[i]; if(a==dev) continue
+			    if($0 ~ ("(^|/)" a "(/|\\.|$)")) next }
+			  print }' "$WORK/plan.del" >"$WORK/plan.del.abi" 2>/dev/null && mv -f "$WORK/plan.del.abi" "$WORK/plan.del"
+	fi
+}
+
 # ---- diff -----------------------------------------------------------------
 do_diff() { # persist(0|1); rc: 2 fetch/parse, 3 verify/meta fail, 4 device AHEAD of feed (benign)
 	local persist="$1" _vr
@@ -827,6 +931,7 @@ do_diff() { # persist(0|1); rc: 2 fetch/parse, 3 verify/meta fail, 4 device AHEA
 		FROMVER=$(grep -m1 "^version$TAB" "$WORK/current.flat" | cut -f2)
 		isnum "$FROMVER" || FROMVER=0
 	fi
+	fromver_floor   # live installed versionCode floors FROMVER: a manager-updated module reads as AHEAD, never reverted
 	validate_meta || { _vr=$?; [ "$_vr" = 4 ] && return 4; return 3; }
 	build_plan "$WORK/manifest.flat" >"$WORK/plan.raw"
 	finalize_plan "$WORK/plan.raw" >"$WORK/plan.work"
@@ -840,6 +945,10 @@ do_diff() { # persist(0|1); rc: 2 fetch/parse, 3 verify/meta fail, 4 device AHEA
 	awk -F'\t' '$NF !~ /^vdlu\// && $NF != "vdlu"' "$WORK/plan.work" >"$WORK/plan.work.f" 2>/dev/null && mv -f "$WORK/plan.work.f" "$WORK/plan.work"
 	awk '$0 !~ /^vdlu\// && $0 != "vdlu"' "$WORK/plan.del" >"$WORK/plan.del.f" 2>/dev/null && mv -f "$WORK/plan.del.f" "$WORK/plan.del"
 	validate_plan || return 3
+	# Per-ABI plan reduction (VDLU#3): AFTER validate_plan (security saw the full manifest), drop other-ABI
+	# adds/deletes so a pruned/per-ABI device is not pushed back toward the universal-full feed. Reduction
+	# only; fail-safe (drops nothing) when the device ABI cannot be detected.
+	filter_abi_plan "$(device_abi)"
 	if [ "$persist" = 1 ]; then
 		cp -f "$WORK/manifest.json" "$TARGET"
 		cp -f "$WORK/plan.work" "$PLAN"
@@ -914,6 +1023,7 @@ cmd_resume() {
 cmd_boot() {
 	acquire_lock
 	local rc interval cap tries
+	clear_stale_journal    # self-heal a leftover target<=0 journal before any resume/diff
 	if [ -f "$TARGET" ]; then
 		run_pipeline 1; rc=$?; release_lock; return "$rc"
 	fi

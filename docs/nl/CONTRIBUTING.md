@@ -11,7 +11,7 @@ waar dingen zich bevinden en de paar conventies die we volgen.
 
 COPG-VD is een **Zygisk-apparaatspoofer**: een kleine native library die in app-processen wordt
 geïnjecteerd om de fingerprint en build van het apparaat te herschrijven, plus een vanilla-JS WebUI om het aan te
-sturen. Het is een fork van COPG (door AlirezaParsi), onderhouden door VD171 onder de Apache-2.0-
+sturen. Het is een fork van COPG (door AlirezaParsi), onderhouden door VD171 onder de GNU AGPL-3.0-or-later-
 licentie. Zie [ARCHITECTURE.md](ARCHITECTURE.md) en [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 
 Standaard beperkt het de spoof tot de Google Play-stack via Zygisk, dus het is een
@@ -38,7 +38,7 @@ AI-assistenten en -agents zijn hier eersteklas bijdragers, geen bijzaak.
 - Bouw een flashbare zip: kopieer de gebouwde `libspoof.so` naar `module/zygisk/<abi>.so`, dan
   `cd module && zip -r9 ../COPG-VD-dev.zip .` en flash die.
 - De WebUI is `module/webroot/` (open die vanuit de root-manager). De spoofing-logica is
-  `zygisk/spoof_module.cpp`; de profiel-fetcher is `module/fingerprint-update.sh`.
+  `zygisk/spoof_module.cpp`, de profiel-fetcher is `module/fingerprint-update.sh`.
 
 ## Conventies
 
@@ -46,15 +46,15 @@ AI-assistenten en -agents zijn hier eersteklas bijdragers, geen bijzaak.
   header (kopieer die uit een bestaand bestand). Tooling onder `.github/` gebruikt in plaats daarvan een
   korte opmerking.
 - **Code en opmerkingen in het Engels.** Houd opmerkingen minimaal en alleen waar nodig.
-- **Geen em-dash of en-dash**; gebruik altijd een gewoon koppelteken `-`.
-- De WebUI is **vanilla JS** (één `scripts.js`); geen frameworks.
+- **Geen em-dash of en-dash**, gebruik altijd een gewoon koppelteken `-`.
+- De WebUI is **vanilla JS** (één `scripts.js`), geen frameworks.
 - **Verzwak nooit** een echte functie: houd de spoof coherent, en laat de hooks geen app
   crashen waaraan ze zijn gekoppeld (ze zijn met opzet null-gecheckt).
 
 ## Internationalisatie (i18n)
 
 - UI-strings staan in `module/webroot/lang/`. Engels is de canonieke fallback
-  (`en.js` + `en.json`); de andere 20 talen zijn `<code>.json`.
+  (`en.js` + `en.json`), de andere 20 talen zijn `<code>.json`.
 - Om een string toe te voegen of te wijzigen: bewerk `en.js` **en** `en.json`, update dan elke
   `<code>.json`. Een zichtbaar label aanraken betekent **alle** taalbestanden en
   **alle** `README.<code>.md` updaten.
@@ -75,4 +75,4 @@ Pixel-profielen zijn allemaal geweldige startpunten.
 
 ---
 
-> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom; zie [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom, zie [CONTRIBUTING.md](CONTRIBUTING.md)._

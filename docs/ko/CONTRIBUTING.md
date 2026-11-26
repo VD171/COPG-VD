@@ -11,7 +11,7 @@
 
 COPG-VD는 **Zygisk 디바이스 스푸퍼**입니다: 디바이스의 fingerprint와 build를 다시 작성하기 위해 앱
 프로세스에 주입되는 작은 네이티브 라이브러리와, 그것을 조작하는 바닐라 JS WebUI입니다. COPG
-(AlirezaParsi 제작)의 포크로, VD171이 Apache-2.0 라이선스 하에 유지 관리합니다.
+(AlirezaParsi 제작)의 포크로, VD171이 GNU AGPL-3.0-or-later 라이선스 하에 유지 관리합니다.
 [ARCHITECTURE.md](ARCHITECTURE.md)와 [FILE-STRUCTURE.md](FILE-STRUCTURE.md)를 참조하세요.
 
 기본적으로 Zygisk를 통해 스푸핑을 Google Play 스택으로 한정하므로, PlayIntegrityFix의 더 가볍고 더
@@ -45,14 +45,14 @@ AI 어시스턴트와 에이전트는 여기서 나중에 생각난 것이 아�
 - **모든 모듈 소스 파일**(`.cpp`, `.sh`, `.js`, `.css`, `.html`)은 프로젝트 배너 헤더로 시작합니다
   (기존 파일에서 복사하세요). `.github/` 아래의 툴링은 대신 짧은 주석을 사용합니다.
 - **코드와 주석은 영어로.** 주석은 최소한으로, 필요한 곳에만 유지하세요.
-- **em-dash나 en-dash 없이**; 항상 단순한 하이픈 `-`를 사용하세요.
-- WebUI는 **바닐라 JS**(하나의 `scripts.js`)입니다; 프레임워크 없음.
+- **em-dash나 en-dash 없이**, 항상 단순한 하이픈 `-`를 사용하세요.
+- WebUI는 **바닐라 JS**(하나의 `scripts.js`)입니다, 프레임워크 없음.
 - 실제 기능을 **절대 약화시키지 마세요**: 스푸핑을 일관되게 유지하고, 후크가 붙어 있는 앱을
   충돌시키지 마세요(의도적으로 null 체크되어 있습니다).
 
 ## 국제화 (i18n)
 
-- UI 문자열은 `module/webroot/lang/`에 있습니다. 영어가 정식 폴백(`en.js` + `en.json`)입니다; 다른
+- UI 문자열은 `module/webroot/lang/`에 있습니다. 영어가 정식 폴백(`en.js` + `en.json`)입니다, 다른
   20개 언어는 `<code>.json`입니다.
 - 문자열을 추가하거나 변경하려면: `en.js` **와** `en.json`을 편집한 다음, 모든 `<code>.json`을
   업데이트하세요. 보이는 레이블을 건드리는 것은 **모든** 언어 파일과 **모든** `README.<code>.md`를

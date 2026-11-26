@@ -7,7 +7,7 @@
 Tout le module est piloté par un seul fichier : `/data/adb/COPG-VD/COPG-VD.json`. La WebUI l'écrit
 pour vous, mais vous pouvez l'éditer à la main. Un exemple livré se trouve à
 `module/COPG-VD.json.example`.
-Il s'agit de la source unique de vérité ; la copie sous le répertoire du module n'est qu'une valeur par défaut en lecture seule. Une config laissée par une version plus ancienne à `/data/adb/COPG-VD.json` est déplacée automatiquement dans ce répertoire. Le journal et l'état propres au module (`update.log`, `update.state`) résident ici aussi.
+Il s'agit de la source unique de vérité, la copie sous le répertoire du module n'est qu'une valeur par défaut en lecture seule. Une config laissée par une version plus ancienne à `/data/adb/COPG-VD.json` est déplacée automatiquement dans ce répertoire. Le journal et l'état propres au module (`update.log`, `update.state`) résident ici aussi.
 
 Règles :
 
@@ -25,7 +25,7 @@ Règles :
 | `scope_whitelist` | array | Paquets qui reçoivent le spoof quand `scope_mode` est `whitelist`. |
 | `scope_blacklist` | array | Paquets exclus quand `scope_mode` est `blacklist`. |
 | `COPG-VD` | object | Le profil : les champs Build à présenter (voir ci-dessous). |
-| `COPG-VD-Delete` | array | Noms de champs à retirer au lieu de définir (le champ Build devient null ; une propriété est retirée avec `resetprop --delete`). |
+| `COPG-VD-Delete` | array | Noms de champs à retirer au lieu de définir (le champ Build devient null, une propriété est retirée avec `resetprop --delete`). |
 | `COPG-VD-Settings` | object | Réglages du module qui voyagent avec le profil (voir ci-dessous). |
 | `motor_jni` | bool | Moteur des champs Build (réécrit `android.os.Build.*`). Par défaut `true`. |
 | `motor_prop_hook` | bool | Moteur de propriétés par processus (remap clean-room des propriétés). Par défaut `true`. |
@@ -78,7 +78,7 @@ Réglages qui voyagent avec le profil, pour qu'une sauvegarde emporte vos choix.
 |---|---|---|
 | `resetprop` | bool | Si le moteur resetprop à l'échelle de l'appareil s'exécute. |
 | `autoupdate` | bool | Si `fingerprint-update.sh` s'exécute une fois par démarrage. Activé par défaut. |
-| `spoof_version` | `never` / `rom` / `force` | Comment le groupe version d'Android s'applique. `never` est le défaut. Depuis v6.19 le SDK est plafonné à la valeur de la ROM sous toutes les politiques, donc `force` force les champs texte mais ne peut pas monter le SDK ; `force` est refusé lors de la restauration d'une sauvegarde. |
+| `spoof_version` | `never` / `rom` / `force` | Comment le groupe version d'Android s'applique. `never` est le défaut. Depuis v6.19 le SDK est plafonné à la valeur de la ROM sous toutes les politiques, donc `force` force les champs texte mais ne peut pas monter le SDK, `force` est refusé lors de la restauration d'une sauvegarde. |
 
 ## `global_fields`
 
@@ -119,4 +119,4 @@ le groupe version d'Android ici.
 
 ---
 
-> _Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues ; voir [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues, voir [CONTRIBUTING.md](CONTRIBUTING.md)._

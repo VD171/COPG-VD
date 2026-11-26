@@ -25,7 +25,8 @@ window.VDLU_I18N_SV = {
   savedToast: 'sparat', saveFail: 'kunde inte spara', sourceSaved: 'källa sparad',
   bootstrapping: 'Förbereder uppdateraren…', bootstrapSub: 'engångsnedladdning av hämtaren', bootstrapFail: 'Kunde inte förbereda uppdateraren',
   searching: 'Söker…', upToDate: 'Uppdaterad', nothingNew: 'inget nytt',
-  ahead: 'Nyare än flödet', aheadSub: 'din version är nyare än den publicerade uppdateringen', deferred: 'Nedladdning uppskjuten', deferredSub: 'väntar på tillåtet nätverk - återupptas vid nästa kontroll',
+  ahead: 'Nyare än flödet', aheadSub: 'din version är nyare än den publicerade uppdateringen', silentUpdate: 'Tyst uppdatering', silentUpdateSub: 'Tillämpar uppdateringar i bakgrunden utan att visa omstartsfältet.',
+  deferred: 'Nedladdning uppskjuten', deferredSub: 'väntar på tillåtet nätverk, återupptas vid nästa kontroll',
   updateAvail: 'Uppdatering tillgänglig', install: 'installera', fileOne: 'fil', fileMany: 'filer',
   requiresReboot: 'kräver omstart', checkFail: 'Kontrollen misslyckades', ksuUnavailable: 'KSU-API ej tillgängligt',
   pendingUpdate: 'Väntande uppdatering', notNow: 'Inte nu', srcPlaceholder: 'https://…/&lt;modul&gt;'

@@ -25,7 +25,8 @@ window.VDLU_I18N_TR = {
   savedToast: 'kaydedildi', saveFail: 'kaydedilemedi', sourceSaved: 'kaynak kaydedildi',
   bootstrapping: 'Güncelleyici hazırlanıyor…', bootstrapSub: 'getiricinin tek seferlik indirmesi', bootstrapFail: 'Güncelleyici hazırlanamadı',
   searching: 'Aranıyor…', upToDate: 'Güncel', nothingNew: 'yeni bir şey yok',
-  ahead: 'Akıştan daha yeni', aheadSub: 'sürümünüz yayımlanan güncellemeden daha yeni', deferred: 'İndirme ertelendi', deferredSub: 'izin verilen ağ bekleniyor - sonraki denetimde sürdürülecek',
+  ahead: 'Akıştan daha yeni', aheadSub: 'sürümünüz yayımlanan güncellemeden daha yeni', silentUpdate: 'Sessiz güncelleme', silentUpdateSub: 'Güncellemeleri yeniden başlatma çubuğunu göstermeden arka planda uygular.',
+  deferred: 'İndirme ertelendi', deferredSub: 'izin verilen ağ bekleniyor, sonraki denetimde sürdürülecek',
   updateAvail: 'Güncelleme mevcut', install: 'yükle', fileOne: 'dosya', fileMany: 'dosya',
   requiresReboot: 'yeniden başlatma gerektirir', checkFail: 'Denetim başarısız', ksuUnavailable: 'KSU API kullanılamıyor',
   pendingUpdate: 'Bekleyen güncelleme', notNow: 'Şimdi değil', srcPlaceholder: 'https://…/&lt;modül&gt;'

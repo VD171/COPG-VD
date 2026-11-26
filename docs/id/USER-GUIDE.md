@@ -7,7 +7,7 @@
 COPG-VD menulis ulang fingerprint dan build perangkat sehingga aplikasi yang Anda pilih
 melihat sebuah Pixel alih-alih perangkat Anda yang sebenarnya. Panduan ini membawa Anda dari
 instalasi hingga pengaturan yang berfungsi, melewati pilihan-pilihan di sepanjang jalan.
-Untuk setiap field dan nilai, lihat [CONFIGURATION.md](CONFIGURATION.md); untuk cara kerjanya
+Untuk setiap field dan nilai, lihat [CONFIGURATION.md](CONFIGURATION.md), untuk cara kerjanya
 di dalam, lihat [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Instalasi
@@ -49,7 +49,7 @@ Setiap mesin bersifat independen dan dapat dimatikan. Semua aktif secara default
 - **resetprop**: menulis ulang properti sistem di seluruh perangkat, per grup (identity,
   version, boot state, SELinux, adb/usb, anti-emulator, dan satu pass pembersihan). Dalam
   mode scoped, grup identity dan version tetap di luar pass seluruh perangkat (Zygisk
-  mengirimkannya per proses); grup boot, lock, dan SELinux tetap global. Nyalakan/matikan di
+  mengirimkannya per proses), grup boot, lock, dan SELinux tetap global. Nyalakan/matikan di
   `COPG-VD-Settings.resetprop`.
 - **DRM / Widevine (`motor_drm`, nonaktif secara default)**: melaporkan tingkat keamanan
   Widevine yang dipilih (L1 atau L3) ke aplikasi yang membacanya. Lihat bagian DRM di bawah.
@@ -91,7 +91,7 @@ diterapkan sama sekali:
   menurunkan SDK.
 - `force`: memaksa field versi yang diminta config. SDK tetap dibatasi pada nilai ROM bahkan
   di sini (sejak v6.19), karena menaikkan SDK di atas framework sebenarnya hanya menyebabkan softloop
-  dan tidak ada gunanya, jadi `force` tidak lagi menyebabkan softloop; ia memaksa field string (release, codename).
+  dan tidak ada gunanya, jadi `force` tidak lagi menyebabkan softloop, ia memaksa field string (release, codename).
 
 Versi sebenarnya dibaca dari `/system/build.prop`, tidak pernah dari `getprop` (yang justru
 hal yang dipalsukan modul ini). `force` juga ditolak saat memulihkan backup, sehingga backup
@@ -105,7 +105,7 @@ dipilih, `DRM_SECURITY_LEVEL` (`L1` atau `L3`), ke aplikasi yang membacanya.
 Secara default spoof DRM mengikuti `scope_mode`. Untuk menerapkannya ke sekumpulan aplikasi
 tertentu alih-alih, secara independen dari scope utama, daftarkan mereka di `drm_targets`.
 Modul kemudian tetap dimuat di aplikasi yang terdaftar **hanya** untuk hook DRM, bahkan
-ketika aplikasi itu berada di luar scope utama; daftar yang kosong atau tidak ada berarti
+ketika aplikasi itu berada di luar scope utama, daftar yang kosong atau tidak ada berarti
 mengikuti scope. Ini memerlukan mode scoped (bukan `global`), dan berlaku pada **reboot**
 berikutnya.
 
@@ -135,7 +135,7 @@ Opsional, tetapi cara mudah untuk mengendalikan segalanya. Lima tab:
   laporan Diagnostics (satu tombol untuk membaca dan mengekspor semua yang berguna untuk
   laporan bug).
 
-Ia tidak membuat permintaan jaringan apa pun; semua yang dibutuhkannya disertakan di dalam
+Ia tidak membuat permintaan jaringan apa pun, semua yang dibutuhkannya disertakan di dalam
 modul.
 
 ## Pemecahan masalah
@@ -155,4 +155,4 @@ modul.
 
 ---
 
-> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan; lihat [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan, lihat [CONTRIBUTING.md](CONTRIBUTING.md)._

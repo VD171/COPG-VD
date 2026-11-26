@@ -27,10 +27,10 @@ Açık bir açıklama ve mümkünse yeniden üretme adımlarını ekleyin. Elimi
 
 - Yapılandırma `/data/adb/COPG-VD/COPG-VD.json` konumunda bulunur, yalnızca root tarafından
   okunabilir. Modül onu, kendisinin getirdiği özel bir SELinux kuralı aracılığıyla enjekte
-  edilen süreçten okur; hiçbir kimlik bilgisi (credential) veya parola ifadesi tutmaz.
+  edilen süreçten okur, hiçbir kimlik bilgisi (credential) veya parola ifadesi tutmaz.
 - Sahteleme hook'ları canlı uygulamalara bağlıdır ve null kontrolünden geçer, böylece bozuk
   bir profil uygulamayı çökertmek yerine zarifçe bozulur.
-- İsteğe bağlı profil getirme dışında **telemetri ve ağ yoktur**; bu da modülün kendi
+- İsteğe bağlı profil getirme dışında **telemetri ve ağ yoktur**, bu da modülün kendi
   birlikte gelen indiricisini kullanarak, `PATH`'ten bir `curl`/`wget` değil,
   [github.com/VictorGabriel7Dev/build.prop](https://github.com/VictorGabriel7Dev/build.prop)
   adresinden HTTPS üzerinden genel bir Pixel profilini indirir.
@@ -41,4 +41,4 @@ Açık bir açıklama ve mümkünse yeniden üretme adımlarını ekleyin. Elimi
 
 ---
 
-> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır; bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır, bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._

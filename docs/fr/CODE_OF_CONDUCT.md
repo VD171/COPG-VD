@@ -9,7 +9,7 @@ foi, et gardez les discussions techniques et constructives.
 
 - Soyez bienveillant. Pas de harcèlement, d'attaques personnelles ni de discrimination.
 - Critiquez les idées et le code, pas les personnes.
-- Aidez les nouveaux venus ; tout le monde a été nouveau un jour.
+- Aidez les nouveaux venus, tout le monde a été nouveau un jour.
 
 Un comportement inacceptable peut être signalé en privé au mainteneur (voir
 [SECURITY.md](SECURITY.md) pour le contact). Les mainteneurs peuvent retirer les
@@ -22,4 +22,4 @@ Ceci est une adaptation condensée et adaptée au projet de l'esprit du Contribu
 
 ---
 
-> _Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues ; voir [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues, voir [CONTRIBUTING.md](CONTRIBUTING.md)._

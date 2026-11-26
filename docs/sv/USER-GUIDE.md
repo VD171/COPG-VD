@@ -49,7 +49,7 @@ Varje motor är oberoende och kan stängas av. Alla är på som standard utom DR
 - **resetprop**: skriver om systemproperties över hela enheten, per grupp (identitet,
   version, boot-tillstånd, SELinux, adb/usb, anti-emulator och ett upprensningspass). I ett läge
   med omfattning hålls identitets- och versionsgrupperna utanför passet över hela enheten (Zygisk levererar
-  dem per process); grupperna boot, lock och SELinux förblir globala. Växla det i
+  dem per process), grupperna boot, lock och SELinux förblir globala. Växla det i
   `COPG-VD-Settings.resetprop`.
 - **DRM / Widevine (`motor_drm`, av som standard)**: rapporterar en vald Widevine-säkerhetsnivå
   (L1 eller L3) till appar som läser den. Se DRM-avsnittet nedan.
@@ -88,7 +88,7 @@ Android version** (`COPG-VD-Settings.spoof_version`) avgör om de tillämpas all
 - `rom`: tillämpar endast det som inte överskrider ROM:en, vilket i praktiken innebär att sänka SDK.
 - `force`: tvingar fram versionsfälten som konfigurationen begär. SDK:n begränsas fortfarande till ROM:ens
   värde även här (sedan v6.19), eftersom att höja SDK:n över det riktiga ramverket bara orsakar en softloop
-  och är meningslöst, så `force` softloopar inte längre; den tvingar fram strängfälten (release, codename).
+  och är meningslöst, så `force` softloopar inte längre, den tvingar fram strängfälten (release, codename).
 
 Den riktiga versionen läses från `/system/build.prop`, aldrig från `getprop` (vilket är precis
 det som den här modulen förfalskar). `force` nekas också vid återställning av en säkerhetskopia, så en
@@ -102,7 +102,7 @@ Av som standard (`motor_drm`). När det är på rapporterar det en vald Widevine
 Som standard följer DRM-spoofen `scope_mode`. För att istället tillämpa den på en specifik uppsättning appar
 - oberoende av huvudomfattningen: lista dem i `drm_targets`. Modulen förblir då
 inläst i en listad app **enbart** för DRM-hooken, även när den appen är utanför
-huvudomfattningen; en tom eller frånvarande lista betyder följ omfattningen. Detta kräver ett läge med omfattning (inte
+huvudomfattningen, en tom eller frånvarande lista betyder följ omfattningen. Detta kräver ett läge med omfattning (inte
 `global`), och träder i kraft vid nästa **omstart**.
 
 ## Analyze: kontrollera din konfiguration
@@ -131,7 +131,7 @@ Valfritt, men det enkla sättet att styra allt. Fem flikar:
   och Diagnostics-rapporten (en knapp för att läsa och exportera allt användbart för en
   buggrapport).
 
-Det gör ingen nätverksbegäran; allt det behöver levereras inuti modulen.
+Det gör ingen nätverksbegäran, allt det behöver levereras inuti modulen.
 
 ## Felsökning
 
@@ -150,4 +150,4 @@ Det gör ingen nätverksbegäran; allt det behöver levereras inuti modulen.
 
 ---
 
-> _Denna dokumentation genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar välkomnas; se [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Denna dokumentation genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar välkomnas, se [CONTRIBUTING.md](CONTRIBUTING.md)._

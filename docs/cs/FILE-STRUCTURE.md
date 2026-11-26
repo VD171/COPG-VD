@@ -56,7 +56,7 @@ COPG-VD/
 ├── README.md + README.<code>.md   # 21 languages
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md  CODE_OF_CONDUCT.md  SECURITY.md
-├── LICENSE                     # Apache-2.0
+├── LICENSE                     # AGPL-3.0-or-later
 └── screenshots/                # images used by the README
 ```
 
@@ -64,10 +64,10 @@ COPG-VD/
 
 `/data/adb/COPG-VD/` na zařízení je vlastní adresář modulu: `COPG-VD.json` drží profil a nastavení
 (viz [CONFIGURATION.md](CONFIGURATION.md)), vedle `update.log`, `update.state` a `update.status`.
-Konfigurace se nikdy necommituje; `module/COPG-VD.json.example` je šablona.
+Konfigurace se nikdy necommituje, `module/COPG-VD.json.example` je šablona.
 
 <!-- doc-footer -->
 
 ---
 
-> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány; viz [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány, viz [CONTRIBUTING.md](CONTRIBUTING.md)._

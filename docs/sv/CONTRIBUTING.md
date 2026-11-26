@@ -11,7 +11,7 @@ var saker finns och de få konventioner vi följer.
 
 COPG-VD är en **Zygisk-enhetsspoofer**: ett litet nativt bibliotek som injiceras i app-
 processer för att skriva om enhetens fingerprint och build, plus ett WebUI i ren JS för att styra det.
-Det är en fork av COPG (av AlirezaParsi), underhållen av VD171 under Apache-2.0-licensen.
+Det är en fork av COPG (av AlirezaParsi), underhållen av VD171 under GNU AGPL-3.0-or-later-licensen.
 Se [ARCHITECTURE.md](ARCHITECTURE.md) och [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 
 Som standard begränsar den spoofen till Google Play-stacken via Zygisk, så den är ett
@@ -38,7 +38,7 @@ AI-assistenter och agenter är förstklassiga bidragsgivare här, inte en eftert
 - Bygg en flashbar zip: kopiera det byggda `libspoof.so` till `module/zygisk/<abi>.so`, sedan
   `cd module && zip -r9 ../COPG-VD-dev.zip .` och flasha den.
 - WebUI:t är `module/webroot/` (öppna det från root-hanteraren). Spoofing-logiken är
-  `zygisk/spoof_module.cpp`; profilhämtaren är `module/fingerprint-update.sh`.
+  `zygisk/spoof_module.cpp`, profilhämtaren är `module/fingerprint-update.sh`.
 
 ## Konventioner
 
@@ -46,15 +46,15 @@ AI-assistenter och agenter är förstklassiga bidragsgivare här, inte en eftert
   projektets banner-header (kopiera den från valfri befintlig fil). Verktyg under `.github/` använder
   istället en kort kommentar.
 - **Kod och kommentarer på engelska.** Håll kommentarerna minimala och endast där de behövs.
-- **Ingen em-dash eller en-dash**; använd alltid ett vanligt bindestreck `-`.
-- WebUI:t är **ren JS** (ett enda `scripts.js`); inga ramverk.
+- **Ingen em-dash eller en-dash**, använd alltid ett vanligt bindestreck `-`.
+- WebUI:t är **ren JS** (ett enda `scripts.js`), inga ramverk.
 - **Försvaga aldrig** en riktig funktion: håll spoofen koherent och låt inte hookarna
   krascha en app de är fästa vid (de är null-kontrollerade med avsikt).
 
 ## Internationalisering (i18n)
 
 - UI-strängar finns i `module/webroot/lang/`. Engelska är den kanoniska reservutvägen
-  (`en.js` + `en.json`); de övriga 20 språken är `<code>.json`.
+  (`en.js` + `en.json`), de övriga 20 språken är `<code>.json`.
 - För att lägga till eller ändra en sträng: redigera `en.js` **och** `en.json`, uppdatera sedan varje
   `<code>.json`. Att röra en synlig etikett innebär att uppdatera **alla** språkfiler och
   **alla** `README.<code>.md`.
@@ -75,4 +75,4 @@ Pixel-profiler är alla utmärkta startpunkter.
 
 ---
 
-> _Denna dokumentation genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar välkomnas; se [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Denna dokumentation genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar välkomnas, se [CONTRIBUTING.md](CONTRIBUTING.md)._

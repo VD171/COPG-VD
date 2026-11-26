@@ -9,7 +9,7 @@ dyskusje techniczne i konstruktywne.
 
 - Bądź życzliwy. Żadnego nękania, ataków osobistych ani dyskryminacji.
 - Krytykuj pomysły i kod, nie ludzi.
-- Pomagaj nowicjuszom; każdy kiedyś był nowy.
+- Pomagaj nowicjuszom, każdy kiedyś był nowy.
 
 Niedopuszczalne zachowanie można zgłosić prywatnie do opiekuna (zobacz [SECURITY.md](SECURITY.md)
 po kontakt). Opiekunowie mogą usuwać komentarze, commity, zgłoszenia i wkłady, które
@@ -22,4 +22,4 @@ Covenant.
 
 ---
 
-> _Ta dokumentacja została wygenerowana za pomocą Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane; zobacz [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Ta dokumentacja została wygenerowana za pomocą Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane, zobacz [CONTRIBUTING.md](CONTRIBUTING.md)._

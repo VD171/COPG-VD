@@ -6,7 +6,7 @@
 
 De hele module wordt aangestuurd door één bestand: `/data/adb/COPG-VD/COPG-VD.json`. De WebUI schrijft het
 voor je, maar je kunt het met de hand bewerken. Een meegeleverd voorbeeld staat in `module/COPG-VD.json.example`.
-Dit is de enige bron van waarheid; de kopie onder de modulemap is slechts een alleen-lezen standaard.
+Dit is de enige bron van waarheid, de kopie onder de modulemap is slechts een alleen-lezen standaard.
 Een configuratie die van een oudere versie is achtergebleven op `/data/adb/COPG-VD.json` wordt automatisch
 naar deze map verplaatst. De eigen log en status van de module (`update.log`, `update.state`) staan hier ook.
 
@@ -26,7 +26,7 @@ Regels:
 | `scope_whitelist` | array | Packages die de spoof krijgen wanneer `scope_mode` `whitelist` is. |
 | `scope_blacklist` | array | Packages die worden uitgesloten wanneer `scope_mode` `blacklist` is. |
 | `COPG-VD` | object | Het profiel: de Build-velden om te presenteren (zie hieronder). |
-| `COPG-VD-Delete` | array | Veldnamen om te verwijderen in plaats van in te stellen (Build-veld wordt null; een property wordt verwijderd met `resetprop --delete`). |
+| `COPG-VD-Delete` | array | Veldnamen om te verwijderen in plaats van in te stellen (Build-veld wordt null, een property wordt verwijderd met `resetprop --delete`). |
 | `COPG-VD-Settings` | object | Module-instellingen die met het profiel meereizen (zie hieronder). |
 | `motor_jni` | bool | Build-velden-engine (herschrijft `android.os.Build.*`). Standaard `true`. |
 | `motor_prop_hook` | bool | Property-engine per proces (clean-room property-remap). Standaard `true`. |
@@ -77,7 +77,7 @@ Instellingen die met het profiel meereizen, zodat een back-up je keuzes meedraag
 |---|---|---|
 | `resetprop` | bool | Of de apparaatbrede resetprop-engine draait. |
 | `autoupdate` | bool | Of `fingerprint-update.sh` eenmaal per boot draait. Standaard aan. |
-| `spoof_version` | `never` / `rom` / `force` | Hoe de Android-versiegroep wordt toegepast. `never` is de standaard. Sinds v6.19 wordt de SDK afgetopt op de waarde van de ROM onder elk beleid, dus `force` forceert de stringvelden maar kan de SDK niet verhogen; `force` wordt geweigerd bij het herstellen van een back-up. |
+| `spoof_version` | `never` / `rom` / `force` | Hoe de Android-versiegroep wordt toegepast. `never` is de standaard. Sinds v6.19 wordt de SDK afgetopt op de waarde van de ROM onder elk beleid, dus `force` forceert de stringvelden maar kan de SDK niet verhogen, `force` wordt geweigerd bij het herstellen van een back-up. |
 
 ## `global_fields`
 
@@ -117,4 +117,4 @@ gebruikelijke. Zet **nooit** identiteit of de Android-versiegroep hier.
 
 ---
 
-> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom; zie [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom, zie [CONTRIBUTING.md](CONTRIBUTING.md)._

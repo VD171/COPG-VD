@@ -51,7 +51,7 @@ Chaque moteur est indépendant et peut être désactivé. Tous sont activés par
 - **resetprop**: réécrit les propriétés système à l'échelle de l'appareil, par groupe
   (identity, version, boot state, SELinux, adb/usb, anti-emulator, et une passe de nettoyage).
   Dans un mode scoped, les groupes identity et version restent hors de la passe à l'échelle
-  de l'appareil (Zygisk les livre par processus) ; les groupes boot, lock et SELinux restent
+  de l'appareil (Zygisk les livre par processus), les groupes boot, lock et SELinux restent
   globaux. Basculez-le dans `COPG-VD-Settings.resetprop`.
 - **DRM / Widevine (`motor_drm`, désactivé par défaut)**: rapporte un niveau de sécurité
   Widevine choisi (L1 ou L3) aux applications qui le lisent. Voir la section DRM ci-dessous.
@@ -93,7 +93,7 @@ Android version** (`COPG-VD-Settings.spoof_version`) décide s'ils s'appliquent 
   abaisser le SDK.
 - `force`: force les champs de version que demande la config. Le SDK reste plafonné à la valeur
   de la ROM même ici (depuis v6.19), car monter le SDK au-dessus du framework réel ne fait que
-  provoquer un softloop et n'a aucun usage, donc `force` ne provoque plus de softloop ; il force
+  provoquer un softloop et n'a aucun usage, donc `force` ne provoque plus de softloop, il force
   les champs texte (release, codename).
 
 La version réelle est lue depuis `/system/build.prop`, jamais depuis `getprop` (qui est
@@ -108,7 +108,7 @@ choisi, `DRM_SECURITY_LEVEL` (`L1` ou `L3`), aux applications qui le lisent.
 Par défaut, le spoof DRM suit `scope_mode`. Pour l'appliquer à un ensemble spécifique
 d'applications à la place: indépendamment du scope principal: listez-les dans
 `drm_targets`. Le module reste alors chargé dans une application listée **uniquement** pour
-le hook DRM, même quand cette application est hors du scope principal ; une liste vide ou
+le hook DRM, même quand cette application est hors du scope principal, une liste vide ou
 absente signifie suivre le scope. Cela nécessite un mode scoped (pas `global`), et prend
 effet au prochain **redémarrage**.
 
@@ -138,7 +138,7 @@ Optionnelle, mais la façon facile de tout piloter. Cinq onglets :
   au démarrage, et le rapport Diagnostics (un bouton pour lire et exporter tout ce qui est
   utile pour un rapport de bug).
 
-Elle ne fait aucune requête réseau ; tout ce dont elle a besoin est livré dans le module.
+Elle ne fait aucune requête réseau, tout ce dont elle a besoin est livré dans le module.
 
 ## Dépannage
 
@@ -158,4 +158,4 @@ Elle ne fait aucune requête réseau ; tout ce dont elle a besoin est livré dan
 
 ---
 
-> _Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues ; voir [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues, voir [CONTRIBUTING.md](CONTRIBUTING.md)._

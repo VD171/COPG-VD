@@ -25,7 +25,8 @@ window.VDLU_I18N_PL = {
   savedToast: 'zapisano', saveFail: 'nie udało się zapisać', sourceSaved: 'źródło zapisane',
   bootstrapping: 'Przygotowywanie aktualizatora…', bootstrapSub: 'jednorazowe pobranie pobieracza', bootstrapFail: 'Nie udało się przygotować aktualizatora',
   searching: 'Szukanie…', upToDate: 'Aktualne', nothingNew: 'nic nowego',
-  ahead: 'Nowsza niż kanał', aheadSub: 'twoja wersja jest nowsza niż opublikowana aktualizacja', deferred: 'Pobieranie odroczone', deferredSub: 'oczekiwanie na dozwoloną sieć - wznowi się przy następnym sprawdzeniu',
+  ahead: 'Nowsza niż kanał', aheadSub: 'twoja wersja jest nowsza niż opublikowana aktualizacja', silentUpdate: 'Cicha aktualizacja', silentUpdateSub: 'Stosuje aktualizacje w tle bez pokazywania paska ponownego uruchomienia.',
+  deferred: 'Pobieranie odroczone', deferredSub: 'oczekiwanie na dozwoloną sieć, wznowi się przy następnym sprawdzeniu',
   updateAvail: 'Dostępna aktualizacja', install: 'zainstaluj', fileOne: 'plik', fileMany: 'plików',
   requiresReboot: 'wymaga restartu', checkFail: 'Sprawdzanie nie powiodło się', ksuUnavailable: 'API KSU niedostępne',
   pendingUpdate: 'Oczekująca aktualizacja', notNow: 'Nie teraz', srcPlaceholder: 'https://…/&lt;moduł&gt;'

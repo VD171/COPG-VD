@@ -15,7 +15,7 @@ COPG-VD는 AI 및 에이전트 기여자를 환영하며, 모듈 전체가 WebUI
 ## 구성 파일
 
 `/data/adb/COPG-VD/COPG-VD.json`은 평범한 JSON 객체입니다. 모듈은 자신이 직접 포함한 전용 SELinux 규칙을
-통해 주입된 프로세스에서 이 파일을 읽습니다; 어떤 자격 증명도 담지 않습니다. 포함된 예시는
+통해 주입된 프로세스에서 이 파일을 읽습니다, 어떤 자격 증명도 담지 않습니다. 포함된 예시는
 `module/COPG-VD.json.example`에 있으며, Google의 최신 공장 이미지로부터 매일 갱신됩니다.
 
 에이전트가 반드시 따라야 할 규칙:
@@ -41,19 +41,19 @@ COPG-VD는 AI 및 에이전트 기여자를 환영하며, 모듈 전체가 WebUI
 sh /data/adb/modules/COPG-VD/fingerprint-update.sh <verb> [arg]
 ```
 
-스크립트는 사람이 읽을 수 있는 줄을 출력합니다; 기계가 읽을 수 있는 줄은 `status:`로 시작합니다. 종료 코드는
+스크립트는 사람이 읽을 수 있는 줄을 출력합니다, 기계가 읽을 수 있는 줄은 `status:`로 시작합니다. 종료 코드는
 성공 시 `0`, 실패 시 0이 아닙니다.
 
 | 동사 | 하는 일 | 일반적인 출력 |
 |---|---|---|
 | `check` | 설치된 프로필을 최신 upstream 빌드와 비교하며, 아무것도 쓰지 않습니다. | `status: update-available` \| `status: up-to-date` \| `status: local-newer` \| `status: no-config` |
-| `apply` | 최신 프로필을 가져와 구성에 병합합니다(빌드 필드만; 당신의 다른 키는 보존됩니다). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
-| `analyze` | 현재 상태의 구성을 감사합니다(parse, 버전 대 ROM, fingerprint 일관성, 알 수 없는 키, 날짜, props). 보고서를 출력하며; 종료 코드는 red/warn 발견을 반영합니다. | 텍스트 보고서 |
+| `apply` | 최신 프로필을 가져와 구성에 병합합니다(빌드 필드만, 당신의 다른 키는 보존됩니다). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
+| `analyze` | 현재 상태의 구성을 감사합니다(parse, 버전 대 ROM, fingerprint 일관성, 알 수 없는 키, 날짜, props). 보고서를 출력하며, 종료 코드는 red/warn 발견을 반영합니다. | 텍스트 보고서 |
 | `fetch-index` | 서명된 기기 색인을 다운로드·검증하고 출력합니다(`index.json`). | 색인 JSON \| `status: sig-failed` \| `status: download-failed` |
 | `fetch <path>` | 한 기기의 `build.prop`을 다운로드하고(경로는 색인에서, 예: `pixel-9a/latest.prop`) 그 빌드 필드를 구성에 씁니다. | `status: fetched` \| `status: bad-path` \| `status: map-failed` \| `status: write-failed` |
 | `sync-settings` | 상태/구성을 예전의 평평한 레이아웃에서 `/data/adb/COPG-VD/`로 마이그레이션합니다. | - |
 | `migrate` | 모듈 버전 간 일회성 구성 마이그레이션. | `status: migrated` \| `status: nothing-to-migrate` |
-| `boot` | 부팅당 한 번의 자동 업데이트; `service.sh`용이며 대화형 사용을 위한 것이 아닙니다. | `update.status`를 씁니다 |
+| `boot` | 부팅당 한 번의 자동 업데이트, `service.sh`용이며 대화형 사용을 위한 것이 아닙니다. | `update.status`를 씁니다 |
 
 모든 다운로드는 사용 전에 검증되며(기기 내 유일한 다운로더는 busybox `wget`로, TLS를 검증할 수 없습니다),
 프로필 업데이터는 결코 거꾸로 가지 않습니다: 설치된 것보다 오래된 upstream 빌드는 거부됩니다. 피드 색인과 각
@@ -70,7 +70,7 @@ sh /data/adb/modules/COPG-VD/fingerprint-update.sh <verb> [arg]
 
 ## 안전 가드레일
 
-- 구성을 바꾸거나 프로필을 적용하면 모든 대상 앱이 보는 것이 바뀝니다; WebUI가 하듯이 쓰기 전에 의도를
+- 구성을 바꾸거나 프로필을 적용하면 모든 대상 앱이 보는 것이 바뀝니다, WebUI가 하듯이 쓰기 전에 의도를
   확인하세요.
 - 실제 일관성 보호 장치를 결코 느슨하게 하지 마세요: SDK는 어떤 정책에서도 실제 프레임워크로 제한되고,
   manufacturer는 프로필의 나머지와 보조를 맞추며, 다른 기기의 프로필은 거부됩니다. 이것들은 의도적이며

@@ -25,7 +25,8 @@ window.VDLU_I18N_KO = {
   savedToast: '저장됨', saveFail: '저장 실패', sourceSaved: '소스 저장됨',
   bootstrapping: '업데이터 준비 중…', bootstrapSub: '페처 일회성 다운로드', bootstrapFail: '업데이터를 준비할 수 없습니다',
   searching: '검색 중…', upToDate: '최신 상태', nothingNew: '새 항목 없음',
-  ahead: '피드보다 최신', aheadSub: '현재 버전이 게시된 업데이트보다 최신입니다', deferred: '다운로드 연기됨', deferredSub: '허용된 네트워크 대기 중 - 다음 확인 시 재개됩니다',
+  ahead: '피드보다 최신', aheadSub: '현재 버전이 게시된 업데이트보다 최신입니다', silentUpdate: '무음 업데이트', silentUpdateSub: '재부팅 바를 표시하지 않고 백그라운드에서 업데이트를 적용합니다.',
+  deferred: '다운로드 연기됨', deferredSub: '허용된 네트워크 대기 중, 다음 확인 시 재개됩니다',
   updateAvail: '업데이트 있음', install: '설치', fileOne: '파일', fileMany: '파일',
   requiresReboot: '재부팅 필요', checkFail: '확인 실패', ksuUnavailable: 'KSU API 사용 불가',
   pendingUpdate: '대기 중인 업데이트', notNow: '나중에', srcPlaceholder: 'https://…/&lt;모듈&gt;'

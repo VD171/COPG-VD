@@ -7,7 +7,7 @@
 COPG-VD reescribe la huella del dispositivo y el build para que las apps que elijas vean
 un Pixel en lugar de tu dispositivo real. Esta guía te lleva desde la instalación hasta una
 configuración funcional, y a través de las decisiones del camino. Para cada campo y valor,
-consulta [CONFIGURATION.md](CONFIGURATION.md); para saber cómo funciona por dentro, consulta
+consulta [CONFIGURATION.md](CONFIGURATION.md), para saber cómo funciona por dentro, consulta
 [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Instalación
@@ -51,7 +51,7 @@ excepto DRM.
 - **resetprop**: reescribe las propiedades del sistema en todo el dispositivo, por grupo
   (identidad, versión, estado de arranque, SELinux, adb/usb, anti-emulador y una pasada de
   limpieza). En un modo con alcance acotado, los grupos de identidad y versión quedan fuera
-  de la pasada en todo el dispositivo (Zygisk los entrega por proceso); los grupos de
+  de la pasada en todo el dispositivo (Zygisk los entrega por proceso), los grupos de
   arranque, bloqueo y SELinux permanecen globales. Actívalo o desactívalo en
   `COPG-VD-Settings.resetprop`.
 - **DRM / Widevine (`motor_drm`, desactivado de forma predeterminada)**: informa de un
@@ -94,7 +94,7 @@ Estos campos no están en la configuración incluida y el actualizador nunca los
 - `rom`: aplica solo lo que no excede la ROM, lo que en la práctica significa bajar el SDK.
 - `force`: fuerza los campos de versión que pide la configuración. El SDK se sigue limitando al
   valor de la ROM incluso aquí (desde v6.19), porque subir el SDK por encima del framework real
-  solo causa un softloop y no tiene uso, así que `force` ya no causa softloop; fuerza los campos
+  solo causa un softloop y no tiene uso, así que `force` ya no causa softloop, fuerza los campos
   de texto (release, codename).
 
 La versión real se lee de `/system/build.prop`, nunca de `getprop` (que es justo lo que este
@@ -109,7 +109,7 @@ Widevine elegido, `DRM_SECURITY_LEVEL` (`L1` o `L3`), a las apps que lo leen.
 De forma predeterminada el spoof de DRM sigue a `scope_mode`. Para aplicarlo en cambio a un
 conjunto específico de apps: independientemente del alcance principal: lístalas en
 `drm_targets`. El módulo entonces permanece cargado en una app listada **solo** para el hook
-de DRM, incluso cuando esa app está fuera del alcance principal; una lista vacía o ausente
+de DRM, incluso cuando esa app está fuera del alcance principal, una lista vacía o ausente
 significa seguir el alcance. Esto necesita un modo con alcance acotado (no `global`) y surte
 efecto en el siguiente **reinicio**.
 
@@ -139,7 +139,7 @@ Opcional, pero la forma fácil de controlar todo. Cinco pestañas:
   arranque, y el informe Diagnostics (un botón para leer y exportar todo lo útil para un
   reporte de error).
 
-No hace ninguna petición de red; todo lo que necesita viene dentro del módulo.
+No hace ninguna petición de red, todo lo que necesita viene dentro del módulo.
 
 ## Solución de problemas
 
@@ -159,4 +159,4 @@ No hace ninguna petición de red; todo lo que necesita viene dentro del módulo.
 
 ---
 
-> _Esta documentación se generó con Claude (Anthropic) y la mantiene VD171. Las correcciones y mejoras son bienvenidas; consulta [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Esta documentación se generó con Claude (Anthropic) y la mantiene VD171. Las correcciones y mejoras son bienvenidas, consulta [CONTRIBUTING.md](CONTRIBUTING.md)._

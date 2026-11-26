@@ -25,7 +25,8 @@ window.VDLU_I18N_NL = {
   savedToast: 'opgeslagen', saveFail: 'opslaan mislukt', sourceSaved: 'bron opgeslagen',
   bootstrapping: 'Updater voorbereiden…', bootstrapSub: 'eenmalige download van de fetcher', bootstrapFail: 'Kan de updater niet voorbereiden',
   searching: 'Zoeken…', upToDate: 'Up-to-date', nothingNew: 'niets nieuws',
-  ahead: 'Nieuwer dan de feed', aheadSub: 'jouw versie is nieuwer dan de gepubliceerde update', deferred: 'Download uitgesteld', deferredSub: 'wacht op het toegestane netwerk - hervat bij de volgende controle',
+  ahead: 'Nieuwer dan de feed', aheadSub: 'jouw versie is nieuwer dan de gepubliceerde update', silentUpdate: 'Stille update', silentUpdateSub: 'Past updates op de achtergrond toe zonder de herstartbalk te tonen.',
+  deferred: 'Download uitgesteld', deferredSub: 'wacht op het toegestane netwerk, hervat bij de volgende controle',
   updateAvail: 'Update beschikbaar', install: 'installeren', fileOne: 'bestand', fileMany: 'bestanden',
   requiresReboot: 'vereist herstart', checkFail: 'Controle mislukt', ksuUnavailable: 'KSU-API niet beschikbaar',
   pendingUpdate: 'Update in behandeling', notNow: 'Niet nu', srcPlaceholder: 'https://…/&lt;module&gt;'

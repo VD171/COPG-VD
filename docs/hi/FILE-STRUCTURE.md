@@ -56,7 +56,7 @@ COPG-VD/
 ├── README.md + README.<code>.md   # 21 languages
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md  CODE_OF_CONDUCT.md  SECURITY.md
-├── LICENSE                     # Apache-2.0
+├── LICENSE                     # AGPL-3.0-or-later
 └── screenshots/                # images used by the README
 ```
 
@@ -64,10 +64,10 @@ COPG-VD/
 
 डिवाइस पर `/data/adb/COPG-VD/` मॉड्यूल की अपनी डायरेक्टरी है: `COPG-VD.json` प्रोफ़ाइल और सेटिंग्स रखता है
 (देखें [CONFIGURATION.md](CONFIGURATION.md)), साथ ही `update.log`, `update.state` और `update.status` भी।
-यह config कभी commit नहीं की जाती; `module/COPG-VD.json.example` टेम्पलेट है।
+यह config कभी commit नहीं की जाती, `module/COPG-VD.json.example` टेम्पलेट है।
 
 <!-- doc-footer -->
 
 ---
 
-> _यह दस्तावेज़ Claude (Anthropic) से तैयार किया गया है और इसे VD171 द्वारा अनुरक्षित किया जाता है। सुधार और संशोधन का स्वागत है; देखें [CONTRIBUTING.md](CONTRIBUTING.md)।_
+> _यह दस्तावेज़ Claude (Anthropic) से तैयार किया गया है और इसे VD171 द्वारा अनुरक्षित किया जाता है। सुधार और संशोधन का स्वागत है, देखें [CONTRIBUTING.md](CONTRIBUTING.md)।_

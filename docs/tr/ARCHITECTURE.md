@@ -43,7 +43,7 @@ Her biri bağımsız ve değiştirilebilir.
 - **resetprop (cihaz geneli).** Sistem özelliklerini gruplar halinde yazar: identity,
   version, boot state, SELinux, adb/usb, anti-emulator, artı bir temizleme geçişi.
   Önyükleme betikleri onu çalıştırır. Kapsamlı bir modda identity ve version grupları
-  dışarıda bırakılır (Zygisk bunları süreç başına iletir); boot, lock ve SELinux grupları
+  dışarıda bırakılır (Zygisk bunları süreç başına iletir), boot, lock ve SELinux grupları
   cihazın tutarlı olması için genel kalır.
 - **DRM / Widevine (`motor_drm`).** Widevine güvenlik seviyesini bildiren `MediaDrm`
   metotlarını (`getSecurityLevel`, `getPropertyString`) hook'lar ve yapılandırılan
@@ -57,7 +57,7 @@ Enjekte edilen süreç, varsayılan olarak `/data/adb`'ye erişemeyen zygote SEL
 çalışır. Modül buna izin vermek için kendi `sepolicy.rule`'unu getirir ve bir yedek
 olarak, yapılandırmayı açık modül dizini (`getModuleDir`) aracılığıyla okuyabilir, böylece
 bir Zygisk build'i yolu vermeyi durdursa bile çalışmaya devam eder. Dosya, küçük gömülü bir
-JSON ayrıştırıcıyla (`jsmn`) ayrıştırılır; ayrıştırılamayan bir dosya, modülün hiçbir şey
+JSON ayrıştırıcıyla (`jsmn`) ayrıştırılır, ayrıştırılamayan bir dosya, modülün hiçbir şey
 sahtelememesi anlamına gelir.
 
 ## Profili güncel tutmak
@@ -73,9 +73,9 @@ ulaşır. Kullanıcı tarafı için [USER-GUIDE.md](USER-GUIDE.md) bölümüne v
 ## Android sürümü neden varsayılan olarak sahtelenmez
 
 `SDK_INT` / `ANDROID_VERSION` değerini ROM'un framework'ünün gerçekte olduğundan daha
-yükseğe çıkarmak, uygulamaların var olmayan API'leri çağırmasına neden olur; bu da
+yükseğe çıkarmak, uygulamaların var olmayan API'leri çağırmasına neden olur, bu da
 Google'ın uygulamalarını çökertir ve telefonu bir softloop'a sokar. Bu nedenle sürüm grubu
-varsayılan olarak kapalıdır ve `spoof_version`'ın arkasında kapılıdır; ayrıca v6.19'dan beri SDK, **her** politika altında (Force dahil) gerçek framework değerinde ek olarak sınırlanır, bu yüzden zorlanmış daha yüksek SDK'lı bir profil bile softloop yapamaz (Force yine de dize sürüm alanlarını zorlar). Modül gerçek sürümü
+varsayılan olarak kapalıdır ve `spoof_version`'ın arkasında kapılıdır, ayrıca v6.19'dan beri SDK, **her** politika altında (Force dahil) gerçek framework değerinde ek olarak sınırlanır, bu yüzden zorlanmış daha yüksek SDK'lı bir profil bile softloop yapamaz (Force yine de dize sürüm alanlarını zorlar). Modül gerçek sürümü
 `/system/build.prop` dosyasından okur, asla `getprop` üzerinden değil, çünkü `getprop` tam
 olarak sahtelediği şeydir. Tuzak için [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap)
 bölümüne bakın.
@@ -84,4 +84,4 @@ bölümüne bakın.
 
 ---
 
-> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır; bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır, bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._

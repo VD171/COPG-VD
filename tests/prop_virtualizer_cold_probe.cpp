@@ -4,11 +4,11 @@
  *  Spoof your device fingerprint and build: Zygisk, KernelSU/APatch/Magisk.
  *
  *  Copyright (C) 2026  VD171
- *  SPDX-License-Identifier: Apache-2.0
+ *  SPDX-License-Identifier: AGPL-3.0-or-later
  *  Fork by VD171.
  *
- *  Licensed under the Apache License, Version 2.0; you may obtain a copy at
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *  Free software under the GNU AGPL v3 or later. NETWORK COPYLEFT: run a
+ *  modified version, even as a service, and you MUST offer its source.
  *
  *  Site           : https://vd171.ru
  *  Site           : https://vd.priv8.ru

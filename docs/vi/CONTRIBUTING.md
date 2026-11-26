@@ -12,7 +12,7 @@ thứ nằm ở đâu và vài quy ước mà chúng tôi tuân theo.
 COPG-VD là một **trình giả mạo thiết bị Zygisk (Zygisk device spoofer)**: một thư viện
 native nhỏ được tiêm vào các tiến trình ứng dụng để viết lại dấu vân tay và build của thiết
 bị, cộng với một WebUI thuần JS (vanilla-JS) để điều khiển nó. Nó là một fork của COPG (bởi
-AlirezaParsi), được duy trì bởi VD171 theo giấy phép Apache-2.0. Xem
+AlirezaParsi), được duy trì bởi VD171 theo giấy phép GNU AGPL-3.0-or-later. Xem
 [ARCHITECTURE.md](ARCHITECTURE.md) và [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 
 Theo mặc định, nó giới hạn sự giả mạo vào ngăn xếp Google Play thông qua Zygisk, nên nó là
@@ -43,7 +43,7 @@ Các trợ lý và tác nhân AI là những người đóng góp hạng nhất 
 - Build một tệp zip có thể flash: sao chép `libspoof.so` đã build vào `module/zygisk/<abi>.so`,
   sau đó `cd module && zip -r9 ../COPG-VD-dev.zip .` và flash nó.
 - WebUI là `module/webroot/` (mở nó từ trình quản lý root). Logic giả mạo là
-  `zygisk/spoof_module.cpp`; trình tải hồ sơ là `module/fingerprint-update.sh`.
+  `zygisk/spoof_module.cpp`, trình tải hồ sơ là `module/fingerprint-update.sh`.
 
 ## Quy ước
 
@@ -51,15 +51,15 @@ Các trợ lý và tác nhân AI là những người đóng góp hạng nhất 
   đầu banner của dự án (sao chép nó từ bất kỳ tệp hiện có nào). Các công cụ dưới `.github/`
   dùng một chú thích ngắn thay thế.
 - **Mã và chú thích bằng tiếng Anh.** Giữ chú thích ở mức tối thiểu và chỉ ở nơi cần thiết.
-- **Không em-dash hay en-dash**; luôn dùng dấu gạch nối thường `-`.
-- WebUI là **vanilla JS** (một `scripts.js` duy nhất); không framework.
+- **Không em-dash hay en-dash**, luôn dùng dấu gạch nối thường `-`.
+- WebUI là **vanilla JS** (một `scripts.js` duy nhất), không framework.
 - **Không bao giờ làm yếu đi** một tính năng thật: giữ sự giả mạo nhất quán, và đừng làm các
   hook làm sập một ứng dụng mà chúng gắn vào (chúng được kiểm tra null một cách có chủ đích).
 
 ## Quốc tế hóa (i18n)
 
 - Các chuỗi UI nằm trong `module/webroot/lang/`. Tiếng Anh là bản dự phòng chuẩn (`en.js` +
-  `en.json`); 20 ngôn ngữ còn lại là `<code>.json`.
+  `en.json`), 20 ngôn ngữ còn lại là `<code>.json`.
 - Để thêm hoặc thay đổi một chuỗi: chỉnh sửa `en.js` **và** `en.json`, sau đó cập nhật mọi
   `<code>.json`. Chạm vào một nhãn hiển thị nghĩa là cập nhật **tất cả** các tệp ngôn ngữ và
   **tất cả** `README.<code>.md`.
@@ -80,4 +80,4 @@ mới đều là những điểm khởi đầu tuyệt vời.
 
 ---
 
-> _Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Chúng tôi hoan nghênh các chỉnh sửa và cải tiến; xem [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Chúng tôi hoan nghênh các chỉnh sửa và cải tiến, xem [CONTRIBUTING.md](CONTRIBUTING.md)._

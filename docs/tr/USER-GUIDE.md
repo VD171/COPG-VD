@@ -51,7 +51,7 @@ Her motor bağımsızdır ve kapatılabilir. DRM hariç hepsi varsayılan olarak
 - **resetprop**: sistem özelliklerini cihaz genelinde, gruplar halinde yeniden yazar
   (identity, version, boot state, SELinux, adb/usb, anti-emulator ve bir temizleme geçişi).
   Kapsamlı bir modda identity ve version grupları cihaz geneli geçişin dışında kalır
-  (Zygisk bunları süreç başına iletir); boot, lock ve SELinux grupları genel kalır. Bunu
+  (Zygisk bunları süreç başına iletir), boot, lock ve SELinux grupları genel kalır. Bunu
   `COPG-VD-Settings.resetprop` içinde açıp kapatın.
 - **DRM / Widevine (`motor_drm`, varsayılan olarak kapalı)**: okuyan uygulamalara seçilen
   bir Widevine güvenlik seviyesi (L1 veya L3) bildirir. Aşağıdaki DRM bölümüne bakın.
@@ -89,10 +89,10 @@ Android version** (`COPG-VD-Settings.spoof_version`) bunların hiç uygulanıp
 uygulanmayacağına karar verir:
 
 - `never` (varsayılan): ROM'un kendi sürümü kullanılır.
-- `rom`: yalnızca ROM'u aşmayanı uygula; bu pratikte SDK'yı düşürmek anlamına gelir.
+- `rom`: yalnızca ROM'u aşmayanı uygula, bu pratikte SDK'yı düşürmek anlamına gelir.
 - `force`: yapılandırmanın istediği sürüm alanlarını zorla. SDK burada bile hâlâ ROM'un
   değerinde sınırlanır (v6.19'dan beri), çünkü SDK'yı gerçek framework'ün üzerine çıkarmak yalnızca
-  softloop'a yol açar ve işe yaramaz, bu yüzden `force` artık softloop yapmaz; dize alanlarını (release, codename) zorlar.
+  softloop'a yol açar ve işe yaramaz, bu yüzden `force` artık softloop yapmaz, dize alanlarını (release, codename) zorlar.
 
 Gerçek sürüm `/system/build.prop` dosyasından okunur, asla `getprop` üzerinden değil (ki
 bu modülün sahtelediği şeyin ta kendisidir). `force` ayrıca bir yedek geri yüklenirken de
@@ -106,7 +106,7 @@ seviyesini, `DRM_SECURITY_LEVEL` (`L1` veya `L3`), bildirir.
 Varsayılan olarak DRM sahtelemesi `scope_mode`'u takip eder. Bunun yerine belirli bir
 uygulama kümesine, ana kapsamdan bağımsız olarak, uygulamak için bunları `drm_targets`
 içinde listeleyin. Modül o zaman, o uygulama ana kapsamın dışında olsa bile, listelenen
-bir uygulamada **yalnızca** DRM hook'u için yüklü kalır; boş veya olmayan bir liste,
+bir uygulamada **yalnızca** DRM hook'u için yüklü kalır, boş veya olmayan bir liste,
 kapsamı takip et anlamına gelir. Bu, kapsamlı bir mod gerektirir (`global` değil) ve bir
 sonraki **yeniden başlatmada** etkili olur.
 
@@ -136,7 +136,7 @@ Yapılandırmayı elle her düzenlediğinizde çalıştırın.
   güncellemesi ve Diagnostics raporu (bir hata raporu için yararlı olan her şeyi okumak ve
   dışa aktarmak için tek bir düğme).
 
-Hiçbir ağ isteği yapmaz; ihtiyacı olan her şey modülün içinde gelir.
+Hiçbir ağ isteği yapmaz, ihtiyacı olan her şey modülün içinde gelir.
 
 ## Sorun giderme
 
@@ -156,4 +156,4 @@ Hiçbir ağ isteği yapmaz; ihtiyacı olan her şey modülün içinde gelir.
 
 ---
 
-> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır; bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır, bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._

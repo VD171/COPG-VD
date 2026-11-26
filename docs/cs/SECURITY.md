@@ -26,7 +26,7 @@ jako autora, pokud si to přejete.
 ## Poznámky k rozsahu
 
 - Konfigurace leží v `/data/adb/COPG-VD/COPG-VD.json`, čitelná pouze rootem. Modul ji čte z
-  injektovaného procesu přes dedikované SELinux pravidlo, které si sám přináší; nedrží
+  injektovaného procesu přes dedikované SELinux pravidlo, které si sám přináší, nedrží
   žádné přihlašovací údaje ani přístupové fráze.
 - Spoofing hooky jsou připojeny k živým aplikacím a mají kontrolu na null, takže poškozený
   profil elegantně degraduje místo pádu aplikace.
@@ -41,4 +41,4 @@ jako autora, pokud si to přejete.
 
 ---
 
-> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány; viz [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány, viz [CONTRIBUTING.md](CONTRIBUTING.md)._

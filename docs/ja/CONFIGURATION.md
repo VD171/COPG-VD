@@ -26,7 +26,7 @@
 | `scope_whitelist` | array | `scope_mode` が `whitelist` のときにスプーフを受け取るパッケージ。 |
 | `scope_blacklist` | array | `scope_mode` が `blacklist` のときに除外されるパッケージ。 |
 | `COPG-VD` | object | プロファイル: 提示する Build フィールド(下記参照)。 |
-| `COPG-VD-Delete` | array | 設定ではなく削除するフィールド名(Build フィールドは null になります; プロパティは `resetprop --delete` で削除されます)。 |
+| `COPG-VD-Delete` | array | 設定ではなく削除するフィールド名(Build フィールドは null になります、プロパティは `resetprop --delete` で削除されます)。 |
 | `COPG-VD-Settings` | object | プロファイルとともに移動するモジュール設定(下記参照)。 |
 | `motor_jni` | bool | Build フィールドエンジン(`android.os.Build.*` を書き換え)。デフォルト `true`。 |
 | `motor_prop_hook` | bool | プロセスごとのプロパティエンジン(クリーンルームなプロパティリマップ)。デフォルト `true`。 |
@@ -77,7 +77,7 @@
 |---|---|---|
 | `resetprop` | bool | デバイス全体の resetprop エンジンを実行するかどうか。 |
 | `autoupdate` | bool | `fingerprint-update.sh` を起動ごとに一度実行するかどうか。デフォルトでオン。 |
-| `spoof_version` | `never` / `rom` / `force` | Android version グループの適用方法。`never` がデフォルト。v6.19 以降、SDK はすべてのポリシーで ROM の値に制限されるため、`force` は文字列フィールドを強制しますが SDK を上げることはできません; `force` はバックアップの復元時に拒否されます。 |
+| `spoof_version` | `never` / `rom` / `force` | Android version グループの適用方法。`never` がデフォルト。v6.19 以降、SDK はすべてのポリシーで ROM の値に制限されるため、`force` は文字列フィールドを強制しますが SDK を上げることはできません、`force` はバックアップの復元時に拒否されます。 |
 
 ## `global_fields`
 

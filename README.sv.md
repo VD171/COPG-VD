@@ -1,6 +1,25 @@
 <!--
-  COPG-VD: global device spoofer: spoof your device fingerprint and build.
-  Copyright (C) 2026  AlirezaParsi & VD171. SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+  ======================================================================
+   COPG-VD  ::  global device spoofer
+   Spoof your device fingerprint and build.
+
+   Copyright (C) 2026  AlirezaParsi & VD171 (Fork by VD171)
+   SPDX-License-Identifier: AGPL-3.0-or-later
+
+   Licensed under the GNU AGPL v3.0 or later. You may obtain a copy at
+   https://www.gnu.org/licenses/agpl-3.0.html
+
+   Site           : https://vd171.ru
+   Site           : https://vd.priv8.ru
+   Source         : https://github.com/VD171/COPG-VD
+   GitHub         : @VD171 https://github.com/VD171
+   XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+   XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+   Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+   Channel        : @Priv8_VD https://t.me/Priv8_VD
+   Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+   E-mail         : vd.priv8@pm.me
+  ======================================================================
 -->
 
 # COPG-VD
@@ -11,7 +30,7 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases/latest"><img src="https://img.shields.io/github/v/release/VD171/COPG-VD?label=release&color=2ee89d" alt="Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1a7f37" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-1a7f37" alt="License"></a>
   <a href="https://github.com/VD171/COPG-VD/releases"><img src="https://img.shields.io/github/downloads/VD171/COPG-VD/total?label=downloads&color=8250df" alt="Downloads"></a>
   <a href="https://github.com/VD171/COPG-VD/stargazers"><img src="https://img.shields.io/github/stars/VD171/COPG-VD?color=d29922" alt="Stars"></a>
 </p>
@@ -32,10 +51,10 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · Svenska · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
-  <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
+  <img src="docs/screenshots/sv/device.png" width="24%" alt="Device"> <img src="docs/screenshots/sv/spoofing.png" width="24%" alt="Spoofing"> <img src="docs/screenshots/sv/system.png" width="24%" alt="System"> <img src="docs/screenshots/sv/tools.png" width="24%" alt="Tools">
 </p>
 
 ---
@@ -49,10 +68,10 @@ Appar vägrar allt oftare att köra, eller nedgraderar tyst, när enheten de ser
 - **Omfattningskontroll:** leverera den spoofade identiteten till enbart Google Play-stacken (standard), hela enheten, en whitelist eller allt utom en blacklist. I ett läge med omfattning levererar Zygisk identiteten per process, så den läcker aldrig ut via de globala egenskaperna.
 - **Oberoende motorer:** Build-fält (en JNI-omskrivning av `android.os.Build.*`), en clean-room property-hook per process (ingen funktionshook), grupperad `resetprop` och en valfri DRM- / Widevine-nivå (L1 eller L3) med en egen mållista. Var och en kan stängas av.
 - **Kontroll per fält:** varje Build-fält kan anges, tömmas, raderas eller hoppas över, med en `global_fields`-lista för värden som måste förbli konsekventa enhetsövergripande.
-- **Alltid färskt fingerprint:** en Pixel-profil medföljer och uppdaterar sig själv en gång per boot från den nyaste Google-factory-avbildningen; du kan också hämta en annan Pixel-profil från WebUI. Den nedgraderar aldrig och vägrar en profil för en annan enhet.
+- **Alltid färskt fingerprint:** en Pixel-profil medföljer och uppdaterar sig själv en gång per boot från den nyaste Google-factory-avbildningen, du kan också hämta en annan Pixel-profil från WebUI. Den nedgraderar aldrig och vägrar en profil för en annan enhet.
 - **Säker policy för Android-version:** SDK:n höjs aldrig över ditt verkliga framework (att höja den softloopar bara telefonen), under varje policy.
 - **Analyze:** granskar konfigurationen mot din ROM och dina props och flaggar allt inkoherent innan det når apparna.
-- **WebUI:** fem flikar för att styra allt, utan någon nätverksbegäran; konfigurationsfilen bär alla inställningar så att de överlever en moduluppdatering.
+- **WebUI:** fem flikar för att styra allt, utan någon nätverksbegäran, konfigurationsfilen bär alla inställningar så att de överlever en moduluppdatering.
 - **Inkrementell självuppdatering (VDLU)** och ett native-bibliotek med **fyra ABI:er** (arm64-v8a, armeabi-v7a, x86, x86_64).
 
 ## AI-agenter
@@ -65,11 +84,11 @@ Flasha zip-filen i KernelSU, APatch eller Magisk och starta om. Den medföljande
 
 ## Säkerhet
 
-Spoofingen är enbart användarsidig: COPG-VD höjer aldrig SDK:n över ditt verkliga framework, håller tillverkaren koherent med resten av profilen och läser den verkliga versionen från `/system/build.prop`, aldrig från egenskaperna den förfalskar. Självuppdateraren kräver en giltig ed25519-signatur och vägrar nedgraderingar; WebUI gör ingen nätverksbegäran. Rapportera problem enligt [SECURITY.md](docs/sv/SECURITY.md).
+Spoofingen är enbart användarsidig: COPG-VD höjer aldrig SDK:n över ditt verkliga framework, håller tillverkaren koherent med resten av profilen och läser den verkliga versionen från `/system/build.prop`, aldrig från egenskaperna den förfalskar. Självuppdateraren kräver en giltig ed25519-signatur och vägrar nedgraderingar, WebUI gör ingen nätverksbegäran. Rapportera problem enligt [SECURITY.md](docs/sv/SECURITY.md).
 
 ## Bygge
 
-Alltid release, aldrig debug. Native-biblioteket och scope-hjälparen byggs i CI för alla fyra ABI:er; release-arbetsflödet sätter samman den flashbara zip-filen, skriver `.sha256`-följeslagarna per fil, regenererar den signerade VDLU-baslinjen och publicerar som `github-actions[bot]`. Se [CONTRIBUTING.md](docs/sv/CONTRIBUTING.md).
+Alltid release, aldrig debug. Native-biblioteket och scope-hjälparen byggs i CI för alla fyra ABI:er, release-arbetsflödet sätter samman den flashbara zip-filen, skriver `.sha256`-följeslagarna per fil, regenererar den signerade VDLU-baslinjen och publicerar som `github-actions[bot]`. Se [CONTRIBUTING.md](docs/sv/CONTRIBUTING.md).
 
 ## Hur använder man den?
 Installera modulen, starta om, så spoofas den medföljande profilen (en Pixel) till målapparna. Med ett fungerande fingerprint behöver du inte PlayIntegrityFix eller GooglePhotosUnlimited.  
@@ -78,7 +97,7 @@ Allt konfigureras i `/data/adb/COPG-VD/COPG-VD.json`, eller från WebUI. Alla f�
 ### Omfattning: vem som ser spoofingen
 `scope_mode` avgör vilka processer som får den spoofade identiteten. I ett läge med omfattning levereras identiteten per process av Zygisk och läcker inte ut till resten av systemet via de globala egenskaperna.  
 * **Google Play** (`playstore`, standard): endast Play-stacken (Google Play services, dess unstable-process och Play Store).  
-* **Global**: hela enheten; varje process ser den.  
+* **Global**: hela enheten, varje process ser den.  
 * **Whitelist**: endast apparna i `scope_whitelist`.  
 * **Blacklist**: alla appar utom de i `scope_blacklist`.  
 
@@ -86,15 +105,15 @@ Allt konfigureras i `/data/adb/COPG-VD/COPG-VD.json`, eller från WebUI. Alla f�
 Var och en är oberoende och kan stängas av:  
 * **Build fields (JNI)**: skriver om `android.os.Build.*` i målprocesserna.  
 * **Property hook**: presenterar de spoofade systemegenskaperna för målprocesserna (en clean-room-ommappning av egenskapsområdet per process, ingen funktionshook).  
-* **resetprop**: skriver om systemegenskaperna, hanterade per grupp: identitet, version, starttillstånd, SELinux, adb/usb, anti-emulator och en rensningsomgång. I ett läge med omfattning hålls identitets- och versionsgrupperna utanför den enhetsövergripande resetprop (Zygisk levererar dem per process); grupperna för boot/lås/SELinux förblir globala.  
-* **DRM / Widevine** (av som standard): rapporterar en vald Widevine-säkerhetsnivå, L1 eller L3, till apparna som läser den. Som standard följer den omfattningen ovan; ange `drm_targets` (en lista över appar) för att tillämpa DRM-spoofen **endast** på dessa appar, oberoende av `scope_mode`: modulen förblir laddad i en listad app enbart för DRM-hooken, även när den appen ligger utanför huvudomfattningen. Tomt eller saknat innebär att följa omfattningen. (Kräver ett läge med omfattning, inte Global.)  
+* **resetprop**: skriver om systemegenskaperna, hanterade per grupp: identitet, version, starttillstånd, SELinux, adb/usb, anti-emulator och en rensningsomgång. I ett läge med omfattning hålls identitets- och versionsgrupperna utanför den enhetsövergripande resetprop (Zygisk levererar dem per process), grupperna för boot/lås/SELinux förblir globala.  
+* **DRM / Widevine** (av som standard): rapporterar en vald Widevine-säkerhetsnivå, L1 eller L3, till apparna som läser den. Som standard följer den omfattningen ovan, ange `drm_targets` (en lista över appar) för att tillämpa DRM-spoofen **endast** på dessa appar, oberoende av `scope_mode`: modulen förblir laddad i en listad app enbart för DRM-hooken, även när den appen ligger utanför huvudomfattningen. Tomt eller saknat innebär att följa omfattningen. (Kräver ett läge med omfattning, inte Global.)  
 
 ### Fält: ange, tomt, radera eller hoppa över
 Inuti `COPG-VD`-objektet har varje Build-fält fyra tillstånd:  
 * **Ange**: `"KEY": "value"` skriver värdet.  
 * **Tomt**: `"KEY": ""` skriver ett tomt värde.  
 * **Radera**: lista nyckeln i en `"COPG-VD-Delete": [ ... ]` på toppnivå för att ta bort den (ett Build-fält blir null, en egenskap tas bort med `resetprop --delete`).  
-* **Hoppa över**: utelämna nyckeln helt; ROM:ens eget värde behålls.  
+* **Hoppa över**: utelämna nyckeln helt, ROM:ens eget värde behålls.  
 
 En `"global_fields": [ ... ]`-lista tillämpar de angivna Build-fälten enhetsövergripande även i ett läge med omfattning, för att hålla ett värde konsekvent överallt: endast för koherenssäkra fält (säkerhetspatchen, till exempel), aldrig identitet och aldrig gruppen för Android-versionen.  
 
@@ -161,11 +180,21 @@ Blocket ovan och `module/COPG-VD.json.example` uppdateras dagligen av arbetsflö
 **Analyze** i WebUI (eller `fingerprint-update.sh analyze`) granskar konfigurationen som den ser ut: versionen mot ROM:en, om filen fortfarande går att tolka alls (en trasig fil får modulen att spoofa **ingenting**, och bara logcat säger det), om fingerprint stämmer med fälten runt omkring, nycklar som modulen inte läser, datum, och om proparna redan bär det som konfigurationen begär.  
 
 ### WebUI
-WebUI är valfritt (allt kan redigeras direkt i JSON-konfigurationen) men det är det enkla sättet att styra modulen. Det har fem flikar: **About**, **Device** (varje fält, satt per tillstånd, grupperat efter kategori), **Spoofing** (omfattning och motorer), **System** (resetprop-grupperna) och **Tools** (Analyze, Check Update, Update Now, Backup/Restore och auto-uppdateringen vid start). Det gör ingen nätverksbegäran; allt det behöver ingår i modulen.  
+WebUI är valfritt (allt kan redigeras direkt i JSON-konfigurationen) men det är det enkla sättet att styra modulen. Det har fem flikar: **About**, **Device** (varje fält, satt per tillstånd, grupperat efter kategori), **Spoofing** (omfattning och motorer), **System** (resetprop-grupperna) och **Tools** (Analyze, Check Update, Update Now, Backup/Restore och auto-uppdateringen vid start). Det gör ingen nätverksbegäran, allt det behöver ingår i modulen.  
 Om du är Magisk-användare, använd KsuWebUI av KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases). Du kan också använda WebUI-X Portable av MMRL (https://github.com/MMRLApp/WebUI-X-Portable/releases) eller KsuWebUI-SN (https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).  
 
 ### Inställningar i konfigurationen
 `COPG-VD.json` bär sina inställningar bredvid profilen, så dina val följer med en säkerhetskopia och kan redigeras för hand: `scope_mode`, motor-brytarna, resetprop-grupperna, `global_fields` och ett `COPG-VD-Settings`-objekt (`resetprop`, `autoupdate`, `spoof_version`). Allt finns i denna enda fil: startskripten och WebUI läser inställningarna direkt från den, så dina val överlever en moduluppdatering. `"spoof_version": "force"` avvisas från filen och nedgraderas: att återställa en gammal säkerhetskopia får inte återaktivera det bakom din rygg.  
+
+## Inkrementella uppdateringar (VDLU)
+
+COPG-VD levereras med motorn **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (inbäddad i `module/vdlu/`): modulen uppdaterar sig själv genom att bara hämta de filer som ändrats (innehållsadresserade blobbar + en signerad `manifest.json`), istället för att ladda ner hela `.zip` igen. Profilen **Hardened**: ed25519-signaturen är obligatorisk och nedgraderingar blockeras, den fullständiga `.zip` förblir giltig som reserv.
+
+- **`vdlu/`** (medföljer i zip-filen): `update.sh` (motor) + `vdlu-verify` + `config.default` + `keyring/` (publik nyckel).
+- **Tillstånd** i `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback), utanför modulen, överlever en omflashning.
+- **Starttrigger:** `post-fs-data.sh`, före zygote, COPG-VD har `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), så den nya `.so` förbereds och byts ut innan zygote mappar den.
+- **WebUI:** en **Updates**-panel (`webroot/vdlu.js`) med en förloppsavisering och avbryt.
+- **Release:** se `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, arkiverar manifestet, `vdlu-gc` rensar föräldralösa blobbar, batchad Pages-push).
 
 <!-- vd-docs -->
 ## Dokumentation
@@ -177,16 +206,6 @@ Om du är Magisk-användare, använd KsuWebUI av KOW (https://github.com/KOWX712
 - **[AI-agenter](https://github.com/VD171/COPG-VD/wiki/sv-AI-AGENTS)**: driv konfigurationen och uppdateraren huvudlöst.
 
 <!-- /vd-docs -->
-
-## Inkrementella uppdateringar (VDLU)
-
-COPG-VD levereras med motorn **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (inbäddad i `module/vdlu/`): modulen uppdaterar sig själv genom att bara hämta de filer som ändrats (innehållsadresserade blobbar + en signerad `manifest.json`), istället för att ladda ner hela `.zip` igen. Profilen **Hardened**: ed25519-signaturen är obligatorisk och nedgraderingar blockeras; den fullständiga `.zip` förblir giltig som reserv.
-
-- **`vdlu/`** (medföljer i zip-filen): `update.sh` (motor) + `vdlu-verify` + `config.default` + `keyring/` (publik nyckel).
-- **Tillstånd** i `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - utanför modulen, överlever en omflashning.
-- **Starttrigger:** `post-fs-data.sh`, före zygote - COPG-VD har `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), så den nya `.so` förbereds och byts ut innan zygote mappar den.
-- **WebUI:** en **Updates**-panel (`webroot/vdlu.js`) med en förloppsavisering och avbryt.
-- **Release:** se `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, arkiverar manifestet, `vdlu-gc` rensar föräldralösa blobbar, batchad Pages-push).
 
 ## Se även
 
@@ -202,20 +221,19 @@ COPG-VD levereras med motorn **[VDLiveUpdate](https://github.com/VD171/VDLiveUpd
 
 ## Kontakter
 
-- Site           : https://vd171.ru
-- Site           : https://vd.priv8.ru
-- Source         : https://github.com/VD171/COPG-VD
-- GitHub         : [@VD171](https://github.com/VD171)
-- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
-- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
-- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
-- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
-- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
-- E-mail         : vd.priv8@pm.me
+- https://vd171.ru
+- https://vd.priv8.ru
+- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+- **Channel:** @Priv8_VD https://t.me/Priv8_VD
+- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
+- **E-mail:** vd.priv8@pm.me
+- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
+- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
+- **GitHub:** @VD171 https://github.com/VD171
 
 ## Licens
 
-**Apache-2.0**: se [LICENSE](LICENSE). COPG-VD är en fork av VD171 av det ursprungliga COPG av AlirezaParsi, vidareutvecklad under samma licens.
+**AGPL-3.0-or-later**: se [LICENSE](LICENSE). COPG-VD är en fork av VD171 av det ursprungliga COPG av AlirezaParsi (Apache-2.0), omlicensierad under GNU AGPL-3.0-or-later. NÄTVERKS-COPYLEFT: om du kör en modifierad version, även som en tjänst, måste du erbjuda dess källkod.
 
 ## Varumärken
 
@@ -224,3 +242,7 @@ COPG-VD är ett oberoende, inofficiellt projekt. Det är inte anslutet till, god
 ## Tags
 
 `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG-VD`
+
+---
+
+📣 **Gå med i kanalen för uppdateringar:** @Priv8_VD https://t.me/Priv8_VD

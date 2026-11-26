@@ -5,7 +5,18 @@
 #  Copyright (C) 2026  VD171
 #  SPDX-License-Identifier: AGPL-3.0-or-later
 #
-#  Source : https://github.com/VD171
+#  Free software under the GNU Affero General Public License, version 3 or later;
+#  see https://www.gnu.org/licenses/agpl-3.0.html
+#
+#  Site           : https://vd171.ru
+#  Site           : https://vd.priv8.ru
+#  Source         : https://github.com/VD171/COPG-VD
+#  GitHub         : @VD171 https://github.com/VD171
+#  XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+#  Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+#  Channel        : @Priv8_VD https://t.me/Priv8_VD
+#  Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+#  E-mail         : vd.priv8@pm.me
 # ======================================================================
 """Maintain the `> **Languages:**` switcher and the attribution footer on
 EVERY documentation page (content + governance + Home), the English source and

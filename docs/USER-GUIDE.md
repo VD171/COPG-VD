@@ -49,7 +49,7 @@ Each engine is independent and can be turned off. All are on by default except D
 - **resetprop**: rewrites the system properties device-wide, by group (identity,
   version, boot state, SELinux, adb/usb, anti-emulator, and a cleanup pass). In a scoped
   mode the identity and version groups stay out of the device-wide pass (Zygisk delivers
-  them per process); boot, lock and SELinux groups stay global. Toggle it in
+  them per process), boot, lock and SELinux groups stay global. Toggle it in
   `COPG-VD-Settings.resetprop`.
 - **DRM / Widevine (`motor_drm`, off by default)**: reports a chosen Widevine security
   level (L1 or L3) to apps that read it. See the DRM section below.
@@ -88,7 +88,7 @@ Android version** (`COPG-VD-Settings.spoof_version`) decides whether they apply 
 - `rom`: apply only what does not exceed the ROM, which in practice means lowering the SDK.
 - `force`: force the version fields the config asks for. The SDK is still capped at the ROM's
   value even here (since v6.19), because raising the SDK above the real framework only softloops
-  and has no use, so `force` no longer softloops; it forces the string fields (release, codename).
+  and has no use, so `force` no longer softloops, it forces the string fields (release, codename).
 
 The real version is read from `/system/build.prop`, never from `getprop` (which is the
 very thing this module falsifies). `force` is also refused when restoring a backup, so an
@@ -102,7 +102,7 @@ Off by default (`motor_drm`). When on, it reports a chosen Widevine level,
 By default the DRM spoof follows `scope_mode`. To apply it to a specific set of apps
 instead, independently of the main scope, list them in `drm_targets`. The module then
 stays loaded in a listed app **just** for the DRM hook, even when that app is outside the
-main scope; an empty or absent list means follow the scope. This needs a scoped mode (not
+main scope, an empty or absent list means follow the scope. This needs a scoped mode (not
 `global`), and takes effect on the next **reboot**.
 
 ## Analyze: check your config
@@ -131,7 +131,7 @@ Optional, but the easy way to drive everything. Five tabs:
   and the Diagnostics report (one button to read and export everything useful for a bug
   report).
 
-It makes no network request; everything it needs ships inside the module.
+It makes no network request, everything it needs ships inside the module.
 
 ## Troubleshooting
 
@@ -150,4 +150,4 @@ It makes no network request; everything it needs ships inside the module.
 
 ---
 
-> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome; see [CONTRIBUTING.md](../CONTRIBUTING.md)._
+> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome, see [CONTRIBUTING.md](../CONTRIBUTING.md)._

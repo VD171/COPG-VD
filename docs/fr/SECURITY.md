@@ -26,7 +26,7 @@ dès que possible et vous créditerons si vous le souhaitez.
 ## Notes sur le scope
 
 - La configuration vit à `/data/adb/COPG-VD/COPG-VD.json`, lisible uniquement par root. Le module la
-  lit depuis le processus injecté via une règle SELinux dédiée qu'il livre lui-même ; il ne
+  lit depuis le processus injecté via une règle SELinux dédiée qu'il livre lui-même, il ne
   contient aucun identifiant ni phrase de passe.
 - Les hooks de spoofing sont attachés à des applications actives et sont null-checked afin
   qu'un profil malformé se dégrade en douceur au lieu de planter l'application.
@@ -41,4 +41,4 @@ dès que possible et vous créditerons si vous le souhaitez.
 
 ---
 
-> _Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues ; voir [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues, voir [CONTRIBUTING.md](CONTRIBUTING.md)._

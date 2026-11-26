@@ -1,6 +1,25 @@
 <!--
-  COPG-VD: global device spoofer: spoof your device fingerprint and build.
-  Copyright (C) 2026  AlirezaParsi & VD171. SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+  ======================================================================
+   COPG-VD  ::  global device spoofer
+   Spoof your device fingerprint and build.
+
+   Copyright (C) 2026  AlirezaParsi & VD171 (Fork by VD171)
+   SPDX-License-Identifier: AGPL-3.0-or-later
+
+   Licensed under the GNU AGPL v3.0 or later. You may obtain a copy at
+   https://www.gnu.org/licenses/agpl-3.0.html
+
+   Site           : https://vd171.ru
+   Site           : https://vd.priv8.ru
+   Source         : https://github.com/VD171/COPG-VD
+   GitHub         : @VD171 https://github.com/VD171
+   XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+   XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+   Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+   Channel        : @Priv8_VD https://t.me/Priv8_VD
+   Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+   E-mail         : vd.priv8@pm.me
+  ======================================================================
 -->
 
 # COPG-VD
@@ -11,7 +30,7 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases/latest"><img src="https://img.shields.io/github/v/release/VD171/COPG-VD?label=release&color=2ee89d" alt="Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1a7f37" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-1a7f37" alt="License"></a>
   <a href="https://github.com/VD171/COPG-VD/releases"><img src="https://img.shields.io/github/downloads/VD171/COPG-VD/total?label=downloads&color=8250df" alt="Downloads"></a>
   <a href="https://github.com/VD171/COPG-VD/stargazers"><img src="https://img.shields.io/github/stars/VD171/COPG-VD?color=d29922" alt="Stars"></a>
 </p>
@@ -32,10 +51,10 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · Tiếng Việt · [中文](README.zh.md)
 
 <p align="center">
-  <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
+  <img src="docs/screenshots/vi/device.png" width="24%" alt="Device"> <img src="docs/screenshots/vi/spoofing.png" width="24%" alt="Spoofing"> <img src="docs/screenshots/vi/system.png" width="24%" alt="System"> <img src="docs/screenshots/vi/tools.png" width="24%" alt="Tools">
 </p>
 
 ---
@@ -49,10 +68,10 @@ Các ứng dụng ngày càng từ chối chạy, hoặc âm thầm hạ cấp, 
 - **Kiểm soát phạm vi:** cung cấp danh tính giả mạo chỉ cho ngăn xếp Google Play (mặc định), toàn bộ thiết bị, một whitelist, hoặc mọi thứ ngoại trừ một blacklist. Trong một chế độ có giới hạn phạm vi, Zygisk cung cấp danh tính theo từng tiến trình, nên nó không bao giờ rò rỉ qua các thuộc tính toàn cục.
 - **Các engine độc lập:** các trường Build (viết lại `android.os.Build.*` bằng JNI), một property hook theo từng tiến trình kiểu clean-room (không có function hook), `resetprop` được nhóm lại, và một mức DRM / Widevine tùy chọn (L1 hoặc L3) với danh sách mục tiêu riêng. Mỗi thứ đều có thể tắt.
 - **Kiểm soát theo từng trường:** mỗi trường Build có thể được đặt, làm rỗng, xóa hoặc bỏ qua, cùng với một danh sách `global_fields` cho các giá trị phải giữ nhất quán trên toàn thiết bị.
-- **Fingerprint luôn mới:** một hồ sơ Pixel đi kèm sẵn và tự làm mới một lần mỗi lần khởi động từ image factory mới nhất của Google; bạn cũng có thể lấy một hồ sơ Pixel khác từ WebUI. Nó không bao giờ hạ cấp và từ chối một hồ sơ dành cho thiết bị khác.
+- **Fingerprint luôn mới:** một hồ sơ Pixel đi kèm sẵn và tự làm mới một lần mỗi lần khởi động từ image factory mới nhất của Google, bạn cũng có thể lấy một hồ sơ Pixel khác từ WebUI. Nó không bao giờ hạ cấp và từ chối một hồ sơ dành cho thiết bị khác.
 - **Chính sách phiên bản Android an toàn:** SDK không bao giờ được nâng cao hơn framework thật của bạn (việc nâng chỉ khiến điện thoại bị softloop), dưới mọi chính sách.
 - **Analyze:** kiểm tra cấu hình đối chiếu với ROM và props của bạn và đánh dấu bất kỳ điều gì không nhất quán trước khi nó đến được các ứng dụng.
-- **WebUI:** năm tab để điều khiển mọi thứ, không có yêu cầu mạng nào; tệp cấu hình mang theo tất cả thiết lập nên chúng tồn tại qua một lần cập nhật module.
+- **WebUI:** năm tab để điều khiển mọi thứ, không có yêu cầu mạng nào, tệp cấu hình mang theo tất cả thiết lập nên chúng tồn tại qua một lần cập nhật module.
 - **Tự cập nhật tăng dần (VDLU)** và một thư viện native **bốn ABI** (arm64-v8a, armeabi-v7a, x86, x86_64).
 
 ## Tác nhân AI
@@ -65,11 +84,11 @@ Flash tệp zip trong KernelSU, APatch hoặc Magisk rồi khởi động lại.
 
 ## Bảo mật
 
-Việc giả mạo chỉ ở phía người dùng: COPG-VD không bao giờ nâng SDK cao hơn framework thật của bạn, giữ nhà sản xuất nhất quán với phần còn lại của hồ sơ, và đọc phiên bản thật từ `/system/build.prop`, chứ không phải từ các thuộc tính mà nó làm giả. Trình tự cập nhật yêu cầu một chữ ký ed25519 hợp lệ và từ chối hạ cấp; WebUI không thực hiện yêu cầu mạng nào. Báo cáo sự cố theo [SECURITY.md](docs/vi/SECURITY.md).
+Việc giả mạo chỉ ở phía người dùng: COPG-VD không bao giờ nâng SDK cao hơn framework thật của bạn, giữ nhà sản xuất nhất quán với phần còn lại của hồ sơ, và đọc phiên bản thật từ `/system/build.prop`, chứ không phải từ các thuộc tính mà nó làm giả. Trình tự cập nhật yêu cầu một chữ ký ed25519 hợp lệ và từ chối hạ cấp, WebUI không thực hiện yêu cầu mạng nào. Báo cáo sự cố theo [SECURITY.md](docs/vi/SECURITY.md).
 
 ## Xây dựng
 
-Luôn là release, không bao giờ debug. Thư viện native và trình trợ giúp phạm vi được xây dựng trong CI cho cả bốn ABI; quy trình release lắp ráp tệp zip có thể flash, ghi các tệp đồng hành `.sha256` cho từng tệp, tái tạo baseline VDLU đã ký và xuất bản với tư cách `github-actions[bot]`. Xem [CONTRIBUTING.md](docs/vi/CONTRIBUTING.md).
+Luôn là release, không bao giờ debug. Thư viện native và trình trợ giúp phạm vi được xây dựng trong CI cho cả bốn ABI, quy trình release lắp ráp tệp zip có thể flash, ghi các tệp đồng hành `.sha256` cho từng tệp, tái tạo baseline VDLU đã ký và xuất bản với tư cách `github-actions[bot]`. Xem [CONTRIBUTING.md](docs/vi/CONTRIBUTING.md).
 
 ## Cách sử dụng?
 Cài đặt module, khởi động lại, và hồ sơ đi kèm (một chiếc Pixel) được giả mạo cho các ứng dụng mục tiêu. Với một fingerprint hoạt động được, bạn không cần PlayIntegrityFix hay GooglePhotosUnlimited.  
@@ -78,7 +97,7 @@ Mọi thứ được cấu hình trong `/data/adb/COPG-VD/COPG-VD.json`, hoặc 
 ### Scope: ai thấy sự giả mạo
 `scope_mode` quyết định tiến trình nào nhận được danh tính giả mạo. Trong một chế độ có giới hạn phạm vi, danh tính được Zygisk cung cấp theo từng tiến trình và không bị rò rỉ ra phần còn lại của hệ thống qua các global properties.  
 * **Google Play** (`playstore`, mặc định): chỉ ngăn xếp Play (Google Play services, tiến trình unstable của nó và Play Store).  
-* **Global**: toàn bộ thiết bị; mọi tiến trình đều thấy nó.  
+* **Global**: toàn bộ thiết bị, mọi tiến trình đều thấy nó.  
 * **Whitelist**: chỉ các ứng dụng trong `scope_whitelist`.  
 * **Blacklist**: mọi ứng dụng trừ những ứng dụng trong `scope_blacklist`.  
 
@@ -86,15 +105,15 @@ Mọi thứ được cấu hình trong `/data/adb/COPG-VD/COPG-VD.json`, hoặc 
 Mỗi engine là độc lập và có thể tắt:  
 * **Build fields (JNI)**: ghi lại `android.os.Build.*` trong các tiến trình mục tiêu.  
 * **Property hook**: trình bày các thuộc tính hệ thống giả mạo cho các tiến trình mục tiêu (một bản ánh xạ lại vùng thuộc tính theo từng tiến trình kiểu clean-room, không hook hàm).  
-* **resetprop**: ghi lại các thuộc tính hệ thống, được quản lý theo nhóm: identity, version, boot state, SELinux, adb/usb, anti-emulator và một lượt dọn dẹp. Trong một chế độ có giới hạn phạm vi, các nhóm identity và version nằm ngoài resetprop trên toàn thiết bị (Zygisk cung cấp chúng theo từng tiến trình); các nhóm boot/lock/SELinux vẫn mang tính global.  
-* **DRM / Widevine** (mặc định tắt): báo cáo một mức bảo mật Widevine được chọn, L1 hoặc L3, cho các ứng dụng đọc nó. Theo mặc định nó tuân theo phạm vi ở trên; đặt `drm_targets` (một danh sách ứng dụng) để áp dụng giả mạo DRM chỉ cho những ứng dụng đó, độc lập với `scope_mode`: mô-đun vẫn được tải trong một ứng dụng được liệt kê chỉ để phục vụ DRM hook, ngay cả khi ứng dụng đó nằm ngoài phạm vi chính. Trống hoặc không có nghĩa là tuân theo phạm vi. (Yêu cầu một chế độ có phạm vi, không phải Global.)  
+* **resetprop**: ghi lại các thuộc tính hệ thống, được quản lý theo nhóm: identity, version, boot state, SELinux, adb/usb, anti-emulator và một lượt dọn dẹp. Trong một chế độ có giới hạn phạm vi, các nhóm identity và version nằm ngoài resetprop trên toàn thiết bị (Zygisk cung cấp chúng theo từng tiến trình), các nhóm boot/lock/SELinux vẫn mang tính global.  
+* **DRM / Widevine** (mặc định tắt): báo cáo một mức bảo mật Widevine được chọn, L1 hoặc L3, cho các ứng dụng đọc nó. Theo mặc định nó tuân theo phạm vi ở trên, đặt `drm_targets` (một danh sách ứng dụng) để áp dụng giả mạo DRM chỉ cho những ứng dụng đó, độc lập với `scope_mode`: mô-đun vẫn được tải trong một ứng dụng được liệt kê chỉ để phục vụ DRM hook, ngay cả khi ứng dụng đó nằm ngoài phạm vi chính. Trống hoặc không có nghĩa là tuân theo phạm vi. (Yêu cầu một chế độ có phạm vi, không phải Global.)  
 
 ### Fields: set, empty, delete hoặc skip
 Bên trong đối tượng `COPG-VD`, mỗi trường Build có bốn trạng thái:  
 * **Set**: `"KEY": "value"` ghi giá trị.  
 * **Empty**: `"KEY": ""` ghi một giá trị rỗng.  
 * **Delete**: liệt kê khóa trong `"COPG-VD-Delete": [ ... ]` ở cấp cao nhất để loại bỏ nó (một trường Build trở thành null, một thuộc tính bị loại bỏ bằng `resetprop --delete`).  
-* **Skip**: bỏ khóa ra hoàn toàn; giá trị của chính ROM được giữ lại.  
+* **Skip**: bỏ khóa ra hoàn toàn, giá trị của chính ROM được giữ lại.  
 
 Một danh sách `"global_fields": [ ... ]` áp dụng các trường Build được nêu tên trên toàn thiết bị ngay cả trong một chế độ có giới hạn phạm vi, để giữ cho một giá trị nhất quán ở mọi nơi: chỉ dành cho các trường an toàn về tính nhất quán (ví dụ bản vá bảo mật), không bao giờ dành cho identity và không bao giờ dành cho nhóm phiên bản Android.  
 
@@ -161,11 +180,21 @@ Khối ở trên và `module/COPG-VD.json.example` được làm mới hằng ng
 **Analyze** trong WebUI (hoặc `fingerprint-update.sh analyze`) kiểm tra cấu hình ở trạng thái hiện tại: phiên bản so với ROM, liệu tệp còn phân tích cú pháp được hay không (một tệp hỏng khiến module giả mạo **không gì cả**, và chỉ logcat mới cho biết điều đó), liệu fingerprint có khớp với các trường xung quanh hay không, các khóa mà module không đọc, các ngày tháng, và liệu các prop đã mang sẵn những gì cấu hình yêu cầu hay chưa.  
 
 ### WebUI
-WebUI là tùy chọn (mọi thứ đều có thể chỉnh sửa trực tiếp trong tệp cấu hình JSON) nhưng nó là cách dễ dàng để điều khiển module. Nó có năm tab: **About**, **Device** (mọi trường, đặt theo từng trạng thái, nhóm theo danh mục), **Spoofing** (scope và engines), **System** (các nhóm resetprop) và **Tools** (Analyze, Check Update, Update Now, Backup/Restore và tự động cập nhật khi khởi động). Nó không thực hiện yêu cầu mạng nào; mọi thứ nó cần đều đi kèm bên trong module.  
+WebUI là tùy chọn (mọi thứ đều có thể chỉnh sửa trực tiếp trong tệp cấu hình JSON) nhưng nó là cách dễ dàng để điều khiển module. Nó có năm tab: **About**, **Device** (mọi trường, đặt theo từng trạng thái, nhóm theo danh mục), **Spoofing** (scope và engines), **System** (các nhóm resetprop) và **Tools** (Analyze, Check Update, Update Now, Backup/Restore và tự động cập nhật khi khởi động). Nó không thực hiện yêu cầu mạng nào, mọi thứ nó cần đều đi kèm bên trong module.  
 Nếu bạn là người dùng Magisk, hãy dùng KsuWebUI của KOW (https://github.com/KOWX712/KsuWebUIStandalone/releases). Bạn cũng có thể dùng WebUI-X Portable của MMRL (https://github.com/MMRLApp/WebUI-X-Portable/releases) hoặc KsuWebUI-SN (https://github.com/dnascorpionofficial/KsuWebUI-SN/releases).  
 
 ### Cài đặt trong cấu hình
 `COPG-VD.json` mang các cài đặt của nó ngay cạnh hồ sơ, để các lựa chọn của bạn đi theo cùng bản sao lưu và có thể chỉnh sửa bằng tay: `scope_mode`, các công tắc của engine, các nhóm resetprop, `global_fields`, và một đối tượng `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_version`). Mọi thứ đều nằm trong một tệp duy nhất này: các script khởi động và WebUI đọc các cài đặt trực tiếp từ nó, nên các lựa chọn của bạn vẫn còn sau một lần cập nhật module. `"spoof_version": "force"` bị từ chối từ tệp và bị hạ cấp: việc khôi phục một bản sao lưu cũ không được tự ý kích hoạt lại nó sau lưng bạn.  
+
+## Cập nhật tăng dần (VDLU)
+
+COPG-VD đi kèm engine **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (được nhúng trong `module/vdlu/`): mô-đun tự cập nhật bằng cách chỉ tải về những tệp đã thay đổi (các blob định địa chỉ theo nội dung + một `manifest.json` đã ký), thay vì tải lại toàn bộ `.zip`. Hồ sơ **Hardened**: chữ ký ed25519 là bắt buộc và việc hạ cấp bị chặn, tệp `.zip` đầy đủ vẫn hợp lệ như một phương án dự phòng.
+
+- **`vdlu/`** (đi kèm trong zip): `update.sh` (engine) + `vdlu-verify` + `config.default` + `keyring/` (khóa công khai).
+- **Trạng thái** trong `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback), nằm ngoài mô-đun, tồn tại sau khi flash lại.
+- **Kích hoạt khi khởi động:** `post-fs-data.sh`, trước zygote, COPG-VD có `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), nên tệp `.so` mới được chuẩn bị và hoán đổi trước khi zygote ánh xạ nó.
+- **WebUI:** một bảng **Updates** (`webroot/vdlu.js`) với thông báo tiến trình và nút hủy.
+- **Phát hành:** xem `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, lưu trữ manifest, `vdlu-gc` dọn các blob mồ côi, đẩy Pages theo lô).
 
 <!-- vd-docs -->
 ## Tài liệu
@@ -177,16 +206,6 @@ Nếu bạn là người dùng Magisk, hãy dùng KsuWebUI của KOW (https://gi
 - **[Tác nhân AI](https://github.com/VD171/COPG-VD/wiki/vi-AI-AGENTS)**: điều khiển cấu hình và trình cập nhật không cần giao diện.
 
 <!-- /vd-docs -->
-
-## Cập nhật tăng dần (VDLU)
-
-COPG-VD đi kèm engine **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (được nhúng trong `module/vdlu/`): mô-đun tự cập nhật bằng cách chỉ tải về những tệp đã thay đổi (các blob định địa chỉ theo nội dung + một `manifest.json` đã ký), thay vì tải lại toàn bộ `.zip`. Hồ sơ **Hardened**: chữ ký ed25519 là bắt buộc và việc hạ cấp bị chặn; tệp `.zip` đầy đủ vẫn hợp lệ như một phương án dự phòng.
-
-- **`vdlu/`** (đi kèm trong zip): `update.sh` (engine) + `vdlu-verify` + `config.default` + `keyring/` (khóa công khai).
-- **Trạng thái** trong `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - nằm ngoài mô-đun, tồn tại sau khi flash lại.
-- **Kích hoạt khi khởi động:** `post-fs-data.sh`, trước zygote - COPG-VD có `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard), nên tệp `.so` mới được chuẩn bị và hoán đổi trước khi zygote ánh xạ nó.
-- **WebUI:** một bảng **Updates** (`webroot/vdlu.js`) với thông báo tiến trình và nút hủy.
-- **Phát hành:** xem `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, lưu trữ manifest, `vdlu-gc` dọn các blob mồ côi, đẩy Pages theo lô).
 
 ## Xem thêm
 
@@ -202,20 +221,19 @@ COPG-VD đi kèm engine **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) 
 
 ## Liên hệ
 
-- Site           : https://vd171.ru
-- Site           : https://vd.priv8.ru
-- Source         : https://github.com/VD171/COPG-VD
-- GitHub         : [@VD171](https://github.com/VD171)
-- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
-- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
-- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
-- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
-- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
-- E-mail         : vd.priv8@pm.me
+- https://vd171.ru
+- https://vd.priv8.ru
+- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+- **Channel:** @Priv8_VD https://t.me/Priv8_VD
+- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
+- **E-mail:** vd.priv8@pm.me
+- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
+- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
+- **GitHub:** @VD171 https://github.com/VD171
 
 ## License
 
-**Apache-2.0**: xem [LICENSE](LICENSE). COPG-VD là một bản fork bởi VD171 của COPG gốc bởi AlirezaParsi, được tiếp tục dưới cùng một giấy phép.
+**AGPL-3.0-or-later**: xem [LICENSE](LICENSE). COPG-VD là một bản fork bởi VD171 của COPG gốc bởi AlirezaParsi (Apache-2.0), được cấp phép lại theo GNU AGPL-3.0-or-later. COPYLEFT MẠNG: nếu bạn chạy một phiên bản đã sửa đổi, kể cả dưới dạng dịch vụ, bạn phải cung cấp mã nguồn của nó.
 
 ## Trademarks
 
@@ -224,3 +242,7 @@ COPG-VD là một dự án độc lập, không chính thức. Nó không liên 
 ## Tags
 
 `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG-VD`
+
+---
+
+📣 **Tham gia kênh để nhận cập nhật:** @Priv8_VD https://t.me/Priv8_VD

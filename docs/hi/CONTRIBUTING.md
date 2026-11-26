@@ -11,7 +11,7 @@
 
 COPG-VD एक **Zygisk डिवाइस spoofer** है: एक छोटी native लाइब्रेरी जो ऐप प्रोसेस में इंजेक्ट की जाती
 है ताकि डिवाइस fingerprint और build को फिर से लिखा जा सके, साथ ही इसे चलाने के लिए एक vanilla-JS
-WebUI। यह COPG (AlirezaParsi द्वारा) का एक fork है, जिसका रखरखाव VD171 द्वारा Apache-2.0 लाइसेंस के
+WebUI। यह COPG (AlirezaParsi द्वारा) का एक fork है, जिसका रखरखाव VD171 द्वारा GNU AGPL-3.0-or-later लाइसेंस के
 तहत किया जाता है। [ARCHITECTURE.md](ARCHITECTURE.md) और [FILE-STRUCTURE.md](FILE-STRUCTURE.md)
 देखें।
 
@@ -39,7 +39,7 @@ AI सहायक और एजेंट यहाँ प्रथम-श्र
 - एक flashable zip बनाएँ: बने हुए `libspoof.so` को `module/zygisk/<abi>.so` में कॉपी करें, फिर
   `cd module && zip -r9 ../COPG-VD-dev.zip .` और इसे फ़्लैश करें।
 - WebUI `module/webroot/` है (इसे root मैनेजर से खोलें)। spoofing तर्क `zygisk/spoof_module.cpp`
-  है; प्रोफ़ाइल fetcher `module/fingerprint-update.sh` है।
+  है, प्रोफ़ाइल fetcher `module/fingerprint-update.sh` है।
 
 ## परंपराएँ
 
@@ -47,8 +47,8 @@ AI सहायक और एजेंट यहाँ प्रथम-श्र
   होती है (इसे किसी मौजूदा फ़ाइल से कॉपी करें)। `.github/` के अंतर्गत टूलिंग इसके बजाय एक छोटी टिप्पणी
   का उपयोग करती है।
 - **कोड और टिप्पणियाँ अंग्रेज़ी में।** टिप्पणियों को न्यूनतम और केवल जहाँ आवश्यक हो वहीं रखें।
-- **कोई em-dash या en-dash नहीं**; हमेशा एक सादा hyphen `-` उपयोग करें।
-- WebUI **vanilla JS** है (एक `scripts.js`); कोई framework नहीं।
+- **कोई em-dash या en-dash नहीं**, हमेशा एक सादा hyphen `-` उपयोग करें।
+- WebUI **vanilla JS** है (एक `scripts.js`), कोई framework नहीं।
 - एक वास्तविक फ़ीचर को **कभी कमज़ोर न करें**: spoof को सुसंगत रखें, और hooks को ऐसी ऐप को क्रैश न
   करने दें जिससे वे जुड़े हैं (वे जानबूझकर null-checked हैं)।
 
@@ -76,4 +76,4 @@ AI सहायक और एजेंट यहाँ प्रथम-श्र
 
 ---
 
-> _यह दस्तावेज़ Claude (Anthropic) से तैयार किया गया है और इसे VD171 द्वारा अनुरक्षित किया जाता है। सुधार और संशोधन का स्वागत है; देखें [CONTRIBUTING.md](CONTRIBUTING.md)।_
+> _यह दस्तावेज़ Claude (Anthropic) से तैयार किया गया है और इसे VD171 द्वारा अनुरक्षित किया जाता है। सुधार और संशोधन का स्वागत है, देखें [CONTRIBUTING.md](CONTRIBUTING.md)।_

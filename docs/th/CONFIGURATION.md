@@ -26,7 +26,7 @@
 | `scope_whitelist` | array | แพ็กเกจที่ได้รับการปลอมเมื่อ `scope_mode` เป็น `whitelist` |
 | `scope_blacklist` | array | แพ็กเกจที่ถูกยกเว้นเมื่อ `scope_mode` เป็น `blacklist` |
 | `COPG-VD` | object | โปรไฟล์: ฟิลด์ Build ที่จะนำเสนอ (ดูด้านล่าง) |
-| `COPG-VD-Delete` | array | ชื่อฟิลด์ที่จะลบแทนที่จะตั้งค่า (ฟิลด์ Build กลายเป็น null; พร็อพเพอร์ตีจะถูกลบด้วย `resetprop --delete`) |
+| `COPG-VD-Delete` | array | ชื่อฟิลด์ที่จะลบแทนที่จะตั้งค่า (ฟิลด์ Build กลายเป็น null, พร็อพเพอร์ตีจะถูกลบด้วย `resetprop --delete`) |
 | `COPG-VD-Settings` | object | การตั้งค่าโมดูลที่เดินทางไปกับโปรไฟล์ (ดูด้านล่าง) |
 | `motor_jni` | bool | เครื่องยนต์ฟิลด์ Build (เขียน `android.os.Build.*` ใหม่) ค่าเริ่มต้น `true` |
 | `motor_prop_hook` | bool | เครื่องยนต์พร็อพเพอร์ตีรายโปรเซส (รีแมปพร็อพเพอร์ตีแบบ clean-room) ค่าเริ่มต้น `true` |
@@ -78,7 +78,7 @@ attestation รายงานค่าที่ต่างจากค่า�
 |---|---|---|
 | `resetprop` | bool | เครื่องยนต์ resetprop ที่ทำทั้งอุปกรณ์ทำงานหรือไม่ |
 | `autoupdate` | bool | `fingerprint-update.sh` ทำงานหนึ่งครั้งต่อการบูตหรือไม่ ค่าเริ่มต้นเปิด |
-| `spoof_version` | `never` / `rom` / `force` | กลุ่มเวอร์ชัน Android ใช้อย่างไร `never` เป็นค่าเริ่มต้น ตั้งแต่ v6.19 SDK ถูกจำกัดไว้ที่ค่าของ ROM ภายใต้ทุกนโยบาย ดังนั้น `force` จึงบังคับใช้ฟิลด์สตริงแต่ไม่สามารถเพิ่ม SDK ได้; `force` ถูกปฏิเสธเมื่อกู้คืนข้อมูลสำรอง |
+| `spoof_version` | `never` / `rom` / `force` | กลุ่มเวอร์ชัน Android ใช้อย่างไร `never` เป็นค่าเริ่มต้น ตั้งแต่ v6.19 SDK ถูกจำกัดไว้ที่ค่าของ ROM ภายใต้ทุกนโยบาย ดังนั้น `force` จึงบังคับใช้ฟิลด์สตริงแต่ไม่สามารถเพิ่ม SDK ได้, `force` ถูกปฏิเสธเมื่อกู้คืนข้อมูลสำรอง |
 
 ## `global_fields`
 

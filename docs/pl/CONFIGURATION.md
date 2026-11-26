@@ -6,7 +6,7 @@
 
 Cały moduł jest sterowany jednym plikiem: `/data/adb/COPG-VD/COPG-VD.json`. WebUI zapisuje go za
 Ciebie, ale możesz go edytować ręcznie. Dostarczany przykład znajduje się w `module/COPG-VD.json.example`.
-To jest jedyne źródło prawdy; kopia w katalogu modułu jest tylko domyślną wartością tylko do odczytu.
+To jest jedyne źródło prawdy, kopia w katalogu modułu jest tylko domyślną wartością tylko do odczytu.
 Konfiguracja pozostała po starszej wersji w `/data/adb/COPG-VD.json` jest automatycznie przenoszona do tego katalogu.
 Własny log i stan modułu (`update.log`, `update.state`) również znajdują się tutaj.
 
@@ -26,7 +26,7 @@ Zasady:
 | `scope_whitelist` | array | Pakiety, które dostają spoof, gdy `scope_mode` to `whitelist`. |
 | `scope_blacklist` | array | Pakiety wykluczone, gdy `scope_mode` to `blacklist`. |
 | `COPG-VD` | object | Profil: pola Build do zaprezentowania (zobacz poniżej). |
-| `COPG-VD-Delete` | array | Nazwy pól do usunięcia zamiast ustawienia (pole Build staje się null; właściwość jest usuwana za pomocą `resetprop --delete`). |
+| `COPG-VD-Delete` | array | Nazwy pól do usunięcia zamiast ustawienia (pole Build staje się null, właściwość jest usuwana za pomocą `resetprop --delete`). |
 | `COPG-VD-Settings` | object | Ustawienia modułu, które podróżują z profilem (zobacz poniżej). |
 | `motor_jni` | bool | Silnik pól Build (przepisuje `android.os.Build.*`). Domyślnie `true`. |
 | `motor_prop_hook` | bool | Silnik właściwości per proces (clean-room remapowanie właściwości). Domyślnie `true`. |
@@ -78,7 +78,7 @@ Ustawienia, które podróżują z profilem, więc kopia zapasowa niesie Twoje wy
 |---|---|---|
 | `resetprop` | bool | Czy działa silnik resetprop obejmujący całe urządzenie. |
 | `autoupdate` | bool | Czy `fingerprint-update.sh` uruchamia się raz na rozruch. Domyślnie włączone. |
-| `spoof_version` | `never` / `rom` / `force` | Jak stosuje się grupa wersji Androida. `never` jest domyślne. Od v6.19 SDK jest ograniczone do wartości ROM-u pod każdą polityką, więc `force` wymusza pola tekstowe, ale nie może podnieść SDK; `force` jest odrzucane podczas przywracania kopii zapasowej. |
+| `spoof_version` | `never` / `rom` / `force` | Jak stosuje się grupa wersji Androida. `never` jest domyślne. Od v6.19 SDK jest ograniczone do wartości ROM-u pod każdą polityką, więc `force` wymusza pola tekstowe, ale nie może podnieść SDK, `force` jest odrzucane podczas przywracania kopii zapasowej. |
 
 ## `global_fields`
 
@@ -118,4 +118,4 @@ spójną wszędzie. Używaj tego tylko dla pól bezpiecznych pod względem spój
 
 ---
 
-> _Ta dokumentacja została wygenerowana za pomocą Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane; zobacz [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Ta dokumentacja została wygenerowana za pomocą Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane, zobacz [CONTRIBUTING.md](CONTRIBUTING.md)._

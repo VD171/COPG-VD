@@ -1,6 +1,6 @@
 # Third-party components
 
-The WebUI bundles the following third-party files. Each is shipped verbatim; the sha256 lets you verify the shipped bytes.
+The WebUI bundles the following third-party files. Each is shipped verbatim, the sha256 lets you verify the shipped bytes.
 
 | File | Component | Version | License | Source | sha256 |
 |---|---|---|---|---|---|
@@ -12,6 +12,6 @@ The WebUI bundles the following third-party files. Each is shipped verbatim; the
 
 The woff2 files are subsets (only the glyphs the WebUI uses).
 
-- **Marked** is MIT-licensed, Copyright (c) 2011-2025 Christopher Jeffrey; the header is kept inside `marked.min.js`.
-- **Poppins** is under the SIL Open Font License 1.1; the full text ships in `fonts/OFL.txt` (Copyright 2014-2019 Indian Type Foundry).
-- **Roboto Mono** is under the Apache License 2.0, Copyright Google LLC; the module itself is Apache-2.0 (see `../../LICENSE`).
+- **Marked** is MIT-licensed, Copyright (c) 2011-2025 Christopher Jeffrey, the header is kept inside `marked.min.js`.
+- **Poppins** is under the SIL Open Font License 1.1, the full text ships in `fonts/OFL.txt` (Copyright 2014-2019 Indian Type Foundry).
+- **Roboto Mono** is under the Apache License 2.0, Copyright Google LLC, the module itself is AGPL-3.0-or-later (see `../../LICENSE`).

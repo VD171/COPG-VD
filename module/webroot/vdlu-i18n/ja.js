@@ -25,7 +25,8 @@ window.VDLU_I18N_JA = {
   savedToast: '保存しました', saveFail: '保存に失敗しました', sourceSaved: 'ソースを保存しました',
   bootstrapping: 'アップデーターを準備中…', bootstrapSub: 'フェッチャーを一度だけダウンロード', bootstrapFail: 'アップデーターを準備できませんでした',
   searching: '検索中…', upToDate: '最新です', nothingNew: '新着なし',
-  ahead: 'フィードより新しい', aheadSub: 'お使いのバージョンは公開済みの更新より新しいです', deferred: 'ダウンロードを延期', deferredSub: '許可されたネットワークを待機中 - 次回の確認で再開します',
+  ahead: 'フィードより新しい', aheadSub: 'お使いのバージョンは公開済みの更新より新しいです', silentUpdate: 'サイレント更新', silentUpdateSub: '再起動バーを表示せずにバックグラウンドで更新を適用します。',
+  deferred: 'ダウンロードを延期', deferredSub: '許可されたネットワークを待機中、次回の確認で再開します',
   updateAvail: '更新があります', install: 'インストール', fileOne: 'ファイル', fileMany: 'ファイル',
   requiresReboot: '再起動が必要', checkFail: '確認に失敗しました', ksuUnavailable: 'KSU API を利用できません',
   pendingUpdate: '保留中の更新', notNow: '今はしない', srcPlaceholder: 'https://…/&lt;モジュール&gt;'

@@ -56,7 +56,7 @@ COPG-VD/
 ├── README.md + README.<code>.md   # 21 dil
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md  CODE_OF_CONDUCT.md  SECURITY.md
-├── LICENSE                     # Apache-2.0
+├── LICENSE                     # AGPL-3.0-or-later
 └── screenshots/                # README tarafından kullanılan görseller
 ```
 
@@ -64,10 +64,10 @@ COPG-VD/
 
 Cihazdaki `/data/adb/COPG-VD/`, modülün kendi dizinidir: `COPG-VD.json`, profili ve ayarları tutar
 (bkz. [CONFIGURATION.md](CONFIGURATION.md)), `update.log`, `update.state` ve `update.status` ile birlikte.
-Yapılandırma asla commit edilmez; `module/COPG-VD.json.example` şablondur.
+Yapılandırma asla commit edilmez, `module/COPG-VD.json.example` şablondur.
 
 <!-- doc-footer -->
 
 ---
 
-> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır; bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır, bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._

@@ -25,7 +25,8 @@ window.VDLU_I18N_FR = {
   savedToast: 'enregistré', saveFail: 'échec de l\'enregistrement', sourceSaved: 'source enregistrée',
   bootstrapping: 'Préparation du programme de mise à jour…', bootstrapSub: 'téléchargement unique du récupérateur', bootstrapFail: 'Impossible de préparer le programme de mise à jour',
   searching: 'Recherche…', upToDate: 'À jour', nothingNew: 'rien de nouveau',
-  ahead: 'Plus récent que le flux', aheadSub: 'votre version est plus récente que la mise à jour publiée', deferred: 'Téléchargement différé', deferredSub: 'en attente du réseau autorisé - reprend à la prochaine vérification',
+  ahead: 'Plus récent que le flux', aheadSub: 'votre version est plus récente que la mise à jour publiée', silentUpdate: 'Mise à jour silencieuse', silentUpdateSub: 'Applique les mises à jour en arrière-plan sans afficher la barre de redémarrage.',
+  deferred: 'Téléchargement différé', deferredSub: 'en attente du réseau autorisé, reprend à la prochaine vérification',
   updateAvail: 'Mise à jour disponible', install: 'installer', fileOne: 'fichier', fileMany: 'fichiers',
   requiresReboot: 'nécessite un redémarrage', checkFail: 'Échec de la vérification', ksuUnavailable: 'API KSU indisponible',
   pendingUpdate: 'Mise à jour en attente', notNow: 'Pas maintenant', srcPlaceholder: 'https://…/&lt;module&gt;'

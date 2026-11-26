@@ -11,7 +11,7 @@
 
 COPG-VD เป็น **ตัวปลอมอุปกรณ์ Zygisk (Zygisk device spoofer)**: ไลบรารี native ขนาดเล็กที่ถูกฉีด
 เข้าไปในโปรเซสของแอปเพื่อเขียนลายนิ้วมือและ build ของอุปกรณ์ใหม่ บวกกับ WebUI แบบ vanilla-JS เพื่อขับเคลื่อน
-มัน มันเป็นฟอร์กของ COPG (โดย AlirezaParsi) ดูแลรักษาโดย VD171 ภายใต้ใบอนุญาต Apache-2.0
+มัน มันเป็นฟอร์กของ COPG (โดย AlirezaParsi) ดูแลรักษาโดย VD171 ภายใต้ใบอนุญาต GNU AGPL-3.0-or-later
 ดู [ARCHITECTURE.md](ARCHITECTURE.md) และ [FILE-STRUCTURE.md](FILE-STRUCTURE.md)
 
 โดยค่าเริ่มต้นมันจำกัดขอบเขตการปลอมไว้ที่สแตก Google Play ผ่าน Zygisk ดังนั้นมันจึงเป็น
@@ -38,7 +38,7 @@ COPG-VD เป็น **ตัวปลอมอุปกรณ์ Zygisk (Zygisk
 - Build zip ที่แฟลชได้: คัดลอก `libspoof.so` ที่ build แล้วไปยัง `module/zygisk/<abi>.so` จากนั้น
   `cd module && zip -r9 ../COPG-VD-dev.zip .` แล้วแฟลชมัน
 - WebUI คือ `module/webroot/` (เปิดจากตัวจัดการ root) ตรรกะการปลอมคือ
-  `zygisk/spoof_module.cpp`; ตัวดึงโปรไฟล์คือ `module/fingerprint-update.sh`
+  `zygisk/spoof_module.cpp`, ตัวดึงโปรไฟล์คือ `module/fingerprint-update.sh`
 
 ## ธรรมเนียม
 
@@ -46,15 +46,15 @@ COPG-VD เป็น **ตัวปลอมอุปกรณ์ Zygisk (Zygisk
   ส่วนหัวแบนเนอร์ของโครงการ (คัดลอกจากไฟล์ที่มีอยู่) เครื่องมือภายใต้ `.github/` ใช้
   คอมเมนต์สั้น ๆ แทน
 - **โค้ดและคอมเมนต์เป็นภาษาอังกฤษ** เก็บคอมเมนต์ให้น้อยที่สุดและเฉพาะที่จำเป็น
-- **ห้าม em-dash หรือ en-dash**; ใช้ hyphen ธรรมดา `-` เสมอ
-- WebUI เป็น **vanilla JS** (`scripts.js` ไฟล์เดียว); ไม่มี framework
+- **ห้าม em-dash หรือ en-dash**, ใช้ hyphen ธรรมดา `-` เสมอ
+- WebUI เป็น **vanilla JS** (`scripts.js` ไฟล์เดียว), ไม่มี framework
 - **ห้ามทำให้อ่อนลง** ฟีเจอร์จริง: คงการปลอมให้สอดคล้อง และอย่าทำให้ hook
   ทำให้แอปที่มันติดอยู่ล่ม (พวกมันถูกตรวจสอบ null โดยเจตนา)
 
 ## การแปลเป็นภาษาต่าง ๆ (i18n)
 
 - สตริง UI อยู่ใน `module/webroot/lang/` ภาษาอังกฤษเป็นค่าสำรองหลัก
-  (`en.js` + `en.json`); อีก 20 ภาษาคือ `<code>.json`
+  (`en.js` + `en.json`), อีก 20 ภาษาคือ `<code>.json`
 - ในการเพิ่มหรือเปลี่ยนสตริง: แก้ `en.js` **และ** `en.json` จากนั้นอัปเดตทุก
   `<code>.json` การแตะป้ายที่มองเห็นได้หมายถึงการอัปเดตไฟล์ภาษา **ทั้งหมด** และ
   `README.<code>.md` **ทั้งหมด**

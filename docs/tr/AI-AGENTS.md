@@ -9,7 +9,7 @@ olarak yönetilecek şekilde oluşturulmuştur. İki yüzey vardır ve root olar
 yaptığı gibi) her ikisini de kullanır:
 
 1. **Yapılandırma dosyası** `/data/adb/COPG-VD/COPG-VD.json` - tek doğruluk kaynağı. Her profil alanı ve
-   her ayar burada bulunur; bu dosyayı okumak ve yazmak, modülün neyi sahtelediğini değiştirme
+   her ayar burada bulunur, bu dosyayı okumak ve yazmak, modülün neyi sahtelediğini değiştirme
    biçiminizdir.
 2. **Kabuk giriş noktası** `fingerprint-update.sh` - profilleri kontrol etmek, uygulamak ve getirmek
    için kararlı fiillere sahip tek bir betik.
@@ -17,7 +17,7 @@ yaptığı gibi) her ikisini de kullanır:
 ## Yapılandırma dosyası
 
 `/data/adb/COPG-VD/COPG-VD.json` düz bir JSON nesnesidir. Modül, onu enjekte edilen işlemlerden, kendi
-sağladığı özel bir SELinux kuralı aracılığıyla okur; hiçbir kimlik bilgisi tutmaz. Birlikte gelen bir
+sağladığı özel bir SELinux kuralı aracılığıyla okur, hiçbir kimlik bilgisi tutmaz. Birlikte gelen bir
 örnek `module/COPG-VD.json.example` konumunda bulunur ve en yeni Google fabrika imajından her gün
 yenilenir.
 
@@ -46,19 +46,19 @@ bunların uygulamalara ulaşması için **yeniden başlatma gereklidir**.
 sh /data/adb/modules/COPG-VD/fingerprint-update.sh <verb> [arg]
 ```
 
-Betik, insan tarafından okunabilir satırlar yazdırır; makine tarafından okunabilir olanlar `status:` ile
+Betik, insan tarafından okunabilir satırlar yazdırır, makine tarafından okunabilir olanlar `status:` ile
 başlar. Çıkış kodu başarıda `0` ve başarısızlıkta sıfırdan farklıdır.
 
 | Fiil | Ne yapar | Tipik çıktı |
 |---|---|---|
 | `check` | Yüklü profili en yeni upstream build ile karşılaştırır, hiçbir şey yazmaz. | `status: update-available` \| `status: up-to-date` \| `status: local-newer` \| `status: no-config` |
-| `apply` | En yeni profili getirir ve yapılandırmaya birleştirir (yalnızca build alanları; diğer anahtarlarınız korunur). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
-| `analyze` | Yapılandırmayı olduğu haliyle denetler (ayrıştırma, sürüm ve ROM karşılaştırması, fingerprint tutarlılığı, bilinmeyen anahtarlar, tarihler, props). Bir rapor yazdırır; çıkış kodu red/warn bulgularını yansıtır. | bir metin raporu |
+| `apply` | En yeni profili getirir ve yapılandırmaya birleştirir (yalnızca build alanları, diğer anahtarlarınız korunur). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
+| `analyze` | Yapılandırmayı olduğu haliyle denetler (ayrıştırma, sürüm ve ROM karşılaştırması, fingerprint tutarlılığı, bilinmeyen anahtarlar, tarihler, props). Bir rapor yazdırır, çıkış kodu red/warn bulgularını yansıtır. | bir metin raporu |
 | `fetch-index` | İmzalı cihaz dizinini indirir ve doğrular, ardından yazdırır (`index.json`). | dizin JSON'u \| `status: sig-failed` \| `status: download-failed` |
 | `fetch <path>` | Bir cihazın `build.prop` dosyasını indirir (dizinden gelen yol, örn. `pixel-9a/latest.prop`) ve build alanlarını yapılandırmaya yazar. | `status: fetched` \| `status: bad-path` \| `status: map-failed` \| `status: write-failed` |
 | `sync-settings` | Durumu/yapılandırmayı eski düz yerleşimden `/data/adb/COPG-VD/` konumuna taşır. | - |
 | `migrate` | Modül sürümleri arasında tek seferlik yapılandırma taşıma. | `status: migrated` \| `status: nothing-to-migrate` |
-| `boot` | Önyükleme başına bir kez otomatik güncelleme; `service.sh` için tasarlanmıştır, etkileşimli kullanım için değil. | `update.status` yazar |
+| `boot` | Önyükleme başına bir kez otomatik güncelleme, `service.sh` için tasarlanmıştır, etkileşimli kullanım için değil. | `update.status` yazar |
 
 Her indirme, kullanılmadan önce doğrulanır (cihazdaki tek indirici, TLS'yi doğrulayamayan busybox
 `wget`'tir) ve profil güncelleyicisi asla geriye gitmez: yüklü olandan daha eski bir upstream build
@@ -88,4 +88,4 @@ taşır.
 
 ---
 
-> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır; bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Bu belgeler Claude (Anthropic) ile oluşturulmuş olup VD171 tarafından yürütülmektedir. Düzeltmeler ve iyileştirmeler memnuniyetle karşılanır, bkz. [CONTRIBUTING.md](CONTRIBUTING.md)._

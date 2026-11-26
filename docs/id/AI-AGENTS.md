@@ -9,7 +9,7 @@ tanpa scraping WebUI. Ada dua permukaan, dan agen yang berjalan sebagai root (se
 menggunakan keduanya:
 
 1. **File konfigurasi** `/data/adb/COPG-VD/COPG-VD.json` - satu-satunya sumber kebenaran. Setiap field
-   profil dan setiap pengaturan berada di sini; membaca dan menulis file ini adalah cara mengubah apa yang
+   profil dan setiap pengaturan berada di sini, membaca dan menulis file ini adalah cara mengubah apa yang
    dipalsukan modul.
 2. **Titik masuk shell** `fingerprint-update.sh` - satu skrip dengan verb yang stabil untuk memeriksa,
    menerapkan, dan mengambil profil.
@@ -17,7 +17,7 @@ menggunakan keduanya:
 ## File konfigurasi
 
 `/data/adb/COPG-VD/COPG-VD.json` adalah objek JSON biasa. Modul membacanya dari proses yang diinjeksi
-melalui aturan SELinux khusus yang disertakannya sendiri; file ini tidak menyimpan kredensial. Contoh yang
+melalui aturan SELinux khusus yang disertakannya sendiri, file ini tidak menyimpan kredensial. Contoh yang
 disertakan ada di `module/COPG-VD.json.example`, disegarkan setiap hari dari citra pabrik Google terbaru.
 
 Aturan yang harus diikuti agen:
@@ -45,19 +45,19 @@ pustaka Zygisk saat zygote dimulai, jadi **reboot diperlukan** agar field terseb
 sh /data/adb/modules/COPG-VD/fingerprint-update.sh <verb> [arg]
 ```
 
-Skrip mencetak baris yang dapat dibaca manusia; baris yang dapat dibaca mesin dimulai dengan `status:`. Kode
+Skrip mencetak baris yang dapat dibaca manusia, baris yang dapat dibaca mesin dimulai dengan `status:`. Kode
 keluarnya `0` saat berhasil dan bukan nol saat gagal.
 
 | Verb | Apa yang dilakukan | Keluaran umum |
 |---|---|---|
 | `check` | Membandingkan profil terpasang dengan build hulu terbaru, tidak menulis apa pun. | `status: update-available` \| `status: up-to-date` \| `status: local-newer` \| `status: no-config` |
-| `apply` | Mengambil profil terbaru dan menggabungkannya ke dalam config (hanya field Build; kunci Anda yang lain dipertahankan). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
-| `analyze` | Mengaudit config apa adanya (parse, versi vs ROM, koherensi fingerprint, kunci tak dikenal, tanggal, props). Mencetak laporan; kode keluar mencerminkan temuan red/warn. | laporan teks |
+| `apply` | Mengambil profil terbaru dan menggabungkannya ke dalam config (hanya field Build, kunci Anda yang lain dipertahankan). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
+| `analyze` | Mengaudit config apa adanya (parse, versi vs ROM, koherensi fingerprint, kunci tak dikenal, tanggal, props). Mencetak laporan, kode keluar mencerminkan temuan red/warn. | laporan teks |
 | `fetch-index` | Mengunduh dan memverifikasi indeks perangkat yang ditandatangani dan mencetaknya (`index.json`). | JSON indeks \| `status: sig-failed` \| `status: download-failed` |
 | `fetch <path>` | Mengunduh `build.prop` satu perangkat (path dari indeks, mis. `pixel-9a/latest.prop`) dan menulis field Build-nya ke dalam config. | `status: fetched` \| `status: bad-path` \| `status: map-failed` \| `status: write-failed` |
 | `sync-settings` | Memigrasi state/config dari tata letak datar lama ke `/data/adb/COPG-VD/`. | - |
 | `migrate` | Migrasi config sekali jalan antar versi modul. | `status: migrated` \| `status: nothing-to-migrate` |
-| `boot` | Pembaruan otomatis sekali per boot; ditujukan untuk `service.sh`, bukan penggunaan interaktif. | menulis `update.status` |
+| `boot` | Pembaruan otomatis sekali per boot, ditujukan untuk `service.sh`, bukan penggunaan interaktif. | menulis `update.status` |
 
 Setiap unduhan divalidasi sebelum digunakan (satu-satunya pengunduh di perangkat adalah `wget` busybox, yang
 tidak dapat memvalidasi TLS), dan pembaru profil tidak pernah mundur: build hulu yang lebih tua dari yang
@@ -87,4 +87,4 @@ sebelum konten dibaca.
 
 ---
 
-> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan; lihat [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan, lihat [CONTRIBUTING.md](CONTRIBUTING.md)._

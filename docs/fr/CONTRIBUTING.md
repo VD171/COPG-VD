@@ -12,7 +12,7 @@ trouvent les choses et les quelques conventions que nous suivons.
 COPG-VD est un **spoofer d'appareil Zygisk** : une petite bibliothèque native injectée dans
 les processus des applications pour réécrire le fingerprint et le build de l'appareil, plus
 une WebUI en JS vanilla pour le piloter. C'est un fork de COPG (par AlirezaParsi), maintenu
-par VD171 sous la licence Apache-2.0. Voir [ARCHITECTURE.md](ARCHITECTURE.md) et
+par VD171 sous la licence GNU AGPL-3.0-or-later. Voir [ARCHITECTURE.md](ARCHITECTURE.md) et
 [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 
 Par défaut, il limite le spoof à la pile Google Play via Zygisk, ce qui en fait une
@@ -42,7 +42,7 @@ Les assistants et agents IA sont ici des contributeurs de premier plan, pas une 
 - Compilez un zip flashable : copiez le `libspoof.so` compilé dans `module/zygisk/<abi>.so`,
   puis `cd module && zip -r9 ../COPG-VD-dev.zip .` et flashez-le.
 - La WebUI est `module/webroot/` (ouvrez-la depuis le gestionnaire root). La logique de
-  spoofing est `zygisk/spoof_module.cpp` ; le récupérateur de profil est
+  spoofing est `zygisk/spoof_module.cpp`, le récupérateur de profil est
   `module/fingerprint-update.sh`.
 
 ## Conventions
@@ -52,8 +52,8 @@ Les assistants et agents IA sont ici des contributeurs de premier plan, pas une 
   sous `.github/` utilise un court commentaire à la place.
 - **Code et commentaires en anglais.** Gardez les commentaires minimaux et seulement là où
   c'est nécessaire.
-- **Pas d'em-dash ni d'en-dash** ; utilisez toujours un simple hyphen `-`.
-- La WebUI est en **JS vanilla** (un seul `scripts.js`) ; pas de frameworks.
+- **Pas d'em-dash ni d'en-dash**, utilisez toujours un simple hyphen `-`.
+- La WebUI est en **JS vanilla** (un seul `scripts.js`), pas de frameworks.
 - **Ne jamais affaiblir** une vraie fonctionnalité : gardez le spoof cohérent, et ne faites
   pas planter une application à laquelle les hooks sont attachés (ils sont null-checked
   volontairement).
@@ -61,7 +61,7 @@ Les assistants et agents IA sont ici des contributeurs de premier plan, pas une 
 ## Internationalisation (i18n)
 
 - Les chaînes de l'UI vivent dans `module/webroot/lang/`. L'anglais est le repli canonique
-  (`en.js` + `en.json`) ; les 20 autres langues sont des `<code>.json`.
+  (`en.js` + `en.json`), les 20 autres langues sont des `<code>.json`.
 - Pour ajouter ou changer une chaîne : éditez `en.js` **et** `en.json`, puis mettez à jour
   chaque `<code>.json`. Toucher à un libellé visible implique de mettre à jour **tous** les
   fichiers de langue et **tous** les `README.<code>.md`.
@@ -83,4 +83,4 @@ et les nouveaux profils Pixel sont tous d'excellents points de départ.
 
 ---
 
-> _Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues ; voir [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Cette documentation a été générée avec Claude (Anthropic) et est maintenue par VD171. Les corrections et améliorations sont les bienvenues, voir [CONTRIBUTING.md](CONTRIBUTING.md)._

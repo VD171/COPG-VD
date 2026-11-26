@@ -8,16 +8,16 @@ COPG-VD welcomes AI and agent contributors, and the whole module is built to be 
 without scraping the WebUI. There are two surfaces, and an agent running as root (as the WebUI does)
 uses both:
 
-1. **The config file** `/data/adb/COPG-VD/COPG-VD.json` - the single source of truth. Every profile
-   field and every setting lives here; reading and writing this file is how you change what the module
+1. **The config file** `/data/adb/COPG-VD/COPG-VD.json`, the single source of truth. Every profile
+   field and every setting lives here, reading and writing this file is how you change what the module
    spoofs.
-2. **The shell entry point** `fingerprint-update.sh` - one script with stable verbs for checking,
+2. **The shell entry point** `fingerprint-update.sh`, one script with stable verbs for checking,
    applying and fetching profiles.
 
 ## The config file
 
 `/data/adb/COPG-VD/COPG-VD.json` is a plain JSON object. The module reads it from the injected
-processes through a dedicated SELinux rule it ships itself; it holds no credentials. A shipped example
+processes through a dedicated SELinux rule it ships itself, it holds no credentials. A shipped example
 lives at `module/COPG-VD.json.example`, refreshed daily from the newest Google factory image.
 
 Rules an agent must follow:
@@ -44,19 +44,19 @@ by the Zygisk library when zygote starts, so **a reboot is required** for those 
 sh /data/adb/modules/COPG-VD/fingerprint-update.sh <verb> [arg]
 ```
 
-The script prints human-readable lines; machine-readable ones start with `status:`. Its exit code is
+The script prints human-readable lines, machine-readable ones start with `status:`. Its exit code is
 `0` on success and non-zero on failure.
 
 | Verb | What it does | Typical output |
 |---|---|---|
 | `check` | Compares the installed profile against the newest upstream build, writes nothing. | `status: update-available` \| `status: up-to-date` \| `status: local-newer` \| `status: no-config` |
-| `apply` | Fetches the newest profile and merges it into the config (build fields only; your other keys are preserved). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
-| `analyze` | Audits the config as it stands (parse, version vs ROM, fingerprint coherence, unknown keys, dates, props). Prints a report; exit code reflects red/warn findings. | a text report |
+| `apply` | Fetches the newest profile and merges it into the config (build fields only, your other keys are preserved). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
+| `analyze` | Audits the config as it stands (parse, version vs ROM, fingerprint coherence, unknown keys, dates, props). Prints a report, exit code reflects red/warn findings. | a text report |
 | `fetch-index` | Downloads and verifies the signed device index and prints it (`index.json`). | the index JSON \| `status: sig-failed` \| `status: download-failed` |
 | `fetch <path>` | Downloads one device's `build.prop` (path from the index, e.g. `pixel-9a/latest.prop`) and writes its build fields into the config. | `status: fetched` \| `status: bad-path` \| `status: map-failed` \| `status: write-failed` |
 | `sync-settings` | Migrates state/config from the old flat layout to `/data/adb/COPG-VD/`. | - |
 | `migrate` | One-shot config migration between module versions. | `status: migrated` \| `status: nothing-to-migrate` |
-| `boot` | The once-per-boot auto-update; intended for `service.sh`, not interactive use. | writes `update.status` |
+| `boot` | The once-per-boot auto-update, intended for `service.sh`, not interactive use. | writes `update.status` |
 
 Every download is validated before use (the only on-device downloader is busybox `wget`, which cannot
 validate TLS), and the profile updater never goes backwards: an upstream build older than the one
@@ -74,7 +74,7 @@ verified before the content is read.
 
 ## Safety rails
 
-- Changing the config or applying a profile changes what every targeted app sees; confirm intent before
+- Changing the config or applying a profile changes what every targeted app sees, confirm intent before
   writing, as the WebUI does.
 - Never loosen a real coherence guard: the SDK is capped at the real framework under every policy, the
   manufacturer stays in step with the rest of the profile, and a profile for a different device is
@@ -85,4 +85,4 @@ verified before the content is read.
 
 ---
 
-> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome; see [CONTRIBUTING.md](../CONTRIBUTING.md)._
+> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome, see [CONTRIBUTING.md](../CONTRIBUTING.md)._

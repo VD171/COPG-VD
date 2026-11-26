@@ -40,7 +40,7 @@ Masing-masing independen dan dapat diaktifkan/dimatikan.
 - **resetprop (seluruh perangkat).** Menulis properti sistem per grup: identity, version,
   boot state, SELinux, adb/usb, anti-emulator, ditambah satu pass pembersihan. Skrip boot
   menjalankannya. Dalam mode scoped, grup identity dan version ditinggalkan (Zygisk
-  mengirimkannya per proses); grup boot, lock, dan SELinux tetap global agar perangkat
+  mengirimkannya per proses), grup boot, lock, dan SELinux tetap global agar perangkat
   koheren.
 - **DRM / Widevine (`motor_drm`).** Meng-hook metode `MediaDrm` yang melaporkan tingkat
   keamanan Widevine (`getSecurityLevel`, `getPropertyString`) dan mengembalikan tingkat yang
@@ -54,7 +54,7 @@ Proses yang disuntikkan berjalan dalam domain SELinux zygote, yang secara defaul
 menjangkau `/data/adb`. Modul menyertakan `sepolicy.rule` miliknya sendiri untuk
 mengizinkannya, dan, sebagai cadangan, dapat membaca config melalui direktori modulnya yang
 terbuka (`getModuleDir`), sehingga tetap berfungsi bahkan jika sebuah build Zygisk berhenti
-memberikan path tersebut. File diparse dengan parser JSON tertanam yang kecil (`jsmn`); file
+memberikan path tersebut. File diparse dengan parser JSON tertanam yang kecil (`jsmn`), file
 yang tidak dapat diparse berarti modul tidak men-spoof apa pun.
 
 ## Menjaga profil tetap segar
@@ -71,7 +71,7 @@ untuk sisi pengguna dan [CONFIGURATION.md](CONFIGURATION.md) untuk field-field-n
 Menaikkan `SDK_INT` / `ANDROID_VERSION` di atas versi framework ROM yang sebenarnya membuat
 aplikasi memanggil API yang tidak ada, yang membuat aplikasi Google crash dan mereboot ponsel
 ke dalam softloop. Oleh karena itu grup version nonaktif secara default dan dikunci di balik
-`spoof_version`; dan sejak v6.19 SDK juga dibatasi pada nilai framework sebenarnya di bawah **setiap** kebijakan (termasuk Force), sehingga bahkan profil dengan SDK lebih tinggi yang dipaksakan pun tidak dapat softloop (Force tetap memaksa field versi string). Modul membaca versi sebenarnya dari `/system/build.prop`, tidak pernah dari
+`spoof_version`, dan sejak v6.19 SDK juga dibatasi pada nilai framework sebenarnya di bawah **setiap** kebijakan (termasuk Force), sehingga bahkan profil dengan SDK lebih tinggi yang dipaksakan pun tidak dapat softloop (Force tetap memaksa field versi string). Modul membaca versi sebenarnya dari `/system/build.prop`, tidak pernah dari
 `getprop`, karena `getprop` justru hal yang dipalsukannya. Lihat jebakannya di
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
@@ -79,4 +79,4 @@ ke dalam softloop. Oleh karena itu grup version nonaktif secara default dan diku
 
 ---
 
-> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan; lihat [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Dokumentasi ini dibuat dengan Claude (Anthropic) dan dikelola oleh VD171. Koreksi dan perbaikan dipersilakan, lihat [CONTRIBUTING.md](CONTRIBUTING.md)._

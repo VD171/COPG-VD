@@ -45,7 +45,7 @@ Integrity를 통과하는 옵션입니다.
   스푸핑된 시스템 속성을 제시합니다(함수 후크 없음).
 - **resetprop**: 시스템 속성을 디바이스 전체에서 그룹별(identity, version, boot 상태, SELinux,
   adb/usb, anti-emulator 및 정리 패스)로 다시 작성합니다. 스코프 모드에서는 identity와 version 그룹이
-  디바이스 전체 패스에서 제외됩니다(Zygisk가 프로세스별로 전달); boot, lock, SELinux 그룹은 전역으로
+  디바이스 전체 패스에서 제외됩니다(Zygisk가 프로세스별로 전달), boot, lock, SELinux 그룹은 전역으로
   유지됩니다. `COPG-VD-Settings.resetprop`에서 전환합니다.
 - **DRM / Widevine (`motor_drm`, 기본적으로 꺼짐)**: 선택한 Widevine 보안 수준(L1 또는 L3)을 그것을
   읽는 앱에 보고합니다. 아래 DRM 섹션을 참조하세요.
@@ -80,7 +80,7 @@ fingerprint는 낡습니다: Google이 factory image를 교체하고, 오래된 
 - `rom`: ROM을 초과하지 않는 것만 적용하며, 실제로는 SDK를 낮추는 것을 의미합니다.
 - `force`: config가 요청하는 버전 필드를 강제합니다. 여기서도 SDK는 여전히 ROM 값으로 제한됩니다
   (v6.19부터). SDK를 실제 framework보다 높게 올리는 것은 softloop만 일으킬 뿐 용도가 없기 때문입니다.
-  그래서 `force`는 더 이상 softloop하지 않습니다; 문자열 필드(release, codename)를 강제합니다.
+  그래서 `force`는 더 이상 softloop하지 않습니다, 문자열 필드(release, codename)를 강제합니다.
 
 실제 버전은 `/system/build.prop`에서 읽히며, `getprop`에서는 절대 읽히지 않습니다(그것이 바로 이
 모듈이 위조하는 것입니다). `force`는 백업을 복원할 때도 거부되므로, 오래된 백업이 당신 모르게 그것을
@@ -93,7 +93,7 @@ fingerprint는 낡습니다: Google이 factory image를 교체하고, 오래된 
 
 기본적으로 DRM 스푸핑은 `scope_mode`를 따릅니다. 대신 특정 앱 집합에 적용하려면: 메인 스코프와
 독립적으로: `drm_targets`에 나열하세요. 그러면 모듈은 나열된 앱이 메인 스코프 밖에 있더라도 DRM
-후크를 위해 **오직** 그 앱에 로드된 상태로 유지됩니다; 비어 있거나 없는 리스트는 스코프를 따른다는
+후크를 위해 **오직** 그 앱에 로드된 상태로 유지됩니다, 비어 있거나 없는 리스트는 스코프를 따른다는
 의미입니다. 이것은 스코프 모드(`global`이 아님)가 필요하며, 다음 **재부팅** 시 적용됩니다.
 
 ## Analyze: 설정 확인
@@ -120,7 +120,7 @@ config를 손으로 편집할 때마다 실행하세요.
 - **Tools**: Analyze, Check Update, Update Now, Backup / Restore, 부팅 자동 업데이트, 그리고
   Diagnostics 보고서(버그 보고서에 유용한 모든 것을 읽고 내보내는 하나의 버튼).
 
-네트워크 요청을 하지 않습니다; 필요한 모든 것이 모듈 안에 함께 제공됩니다.
+네트워크 요청을 하지 않습니다, 필요한 모든 것이 모듈 안에 함께 제공됩니다.
 
 ## 문제 해결
 

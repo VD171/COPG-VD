@@ -56,7 +56,7 @@ COPG-VD/
 ├── README.md + README.<code>.md   # 21 язык
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md  CODE_OF_CONDUCT.md  SECURITY.md
-├── LICENSE                     # Apache-2.0
+├── LICENSE                     # AGPL-3.0-or-later
 └── screenshots/                # изображения, используемые README
 ```
 
@@ -64,10 +64,10 @@ COPG-VD/
 
 `/data/adb/COPG-VD/` на устройстве является собственным каталогом модуля: `COPG-VD.json` хранит профиль
 и настройки (смотрите [CONFIGURATION.md](CONFIGURATION.md)), рядом с `update.log`, `update.state` и
-`update.status`. Конфигурация никогда не коммитится; `module/COPG-VD.json.example`: шаблон.
+`update.status`. Конфигурация никогда не коммитится, `module/COPG-VD.json.example`: шаблон.
 
 <!-- doc-footer -->
 
 ---
 
-> _Эта документация создана с помощью Claude (Anthropic) и поддерживается VD171. Исправления и улучшения приветствуются; см. [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Эта документация создана с помощью Claude (Anthropic) и поддерживается VD171. Исправления и улучшения приветствуются, см. [CONTRIBUTING.md](CONTRIBUTING.md)._

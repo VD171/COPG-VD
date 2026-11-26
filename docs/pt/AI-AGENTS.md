@@ -9,7 +9,7 @@ headless, sem fazer scraping da WebUI. Há duas superfícies, e um agente rodand
 faz) usa ambas:
 
 1. **O arquivo de configuração** `/data/adb/COPG-VD/COPG-VD.json` - a única fonte da verdade. Cada campo
-   de perfil e cada configuração mora aqui; ler e escrever este arquivo é como você muda o que o módulo
+   de perfil e cada configuração mora aqui, ler e escrever este arquivo é como você muda o que o módulo
    falsifica.
 2. **O ponto de entrada shell** `fingerprint-update.sh` - um único script com verbos estáveis para
    verificar, aplicar e buscar perfis.
@@ -17,7 +17,7 @@ faz) usa ambas:
 ## O arquivo de configuração
 
 `/data/adb/COPG-VD/COPG-VD.json` é um objeto JSON simples. O módulo o lê a partir dos processos injetados
-por meio de uma regra SELinux dedicada que ele mesmo entrega; ele não guarda nenhuma credencial. Um exemplo
+por meio de uma regra SELinux dedicada que ele mesmo entrega, ele não guarda nenhuma credencial. Um exemplo
 incluído fica em `module/COPG-VD.json.example`, atualizado diariamente a partir da imagem de fábrica mais
 recente do Google.
 
@@ -46,19 +46,19 @@ apps.
 sh /data/adb/modules/COPG-VD/fingerprint-update.sh <verb> [arg]
 ```
 
-O script imprime linhas legíveis por humanos; as legíveis por máquina começam com `status:`. Seu código de
+O script imprime linhas legíveis por humanos, as legíveis por máquina começam com `status:`. Seu código de
 saída é `0` em caso de sucesso e diferente de zero em caso de falha.
 
 | Verbo | O que faz | Saída típica |
 |---|---|---|
 | `check` | Compara o perfil instalado com o build upstream mais recente, não escreve nada. | `status: update-available` \| `status: up-to-date` \| `status: local-newer` \| `status: no-config` |
-| `apply` | Busca o perfil mais recente e o mescla na config (apenas os campos Build; suas outras chaves são preservadas). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
-| `analyze` | Audita a config como ela está (parse, versão vs ROM, coerência do fingerprint, chaves desconhecidas, datas, props). Imprime um relatório; o código de saída reflete achados red/warn. | um relatório em texto |
+| `apply` | Busca o perfil mais recente e o mescla na config (apenas os campos Build, suas outras chaves são preservadas). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
+| `analyze` | Audita a config como ela está (parse, versão vs ROM, coerência do fingerprint, chaves desconhecidas, datas, props). Imprime um relatório, o código de saída reflete achados red/warn. | um relatório em texto |
 | `fetch-index` | Baixa e verifica o índice de dispositivos assinado e o imprime (`index.json`). | o JSON do índice \| `status: sig-failed` \| `status: download-failed` |
 | `fetch <path>` | Baixa o `build.prop` de um dispositivo (o caminho vem do índice, ex.: `pixel-9a/latest.prop`) e escreve seus campos Build na config. | `status: fetched` \| `status: bad-path` \| `status: map-failed` \| `status: write-failed` |
 | `sync-settings` | Migra o estado/config do layout plano antigo para `/data/adb/COPG-VD/`. | - |
 | `migrate` | Migração pontual de config entre versões do módulo. | `status: migrated` \| `status: nothing-to-migrate` |
-| `boot` | A auto-atualização uma vez por boot; destinada ao `service.sh`, não ao uso interativo. | escreve `update.status` |
+| `boot` | A auto-atualização uma vez por boot, destinada ao `service.sh`, não ao uso interativo. | escreve `update.status` |
 
 Todo download é validado antes do uso (o único downloader no dispositivo é o busybox `wget`, que não consegue
 validar TLS), e o atualizador de perfil nunca retrocede: um build upstream mais antigo do que o instalado é
@@ -77,7 +77,7 @@ o conteúdo ser lido.
 
 ## Grades de segurança
 
-- Mudar a config ou aplicar um perfil muda o que cada app alvo vê; confirme a intenção antes de escrever,
+- Mudar a config ou aplicar um perfil muda o que cada app alvo vê, confirme a intenção antes de escrever,
   como a WebUI faz.
 - Nunca afrouxe uma proteção real de coerência: o SDK é limitado ao framework real sob qualquer política, o
   manufacturer fica em sintonia com o resto do perfil, e um perfil de outro dispositivo é recusado. Isso é
@@ -88,4 +88,4 @@ o conteúdo ser lido.
 
 ---
 
-> _Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas; veja [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas, veja [CONTRIBUTING.md](CONTRIBUTING.md)._

@@ -11,7 +11,7 @@ wo die Dinge liegen, und die wenigen Konventionen, denen wir folgen.
 
 COPG-VD ist ein **Zygisk-Device-Spoofer**: eine kleine native Bibliothek, die in App-Prozesse
 injiziert wird, um den Geräte-Fingerprint und den Build umzuschreiben, plus eine Vanilla-JS-WebUI zu dessen
-Steuerung. Es ist ein Fork von COPG (von AlirezaParsi), gepflegt von VD171 unter der Apache-2.0-
+Steuerung. Es ist ein Fork von COPG (von AlirezaParsi), gepflegt von VD171 unter der GNU AGPL-3.0-or-later-
 Lizenz. Siehe [ARCHITECTURE.md](ARCHITECTURE.md) und [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 
 Standardmäßig begrenzt es den Spoof über Zygisk auf den Google-Play-Stack, sodass es eine
@@ -38,7 +38,7 @@ KI-Assistenten und -Agenten sind hier erstklassige Beitragende, kein nachträgli
 - Bauen Sie ein flashbares Zip: kopieren Sie die gebaute `libspoof.so` in `module/zygisk/<abi>.so`, dann
   `cd module && zip -r9 ../COPG-VD-dev.zip .` und flashen Sie es.
 - Die WebUI ist `module/webroot/` (öffnen Sie sie aus dem Root-Manager). Die Spoofing-Logik ist
-  `zygisk/spoof_module.cpp`; der Profilabrufer ist `module/fingerprint-update.sh`.
+  `zygisk/spoof_module.cpp`, der Profilabrufer ist `module/fingerprint-update.sh`.
 
 ## Konventionen
 
@@ -46,15 +46,15 @@ KI-Assistenten und -Agenten sind hier erstklassige Beitragende, kein nachträgli
   Projekt-Banner-Header (kopieren Sie ihn aus einer beliebigen bestehenden Datei). Tooling unter `.github/` verwendet
   stattdessen einen kurzen Kommentar.
 - **Code und Kommentare in Englisch.** Halten Sie Kommentare minimal und nur dort, wo nötig.
-- **Kein Em-Dash oder En-Dash**; verwenden Sie immer einen einfachen Bindestrich `-`.
-- Die WebUI ist **Vanilla JS** (eine `scripts.js`); keine Frameworks.
+- **Kein Em-Dash oder En-Dash**, verwenden Sie immer einen einfachen Bindestrich `-`.
+- Die WebUI ist **Vanilla JS** (eine `scripts.js`), keine Frameworks.
 - **Schwächen Sie nie** eine echte Funktion: halten Sie den Spoof kohärent, und bringen Sie die Hooks
   nicht dazu, eine App zum Absturz zu bringen, an die sie angehängt sind (sie sind absichtlich null-geprüft).
 
 ## Internationalisierung (i18n)
 
 - UI-Strings liegen in `module/webroot/lang/`. Englisch ist der kanonische Fallback
-  (`en.js` + `en.json`); die anderen 20 Sprachen sind `<code>.json`.
+  (`en.js` + `en.json`), die anderen 20 Sprachen sind `<code>.json`.
 - Um einen String hinzuzufügen oder zu ändern: bearbeiten Sie `en.js` **und** `en.json`, dann aktualisieren Sie jede
   `<code>.json`. Ein sichtbares Label anzufassen bedeutet, **alle** Sprachdateien und
   **alle** `README.<code>.md` zu aktualisieren.
@@ -75,4 +75,4 @@ Pixel-Profile sind allesamt großartige Ausgangspunkte.
 
 ---
 
-> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen; siehe [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen, siehe [CONTRIBUTING.md](CONTRIBUTING.md)._

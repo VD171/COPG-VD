@@ -11,7 +11,7 @@ coisas ficam e as poucas convenções que seguimos.
 
 O COPG-VD é um **spoofer de dispositivo Zygisk**: uma pequena biblioteca nativa que é injetada nos
 processos dos apps para reescrever o fingerprint e o build do dispositivo, mais uma WebUI em JS puro para controlá-lo.
-É um fork do COPG (por AlirezaParsi), mantido por VD171 sob a licença Apache-2.0.
+É um fork do COPG (por AlirezaParsi), mantido por VD171 sob a licença GNU AGPL-3.0-or-later.
 Veja [ARCHITECTURE.md](ARCHITECTURE.md) e [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 
 Por padrão, ele limita o spoof à stack do Google Play por meio do Zygisk, sendo assim uma
@@ -38,7 +38,7 @@ Assistentes e agentes de IA são contribuidores de primeira classe aqui, não um
 - Compile um zip flashável: copie o `libspoof.so` compilado para `module/zygisk/<abi>.so`, depois
   `cd module && zip -r9 ../COPG-VD-dev.zip .` e faça o flash.
 - A WebUI é `module/webroot/` (abra pelo gerenciador de root). A lógica de spoofing é
-  `zygisk/spoof_module.cpp`; o buscador de perfil é `module/fingerprint-update.sh`.
+  `zygisk/spoof_module.cpp`, o buscador de perfil é `module/fingerprint-update.sh`.
 
 ## Convenções
 
@@ -46,15 +46,15 @@ Assistentes e agentes de IA são contribuidores de primeira classe aqui, não um
   cabeçalho de banner do projeto (copie-o de qualquer arquivo existente). O ferramental em `.github/` usa
   um comentário curto no lugar.
 - **Código e comentários em inglês.** Mantenha os comentários mínimos e só onde necessário.
-- **Sem em-dash nem en-dash**; sempre use um hífen simples `-`.
-- A WebUI é **JS puro** (um único `scripts.js`); sem frameworks.
+- **Sem em-dash nem en-dash**, sempre use um hífen simples `-`.
+- A WebUI é **JS puro** (um único `scripts.js`), sem frameworks.
 - **Nunca enfraqueça** uma funcionalidade real: mantenha o spoof coerente e não faça os hooks
   travarem um app ao qual estão anexados (eles têm checagem de null de propósito).
 
 ## Internacionalização (i18n)
 
 - As strings de UI ficam em `module/webroot/lang/`. O inglês é o fallback canônico
-  (`en.js` + `en.json`); os outros 20 idiomas são `<code>.json`.
+  (`en.js` + `en.json`), os outros 20 idiomas são `<code>.json`.
 - Para adicionar ou alterar uma string: edite `en.js` **e** `en.json`, depois atualize cada
   `<code>.json`. Mexer em um rótulo visível significa atualizar **todos** os arquivos de idioma e
   **todos** os `README.<code>.md`.
@@ -75,4 +75,4 @@ perfis Pixel são ótimos pontos de partida.
 
 ---
 
-> _Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas; veja [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Esta documentação foi gerada com o Claude (Anthropic) e é mantida por VD171. Correções e melhorias são bem-vindas, veja [CONTRIBUTING.md](CONTRIBUTING.md)._

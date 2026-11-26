@@ -6,7 +6,7 @@
 
 모듈 전체는 하나의 파일 `/data/adb/COPG-VD/COPG-VD.json`으로 구동됩니다. WebUI가 당신을 위해 그것을
 작성하지만, 손으로 편집할 수 있습니다. 제공되는 예시는 `module/COPG-VD.json.example`에 있습니다.
-이것이 유일한 신뢰 출처입니다; 모듈 디렉터리 아래의 사본은 읽기 전용 기본값일 뿐입니다.
+이것이 유일한 신뢰 출처입니다, 모듈 디렉터리 아래의 사본은 읽기 전용 기본값일 뿐입니다.
 이전 버전에서 `/data/adb/COPG-VD.json`에 남은 설정은 이 디렉터리로 자동으로 이동됩니다.
 모듈 자신의 로그와 상태(`update.log`, `update.state`)도 여기에 존재합니다.
 
@@ -25,7 +25,7 @@
 | `scope_whitelist` | array | `scope_mode`가 `whitelist`일 때 스푸핑을 받는 패키지. |
 | `scope_blacklist` | array | `scope_mode`가 `blacklist`일 때 제외되는 패키지. |
 | `COPG-VD` | object | 프로파일: 제시할 Build 필드(아래 참조). |
-| `COPG-VD-Delete` | array | 설정이 아니라 제거할 필드 이름(Build 필드는 null이 됨; 속성은 `resetprop --delete`로 제거됨). |
+| `COPG-VD-Delete` | array | 설정이 아니라 제거할 필드 이름(Build 필드는 null이 됨, 속성은 `resetprop --delete`로 제거됨). |
 | `COPG-VD-Settings` | object | 프로파일과 함께 이동하는 모듈 설정(아래 참조). |
 | `motor_jni` | bool | Build 필드 엔진(`android.os.Build.*`를 다시 작성). 기본값 `true`. |
 | `motor_prop_hook` | bool | 프로세스별 속성 엔진(clean-room 속성 리맵). 기본값 `true`. |
@@ -76,7 +76,7 @@
 |---|---|---|
 | `resetprop` | bool | 디바이스 전체 resetprop 엔진이 실행되는지 여부. |
 | `autoupdate` | bool | `fingerprint-update.sh`가 부팅마다 한 번 실행되는지 여부. 기본적으로 켜짐. |
-| `spoof_version` | `never` / `rom` / `force` | Android version 그룹이 적용되는 방식. `never`가 기본값. v6.19부터 SDK는 모든 정책에서 ROM 값으로 제한되므로, `force`는 문자열 필드를 강제하지만 SDK를 올릴 수는 없습니다; `force`는 백업을 복원할 때 거부됩니다. |
+| `spoof_version` | `never` / `rom` / `force` | Android version 그룹이 적용되는 방식. `never`가 기본값. v6.19부터 SDK는 모든 정책에서 ROM 값으로 제한되므로, `force`는 문자열 필드를 강제하지만 SDK를 올릴 수는 없습니다, `force`는 백업을 복원할 때 거부됩니다. |
 
 ## `global_fields`
 

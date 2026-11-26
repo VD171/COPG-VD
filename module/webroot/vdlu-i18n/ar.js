@@ -25,7 +25,8 @@ window.VDLU_I18N_AR = {
   savedToast: 'تم الحفظ', saveFail: 'فشل الحفظ', sourceSaved: 'تم حفظ المصدر',
   bootstrapping: 'جارٍ تجهيز أداة التحديث…', bootstrapSub: 'تنزيل لمرة واحدة لأداة الجلب', bootstrapFail: 'تعذّر تجهيز أداة التحديث',
   searching: 'جارٍ البحث…', upToDate: 'محدَّث', nothingNew: 'لا جديد',
-  ahead: 'أحدث من الخلاصة', aheadSub: 'نسختك أحدث من التحديث المنشور', deferred: 'تأجّل التنزيل', deferredSub: 'بانتظار الشبكة المسموح بها - يُستأنف عند الفحص التالي',
+  ahead: 'أحدث من الخلاصة', aheadSub: 'نسختك أحدث من التحديث المنشور', silentUpdate: 'تحديث صامت', silentUpdateSub: 'يطبّق التحديثات في الخلفية دون إظهار شريط إعادة التشغيل.',
+  deferred: 'تأجّل التنزيل', deferredSub: 'بانتظار الشبكة المسموح بها، يُستأنف عند الفحص التالي',
   updateAvail: 'يتوفر تحديث', install: 'تثبيت', fileOne: 'ملف', fileMany: 'ملفات',
   requiresReboot: 'يتطلب إعادة التشغيل', checkFail: 'فشل الفحص', ksuUnavailable: 'واجهة KSU غير متاحة',
   pendingUpdate: 'تحديث معلّق', notNow: 'ليس الآن', srcPlaceholder: 'https://…/&lt;وحدة&gt;'

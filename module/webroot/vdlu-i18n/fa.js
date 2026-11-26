@@ -25,7 +25,8 @@ window.VDLU_I18N_FA = {
   savedToast: 'ذخیره شد', saveFail: 'ذخیره ناموفق بود', sourceSaved: 'منبع ذخیره شد',
   bootstrapping: 'در حال آماده‌سازی به‌روزرسان…', bootstrapSub: 'دانلود یک‌بارهٔ واکشی‌کننده', bootstrapFail: 'آماده‌سازی به‌روزرسان ممکن نشد',
   searching: 'در حال جستجو…', upToDate: 'به‌روز', nothingNew: 'چیز جدیدی نیست',
-  ahead: 'جدیدتر از فید', aheadSub: 'نسخهٔ شما جدیدتر از به‌روزرسانی منتشرشده است', deferred: 'دانلود به تعویق افتاد', deferredSub: 'در انتظار شبکهٔ مجاز - در بررسی بعدی ازسر گرفته می‌شود',
+  ahead: 'جدیدتر از فید', aheadSub: 'نسخهٔ شما جدیدتر از به‌روزرسانی منتشرشده است', silentUpdate: 'به‌روزرسانی بی‌صدا', silentUpdateSub: 'به‌روزرسانی‌ها را در پس‌زمینه و بدون نمایش نوار راه‌اندازی مجدد اعمال می‌کند.',
+  deferred: 'دانلود به تعویق افتاد', deferredSub: 'در انتظار شبکهٔ مجاز، در بررسی بعدی ازسر گرفته می‌شود',
   updateAvail: 'به‌روزرسانی موجود است', install: 'نصب', fileOne: 'فایل', fileMany: 'فایل',
   requiresReboot: 'نیازمند راه‌اندازی مجدد', checkFail: 'بررسی ناموفق بود', ksuUnavailable: 'KSU API در دسترس نیست',
   pendingUpdate: 'به‌روزرسانی در انتظار', notNow: 'الان نه', srcPlaceholder: 'https://…/&lt;ماژول&gt;'

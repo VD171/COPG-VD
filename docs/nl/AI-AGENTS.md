@@ -9,7 +9,7 @@ zonder de WebUI te scrapen. Er zijn twee oppervlakken, en een agent die als root
 gebruikt ze allebei:
 
 1. **Het configuratiebestand** `/data/adb/COPG-VD/COPG-VD.json` - de enige bron van waarheid. Elk
-   profielveld en elke instelling woont hier; dit bestand lezen en schrijven is hoe je verandert wat de
+   profielveld en elke instelling woont hier, dit bestand lezen en schrijven is hoe je verandert wat de
    module vervalst.
 2. **Het shell-startpunt** `fingerprint-update.sh` - een enkel script met stabiele werkwoorden voor het
    controleren, toepassen en ophalen van profielen.
@@ -17,7 +17,7 @@ gebruikt ze allebei:
 ## Het configuratiebestand
 
 `/data/adb/COPG-VD/COPG-VD.json` is een gewoon JSON-object. De module leest het vanuit de geinjecteerde
-processen via een eigen SELinux-regel die het zelf meelevert; het bevat geen inloggegevens. Een meegeleverd
+processen via een eigen SELinux-regel die het zelf meelevert, het bevat geen inloggegevens. Een meegeleverd
 voorbeeld staat in `module/COPG-VD.json.example`, dagelijks vernieuwd vanuit de nieuwste fabrieksimage van
 Google.
 
@@ -47,19 +47,19 @@ apps bereiken.
 sh /data/adb/modules/COPG-VD/fingerprint-update.sh <verb> [arg]
 ```
 
-Het script print voor mensen leesbare regels; de door machines leesbare beginnen met `status:`. De exitcode is
+Het script print voor mensen leesbare regels, de door machines leesbare beginnen met `status:`. De exitcode is
 `0` bij succes en niet-nul bij een fout.
 
 | Werkwoord | Wat het doet | Typische uitvoer |
 |---|---|---|
 | `check` | Vergelijkt het geinstalleerde profiel met de nieuwste upstream build, schrijft niets. | `status: update-available` \| `status: up-to-date` \| `status: local-newer` \| `status: no-config` |
-| `apply` | Haalt het nieuwste profiel op en voegt het samen met de config (alleen Build-velden; je andere sleutels blijven behouden). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
-| `analyze` | Controleert de config zoals die nu is (parse, versie vs ROM, fingerprint-coherentie, onbekende sleutels, datums, props). Print een rapport; de exitcode weerspiegelt red/warn-bevindingen. | een tekstrapport |
+| `apply` | Haalt het nieuwste profiel op en voegt het samen met de config (alleen Build-velden, je andere sleutels blijven behouden). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
+| `analyze` | Controleert de config zoals die nu is (parse, versie vs ROM, fingerprint-coherentie, onbekende sleutels, datums, props). Print een rapport, de exitcode weerspiegelt red/warn-bevindingen. | een tekstrapport |
 | `fetch-index` | Downloadt en verifieert de ondertekende apparaatindex en print die (`index.json`). | de index-JSON \| `status: sig-failed` \| `status: download-failed` |
 | `fetch <path>` | Downloadt de `build.prop` van een apparaat (pad uit de index, bv. `pixel-9a/latest.prop`) en schrijft de Build-velden ervan naar de config. | `status: fetched` \| `status: bad-path` \| `status: map-failed` \| `status: write-failed` |
 | `sync-settings` | Migreert staat/config van de oude platte indeling naar `/data/adb/COPG-VD/`. | - |
 | `migrate` | Eenmalige config-migratie tussen moduleversies. | `status: migrated` \| `status: nothing-to-migrate` |
-| `boot` | De automatische update eens per boot; bedoeld voor `service.sh`, niet voor interactief gebruik. | schrijft `update.status` |
+| `boot` | De automatische update eens per boot, bedoeld voor `service.sh`, niet voor interactief gebruik. | schrijft `update.status` |
 
 Elke download wordt voor gebruik gevalideerd (de enige downloader op het toestel is busybox `wget`, die TLS
 niet kan valideren), en de profiel-updater gaat nooit achteruit: een upstream build ouder dan de
@@ -78,7 +78,7 @@ geverifieerd voordat de inhoud wordt gelezen.
 
 ## Veiligheidsgrenzen
 
-- De config wijzigen of een profiel toepassen verandert wat elke beoogde app ziet; bevestig de bedoeling
+- De config wijzigen of een profiel toepassen verandert wat elke beoogde app ziet, bevestig de bedoeling
   voordat je schrijft, zoals de WebUI doet.
 - Versoepel nooit een echte coherentiebescherming: de SDK is onder elk beleid afgetopt op het echte framework,
   de manufacturer blijft in de pas met de rest van het profiel, en een profiel voor een ander apparaat wordt
@@ -89,4 +89,4 @@ geverifieerd voordat de inhoud wordt gelezen.
 
 ---
 
-> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom; zie [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom, zie [CONTRIBUTING.md](CONTRIBUTING.md)._

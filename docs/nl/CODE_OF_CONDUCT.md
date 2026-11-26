@@ -9,7 +9,7 @@ discussies technisch en constructief.
 
 - Wees vriendelijk. Geen intimidatie, persoonlijke aanvallen of discriminatie.
 - Bekritiseer ideeën en code, niet mensen.
-- Help nieuwkomers; iedereen was ooit nieuw.
+- Help nieuwkomers, iedereen was ooit nieuw.
 
 Onaanvaardbaar gedrag kan privé worden gemeld aan de maintainer (zie [SECURITY.md](SECURITY.md)
 voor contact). Maintainers mogen opmerkingen, commits, issues en bijdragen verwijderen die
@@ -22,4 +22,4 @@ Covenant.
 
 ---
 
-> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom; zie [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom, zie [CONTRIBUTING.md](CONTRIBUTING.md)._

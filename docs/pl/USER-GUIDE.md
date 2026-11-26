@@ -7,7 +7,7 @@
 COPG-VD przepisuje odcisk urządzenia (fingerprint) oraz build tak, aby wybrane przez Ciebie
 aplikacje widziały Pixela zamiast Twojego prawdziwego urządzenia. Ten przewodnik prowadzi Cię
 od instalacji do działającej konfiguracji i przez decyzje po drodze. Opis każdego pola i wartości
-znajdziesz w [CONFIGURATION.md](CONFIGURATION.md); jak to działa od środka: zobacz [ARCHITECTURE.md](ARCHITECTURE.md).
+znajdziesz w [CONFIGURATION.md](CONFIGURATION.md), jak to działa od środka: zobacz [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Instalacja
 
@@ -49,7 +49,7 @@ Każdy silnik jest niezależny i można go wyłączyć. Wszystkie są domyślnie
 - **resetprop**: przepisuje właściwości systemowe na poziomie całego urządzenia, grupami (tożsamość,
   wersja, stan rozruchu, SELinux, adb/usb, anty-emulator oraz przebieg porządkujący). W trybie z
   zakresem grupy tożsamości i wersji pozostają poza przebiegiem obejmującym całe urządzenie (Zygisk
-  dostarcza je per proces); grupy boot, lock i SELinux pozostają globalne. Przełącz w
+  dostarcza je per proces), grupy boot, lock i SELinux pozostają globalne. Przełącz w
   `COPG-VD-Settings.resetprop`.
 - **DRM / Widevine (`motor_drm`, domyślnie wyłączony)**: zgłasza wybrany poziom bezpieczeństwa
   Widevine (L1 lub L3) aplikacjom, które go odczytują. Zobacz sekcję DRM poniżej.
@@ -88,7 +88,7 @@ Android version** (`COPG-VD-Settings.spoof_version`) decyduje, czy w ogóle są 
 - `rom`: stosuje tylko to, co nie przekracza ROM-u, co w praktyce oznacza obniżenie SDK.
 - `force`: wymusza pola wersji, o które prosi konfiguracja. SDK i tak jest ograniczone do wartości
   ROM-u nawet tutaj (od v6.19), ponieważ podniesienie SDK powyżej prawdziwego frameworku tylko powoduje
-  softloop i nie ma żadnego zastosowania, więc `force` już nie powoduje softloopa; wymusza pola tekstowe (release, codename).
+  softloop i nie ma żadnego zastosowania, więc `force` już nie powoduje softloopa, wymusza pola tekstowe (release, codename).
 
 Prawdziwa wersja jest odczytywana z `/system/build.prop`, nigdy z `getprop` (który jest tym
 samym, co ten moduł fałszuje). `force` jest również odrzucane podczas przywracania kopii zapasowej, więc
@@ -102,7 +102,7 @@ Domyślnie wyłączony (`motor_drm`). Gdy włączony, zgłasza wybrany poziom Wi
 Domyślnie spoof DRM podąża za `scope_mode`. Aby zastosować go do konkretnego zestawu aplikacji
 zamiast tego, niezależnie od głównego zakresu, wymień je w `drm_targets`. Moduł wówczas
 pozostaje załadowany w wymienionej aplikacji **wyłącznie** dla haka DRM, nawet gdy ta aplikacja jest poza
-głównym zakresem; pusta lub nieobecna lista oznacza podążanie za zakresem. Wymaga to trybu z zakresem (nie
+głównym zakresem, pusta lub nieobecna lista oznacza podążanie za zakresem. Wymaga to trybu z zakresem (nie
 `global`) i zaczyna obowiązywać po następnym **ponownym uruchomieniu**.
 
 ## Analyze: sprawdź swoją konfigurację
@@ -131,7 +131,7 @@ Opcjonalne, ale łatwy sposób sterowania wszystkim. Pięć zakładek:
   oraz raport Diagnostics (jeden przycisk do odczytania i wyeksportowania wszystkiego przydatnego do zgłoszenia
   błędu).
 
-Nie wykonuje żadnego żądania sieciowego; wszystko, czego potrzebuje, jest dostarczane wewnątrz modułu.
+Nie wykonuje żadnego żądania sieciowego, wszystko, czego potrzebuje, jest dostarczane wewnątrz modułu.
 
 ## Rozwiązywanie problemów
 
@@ -150,4 +150,4 @@ Nie wykonuje żadnego żądania sieciowego; wszystko, czego potrzebuje, jest dos
 
 ---
 
-> _Ta dokumentacja została wygenerowana za pomocą Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane; zobacz [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Ta dokumentacja została wygenerowana za pomocą Claude (Anthropic) i jest utrzymywana przez VD171. Poprawki i ulepszenia są mile widziane, zobacz [CONTRIBUTING.md](CONTRIBUTING.md)._

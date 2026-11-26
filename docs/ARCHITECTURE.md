@@ -40,7 +40,7 @@ Each is independent and switchable.
 - **resetprop (device-wide).** Writes system properties by group: identity, version,
   boot state, SELinux, adb/usb, anti-emulator, plus a cleanup pass. The boot scripts run
   it. In a scoped mode the identity and version groups are left out (Zygisk delivers them
-  per process); boot, lock and SELinux groups stay global so the device is coherent.
+  per process), boot, lock and SELinux groups stay global so the device is coherent.
 - **DRM / Widevine (`motor_drm`).** Hooks the `MediaDrm` methods that report the Widevine
   security level (`getSecurityLevel`, `getPropertyString`) and returns the configured
   level. The hooks are null-checked, so a malformed profile degrades gracefully instead of
@@ -53,7 +53,7 @@ The injected process runs in the zygote SELinux domain, which by default cannot 
 `/data/adb`. The module ships its own `sepolicy.rule` to allow it, and, as a fallback,
 can read the config through its open module directory (`getModuleDir`), so it keeps
 working even if a Zygisk build stops granting the path. The file is parsed with a small
-embedded JSON parser (`jsmn`); a file that does not parse means the module spoofs nothing.
+embedded JSON parser (`jsmn`), a file that does not parse means the module spoofs nothing.
 
 ## Keeping the profile fresh
 
@@ -69,7 +69,7 @@ side and [CONFIGURATION.md](CONFIGURATION.md) for the fields.
 Raising `SDK_INT` / `ANDROID_VERSION` above what the ROM's framework really is makes apps
 call APIs that do not exist, which crashes Google's apps and reboots the phone into a
 softloop. The version group is therefore off by default and gated behind
-`spoof_version`; and since v6.19 the SDK is additionally capped at the real framework value under **every** policy (Force included), so even a forced higher-SDK profile cannot softloop (Force still forces the string version fields). The module reads the real version from `/system/build.prop`, never from
+`spoof_version`, and since v6.19 the SDK is additionally capped at the real framework value under **every** policy (Force included), so even a forced higher-SDK profile cannot softloop (Force still forces the string version fields). The module reads the real version from `/system/build.prop`, never from
 `getprop`, because `getprop` is exactly what it falsifies. See the trap in
 [USER-GUIDE.md](USER-GUIDE.md#the-android-version-trap).
 
@@ -77,4 +77,4 @@ softloop. The version group is therefore off by default and gated behind
 
 ---
 
-> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome; see [CONTRIBUTING.md](../CONTRIBUTING.md)._
+> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome, see [CONTRIBUTING.md](../CONTRIBUTING.md)._

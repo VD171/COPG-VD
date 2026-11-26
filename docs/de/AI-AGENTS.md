@@ -9,7 +9,7 @@ gesteuert zu werden, ohne die WebUI abzuscrapen. Es gibt zwei Oberflächen, und 
 Agent (wie es die WebUI tut) nutzt beide:
 
 1. **Die Konfigurationsdatei** `/data/adb/COPG-VD/COPG-VD.json` - die einzige Quelle der Wahrheit. Jedes
-   Profilfeld und jede Einstellung liegt hier; das Lesen und Schreiben dieser Datei ist der Weg, zu ändern,
+   Profilfeld und jede Einstellung liegt hier, das Lesen und Schreiben dieser Datei ist der Weg, zu ändern,
    was das Modul spooft.
 2. **Der Shell-Einstiegspunkt** `fingerprint-update.sh` - ein Skript mit stabilen Verben zum Prüfen,
    Anwenden und Holen von Profilen.
@@ -17,7 +17,7 @@ Agent (wie es die WebUI tut) nutzt beide:
 ## Die Konfigurationsdatei
 
 `/data/adb/COPG-VD/COPG-VD.json` ist ein schlichtes JSON-Objekt. Das Modul liest sie aus den injizierten
-Prozessen über eine eigene SELinux-Regel, die es selbst mitliefert; sie enthält keine Zugangsdaten. Ein
+Prozessen über eine eigene SELinux-Regel, die es selbst mitliefert, sie enthält keine Zugangsdaten. Ein
 mitgeliefertes Beispiel liegt unter `module/COPG-VD.json.example`, täglich aus dem neuesten
 Google-Factory-Image aufgefrischt.
 
@@ -47,19 +47,19 @@ damit diese die Apps erreichen.
 sh /data/adb/modules/COPG-VD/fingerprint-update.sh <verb> [arg]
 ```
 
-Das Skript gibt menschenlesbare Zeilen aus; maschinenlesbare beginnen mit `status:`. Sein Exit-Code ist
+Das Skript gibt menschenlesbare Zeilen aus, maschinenlesbare beginnen mit `status:`. Sein Exit-Code ist
 `0` bei Erfolg und ungleich null bei Fehlschlag.
 
 | Verb | Was es tut | Typische Ausgabe |
 |---|---|---|
 | `check` | Vergleicht das installierte Profil mit dem neuesten Upstream-Build, schreibt nichts. | `status: update-available` \| `status: up-to-date` \| `status: local-newer` \| `status: no-config` |
-| `apply` | Holt das neueste Profil und merged es in die Konfiguration (nur Build-Felder; deine anderen Schlüssel bleiben erhalten). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
-| `analyze` | Prüft die Konfiguration im aktuellen Zustand (Parsen, Version vs. ROM, Fingerprint-Kohärenz, unbekannte Schlüssel, Daten, Props). Gibt einen Bericht aus; der Exit-Code spiegelt rote/Warn-Befunde wider. | ein Textbericht |
+| `apply` | Holt das neueste Profil und merged es in die Konfiguration (nur Build-Felder, deine anderen Schlüssel bleiben erhalten). | `status: applied` \| `status: up-to-date` \| `status: local-newer` \| `status: analyze-red` \| `status: skipped-custom-device` \| `status: failed` |
+| `analyze` | Prüft die Konfiguration im aktuellen Zustand (Parsen, Version vs. ROM, Fingerprint-Kohärenz, unbekannte Schlüssel, Daten, Props). Gibt einen Bericht aus, der Exit-Code spiegelt rote/Warn-Befunde wider. | ein Textbericht |
 | `fetch-index` | Lädt den signierten Geräteindex herunter, verifiziert ihn und gibt ihn aus (`index.json`). | das Index-JSON \| `status: sig-failed` \| `status: download-failed` |
 | `fetch <path>` | Lädt die `build.prop` eines Geräts herunter (Pfad aus dem Index, z. B. `pixel-9a/latest.prop`) und schreibt dessen Build-Felder in die Konfiguration. | `status: fetched` \| `status: bad-path` \| `status: map-failed` \| `status: write-failed` |
 | `sync-settings` | Migriert Zustand/Konfiguration vom alten flachen Layout nach `/data/adb/COPG-VD/`. | - |
 | `migrate` | Einmalige Konfigurationsmigration zwischen Modulversionen. | `status: migrated` \| `status: nothing-to-migrate` |
-| `boot` | Das Auto-Update einmal pro Boot; für `service.sh` gedacht, nicht für interaktiven Gebrauch. | schreibt `update.status` |
+| `boot` | Das Auto-Update einmal pro Boot, für `service.sh` gedacht, nicht für interaktiven Gebrauch. | schreibt `update.status` |
 
 Jeder Download wird vor der Verwendung validiert (der einzige On-Device-Downloader ist busybox `wget`, das
 TLS nicht validieren kann), und der Profil-Updater geht nie rückwärts: Ein Upstream-Build, der älter ist
@@ -89,4 +89,4 @@ ed25519-Signatur, die verifiziert wird, bevor der Inhalt gelesen wird.
 
 ---
 
-> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen; siehe [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Diese Dokumentation wurde mit Claude (Anthropic) erstellt und wird von VD171 gepflegt. Korrekturen und Verbesserungen sind willkommen, siehe [CONTRIBUTING.md](CONTRIBUTING.md)._

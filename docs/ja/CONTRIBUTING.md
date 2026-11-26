@@ -11,7 +11,7 @@
 
 COPG-VD は **Zygisk デバイススプーファー** です: デバイスの fingerprint と build を書き換えるために
 アプリプロセスに注入される小さなネイティブライブラリと、それを操作するバニラ JS の WebUI です。
-COPG(AlirezaParsi による)のフォークで、VD171 が Apache-2.0 ライセンスのもとで保守しています。
+COPG(AlirezaParsi による)のフォークで、VD171 が GNU AGPL-3.0-or-later ライセンスのもとで保守しています。
 [ARCHITECTURE.md](ARCHITECTURE.md) と [FILE-STRUCTURE.md](FILE-STRUCTURE.md) を参照してください。
 
 デフォルトでは Zygisk を通じてスプーフを Google Play スタックに限定するため、PlayIntegrityFix より
@@ -38,7 +38,7 @@ AI アシスタントとエージェントは、ここでは後付けではな�
 - フラッシュ可能な zip をビルドします: ビルドされた `libspoof.so` を `module/zygisk/<abi>.so` にコピーし、
   次に `cd module && zip -r9 ../COPG-VD-dev.zip .` してフラッシュします。
 - WebUI は `module/webroot/` です(root マネージャーから開きます)。スプーフィングロジックは
-  `zygisk/spoof_module.cpp` です; プロファイル取得は `module/fingerprint-update.sh` です。
+  `zygisk/spoof_module.cpp` です、プロファイル取得は `module/fingerprint-update.sh` です。
 
 ## 慣習
 
@@ -46,15 +46,15 @@ AI アシスタントとエージェントは、ここでは後付けではな�
   バナーヘッダーで始まります(既存のファイルからコピーしてください)。`.github/` 以下のツーリングは
   代わりに短いコメントを使用します。
 - **コードとコメントは英語で。** コメントは最小限に、必要な場所だけにしてください。
-- **em-dash や en-dash は使わない**; 常に単純なハイフン `-` を使用してください。
-- WebUI は **バニラ JS**(1 つの `scripts.js`)です; フレームワークはありません。
+- **em-dash や en-dash は使わない**、常に単純なハイフン `-` を使用してください。
+- WebUI は **バニラ JS**(1 つの `scripts.js`)です、フレームワークはありません。
 - 本物の機能を **決して弱めない**: スプーフを一貫させ、フックが取り付けられているアプリを
   クラッシュさせないでください(意図的に null チェックされています)。
 
 ## 国際化(i18n)
 
 - UI 文字列は `module/webroot/lang/` にあります。英語が正規のフォールバック
-  (`en.js` + `en.json`)です; 他の 20 言語は `<code>.json` です。
+  (`en.js` + `en.json`)です、他の 20 言語は `<code>.json` です。
 - 文字列を追加または変更するには: `en.js` **と** `en.json` を編集し、次にすべての
   `<code>.json` を更新します。可視ラベルに触れることは、**すべての**言語ファイルと
   **すべての** `README.<code>.md` を更新することを意味します。

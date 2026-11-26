@@ -1,6 +1,25 @@
 <!--
-  COPG-VD: global device spoofer: spoof your device fingerprint and build.
-  Copyright (C) 2026  AlirezaParsi & VD171. SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+  ======================================================================
+   COPG-VD  ::  global device spoofer
+   Spoof your device fingerprint and build.
+
+   Copyright (C) 2026  AlirezaParsi & VD171 (Fork by VD171)
+   SPDX-License-Identifier: AGPL-3.0-or-later
+
+   Licensed under the GNU AGPL v3.0 or later. You may obtain a copy at
+   https://www.gnu.org/licenses/agpl-3.0.html
+
+   Site           : https://vd171.ru
+   Site           : https://vd.priv8.ru
+   Source         : https://github.com/VD171/COPG-VD
+   GitHub         : @VD171 https://github.com/VD171
+   XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+   XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+   Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+   Channel        : @Priv8_VD https://t.me/Priv8_VD
+   Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+   E-mail         : vd.priv8@pm.me
+  ======================================================================
 -->
 
 # COPG-VD
@@ -11,7 +30,7 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases/latest"><img src="https://img.shields.io/github/v/release/VD171/COPG-VD?label=release&color=2ee89d" alt="Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1a7f37" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-1a7f37" alt="License"></a>
   <a href="https://github.com/VD171/COPG-VD/releases"><img src="https://img.shields.io/github/downloads/VD171/COPG-VD/total?label=downloads&color=8250df" alt="Downloads"></a>
   <a href="https://github.com/VD171/COPG-VD/stargazers"><img src="https://img.shields.io/github/stars/VD171/COPG-VD?color=d29922" alt="Stars"></a>
 </p>
@@ -32,10 +51,10 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · العربية · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
-  <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
+  <img src="docs/screenshots/ar/device.png" width="24%" alt="Device"> <img src="docs/screenshots/ar/spoofing.png" width="24%" alt="Spoofing"> <img src="docs/screenshots/ar/system.png" width="24%" alt="System"> <img src="docs/screenshots/ar/tools.png" width="24%" alt="Tools">
 </p>
 
 ---
@@ -170,6 +189,16 @@ WebUI اختياري (يمكن تعديل كل شيء في إعداد JSON مب�
 ### الإعدادات في ملف الإعداد
 يحمل `COPG-VD.json` إعداداته بجوار الملف الشخصي، بحيث تسافر اختياراتك مع النسخة الاحتياطية ويمكن تعديلها يدوياً: `scope_mode`، ومفاتيح الـ engines، ومجموعات resetprop، و`global_fields`، وكائن `COPG-VD-Settings` (`resetprop`، و`autoupdate`، و`spoof_version`). كل شيء موجود في هذا الملف الواحد: تقرأ سكربتات الإقلاع وWebUI الإعدادات منه مباشرةً، لذا تبقى اختياراتك بعد تحديث الوحدة. `"spoof_version": "force"` يُرفض من الملف ويُخفَّض: استعادة نسخة احتياطية قديمة يجب ألا تعيد تفعيله من وراء ظهرك.  
 
+## التحديثات التزايدية (VDLU)
+
+يأتي COPG-VD مع محرك **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (مُضمَّن في `module/vdlu/`): يحدّث الموديول نفسه بجلب الملفات التي تغيّرت فقط (كتل معنونة بالمحتوى + ملف `manifest.json` موقّع)، بدلاً من إعادة تنزيل ملف `.zip` بالكامل. الوضع **المُحصَّن** (Hardened): توقيع ed25519 إلزامي والرجوع لإصدار أقدم محظور؛ ويبقى ملف `.zip` الكامل صالحاً كحل احتياطي.
+
+- **`vdlu/`** (المُرفق في ملف الـ zip): `update.sh` (المحرك) + `vdlu-verify` + `config.default` + `keyring/` (المفتاح العام).
+- **الحالة** في `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback)، خارج الموديول، وتبقى بعد إعادة التثبيت.
+- **مُشغِّل الإقلاع:** `post-fs-data.sh`، قبل zygote، يحتوي COPG-VD على `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard)، لذا يتم تجهيز ملف `.so` الجديد وتبديله قبل أن يربطه zygote.
+- **واجهة الويب:** لوحة **Updates** (`webroot/vdlu.js`) مع إشعار تقدّم وزر إلغاء.
+- **الإصدار:** راجع `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`، أرشفة الـ manifest، و`vdlu-gc` يحذف الكتل اليتيمة، ودفع Pages على دفعات).
+
 <!-- vd-docs -->
 ## التوثيق
 
@@ -180,16 +209,6 @@ WebUI اختياري (يمكن تعديل كل شيء في إعداد JSON مب�
 - **[وكلاء الذكاء الاصطناعي](https://github.com/VD171/COPG-VD/wiki/ar-AI-AGENTS)**: قُد الإعداد والمحدِّث بلا واجهة.
 
 <!-- /vd-docs -->
-
-## التحديثات التزايدية (VDLU)
-
-يأتي COPG-VD مع محرك **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (مُضمَّن في `module/vdlu/`): يحدّث الموديول نفسه بجلب الملفات التي تغيّرت فقط (كتل معنونة بالمحتوى + ملف `manifest.json` موقّع)، بدلاً من إعادة تنزيل ملف `.zip` بالكامل. الوضع **المُحصَّن** (Hardened): توقيع ed25519 إلزامي والرجوع لإصدار أقدم محظور؛ ويبقى ملف `.zip` الكامل صالحاً كحل احتياطي.
-
-- **`vdlu/`** (المُرفق في ملف الـ zip): `update.sh` (المحرك) + `vdlu-verify` + `config.default` + `keyring/` (المفتاح العام).
-- **الحالة** في `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - خارج الموديول، وتبقى بعد إعادة التثبيت.
-- **مُشغِّل الإقلاع:** `post-fs-data.sh`، قبل zygote - يحتوي COPG-VD على `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard)، لذا يتم تجهيز ملف `.so` الجديد وتبديله قبل أن يربطه zygote.
-- **واجهة الويب:** لوحة **Updates** (`webroot/vdlu.js`) مع إشعار تقدّم وزر إلغاء.
-- **الإصدار:** راجع `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`، أرشفة الـ manifest، و`vdlu-gc` يحذف الكتل اليتيمة، ودفع Pages على دفعات).
 
 ## انظر أيضًا
 
@@ -205,20 +224,19 @@ WebUI اختياري (يمكن تعديل كل شيء في إعداد JSON مب�
 
 ## جهات الاتصال
 
-- Site           : https://vd171.ru
-- Site           : https://vd.priv8.ru
-- Source         : https://github.com/VD171/COPG-VD
-- GitHub         : [@VD171](https://github.com/VD171)
-- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
-- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
-- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
-- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
-- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
-- E-mail         : vd.priv8@pm.me
+- https://vd171.ru
+- https://vd.priv8.ru
+- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+- **Channel:** @Priv8_VD https://t.me/Priv8_VD
+- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
+- **E-mail:** vd.priv8@pm.me
+- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
+- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
+- **GitHub:** @VD171 https://github.com/VD171
 
 ## الترخيص
 
-**Apache-2.0**: راجع [LICENSE](LICENSE). COPG-VD هو تفريعة (fork) من قِبل VD171 للمشروع الأصلي COPG من AlirezaParsi، ويستمر تحت الترخيص نفسه.
+**AGPL-3.0-or-later**: راجع [LICENSE](LICENSE). COPG-VD هو تفريعة (fork) من قِبل VD171 للمشروع الأصلي COPG من AlirezaParsi (Apache-2.0)، وأُعيد ترخيصه تحت GNU AGPL-3.0-or-later. حقوق النسخ على الشبكة (NETWORK COPYLEFT): إذا شغّلت نسخة معدّلة، حتى كخدمة، فيجب أن تتيح شيفرتها المصدرية.
 
 ## العلامات التجارية
 
@@ -227,3 +245,7 @@ COPG-VD مشروع مستقل وغير رسمي. ليس له ارتباط بـ G
 ## الوسوم
 
 `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG-VD`
+
+---
+
+📣 **انضم إلى القناة للتحديثات:** @Priv8_VD https://t.me/Priv8_VD

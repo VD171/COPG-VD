@@ -1,6 +1,25 @@
 <!--
-  COPG-VD: global device spoofer: spoof your device fingerprint and build.
-  Copyright (C) 2026  AlirezaParsi & VD171. SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+  ======================================================================
+   COPG-VD  ::  global device spoofer
+   Spoof your device fingerprint and build.
+
+   Copyright (C) 2026  AlirezaParsi & VD171 (Fork by VD171)
+   SPDX-License-Identifier: AGPL-3.0-or-later
+
+   Licensed under the GNU AGPL v3.0 or later. You may obtain a copy at
+   https://www.gnu.org/licenses/agpl-3.0.html
+
+   Site           : https://vd171.ru
+   Site           : https://vd.priv8.ru
+   Source         : https://github.com/VD171/COPG-VD
+   GitHub         : @VD171 https://github.com/VD171
+   XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+   XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+   Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+   Channel        : @Priv8_VD https://t.me/Priv8_VD
+   Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+   E-mail         : vd.priv8@pm.me
+  ======================================================================
 -->
 
 # COPG-VD
@@ -11,7 +30,7 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases/latest"><img src="https://img.shields.io/github/v/release/VD171/COPG-VD?label=release&color=2ee89d" alt="Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1a7f37" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-1a7f37" alt="License"></a>
   <a href="https://github.com/VD171/COPG-VD/releases"><img src="https://img.shields.io/github/downloads/VD171/COPG-VD/total?label=downloads&color=8250df" alt="Downloads"></a>
   <a href="https://github.com/VD171/COPG-VD/stargazers"><img src="https://img.shields.io/github/stars/VD171/COPG-VD?color=d29922" alt="Stars"></a>
 </p>
@@ -32,10 +51,10 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · हिन्दी · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
-  <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
+  <img src="docs/screenshots/hi/device.png" width="24%" alt="Device"> <img src="docs/screenshots/hi/spoofing.png" width="24%" alt="Spoofing"> <img src="docs/screenshots/hi/system.png" width="24%" alt="System"> <img src="docs/screenshots/hi/tools.png" width="24%" alt="Tools">
 </p>
 
 ---
@@ -49,10 +68,10 @@
 - **दायरा नियंत्रण:** स्पूफ़ की गई पहचान केवल Google Play स्टैक को (डिफ़ॉल्ट), पूरे डिवाइस को, एक whitelist को, या एक blacklist को छोड़कर सब कुछ को पहुँचाएँ। किसी सीमित दायरे वाले मोड में Zygisk पहचान को प्रति प्रोसेस पहुँचाता है, इसलिए यह कभी भी ग्लोबल प्रॉपर्टीज़ के ज़रिए लीक नहीं होती।
 - **स्वतंत्र engine:** Build फ़ील्ड (`android.os.Build.*` का एक JNI पुनर्लेखन), प्रति-प्रोसेस एक clean-room property hook (कोई function hook नहीं), समूहबद्ध `resetprop`, और अपनी स्वयं की target सूची के साथ एक वैकल्पिक DRM / Widevine स्तर (L1 या L3)। हर एक को बंद किया जा सकता है।
 - **प्रति-फ़ील्ड नियंत्रण:** हर Build फ़ील्ड को सेट, खाली, हटाया या छोड़ा जा सकता है, और उन मानों के लिए एक `global_fields` सूची होती है जिन्हें पूरे डिवाइस में एक समान रहना चाहिए।
-- **हमेशा ताज़ा fingerprint:** एक Pixel प्रोफ़ाइल बॉक्स में ही आती है और नवीनतम Google फ़ैक्ट्री इमेज से प्रति बूट एक बार खुद को ताज़ा करती है; आप WebUI से कोई दूसरी Pixel प्रोफ़ाइल भी ला सकते हैं। यह कभी डाउनग्रेड नहीं करती और किसी भिन्न डिवाइस की प्रोफ़ाइल को अस्वीकार करती है।
+- **हमेशा ताज़ा fingerprint:** एक Pixel प्रोफ़ाइल बॉक्स में ही आती है और नवीनतम Google फ़ैक्ट्री इमेज से प्रति बूट एक बार खुद को ताज़ा करती है, आप WebUI से कोई दूसरी Pixel प्रोफ़ाइल भी ला सकते हैं। यह कभी डाउनग्रेड नहीं करती और किसी भिन्न डिवाइस की प्रोफ़ाइल को अस्वीकार करती है।
 - **सुरक्षित Android-संस्करण नीति:** SDK को कभी भी आपके असली framework से ऊपर नहीं उठाया जाता (उसे उठाने से फ़ोन केवल softloop करता है), हर नीति के तहत।
 - **Analyze:** कॉन्फ़िग की आपकी ROM और props के विरुद्ध जाँच करता है और किसी भी असंगति को ऐप्स तक पहुँचने से पहले चिह्नित करता है।
-- **WebUI:** सब कुछ चलाने के लिए पाँच टैब, बिना किसी नेटवर्क अनुरोध के; कॉन्फ़िग फ़ाइल सभी सेटिंग्स को धारण करती है ताकि वे मॉड्यूल अपडेट के बाद भी बनी रहें।
+- **WebUI:** सब कुछ चलाने के लिए पाँच टैब, बिना किसी नेटवर्क अनुरोध के, कॉन्फ़िग फ़ाइल सभी सेटिंग्स को धारण करती है ताकि वे मॉड्यूल अपडेट के बाद भी बनी रहें।
 - **इंक्रीमेंटल स्व-अपडेट (VDLU)** और एक **चार-ABI** नेटिव लाइब्रेरी (arm64-v8a, armeabi-v7a, x86, x86_64)।
 
 ## एआई एजेंट
@@ -65,11 +84,11 @@ KernelSU, APatch या Magisk में zip को फ़्लैश करे
 
 ## सुरक्षा
 
-स्पूफ़ केवल उपयोगकर्ता-पक्ष पर है: COPG-VD कभी भी SDK को आपके असली framework से ऊपर नहीं उठाता, निर्माता को प्रोफ़ाइल के बाकी हिस्से के साथ सुसंगत रखता है, और असली संस्करण को `/system/build.prop` से पढ़ता है, कभी भी उन प्रॉपर्टीज़ से नहीं जिन्हें वह झुठलाता है। स्व-अपडेटर को एक वैध ed25519 हस्ताक्षर चाहिए और वह डाउनग्रेड को अस्वीकार करता है; WebUI कोई नेटवर्क अनुरोध नहीं करती। समस्याओं की रिपोर्ट [SECURITY.md](docs/hi/SECURITY.md) के अनुसार करें।
+स्पूफ़ केवल उपयोगकर्ता-पक्ष पर है: COPG-VD कभी भी SDK को आपके असली framework से ऊपर नहीं उठाता, निर्माता को प्रोफ़ाइल के बाकी हिस्से के साथ सुसंगत रखता है, और असली संस्करण को `/system/build.prop` से पढ़ता है, कभी भी उन प्रॉपर्टीज़ से नहीं जिन्हें वह झुठलाता है। स्व-अपडेटर को एक वैध ed25519 हस्ताक्षर चाहिए और वह डाउनग्रेड को अस्वीकार करता है, WebUI कोई नेटवर्क अनुरोध नहीं करती। समस्याओं की रिपोर्ट [SECURITY.md](docs/hi/SECURITY.md) के अनुसार करें।
 
 ## बिल्ड
 
-हमेशा release, कभी debug नहीं। नेटिव लाइब्रेरी और स्कोप हेल्पर को CI में सभी चार ABI के लिए बनाया जाता है; release वर्कफ़्लो फ़्लैश-योग्य zip को इकट्ठा करता है, प्रति-फ़ाइल `.sha256` साथी लिखता है, हस्ताक्षरित VDLU बेसलाइन को फिर से उत्पन्न करता है और `github-actions[bot]` के रूप में प्रकाशित करता है। देखें [CONTRIBUTING.md](docs/hi/CONTRIBUTING.md)।
+हमेशा release, कभी debug नहीं। नेटिव लाइब्रेरी और स्कोप हेल्पर को CI में सभी चार ABI के लिए बनाया जाता है, release वर्कफ़्लो फ़्लैश-योग्य zip को इकट्ठा करता है, प्रति-फ़ाइल `.sha256` साथी लिखता है, हस्ताक्षरित VDLU बेसलाइन को फिर से उत्पन्न करता है और `github-actions[bot]` के रूप में प्रकाशित करता है। देखें [CONTRIBUTING.md](docs/hi/CONTRIBUTING.md)।
 
 ## इसका उपयोग कैसे करें?
 मॉड्यूल इंस्टॉल करें, रिबूट करें, और शामिल किया गया प्रोफ़ाइल (एक Pixel) लक्षित ऐप्स के लिए स्पूफ हो जाता है। एक काम करने वाले fingerprint के साथ आपको PlayIntegrityFix या GooglePhotosUnlimited की ज़रूरत नहीं है।  
@@ -78,7 +97,7 @@ KernelSU, APatch या Magisk में zip को फ़्लैश करे
 ### Scope: स्पूफ कौन देखता है
 `scope_mode` तय करता है कि किन प्रक्रियाओं को स्पूफ की गई पहचान मिलती है। सीमित दायरे वाले मोड में पहचान Zygisk द्वारा प्रति प्रक्रिया पहुँचाई जाती है और ग्लोबल प्रॉपर्टीज़ के माध्यम से बाकी सिस्टम को लीक नहीं होती।  
 * **Google Play** (`playstore`, डिफ़ॉल्ट): केवल Play स्टैक (Google Play services, इसकी unstable प्रक्रिया और Play Store)।  
-* **Global**: पूरा डिवाइस; हर प्रक्रिया इसे देखती है।  
+* **Global**: पूरा डिवाइस, हर प्रक्रिया इसे देखती है।  
 * **Whitelist**: केवल `scope_whitelist` में मौजूद ऐप्स।  
 * **Blacklist**: `scope_blacklist` में मौजूद ऐप्स को छोड़कर हर ऐप।  
 
@@ -86,15 +105,15 @@ KernelSU, APatch या Magisk में zip को फ़्लैश करे
 हर एक स्वतंत्र है और इसे बंद किया जा सकता है:  
 * **Build fields (JNI)**: लक्षित प्रक्रियाओं में `android.os.Build.*` को फिर से लिखता है।  
 * **Property hook**: लक्षित प्रक्रियाओं को स्पूफ की गई सिस्टम प्रॉपर्टीज़ प्रस्तुत करता है (प्रॉपर्टी क्षेत्र का प्रति-प्रक्रिया clean-room रीमैप, बिना किसी फ़ंक्शन hook के)।  
-* **resetprop**: सिस्टम प्रॉपर्टीज़ को फिर से लिखता है, समूह के अनुसार प्रबंधित: identity, version, boot state, SELinux, adb/usb, anti-emulator और एक cleanup पास। सीमित दायरे वाले मोड में identity और version समूह पूरे-डिवाइस वाले resetprop से बाहर रहते हैं (Zygisk उन्हें प्रति प्रक्रिया पहुँचाता है); boot/lock/SELinux समूह ग्लोबल रहते हैं।  
-* **DRM / Widevine** (डिफ़ॉल्ट रूप से बंद): इसे पढ़ने वाले ऐप्स को एक चुना हुआ Widevine सुरक्षा स्तर, L1 या L3, रिपोर्ट करता है। डिफ़ॉल्ट रूप से यह ऊपर दिए गए दायरे का पालन करता है; DRM स्पूफ को **केवल** उन ऐप्स पर लागू करने के लिए `drm_targets` (ऐप्स की एक सूची) सेट करें, `scope_mode` से स्वतंत्र: मॉड्यूल केवल DRM hook के लिए एक सूचीबद्ध ऐप में लोड रहता है, भले ही वह ऐप मुख्य दायरे से बाहर हो। खाली या अनुपस्थित होने का अर्थ है दायरे का पालन करना। (एक सीमित दायरे वाला मोड आवश्यक है, Global नहीं।)  
+* **resetprop**: सिस्टम प्रॉपर्टीज़ को फिर से लिखता है, समूह के अनुसार प्रबंधित: identity, version, boot state, SELinux, adb/usb, anti-emulator और एक cleanup पास। सीमित दायरे वाले मोड में identity और version समूह पूरे-डिवाइस वाले resetprop से बाहर रहते हैं (Zygisk उन्हें प्रति प्रक्रिया पहुँचाता है), boot/lock/SELinux समूह ग्लोबल रहते हैं।  
+* **DRM / Widevine** (डिफ़ॉल्ट रूप से बंद): इसे पढ़ने वाले ऐप्स को एक चुना हुआ Widevine सुरक्षा स्तर, L1 या L3, रिपोर्ट करता है। डिफ़ॉल्ट रूप से यह ऊपर दिए गए दायरे का पालन करता है, DRM स्पूफ को **केवल** उन ऐप्स पर लागू करने के लिए `drm_targets` (ऐप्स की एक सूची) सेट करें, `scope_mode` से स्वतंत्र: मॉड्यूल केवल DRM hook के लिए एक सूचीबद्ध ऐप में लोड रहता है, भले ही वह ऐप मुख्य दायरे से बाहर हो। खाली या अनुपस्थित होने का अर्थ है दायरे का पालन करना। (एक सीमित दायरे वाला मोड आवश्यक है, Global नहीं।)  
 
 ### Fields: सेट, खाली, डिलीट या छोड़ना
 `COPG-VD` ऑब्जेक्ट के भीतर हर Build फ़ील्ड की चार अवस्थाएँ होती हैं:  
 * **Set**: `"KEY": "value"` मान लिखता है।  
 * **Empty**: `"KEY": ""` एक खाली मान लिखता है।  
 * **Delete**: इसे हटाने के लिए कुंजी को एक टॉप-लेवल `"COPG-VD-Delete": [ ... ]` में सूचीबद्ध करें (एक Build फ़ील्ड null हो जाती है, एक प्रॉपर्टी `resetprop --delete` से हटा दी जाती है)।  
-* **Skip**: कुंजी को पूरी तरह छोड़ दें; ROM का अपना मान बनाए रखा जाता है।  
+* **Skip**: कुंजी को पूरी तरह छोड़ दें, ROM का अपना मान बनाए रखा जाता है।  
 
 एक `"global_fields": [ ... ]` सूची नामित Build फ़ील्ड को सीमित दायरे वाले मोड में भी पूरे-डिवाइस पर लागू करती है, ताकि एक मान हर जगह सुसंगत रहे: केवल सुसंगतता-सुरक्षित फ़ील्ड के लिए (उदाहरण के लिए security patch), कभी identity नहीं और कभी Android version समूह नहीं।  
 
@@ -161,11 +180,21 @@ KernelSU, APatch या Magisk में zip को फ़्लैश करे
 WebUI में **Analyze** (या `fingerprint-update.sh analyze`) कॉन्फ़िग को उसकी मौजूदा स्थिति में ऑडिट करता है: ROM के मुकाबले संस्करण, क्या फ़ाइल अभी भी पार्स होती है (एक टूटी हुई फ़ाइल मॉड्यूल को **कुछ भी** स्पूफ न करने पर मजबूर करती है, और केवल logcat ही यह बताता है), क्या fingerprint अपने आस-पास के फ़ील्ड से मेल खाता है, वे कुंजियाँ जिन्हें मॉड्यूल नहीं पढ़ता, तारीखें, और क्या props पहले से ही वही धारण करते हैं जो कॉन्फ़िग माँगती है।  
 
 ### WebUI
-WebUI वैकल्पिक है (सब कुछ सीधे JSON कॉन्फ़िग में संपादित किया जा सकता है) लेकिन यह मॉड्यूल को चलाने का आसान तरीका है। इसमें पाँच टैब हैं: **About**, **Device** (हर फ़ील्ड, प्रति अवस्था सेट, श्रेणी के अनुसार समूहीकृत), **Spoofing** (scope और engines), **System** (resetprop समूह) और **Tools** (Analyze, Check Update, Update Now, Backup/Restore और बूट ऑटो-अपडेट)। यह कोई नेटवर्क अनुरोध नहीं करता; इसे जो कुछ चाहिए वह सब मॉड्यूल के भीतर शामिल है।  
+WebUI वैकल्पिक है (सब कुछ सीधे JSON कॉन्फ़िग में संपादित किया जा सकता है) लेकिन यह मॉड्यूल को चलाने का आसान तरीका है। इसमें पाँच टैब हैं: **About**, **Device** (हर फ़ील्ड, प्रति अवस्था सेट, श्रेणी के अनुसार समूहीकृत), **Spoofing** (scope और engines), **System** (resetprop समूह) और **Tools** (Analyze, Check Update, Update Now, Backup/Restore और बूट ऑटो-अपडेट)। यह कोई नेटवर्क अनुरोध नहीं करता, इसे जो कुछ चाहिए वह सब मॉड्यूल के भीतर शामिल है।  
 यदि आप Magisk उपयोगकर्ता हैं, तो KOW द्वारा KsuWebUI का उपयोग करें (https://github.com/KOWX712/KsuWebUIStandalone/releases)। आप MMRL द्वारा WebUI-X Portable का भी उपयोग कर सकते हैं (https://github.com/MMRLApp/WebUI-X-Portable/releases) या KsuWebUI-SN (https://github.com/dnascorpionofficial/KsuWebUI-SN/releases)।  
 
 ### कॉन्फ़िग में सेटिंग्स
 `COPG-VD.json` अपनी सेटिंग्स को प्रोफ़ाइल के साथ ही रखता है, ताकि आपकी पसंद बैकअप के साथ यात्रा करें और हाथ से संपादित की जा सकें: `scope_mode`, engine स्विच, resetprop समूह, `global_fields`, और एक `COPG-VD-Settings` ऑब्जेक्ट (`resetprop`, `autoupdate`, `spoof_version`)। सब कुछ इसी एक फ़ाइल में रहता है: बूट स्क्रिप्ट और WebUI सेटिंग्स को सीधे इसी से पढ़ते हैं, इसलिए आपकी पसंद मॉड्यूल अपडेट के बाद भी बनी रहती है। `"spoof_version": "force"` फ़ाइल से अस्वीकार किया जाता है और डाउनग्रेड किया जाता है: एक पुराना बैकअप रीस्टोर करने से इसे आपकी जानकारी के बिना फिर से चालू नहीं किया जाना चाहिए।  
+
+## इंक्रीमेंटल अपडेट (VDLU)
+
+COPG-VD के साथ **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** इंजन आता है (`module/vdlu/` में वेंडर किया गया): मॉड्यूल पूरा `.zip` दोबारा डाउनलोड करने के बजाय केवल बदली हुई फ़ाइलों को लाकर खुद को अपडेट करता है (कंटेंट-एड्रेस्ड ब्लॉब्स + एक हस्ताक्षरित `manifest.json`)। **Hardened** प्रोफ़ाइल: ed25519 हस्ताक्षर अनिवार्य है और डाउनग्रेड अवरुद्ध हैं, पूरा `.zip` फ़ॉलबैक के रूप में मान्य रहता है।
+
+- **`vdlu/`** (zip में शामिल): `update.sh` (इंजन) + `vdlu-verify` + `config.default` + `keyring/` (सार्वजनिक कुंजी)।
+- **स्थिति** `/data/adb/COPG-VD/vdlu/` में (config/journal/blobs/staged/rollback), मॉड्यूल के बाहर, रीफ़्लैश के बाद भी बनी रहती है।
+- **बूट ट्रिगर:** `post-fs-data.sh`, zygote से पहले, COPG-VD में `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard) है, इसलिए नई `.so` को zygote द्वारा मैप करने से पहले तैयार और बदल दिया जाता है।
+- **WebUI:** एक **Updates** पैनल (`webroot/vdlu.js`) जिसमें प्रोग्रेस टोस्ट और रद्द करने का विकल्प है।
+- **रिलीज़:** `module/vdlu/RELEASE.md` देखें (`vdlu-pack` + `vdlu-sign`, manifest को संग्रहित करता है, `vdlu-gc` अनाथ ब्लॉब्स हटाता है, बैच में Pages पुश)।
 
 <!-- vd-docs -->
 ## दस्तावेज़ीकरण
@@ -177,16 +206,6 @@ WebUI वैकल्पिक है (सब कुछ सीधे JSON कॉ
 - **[एआई एजेंट](https://github.com/VD171/COPG-VD/wiki/hi-AI-AGENTS)**: कॉन्फ़िग और अपडेटर को बिना इंटरफ़ेस के चलाएँ।
 
 <!-- /vd-docs -->
-
-## इंक्रीमेंटल अपडेट (VDLU)
-
-COPG-VD के साथ **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** इंजन आता है (`module/vdlu/` में वेंडर किया गया): मॉड्यूल पूरा `.zip` दोबारा डाउनलोड करने के बजाय केवल बदली हुई फ़ाइलों को लाकर खुद को अपडेट करता है (कंटेंट-एड्रेस्ड ब्लॉब्स + एक हस्ताक्षरित `manifest.json`)। **Hardened** प्रोफ़ाइल: ed25519 हस्ताक्षर अनिवार्य है और डाउनग्रेड अवरुद्ध हैं; पूरा `.zip` फ़ॉलबैक के रूप में मान्य रहता है।
-
-- **`vdlu/`** (zip में शामिल): `update.sh` (इंजन) + `vdlu-verify` + `config.default` + `keyring/` (सार्वजनिक कुंजी)।
-- **स्थिति** `/data/adb/COPG-VD/vdlu/` में (config/journal/blobs/staged/rollback) - मॉड्यूल के बाहर, रीफ़्लैश के बाद भी बनी रहती है।
-- **बूट ट्रिगर:** `post-fs-data.sh`, zygote से पहले - COPG-VD में `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard) है, इसलिए नई `.so` को zygote द्वारा मैप करने से पहले तैयार और बदल दिया जाता है।
-- **WebUI:** एक **Updates** पैनल (`webroot/vdlu.js`) जिसमें प्रोग्रेस टोस्ट और रद्द करने का विकल्प है।
-- **रिलीज़:** `module/vdlu/RELEASE.md` देखें (`vdlu-pack` + `vdlu-sign`, manifest को संग्रहित करता है, `vdlu-gc` अनाथ ब्लॉब्स हटाता है, बैच में Pages पुश)।
 
 ## यह भी देखें
 
@@ -202,20 +221,19 @@ COPG-VD के साथ **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate)
 
 ## संपर्क
 
-- Site           : https://vd171.ru
-- Site           : https://vd.priv8.ru
-- Source         : https://github.com/VD171/COPG-VD
-- GitHub         : [@VD171](https://github.com/VD171)
-- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
-- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
-- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
-- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
-- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
-- E-mail         : vd.priv8@pm.me
+- https://vd171.ru
+- https://vd.priv8.ru
+- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+- **Channel:** @Priv8_VD https://t.me/Priv8_VD
+- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
+- **E-mail:** vd.priv8@pm.me
+- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
+- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
+- **GitHub:** @VD171 https://github.com/VD171
 
 ## लाइसेंस
 
-**Apache-2.0**: [LICENSE](LICENSE) देखें। COPG-VD, AlirezaParsi के मूल COPG का VD171 द्वारा किया गया एक fork है, जो उसी लाइसेंस के तहत जारी है।
+**AGPL-3.0-or-later**: [LICENSE](LICENSE) देखें। COPG-VD, AlirezaParsi के मूल COPG (Apache-2.0) का VD171 द्वारा किया गया एक fork है, जिसे GNU AGPL-3.0-or-later के तहत पुनः लाइसेंस किया गया है। नेटवर्क कॉपीलेफ्ट: यदि आप कोई संशोधित संस्करण चलाते हैं, सेवा के रूप में भी, तो आपको उसका स्रोत कोड उपलब्ध कराना होगा।
 
 ## ट्रेडमार्क
 
@@ -224,3 +242,7 @@ COPG-VD एक स्वतंत्र, अनौपचारिक परि�
 ## Tags
 
 `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG-VD`
+
+---
+
+📣 **अपडेट के लिए चैनल से जुड़ें:** @Priv8_VD https://t.me/Priv8_VD

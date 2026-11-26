@@ -49,7 +49,7 @@ Každý engine je nezávislý a lze jej vypnout. Všechny jsou ve výchozím sta
 - **resetprop**: přepisuje systémové vlastnosti napříč zařízením, po skupinách (identita,
   verze, stav bootu, SELinux, adb/usb, anti-emulátor a čisticí průchod). V rozsahovém
   režimu zůstávají skupiny identity a verze mimo průchod napříč zařízením (Zygisk je
-  doručuje per proces); skupiny bootu, zámku a SELinuxu zůstávají globální. Přepněte jej
+  doručuje per proces), skupiny bootu, zámku a SELinuxu zůstávají globální. Přepněte jej
   v `COPG-VD-Settings.resetprop`.
 - **DRM / Widevine (`motor_drm`, ve výchozím stavu vypnuto)**: hlásí zvolenou
   bezpečnostní úroveň Widevine (L1 nebo L3) aplikacím, které ji čtou. Viz sekce DRM níže.
@@ -87,7 +87,7 @@ version** (`COPG-VD-Settings.spoof_version`) rozhoduje, zda se vůbec aplikují:
 - `rom`: aplikuj pouze to, co nepřekračuje ROM, což v praxi znamená snížení SDK.
 - `force`: vynuť pole verze, která žádá konfigurace. SDK je i zde omezeno na hodnotu
   ROM (od v6.19), protože zvýšení SDK nad skutečný framework jen způsobí softloop a nemá
-  využití, takže `force` už nezpůsobuje softloop; vynutí řetězcová pole (release, codename).
+  využití, takže `force` už nezpůsobuje softloop, vynutí řetězcová pole (release, codename).
 
 Skutečná verze se čte z `/system/build.prop`, nikdy z `getprop` (což je právě to, co
 tento modul falšuje). `force` je také odmítnut při obnově zálohy, takže stará záloha jej
@@ -101,7 +101,7 @@ Ve výchozím stavu vypnuto (`motor_drm`). Když je zapnuto, hlásí zvolenou ú
 Ve výchozím stavu DRM spoof následuje `scope_mode`. Chcete-li jej místo toho aplikovat na
 konkrétní sadu aplikací, nezávisle na hlavním rozsahu, uveďte je v `drm_targets`. Modul
 pak zůstává v uvedené aplikaci načten **pouze** kvůli DRM hooku, i když je tato aplikace
-mimo hlavní rozsah; prázdný nebo chybějící seznam znamená následovat rozsah. To vyžaduje
+mimo hlavní rozsah, prázdný nebo chybějící seznam znamená následovat rozsah. To vyžaduje
 rozsahový režim (ne `global`) a projeví se při příštím **restartu**.
 
 ## Analyze: zkontrolujte svou konfiguraci
@@ -130,7 +130,7 @@ Volitelné, ale snadný způsob, jak vše ovládat. Pět záložek:
   při bootu a report Diagnostics (jedno tlačítko pro přečtení a export všeho užitečného
   pro hlášení chyby).
 
-Nedělá žádný síťový požadavek; vše, co potřebuje, přichází uvnitř modulu.
+Nedělá žádný síťový požadavek, vše, co potřebuje, přichází uvnitř modulu.
 
 ## Řešení potíží
 
@@ -149,4 +149,4 @@ Nedělá žádný síťový požadavek; vše, co potřebuje, přichází uvnitř
 
 ---
 
-> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány; viz [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány, viz [CONTRIBUTING.md](CONTRIBUTING.md)._

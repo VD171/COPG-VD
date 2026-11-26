@@ -6,7 +6,7 @@
 
 Hela modulen styrs av en enda fil: `/data/adb/COPG-VD/COPG-VD.json`. WebUI skriver den åt
 dig, men du kan redigera den för hand. Ett levererat exempel finns i `module/COPG-VD.json.example`.
-Detta är den enda sanningskällan; kopian under modulkatalogen är bara ett skrivskyddat standardvärde.
+Detta är den enda sanningskällan, kopian under modulkatalogen är bara ett skrivskyddat standardvärde.
 En konfiguration som blivit kvar från en äldre version i `/data/adb/COPG-VD.json` flyttas automatiskt till den här katalogen.
 Modulens egen logg och tillstånd (`update.log`, `update.state`) finns också här.
 
@@ -26,7 +26,7 @@ Regler:
 | `scope_whitelist` | array | Paket som får spoofen när `scope_mode` är `whitelist`. |
 | `scope_blacklist` | array | Paket som exkluderas när `scope_mode` är `blacklist`. |
 | `COPG-VD` | object | Profilen: Build-fälten som ska presenteras (se nedan). |
-| `COPG-VD-Delete` | array | Fältnamn att ta bort istället för att sätta (Build-fält blir null; en property tas bort med `resetprop --delete`). |
+| `COPG-VD-Delete` | array | Fältnamn att ta bort istället för att sätta (Build-fält blir null, en property tas bort med `resetprop --delete`). |
 | `COPG-VD-Settings` | object | Modulinställningar som följer med profilen (se nedan). |
 | `motor_jni` | bool | Build-fältmotor (skriver om `android.os.Build.*`). Standard `true`. |
 | `motor_prop_hook` | bool | Property-motor per process (clean-room property-ommappning). Standard `true`. |
@@ -78,7 +78,7 @@ Inställningar som följer med profilen, så att en säkerhetskopia bär dina va
 |---|---|---|
 | `resetprop` | bool | Om resetprop-motorn över hela enheten körs. |
 | `autoupdate` | bool | Om `fingerprint-update.sh` körs en gång per boot. Standard på. |
-| `spoof_version` | `never` / `rom` / `force` | Hur Android-versionsgruppen tillämpas. `never` är standard. Sedan v6.19 begränsas SDK:n till ROM:ens värde under varje policy, så `force` tvingar fram strängfälten men kan inte höja SDK:n; `force` nekas vid återställning av en säkerhetskopia. |
+| `spoof_version` | `never` / `rom` / `force` | Hur Android-versionsgruppen tillämpas. `never` är standard. Sedan v6.19 begränsas SDK:n till ROM:ens värde under varje policy, så `force` tvingar fram strängfälten men kan inte höja SDK:n, `force` nekas vid återställning av en säkerhetskopia. |
 
 ## `global_fields`
 
@@ -118,4 +118,4 @@ vanliga. Lägg **aldrig** in identitet eller Android-versionsgruppen här.
 
 ---
 
-> _Denna dokumentation genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar välkomnas; se [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Denna dokumentation genererades med Claude (Anthropic) och underhålls av VD171. Rättelser och förbättringar välkomnas, se [CONTRIBUTING.md](CONTRIBUTING.md)._

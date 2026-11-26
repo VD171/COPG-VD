@@ -25,7 +25,8 @@ window.VDLU_I18N_HI = {
   savedToast: 'सहेजा गया', saveFail: 'सहेजना विफल', sourceSaved: 'स्रोत सहेजा गया',
   bootstrapping: 'अपडेटर तैयार हो रहा है…', bootstrapSub: 'फ़ेचर का एक-बार डाउनलोड', bootstrapFail: 'अपडेटर तैयार नहीं हो सका',
   searching: 'खोज हो रही है…', upToDate: 'अद्यतित', nothingNew: 'कुछ नया नहीं',
-  ahead: 'फ़ीड से नया', aheadSub: 'आपका संस्करण प्रकाशित अपडेट से नया है', deferred: 'डाउनलोड स्थगित', deferredSub: 'अनुमत नेटवर्क की प्रतीक्षा - अगली जाँच पर फिर शुरू होगा',
+  ahead: 'फ़ीड से नया', aheadSub: 'आपका संस्करण प्रकाशित अपडेट से नया है', silentUpdate: 'मौन अपडेट', silentUpdateSub: 'रीबूट बार दिखाए बिना पृष्ठभूमि में अपडेट लागू करता है।',
+  deferred: 'डाउनलोड स्थगित', deferredSub: 'अनुमत नेटवर्क की प्रतीक्षा, अगली जाँच पर फिर शुरू होगा',
   updateAvail: 'अपडेट उपलब्ध', install: 'इंस्टॉल करें', fileOne: 'फ़ाइल', fileMany: 'फ़ाइलें',
   requiresReboot: 'रीबूट आवश्यक', checkFail: 'जाँच विफल', ksuUnavailable: 'KSU API अनुपलब्ध',
   pendingUpdate: 'लंबित अपडेट', notNow: 'अभी नहीं', srcPlaceholder: 'https://…/&lt;मॉड्यूल&gt;'

@@ -6,7 +6,7 @@
 
 Toàn bộ mô-đun được điều khiển bởi một tệp: `/data/adb/COPG-VD/COPG-VD.json`. WebUI ghi nó cho bạn,
 nhưng bạn có thể chỉnh sửa bằng tay. Một ví dụ đi kèm nằm tại `module/COPG-VD.json.example`.
-Đây là nguồn chân lý duy nhất; bản sao nằm trong thư mục module chỉ là một mặc định chỉ đọc.
+Đây là nguồn chân lý duy nhất, bản sao nằm trong thư mục module chỉ là một mặc định chỉ đọc.
 Một cấu hình còn sót lại từ một phiên bản cũ tại `/data/adb/COPG-VD.json` sẽ tự động được chuyển vào
 thư mục này. Nhật ký và trạng thái của riêng module (`update.log`, `update.state`) cũng nằm ở đây.
 
@@ -26,7 +26,7 @@ Quy tắc:
 | `scope_whitelist` | array | Các gói nhận được sự giả mạo khi `scope_mode` là `whitelist`. |
 | `scope_blacklist` | array | Các gói bị loại trừ khi `scope_mode` là `blacklist`. |
 | `COPG-VD` | object | Hồ sơ: các trường Build cần trình bày (xem bên dưới). |
-| `COPG-VD-Delete` | array | Tên các trường cần xóa thay vì đặt (trường Build trở thành null; một thuộc tính bị xóa bằng `resetprop --delete`). |
+| `COPG-VD-Delete` | array | Tên các trường cần xóa thay vì đặt (trường Build trở thành null, một thuộc tính bị xóa bằng `resetprop --delete`). |
 | `COPG-VD-Settings` | object | Các thiết lập mô-đun đi cùng với hồ sơ (xem bên dưới). |
 | `motor_jni` | bool | Động cơ trường Build (viết lại `android.os.Build.*`). Mặc định `true`. |
 | `motor_prop_hook` | bool | Động cơ thuộc tính theo từng tiến trình (ánh xạ lại thuộc tính kiểu clean-room). Mặc định `true`. |
@@ -80,7 +80,7 @@ Các thiết lập đi cùng với hồ sơ, nên một bản sao lưu mang theo
 |---|---|---|
 | `resetprop` | bool | Liệu động cơ resetprop toàn thiết bị có chạy không. |
 | `autoupdate` | bool | Liệu `fingerprint-update.sh` có chạy một lần mỗi lần khởi động không. Mặc định bật. |
-| `spoof_version` | `never` / `rom` / `force` | Cách nhóm phiên bản Android được áp dụng. `never` là mặc định. Kể từ v6.19 SDK bị giới hạn ở giá trị của ROM dưới mọi chính sách, nên `force` buộc các trường chuỗi nhưng không thể nâng SDK; `force` bị từ chối khi khôi phục một bản sao lưu. |
+| `spoof_version` | `never` / `rom` / `force` | Cách nhóm phiên bản Android được áp dụng. `never` là mặc định. Kể từ v6.19 SDK bị giới hạn ở giá trị của ROM dưới mọi chính sách, nên `force` buộc các trường chuỗi nhưng không thể nâng SDK, `force` bị từ chối khi khôi phục một bản sao lưu. |
 
 ## `global_fields`
 
@@ -121,4 +121,4 @@ nhóm phiên bản Android ở đây.
 
 ---
 
-> _Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Chúng tôi hoan nghênh các chỉnh sửa và cải tiến; xem [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Tài liệu này được tạo bằng Claude (Anthropic) và được duy trì bởi VD171. Chúng tôi hoan nghênh các chỉnh sửa và cải tiến, xem [CONTRIBUTING.md](CONTRIBUTING.md)._

@@ -56,7 +56,7 @@ COPG-VD/
 ├── README.md + README.<code>.md   # 21 talen
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md  CODE_OF_CONDUCT.md  SECURITY.md
-├── LICENSE                     # Apache-2.0
+├── LICENSE                     # AGPL-3.0-or-later
 └── screenshots/                # afbeeldingen die de README gebruikt
 ```
 
@@ -64,11 +64,11 @@ COPG-VD/
 
 `/data/adb/COPG-VD/` op het apparaat is de eigen map van de module: `COPG-VD.json` bevat het profiel
 en de instellingen (zie [CONFIGURATION.md](CONFIGURATION.md)), naast `update.log`, `update.state` en
-`update.status`. De config wordt nooit gecommit; `module/COPG-VD.json.example`
+`update.status`. De config wordt nooit gecommit, `module/COPG-VD.json.example`
 is het sjabloon.
 
 <!-- doc-footer -->
 
 ---
 
-> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom; zie [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom, zie [CONTRIBUTING.md](CONTRIBUTING.md)._

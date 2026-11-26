@@ -1,6 +1,25 @@
 <!--
-  COPG-VD: global device spoofer: spoof your device fingerprint and build.
-  Copyright (C) 2026  AlirezaParsi & VD171. SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+  ======================================================================
+   COPG-VD  ::  global device spoofer
+   Spoof your device fingerprint and build.
+
+   Copyright (C) 2026  AlirezaParsi & VD171 (Fork by VD171)
+   SPDX-License-Identifier: AGPL-3.0-or-later
+
+   Licensed under the GNU AGPL v3.0 or later. You may obtain a copy at
+   https://www.gnu.org/licenses/agpl-3.0.html
+
+   Site           : https://vd171.ru
+   Site           : https://vd.priv8.ru
+   Source         : https://github.com/VD171/COPG-VD
+   GitHub         : @VD171 https://github.com/VD171
+   XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+   XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+   Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+   Channel        : @Priv8_VD https://t.me/Priv8_VD
+   Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+   E-mail         : vd.priv8@pm.me
+  ======================================================================
 -->
 
 # COPG-VD
@@ -11,7 +30,7 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases/latest"><img src="https://img.shields.io/github/v/release/VD171/COPG-VD?label=release&color=2ee89d" alt="Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1a7f37" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-1a7f37" alt="License"></a>
   <a href="https://github.com/VD171/COPG-VD/releases"><img src="https://img.shields.io/github/downloads/VD171/COPG-VD/total?label=downloads&color=8250df" alt="Downloads"></a>
   <a href="https://github.com/VD171/COPG-VD/stargazers"><img src="https://img.shields.io/github/stars/VD171/COPG-VD?color=d29922" alt="Stars"></a>
 </p>
@@ -32,10 +51,10 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · 中文
 
 <p align="center">
-  <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
+  <img src="docs/screenshots/zh/device.png" width="24%" alt="Device"> <img src="docs/screenshots/zh/spoofing.png" width="24%" alt="Spoofing"> <img src="docs/screenshots/zh/system.png" width="24%" alt="System"> <img src="docs/screenshots/zh/tools.png" width="24%" alt="Tools">
 </p>
 
 ---
@@ -167,6 +186,16 @@ WebUI 是可选的 (一切都可以直接在 JSON 配置文件中编辑) 但它�
 ### 配置中的设置
 `COPG-VD.json` 将其设置放在配置文件旁边，这样你的选择会随备份一起保存，也可以手动编辑：`scope_mode`、各 engine 开关、resetprop 组、`global_fields`，以及一个 `COPG-VD-Settings` 对象（`resetprop`、`autoupdate`、`spoof_version`）。一切都保存在这一个文件中: 开机脚本和 WebUI 都直接从中读取设置，因此你的选择能在模块更新后保留下来。`"spoof_version": "force"` 会从文件中被拒绝并降级：恢复旧备份不得在你不知情的情况下重新启用它。  
 
+## 增量更新 (VDLU)
+
+COPG-VD 内置 **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** 引擎（随附于 `module/vdlu/`）：模块只获取发生变化的文件（内容寻址的 blob + 已签名的 `manifest.json`）来自我更新，而不是重新下载整个 `.zip`。**Hardened** 配置：ed25519 签名是强制的，且降级被阻止；完整的 `.zip` 仍作为回退保持有效。
+
+- **`vdlu/`**（随 zip 一起提供）：`update.sh`（引擎）+ `vdlu-verify` + `config.default` + `keyring/`（公钥）。
+- **状态** 位于 `/data/adb/COPG-VD/vdlu/`（config/journal/blobs/staged/rollback）- 在模块之外，重新刷入后仍然保留。
+- **启动触发器：** `post-fs-data.sh`，在 zygote 之前，COPG-VD 带有 `zygisk/*.so` + `sepolicy.rule`（REBOOT-hard），因此新的 `.so` 会在 zygote 映射它之前被暂存并替换。
+- **WebUI：** 一个带有进度提示和取消功能的 **Updates** 面板（`webroot/vdlu.js`）。
+- **发布：** 参见 `module/vdlu/RELEASE.md`（`vdlu-pack` + `vdlu-sign`，归档 manifest，`vdlu-gc` 清理孤立的 blob，批量推送到 Pages）。
+
 <!-- vd-docs -->
 ## 文档
 
@@ -177,16 +206,6 @@ WebUI 是可选的 (一切都可以直接在 JSON 配置文件中编辑) 但它�
 - **[AI 智能体](https://github.com/VD171/COPG-VD/wiki/zh-AI-AGENTS)**：无界面地驱动配置和更新程序。
 
 <!-- /vd-docs -->
-
-## 增量更新 (VDLU)
-
-COPG-VD 内置 **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** 引擎（随附于 `module/vdlu/`）：模块只获取发生变化的文件（内容寻址的 blob + 已签名的 `manifest.json`）来自我更新，而不是重新下载整个 `.zip`。**Hardened** 配置：ed25519 签名是强制的，且降级被阻止；完整的 `.zip` 仍作为回退保持有效。
-
-- **`vdlu/`**（随 zip 一起提供）：`update.sh`（引擎）+ `vdlu-verify` + `config.default` + `keyring/`（公钥）。
-- **状态** 位于 `/data/adb/COPG-VD/vdlu/`（config/journal/blobs/staged/rollback）- 在模块之外，重新刷入后仍然保留。
-- **启动触发器：** `post-fs-data.sh`，在 zygote 之前 - COPG-VD 带有 `zygisk/*.so` + `sepolicy.rule`（REBOOT-hard），因此新的 `.so` 会在 zygote 映射它之前被暂存并替换。
-- **WebUI：** 一个带有进度提示和取消功能的 **Updates** 面板（`webroot/vdlu.js`）。
-- **发布：** 参见 `module/vdlu/RELEASE.md`（`vdlu-pack` + `vdlu-sign`，归档 manifest，`vdlu-gc` 清理孤立的 blob，批量推送到 Pages）。
 
 ## 另请参阅
 
@@ -202,20 +221,19 @@ COPG-VD 内置 **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** 
 
 ## 联系方式
 
-- Site           : https://vd171.ru
-- Site           : https://vd.priv8.ru
-- Source         : https://github.com/VD171/COPG-VD
-- GitHub         : [@VD171](https://github.com/VD171)
-- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
-- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
-- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
-- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
-- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
-- E-mail         : vd.priv8@pm.me
+- https://vd171.ru
+- https://vd.priv8.ru
+- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+- **Channel:** @Priv8_VD https://t.me/Priv8_VD
+- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
+- **E-mail:** vd.priv8@pm.me
+- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
+- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
+- **GitHub:** @VD171 https://github.com/VD171
 
 ## License
 
-**Apache-2.0**: 参见 [LICENSE](LICENSE)。COPG-VD 是 VD171 对 AlirezaParsi 原始 COPG 的一个 fork，在相同许可证下继续开发。
+**AGPL-3.0-or-later**: 参见 [LICENSE](LICENSE)。COPG-VD 是 VD171 对 AlirezaParsi 原始 COPG（Apache-2.0）的一个 fork，以 GNU AGPL-3.0-or-later 重新授权。网络著佐权（Copyleft）：即使作为服务运行修改后的版本，你也必须提供其源代码。
 
 ## Trademarks
 
@@ -224,3 +242,7 @@ COPG-VD 是一个独立的、非官方的项目。它与 Google LLC 没有任何
 ## Tags
 
 `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG-VD`
+
+---
+
+📣 **加入频道以获取更新：** @Priv8_VD https://t.me/Priv8_VD

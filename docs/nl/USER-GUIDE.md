@@ -49,7 +49,7 @@ Elke engine is onafhankelijk en kan worden uitgeschakeld. Alle staan standaard a
 - **resetprop**: herschrijft de systeemproperties apparaatbreed, per groep (identiteit,
   versie, boot-status, SELinux, adb/usb, anti-emulator, en een opschoonronde). In een scoped
   modus blijven de identiteit- en versiegroepen buiten de apparaatbrede ronde (Zygisk levert
-  ze per proces); de boot-, lock- en SELinux-groepen blijven globaal. Schakel het in via
+  ze per proces), de boot-, lock- en SELinux-groepen blijven globaal. Schakel het in via
   `COPG-VD-Settings.resetprop`.
 - **DRM / Widevine (`motor_drm`, standaard uit)**: rapporteert een gekozen Widevine-
   beveiligingsniveau (L1 of L3) aan apps die het lezen. Zie de DRM-sectie hieronder.
@@ -88,7 +88,7 @@ Android version** (`COPG-VD-Settings.spoof_version`) bepaalt of ze überhaupt va
 - `rom`: past alleen toe wat de ROM niet overschrijdt, wat in de praktijk betekent de SDK verlagen.
 - `force`: forceert de versievelden die de config vraagt. De SDK wordt ook hier nog steeds afgetopt op de
   waarde van de ROM (sinds v6.19), omdat de SDK boven het echte framework tillen alleen softloopt en geen
-  nut heeft, dus `force` softloopt niet meer; het forceert de stringvelden (release, codename).
+  nut heeft, dus `force` softloopt niet meer, het forceert de stringvelden (release, codename).
 
 De echte versie wordt gelezen uit `/system/build.prop`, nooit uit `getprop` (wat precies het ding
 is dat deze module vervalst). `force` wordt ook geweigerd bij het herstellen van een back-up, zodat een
@@ -102,7 +102,7 @@ Standaard uit (`motor_drm`). Indien aan rapporteert het een gekozen Widevine-niv
 Standaard volgt de DRM-spoof `scope_mode`. Om het in plaats daarvan toe te passen op een specifieke set
 apps, onafhankelijk van de hoofdscope, vermeld je ze in `drm_targets`. De module blijft dan
 geladen in een vermelde app **alleen** voor de DRM-hook, zelfs wanneer die app buiten de
-hoofdscope valt; een lege of ontbrekende lijst betekent de scope volgen. Dit vereist een scoped modus (niet
+hoofdscope valt, een lege of ontbrekende lijst betekent de scope volgen. Dit vereist een scoped modus (niet
 `global`), en wordt van kracht bij de volgende **herstart**.
 
 ## Analyze: controleer je config
@@ -131,7 +131,7 @@ Optioneel, maar de makkelijke manier om alles aan te sturen. Vijf tabbladen:
   en het Diagnostics-rapport (één knop om alles te lezen en exporteren dat nuttig is voor een bug-
   rapport).
 
-Het doet geen enkel netwerkverzoek; alles wat het nodig heeft wordt in de module meegeleverd.
+Het doet geen enkel netwerkverzoek, alles wat het nodig heeft wordt in de module meegeleverd.
 
 ## Probleemoplossing
 
@@ -150,4 +150,4 @@ Het doet geen enkel netwerkverzoek; alles wat het nodig heeft wordt in de module
 
 ---
 
-> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom; zie [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Deze documentatie is gegenereerd met Claude (Anthropic) en wordt onderhouden door VD171. Correcties en verbeteringen zijn welkom, zie [CONTRIBUTING.md](CONTRIBUTING.md)._

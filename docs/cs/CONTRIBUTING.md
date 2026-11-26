@@ -11,7 +11,7 @@ a těch pár konvencí, které dodržujeme.
 
 COPG-VD je **Zygisk spoofer zařízení**: malá nativní knihovna, která je injektována do
 procesů aplikací, aby přepsala otisk zařízení a build, plus vanilla-JS WebUI pro jeho
-ovládání. Je to fork COPG (od AlirezaParsi), udržovaný VD171 pod licencí Apache-2.0. Viz
+ovládání. Je to fork COPG (od AlirezaParsi), udržovaný VD171 pod licencí GNU AGPL-3.0-or-later. Viz
 [ARCHITECTURE.md](ARCHITECTURE.md) a [FILE-STRUCTURE.md](FILE-STRUCTURE.md).
 
 Ve výchozím stavu omezuje spoof na stack Google Play přes Zygisk, takže je to lehčí,
@@ -39,7 +39,7 @@ AI asistenti a agenti jsou zde prvotřídní přispěvatelé, ne dodatečný ná
 - Sestavte flashovatelný zip: zkopírujte sestavené `libspoof.so` do `module/zygisk/<abi>.so`,
   pak `cd module && zip -r9 ../COPG-VD-dev.zip .` a nahrajte jej.
 - WebUI je `module/webroot/` (otevřete jej z root manageru). Logika spoofingu je
-  `zygisk/spoof_module.cpp`; stahovač profilu je `module/fingerprint-update.sh`.
+  `zygisk/spoof_module.cpp`, stahovač profilu je `module/fingerprint-update.sh`.
 
 ## Konvence
 
@@ -47,15 +47,15 @@ AI asistenti a agenti jsou zde prvotřídní přispěvatelé, ne dodatečný ná
   s bannerem projektu (zkopírujte ji z libovolného existujícího souboru). Nástroje pod
   `.github/` používají místo toho krátký komentář.
 - **Kód a komentáře anglicky.** Udržujte komentáře minimální a jen tam, kde je potřeba.
-- **Žádný em-dash ani en-dash**; vždy používejte prostou pomlčku `-`.
-- WebUI je **vanilla JS** (jeden `scripts.js`); žádné frameworky.
+- **Žádný em-dash ani en-dash**, vždy používejte prostou pomlčku `-`.
+- WebUI je **vanilla JS** (jeden `scripts.js`), žádné frameworky.
 - **Nikdy neoslabujte** skutečnou funkci: udržujte spoof koherentní a nenechte hooky shodit
   aplikaci, ke které jsou připojeny (mají záměrně kontrolu na null).
 
 ## Internacionalizace (i18n)
 
 - Řetězce UI leží v `module/webroot/lang/`. Angličtina je kanonický fallback
-  (`en.js` + `en.json`); ostatních 20 jazyků je `<code>.json`.
+  (`en.js` + `en.json`), ostatních 20 jazyků je `<code>.json`.
 - Pro přidání nebo změnu řetězce: upravte `en.js` **a** `en.json`, pak aktualizujte každý
   `<code>.json`. Dotknout se viditelného popisku znamená aktualizovat **všechny** jazykové
   soubory a **všechny** `README.<code>.md`.
@@ -76,4 +76,4 @@ Pixelů jsou skvělé výchozí body.
 
 ---
 
-> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány; viz [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Tato dokumentace byla vytvořena pomocí Claude (Anthropic) a spravuje ji VD171. Opravy a vylepšení jsou vítány, viz [CONTRIBUTING.md](CONTRIBUTING.md)._

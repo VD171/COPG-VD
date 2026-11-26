@@ -1,6 +1,25 @@
 <!--
-  COPG-VD: global device spoofer: spoof your device fingerprint and build.
-  Copyright (C) 2026  AlirezaParsi & VD171. SPDX-License-Identifier: Apache-2.0 (Fork by VD171)
+  ======================================================================
+   COPG-VD  ::  global device spoofer
+   Spoof your device fingerprint and build.
+
+   Copyright (C) 2026  AlirezaParsi & VD171 (Fork by VD171)
+   SPDX-License-Identifier: AGPL-3.0-or-later
+
+   Licensed under the GNU AGPL v3.0 or later. You may obtain a copy at
+   https://www.gnu.org/licenses/agpl-3.0.html
+
+   Site           : https://vd171.ru
+   Site           : https://vd.priv8.ru
+   Source         : https://github.com/VD171/COPG-VD
+   GitHub         : @VD171 https://github.com/VD171
+   XDA-Developers : @VD171 https://xdaforums.com/m/vd171.4699873/
+   XDA thread     : https://xdaforums.com/t/COPG-VD.4807698/
+   Telegram       : @VD_Priv8 https://t.me/VD_Priv8
+   Channel        : @Priv8_VD https://t.me/Priv8_VD
+   Discord        : @VD.Priv8 https://discord.com/users/1296831918989639721
+   E-mail         : vd.priv8@pm.me
+  ======================================================================
 -->
 
 # COPG-VD
@@ -11,7 +30,7 @@
 
 <p align="center">
   <a href="https://github.com/VD171/COPG-VD/releases/latest"><img src="https://img.shields.io/github/v/release/VD171/COPG-VD?label=release&color=2ee89d" alt="Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1a7f37" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-1a7f37" alt="License"></a>
   <a href="https://github.com/VD171/COPG-VD/releases"><img src="https://img.shields.io/github/downloads/VD171/COPG-VD/total?label=downloads&color=8250df" alt="Downloads"></a>
   <a href="https://github.com/VD171/COPG-VD/stargazers"><img src="https://img.shields.io/github/stars/VD171/COPG-VD?color=d29922" alt="Stars"></a>
 </p>
@@ -32,10 +51,10 @@
   <a href="https://xdaforums.com/t/COPG-VD.4807698/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · ไทย · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 <p align="center">
-  <img src="screenshots/device.png" width="24%" alt="Device"> <img src="screenshots/spoofing.png" width="24%" alt="Spoofing"> <img src="screenshots/system.png" width="24%" alt="System"> <img src="screenshots/tools.png" width="24%" alt="Tools">
+  <img src="docs/screenshots/th/device.png" width="24%" alt="Device"> <img src="docs/screenshots/th/spoofing.png" width="24%" alt="Spoofing"> <img src="docs/screenshots/th/system.png" width="24%" alt="System"> <img src="docs/screenshots/th/tools.png" width="24%" alt="Tools">
 </p>
 
 ---
@@ -49,10 +68,10 @@
 - **การควบคุมขอบเขต:** ส่งอัตลักษณ์ที่สปูฟไปยังสแตก Google Play เท่านั้น (ค่าเริ่มต้น), ทั้งอุปกรณ์, whitelist, หรือทุกอย่างยกเว้น blacklist ในโหมดที่จำกัดขอบเขต Zygisk จะส่งอัตลักษณ์แบบต่อโปรเซส ดังนั้นมันจึงไม่รั่วไหลผ่าน global properties เลย
 - **เอนจินที่เป็นอิสระ:** Build fields (การเขียน `android.os.Build.*` ใหม่ด้วย JNI), property hook แบบ clean-room ต่อโปรเซส (ไม่มี function hook), `resetprop` แบบจัดกลุ่ม, และระดับ DRM / Widevine ที่เป็นทางเลือก (L1 หรือ L3) พร้อมรายการเป้าหมายของตัวเอง แต่ละอย่างสามารถปิดได้
 - **การควบคุมรายฟิลด์:** Build field ทุกตัวสามารถตั้งค่า, ทำให้ว่าง, ลบ หรือข้ามได้ พร้อมรายการ `global_fields` สำหรับค่าที่ต้องคงความสอดคล้องทั่วทั้งอุปกรณ์
-- **fingerprint ที่สดใหม่เสมอ:** โปรไฟล์ Pixel มาพร้อมในแพ็กเกจและรีเฟรชตัวเองหนึ่งครั้งต่อการบูตจาก Google factory image ที่ใหม่ที่สุด; คุณยังสามารถดึงโปรไฟล์ Pixel อื่นจาก WebUI ได้ด้วย มันจะไม่ลดระดับเวอร์ชันและปฏิเสธโปรไฟล์สำหรับอุปกรณ์อื่น
+- **fingerprint ที่สดใหม่เสมอ:** โปรไฟล์ Pixel มาพร้อมในแพ็กเกจและรีเฟรชตัวเองหนึ่งครั้งต่อการบูตจาก Google factory image ที่ใหม่ที่สุด, คุณยังสามารถดึงโปรไฟล์ Pixel อื่นจาก WebUI ได้ด้วย มันจะไม่ลดระดับเวอร์ชันและปฏิเสธโปรไฟล์สำหรับอุปกรณ์อื่น
 - **นโยบายเวอร์ชัน Android ที่ปลอดภัย:** SDK จะไม่ถูกยกให้สูงกว่า framework จริงของคุณเลย (การยกมันขึ้นมีแต่จะทำให้โทรศัพท์ softloop) ภายใต้ทุกนโยบาย
 - **Analyze:** ตรวจสอบการตั้งค่าเทียบกับ ROM และ props ของคุณ และแจ้งเตือนสิ่งที่ไม่สอดคล้องกันก่อนที่มันจะไปถึงแอป
-- **WebUI:** ห้าแท็บสำหรับควบคุมทุกอย่าง โดยไม่มีคำขอเครือข่าย; ไฟล์การตั้งค่าเก็บการตั้งค่าทั้งหมดไว้ ดังนั้นมันจึงอยู่รอดผ่านการอัปเดตโมดูล
+- **WebUI:** ห้าแท็บสำหรับควบคุมทุกอย่าง โดยไม่มีคำขอเครือข่าย, ไฟล์การตั้งค่าเก็บการตั้งค่าทั้งหมดไว้ ดังนั้นมันจึงอยู่รอดผ่านการอัปเดตโมดูล
 - **การอัปเดตตัวเองแบบเพิ่มทีละส่วน (VDLU)** และไลบรารีเนทีฟ **สี่ ABI** (arm64-v8a, armeabi-v7a, x86, x86_64)
 
 ## เอเจนต์ AI
@@ -65,11 +84,11 @@ COPG-VD สามารถสคริปต์แบบ headless ได้: ท
 
 ## ความปลอดภัย
 
-การสปูฟอยู่ฝั่งผู้ใช้เท่านั้น: COPG-VD จะไม่ยก SDK ให้สูงกว่า framework จริงของคุณเลย, คงผู้ผลิตให้สอดคล้องกับส่วนที่เหลือของโปรไฟล์, และอ่านเวอร์ชันจริงจาก `/system/build.prop` ไม่ใช่จาก properties ที่มันปลอมแปลง ตัวอัปเดตตัวเองต้องการลายเซ็น ed25519 ที่ถูกต้องและปฏิเสธการลดระดับเวอร์ชัน; WebUI ไม่ส่งคำขอเครือข่ายใด ๆ รายงานปัญหาตาม [SECURITY.md](docs/th/SECURITY.md)
+การสปูฟอยู่ฝั่งผู้ใช้เท่านั้น: COPG-VD จะไม่ยก SDK ให้สูงกว่า framework จริงของคุณเลย, คงผู้ผลิตให้สอดคล้องกับส่วนที่เหลือของโปรไฟล์, และอ่านเวอร์ชันจริงจาก `/system/build.prop` ไม่ใช่จาก properties ที่มันปลอมแปลง ตัวอัปเดตตัวเองต้องการลายเซ็น ed25519 ที่ถูกต้องและปฏิเสธการลดระดับเวอร์ชัน, WebUI ไม่ส่งคำขอเครือข่ายใด ๆ รายงานปัญหาตาม [SECURITY.md](docs/th/SECURITY.md)
 
 ## การบิลด์
 
-เป็น release เสมอ ไม่เคยเป็น debug ไลบรารีเนทีฟและตัวช่วย scope ถูกบิลด์ใน CI สำหรับทั้งสี่ ABI; เวิร์กโฟลว์ release ประกอบไฟล์ zip ที่แฟลชได้, เขียนไฟล์คู่ `.sha256` ต่อไฟล์, สร้าง VDLU baseline ที่ลงนามแล้วขึ้นใหม่ และเผยแพร่ในฐานะ `github-actions[bot]` ดู [CONTRIBUTING.md](docs/th/CONTRIBUTING.md)
+เป็น release เสมอ ไม่เคยเป็น debug ไลบรารีเนทีฟและตัวช่วย scope ถูกบิลด์ใน CI สำหรับทั้งสี่ ABI, เวิร์กโฟลว์ release ประกอบไฟล์ zip ที่แฟลชได้, เขียนไฟล์คู่ `.sha256` ต่อไฟล์, สร้าง VDLU baseline ที่ลงนามแล้วขึ้นใหม่ และเผยแพร่ในฐานะ `github-actions[bot]` ดู [CONTRIBUTING.md](docs/th/CONTRIBUTING.md)
 
 ## วิธีใช้งาน?
 ติดตั้งโมดูล รีบูต แล้วโปรไฟล์ที่มาพร้อมกัน (ซึ่งเป็น Pixel) จะถูกปลอมแปลงให้กับแอปเป้าหมาย เมื่อมี fingerprint ที่ใช้งานได้ คุณก็ไม่จำเป็นต้องใช้ PlayIntegrityFix หรือ GooglePhotosUnlimited  
@@ -167,6 +186,16 @@ WebUI เป็นตัวเลือก (ทุกอย่างสามา
 ### การตั้งค่าภายในการกำหนดค่า
 `COPG-VD.json` เก็บการตั้งค่าของมันไว้ข้าง ๆ โปรไฟล์ เพื่อให้ตัวเลือกของคุณติดไปกับการสำรองข้อมูลและสามารถแก้ไขด้วยมือได้: `scope_mode`, สวิตช์ของ engine, กลุ่ม resetprop, `global_fields` และออบเจกต์ `COPG-VD-Settings` (`resetprop`, `autoupdate`, `spoof_version`) ทุกอย่างอยู่ในไฟล์เดียวนี้: สคริปต์บูตและ WebUI อ่านการตั้งค่าจากมันโดยตรง ดังนั้นตัวเลือกของคุณจะคงอยู่แม้จะอัปเดตโมดูล `"spoof_version": "force"` จะถูกปฏิเสธจากไฟล์และถูกลดระดับลง: การกู้คืนการสำรองข้อมูลเก่าต้องไม่เปิดใช้งานมันอีกครั้งโดยที่คุณไม่รู้ตัว  
 
+## การอัปเดตแบบเพิ่มทีละส่วน (VDLU)
+
+COPG-VD มาพร้อมกับเอนจิน **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (ฝังไว้ใน `module/vdlu/`): โมดูลจะอัปเดตตัวเองโดยดึงเฉพาะไฟล์ที่เปลี่ยนแปลง (blob แบบระบุที่อยู่ด้วยเนื้อหา + `manifest.json` ที่เซ็นชื่อ) แทนที่จะดาวน์โหลด `.zip` ทั้งก้อนใหม่ โปรไฟล์ **Hardened**: ลายเซ็น ed25519 เป็นสิ่งจำเป็นและการดาวน์เกรดถูกบล็อก, ไฟล์ `.zip` แบบเต็มยังคงใช้งานได้เป็นตัวสำรอง
+
+- **`vdlu/`** (รวมอยู่ใน zip): `update.sh` (เอนจิน) + `vdlu-verify` + `config.default` + `keyring/` (กุญแจสาธารณะ)
+- **สถานะ** ใน `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) อยู่นอกโมดูล และคงอยู่หลังการแฟลชใหม่
+- **ตัวกระตุ้นตอนบูต:** `post-fs-data.sh`, ก่อน zygote COPG-VD มี `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard) ดังนั้นไฟล์ `.so` ใหม่จะถูกจัดเตรียมและสลับก่อนที่ zygote จะแมปมัน
+- **WebUI:** แผง **Updates** (`webroot/vdlu.js`) พร้อมการแจ้งเตือนความคืบหน้าและการยกเลิก
+- **การเผยแพร่:** ดู `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, เก็บถาวร manifest, `vdlu-gc` ลบ blob ที่กำพร้า, push ไปยัง Pages แบบเป็นชุด)
+
 <!-- vd-docs -->
 ## เอกสารประกอบ
 
@@ -177,16 +206,6 @@ WebUI เป็นตัวเลือก (ทุกอย่างสามา
 - **[เอเจนต์ AI](https://github.com/VD171/COPG-VD/wiki/th-AI-AGENTS)**: ขับเคลื่อนการตั้งค่าและตัวอัปเดตแบบ headless
 
 <!-- /vd-docs -->
-
-## การอัปเดตแบบเพิ่มทีละส่วน (VDLU)
-
-COPG-VD มาพร้อมกับเอนจิน **[VDLiveUpdate](https://github.com/VD171/VDLiveUpdate) (VDLU)** (ฝังไว้ใน `module/vdlu/`): โมดูลจะอัปเดตตัวเองโดยดึงเฉพาะไฟล์ที่เปลี่ยนแปลง (blob แบบระบุที่อยู่ด้วยเนื้อหา + `manifest.json` ที่เซ็นชื่อ) แทนที่จะดาวน์โหลด `.zip` ทั้งก้อนใหม่ โปรไฟล์ **Hardened**: ลายเซ็น ed25519 เป็นสิ่งจำเป็นและการดาวน์เกรดถูกบล็อก; ไฟล์ `.zip` แบบเต็มยังคงใช้งานได้เป็นตัวสำรอง
-
-- **`vdlu/`** (รวมอยู่ใน zip): `update.sh` (เอนจิน) + `vdlu-verify` + `config.default` + `keyring/` (กุญแจสาธารณะ)
-- **สถานะ** ใน `/data/adb/COPG-VD/vdlu/` (config/journal/blobs/staged/rollback) - อยู่นอกโมดูล และคงอยู่หลังการแฟลชใหม่
-- **ตัวกระตุ้นตอนบูต:** `post-fs-data.sh`, ก่อน zygote - COPG-VD มี `zygisk/*.so` + `sepolicy.rule` (REBOOT-hard) ดังนั้นไฟล์ `.so` ใหม่จะถูกจัดเตรียมและสลับก่อนที่ zygote จะแมปมัน
-- **WebUI:** แผง **Updates** (`webroot/vdlu.js`) พร้อมการแจ้งเตือนความคืบหน้าและการยกเลิก
-- **การเผยแพร่:** ดู `module/vdlu/RELEASE.md` (`vdlu-pack` + `vdlu-sign`, เก็บถาวร manifest, `vdlu-gc` ลบ blob ที่กำพร้า, push ไปยัง Pages แบบเป็นชุด)
 
 ## ดูเพิ่มเติม
 
@@ -202,20 +221,19 @@ COPG-VD มาพร้อมกับเอนจิน **[VDLiveUpdate](https:
 
 ## ช่องทางติดต่อ
 
-- Site           : https://vd171.ru
-- Site           : https://vd.priv8.ru
-- Source         : https://github.com/VD171/COPG-VD
-- GitHub         : [@VD171](https://github.com/VD171)
-- XDA-Developers : [@VD171](https://xdaforums.com/m/vd171.4699873/)
-- XDA thread     : [COPG-VD](https://xdaforums.com/t/COPG-VD.4807698/)
-- Telegram       : [@VD_Priv8](https://t.me/VD_Priv8)
-- Channel        : [@Priv8_VD](https://t.me/Priv8_VD)
-- Discord        : [@VD.Priv8](https://discord.com/users/1296831918989639721)
-- E-mail         : vd.priv8@pm.me
+- https://vd171.ru
+- https://vd.priv8.ru
+- **Telegram:** @VD_Priv8 https://t.me/VD_Priv8
+- **Channel:** @Priv8_VD https://t.me/Priv8_VD
+- **Discord:** @VD.Priv8 https://discord.com/users/1296831918989639721
+- **E-mail:** vd.priv8@pm.me
+- **XDA-Developers:** @VD171 https://xdaforums.com/m/vd171.4699873/
+- **XDA thread:** https://xdaforums.com/t/COPG-VD.4807698/
+- **GitHub:** @VD171 https://github.com/VD171
 
 ## สัญญาอนุญาต
 
-**Apache-2.0**: ดู [LICENSE](LICENSE) COPG-VD เป็นฟอร์กโดย VD171 ของ COPG ดั้งเดิมโดย AlirezaParsi พัฒนาต่อภายใต้สัญญาอนุญาตเดียวกัน
+**AGPL-3.0-or-later**: ดู [LICENSE](LICENSE) COPG-VD เป็นฟอร์กโดย VD171 ของ COPG ดั้งเดิมโดย AlirezaParsi (Apache-2.0) ออกใบอนุญาตใหม่ภายใต้ GNU AGPL-3.0-or-later NETWORK COPYLEFT: หากคุณรันเวอร์ชันที่แก้ไข แม้จะเป็นบริการ คุณต้องเสนอซอร์สโค้ดของมัน
 
 ## เครื่องหมายการค้า
 
@@ -224,3 +242,7 @@ COPG-VD เป็นโปรเจกต์อิสระที่ไม่เ
 ## Tags
 
 `Zygisk` `KernelSU` `APatch` `Magisk` `device-spoofing` `fingerprint` `PlayIntegrity` `Pixel` `build.prop` `resetprop` `root` `Android` `COPG-VD`
+
+---
+
+📣 **เข้าร่วมช่องเพื่อรับการอัปเดต:** @Priv8_VD https://t.me/Priv8_VD

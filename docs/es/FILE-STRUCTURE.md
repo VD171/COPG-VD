@@ -56,7 +56,7 @@ COPG-VD/
 ├── README.md + README.<code>.md   # 21 languages
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md  CODE_OF_CONDUCT.md  SECURITY.md
-├── LICENSE                     # Apache-2.0
+├── LICENSE                     # AGPL-3.0-or-later
 └── screenshots/                # images used by the README
 ```
 
@@ -64,11 +64,11 @@ COPG-VD/
 
 `/data/adb/COPG-VD/` en el dispositivo es el propio directorio del módulo: `COPG-VD.json` contiene
 el perfil y los ajustes (consulta [CONFIGURATION.md](CONFIGURATION.md)), junto a `update.log`,
-`update.state` y `update.status`. La configuración nunca se commitea; `module/COPG-VD.json.example`
+`update.state` y `update.status`. La configuración nunca se commitea, `module/COPG-VD.json.example`
 es la plantilla.
 
 <!-- doc-footer -->
 
 ---
 
-> _Esta documentación se generó con Claude (Anthropic) y la mantiene VD171. Las correcciones y mejoras son bienvenidas; consulta [CONTRIBUTING.md](CONTRIBUTING.md)._
+> _Esta documentación se generó con Claude (Anthropic) y la mantiene VD171. Las correcciones y mejoras son bienvenidas, consulta [CONTRIBUTING.md](CONTRIBUTING.md)._
