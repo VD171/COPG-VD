@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/KernelSU-Modules/tools/main/schemas/module.schema.json
+schemaVersion: 1
+id: COPG-VD
+name: COPG-VD
+summary: Globally spoof your device fingerprint and build properties so that even system apps and the whole device see the forged values.
+description: README.md
+license: AGPL-3.0-or-later
+homepage: https://github.com/VD171/COPG-VD
+support: https://xdaforums.com/t/4807698
+tags:
+  - kernelsu
+  - apatch
+  - magisk
+  - root
+  - spoofing
+  - fingerprint
+  - zygisk
+  - props
+  - webui
+icon: module/webroot/icon.png
+compatibility:
+  architectures:
+    - arm64-v8a
+    - armeabi-v7a
+    - x86
+    - x86_64
+release:
+  assetPattern: "COPG-VD-*.zip"
