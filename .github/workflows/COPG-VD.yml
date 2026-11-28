@@ -233,21 +233,16 @@ jobs:
               echo "::warning::no CHANGELOG section for $VERSION"
               notes="See the commit history for the changes in this version."
           fi
-          # Every release carries the channel banner (same footer applied by hand to the
-          # manual releases), so automatic fingerprint releases get it too.
-          # sha256 of the zip and each shipped .so, published so anyone can verify the bytes.
-          sha256sum "${{ steps.version.outputs.zip_name }}" > SHA256SUMS.txt
-          ( cd module/zygisk && sha256sum *.so ) >> SHA256SUMS.txt
+          # Lean release body (owner 28/11): the version's CHANGELOG section plus the
+          # @Priv8_VD banner as the last line - no checksums block, no SHA256SUMS asset
+          # (they took too much space; auditability is unchanged, the per-file .sha256
+          # companions inside the zip stay the integrity gate). Assets = the .zip only.
           {
             printf '%s\n' "$notes"
-            printf '\n### Checksums (sha256)\n\n'
-            printf '```\n'
-            cat SHA256SUMS.txt
-            printf '```\n'
             printf '\n---\n'
             printf '%s\n' "📣 **Join the channel for updates:** @Priv8_VD https://t.me/Priv8_VD"
           } > release-notes.md
-          gh release create "$VERSION" "${{ steps.version.outputs.zip_name }}" SHA256SUMS.txt \
+          gh release create "$VERSION" "${{ steps.version.outputs.zip_name }}" \
             --title "$VERSION" --notes-file release-notes.md
           # module/update.json already points at this asset, so the in-app updater works
           # the moment the release exists.
